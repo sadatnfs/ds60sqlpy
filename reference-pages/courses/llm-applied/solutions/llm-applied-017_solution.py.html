@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,56 +161,56 @@
       <h1>Llm Applied 017 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-017_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-017: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span>import torch</span>
-<span>from torch import nn</span>
-<span>from torch.nn import functional as F</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Quantize a fixed matrix</span>
-<span>    original=np.array([[.1,-.9],[1.7,-.2]],dtype=np.float32); scale=float(np.abs(original).max()/7)</span>
-<span>    codes=np.clip(np.rint(original/scale),-7,7).astype(np.int8)</span>
-<span>    np.testing.assert_array_equal(codes,[[0,-4],[7,-1]])</span>
-<span> </span>
-<span>    # Exercise 2: Pack and unpack real nibbles</span>
-<span>    unsigned=(codes.reshape(-1).astype(np.int16)+8).astype(np.uint8)</span>
-<span>    packed=unsigned[::2] | (unsigned[1::2]&lt;&lt;4)</span>
-<span>    unpacked=np.empty(4,dtype=np.uint8); unpacked[::2]=packed&amp;15; unpacked[1::2]=packed&gt;&gt;4</span>
-<span>    restored_codes=(unpacked.astype(np.int16)-8).astype(np.int8).reshape(2,2)</span>
-<span>    np.testing.assert_array_equal(packed,[72,127]); np.testing.assert_array_equal(restored_codes,codes)</span>
-<span> </span>
-<span>    # Exercise 3: Measure dequantization error</span>
-<span>    dequantized=restored_codes.astype(np.float32)*scale; x_np=np.array([1.,-2.],dtype=np.float32)</span>
-<span>    reference=original@x_np; approximate=dequantized@x_np</span>
-<span>    np.testing.assert_allclose(reference,[1.9,2.1],atol=1e-6,rtol=0)</span>
-<span>    assert np.isfinite(approximate).all() and np.max(np.abs(approximate-reference))&gt;0</span>
-<span> </span>
-<span>    # Exercise 4: Train only a small adapter</span>
-<span>    w=torch.tensor(dequantized); a=nn.Parameter(torch.ones((2,1))*.1); b=nn.Parameter(torch.zeros((1,2))); x=torch.tensor(x_np[None,:]); saved=packed.copy(); opt=torch.optim.SGD([a,b],lr=.05)</span>
-<span>    initial=(x@(w+a@b).T).square().mean().item()</span>
-<span>    for _ in range(10):</span>
-<span>        opt.zero_grad(set_to_none=True); loss=(x@(w+a@b).T).square().mean(); loss.backward(); opt.step()</span>
-<span>    final=(x@(w+a@b).T).square().mean().item()</span>
-<span>    assert final&lt;initial and w.grad is None; np.testing.assert_array_equal(packed,saved)</span>
-<span> </span>
-<span>    # Exercise 5: Account for storage honestly</span>
-<span>    storage=packed.nbytes+np.dtype(&#x27;float32&#x27;).itemsize; compute_buffer=dequantized.nbytes</span>
-<span>    assert storage==6 and compute_buffer==16</span>
-<span> </span>
-<span>    # Exercise 6: State what was not measured</span>
-<span>    receipt={&#x27;uniform_4bit_packing&#x27;:True,&#x27;actual_adapter_update&#x27;:True,&#x27;nf4&#x27;:False,&#x27;double_quantization&#x27;:False,&#x27;paged_optimizer&#x27;:False,&#x27;gpu_peak_memory_measured&#x27;:False}</span>
-<span>    assert receipt[&#x27;actual_adapter_update&#x27;] and not any(receipt[k] for k in [&#x27;nf4&#x27;,&#x27;double_quantization&#x27;,&#x27;paged_optimizer&#x27;,&#x27;gpu_peak_memory_measured&#x27;])</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-applied-017: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Quantize a fixed matrix</span></span>
+<span class="source-line">    original<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> scale<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    codes<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>original<span class="syntax-operator">/</span>scale<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>codes<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Pack and unpack real nibbles</span></span>
+<span class="source-line">    unsigned<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>codes<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int16<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>uint8<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    packed<span class="syntax-operator">=</span>unsigned<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">(</span>unsigned<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;&lt;</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    unpacked<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>uint8<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> unpacked<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>packed<span class="syntax-operator">&amp;</span><span class="syntax-number">15</span><span class="syntax-punctuation">;</span> unpacked<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>packed<span class="syntax-operator">&gt;&gt;</span><span class="syntax-number">4</span></span>
+<span class="source-line">    restored_codes<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>unpacked<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int16<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>packed<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">72</span><span class="syntax-punctuation">,</span><span class="syntax-number">127</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>restored_codes<span class="syntax-punctuation">,</span>codes<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Measure dequantization error</span></span>
+<span class="source-line">    dequantized<span class="syntax-operator">=</span>restored_codes<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>scale<span class="syntax-punctuation">;</span> x_np<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    reference<span class="syntax-operator">=</span>original<span class="syntax-decorator">@x_np</span><span class="syntax-punctuation">;</span> approximate<span class="syntax-operator">=</span>dequantized<span class="syntax-decorator">@x_np</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>reference<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>approximate<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>approximate<span class="syntax-operator">-</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Train only a small adapter</span></span>
+<span class="source-line">    w<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span>dequantized<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> a<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> b<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span>x_np<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saved<span class="syntax-operator">=</span>packed<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.05</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    initial<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    final<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> final<span class="syntax-operator">&lt;</span>initial <span class="syntax-operator">and</span> w<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>packed<span class="syntax-punctuation">,</span>saved<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Account for storage honestly</span></span>
+<span class="source-line">    storage<span class="syntax-operator">=</span>packed<span class="syntax-operator">.</span>nbytes<span class="syntax-operator">+</span>np<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>itemsize<span class="syntax-punctuation">;</span> compute_buffer<span class="syntax-operator">=</span>dequantized<span class="syntax-operator">.</span>nbytes</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> storage<span class="syntax-operator">==</span><span class="syntax-number">6</span> <span class="syntax-operator">and</span> compute_buffer<span class="syntax-operator">==</span><span class="syntax-number">16</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: State what was not measured</span></span>
+<span class="source-line">    receipt<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">uniform_4bit_packing</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">actual_adapter_update</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nf4</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">double_quantization</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">paged_optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">gpu_peak_memory_measured</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> receipt<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">actual_adapter_update</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>receipt<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nf4</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">double_quantization</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">paged_optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">gpu_peak_memory_measured</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

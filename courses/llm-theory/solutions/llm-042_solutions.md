@@ -14,7 +14,7 @@ A defensible language-system decision compares candidate systems under one froze
 
 ## Reading the implementation
 
-Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate asTrue,False orNone for unexecuted. OnlyTrue satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.
+Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate asTrue,False or None for unexecuted. OnlyTrue satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.
 
 ## Exercise 1: Freeze common questions
 
@@ -113,9 +113,9 @@ report={'decision':decision,'failure':'q3: tiny candidate answered without evide
 assert report['decision']=='no-go' and 'q3' in report['failure'] and 'families' in report['missing']
 ```
 
-**Expected:** report namesq3 unsupportedanswer and new independent families needed.
+**Expected:** report namesq3 unsupported answer and new independent families needed.
 
-**Verify:** Compare the computed values or written argument with report namesq3 unsupportedanswer and new independent families needed.
+**Verify:** Compare the computed values or written argument with report namesq3 unsupported answer and new independent families needed.
 
 ## Review after comparison
 

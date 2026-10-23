@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not returnnull. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.
+Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not return null. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.
 
 **Optional:** A container explicitly representing presence or absence.
 
@@ -14,11 +14,11 @@ Optional represents the presence or absence of a value in a return contract. It 
 
 ## Reading the reference
 
-Optional.of rejectsnull,ofNullable mapsnull toempty,andmap transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.
+Optional.of rejects null,ofNullable maps null to empty,and map transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.
 
 ## Exercise 1: Represent a missing lookup
 
-Task: Look up knowna andunknownb in a fixed map throughOptional.
+Task: Look up known a and unknown b in a fixed map through Optional.
 
 The absence ofb is an expected lookup outcome. It is not represented as zero because zero could be a valid stored value.
 
@@ -28,24 +28,24 @@ Optional<Integer> known=Optional.ofNullable(data.get("a")); Optional<Integer> mi
 assert known.orElseThrow()==7 && missing.isEmpty();
 ```
 
-**Expected:** a present with7;b empty.
+**Expected:** a present with 7; b empty.
 
-**Verify:** Compare the program values or named exception with a present with7;b empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with a present with 7; b empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Transform only present values
 
-Task: Map the known value todouble and apply the same mapping toempty.
+Task: Map the known value to double and apply the same mapping to empty.
 
-The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeatednull conditionals.
+The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeated null conditionals.
 
 ```java
 assert known.map(value -> value*2).orElseThrow()==14;
 assert missing.map(value -> value*2).isEmpty();
 ```
 
-**Expected:** 14 andempty.
+**Expected:** 14 and empty.
 
-**Verify:** Compare the program values or named exception with 14 andempty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 14 and empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Compare eager and lazy fallback
 
@@ -75,9 +75,9 @@ try { lookup(data," "); } catch(IllegalArgumentException expected){invalid=true;
 assert invalid && lookup(data,"b").isEmpty();
 ```
 
-**Expected:** IllegalArgumentException rather thanempty.
+**Expected:** IllegalArgumentException rather than empty.
 
-**Verify:** Compare the program values or named exception with IllegalArgumentException rather thanempty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with IllegalArgumentException rather than empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Flatten a nullable transformation
 
@@ -96,7 +96,7 @@ assert Optional.of("bad").flatMap(Main::tryParse).isEmpty();
 
 ## Exercise 6: Expose unsafeget
 
-Task: Callget onempty and catchNoSuchElementException.
+Task: Callget on empty and catchNoSuchElementException.
 
 Optional does not make unchecked access safe. Prefer an explicit fallback,orElseThrow with context,or a branching operation that matches the caller contract.
 

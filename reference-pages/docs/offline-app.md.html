@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,6 +162,7 @@
       <p class="source-path">Generated from <code>docs/offline-app.md</code></p>
     </header>
     <article class="document"><h2 id="the-guided-learning-application">The guided learning application<a class="heading-anchor" href="#the-guided-learning-application" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
 <p>DS60 now has a working local coding environment in addition to its static course library. The application combines a prerequisite-aware route, the complete lesson guide, Python and PostgreSQL coding pads, saved work, progressive hints, an explicit solution reveal, and evidence notes. It runs in your browser while a local process handles storage and execution. There is no hosted application account or mandatory AI connection.</p>
 <h3 id="choose-how-to-run-it">Choose how to run it<a class="heading-anchor" href="#choose-how-to-run-it" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
@@ -158,11 +205,11 @@
 <p>The native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.</p>
 <h3 id="docker-browser-lab">Docker browser lab<a class="heading-anchor" href="#docker-browser-lab" aria-label="Link to this section">#</a></h3>
 <p>Begin with the <a href="docker-beginners.md.html">Docker beginner walkthrough</a> if installing an engine, WSL 2, terminals, or container persistence is new. It covers Windows, macOS, Linux, and a Docker-compatible local Rancher Desktop Moby engine. The browser route requires no host Python, native PostgreSQL, or course package installation. With the engine running, Windows users can double-click <code>START_DOCKER_LAB.cmd</code>; Mac users can double-click <code>START_DOCKER_LAB.command</code>. Terminal alternatives from the repository root are:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start</code></pre>
-<pre><code class="language-bash"># macOS/Linux/WSL
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>docker_lab<span class="syntax-punctuation">.</span>ps1 start</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux/WSL</span>
 bash scripts/docker_lab.sh start</code></pre>
-<p>The launcher builds when needed, starts the containers, waits for HTTP readiness, and opens the host browser. Use the printed exact URL, normally <a href="http://127.0.0.1:8765/learn">the local coding lab</a>. The app validates its Host header. <code>localhost</code> is a different host label. For ports, a custom learning folder, no-browser mode, or a deliberate rebuild, see the <a href="docker-beginners.md.html#7-stop-resume-and-rebuild-without-losing-progress">launcher examples</a>.</p>
+<p>The launcher builds when needed, starts the containers, waits for HTTP readiness, and opens the host browser. Use the printed exact URL, normally <a href="http://127.0.0.1:8765/classroom">the local coding lab</a>. The app validates its Host header. <code>localhost</code> is a different host label. For ports, a custom learning folder, no-browser mode, or a deliberate rebuild, see the <a href="docker-beginners.md.html#7-stop-resume-and-rebuild-without-losing-progress">launcher examples</a>.</p>
 <p>Course files are copied from the current image into the replaceable container workspace. Only the host learning folder is mounted at <code>/workspace/.learning</code>. Its default is <code>.learning</code> inside the repository; <code>--data-dir</code> on Bash/Python or <code>-DataDir</code> on PowerShell selects another absolute host folder. Saved pads, history, evidence, and progress therefore survive container replacement and can be reused by a future course image. The user home for container settings/caches also lives under <code>.learning/home</code>. Matplotlib uses reusable platform-specific font metadata under <code>.learning/cache/matplotlib/</code>, so cache preparation can be reused across lessons and future containers. Rendered plot images remain run output; save the code and evidence needed to reproduce them. <a href="docker-beginners.md.html#8-back-up-and-restore-the-learning-folder">Backup and restore instructions</a> cover copying that host folder while the app is stopped. Existing host data is preserved. Older <code>learner-work</code> volumes require an explicit export into an unused host folder; startup does not merge or overwrite learner evidence.</p>
 <p>PostgreSQL stores tables separately in the project&#x27;s <code>postgres-data</code> named volume. The default project is <code>ds60-learning</code>, browser port 8765, and host database port 55432. Inside the shared container network namespace the app uses loopback port 5432, preserving the course database&#x27;s exact local-target rule. The fresh course login is <code>admin</code> / <code>admin</code>, with limited database privileges; a separate bootstrap login owns cluster administration. The browser supplies the course connection internally and needs no website account.</p>
 <p>Use the same launcher with <code>stop</code> to pause services while preserving both stores. Rebuild deliberately with <code>start --build</code> on Bash or <code>start -Build</code> in PowerShell when updating the image. An image build does not replace the host learning folder or publish an image. Container removal alone also preserves the host folder; database volume deletion is a separate destructive operation.</p>
@@ -171,13 +218,13 @@ bash scripts/docker_lab.sh start</code></pre>
 <h3 id="source-application">Source application<a class="heading-anchor" href="#source-application" aria-label="Link to this section">#</a></h3>
 <p>Finish <a href="setup/first-success.md.html">the first-success setup</a>. On Windows, double-click <code>START_LEARNING_LAB.cmd</code>; it reuses the existing Windows discovery/bootstrap workflow and opens the coding application.</p>
 <p>You can launch directly with the repository interpreter too.</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\learning_lab.py</code></pre>
-<pre><code class="language-bash">.venv/bin/python scripts/learning_lab.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>learning_lab<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/learning_lab.py</code></pre>
 <p>A free loopback port is chosen. Keep the terminal open; Ctrl+C stops the server. Use <code>--no-browser</code> to print the URL without opening it. Use <code>--python</code> with an absolute executable path to choose a different supported backend. Never point the SQL backend at a shared or valuable database. <code>DS60_DATABASE_URL</code> uses the same exact local <code>advanced_sql_training</code> contract as the rest of the course.</p>
 <p><code>START_DS60.cmd</code> and <code>scripts/learning_portal.py</code> remain the reading/navigation and allowlisted editor-launch workflow. That portal does not acquire arbitrary execution endpoints. The coding lab is a separate, explicit entry point.</p>
 <h3 id="learn-inside-the-application">Learn inside the application<a class="heading-anchor" href="#learn-inside-the-application" aria-label="Link to this section">#</a></h3>
@@ -201,12 +248,12 @@ bash scripts/docker_lab.sh start</code></pre>
 <h3 id="build-a-native-executable">Build a native executable<a class="heading-anchor" href="#build-a-native-executable" aria-label="Link to this section">#</a></h3>
 <p>Build on the operating system and CPU architecture you intend to distribute to. PyInstaller bundles are <a href="https://pyinstaller.org/en/stable/operating-mode.html">specific to the build platform</a>. Building a macOS executable does not produce a Windows executable or validate Windows behavior.</p>
 <p>Install only the optional builder in a separate environment if you want a small application bundle:</p>
-<pre><code class="language-powershell">py -3.12 -m venv .app-build
-&amp; .\.app-build\Scripts\python.exe -m pip install &quot;.[desktop-build]&quot;
-&amp; .\.app-build\Scripts\python.exe scripts\build_app.py
-&amp; .\dist\DS60LearningLab.exe --self-check</code></pre>
-<pre><code class="language-bash">python3.12 -m venv .app-build
-.app-build/bin/python -m pip install &#x27;.[desktop-build]&#x27;
+<pre class="highlighted-code"><code class="language-powershell">py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv <span class="syntax-punctuation">.</span>app-build
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>app-build<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip install <span class="syntax-string">&quot;</span><span class="syntax-string">.[desktop-build]</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>app-build<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe scripts<span class="syntax-punctuation">\</span>build_app<span class="syntax-punctuation">.</span>py
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>dist<span class="syntax-punctuation">\</span>DS60LearningLab<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-self-check</code></pre>
+<pre class="highlighted-code"><code class="language-bash">python3.12 -m venv .app-build
+.app-build/bin/python -m pip install <span class="syntax-string">&#x27;.[desktop-build]&#x27;</span>
 .app-build/bin/python scripts/build_app.py
 ./dist/DS60LearningLab --self-check</code></pre>
 <p>The equivalent Make target is <code>make app PYTHON=.app-build/bin/python</code>. Windows users do not need Make. Build output is ignored under <code>dist/</code>; intermediary payloads live under <code>build/</code>. The payload allowlist excludes Git history, credentials, package caches, notebooks&#x27; saved outputs, and learner state. Notebook source and separate solutions are included as course content.</p>
@@ -275,72 +322,72 @@ bash scripts/docker_lab.sh start</code></pre>
 <p>New Docker volumes initialize two separate roles. <code>ds60_admin</code> is the bootstrap administrator; the application and SQL runner use <code>admin</code>, a login with <code>NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS</code>, no elevated predefined-role memberships, and ownership of only the disposable <code>advanced_sql_training</code> database. Its course password is <code>admin</code>; the separate bootstrap password is <code>ds60_admin</code>. The course role&#x27;s name does not grant it cluster-administrator capabilities. Keep these development services bound to loopback. The app never uses the bootstrap administrator. A limited database owner can create ordinary course objects and reset its own course schema, but cannot run server-side programs or read server files using administrative PostgreSQL capabilities. Optional role-administration lessons retain their documented capability-check fallback.</p>
 <p>The SQL pad rejects an administrative backend login even on a local database. This check is separate from validating the database&#x27;s name and host. Native installations whose default PostgreSQL login is a superuser need a separate limited pad login, described below. The course&#x27;s explicit terminal or guided administration lessons keep their existing capability rules.</p>
 <p>PostgreSQL initialization scripts run only on an empty volume. Rebuilding the app image does <strong>not</strong> demote a legacy <code>ds60</code> superuser, change a saved password, or erase database data. For an existing disposable course volume, first stop its writers and back up any course state you want to keep. The legacy source examples explicitly use its former default project name, <code>ds60sqlpy</code>. Inspect <code>docker compose ls</code> and substitute your real old project name if it differs. First inspect the old login without changing it:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -c &quot;SELECT oid, rolsuper FROM pg_roles WHERE rolname=&#x27;ds60&#x27;;&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -c &quot;SELECT oid, rolsuper FROM pg_roles WHERE rolname=&#x27;ds60&#x27;;&quot;</code></pre>
 <p>If its OID is <strong>10</strong>, this is PostgreSQL&#x27;s bootstrap superuser. PostgreSQL does not permit removing its <code>SUPERUSER</code> attribute, even from another administrator. Use the <a href="#bootstrap-role-volumes-side-by-side-migration">side-by-side migration</a> below. Both administration scripts explicitly reject that case before changing roles, ownership, passwords, or rows. Creating another administrator cannot remove this PostgreSQL restriction.</p>
 <p>The following legacy commands apply to old volumes whose course role was named <code>ds60</code>, not a newly initialized <code>admin</code> volume. For a non-bootstrap legacy <code>ds60</code> role, read <code>docker/admin/create-bootstrap-admin.sql</code> and <code>docker/admin/upgrade-course-role.sql</code>. When ready, run these two explicit commands from the repository root in PowerShell, macOS, or Linux:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/create-bootstrap-admin.sql
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/create-bootstrap-admin.sql
 docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60_admin -d advanced_sql_training -f /opt/course-admin/upgrade-course-role.sql</code></pre>
 <p>The first command uses the old course administrator to create a separate administrator if absent. An existing <code>ds60_admin</code> is preserved unchanged. The second command must connect as that separate administrator; it refuses self-demotion through <code>ds60</code>. It removes direct elevated memberships, rejects unresolved inherited elevated memberships, and changes privileges and database ownership in one transaction. It preserves the <code>ds60</code> password, application pads, progress, and table rows. If your volume uses another administrator, substitute that existing administrative login in the second command. If local authentication has been customized, use your established password mechanism; do not paste a password into a SQL file or commit it to the repository.</p>
 <p>Verify through the limited course login:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql</code></pre>
 <p>Expect <code>ds60</code> and <code>advanced_sql_training</code> with no exception for that legacy path. To keep using this explicitly selected legacy login with the new image, set <code>DS60_COURSE_USER=ds60</code> and <code>DS60_COURSE_PASSWORD</code> to its existing local password in your private Compose configuration. Fresh defaults are <code>admin</code> / <code>admin</code>; changing defaults does not change stored passwords. Then restart the app service if needed. Do not delete either named volume to perform this upgrade. A failure about inherited memberships requires inspecting that volume&#x27;s role configuration, not bypassing the SQL pad&#x27;s role guard.</p>
 <h4 id="bootstrap-role-volumes-side-by-side-migration">Bootstrap role volumes: side-by-side migration<a class="heading-anchor" href="#bootstrap-role-volumes-side-by-side-migration" aria-label="Link to this section">#</a></h4>
 <p>Keep the original database volume. A new cluster with the corrected bootstrap role lets restored course objects belong to the limited <code>admin</code> login without renaming the old bootstrap role or reassigning system catalogs. This is an explicit migration you choose to perform, not something app startup executes. The source commands below explicitly name the old default project <code>ds60sqlpy</code>. Confirm your original project with <code>docker compose ls</code>, and substitute its actual name if different. The new launcher defaults to <code>ds60-learning</code>, so a bare command could otherwise select a different project.</p>
 <p>Freeze all writers first. Stop the old lab while retaining its database:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy stop lab</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy stop lab</code></pre>
 <p>Choose unused archive directory names. The example date is only a label; substitute a fresh name rather than reusing an existing backup directory. Create an empty host directory. These commands intentionally fail if the final directory already exists.</p>
-<pre><code class="language-powershell"># Windows PowerShell, repository root
-if (-not (Test-Path work)) { New-Item -ItemType Directory -Path work | Out-Null }
-New-Item -ItemType Directory -Path work\course-migration-20261022 -ErrorAction Stop</code></pre>
-<pre><code class="language-bash"># macOS/Linux, repository root
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, repository root</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> work<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-builtin">New-Item</span> -ItemType Directory -Path work <span class="syntax-punctuation">|</span> <span class="syntax-builtin">Out-Null</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">New-Item</span> -ItemType Directory -Path work<span class="syntax-punctuation">\</span>course-migration<span class="syntax-punctuation">-</span>20261022 -ErrorAction Stop</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, repository root</span>
 mkdir -p work
 mkdir work/course-migration-20261022</code></pre>
 <p>Write a single-database custom archive inside the old container, then copy it as a binary file. No shell redirection or text pipe touches the archive, which keeps this procedure usable in Windows PowerShell as well as POSIX terminals. The container-side <code>mkdir</code> also refuses an existing destination:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy exec -T postgres mkdir /tmp/ds60-course-migration-20261022
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy exec -T postgres mkdir /tmp/ds60-course-migration-20261022
 docker compose --project-name ds60sqlpy exec -T postgres pg_dump --username ds60 --dbname advanced_sql_training --format custom --file /tmp/ds60-course-migration-20261022/course.dump
 docker compose --project-name ds60sqlpy cp postgres:/tmp/ds60-course-migration-20261022/course.dump work/course-migration-20261022/course.dump</code></pre>
 <p>The archive contains course data and may contain any personal data you added. Keep it private under ignored <code>work/</code>. Do not commit it or import cluster roles. The original database&#x27;s passwords, objects, and rows remain unchanged. Preserve your existing <code>learner-work</code> volume and its <code>.learning/</code> directory separately; a database dump does not contain saved pads, evidence, or progress.</p>
 <p>For the cutover, stop the old database container to free its published ports, without deleting containers&#x27; volumes. Choose a <strong>new, unused</strong> target Compose project name; <code>ds60-limited</code> below is an example. If containers or volumes already exist for that name, choose another name before continuing. The new project creates its own database volume. Keep its learning-folder choice explicit; do not overwrite or merge an existing host <code>.learning</code> tree:</p>
-<pre><code class="language-text">docker compose --project-name ds60sqlpy stop postgres
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60sqlpy stop postgres
 docker compose --project-name ds60-limited up -d postgres</code></pre>
 <p>Wait for the new database to become healthy, then copy the archive into the new container and restore as the limited course owner:</p>
-<pre><code class="language-text">docker compose --project-name ds60-limited cp work/course-migration-20261022/course.dump postgres:/tmp/course.dump
+<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60-limited cp work/course-migration-20261022/course.dump postgres:/tmp/course.dump
 docker compose --project-name ds60-limited exec -T postgres pg_restore --exit-on-error --single-transaction --no-owner --no-acl --username admin --dbname advanced_sql_training /tmp/course.dump
 docker compose --project-name ds60-limited exec -T postgres psql -X -v ON_ERROR_STOP=1 -U admin -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql</code></pre>
 <p><code>--no-owner --no-acl</code> restores objects under the new limited owner rather than copying the bootstrap owner&#x27;s identity and grants. <code>--single-transaction</code> makes a restore error roll back that restore. If custom extensions or other administrator-only objects prevent a limited restore, stop and review those objects; do not grant the new pad login global privileges. The old volume and archive remain available. PostgreSQL documents these restore options in its <a href="https://www.postgresql.org/docs/17/app-pgrestore.html">pg_restore reference</a>.</p>
 <p>Compare your own table counts, selected identities, constraints, and business control totals between the source and restored database before accepting the migration. The source volume stays intact, and restoration must pass through the limited course owner without global privilege grants. PostgreSQL dump files do not contain learner pads, progress, or private evidence notes.</p>
 <p>Only after verification, start the new project&#x27;s lab using its new or explicitly selected host learning folder. The shell launchers prepare that bind mount and your user identity:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -Project ds60-limited -DataDir &quot;C:\Users\Ada\Documents\DS60 migrated learning&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux/WSL
-bash scripts/docker_lab.sh start --project ds60-limited --data-dir &quot;$HOME/DS60 migrated learning&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>docker_lab<span class="syntax-punctuation">.</span>ps1 <span class="syntax-builtin">start </span>-Project ds60-limited -DataDir <span class="syntax-string">&quot;</span><span class="syntax-string">C:\Users\Ada\Documents\DS60 migrated learning</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux/WSL</span>
+bash scripts/docker_lab.sh start --project ds60-limited --data-dir <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/DS60 migrated learning</span><span class="syntax-string">&quot;</span></code></pre>
 <p>Replace the example path with your actual user-owned target folder. Export old <code>/workspace/.learning</code> into a separate unused host folder before retiring its old container; retain the original <code>learner-work</code> volume until the exported files are verified. Reuse a preserved working copy through <code>--data-dir</code> or <code>-DataDir</code> rather than overwriting another active learning folder. For details, see <a href="docker-beginners.md.html#8-back-up-and-restore-the-learning-folder">backing up learning work</a>.</p>
 <p>To return to the original database, stop the new project with <code>docker compose --project-name ds60-limited stop</code> and restart the original project&#x27;s <code>postgres</code> service. Its original bootstrap login remains administrative, so the SQL pad still rejects it. Do not remove either project&#x27;s volumes until you have independently accepted and backed up the new state.</p>
 <p>For a native installation, connect once through your local administrator and create a separate login using an interactive <code>psql</code> session:</p>
-<pre><code class="language-sql">CREATE ROLE ds60_pad LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE
-  NOREPLICATION NOBYPASSRLS;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_pad LOGIN NOSUPERUSER <span class="syntax-keyword">NOCREATEDB</span> NOCREATEROLE
+  NOREPLICATION NOBYPASSRLS<span class="syntax-punctuation">;</span>
 \password ds60_pad
-GRANT CONNECT, CREATE, TEMPORARY ON DATABASE advanced_sql_training TO ds60_pad;</code></pre>
+<span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">CONNECT</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CREATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TEMPORARY</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">DATABASE</span> advanced_sql_training <span class="syntax-keyword">TO</span> ds60_pad<span class="syntax-punctuation">;</span></code></pre>
 <p>The <code>\password</code> command prompts interactively; credentials stay out of SQL source. Configure the backend&#x27;s normal local authentication as documented in <a href="setup/postgresql.md.html">PostgreSQL setup</a>, and set <code>DS60_DATABASE_URL</code> to the local course target using the <code>ds60_pad</code> login. For example, the target without an embedded password is <code>postgresql://ds60_pad@127.0.0.1:5432/advanced_sql_training</code>; use your normal private PostgreSQL password file or existing local authentication policy. The standalone beginner fixtures work with temporary tables under this role. To query an already seeded <code>training</code> schema owned by another local role, its owner can explicitly grant read access:</p>
-<pre><code class="language-sql">GRANT USAGE ON SCHEMA training TO ds60_pad;
-GRANT SELECT ON ALL TABLES IN SCHEMA training TO ds60_pad;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> training <span class="syntax-keyword">TO</span> ds60_pad<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">ALL</span> TABLES <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> training <span class="syntax-keyword">TO</span> ds60_pad<span class="syntax-punctuation">;</span></code></pre>
 <p>Those read grants do not transfer schema ownership or authorize resetting another role&#x27;s objects. Keep schema preparation under the course schema owner, or deliberately create a separate disposable course installation owned by the limited role. The app reports an ownership failure instead of escalating the pad login automatically.</p>
 <h3 id="concurrent-progress-and-evidence-storage">Concurrent progress and evidence storage<a class="heading-anchor" href="#concurrent-progress-and-evidence-storage" aria-label="Link to this section">#</a></h3>
 <p>The app, portal, CLI, and optional MCP service may open the same workspace. Progress and coaching mutations hold a shared operating-system file lock for the entire read, change, and atomic-replace operation. Each write uses a unique temporary file, so one service cannot replace another service&#x27;s scratch file. Reads create neither <code>.learning/</code> nor a lock file. Explicit mutations may leave small <code>progress.json.lock</code> and <code>coaching.json.lock</code> anchors, including after a progress reset. Keep these files in place while services can access the workspace; deleting a lock anchor can break coordination between processes. They contain no learner notes. These advisory locks are intended for local course workspaces; synchronize or back up a closed workspace when moving it between computers instead of concurrently editing a network-mounted copy.</p>
 <h3 id="local-image-names-ports-and-rancher-desktop">Local image names, ports, and Rancher Desktop<a class="heading-anchor" href="#local-image-names-ports-and-rancher-desktop" aria-label="Link to this section">#</a></h3>
 <p>Compose builds the application as the local image <code>ds60sqlpy-lab:0.3.0</code>. Its <code>pull_policy: never</code> prevents an application-image registry pull. Building or tagging that image does not publish it. Once it is built and the public PostgreSQL base is cached, use the shell launcher for an ordinary start. A manual Compose start additionally needs the <a href="docker-beginners.md.html#direct-compose-alternative-without-host-python">bind-directory and user-identity setup</a> in the current terminal. With that setup in place, start without rebuilding or pulling:</p>
-<pre><code class="language-text">docker compose --profile lab up --detach --no-build --pull never</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker compose --profile lab up --detach --no-build --pull never</code></pre>
 <p>The course defaults to host database port 55432. If that port is occupied, select a different host database port before starting the course stack:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-$env:DS60_POSTGRES_PORT = &quot;55433&quot;
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+$env:DS60_POSTGRES_PORT <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">55433</span><span class="syntax-string">&quot;</span>
+docker compose <span class="syntax-punctuation">-</span>-profile lab up <span class="syntax-punctuation">-</span>-detach <span class="syntax-punctuation">-</span>-no-build <span class="syntax-punctuation">-</span>-pull never</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<span class="syntax-builtin">export</span> DS60_POSTGRES_PORT<span class="syntax-operator">=</span><span class="syntax-number">55433</span>
 docker compose --profile lab up --detach --no-build --pull never</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-export DS60_POSTGRES_PORT=55433
-docker compose --profile lab up --detach --no-build --pull never</code></pre>
-<p>The app still connects over the private shared namespace to port 5432; this setting changes only the host&#x27;s published database port. The browser address remains <code>http://127.0.0.1:8765/learn</code> unless you change <code>DS60_LAB_PORT</code>. Use a Docker-compatible local engine with Compose. For Rancher Desktop, verify that its local Moby engine is running with <code>docker info</code> and <code>docker compose version</code>. Inspect the selected context and endpoint before using a machine that also has remote Docker contexts.</p>
+<p>The app still connects over the private shared namespace to port 5432; this setting changes only the host&#x27;s published database port. The browser address remains <code>http://127.0.0.1:8765/classroom</code> unless you change <code>DS60_LAB_PORT</code>. Use a Docker-compatible local engine with Compose. For Rancher Desktop, verify that its local Moby engine is running with <code>docker info</code> and <code>docker compose version</code>. Inspect the selected context and endpoint before using a machine that also has remote Docker contexts.</p>
 <h4 id="a-tls-verified-fallback-for-a-blocked-docker-hub-cdn">A TLS-verified fallback for a blocked Docker Hub CDN<a class="heading-anchor" href="#a-tls-verified-fallback-for-a-blocked-docker-hub-cdn" aria-label="Link to this section">#</a></h4>
 <p>Some networks can verify GitHub&#x27;s registry and Google&#x27;s public mirror while rejecting Docker Hub&#x27;s CDN certificate chain. Keep TLS verification enabled. When those alternative endpoints are trusted and available, the Dockerfile&#x27;s <code>DS60_BASE_IMAGE</code> argument permits this explicit local build:</p>
-<pre><code class="language-text">docker pull ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+<pre class="highlighted-code"><code class="language-text">docker pull ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 docker pull mirror.gcr.io/library/postgres:17
 docker image tag mirror.gcr.io/library/postgres:17 postgres:17
 docker compose --profile lab build --build-arg DS60_BASE_IMAGE=ghcr.io/astral-sh/uv:python3.12-bookworm-slim lab
@@ -351,17 +398,17 @@ docker compose --profile lab up --detach --no-build --pull never</code></pre>
 <h3 id="package-the-windows-starter">Package the Windows starter<a class="heading-anchor" href="#package-the-windows-starter" aria-label="Link to this section">#</a></h3>
 <p>The Windows starter is a complete source ZIP with <code>START_DOCKER_LAB.cmd</code> at its entry point. A learner extracts it and double-clicks that file; Git and host Python are not required. The first-run Windows wizard checks the engine and prerequisites before handing over to the normal Docker launcher. Windows installation consent, UAC, or a required restart remain visible steps. See the <a href="docker-beginners.md.html#windows-start-with-the-first-run-wizard">beginner Windows walkthrough</a>.</p>
 <p>Maintainers can build the ZIP on any supported development OS:</p>
-<pre><code class="language-bash">python scripts/build_windows_starter.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">python scripts/build_windows_starter.py</code></pre>
 <p>Or use <code>make windows-starter</code> on macOS/Linux. The archive is written to <code>dist/DS60LearningLab-0.3.0-Windows-Starter.zip</code>. Packaging checks the generated readers, includes the authored course and Docker build files, and excludes local progress, environments, authentication files, and symlinks. The application-build workflow also produces this starter as a downloadable CI artifact. It does not publish a release or push an image.</p>
 <h3 id="watch-a-local-image-build">Watch a local image build<a class="heading-anchor" href="#watch-a-local-image-build" aria-label="Link to this section">#</a></h3>
 <p>Run a build in the foreground with plain progress output:</p>
-<pre><code class="language-bash">BUILDKIT_PROGRESS=plain bash scripts/docker_lab.sh build</code></pre>
+<pre class="highlighted-code"><code class="language-bash">BUILDKIT_PROGRESS<span class="syntax-operator">=</span>plain bash scripts/docker_lab.sh build</code></pre>
 <p>The terminal shows the Dockerfile steps, package installation, and cache hits. The command builds the local image and does not start services or push it. Cached steps report <code>CACHED</code>; this is expected after a successful build. To inspect a completely fresh dependency installation, use the direct Compose command <code>docker compose --progress plain --profile lab build --no-cache lab</code>. This reruns dependency installation, so it takes longer. BuildKit&#x27;s separate package-download caches can still avoid downloading every package again.</p>
 <p>On a network that requires the verified alternate base above:</p>
-<pre><code class="language-bash">DS60_BASE_IMAGE=ghcr.io/astral-sh/uv:python3.12-bookworm-slim BUILDKIT_PROGRESS=plain bash scripts/docker_lab.sh build</code></pre>
+<pre class="highlighted-code"><code class="language-bash">DS60_BASE_IMAGE<span class="syntax-operator">=</span>ghcr.io/astral-sh/uv:python3.12-bookworm-slim BUILDKIT_PROGRESS<span class="syntax-operator">=</span>plain bash scripts/docker_lab.sh build</code></pre>
 <p>Windows PowerShell uses the same plain-output environment setting:</p>
-<pre><code class="language-powershell">$env:BUILDKIT_PROGRESS = &#x27;plain&#x27;
-.\scripts\docker_lab.ps1 build</code></pre></article>
+<pre class="highlighted-code"><code class="language-powershell">$env:BUILDKIT_PROGRESS <span class="syntax-punctuation">=</span> <span class="syntax-string">&#x27;plain&#x27;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>docker_lab<span class="syntax-punctuation">.</span>ps1 build</code></pre></article>
   </main>
 </body>
 </html>

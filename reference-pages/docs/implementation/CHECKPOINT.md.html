@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,10 +164,9 @@
     <article class="document"><h2 id="implementation-checkpoint">Implementation checkpoint<a class="heading-anchor" href="#implementation-checkpoint" aria-label="Link to this section">#</a></h2>
 <p>Updated 23 October 2026. Human-managed HEAD: <code>6299005</code>. All implementation is in the main checkout. Human Git staging, commits and pushes remain untouched. No image was published. Preserve unrelated containers and every learner volume.</p>
 <h3 id="current-phase">Current phase<a class="heading-anchor" href="#current-phase" aria-label="Link to this section">#</a></h3>
-<p>The single-command classroom and all 72 LLM textbook chapters are implemented and reviewed. <code>./classroom</code> builds the app and ten ordinary workers locally, starts them in a controlled order, checks internal and host-facing readiness, and opens the actual browser URL. It uses Bash on macOS/Linux/WSL 2 and requires Compose 2.28.0 or newer. The Windows CMD and Mac command files delegate to it. Each service is built in a separate Compose invocation because live Compose Bake testing showed that a multi-service build could ignore the parallel limit.</p>
-<p>The launcher selects available loopback ports for a new project, preserves explicit settings and named data volumes, and serializes concurrent starts and stale-lock recovery. Container-only DS60_PUBLIC_PORT retains one exact allowed Host/Origin for the discovered host port. Internal and external HTTP checks, no-curl failure cases, actual strict Host/Origin requests and the controlled stale-lock race are covered. A saved source/prediction/notes marker survived port change and rebuilt application containers in ds60-onestep-validation.</p>
-<p>All 48 theory and 24 applied chapters have connected textbook narratives, notation, numerical traces and chapter bridges. The applied route follows a Methods Desk case. Both LLM journeys default to wide reading, remember layout per journey, link directly to the chapter map, and retain their practice pads. The applied prose pass preserves 73 protected artifacts and all 97 fences. Historical theory prose-only parity receipts remain historical: subsequent independent review repaired 046 attention overflow and 048 zero-support sampling. Both references, both worked sequences and both numeric regressions passed fresh current Core Docker. The 025/031 notation/scope corrections include a 031 learner-comment spacing correction with no executable change.</p>
-<p>The portable delivery is DS60LearningLab-0.3.0-One-Command-Classroom.zip, with ONE-COMMAND-CLASSROOM.md and acceptance/checksum files in the task outputs. The final image/archive comparison binds packaged source bytes to the built app and worker images. See the detailed single-command setup guide for users.</p>
+<p>Unified-classroom implementation is in progress. The user requested one entrypoint for Python, SQL, bridge and all eleven module/book subjects, distinct subject themes, properly typeset math, syntax-highlighted code, and updated navigation/documentation. Root owns backend integration, routing, launchers, validation and packaging. Parallel owners: rich_rendering owns the shared renderer/dependencies; unified_ui owns classroom HTML/CSS/JS and UI tests; math_content_docs owns authored math conversion and user-facing documentation.</p>
+<p>Canonical URL: /classroom. The former /learn and /journeys URLs will serve the same shell as compatibility aliases. Existing legacy pads, coaching phases, module sessions and job histories retain their storage and stable IDs. The combined subject index is derived from both catalogs, never hand-counted. Native MathML and server syntax highlighting must work offline and preserve code bytes. Math authoring conversion is separate from executable code changes.</p>
+<p>This phase is not complete. Final acceptance must cover all fourteen subjects, legacy Python/SQL save and execution modes, module jobs/variants, explicit solutions, math/code rendering, mobile/keyboard/themes, persistence, strict Host/Origin/token checks, full parallel tests, Docker delivery and a new clean archive. Earlier acceptance numbers below describe the prior distribution.</p>
 <p>The user requests comprehensive teaching rather than larger counts alone. The statistics book is a learning tutorial with theory, worked examples and answered interviews, with no exams, problem sets or solution gate. Read markers are manual reading records and never proof of mastery. User instructions: parallel agents where useful, no em dashes, main checkout only, local images.</p>
 <h3 id="authored-inventory">Authored inventory<a class="heading-anchor" href="#authored-inventory" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>

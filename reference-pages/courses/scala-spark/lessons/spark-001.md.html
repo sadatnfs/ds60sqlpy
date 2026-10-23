@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,22 +162,22 @@
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-001.md</code></p>
     </header>
     <article class="document"><h2 id="spark-001-learner-worksheet">spark-001 learner worksheet<a class="heading-anchor" href="#spark-001-learner-worksheet" aria-label="Link to this section">#</a></h2>
-<p>Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
+<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
 <p>Read the <a href="../guides/spark-001.md.html">guide</a>, predict first, and keep an independent response for each task. These are reasoning fixtures, not commands to execute.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-trace-a-scala-program">Worked example 1: Trace a Scala program<a class="heading-anchor" href="#worked-example-1-trace-a-scala-program" aria-label="Link to this section">#</a></h4>
 <p>The arrows are different phases. A source edit does not retroactively modify a process that already ran.</p>
-<pre><code class="language-text">Main.scala -&gt; Scala compiler -&gt; Main.class -&gt; JVM process -&gt; stdout: 42</code></pre>
+<pre class="highlighted-code"><code class="language-text">Main.scala -&gt; Scala compiler -&gt; Main.class -&gt; JVM process -&gt; stdout: 42</code></pre>
 <p><strong>Expected:</strong> The editable input is Main.scala; 42 is an observation from the process.</p>
 <h4 id="worked-example-2-distinguish-a-candidate-from-a-receipt">Worked example 2: Distinguish a candidate from a receipt<a class="heading-anchor" href="#worked-example-2-distinguish-a-candidate-from-a-receipt" aria-label="Link to this section">#</a></h4>
 <p>A supported version range cannot prove that dependencies were downloaded, matched or executed on this machine.</p>
-<pre><code class="language-text">candidate: Spark4.2.0 / Scala2.13.18 / JDK21
+<pre class="highlighted-code"><code class="language-text">candidate: Spark4.2.0 / Scala2.13.18 / JDK21
 receipt: profile absent; no executed probe</code></pre>
 <p><strong>Expected:</strong> Compatibility-informed, execution not established.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-artifacts">Exercise 1: Trace artifacts<a class="heading-anchor" href="#exercise-1-trace-artifacts" aria-label="Link to this section">#</a></h4>
 <p>Label each artifact and explain what can be edited.</p>
-<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit0.</p>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit 0.</p>
 <p><strong>Expected result/shape:</strong> For spark-001 Exercise 1, source, compiled bytecode, observed output and process status are four different categories.</p>
 <p><strong>Verify:</strong> For spark-001 Exercise 1, label all four; do not call stdout a source file.</p>
 <p><strong>Progressive hints:</strong></p>

@@ -58,7 +58,7 @@ The next chapter combines these lifecycle concerns with freshness, caching and o
 
 Use typed tools when a subject assistant needs exact arithmetic, validated database reads, plots or data transformations. Keep the operation catalog small and explicit. Validate inputs before execution and outputs before explanation. For expensive tools, add real time, cancellation and resource bounds in the execution layer rather than relying only on a prompt asking the model to be concise.
 
-Do not exposeeval, arbitrary filesystem paths or unrestricted SQL as a convenience shortcut. A model proposal can be malformed or influenced by retrieved text. A real database tool should use parameter binding, least-privilege access and an explicit target. Preserve the analysis code and input identity so a user can reproduce a result without trusting the generated prose. Statistical interpretation still depends on sampling, measurement and design assumptions beyond the tool's arithmetic correctness.
+Do not expose eval, arbitrary filesystem paths or unrestricted SQL as a convenience shortcut. A model proposal can be malformed or influenced by retrieved text. A real database tool should use parameter binding, least-privilege access and an explicit target. Preserve the analysis code and input identity so a user can reproduce a result without trusting the generated prose. Statistical interpretation still depends on sampling, measurement and design assumptions beyond the tool's arithmetic correctness.
 
 Expose a small operation whose input schema, output grain and computational meaning are reviewable. A proposal model can choose that operation and explain its result, while the application validates and executes it. Keep operation admission distinct from permission to access the underlying data.
 
@@ -179,7 +179,7 @@ assert dispatch(request,huge)[0]['mean']==0.0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: A count 2 mean 2; B count 1 mean 10. descriptive statisticavailable; causal claimnot established. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: A count 2 mean 2; B count 1 mean 10. descriptive statistic available; causal claim not established. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -187,7 +187,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** A count 2 mean 2; B count 1 mean 10.
    **Verify:** Save the assertion results for exercise 1, including A count 2 mean 2; B count 1 mean 10.
 
-2. **Reject an arbitrary operation.** Submitoperationrun_sql or an extraquery field.
+2. **Reject an arbitrary operation.** Submitoperationrun_sql or an extra query field.
    **Expected:** ValueError before any computation.
    **Verify:** Save the assertion results for exercise 2, including ValueError before any computation.
 
@@ -199,13 +199,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** duplicate identity and row-limit violations rejected.
    **Verify:** Save the assertion results for exercise 4, including duplicate identity and row-limit violations rejected.
 
-5. **Verify an explanation against the artifact.** Check a proposed sentence saying groupAmean 2 against the result; reject a proposedmean 20.
+5. **Verify an explanation against the artifact.** Check a proposed sentence saying groupAmean 2 against the result; reject a proposed mean 20.
    **Expected:** 2accepted; 20mismatch.
    **Verify:** Save the assertion results for exercise 5, including 2accepted; 20mismatch.
 
 6. **Refuse an unsupported causal interpretation.** Attach a descriptive result to a claim that group caused the difference without assignment-design evidence.
-   **Expected:** descriptive statisticavailable; causal claimnot established.
-   **Verify:** Save the assertion results for exercise 6, including descriptive statisticavailable; causal claimnot established.
+   **Expected:** descriptive statistic available; causal claim not established.
+   **Verify:** Save the assertion results for exercise 6, including descriptive statistic available; causal claim not established.
 
 ## Common pitfalls and diagnosis
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,19 +168,19 @@
 <p><strong>Expected:</strong> [1,2,1] for [coffee,cup,tea].</p>
 <h3 id="exercise-2-match-the-idf-formula">Exercise 2: Match the IDF formula<a class="heading-anchor" href="#exercise-2-match-the-idf-formula" aria-label="Link to this section">#</a></h3>
 <p>Different TF-IDF conventions omit one or more of these terms. The reference fixes the exact scikit-learn settings and checks the resulting array, so agreement is about a specified implementation rather than the vague label TF-IDF.</p>
-<p><strong>Expected:</strong> [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.</p>
+<p><strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\log(\frac{3}{2})+1,1,\log(\frac{3}{2})+1]</annotation></semantics></math> in the verified vocabulary order.</p>
 <h3 id="exercise-3-build-the-normalized-rows">Exercise 3: Build the normalized rows<a class="heading-anchor" href="#exercise-3-build-the-normalized-rows" aria-label="Link to this section">#</a></h3>
 <p>The first tea coordinate is twice its IDF because raw TF is two. Dividing by each row&#x27;s L2 norm changes all nonzero coordinates together. Comparing every coordinate catches vocabulary-order and normalization mistakes that one retrieval score might miss.</p>
 <p><strong>Expected:</strong> Manual dense oracle matches the 2-by-3 sparse result within tolerance.</p>
 <h3 id="exercise-4-compute-sparse-cosine">Exercise 4: Compute sparse cosine<a class="heading-anchor" href="#exercise-4-compute-sparse-cosine" aria-label="Link to this section">#</a></h3>
 <p>The query has only the tea coordinate, so the score reads that coordinate from each normalized document. This exact small calculation verifies the sparse API path. It does not establish that the highest lexical score is the best answer for a real user.</p>
-<p><strong>Expected:</strong> First score 2a/sqrt(1+4a^2); second score zero.</p>
+<p><strong>Expected:</strong> First score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn><mi>a</mi></mrow><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2a}{\sqrt{1+4a^2}}</annotation></semantics></math>; second score zero.</p>
 <h3 id="exercise-5-handle-oov-without-refitting">Exercise 5: Handle OOV without refitting<a class="heading-anchor" href="#exercise-5-handle-oov-without-refitting" aria-label="Link to this section">#</a></h3>
 <p>Refitting on the query would alter the column space and make comparisons invalid. The zero vector needs a declared fallback because cosine is not geometrically defined for a zero norm even though sparse dot products return numerical zeros.</p>
 <p><strong>Expected:</strong> Zero nonzero entries and unchanged vocabulary; record an explicit no-known-terms outcome.</p>
 <h3 id="exercise-6-change-one-weighting-choice">Exercise 6: Change one weighting choice<a class="heading-anchor" href="#exercise-6-change-one-weighting-choice" aria-label="Link to this section">#</a></h3>
 <p>Sublinear TF reduces the influence of repeated words while leaving IDF unchanged. This controlled comparison shows which part of the representation changed. Select the choice using the downstream task and an honest evaluation split, not from one favorable query.</p>
-<p><strong>Expected:</strong> Tea weight becomes (1+log(2))*a, distinct from 2a.</p>
+<p><strong>Expected:</strong> Tea weight becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>·</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">(1+\log(2))\cdot a</annotation></semantics></math>, distinct from 2a.</p>
 <h3 id="transfer-and-limits">Transfer and limits<a class="heading-anchor" href="#transfer-and-limits" aria-label="Link to this section">#</a></h3>
 <p>Bag-of-words representations turn documents into vectors whose coordinates correspond to a fixed vocabulary. A count says how often a term appears in one document. Document frequency says in how many training documents it appears. TF-IDF combines within-document frequency with a corpus-level rarity weight, providing a useful sparse baseline for classification and retrieval.</p>
 <p>The unit is one document, not one token or one customer. Repeated occurrences of tea in a document increase term frequency but count only once toward document frequency. Changing the document boundaries therefore changes IDF even if the concatenated text is unchanged. Preserve the corpus definition and fit the vocabulary/IDF only on the training or indexed collection appropriate to the evaluation claim.</p>

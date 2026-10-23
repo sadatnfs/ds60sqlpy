@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-54.html#learner">learner SQL</a> · <a href="sql-54.html#solution-1">solution reasoning</a> · <a href="sql-54.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-54 — Project3 DWH Part3 Aggregations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -406,10 +454,10 @@
 </ol>
 <p>This lesson requires the committed Day 52 warehouse. The guided preparation cell resolves that cataloged predecessor. For a direct terminal run, execute Day 52 successfully first; do not assume a rolled-back Day 53 exercise persists into Day 54.</p>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day54_project3_dwh_part3_aggregations.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day54_project3_dwh_part3_aggregations.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -419,23 +467,23 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TABLE agg_sales_category_month (
-  year    INT NOT NULL,
-  month   INT NOT NULL,
-  category TEXT NOT NULL,
-  revenue NUMERIC(14,2) NOT NULL,
-  PRIMARY KEY (year, month, category)
-);</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_category_month <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">year</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span>   <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  category <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TABLE agg_sales_customer_month (
-  year     INT NOT NULL,
-  month    INT NOT NULL,
-  customer_sk INT NOT NULL,
-  revenue  NUMERIC(14,2) NOT NULL,
-  PRIMARY KEY (year, month, customer_sk)
-);</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_customer_month <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">year</span>     <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  customer_sk <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  revenue  <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>agg_sales_customer_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -506,7 +554,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
 
 I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
@@ -564,144 +612,144 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 54: Project 3 - Data Warehouse Design (Part 3)</span>
-<span>-- BEGINNER WORKFLOW — sql-54: Project3 DWH Part3 Aggregations</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-54/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: agg_sales_category_month, agg_sales_customer_month, fact_sales, dim_date, dim_product.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Topics: Aggregation tables and DQ checks in DWH</span>
-<span>BEGIN;</span>
-<span>SET search_path TO dwh, training, public;</span>
-<span> </span>
-<span>-- Aggregate tables (star-schema rollups)</span>
-<span>CREATE TABLE agg_sales_category_month (</span>
-<span>  year    INT NOT NULL,</span>
-<span>  month   INT NOT NULL,</span>
-<span>  category TEXT NOT NULL,</span>
-<span>  revenue NUMERIC(14,2) NOT NULL,</span>
-<span>  PRIMARY KEY (year, month, category)</span>
-<span>);</span>
-<span> </span>
-<span>CREATE TABLE agg_sales_customer_month (</span>
-<span>  year     INT NOT NULL,</span>
-<span>  month    INT NOT NULL,</span>
-<span>  customer_sk INT NOT NULL,</span>
-<span>  revenue  NUMERIC(14,2) NOT NULL,</span>
-<span>  PRIMARY KEY (year, month, customer_sk)</span>
-<span>);</span>
-<span> </span>
-<span>-- Initial full builds (would normally be incremental)</span>
-<span>INSERT INTO agg_sales_category_month(year, month, category, revenue)</span>
-<span>SELECT dd.year,</span>
-<span>       dd.month,</span>
-<span>       dp.category,</span>
-<span>       ROUND(SUM(fs.amount),2) AS revenue</span>
-<span>FROM fact_sales fs</span>
-<span>JOIN dim_date dd    ON dd.date_key = fs.date_key</span>
-<span>JOIN dim_product dp ON dp.product_sk = fs.product_sk</span>
-<span>GROUP BY dd.year, dd.month, dp.category;</span>
-<span> </span>
-<span>INSERT INTO agg_sales_customer_month(year, month, customer_sk, revenue)</span>
-<span>SELECT dd.year,</span>
-<span>       dd.month,</span>
-<span>       fs.customer_sk,</span>
-<span>       ROUND(SUM(fs.amount),2) AS revenue</span>
-<span>FROM fact_sales fs</span>
-<span>JOIN dim_date dd ON dd.date_key = fs.date_key</span>
-<span>GROUP BY dd.year, dd.month, fs.customer_sk;</span>
-<span> </span>
-<span>-- Example incremental refresh for a given month (delete + insert)</span>
-<span>-- WITH target AS (</span>
-<span>--   SELECT 2026 AS y, 1 AS m</span>
-<span>-- )</span>
-<span>-- DELETE FROM agg_sales_category_month a</span>
-<span>-- USING target t</span>
-<span>-- WHERE a.year = t.y AND a.month = t.m;</span>
-<span>-- INSERT INTO agg_sales_category_month(year, month, category, revenue)</span>
-<span>-- SELECT t.y, t.m, dp.category, ROUND(SUM(fs.amount),2)</span>
-<span>-- FROM fact_sales fs</span>
-<span>-- JOIN dim_date dd ON dd.date_key = fs.date_key</span>
-<span>-- JOIN dim_product dp ON dp.product_sk = fs.product_sk</span>
-<span>-- JOIN target t ON dd.year = t.y AND dd.month = t.m</span>
-<span>-- GROUP BY dp.category, t.y, t.m;</span>
-<span> </span>
-<span>-- Data Quality checks: reconciling aggregates to facts</span>
-<span>-- 1. Compare monthly category revenue between agg and base</span>
-<span>WITH base AS (</span>
-<span>  SELECT dd.year, dd.month, dp.category, ROUND(SUM(fs.amount),2) AS rev</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd ON dd.date_key = fs.date_key</span>
-<span>  JOIN dim_product dp ON dp.product_sk = fs.product_sk</span>
-<span>  GROUP BY dd.year, dd.month, dp.category</span>
-<span>), diff AS (</span>
-<span>  SELECT b.year, b.month, b.category,</span>
-<span>         b.rev AS base_rev,</span>
-<span>         a.revenue AS agg_rev,</span>
-<span>         ROUND(coalesce(a.revenue,0) - coalesce(b.rev,0),2) AS delta</span>
-<span>  FROM base b</span>
-<span>  FULL OUTER JOIN agg_sales_category_month a</span>
-<span>    ON a.year = b.year AND a.month = b.month AND a.category = b.category</span>
-<span>)</span>
-<span>SELECT * FROM diff WHERE delta &lt;&gt; 0 ORDER BY year DESC, month DESC, category;</span>
-<span> </span>
-<span>-- 2. Check for orphan SKs in agg_sales_customer_month</span>
-<span>SELECT a.customer_sk</span>
-<span>FROM agg_sales_customer_month a</span>
-<span>LEFT JOIN dim_customer dc ON dc.customer_sk = a.customer_sk</span>
-<span>WHERE dc.customer_sk IS NULL</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Add an agg table agg_sales_product_month and validate it.</span>
-<span>--    Inputs: For sql-54 Exercise 1, read from `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `product_sk`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 1, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `product_sk`. The final order is `a.year, a.month`.</span>
-<span>--    Verify: For sql-54 Exercise 1, independently aggregate `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date` by `year`, `month`, and `product_sk`; require one output row for every distinct `year`, `month`, and `product_sk` tuple and compare `product_sk` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 1, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span>
-<span>-- 2. Create a stored procedure to refresh a given y, m across all aggs.</span>
-<span>--    Inputs: For sql-54 Exercise 2, read from `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `category`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 2, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `category`. The final order is `dd.year DESC, dd.month DESC`.</span>
-<span>--    Verify: For sql-54 Exercise 2, assert no more than 1 rows, no duplicate `year`, `month`, and `product_sk`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date` to confirm `year`, `month`, and `category` came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 2, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span>
-<span>-- 3. Prediction: explain why refreshing only the current month misses a</span>
-<span>--    late-arriving fact for a previous month.</span>
-<span>--    Inputs: For sql-54 Exercise 3, read from `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, `fact_rows`, and `latest_fact_date`; keep `year`, and `month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 3, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `fact_rows`, and `latest_fact_date`. The final order is `dd.year DESC, dd.month DESC`.</span>
-<span>--    Verify: For sql-54 Exercise 3, independently aggregate `fact_sales`, and `dim_date` by `year`, and `month`; require one output row for every distinct `year`, and `month` tuple and compare `fact_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 3, start with the first relation in `fact_sales`, and `dim_date`; after each join, record total rows and distinct `year`, and `month` so the exact fanout or loss is visible.</span>
-<span>-- 4. Construction: implement delete-and-insert refresh for one closed month in</span>
-<span>--    a transaction and return inserted row counts.</span>
-<span>--    Inputs: For sql-54 Exercise 4, read the target keys from `agg_sales_category_month` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected `year`, and `month` values. The final columns are `year`, `month`, `category_rows`, and `revenue`. The final order is `year DESC, month DESC`.</span>
-<span>--    Verify: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry.</span>
-<span>-- 5. Debugging: repair the FULL JOIN reconciliation so a row missing from either</span>
-<span>--    the fact aggregate or stored aggregate is reported, not hidden by NULL math.</span>
-<span>--    Inputs: For sql-54 Exercise 5, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue`. Build the answer toward `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`; keep `year`, and `month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 5, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`. The final order is `year, month`.</span>
-<span>--    Verify: For sql-54 Exercise 5, project `year`, and `month` plus the raw source columns from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue` at each join stage; record row count and distinct `year`, and `month`, then assert the final `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 5, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, and `month` uniqueness before the next stage uses it.</span>
-<span>-- 6. Edge case: rerun the same month refresh twice and prove both row count and</span>
-<span>--    revenue are identical (idempotency).</span>
-<span>--    Inputs: For sql-54 Exercise 6, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`. Build the answer toward `except`; keep `except` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-54 Exercise 6, expected output: at most one row keyed by `except`. The final columns are `except`. The final order is `dd.year DESC, dd.month DESC`.</span>
-<span>--    Verify: For sql-54 Exercise 6, assert no more than 1 rows, no duplicate `except`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before` to confirm `except` came from the same source rows. Add duplicate source candidates for `except`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span>
-<span>--    Hint ladder, rung 1: For sql-54 Exercise 6, start with the first relation in `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`; after each join, record total rows and distinct `except` so the exact fanout or loss is visible.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 54: Project 3 - Data Warehouse Design (Part 3)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-54: Project3 DWH Part3 Aggregations</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-54/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: agg_sales_category_month, agg_sales_customer_month, fact_sales, dim_date, dim_product.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Topics: Aggregation tables and DQ checks in DWH</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Aggregate tables (star-schema rollups)</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_category_month <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">year</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span>   <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_customer_month <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">year</span>     <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_sk <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue  <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Initial full builds (would normally be incremental)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_category_month<span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_date dd    <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_key <span class="syntax-operator">=</span> fs<span class="syntax-punctuation">.</span>date_key</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_product dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_sk <span class="syntax-operator">=</span> fs<span class="syntax-punctuation">.</span>product_sk</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_customer_month<span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       fs<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_key <span class="syntax-operator">=</span> fs<span class="syntax-punctuation">.</span>date_key</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> fs<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example incremental refresh for a given month (delete + insert)</span></span>
+<span class="source-line"><span class="syntax-comment">-- WITH target AS (</span></span>
+<span class="source-line"><span class="syntax-comment">--   SELECT 2026 AS y, 1 AS m</span></span>
+<span class="source-line"><span class="syntax-comment">-- )</span></span>
+<span class="source-line"><span class="syntax-comment">-- DELETE FROM agg_sales_category_month a</span></span>
+<span class="source-line"><span class="syntax-comment">-- USING target t</span></span>
+<span class="source-line"><span class="syntax-comment">-- WHERE a.year = t.y AND a.month = t.m;</span></span>
+<span class="source-line"><span class="syntax-comment">-- INSERT INTO agg_sales_category_month(year, month, category, revenue)</span></span>
+<span class="source-line"><span class="syntax-comment">-- SELECT t.y, t.m, dp.category, ROUND(SUM(fs.amount),2)</span></span>
+<span class="source-line"><span class="syntax-comment">-- FROM fact_sales fs</span></span>
+<span class="source-line"><span class="syntax-comment">-- JOIN dim_date dd ON dd.date_key = fs.date_key</span></span>
+<span class="source-line"><span class="syntax-comment">-- JOIN dim_product dp ON dp.product_sk = fs.product_sk</span></span>
+<span class="source-line"><span class="syntax-comment">-- JOIN target t ON dd.year = t.y AND dd.month = t.m</span></span>
+<span class="source-line"><span class="syntax-comment">-- GROUP BY dp.category, t.y, t.m;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Data Quality checks: reconciling aggregates to facts</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Compare monthly category revenue between agg and base</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> base <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rev</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_key <span class="syntax-operator">=</span> fs<span class="syntax-punctuation">.</span>date_key</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_product dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_sk <span class="syntax-operator">=</span> fs<span class="syntax-punctuation">.</span>product_sk</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> dp<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diff <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         b<span class="syntax-punctuation">.</span>rev <span class="syntax-keyword">AS</span> base_rev<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> agg_rev<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>rev<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delta</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> base b</span>
+<span class="source-line">  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> agg_sales_category_month a</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> diff <span class="syntax-keyword">WHERE</span> delta <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Check for orphan SKs in agg_sales_customer_month</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>customer_sk</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> agg_sales_customer_month a</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> dim_customer dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_sk</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Add an agg table agg_sales_product_month and validate it.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 1, read from `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `product_sk`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 1, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `product_sk`. The final order is `a.year, a.month`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 1, independently aggregate `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date` by `year`, `month`, and `product_sk`; require one output row for every distinct `year`, `month`, and `product_sk` tuple and compare `product_sk` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 1, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Create a stored procedure to refresh a given y, m across all aggs.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 2, read from `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `category`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 2, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `category`. The final order is `dd.year DESC, dd.month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 2, assert no more than 1 rows, no duplicate `year`, `month`, and `product_sk`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date` to confirm `year`, `month`, and `category` came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 2, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: explain why refreshing only the current month misses a</span></span>
+<span class="source-line"><span class="syntax-comment">--    late-arriving fact for a previous month.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 3, read from `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, `fact_rows`, and `latest_fact_date`; keep `year`, and `month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 3, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `fact_rows`, and `latest_fact_date`. The final order is `dd.year DESC, dd.month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 3, independently aggregate `fact_sales`, and `dim_date` by `year`, and `month`; require one output row for every distinct `year`, and `month` tuple and compare `fact_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 3, start with the first relation in `fact_sales`, and `dim_date`; after each join, record total rows and distinct `year`, and `month` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: implement delete-and-insert refresh for one closed month in</span></span>
+<span class="source-line"><span class="syntax-comment">--    a transaction and return inserted row counts.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 4, read the target keys from `agg_sales_category_month` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected `year`, and `month` values. The final columns are `year`, `month`, `category_rows`, and `revenue`. The final order is `year DESC, month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: repair the FULL JOIN reconciliation so a row missing from either</span></span>
+<span class="source-line"><span class="syntax-comment">--    the fact aggregate or stored aggregate is reported, not hidden by NULL math.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 5, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue`. Build the answer toward `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`; keep `year`, and `month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 5, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`. The final order is `year, month`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 5, project `year`, and `month` plus the raw source columns from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue` at each join stage; record row count and distinct `year`, and `month`, then assert the final `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 5, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, and `month` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: rerun the same month refresh twice and prove both row count and</span></span>
+<span class="source-line"><span class="syntax-comment">--    revenue are identical (idempotency).</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-54 Exercise 6, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`. Build the answer toward `except`; keep `except` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-54 Exercise 6, expected output: at most one row keyed by `except`. The final columns are `except`. The final order is `dd.year DESC, dd.month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-54 Exercise 6, assert no more than 1 rows, no duplicate `except`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before` to confirm `except` came from the same source rows. Add duplicate source candidates for `except`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-54 Exercise 6, start with the first relation in `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`; after each join, record total rows and distinct `except` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -737,10 +785,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure">Day 54 Solutions — Warehouse Aggregates and Refresh Procedure<a class="heading-anchor" href="#solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day54_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day54_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day54_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -757,52 +805,52 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 54 creates and tests aggregate objects inside a transaction, then rolls everything back. The complete runnable answer is <a href="sql-54.html#solution-2"><code>day54_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-aggsalesproductmonth">Exercise 1 — <code>agg_sales_product_month</code><a class="heading-anchor" href="#solution-1--exercise-1-aggsalesproductmonth" aria-label="Link to this section">#</a></h4>
 <p>The answer uses this grain and schema:</p>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO dwh, training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE TABLE agg_sales_product_month (
-  year int NOT NULL,
-  month int NOT NULL,
-  product_sk int NOT NULL REFERENCES dim_product(product_sk),
-  revenue numeric(14,2) NOT NULL,
-  units bigint NOT NULL,
-  orders bigint NOT NULL,
-  PRIMARY KEY (year, month, product_sk)
-);
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_product_month <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">year</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  product_sk <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> dim_product<span class="syntax-punctuation">(</span>product_sk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  units <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  orders <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-INSERT INTO agg_sales_product_month(
-  year, month, product_sk, revenue, units, orders
-)
-SELECT dd.year,
-       dd.month,
-       fs.product_sk,
-       ROUND(SUM(fs.amount), 2),
-       SUM(fs.quantity),
-       COUNT(DISTINCT fs.order_id)
-FROM fact_sales fs
-JOIN dim_date dd USING (date_key)
-GROUP BY dd.year, dd.month, fs.product_sk;
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_product_month<span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">,</span> orders
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+       dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+       fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> fs<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> fact_sales fs
+<span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">;</span>
 
-WITH aggregate_total AS (
-  SELECT year, month, SUM(revenue) AS revenue
-  FROM agg_sales_product_month
-  GROUP BY year, month
-), fact_total AS (
-  SELECT dd.year, dd.month, ROUND(SUM(fs.amount), 2) AS revenue
-  FROM fact_sales fs
-  JOIN dim_date dd USING (date_key)
-  GROUP BY dd.year, dd.month
-)
-SELECT a.year,
-       a.month,
-       a.revenue AS aggregate_revenue,
-       f.revenue AS fact_revenue,
-       a.revenue - f.revenue AS difference
-FROM aggregate_total a
-JOIN fact_total f USING (year, month)
-ORDER BY a.year, a.month;
+<span class="syntax-keyword">WITH</span> aggregate_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> agg_sales_product_month
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> fact_sales fs
+  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+       a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> aggregate_revenue<span class="syntax-punctuation">,</span>
+       f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> fact_revenue<span class="syntax-punctuation">,</span>
+       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> difference
+<span class="syntax-keyword">FROM</span> aggregate_total a
+<span class="syntax-keyword">JOIN</span> fact_total f <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The two sides are aggregated independently before joining, preventing join fanout. Expected <code>difference</code> is zero for every built month.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -816,7 +864,7 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-2-refresh-all-aggregates-for-year-month">Exercise 2 — Refresh all aggregates for <code>(year, month)</code><a class="heading-anchor" href="#solution-1--exercise-2-refresh-all-aggregates-for-year-month" aria-label="Link to this section">#</a></h4>
 <p>The executable solution creates:</p>
-<pre><code class="language-text">dwh.refresh_sales_aggregates_solution(p_year int, p_month int)</code></pre>
+<pre class="highlighted-code"><code class="language-text">dwh.refresh_sales_aggregates_solution(p_year int, p_month int)</code></pre>
 <p>Within one procedure call it:</p>
 <ol>
 <li>deletes the target month from category, customer, and product aggregates;</li>
@@ -837,7 +885,7 @@ ROLLBACK;</code></pre>
 <li><strong>Edge case:</strong> Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining <code>dd.year DESC, dd.month DESC</code>.</li>
 </ul>
 <h4 id="solution-1--required-days-52-54-sequence">Required Days 52–54 sequence<a class="heading-anchor" href="#solution-1--required-days-52-54-sequence" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d course -f day52_solutions.sql
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d course -f day52_solutions.sql
 psql -X -v ON_ERROR_STOP=1 -d course -f day53_solutions.sql
 psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <p>Day 52 persists course-owned warehouse state. Days 53 and 54 prove their solutions and roll back. Day 54 does not require Day 53 changes to persist.</p>
@@ -929,218 +977,218 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 54 solutions: aggregate tables and refresh procedure</span>
-<span>-- SOLUTION READING MAP — sql-54: Project3 DWH Part3 Aggregations</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day54_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day54_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO dwh, training, public;</span>
-<span> </span>
-<span>DO $require_day52$</span>
-<span>BEGIN</span>
-<span>  IF to_regclass(&#x27;dwh.fact_sales&#x27;) IS NULL THEN</span>
-<span>    RAISE EXCEPTION &#x27;Run day52_solutions.sql before Day 54&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$require_day52$;</span>
-<span> </span>
-<span>CREATE TABLE agg_sales_category_month (</span>
-<span>  year int NOT NULL,</span>
-<span>  month int NOT NULL,</span>
-<span>  category text NOT NULL,</span>
-<span>  revenue numeric(14,2) NOT NULL,</span>
-<span>  units bigint NOT NULL,</span>
-<span>  PRIMARY KEY (year, month, category)</span>
-<span>);</span>
-<span> </span>
-<span>CREATE TABLE agg_sales_customer_month (</span>
-<span>  year int NOT NULL,</span>
-<span>  month int NOT NULL,</span>
-<span>  customer_sk int NOT NULL REFERENCES dim_customer(customer_sk),</span>
-<span>  revenue numeric(14,2) NOT NULL,</span>
-<span>  orders bigint NOT NULL,</span>
-<span>  PRIMARY KEY (year, month, customer_sk)</span>
-<span>);</span>
-<span> </span>
-<span>-- Exercise 1: product-month aggregate.</span>
-<span>CREATE TABLE agg_sales_product_month (</span>
-<span>  year int NOT NULL,</span>
-<span>  month int NOT NULL,</span>
-<span>  product_sk int NOT NULL REFERENCES dim_product(product_sk),</span>
-<span>  revenue numeric(14,2) NOT NULL,</span>
-<span>  units bigint NOT NULL,</span>
-<span>  orders bigint NOT NULL,</span>
-<span>  PRIMARY KEY (year, month, product_sk)</span>
-<span>);</span>
-<span> </span>
-<span>-- Exercise 2: refresh all aggregate tables for one year/month.</span>
-<span>CREATE OR REPLACE PROCEDURE refresh_sales_aggregates_solution(</span>
-<span>  p_year int,</span>
-<span>  p_month int</span>
-<span>)</span>
-<span>LANGUAGE plpgsql</span>
-<span>AS $procedure$</span>
-<span>BEGIN</span>
-<span>  DELETE FROM agg_sales_category_month</span>
-<span>  WHERE year = p_year AND month = p_month;</span>
-<span>  DELETE FROM agg_sales_customer_month</span>
-<span>  WHERE year = p_year AND month = p_month;</span>
-<span>  DELETE FROM agg_sales_product_month</span>
-<span>  WHERE year = p_year AND month = p_month;</span>
-<span> </span>
-<span>  INSERT INTO agg_sales_category_month(year, month, category, revenue, units)</span>
-<span>  SELECT dd.year,</span>
-<span>         dd.month,</span>
-<span>         dp.category,</span>
-<span>         ROUND(SUM(fs.amount), 2),</span>
-<span>         SUM(fs.quantity)</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd USING (date_key)</span>
-<span>  JOIN dim_product dp USING (product_sk)</span>
-<span>  WHERE dd.year = p_year AND dd.month = p_month</span>
-<span>  GROUP BY dd.year, dd.month, dp.category;</span>
-<span> </span>
-<span>  INSERT INTO agg_sales_customer_month(year, month, customer_sk, revenue, orders)</span>
-<span>  SELECT dd.year,</span>
-<span>         dd.month,</span>
-<span>         fs.customer_sk,</span>
-<span>         ROUND(SUM(fs.amount), 2),</span>
-<span>         COUNT(DISTINCT fs.order_id)</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd USING (date_key)</span>
-<span>  WHERE dd.year = p_year AND dd.month = p_month</span>
-<span>  GROUP BY dd.year, dd.month, fs.customer_sk;</span>
-<span> </span>
-<span>  INSERT INTO agg_sales_product_month(</span>
-<span>    year, month, product_sk, revenue, units, orders</span>
-<span>  )</span>
-<span>  SELECT dd.year,</span>
-<span>         dd.month,</span>
-<span>         fs.product_sk,</span>
-<span>         ROUND(SUM(fs.amount), 2),</span>
-<span>         SUM(fs.quantity),</span>
-<span>         COUNT(DISTINCT fs.order_id)</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd USING (date_key)</span>
-<span>  WHERE dd.year = p_year AND dd.month = p_month</span>
-<span>  GROUP BY dd.year, dd.month, fs.product_sk;</span>
-<span>END</span>
-<span>$procedure$;</span>
-<span> </span>
-<span>DO $refresh_latest_month$</span>
-<span>DECLARE</span>
-<span>  latest_year int;</span>
-<span>  latest_month int;</span>
-<span>BEGIN</span>
-<span>  SELECT dd.year, dd.month</span>
-<span>  INTO latest_year, latest_month</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd USING (date_key)</span>
-<span>  ORDER BY dd.year DESC, dd.month DESC</span>
-<span>  LIMIT 1;</span>
-<span> </span>
-<span>  CALL refresh_sales_aggregates_solution(latest_year, latest_month);</span>
-<span>END</span>
-<span>$refresh_latest_month$;</span>
-<span> </span>
-<span>-- Product aggregate must reconcile to facts for the refreshed month.</span>
-<span>WITH aggregate_total AS (</span>
-<span>  SELECT year, month, SUM(revenue) AS revenue</span>
-<span>  FROM agg_sales_product_month</span>
-<span>  GROUP BY year, month</span>
-<span>), fact_total AS (</span>
-<span>  SELECT dd.year, dd.month, ROUND(SUM(fs.amount), 2) AS revenue</span>
-<span>  FROM fact_sales fs</span>
-<span>  JOIN dim_date dd USING (date_key)</span>
-<span>  WHERE (dd.year, dd.month) IN (</span>
-<span>    SELECT year, month FROM aggregate_total</span>
-<span>  )</span>
-<span>  GROUP BY dd.year, dd.month</span>
-<span>)</span>
-<span>SELECT a.year,</span>
-<span>       a.month,</span>
-<span>       a.revenue AS aggregate_revenue,</span>
-<span>       f.revenue AS fact_revenue,</span>
-<span>       a.revenue - f.revenue AS difference</span>
-<span>FROM aggregate_total a</span>
-<span>JOIN fact_total f USING (year, month);</span>
-<span> </span>
-<span>-- Exercise 3: list loaded periods. A late fact for any listed closed period</span>
-<span>-- requires refreshing that period, not only the newest one.</span>
-<span>SELECT dd.year, dd.month,</span>
-<span>       COUNT(*) AS fact_rows,</span>
-<span>       MAX(dd.date_actual) AS latest_fact_date</span>
-<span>FROM fact_sales fs</span>
-<span>JOIN dim_date dd USING (date_key)</span>
-<span>GROUP BY dd.year, dd.month</span>
-<span>ORDER BY dd.year DESC, dd.month DESC;</span>
-<span> </span>
-<span>-- Exercise 4: the procedure&#x27;s DELETE + INSERT statements share this surrounding</span>
-<span>-- transaction. The prior call already refreshed one month atomically.</span>
-<span>SELECT year, month, COUNT(*) AS category_rows, SUM(revenue) AS revenue</span>
-<span>FROM agg_sales_category_month</span>
-<span>GROUP BY year, month</span>
-<span>ORDER BY year DESC, month DESC;</span>
-<span> </span>
-<span>-- Exercise 5: FULL JOIN plus COALESCE in the delta exposes a row missing from</span>
-<span>-- either side instead of allowing NULL arithmetic to hide it.</span>
-<span>WITH aggregate_total AS (</span>
-<span>  SELECT year, month, SUM(revenue) AS revenue</span>
-<span>  FROM agg_sales_category_month GROUP BY year, month</span>
-<span>), fact_total AS (</span>
-<span>  SELECT dd.year, dd.month, ROUND(SUM(fs.amount), 2) AS revenue</span>
-<span>  FROM fact_sales fs JOIN dim_date dd USING (date_key)</span>
-<span>  GROUP BY dd.year, dd.month</span>
-<span>)</span>
-<span>SELECT COALESCE(a.year, f.year) AS year,</span>
-<span>       COALESCE(a.month, f.month) AS month,</span>
-<span>       a.revenue AS aggregate_revenue,</span>
-<span>       f.revenue AS fact_revenue,</span>
-<span>       COALESCE(a.revenue, 0) - COALESCE(f.revenue, 0) AS difference</span>
-<span>FROM aggregate_total a</span>
-<span>FULL JOIN fact_total f USING (year, month)</span>
-<span>WHERE a.revenue IS DISTINCT FROM f.revenue</span>
-<span>ORDER BY year, month;</span>
-<span> </span>
-<span>-- Exercise 6: snapshot, rerun the same latest-month refresh, then compare both</span>
-<span>-- directions. An empty difference proves row/value idempotency.</span>
-<span>CREATE TEMP TABLE aggregate_snapshot_before AS</span>
-<span>SELECT * FROM agg_sales_category_month;</span>
-<span>DO $refresh_latest_month_again$</span>
-<span>DECLARE</span>
-<span>  latest_year int;</span>
-<span>  latest_month int;</span>
-<span>BEGIN</span>
-<span>  SELECT dd.year, dd.month INTO latest_year, latest_month</span>
-<span>  FROM fact_sales fs JOIN dim_date dd USING (date_key)</span>
-<span>  ORDER BY dd.year DESC, dd.month DESC LIMIT 1;</span>
-<span>  CALL refresh_sales_aggregates_solution(latest_year, latest_month);</span>
-<span>END</span>
-<span>$refresh_latest_month_again$;</span>
-<span>SELECT &#x27;before_minus_after&#x27; AS side, * FROM (</span>
-<span>  SELECT * FROM aggregate_snapshot_before</span>
-<span>  EXCEPT</span>
-<span>  SELECT * FROM agg_sales_category_month</span>
-<span>) a</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;after_minus_before&#x27;, * FROM (</span>
-<span>  SELECT * FROM agg_sales_category_month</span>
-<span>  EXCEPT</span>
-<span>  SELECT * FROM aggregate_snapshot_before</span>
-<span>) b;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 54 solutions: aggregate tables and refresh procedure</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-54: Project3 DWH Part3 Aggregations</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day54_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day54_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $require_day52$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dwh.fact_sales&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Run day52_solutions.sql before Day 54&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$require_day52$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_category_month <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">year</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  units <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_customer_month <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">year</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_sk <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> dim_customer<span class="syntax-punctuation">(</span>customer_sk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  orders <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: product-month aggregate.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_product_month <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">year</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  product_sk <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> dim_product<span class="syntax-punctuation">(</span>product_sk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  units <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  orders <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: refresh all aggregate tables for one year/month.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">PROCEDURE</span> refresh_sales_aggregates_solution<span class="syntax-punctuation">(</span></span>
+<span class="source-line">  p_year <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p_month <span class="syntax-builtin">int</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line"><span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> agg_sales_category_month</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> <span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> agg_sales_customer_month</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> <span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> agg_sales_product_month</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> <span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_category_month<span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_product dp <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_sk<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_customer_month<span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> orders<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         fs<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> fs<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> fs<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_product_month<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">,</span> orders</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> fs<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-operator">=</span> p_year <span class="syntax-keyword">AND</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> p_month</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $refresh_latest_month$</span>
+<span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
+<span class="source-line">  latest_year <span class="syntax-builtin">int</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  latest_month <span class="syntax-builtin">int</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span></span>
+<span class="source-line">  <span class="syntax-keyword">INTO</span> latest_year<span class="syntax-punctuation">,</span> latest_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">CALL</span> refresh_sales_aggregates_solution<span class="syntax-punctuation">(</span>latest_year<span class="syntax-punctuation">,</span> latest_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$refresh_latest_month$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Product aggregate must reconcile to facts for the refreshed month.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> aggregate_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> agg_sales_product_month</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> aggregate_total</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> aggregate_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> fact_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> difference</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> aggregate_total a</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> fact_total f <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: list loaded periods. A late fact for any listed closed period</span></span>
+<span class="source-line"><span class="syntax-comment">-- requires refreshing that period, not only the newest one.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fact_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>dd<span class="syntax-punctuation">.</span>date_actual<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> latest_fact_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> fact_sales fs</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: the procedure&#x27;s DELETE + INSERT statements share this surrounding</span></span>
+<span class="source-line"><span class="syntax-comment">-- transaction. The prior call already refreshed one month atomically.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category_rows<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> agg_sales_category_month</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: FULL JOIN plus COALESCE in the delta exposes a row missing from</span></span>
+<span class="source-line"><span class="syntax-comment">-- either side instead of allowing NULL arithmetic to hide it.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> aggregate_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> agg_sales_category_month <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> aggregate_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> fact_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> difference</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> aggregate_total a</span>
+<span class="source-line"><span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> fact_total f <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> f<span class="syntax-punctuation">.</span>revenue</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: snapshot, rerun the same latest-month refresh, then compare both</span></span>
+<span class="source-line"><span class="syntax-comment">-- directions. An empty difference proves row/value idempotency.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> aggregate_snapshot_before <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> agg_sales_category_month<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $refresh_latest_month_again$</span>
+<span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
+<span class="source-line">  latest_year <span class="syntax-builtin">int</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  latest_month <span class="syntax-builtin">int</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">INTO</span> latest_year<span class="syntax-punctuation">,</span> latest_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> fact_sales fs <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">CALL</span> refresh_sales_aggregates_solution<span class="syntax-punctuation">(</span>latest_year<span class="syntax-punctuation">,</span> latest_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$refresh_latest_month_again$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;before_minus_after&#x27;</span> <span class="syntax-keyword">AS</span> side<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> aggregate_snapshot_before</span>
+<span class="source-line">  <span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> agg_sales_category_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> a</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;after_minus_before&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> agg_sales_category_month</span>
+<span class="source-line">  <span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> aggregate_snapshot_before</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> b<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

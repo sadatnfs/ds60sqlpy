@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 25 (<code>python-25</code>): chart selection, visual encodings, labels, and static export. Plotly and Altair are in the <code>data</code> dependency group.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day26_viz_plotly_altair.md</code>, then open <code>python/ds-60day/notebooks/day26_viz_plotly_altair.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,32 +423,32 @@
 <p>In Plotly Express, <code>x</code>, <code>y</code>, <code>color</code>, and <code>hover_data</code> name visible or inspectable encodings. <code>fig.write_html(path, include_plotlyjs=True)</code> embeds the JavaScript library for offline use; a CDN option makes a smaller file that needs network access. In Altair, a chart combines a mark with encoded fields whose type declarations affect scales and aggregation.</p>
 <h5 id="guide--worked-example-1-build-an-inspectable-plotly-figure">Worked example 1 — Build an inspectable Plotly figure<a class="heading-anchor" href="#guide--worked-example-1-build-an-inspectable-plotly-figure" aria-label="Link to this section">#</a></h5>
 <p>Return the figure so construction remains separate from export. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import pandas as pd
-import plotly.express as px
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px
 
-points = pd.DataFrame({
-    &quot;team&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;],
-    &quot;hours&quot;: [2, 4, 3, 5],
-    &quot;tasks&quot;: [3, 7, 4, 9],
-})
-fig = px.scatter(
-    points, x=&quot;hours&quot;, y=&quot;tasks&quot;, color=&quot;team&quot;,
-    hover_data=[&quot;team&quot;], title=&quot;Tasks completed versus hours&quot;
-)
-(len(fig.data), fig.layout.xaxis.title.text, fig.layout.yaxis.title.text)</code></pre>
+points <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">hours</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">tasks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+fig <span class="syntax-operator">=</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>
+    points<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">hours</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">tasks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    hover_data<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Tasks completed versus hours</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>fig<span class="syntax-operator">.</span>data<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fig<span class="syntax-operator">.</span>layout<span class="syntax-operator">.</span>xaxis<span class="syntax-operator">.</span>title<span class="syntax-operator">.</span>text<span class="syntax-punctuation">,</span> fig<span class="syntax-operator">.</span>layout<span class="syntax-operator">.</span>yaxis<span class="syntax-operator">.</span>title<span class="syntax-operator">.</span>text<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-inspect-a-self-contained-html-representation">Worked example 2 — Inspect a self-contained HTML representation<a class="heading-anchor" href="#guide--worked-example-2-inspect-a-self-contained-html-representation" aria-label="Link to this section">#</a></h5>
 <p>Embedding removes a runtime dependency on a remote CDN. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">html = fig.to_html(full_html=True, include_plotlyjs=True)
-{
-    &quot;starts_as_html&quot;: html.lstrip().lower().startswith(&quot;&lt;html&gt;&quot;),
-    &quot;contains_figure_data&quot;: &quot;Tasks completed versus hours&quot; in html,
-    &quot;characters&quot;: len(html),
-}</code></pre>
+<pre class="highlighted-code"><code class="language-python">html <span class="syntax-operator">=</span> fig<span class="syntax-operator">.</span>to_html<span class="syntax-punctuation">(</span>full_html<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">starts_as_html</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> html<span class="syntax-operator">.</span>lstrip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;html&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">contains_figure_data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Tasks completed versus hours</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> html<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">characters</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>html<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">Both Boolean checks are `True`; the file-sized string is large because Plotly JavaScript is embedded.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Both Boolean checks are `True`; the file-sized string is large because Plotly JavaScript is embedded.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -431,24 +479,24 @@ fig = px.scatter(
 <li><strong>CDN:</strong> network-hosted asset; smaller output, but not offline.</li>
 </ul>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-import pandas as pd
-import plotly.express as px
+<span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px
 
-frame = pd.DataFrame(
-    {&quot;day&quot;: [&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;], &quot;orders&quot;: [12, 18, 15], &quot;returns&quot;: [1, 2, 1]}
-)
-figure = px.scatter(
-    frame,
-    x=&quot;orders&quot;,
-    y=&quot;returns&quot;,
-    hover_name=&quot;day&quot;,
-    title=&quot;Orders and returns by day&quot;,
-)
-output = Path(&quot;artifacts&quot;) / &quot;orders_returns.html&quot;
-output.parent.mkdir(parents=True, exist_ok=True)
-figure.write_html(output, include_plotlyjs=True)</code></pre>
+frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">day</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">Mon</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Tue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Wed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-number">15</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+figure <span class="syntax-operator">=</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>
+    frame<span class="syntax-punctuation">,</span>
+    x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    y<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">returns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    hover_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">day</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Orders and returns by day</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+output <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">orders_returns.html</span><span class="syntax-string">&quot;</span>
+output<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+figure<span class="syntax-operator">.</span>write_html<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Embedding Plotly&#x27;s JavaScript makes the file larger but usable with no network. Do not use <code>include_plotlyjs=&quot;cdn&quot;</code> for an offline deliverable.</p>
 <h4 id="guide--dataset-note">Dataset note<a class="heading-anchor" href="#guide--dataset-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook uses Seaborn&#x27;s <code>tips</code> sample and therefore may download/cache it on first use. The constructed example above avoids that dependency.</p>
@@ -495,7 +543,7 @@ figure.write_html(output, include_plotlyjs=True)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-26`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-26`
 (Day 26 — Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
 I have completed the direct prerequisites: `python-25`. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
 Read `python/ds-60day/companion-guides/day26_viz_plotly_altair.md` and use the learner notebook
@@ -569,30 +617,30 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p>In Plotly Express, <code>x</code>, <code>y</code>, <code>color</code>, and <code>hover_data</code> name visible or inspectable encodings. <code>fig.write_html(path, include_plotlyjs=True)</code> embeds the JavaScript library for offline use; a CDN option makes a smaller file that needs network access. In Altair, a chart combines a mark with encoded fields whose type declarations affect scales and aggregation.</p>
 <h5 id="learner--cell-4--worked-example-1-build-an-inspectable-plotly-figure">Worked example 1 — Build an inspectable Plotly figure<a class="heading-anchor" href="#learner--cell-4--worked-example-1-build-an-inspectable-plotly-figure" aria-label="Link to this section">#</a></h5>
 <p>Return the figure so construction remains separate from export. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
-<span>import plotly.express as px</span>
-<span> </span>
-<span>points = pd.DataFrame({</span>
-<span>    &quot;team&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;],</span>
-<span>    &quot;hours&quot;: [2, 4, 3, 5],</span>
-<span>    &quot;tasks&quot;: [3, 7, 4, 9],</span>
-<span>})</span>
-<span>fig = px.scatter(</span>
-<span>    points, x=&quot;hours&quot;, y=&quot;tasks&quot;, color=&quot;team&quot;,</span>
-<span>    hover_data=[&quot;team&quot;], title=&quot;Tasks completed versus hours&quot;</span>
-<span>)</span>
-<span>(len(fig.data), fig.layout.xaxis.title.text, fig.layout.yaxis.title.text)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px</span>
+<span class="source-line"></span>
+<span class="source-line">points <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">hours</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">tasks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig <span class="syntax-operator">=</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    points<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">hours</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">tasks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    hover_data<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Tasks completed versus hours</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>fig<span class="syntax-operator">.</span>data<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fig<span class="syntax-operator">.</span>layout<span class="syntax-operator">.</span>xaxis<span class="syntax-operator">.</span>title<span class="syntax-operator">.</span>text<span class="syntax-punctuation">,</span> fig<span class="syntax-operator">.</span>layout<span class="syntax-operator">.</span>yaxis<span class="syntax-operator">.</span>title<span class="syntax-operator">.</span>text<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> Two traces (one per team) and the <code>hours</code>/<code>tasks</code> axis titles are reported. The notebook also renders the interactive figure.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-inspect-a-self-contained-html-representation">Worked example 2 — Inspect a self-contained HTML representation<a class="heading-anchor" href="#learner--cell-6--worked-example-2-inspect-a-self-contained-html-representation" aria-label="Link to this section">#</a></h5>
 <p>Embedding removes a runtime dependency on a remote CDN. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>html = fig.to_html(full_html=True, include_plotlyjs=True)</span>
-<span>{</span>
-<span>    &quot;starts_as_html&quot;: html.lstrip().lower().startswith(&quot;&lt;html&gt;&quot;),</span>
-<span>    &quot;contains_figure_data&quot;: &quot;Tasks completed versus hours&quot; in html,</span>
-<span>    &quot;characters&quot;: len(html),</span>
-<span>}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">html <span class="syntax-operator">=</span> fig<span class="syntax-operator">.</span>to_html<span class="syntax-punctuation">(</span>full_html<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">starts_as_html</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> html<span class="syntax-operator">.</span>lstrip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;html&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">contains_figure_data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Tasks completed versus hours</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> html<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">characters</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>html<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Both Boolean checks are <code>True</code>; the file-sized string is large because Plotly JavaScript is embedded.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -606,18 +654,18 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.</p>
 <p><strong>Boundary to test:</strong> Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>import plotly.express as px</span>
-<span>import seaborn as sns</span>
-<span> </span>
-<span>artifact_dir = Path(&#x27;artifacts/day26&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>df = sns.load_dataset(&#x27;tips&#x27;)</span>
-<span>fig = px.scatter(df, x=&#x27;total_bill&#x27;, y=&#x27;tip&#x27;, color=&#x27;time&#x27;, hover_data=[&#x27;day&#x27;,&#x27;size&#x27;])</span>
-<span>fig.show()</span>
-<span>fig.write_html(artifact_dir / &#x27;interactive_scatter.html&#x27;, include_plotlyjs=True)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px</span>
+<span class="source-line"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns</span>
+<span class="source-line"></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day26</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tips</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig <span class="syntax-operator">=</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tip</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">time</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> hover_data<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">day</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">size</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig<span class="syntax-operator">.</span>write_html<span class="syntax-punctuation">(</span>artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">interactive_scatter.html</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -641,86 +689,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Create an interactive histogram whose bin count can be changed only within sensible bounds. <strong>Plotly route:</strong> isolate a builder accepting <code>bins</code>; <strong>Altair route:</strong> bind a range input to a parameter. <strong>Expected behavior:</strong> changing bins alters aggregation without changing the underlying observations. <strong>Verify:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Create an interactive histogram whose bin count can be changed only within sensible bounds. isolate a builder accepting `bins`; bind a range input to a parameter. changing bins...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Create an interactive histogram whose bin count can be changed only within sensible bounds. isolate a builder accepting `bins`; bind a range input to a parameter. changing bins...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Export the chart to a self-contained HTML file under an ignored learner artifact directory. <strong>Constraints:</strong> embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. <strong>Verify:</strong> disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Export the chart to a self-contained HTML file under an ignored learner artifact directory. embed required JavaScript/data, use no remote font/analytics dependency, and document...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Export the chart to a self-contained HTML file under an ignored learner artifact directory. embed required JavaScript/data, use no remote font/analytics dependency, and document...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. <strong>Progressive hint:</strong> A CDN reference needs network access when opened. <strong>Verify:</strong> Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. A CDN reference needs network access when opened. Export embedd...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. A CDN reference needs network access when opened. Export embedd...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. <strong>Progressive hint:</strong> A field retained only in source data is not visibly encoded. <strong>Verify:</strong> For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. A field retained only in source data is not visibly encoded. F...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. A field retained only in source data is not visibly encoded. F...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. <strong>Progressive hint:</strong> Separate figure construction from export. <strong>Verify:</strong> Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. Separate figure construction from export. Te...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. Separate figure construction from export. Te...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. <strong>Progressive hint:</strong> Validate the schema before calling the plotting library. <strong>Verify:</strong> Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. Validate the schema before calling the plotting library. Pass...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. Validate the schema before calling the plotting library. Pass...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. <strong>Progressive hint:</strong> Browser rendering and HTML size are part of the data contract. <strong>Verify:</strong> Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. Browser rendering and HTML size are part of the data contract...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. Browser rendering and HTML size are part of the data contract...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -774,52 +822,52 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create an interactive histogram whose bin count can be changed only within sensible bounds. <strong>Plotly route:</strong> isolate a builder accepting <code>bins</code>; <strong>Altair route:</strong> bind a range input to a parameter. <strong>Expected behavior:</strong> changing bins alters aggregation without changing the underlying observations. <strong>Verify:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create an interactive histogram whose bin count can be changed only within sensible bounds. Plotly route: isolate a builder accepting <code>bins</code>; Altair route: bind a range input to a parameter. Expected behavior: changing bins alters aggregation without changing the underlying observations. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.</p>
-<pre><code class="language-python">import pandas as pd
-import plotly.express as px
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px
 
 
-def histogram(frame: pd.DataFrame, *, bins: int):
-    if not 2 &lt;= bins &lt;= 100:
-        raise ValueError(&quot;bins must be between 2 and 100&quot;)
-    return px.histogram(frame, x=&quot;value&quot;, nbins=bins, title=&quot;Value distribution&quot;)
+<span class="syntax-keyword">def</span> <span class="syntax-function">histogram</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> bins<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">2</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> bins <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bins must be between 2 and 100</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> px<span class="syntax-operator">.</span>histogram<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> nbins<span class="syntax-operator">=</span>bins<span class="syntax-punctuation">,</span> title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Value distribution</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-frame = pd.DataFrame({&quot;value&quot;: [1, 1, 2, 3, 5, 8]})
-source_snapshot = frame.copy(deep=True)
-for bins in (2, 10, 100):
-    figure = histogram(frame, bins=bins)
-    assert figure.layout.title.text == &quot;Value distribution&quot;
-    assert len(figure.data[0].x) == frame[&quot;value&quot;].notna().sum()
-    pd.testing.assert_frame_equal(frame, source_snapshot)
+frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+source_snapshot <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span>deep<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> bins <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    figure <span class="syntax-operator">=</span> histogram<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> bins<span class="syntax-operator">=</span>bins<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> figure<span class="syntax-operator">.</span>layout<span class="syntax-operator">.</span>title<span class="syntax-operator">.</span>text <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Value distribution</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>figure<span class="syntax-operator">.</span>data<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>x<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> frame<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>notna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    pd<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_frame_equal<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> source_snapshot<span class="syntax-punctuation">)</span>
 
-for invalid_bins in (1, 101):
-    try:
-        histogram(frame, bins=invalid_bins)
-    except ValueError as error:
-        assert &quot;between 2 and 100&quot; in str(error)
-    else:
-        raise AssertionError(&quot;out-of-range bins should fail&quot;)</code></pre>
+<span class="syntax-keyword">for</span> invalid_bins <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">101</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        histogram<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> bins<span class="syntax-operator">=</span>invalid_bins<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">between 2 and 100</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">out-of-range bins should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The source observations do not change; only the displayed aggregation granularity changes.</p>
 <p><strong>Verification evidence:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Export the chart to a self-contained HTML file under an ignored learner artifact directory. <strong>Constraints:</strong> embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. <strong>Verify:</strong> disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Export the chart to a self-contained HTML file under an ignored learner artifact directory. Constraints: embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.</p>
-<pre><code class="language-python">from pathlib import Path
-import re
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> re
 
-destination = Path(&quot;artifacts/day26/histogram.html&quot;)
-destination.parent.mkdir(parents=True, exist_ok=True)
-figure.write_html(destination, include_plotlyjs=True, full_html=True)
-html = destination.read_text(encoding=&quot;utf-8&quot;)
-assert &quot;&lt;html&quot; in html.lower()
-assert &quot;Value distribution&quot; in html
-assert re.search(
-    r&quot;&lt;script[^&gt;]+src=[&#x27;\&quot;]https?://&quot;,
-    html,
-    flags=re.IGNORECASE,
-) is None
-payload_bytes = destination.stat().st_size
-assert payload_bytes &gt; 100_000</code></pre>
+destination <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day26/histogram.html</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+destination<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+figure<span class="syntax-operator">.</span>write_html<span class="syntax-punctuation">(</span>destination<span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> full_html<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+html <span class="syntax-operator">=</span> destination<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;html</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> html<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Value distribution</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> html
+<span class="syntax-keyword">assert</span> re<span class="syntax-operator">.</span>search<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;script[^&gt;]+src=[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">\&quot;</span><span class="syntax-string">]https?://</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    html<span class="syntax-punctuation">,</span>
+    flags<span class="syntax-operator">=</span>re<span class="syntax-operator">.</span>IGNORECASE<span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span>
+payload_bytes <span class="syntax-operator">=</span> destination<span class="syntax-operator">.</span>stat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>st_size
+<span class="syntax-keyword">assert</span> payload_bytes <span class="syntax-operator">&gt;</span> <span class="syntax-number">100_000</span></code></pre>
 <p><code>include_plotlyjs=True</code> embeds the runtime so the file remains interactive without a Content Delivery Network. Record <code>payload_bytes</code> when comparing portability with file size; browser offline mode should still show hover tooltips and toolbar controls.</p>
 <p><strong>Verification evidence:</strong> disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -848,36 +896,36 @@ assert payload_bytes &gt; 100_000</code></pre>
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings">Shared implementation for Exercises 3–4 — Portability and visible encodings<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings" aria-label="Link to this section">#</a></h5>
 <p>Embedded Plotly JavaScript makes a larger standalone file that works offline; a CDN-based file is smaller but needs network access. A reader can interpret only fields encoded on axes, color/shape, facets, labels, or tooltips.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering">Shared implementation for Exercises 5–7 — Validate before rendering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from collections.abc import Sequence
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence
 
-import pandas as pd
-import plotly.express as px
-from plotly.graph_objects import Figure
-
-
-def build_scatter(
-    frame: pd.DataFrame,
-    *,
-    x: str,
-    y: str,
-    color: str | None = None,
-    hover: Sequence[str] = (),
-) -&gt; Figure:
-    &quot;&quot;&quot;Return a validated scatter figure without I/O side effects.&quot;&quot;&quot;
-
-    requested = [x, y, *([color] if color else []), *hover]
-    missing = sorted(set(requested) - set(frame.columns))
-    if missing:
-        raise ValueError(f&quot;missing chart columns: {&#x27;, &#x27;.join(missing)}&quot;)
-    bounded_hover = list(hover)[:5]
-    return px.scatter(frame, x=x, y=y, color=color, hover_data=bounded_hover)
+<span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px
+<span class="syntax-keyword">from</span> plotly.graph_objects <span class="syntax-keyword">import</span> Figure
 
 
-sample = pd.DataFrame(
-    {&quot;bill&quot;: [10, 20, 30], &quot;tip&quot;: [1, 4, 5], &quot;meal&quot;: [&quot;L&quot;, &quot;D&quot;, &quot;D&quot;]}
-)
-figure = build_scatter(sample, x=&quot;bill&quot;, y=&quot;tip&quot;, color=&quot;meal&quot;, hover=[&quot;meal&quot;])
-assert len(figure.data) == 2</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">build_scatter</span><span class="syntax-punctuation">(</span>
+    frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span>
+    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span>
+    y<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span>
+    color<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span>
+    hover<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Figure<span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return a validated scatter figure without I/O side effects.&quot;&quot;&quot;</span>
+
+    requested <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>color<span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> color <span class="syntax-keyword">else</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span>hover<span class="syntax-punctuation">]</span>
+    missing <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>requested<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing chart columns: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    bounded_hover <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>hover<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span>color<span class="syntax-punctuation">,</span> hover_data<span class="syntax-operator">=</span>bounded_hover<span class="syntax-punctuation">)</span>
+
+
+sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">L</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+figure <span class="syntax-operator">=</span> build_scatter<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> hover<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>figure<span class="syntax-operator">.</span>data<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span></code></pre>
 <p>For very large data, use a fixed-seed stratified sample by important groups or aggregate to meaningful bins. Report the original and displayed row counts. When exporting for offline use, choose an embedded-JavaScript mode deliberately and test the file with networking disabled.</p></div>
       </section>
 
@@ -914,34 +962,34 @@ assert len(figure.data) == 2</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-26-solutions-interactive-viz-plotly-altair">Day 26 — Solutions: Interactive Viz (Plotly / Altair)<a class="heading-anchor" href="#solution-2--cell-1--day-26-solutions-interactive-viz-plotly-altair" aria-label="Link to this section">#</a></h3>
 <p>Interactive histogram with dynamic bins and HTML export.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>import plotly.express as px</span>
-<span>import seaborn as sns</span>
-<span> </span>
-<span>df = sns.load_dataset(&#x27;tips&#x27;)</span>
-<span>artifact_dir = Path(&#x27;artifacts/day26&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>fig = px.histogram(df, x=&#x27;total_bill&#x27;, nbins=40, color=&#x27;time&#x27;, marginal=&#x27;rug&#x27;,</span>
-<span>                   title=&#x27;Interactive Total Bill Histogram&#x27;)</span>
-<span>fig.update_layout(bargap=0.05)</span>
-<span>fig.show()</span>
-<span>fig.write_html(</span>
-<span>    artifact_dir / &#x27;total_bill_hist_interactive.html&#x27;,</span>
-<span>    include_plotlyjs=True,</span>
-<span>)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px</span>
+<span class="source-line"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns</span>
+<span class="source-line"></span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tips</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day26</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig <span class="syntax-operator">=</span> px<span class="syntax-operator">.</span>histogram<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> nbins<span class="syntax-operator">=</span><span class="syntax-number">40</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">time</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> marginal<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rug</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                   title<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Interactive Total Bill Histogram</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig<span class="syntax-operator">.</span>update_layout<span class="syntax-punctuation">(</span>bargap<span class="syntax-operator">=</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">fig<span class="syntax-operator">.</span>write_html<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill_hist_interactive.html</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Altair example (optional, requires vega runtime).</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import altair as alt, seaborn as sns</span>
-<span>df = sns.load_dataset(&#x27;tips&#x27;)</span>
-<span>slider = alt.binding_range(min=10, max=80, step=5, name=&#x27;Bins: &#x27;)</span>
-<span>select_bins = alt.selection_point(bind=slider, fields=[&#x27;bins&#x27;], value={&#x27;bins&#x27;:40})</span>
-<span>hist = (alt.Chart(df)</span>
-<span>  .transform_bin(&#x27;binned&#x27;, field=&#x27;total_bill&#x27;, bin={&#x27;maxbins&#x27;: {&#x27;expr&#x27;: &#x27;bins&#x27;}}, as_=[&#x27;lo&#x27;,&#x27;hi&#x27;])</span>
-<span>  .mark_bar()</span>
-<span>  .encode(x=&#x27;lo:Q&#x27;, x2=&#x27;hi:Q&#x27;, y=&#x27;count()&#x27;, color=&#x27;time:N&#x27;, tooltip=[&#x27;count()&#x27;])</span>
-<span>  .add_params(select_bins))</span>
-<span>hist</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> altair <span class="syntax-keyword">as</span> alt<span class="syntax-operator">,</span> seaborn <span class="syntax-keyword">as</span> sns</span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tips</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">slider <span class="syntax-operator">=</span> alt<span class="syntax-operator">.</span>binding_range<span class="syntax-punctuation">(</span><span class="syntax-builtin">min</span><span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> step<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Bins: </span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">select_bins <span class="syntax-operator">=</span> alt<span class="syntax-operator">.</span>selection_point<span class="syntax-punctuation">(</span>bind<span class="syntax-operator">=</span>slider<span class="syntax-punctuation">,</span> fields<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">bins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">bins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">40</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">hist <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>alt<span class="syntax-operator">.</span>Chart<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-operator">.</span>transform_bin<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">binned</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> field<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">bin</span><span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">maxbins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">expr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">bins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> as_<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lo</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">hi</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-operator">.</span>mark_bar<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span>x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lo:Q</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> x2<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">hi:Q</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">count()</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">time:N</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> tooltip<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">count()</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-operator">.</span>add_params<span class="syntax-punctuation">(</span>select_bins<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">hist</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><hr>
 <h4 id="solution-2--cell-5--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -973,37 +1021,37 @@ assert len(figure.data) == 2</code></pre>
 <h5 id="solution-2--cell-5--practices-1-2-portability-and-visible-encodings">Practices 1–2 — Portability and visible encodings<a class="heading-anchor" href="#solution-2--cell-5--practices-1-2-portability-and-visible-encodings" aria-label="Link to this section">#</a></h5>
 <p>Embedded Plotly JavaScript makes a larger standalone file that works offline; a CDN-based file is smaller but needs network access. A reader can interpret only fields encoded on axes, color/shape, facets, labels, or tooltips.</p>
 <h5 id="solution-2--cell-5--practices-3-5-validate-before-rendering">Practices 3–5 — Validate before rendering<a class="heading-anchor" href="#solution-2--cell-5--practices-3-5-validate-before-rendering" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from collections.abc import Sequence</span>
-<span> </span>
-<span>import pandas as pd</span>
-<span>import plotly.express as px</span>
-<span>from plotly.graph_objects import Figure</span>
-<span> </span>
-<span> </span>
-<span>def build_scatter(</span>
-<span>    frame: pd.DataFrame,</span>
-<span>    *,</span>
-<span>    x: str,</span>
-<span>    y: str,</span>
-<span>    color: str | None = None,</span>
-<span>    hover: Sequence[str] = (),</span>
-<span>) -&gt; Figure:</span>
-<span>    &quot;&quot;&quot;Return a validated scatter figure without I/O side effects.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    requested = [x, y, *([color] if color else []), *hover]</span>
-<span>    missing = sorted(set(requested) - set(frame.columns))</span>
-<span>    if missing:</span>
-<span>        raise ValueError(f&quot;missing chart columns: {&#x27;, &#x27;.join(missing)}&quot;)</span>
-<span>    bounded_hover = list(hover)[:5]</span>
-<span>    return px.scatter(frame, x=x, y=y, color=color, hover_data=bounded_hover)</span>
-<span> </span>
-<span> </span>
-<span>sample = pd.DataFrame(</span>
-<span>    {&quot;bill&quot;: [10, 20, 30], &quot;tip&quot;: [1, 4, 5], &quot;meal&quot;: [&quot;L&quot;, &quot;D&quot;, &quot;D&quot;]}</span>
-<span>)</span>
-<span>figure = build_scatter(sample, x=&quot;bill&quot;, y=&quot;tip&quot;, color=&quot;meal&quot;, hover=[&quot;meal&quot;])</span>
-<span>assert len(figure.data) == 2</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px</span>
+<span class="source-line"><span class="syntax-keyword">from</span> plotly.graph_objects <span class="syntax-keyword">import</span> Figure</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_scatter</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    y<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    color<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    hover<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Figure<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a validated scatter figure without I/O side effects.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    requested <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>color<span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> color <span class="syntax-keyword">else</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span>hover<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    missing <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>requested<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing chart columns: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    bounded_hover <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>hover<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> px<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span>color<span class="syntax-punctuation">,</span> hover_data<span class="syntax-operator">=</span>bounded_hover<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">L</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">figure <span class="syntax-operator">=</span> build_scatter<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> hover<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">meal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>figure<span class="syntax-operator">.</span>data<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>For very large data, use a fixed-seed stratified sample by important groups or aggregate to meaningful bins. Report the original and displayed row counts. When exporting for offline use, choose an embedded-JavaScript mode deliberately and test the file with networking disabled.</p></article></div>
       </section>

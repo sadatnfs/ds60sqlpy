@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -177,7 +223,7 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-inspect-the-pinned-artifact-contract">Example A: Inspect the pinned artifact contract<a class="heading-anchor" href="#example-a-inspect-the-pinned-artifact-contract" aria-label="Link to this section">#</a></h4>
 <p>A license field records the inspected artifact metadata; it does not replace reviewing the actual license and intended use. The revision prevents a future branch update from silently changing the model.</p>
-<pre><code class="language-text">Model: HuggingFaceTB/SmolLM2-135M-Instruct
+<pre class="highlighted-code"><code class="language-text">Model: HuggingFaceTB/SmolLM2-135M-Instruct
 Revision: 12fd25f77366fa6b3b4b768ec3050bf629380bac
 Card license checked: apache-2.0
 Default lesson action: no download
@@ -185,7 +231,7 @@ Optional acquisition: explicit --acknowledge-network flag</code></pre>
 <p><strong>Expected:</strong> exact 40-character revision and Apache-2.0 card note are present.</p>
 <h4 id="example-b-separate-acquisition-from-execution">Example B: Separate acquisition from execution<a class="heading-anchor" href="#example-b-separate-acquisition-from-execution" aria-label="Link to this section">#</a></h4>
 <p>Separating phases makes network behavior reviewable. A successful local run should not depend on an unnoticed cache hit from a different model revision.</p>
-<pre><code class="language-text">1. Prepare a separate Python3.12 environment with pinned direct dependencies.
+<pre class="highlighted-code"><code class="language-text">1. Prepare a separate Python3.12 environment with pinned direct dependencies.
 2. Explicitly acquire the pinned snapshot and record local file hashes.
 3. Disconnect or enable offline flags.
 4. Run train_local.py with --model-dir pointing to the verified snapshot.
@@ -193,7 +239,7 @@ Optional acquisition: explicit --acknowledge-network flag</code></pre>
 <p><strong>Expected:</strong> training requires existing local assets and never falls back to a remote model ID.</p>
 <h4 id="example-c-verify-chat-template-boundaries">Example C: Verify chat-template boundaries<a class="heading-anchor" href="#example-c-verify-chat-template-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Template markers belong to the model interface. A mismatch should stop the run rather than produce a guessed mask based on character length or a hardcoded token count.</p>
-<pre><code class="language-text">prompt_ids = tokenizer.apply_chat_template(prompt,tokenize=True,add_generation_prompt=True)
+<pre class="highlighted-code"><code class="language-text">prompt_ids = tokenizer.apply_chat_template(prompt,tokenize=True,add_generation_prompt=True)
 full_ids = tokenizer.apply_chat_template(prompt+completion,tokenize=True,add_generation_prompt=False)
 assert full_ids[:len(prompt_ids)] == prompt_ids
 assert len(full_ids) &gt; len(prompt_ids)</code></pre>
@@ -233,7 +279,7 @@ assert len(full_ids) &gt; len(prompt_ids)</code></pre>
 <h3 id="complete-optional-scripts-and-setup">Complete optional scripts and setup<a class="heading-anchor" href="#complete-optional-scripts-and-setup" aria-label="Link to this section">#</a></h3>
 <p>Read the <a href="../fixtures/pretrained/README.md.html">pretrained recipe</a> for pinned dependencies, model identity, explicit acquisition, local hash verification, mask checks, bounded training, local inference, resource estimates and a manual container recipe with persistent mounted artifacts. See the recipe execution record for the bounded training/reload results and the observed generation-quality failure. A new learner run needs its own receipt.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-021, Optional pretrained-model adaptation with pinned offline artifacts.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-021, Optional pretrained-model adaptation with pinned offline artifacts.
 Read courses/llm-applied/guides/llm-applied-021.md and courses/llm-applied/lessons/llm-applied-021.md. Direct prerequisites: `llm-applied-020`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,48 +161,48 @@
       <h1>Llm 021 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-021_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-021: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Fingerprint exact text</span>
-<span>    import hashlib,json</span>
-<span>    hash_text=lambda t:hashlib.sha256(t.encode(&#x27;utf-8&#x27;)).hexdigest()</span>
-<span>    a=hash_text(&#x27;red square&#x27;); copy=hash_text(&#x27;red square&#x27;); para=hash_text(&#x27;square colored red&#x27;)</span>
-<span>    assert a==copy and a!=para</span>
-<span> </span>
-<span>    # Exercise 2: Assign whole families</span>
-<span>    family={&#x27;a&#x27;:&#x27;F&#x27;,&#x27;a2&#x27;:&#x27;F&#x27;,&#x27;b&#x27;:&#x27;G&#x27;,&#x27;c&#x27;:&#x27;H&#x27;}; policy={&#x27;F&#x27;:&#x27;train&#x27;,&#x27;G&#x27;:&#x27;validation&#x27;,&#x27;H&#x27;:&#x27;test&#x27;}</span>
-<span>    manifest={doc:policy[group] for doc,group in family.items()}</span>
-<span>    assert manifest=={&#x27;a&#x27;:&#x27;train&#x27;,&#x27;a2&#x27;:&#x27;train&#x27;,&#x27;b&#x27;:&#x27;validation&#x27;,&#x27;c&#x27;:&#x27;test&#x27;}</span>
-<span> </span>
-<span>    # Exercise 3: Audit all partition pairs</span>
-<span>    sets={part:{family[d] for d,p in manifest.items() if p==part} for part in policy.values()}</span>
-<span>    assert not sets[&#x27;train&#x27;]&amp;sets[&#x27;validation&#x27;] and not sets[&#x27;train&#x27;]&amp;sets[&#x27;test&#x27;] and not sets[&#x27;validation&#x27;]&amp;sets[&#x27;test&#x27;]</span>
-<span> </span>
-<span>    # Exercise 4: Inject a known leak</span>
-<span>    bad=dict(manifest); bad[&#x27;a2&#x27;]=&#x27;validation&#x27;</span>
-<span>    train={family[d] for d,p in bad.items() if p==&#x27;train&#x27;}; valid={family[d] for d,p in bad.items() if p==&#x27;validation&#x27;}</span>
-<span>    assert train&amp;valid=={&#x27;F&#x27;}</span>
-<span> </span>
-<span>    # Exercise 5: Preserve the manifest identity</span>
-<span>    payload=lambda:json.dumps(manifest,sort_keys=True,separators=(&#x27;,&#x27;,&#x27;:&#x27;)).encode(); before=hashlib.sha256(payload()).hexdigest()</span>
-<span>    summary={&#x27;test_documents&#x27;:sum(p==&#x27;test&#x27; for p in manifest.values())}</span>
-<span>    assert summary[&#x27;test_documents&#x27;]==1 and hashlib.sha256(payload()).hexdigest()==before</span>
-<span> </span>
-<span>    # Exercise 6: Distinguish normalization policy</span>
-<span>    assert hash_text(&#x27;red square&#x27;)!=hash_text(&#x27;red square &#x27;)</span>
-<span>    assert hash_text(&#x27;red square&#x27;.strip())==hash_text(&#x27;red square &#x27;.strip())</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-021: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Fingerprint exact text</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> hashlib<span class="syntax-operator">,</span>json</span>
+<span class="source-line">    hash_text<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> t<span class="syntax-punctuation">:</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>t<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    a<span class="syntax-operator">=</span>hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> copy<span class="syntax-operator">=</span>hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> para<span class="syntax-operator">=</span>hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">square colored red</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-operator">==</span>copy <span class="syntax-operator">and</span> a<span class="syntax-operator">!=</span>para</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Assign whole families</span></span>
+<span class="source-line">    family<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">H</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> policy<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">H</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    manifest<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>doc<span class="syntax-punctuation">:</span>policy<span class="syntax-punctuation">[</span>group<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> doc<span class="syntax-punctuation">,</span>group <span class="syntax-operator">in</span> family<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> manifest<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Audit all partition pairs</span></span>
+<span class="source-line">    sets<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>part<span class="syntax-punctuation">:</span><span class="syntax-punctuation">{</span>family<span class="syntax-punctuation">[</span>d<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> d<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> manifest<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">==</span>part<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> part <span class="syntax-operator">in</span> policy<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&amp;</span>sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&amp;</span>sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&amp;</span>sets<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Inject a known leak</span></span>
+<span class="source-line">    bad<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> bad<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">    train<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>family<span class="syntax-punctuation">[</span>d<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> d<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> bad<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> valid<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>family<span class="syntax-punctuation">[</span>d<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> d<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> bad<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> train<span class="syntax-operator">&amp;</span>valid<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Preserve the manifest identity</span></span>
+<span class="source-line">    payload<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">,</span>sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">,</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> before<span class="syntax-operator">=</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    summary<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_documents</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> manifest<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> summary<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_documents</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>before</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Distinguish normalization policy</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span>hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square </span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square</span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>hash_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">red square </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

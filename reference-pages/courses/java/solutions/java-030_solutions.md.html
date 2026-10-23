@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,61 +164,61 @@
     <article class="document"><h2 id="java-030-explanatory-solutions">java-030: explanatory solutions<a class="heading-anchor" href="#java-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Serialization turns domain values into a representation that another process orversion can read. A format needs an explicit schema,version,encoding andsize policy. A reader should validate before allocating large buffers orconstructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default orupgrade rule. Unknown versions should not be guessed at silently.</p>
-<p>This lesson defines a small explicit binary format using DataInputStream andDataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents andan optional version2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes anddomain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.</p>
-<p><strong>Wire schema:</strong> The field order,types,encoding andversion of serialized data.</p>
+<p>Serialization turns domain values into a representation that another process or version can read. A format needs an explicit schema,version,encoding and size policy. A reader should validate before allocating large buffers or constructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default or upgrade rule. Unknown versions should not be guessed at silently.</p>
+<p>This lesson defines a small explicit binary format using DataInputStream and DataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents and an optional version 2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes and domain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.</p>
+<p><strong>Wire schema:</strong> The field order,types,encoding and version of serialized data.</p>
 <p><strong>Schema evolution:</strong> A declared compatibility policy between format versions.</p>
 <p><strong>Length bound:</strong> A maximum accepted size checked before allocation.</p>
 <p><strong>Deserialization boundary:</strong> Validation required before external bytes become trusted objects.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>Write a fixed magicint andversion number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read thelength,validate it,then read exactly thatmany bytes. A CharsetDecoder withREPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents andidentifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.</p>
-<h3 id="exercise-1-round-trip-version2-data">Exercise 1: Round-trip version2 data<a class="heading-anchor" href="#exercise-1-round-trip-version2-data" aria-label="Link to this section">#</a></h3>
-<p>Task: Encode accounta1,balance125,noteCafé withversion2 anddecode.</p>
-<p>The comparison includes both domain values andtext identity. A successful bytewrite alone would not show that the reader agrees onencoding andfield order.</p>
-<pre><code class="language-java">Account record=new Account(&quot;a1&quot;,125,&quot;Café&quot;);byte[] encoded=encode(record,2);
-assert decode(encoded).equals(record);</code></pre>
-<p><strong>Expected:</strong> equal domain record andexact Unicode note.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with equal domain record andexact Unicode note. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Write a fixed magicint and version number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read the length,validate it,then read exactly that many bytes. A CharsetDecoder with REPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents and identifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.</p>
+<h3 id="exercise-1-round-trip-version-2-data">Exercise 1: Round-trip version 2 data<a class="heading-anchor" href="#exercise-1-round-trip-version-2-data" aria-label="Link to this section">#</a></h3>
+<p>Task: Encode account a1, balance 125, note Café with version 2 and decode.</p>
+<p>The comparison includes both domain values and text identity. A successful byte write alone would not show that the reader agrees on encoding and field order.</p>
+<pre class="highlighted-code"><code class="language-java">Account record<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">125</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">Café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> encoded<span class="syntax-operator">=</span>encode<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> decode<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> equal domain record and exact Unicode note.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with equal domain record and exact Unicode note. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-apply-a-version1-default">Exercise 2: Apply a version1 default<a class="heading-anchor" href="#exercise-2-apply-a-version1-default" aria-label="Link to this section">#</a></h3>
-<p>Task: Encode the same core fields usingversion1,which lacksnote.</p>
-<p>The default is an explicit compatibility rule. It should not be inferred from an emptyString orwhatever value happened to initialize a field.</p>
-<pre><code class="language-java">Account legacy=decode(encode(new Account(&quot;a1&quot;,125,&quot;ignored by v1&quot;),1));
-assert legacy.id().equals(&quot;a1&quot;) &amp;&amp; legacy.cents()==125 &amp;&amp; legacy.note().equals(&quot;unlabelled&quot;);</code></pre>
+<p>Task: Encode the same core fields usingversion1,which lacks note.</p>
+<p>The default is an explicit compatibility rule. It should not be inferred from an emptyString or whatever value happened to initialize a field.</p>
+<pre class="highlighted-code"><code class="language-java">Account legacy<span class="syntax-operator">=</span>decode<span class="syntax-punctuation">(</span>encode<span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">125</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignored by v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> legacy<span class="syntax-punctuation">.</span><span class="syntax-attribute">id</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> legacy<span class="syntax-punctuation">.</span><span class="syntax-attribute">cents</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">125</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> legacy<span class="syntax-punctuation">.</span><span class="syntax-attribute">note</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unlabelled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> decoded noteunlabelled.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with decoded noteunlabelled. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-reject-an-unknown-version">Exercise 3: Reject an unknown version<a class="heading-anchor" href="#exercise-3-reject-an-unknown-version" aria-label="Link to this section">#</a></h3>
-<p>Task: Change theversion bytes to99 anddecode.</p>
+<p>Task: Change the version bytes to99 and decode.</p>
 <p>A reader that guesses the layout of an unknown version can reinterpret bytes incorrectly while appearing to succeed.</p>
-<pre><code class="language-java">byte[] unknown=encoded.clone();unknown[4]=0;unknown[5]=99;boolean rejected=false;
-try{decode(unknown);}catch(java.io.IOException expected){rejected=expected.getMessage().contains(&quot;version&quot;);}
-assert rejected;</code></pre>
-<p><strong>Expected:</strong> IOException namingversion.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IOException namingversion. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> unknown<span class="syntax-operator">=</span>encoded<span class="syntax-punctuation">.</span><span class="syntax-attribute">clone</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>unknown<span class="syntax-operator">[</span><span class="syntax-number">4</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>unknown<span class="syntax-operator">[</span><span class="syntax-number">5</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">99</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">boolean</span> rejected<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>decode<span class="syntax-punctuation">(</span>unknown<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>rejected<span class="syntax-operator">=</span>expected<span class="syntax-punctuation">.</span><span class="syntax-attribute">getMessage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">contains</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> rejected<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> IOException naming version.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with IOException naming version. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-detect-truncation">Exercise 4: Detect truncation<a class="heading-anchor" href="#exercise-4-detect-truncation" aria-label="Link to this section">#</a></h3>
-<p>Task: Remove thefinalbyte from a validversion2payload.</p>
-<p>The reader must obtain exactly the declared fieldlength. A partial field is not a valid shorter value.</p>
-<pre><code class="language-java">boolean truncated=false;
-try{decode(Arrays.copyOf(encoded,encoded.length-1));}catch(java.io.IOException expected){truncated=true;}
-assert truncated;</code></pre>
-<p><strong>Expected:</strong> IOException orEOFException before returning a record.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IOException orEOFException before returning a record. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Remove the final byte from a validversion2payload.</p>
+<p>The reader must obtain exactly the declared field length. A partial field is not a valid shorter value.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> truncated<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>decode<span class="syntax-punctuation">(</span>Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">copyOf</span><span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span>encoded<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>truncated<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> truncated<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> IOException or EOFException before returning a record.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with IOException or EOFException before returning a record. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-reject-an-oversized-declared-text-length">Exercise 5: Reject an oversized declared text length<a class="heading-anchor" href="#exercise-5-reject-an-oversized-declared-text-length" aria-label="Link to this section">#</a></h3>
-<p>Task: Replace thefirsttextlength withInteger.MAX_VALUE.</p>
-<p>Length-prefix validation is a resource boundary. Reading orallocating first andchecking afterward defeats that protection.</p>
-<pre><code class="language-java">byte[] huge=encoded.clone();java.nio.ByteBuffer.wrap(huge,6,4).putInt(Integer.MAX_VALUE);boolean bounded=false;
-try{decode(huge);}catch(java.io.IOException expected){bounded=expected.getMessage().contains(&quot;length&quot;);}
-assert bounded;</code></pre>
-<p><strong>Expected:</strong> IOException forlength before allocating thatsize.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IOException forlength before allocating thatsize. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
-<h3 id="exercise-6-reject-trailing-data-andinvalid-domain-state">Exercise 6: Reject trailing data andinvalid domain state<a class="heading-anchor" href="#exercise-6-reject-trailing-data-andinvalid-domain-state" aria-label="Link to this section">#</a></h3>
-<p>Task: Append anextra byte,then try constructing a negative-balance account.</p>
-<p>Format validity anddomain validity are separate gates. The fixture chooses strict trailing-byte rejection rather than an undocumented forward-compatibility policy.</p>
-<pre><code class="language-java">byte[] trailing=Arrays.copyOf(encoded,encoded.length+1);boolean extra=false,negative=false;
-try{decode(trailing);}catch(java.io.IOException expected){extra=expected.getMessage().contains(&quot;trailing&quot;);}
-try{new Account(&quot;a1&quot;,-1,&quot;x&quot;);}catch(IllegalArgumentException expected){negative=true;}
-assert extra &amp;&amp; negative;</code></pre>
-<p><strong>Expected:</strong> trailing payloadIOException;negative balanceIllegalArgumentException.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with trailing payloadIOException;negative balanceIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Replace the first text length withInteger.MAX_VALUE.</p>
+<p>Length-prefix validation is a resource boundary. Reading orallocating first and checking afterward defeats that protection.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> huge<span class="syntax-operator">=</span>encoded<span class="syntax-punctuation">.</span><span class="syntax-attribute">clone</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ByteBuffer</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">wrap</span><span class="syntax-punctuation">(</span>huge<span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">putInt</span><span class="syntax-punctuation">(</span>Integer<span class="syntax-punctuation">.</span><span class="syntax-attribute">MAX_VALUE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">boolean</span> bounded<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>decode<span class="syntax-punctuation">(</span>huge<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>bounded<span class="syntax-operator">=</span>expected<span class="syntax-punctuation">.</span><span class="syntax-attribute">getMessage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">contains</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">length</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> bounded<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> IOException for length before allocating that size.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with IOException for length before allocating that size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-6-reject-trailing-data-and-invalid-domain-state">Exercise 6: Reject trailing data and invalid domain state<a class="heading-anchor" href="#exercise-6-reject-trailing-data-and-invalid-domain-state" aria-label="Link to this section">#</a></h3>
+<p>Task: Append an extra byte,then try constructing a negative-balance account.</p>
+<p>Format validity and domain validity are separate gates. The fixture chooses strict trailing-byte rejection rather than an undocumented forward-compatibility policy.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> trailing<span class="syntax-operator">=</span>Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">copyOf</span><span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span>encoded<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">boolean</span> extra<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span>negative<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>decode<span class="syntax-punctuation">(</span>trailing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>extra<span class="syntax-operator">=</span>expected<span class="syntax-punctuation">.</span><span class="syntax-attribute">getMessage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">contains</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">trailing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>IllegalArgumentException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>negative<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> extra <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> negative<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> trailing payload IOException; negative balance IllegalArgumentException.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with trailing payload IOException; negative balance IllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

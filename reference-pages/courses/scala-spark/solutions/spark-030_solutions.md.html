@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,7 +176,7 @@
 <p><strong>Verification evidence:</strong> Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked.</p>
 <h4 id="exercise-3-map-dependencies-to-driver-and-executor-environments">Exercise 3: Map dependencies to driver and executor environments<a class="heading-anchor" href="#exercise-3-map-dependencies-to-driver-and-executor-environments" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected:</strong> A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
-<p>TheScala jar must be compiled for the declaredScala 2.13 binary family and checked against the selectedSpark 4.0.1/JDK 17 runtime. AScala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.</p>
+<p>TheScala jar must be compiled for the declaredScala 2.13 binary family and checked against the selectedSpark 4.0.1/JDK 17 runtime. A Scala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.</p>
 <p>The purePythonrules.zip can be a candidate for a supported Python-file distribution mechanism. Imports used by driver code must work in the driver&#x27;s interpreter; imports used by task code must work in executor Python processes. A native-extension wheel additionally depends on interpreter ABI, platform and shared-library compatibility, so treating it as a source zip is insufficient. A qualified image or environment-archive approach could provide those layers, but its exact versions and bounded import/task receipt are still required. The worksheet neither installs that environment nor downloads packages.</p>
 <p><strong>Verification evidence:</strong> Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.</p>
 <h4 id="exercise-4-review-a-captured-connection-and-a-retrying-task">Exercise 4: Review a captured connection and a retrying task<a class="heading-anchor" href="#exercise-4-review-a-captured-connection-and-a-retrying-task" aria-label="Link to this section">#</a></h4>
@@ -147,7 +193,7 @@
 <p><strong>Expected:</strong> A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.</p>
 <p>The record should first identify the intended platform, driver placement, dependency versions, input identity, credential source, resource limits and owner. It should then attach inspected artifact hashes and compatibility checks, distinguishing them from a future bounded remote run. That run would need observed driver/executor versions, successful task-side imports, authorized input readback, exact 30-row output, bounded result transfer and cleanup/cancellation evidence.</p>
 <p>Production readiness is a further tier involving representative data volumes, availability, monitoring, concurrency and operational rollback. The proposed remote path and native-package environment remain open requirements, and the Connect adapter remains separate work. A failure action should preserve artifacts and logs, stop only owned work and return to the last qualified implementation. The worksheet approves no deployment and starts no service; its deliverable is a concrete evidence plan that another reviewer can assess before any remote action is considered.</p>
-<p><strong>Verification evidence:</strong> Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram orsyntax alone.</p>
+<p><strong>Verification evidence:</strong> Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.</p>
 <h3 id="evidence-boundary">Evidence boundary<a class="heading-anchor" href="#evidence-boundary" aria-label="Link to this section">#</a></h3>
 <p>These explanations are design-review references. They do not establish a completed deployment, package installation, live database snapshot or remote compatibility result. A future execution must use the named bounded inputs and record its own versioned receipts. Preserve the distinction between a proposed control, an inspected configuration and an observed result.</p></article>
   </main>

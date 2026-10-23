@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -385,26 +431,28 @@
 </tbody></table></div>
 <p>The repeated training sequence is: <strong>clear gradients → forward pass → compute loss → backward pass → update</strong>. Changing that order can silently accumulate gradients or update the wrong state.</p>
 <h4 id="guide--worked-example-deterministic-linear-regression">Worked example: deterministic linear regression<a class="heading-anchor" href="#guide--worked-example-deterministic-linear-regression" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import torch
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 
-torch.manual_seed(42)
-X = torch.linspace(-1, 1, 200).unsqueeze(1)
-y = 2.0 * X - 0.5 + 0.1 * torch.randn_like(X)
+torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>unsqueeze<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> <span class="syntax-number">2.0</span> <span class="syntax-operator">*</span> X <span class="syntax-operator">-</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">*</span> torch<span class="syntax-operator">.</span>randn_like<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
 
-model = torch.nn.Linear(1, 1)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-loss_fn = torch.nn.MSELoss()
-history: list[float] = []
+model <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+optimizer <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span>
+loss_fn <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+history<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 
-for _ in range(200):
-    optimizer.zero_grad()
-    prediction = model(X)
-    loss = loss_fn(prediction, y)
-    loss.backward()
-    optimizer.step()
-    history.append(loss.item())</code></pre>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    optimizer<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    prediction <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+    loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
+    loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    optimizer<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The seed controls parameter initialization and generated noise on this CPU path. Hardware and library differences can still affect exact floating-point results, so reproducibility means bounded, explainable variation—not bitwise identity everywhere.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 46 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -412,9 +460,9 @@ for _ in range(200):
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle">Concept deep dive — tensors, computation graphs, gradients, and the optimizer cycle<a class="heading-anchor" href="#guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -429,28 +477,28 @@ for _ in range(200):
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A — differentiate a scalar function by autograd<a class="heading-anchor" href="#guide--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import torch
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 
-x = torch.tensor(3.0, requires_grad=True)
-y = x**2 + 2 * x
-y.backward()
-print({&quot;y&quot;: y.item(), &quot;dy_dx&quot;: x.grad.item()})
-assert x.grad.item() == 8.0  # derivative: 2*x + 2 at x=3</code></pre>
+x <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> x<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x
+y<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> y<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">dy_dx</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> x<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> x<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8.0</span>  <span class="syntax-comment"># derivative: 2*x + 2 at x=3</span></code></pre>
 <p><strong>Expected observation:</strong> Autograd returns derivative 8.0, matching the hand-derived chain rule.</p>
 <p><strong>Assumption to name:</strong> <code>x</code> is a scalar leaf and only one backward pass has contributed to its gradient.</p>
 <h5 id="guide--focused-example-b-see-gradient-accumulation-explicitly">Focused example B — see gradient accumulation explicitly<a class="heading-anchor" href="#guide--focused-example-b-see-gradient-accumulation-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import torch
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 
-weight = torch.tensor(2.0, requires_grad=True)
-(weight**2).backward()
-first = weight.grad.item()
-(weight**2).backward()
-accumulated = weight.grad.item()
-weight.grad.zero_()
-cleared = weight.grad.item()
-print({&quot;first&quot;: first, &quot;accumulated&quot;: accumulated, &quot;cleared&quot;: cleared})
-assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)</code></pre>
+weight <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+first <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+accumulated <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>zero_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+cleared <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> first<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accumulated</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accumulated<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cleared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> cleared<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> accumulated<span class="syntax-punctuation">,</span> cleared<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> A second backward call adds another gradient; clearing is an explicit part of each ordinary optimization step.</p>
 <p><strong>Assumption to name:</strong> Gradient accumulation is not intentionally being used to combine microbatches.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -574,7 +622,7 @@ assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-46` — Day 46 — Deep Learning Overview.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-46` — Day 46 — Deep Learning Overview.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use exactly these maintained learner materials:
@@ -641,19 +689,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Choose a framework; we&#x27;ll demo PyTorch.</li>
 <li>Hello-world linear model training loop. Note: Install PyTorch per your platform instructions.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import torch</span>
-<span>torch.__version__</span>
-<span># Simple linear regression y = wx + b</span>
-<span>X = torch.linspace(-1,1,200).unsqueeze(1)</span>
-<span>true_w, true_b = 2.0, -0.5</span>
-<span>y = true_w*X + true_b + 0.1*torch.randn_like(X)</span>
-<span>model = torch.nn.Sequential(torch.nn.Linear(1,1))</span>
-<span>opt = torch.optim.SGD(model.parameters(), lr=0.1)</span>
-<span>loss_fn = torch.nn.MSELoss()</span>
-<span>for epoch in range(200):</span>
-<span>    opt.zero_grad(); pred = model(X); loss = loss_fn(pred,y); loss.backward(); opt.step()</span>
-<span>loss.item(), list(model.parameters())</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line">torch<span class="syntax-operator">.</span>__version__</span>
+<span class="source-line"><span class="syntax-comment"># Simple linear regression y = wx + b</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>unsqueeze<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">true_w<span class="syntax-punctuation">,</span> true_b <span class="syntax-operator">=</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.5</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> true_w<span class="syntax-operator">*</span>X <span class="syntax-operator">+</span> true_b <span class="syntax-operator">+</span> <span class="syntax-number">0.1</span><span class="syntax-operator">*</span>torch<span class="syntax-operator">.</span>randn_like<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">model <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loss_fn <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> epoch <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> pred <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>pred<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -671,30 +719,30 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A — differentiate a scalar function by autograd<a class="heading-anchor" href="#learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> <code>x</code> is a scalar leaf and only one backward pass has contributed to its gradient.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import torch</span>
-<span> </span>
-<span>x = torch.tensor(3.0, requires_grad=True)</span>
-<span>y = x**2 + 2 * x</span>
-<span>y.backward()</span>
-<span>print({&quot;y&quot;: y.item(), &quot;dy_dx&quot;: x.grad.item()})</span>
-<span>assert x.grad.item() == 8.0  # derivative: 2*x + 2 at x=3</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"></span>
+<span class="source-line">x <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> x<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x</span>
+<span class="source-line">y<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> y<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">dy_dx</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> x<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> x<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8.0</span>  <span class="syntax-comment"># derivative: 2*x + 2 at x=3</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Autograd returns derivative 8.0, matching the hand-derived chain rule.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly">Focused example B — see gradient accumulation explicitly<a class="heading-anchor" href="#learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Gradient accumulation is not intentionally being used to combine microbatches.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import torch</span>
-<span> </span>
-<span>weight = torch.tensor(2.0, requires_grad=True)</span>
-<span>(weight**2).backward()</span>
-<span>first = weight.grad.item()</span>
-<span>(weight**2).backward()</span>
-<span>accumulated = weight.grad.item()</span>
-<span>weight.grad.zero_()</span>
-<span>cleared = weight.grad.item()</span>
-<span>print({&quot;first&quot;: first, &quot;accumulated&quot;: accumulated, &quot;cleared&quot;: cleared})</span>
-<span>assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"></span>
+<span class="source-line">weight <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">first <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">accumulated <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>zero_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cleared <span class="syntax-operator">=</span> weight<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> first<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accumulated</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accumulated<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cleared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> cleared<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> accumulated<span class="syntax-punctuation">,</span> cleared<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> A second backward call adds another gradient; clearing is an explicit part of each ordinary optimization step.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -769,19 +817,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Loss-aggregation edge case — with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Autograd tracing</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Mode debugging</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Loss-aggregation edge case</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Autograd tracing</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Mode debugging</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Loss-aggregation edge case</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -825,31 +873,31 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python"># 1) Imports
-import torch, torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
-import matplotlib.pyplot as plt
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># 1) Imports</span>
+<span class="syntax-keyword">import</span> torch<span class="syntax-operator">,</span> torch.nn <span class="syntax-keyword">as</span> nn
+<span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> TensorDataset<span class="syntax-punctuation">,</span> DataLoader
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-# 2) Reproducibility and device
-torch.manual_seed(0)
-device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)
+<span class="syntax-comment"># 2) Reproducibility and device</span>
+torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+device <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cuda</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> torch<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>is_available<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
 
-# 3) Toy regression dataset: y = sin(x) + noise
-n = 200
-x = torch.linspace(-3, 3, n).unsqueeze(1)
-y = torch.sin(x) + 0.15*torch.randn_like(x)
+<span class="syntax-comment"># 3) Toy regression dataset: y = sin(x) + noise</span>
+n <span class="syntax-operator">=</span> <span class="syntax-number">200</span>
+x <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>unsqueeze<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>sin<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.15</span><span class="syntax-operator">*</span>torch<span class="syntax-operator">.</span>randn_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
 
-# 4) Train/valid split
-idx = torch.randperm(n)
-train_idx, valid_idx = idx[:160], idx[160:]
-Xtr, ytr = x[train_idx], y[train_idx]
-Xva, yva = x[valid_idx], y[valid_idx]
+<span class="syntax-comment"># 4) Train/valid split</span>
+idx <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>randperm<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span>
+train_idx<span class="syntax-punctuation">,</span> valid_idx <span class="syntax-operator">=</span> idx<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">160</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> idx<span class="syntax-punctuation">[</span><span class="syntax-number">160</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+Xtr<span class="syntax-punctuation">,</span> ytr <span class="syntax-operator">=</span> x<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span>
+Xva<span class="syntax-punctuation">,</span> yva <span class="syntax-operator">=</span> x<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span>
 
-# 5) Dataloaders
-bs = 32
-tr_dl = DataLoader(TensorDataset(Xtr, ytr), batch_size=bs, shuffle=True)
-va_dl = DataLoader(TensorDataset(Xva, yva), batch_size=bs)</code></pre>
+<span class="syntax-comment"># 5) Dataloaders</span>
+bs <span class="syntax-operator">=</span> <span class="syntax-number">32</span>
+tr_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>TensorDataset<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span>bs<span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+va_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>TensorDataset<span class="syntax-punctuation">(</span>Xva<span class="syntax-punctuation">,</span> yva<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span>bs<span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>Imports: torch core, nn modules, DataLoader utilities, plotting</li>
@@ -860,54 +908,54 @@ va_dl = DataLoader(TensorDataset(Xva, yva), batch_size=bs)</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Tiny MLP and capacity exploration</p>
-<pre><code class="language-python">class MLP(nn.Module):
-    def __init__(self, width=32, depth=2):
-        super().__init__()
-        layers = []
-        inp = 1
-        for _ in range(depth):
-            layers += [nn.Linear(inp, width), nn.Tanh()]
-            inp = width
-        layers += [nn.Linear(inp, 1)]
-        self.net = nn.Sequential(*layers)
-    def forward(self, x):
-        return self.net(x)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">MLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        layers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+        inp <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+        <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>inp<span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>Tanh<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+            inp <span class="syntax-operator">=</span> width
+        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>inp<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>layers<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
 
-# Train helper
-def fit(model, dl_tr, dl_va, epochs=500, lr=1e-2):
-    model = model.to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
-    loss_fn = nn.MSELoss()
-    tr_hist, va_hist = [], []
-    for ep in range(epochs):
-        model.train(); tr_loss = 0.0; ntr = 0
-        for xb, yb in dl_tr:
-            xb, yb = xb.to(device), yb.to(device)
-            opt.zero_grad()
-            preds = model(xb)
-            loss = loss_fn(preds, yb)
-            loss.backward(); opt.step()
-            tr_loss += loss.item()*xb.size(0); ntr += xb.size(0)
-        # valid
-        model.eval(); va_loss = 0.0; nva = 0
-        with torch.no_grad():
-            for xb, yb in dl_va:
-                xb, yb = xb.to(device), yb.to(device)
-                loss = loss_fn(model(xb), yb)
-                va_loss += loss.item()*xb.size(0); nva += xb.size(0)
-        tr_hist.append(tr_loss/ntr); va_hist.append(va_loss/nva)
-    return tr_hist, va_hist
+<span class="syntax-comment"># Train helper</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">fit</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> dl_tr<span class="syntax-punctuation">,</span> dl_va<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">500</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+    opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span>
+    loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    tr_hist<span class="syntax-punctuation">,</span> va_hist <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> ep <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>epochs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> tr_loss <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> ntr <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl_tr<span class="syntax-punctuation">:</span>
+            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+            opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            preds <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span>
+            loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>preds<span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+            loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            tr_loss <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> ntr <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-comment"># valid</span>
+        model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> va_loss <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> nva <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+        <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl_va<span class="syntax-punctuation">:</span>
+                xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+                loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+                va_loss <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> nva <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        tr_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tr_loss<span class="syntax-operator">/</span>ntr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> va_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>va_loss<span class="syntax-operator">/</span>nva<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> tr_hist<span class="syntax-punctuation">,</span> va_hist
 
-# Compare small vs big capacity
-small = MLP(width=16, depth=1)
-big   = MLP(width=128, depth=4)
-tr_s, va_s = fit(small, tr_dl, va_dl, epochs=800, lr=5e-3)
-tr_b, va_b = fit(big,   tr_dl, va_dl, epochs=800, lr=5e-3)
+<span class="syntax-comment"># Compare small vs big capacity</span>
+small <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+big   <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+tr_s<span class="syntax-punctuation">,</span> va_s <span class="syntax-operator">=</span> fit<span class="syntax-punctuation">(</span>small<span class="syntax-punctuation">,</span> tr_dl<span class="syntax-punctuation">,</span> va_dl<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">800</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">5e-3</span><span class="syntax-punctuation">)</span>
+tr_b<span class="syntax-punctuation">,</span> va_b <span class="syntax-operator">=</span> fit<span class="syntax-punctuation">(</span>big<span class="syntax-punctuation">,</span>   tr_dl<span class="syntax-punctuation">,</span> va_dl<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">800</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">5e-3</span><span class="syntax-punctuation">)</span>
 
-# Plot learning curves
-plt.plot(tr_s, label=&#x27;small train&#x27;); plt.plot(va_s, label=&#x27;small valid&#x27;)
-plt.plot(tr_b, label=&#x27;big train&#x27;);   plt.plot(va_b, label=&#x27;big valid&#x27;)
-plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Learning curves&#x27;); plt.show()</code></pre>
+<span class="syntax-comment"># Plot learning curves</span>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>tr_s<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">small train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>va_s<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">small valid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>tr_b<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">big train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>   plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>va_b<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">big valid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>yscale<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">log</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Learning curves</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Walkthrough</p>
 <ul>
 <li>MLP: stack [Linear, Tanh] blocks depth times, then a final Linear to 1</li>
@@ -917,29 +965,29 @@ plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Learning curves&#x27;
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — SGD vs Adam convergence</p>
-<pre><code class="language-python">def fit_with_opt(model, opt_ctor, lr=1e-2, epochs=400):
-    model = model.to(device)
-    opt = opt_ctor(model.parameters(), lr=lr)
-    loss_fn = nn.MSELoss()
-    tr_hist = []
-    for _ in range(epochs):
-        model.train(); loss_sum=0.0; n=0
-        for xb, yb in tr_dl:
-            xb, yb = xb.to(device), yb.to(device)
-            opt.zero_grad(); loss = loss_fn(model(xb), yb)
-            loss.backward(); opt.step()
-            loss_sum += loss.item()*xb.size(0); n += xb.size(0)
-        tr_hist.append(loss_sum/n)
-    return tr_hist
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_with_opt</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> opt_ctor<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+    opt <span class="syntax-operator">=</span> opt_ctor<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span>
+    loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    tr_hist <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>epochs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss_sum<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> n<span class="syntax-operator">=</span><span class="syntax-number">0</span>
+        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> tr_dl<span class="syntax-punctuation">:</span>
+            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+            opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+            loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> n <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        tr_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss_sum<span class="syntax-operator">/</span>n<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> tr_hist
 
-model_sgd  = MLP(width=64, depth=3)
-model_adam = MLP(width=64, depth=3)
-sgd_hist  = fit_with_opt(model_sgd,  torch.optim.SGD,  lr=1e-2, epochs=600)
-adam_hist = fit_with_opt(model_adam, torch.optim.Adam, lr=1e-3, epochs=600)
+model_sgd  <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+model_adam <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+sgd_hist  <span class="syntax-operator">=</span> fit_with_opt<span class="syntax-punctuation">(</span>model_sgd<span class="syntax-punctuation">,</span>  torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">,</span>  lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">)</span>
+adam_hist <span class="syntax-operator">=</span> fit_with_opt<span class="syntax-punctuation">(</span>model_adam<span class="syntax-punctuation">,</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">)</span>
 
-plt.plot(sgd_hist, label=&#x27;SGD lr=1e-2&#x27;)
-plt.plot(adam_hist, label=&#x27;Adam lr=1e-3&#x27;)
-plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Convergence speed&#x27;); plt.show()</code></pre>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>sgd_hist<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SGD lr=1e-2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>adam_hist<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Adam lr=1e-3</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>yscale<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">log</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Convergence speed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>fit_with_opt: swaps optimizer constructor; all else same</li>
@@ -962,31 +1010,31 @@ plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Convergence speed&#x2
 <li>Gradient clipping: cap global norm to prevent blow-ups</li>
 </ul>
 <p>Code sketch with good defaults</p>
-<pre><code class="language-python">class StableMLP(nn.Module):
-    def __init__(self, width=128, depth=6):
-        super().__init__()
-        layers = []
-        layers += [nn.Linear(1, width), nn.ReLU(), nn.BatchNorm1d(width)]
-        for _ in range(depth-1):
-            layers += [nn.Linear(width, width), nn.ReLU(), nn.BatchNorm1d(width)]
-        layers += [nn.Linear(width, 1)]
-        self.net = nn.Sequential(*layers)
-        # Kaiming initialization for ReLU
-        for m in self.net:
-            if isinstance(m, nn.Linear):
-                nn.init.kaiming_normal_(m.weight)
-                nn.init.zeros_(m.bias)
-    def forward(self, x): return self.net(x)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">StableMLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        layers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>ReLU<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>BatchNorm1d<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>depth<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>ReLU<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>BatchNorm1d<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>layers<span class="syntax-punctuation">)</span>
+        <span class="syntax-comment"># Kaiming initialization for ReLU</span>
+        <span class="syntax-keyword">for</span> m <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+                nn<span class="syntax-operator">.</span>init<span class="syntax-operator">.</span>kaiming_normal_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>weight<span class="syntax-punctuation">)</span>
+                nn<span class="syntax-operator">.</span>init<span class="syntax-operator">.</span>zeros_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>bias<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
 
-m = StableMLP().to(device)
-opt = torch.optim.Adam(m.parameters(), lr=1e-3)
-loss_fn = nn.MSELoss()
-for xb, yb in tr_dl:
-    xb, yb = xb.to(device), yb.to(device)
-    opt.zero_grad(); loss = loss_fn(m(xb), yb)
-    loss.backward()
-    nn.utils.clip_grad_norm_(m.parameters(), max_norm=1.0)  # gradient clipping
-    opt.step()</code></pre>
+m <span class="syntax-operator">=</span> StableMLP<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">)</span>
+loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> tr_dl<span class="syntax-punctuation">:</span>
+    xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+    opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+    loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    nn<span class="syntax-operator">.</span>utils<span class="syntax-operator">.</span>clip_grad_norm_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> max_norm<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># gradient clipping</span>
+    opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Line‑by‑line highlights</p>
 <ul>
 <li>BatchNorm after ReLU reduces internal covariate shift; stabilizes gradients</li>
@@ -1046,32 +1094,32 @@ for xb, yb in tr_dl:
 <h5 id="solution-1--exercise-6-loss-aggregation-edge-case">Exercise 6 — Loss-aggregation edge case<a class="heading-anchor" href="#solution-1--exercise-6-loss-aggregation-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.</p>
 <p><strong>Reasoning before implementation:</strong> Multiply each mean batch loss by batch size, sum, then divide by the number of examples.</p>
-<pre><code class="language-python">import torch
-from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> DataLoader<span class="syntax-punctuation">,</span> TensorDataset
 
-features = torch.arange(10, dtype=torch.float32).reshape(-1, 1)
-targets = 2 * features + 1
-data_loader = DataLoader(
-    TensorDataset(features, targets),
-    batch_size=4,
-    shuffle=False,
-)
-model = nn.Linear(1, 1)
-loss_function = nn.MSELoss(reduction=&quot;mean&quot;)
+features <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+targets <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> features <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+data_loader <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>
+    TensorDataset<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>
+    shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+loss_function <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span>reduction<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-loss_sum = 0.0
-example_count = 0
-for batch_features, batch_targets in data_loader:
-    predictions = model(batch_features)
-    loss = loss_function(predictions, batch_targets)
-    loss_sum += float(loss.item()) * batch_features.size(0)
-    example_count += batch_features.size(0)
+loss_sum <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span>
+example_count <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">for</span> batch_features<span class="syntax-punctuation">,</span> batch_targets <span class="syntax-operator">in</span> data_loader<span class="syntax-punctuation">:</span>
+    predictions <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>batch_features<span class="syntax-punctuation">)</span>
+    loss <span class="syntax-operator">=</span> loss_function<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> batch_targets<span class="syntax-punctuation">)</span>
+    loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> batch_features<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    example_count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> batch_features<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 
-epoch_loss = loss_sum / example_count
-with torch.no_grad():
-    direct_loss = float(loss_function(model(features), targets).item())
-assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</code></pre>
+epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-operator">/</span> example_count
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    direct_loss <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss_function<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>epoch_loss <span class="syntax-operator">-</span> direct_loss<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-4</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>direct_loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>An unweighted mean of batch means gives the short final batch the same weight as every full batch. It is correct only when all batches are the same size or the loss function returns a sum and the denominator is handled accordingly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Loss-aggregation edge case — with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p></div>
@@ -1119,32 +1167,32 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 <hr>
 <p>Setup</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day46_deep_learning_overview/day46_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># 1) Imports</span>
-<span>import torch, torch.nn as nn</span>
-<span>from torch.utils.data import TensorDataset, DataLoader</span>
-<span>import matplotlib.pyplot as plt</span>
-<span>import numpy as np</span>
-<span> </span>
-<span># 2) Reproducibility and device</span>
-<span>torch.manual_seed(0)</span>
-<span>device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)</span>
-<span> </span>
-<span># 3) Toy regression dataset: y = sin(x) + noise</span>
-<span>n = 200</span>
-<span>x = torch.linspace(-3, 3, n).unsqueeze(1)</span>
-<span>y = torch.sin(x) + 0.15*torch.randn_like(x)</span>
-<span> </span>
-<span># 4) Train/valid split</span>
-<span>idx = torch.randperm(n)</span>
-<span>train_idx, valid_idx = idx[:160], idx[160:]</span>
-<span>Xtr, ytr = x[train_idx], y[train_idx]</span>
-<span>Xva, yva = x[valid_idx], y[valid_idx]</span>
-<span> </span>
-<span># 5) Dataloaders</span>
-<span>bs = 32</span>
-<span>tr_dl = DataLoader(TensorDataset(Xtr, ytr), batch_size=bs, shuffle=True)</span>
-<span>va_dl = DataLoader(TensorDataset(Xva, yva), batch_size=bs)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># 1) Imports</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> torch<span class="syntax-operator">,</span> torch.nn <span class="syntax-keyword">as</span> nn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> TensorDataset<span class="syntax-punctuation">,</span> DataLoader</span>
+<span class="source-line"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 2) Reproducibility and device</span></span>
+<span class="source-line">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">device <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cuda</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> torch<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>is_available<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 3) Toy regression dataset: y = sin(x) + noise</span></span>
+<span class="source-line">n <span class="syntax-operator">=</span> <span class="syntax-number">200</span></span>
+<span class="source-line">x <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>unsqueeze<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>sin<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.15</span><span class="syntax-operator">*</span>torch<span class="syntax-operator">.</span>randn_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 4) Train/valid split</span></span>
+<span class="source-line">idx <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>randperm<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span></span>
+<span class="source-line">train_idx<span class="syntax-punctuation">,</span> valid_idx <span class="syntax-operator">=</span> idx<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">160</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> idx<span class="syntax-punctuation">[</span><span class="syntax-number">160</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> ytr <span class="syntax-operator">=</span> x<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span></span>
+<span class="source-line">Xva<span class="syntax-punctuation">,</span> yva <span class="syntax-operator">=</span> x<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 5) Dataloaders</span></span>
+<span class="source-line">bs <span class="syntax-operator">=</span> <span class="syntax-number">32</span></span>
+<span class="source-line">tr_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>TensorDataset<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span>bs<span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">va_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>TensorDataset<span class="syntax-punctuation">(</span>Xva<span class="syntax-punctuation">,</span> yva<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span>bs<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Explanation</p>
 <ul>
@@ -1156,55 +1204,55 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Tiny MLP and capacity exploration</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>class MLP(nn.Module):</span>
-<span>    def __init__(self, width=32, depth=2):</span>
-<span>        super().__init__()</span>
-<span>        layers = []</span>
-<span>        inp = 1</span>
-<span>        for _ in range(depth):</span>
-<span>            layers += [nn.Linear(inp, width), nn.Tanh()]</span>
-<span>            inp = width</span>
-<span>        layers += [nn.Linear(inp, 1)]</span>
-<span>        self.net = nn.Sequential(*layers)</span>
-<span>    def forward(self, x):</span>
-<span>        return self.net(x)</span>
-<span> </span>
-<span># Train helper</span>
-<span>def fit(model, dl_tr, dl_va, epochs=500, lr=1e-2):</span>
-<span>    model = model.to(device)</span>
-<span>    opt = torch.optim.Adam(model.parameters(), lr=lr)</span>
-<span>    loss_fn = nn.MSELoss()</span>
-<span>    tr_hist, va_hist = [], []</span>
-<span>    for ep in range(epochs):</span>
-<span>        model.train(); tr_loss = 0.0; ntr = 0</span>
-<span>        for xb, yb in dl_tr:</span>
-<span>            xb, yb = xb.to(device), yb.to(device)</span>
-<span>            opt.zero_grad()</span>
-<span>            preds = model(xb)</span>
-<span>            loss = loss_fn(preds, yb)</span>
-<span>            loss.backward(); opt.step()</span>
-<span>            tr_loss += loss.item()*xb.size(0); ntr += xb.size(0)</span>
-<span>        # valid</span>
-<span>        model.eval(); va_loss = 0.0; nva = 0</span>
-<span>        with torch.no_grad():</span>
-<span>            for xb, yb in dl_va:</span>
-<span>                xb, yb = xb.to(device), yb.to(device)</span>
-<span>                loss = loss_fn(model(xb), yb)</span>
-<span>                va_loss += loss.item()*xb.size(0); nva += xb.size(0)</span>
-<span>        tr_hist.append(tr_loss/ntr); va_hist.append(va_loss/nva)</span>
-<span>    return tr_hist, va_hist</span>
-<span> </span>
-<span># Compare small vs big capacity</span>
-<span>small = MLP(width=16, depth=1)</span>
-<span>big   = MLP(width=128, depth=4)</span>
-<span>tr_s, va_s = fit(small, tr_dl, va_dl, epochs=800, lr=5e-3)</span>
-<span>tr_b, va_b = fit(big,   tr_dl, va_dl, epochs=800, lr=5e-3)</span>
-<span> </span>
-<span># Plot learning curves</span>
-<span>plt.plot(tr_s, label=&#x27;small train&#x27;); plt.plot(va_s, label=&#x27;small valid&#x27;)</span>
-<span>plt.plot(tr_b, label=&#x27;big train&#x27;);   plt.plot(va_b, label=&#x27;big valid&#x27;)</span>
-<span>plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Learning curves&#x27;); plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">MLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        layers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        inp <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>inp<span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>Tanh<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">            inp <span class="syntax-operator">=</span> width</span>
+<span class="source-line">        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>inp<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>layers<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Train helper</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> dl_tr<span class="syntax-punctuation">,</span> dl_va<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">500</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tr_hist<span class="syntax-punctuation">,</span> va_hist <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> ep <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>epochs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> tr_loss <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> ntr <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl_tr<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            preds <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>preds<span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            tr_loss <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> ntr <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># valid</span></span>
+<span class="source-line">        model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> va_loss <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> nva <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl_va<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                va_loss <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> nva <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        tr_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tr_loss<span class="syntax-operator">/</span>ntr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> va_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>va_loss<span class="syntax-operator">/</span>nva<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> tr_hist<span class="syntax-punctuation">,</span> va_hist</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Compare small vs big capacity</span></span>
+<span class="source-line">small <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">big   <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">tr_s<span class="syntax-punctuation">,</span> va_s <span class="syntax-operator">=</span> fit<span class="syntax-punctuation">(</span>small<span class="syntax-punctuation">,</span> tr_dl<span class="syntax-punctuation">,</span> va_dl<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">800</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">5e-3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">tr_b<span class="syntax-punctuation">,</span> va_b <span class="syntax-operator">=</span> fit<span class="syntax-punctuation">(</span>big<span class="syntax-punctuation">,</span>   tr_dl<span class="syntax-punctuation">,</span> va_dl<span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">800</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">5e-3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Plot learning curves</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>tr_s<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">small train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>va_s<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">small valid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>tr_b<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">big train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>   plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>va_b<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">big valid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>yscale<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">log</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Learning curves</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Walkthrough</p>
 <ul>
@@ -1215,30 +1263,30 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — SGD vs Adam convergence</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>def fit_with_opt(model, opt_ctor, lr=1e-2, epochs=400):</span>
-<span>    model = model.to(device)</span>
-<span>    opt = opt_ctor(model.parameters(), lr=lr)</span>
-<span>    loss_fn = nn.MSELoss()</span>
-<span>    tr_hist = []</span>
-<span>    for _ in range(epochs):</span>
-<span>        model.train(); loss_sum=0.0; n=0</span>
-<span>        for xb, yb in tr_dl:</span>
-<span>            xb, yb = xb.to(device), yb.to(device)</span>
-<span>            opt.zero_grad(); loss = loss_fn(model(xb), yb)</span>
-<span>            loss.backward(); opt.step()</span>
-<span>            loss_sum += loss.item()*xb.size(0); n += xb.size(0)</span>
-<span>        tr_hist.append(loss_sum/n)</span>
-<span>    return tr_hist</span>
-<span> </span>
-<span>model_sgd  = MLP(width=64, depth=3)</span>
-<span>model_adam = MLP(width=64, depth=3)</span>
-<span>sgd_hist  = fit_with_opt(model_sgd,  torch.optim.SGD,  lr=1e-2, epochs=600)</span>
-<span>adam_hist = fit_with_opt(model_adam, torch.optim.Adam, lr=1e-3, epochs=600)</span>
-<span> </span>
-<span>plt.plot(sgd_hist, label=&#x27;SGD lr=1e-2&#x27;)</span>
-<span>plt.plot(adam_hist, label=&#x27;Adam lr=1e-3&#x27;)</span>
-<span>plt.yscale(&#x27;log&#x27;); plt.legend(); plt.title(&#x27;Convergence speed&#x27;); plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_with_opt</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> opt_ctor<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    opt <span class="syntax-operator">=</span> opt_ctor<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tr_hist <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>epochs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss_sum<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> n<span class="syntax-operator">=</span><span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> tr_dl<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> n <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        tr_hist<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss_sum<span class="syntax-operator">/</span>n<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> tr_hist</span>
+<span class="source-line"></span>
+<span class="source-line">model_sgd  <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model_adam <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span>width<span class="syntax-operator">=</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">sgd_hist  <span class="syntax-operator">=</span> fit_with_opt<span class="syntax-punctuation">(</span>model_sgd<span class="syntax-punctuation">,</span>  torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">,</span>  lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">adam_hist <span class="syntax-operator">=</span> fit_with_opt<span class="syntax-punctuation">(</span>model_adam<span class="syntax-punctuation">,</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>sgd_hist<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SGD lr=1e-2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>adam_hist<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Adam lr=1e-3</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>yscale<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">log</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Convergence speed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Explanation</p>
 <ul>
@@ -1262,32 +1310,32 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 <li>Gradient clipping: cap global norm to prevent blow-ups</li>
 </ul>
 <p>Code sketch with good defaults</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>class StableMLP(nn.Module):</span>
-<span>    def __init__(self, width=128, depth=6):</span>
-<span>        super().__init__()</span>
-<span>        layers = []</span>
-<span>        layers += [nn.Linear(1, width), nn.ReLU(), nn.BatchNorm1d(width)]</span>
-<span>        for _ in range(depth-1):</span>
-<span>            layers += [nn.Linear(width, width), nn.ReLU(), nn.BatchNorm1d(width)]</span>
-<span>        layers += [nn.Linear(width, 1)]</span>
-<span>        self.net = nn.Sequential(*layers)</span>
-<span>        # Kaiming initialization for ReLU</span>
-<span>        for m in self.net:</span>
-<span>            if isinstance(m, nn.Linear):</span>
-<span>                nn.init.kaiming_normal_(m.weight)</span>
-<span>                nn.init.zeros_(m.bias)</span>
-<span>    def forward(self, x): return self.net(x)</span>
-<span> </span>
-<span>m = StableMLP().to(device)</span>
-<span>opt = torch.optim.Adam(m.parameters(), lr=1e-3)</span>
-<span>loss_fn = nn.MSELoss()</span>
-<span>for xb, yb in tr_dl:</span>
-<span>    xb, yb = xb.to(device), yb.to(device)</span>
-<span>    opt.zero_grad(); loss = loss_fn(m(xb), yb)</span>
-<span>    loss.backward()</span>
-<span>    nn.utils.clip_grad_norm_(m.parameters(), max_norm=1.0)  # gradient clipping</span>
-<span>    opt.step()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">StableMLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        layers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>ReLU<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>BatchNorm1d<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>depth<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>ReLU<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>BatchNorm1d<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        layers <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>layers<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Kaiming initialization for ReLU</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> m <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">,</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                nn<span class="syntax-operator">.</span>init<span class="syntax-operator">.</span>kaiming_normal_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>weight<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                nn<span class="syntax-operator">.</span>init<span class="syntax-operator">.</span>zeros_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>bias<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>net<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">m <span class="syntax-operator">=</span> StableMLP<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> tr_dl<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    nn<span class="syntax-operator">.</span>utils<span class="syntax-operator">.</span>clip_grad_norm_<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> max_norm<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># gradient clipping</span></span>
+<span class="source-line">    opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p>Line‑by‑line highlights</p>
 <ul>
@@ -1348,33 +1396,33 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 <h5 id="solution-2--cell-9--exercise-6-loss-aggregation-edge-case">Exercise 6 — Loss-aggregation edge case<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-loss-aggregation-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.</p>
 <p><strong>Reasoning before implementation:</strong> Multiply each mean batch loss by batch size, sum, then divide by the number of examples.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>import torch</span>
-<span>from torch import nn</span>
-<span>from torch.utils.data import DataLoader, TensorDataset</span>
-<span> </span>
-<span>features = torch.arange(10, dtype=torch.float32).reshape(-1, 1)</span>
-<span>targets = 2 * features + 1</span>
-<span>data_loader = DataLoader(</span>
-<span>    TensorDataset(features, targets),</span>
-<span>    batch_size=4,</span>
-<span>    shuffle=False,</span>
-<span>)</span>
-<span>model = nn.Linear(1, 1)</span>
-<span>loss_function = nn.MSELoss(reduction=&quot;mean&quot;)</span>
-<span> </span>
-<span>loss_sum = 0.0</span>
-<span>example_count = 0</span>
-<span>for batch_features, batch_targets in data_loader:</span>
-<span>    predictions = model(batch_features)</span>
-<span>    loss = loss_function(predictions, batch_targets)</span>
-<span>    loss_sum += float(loss.item()) * batch_features.size(0)</span>
-<span>    example_count += batch_features.size(0)</span>
-<span> </span>
-<span>epoch_loss = loss_sum / example_count</span>
-<span>with torch.no_grad():</span>
-<span>    direct_loss = float(loss_function(model(features), targets).item())</span>
-<span>assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> DataLoader<span class="syntax-punctuation">,</span> TensorDataset</span>
+<span class="source-line"></span>
+<span class="source-line">features <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">targets <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> features <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">data_loader <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    TensorDataset<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loss_function <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>MSELoss<span class="syntax-punctuation">(</span>reduction<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">loss_sum <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span></span>
+<span class="source-line">example_count <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> batch_features<span class="syntax-punctuation">,</span> batch_targets <span class="syntax-operator">in</span> data_loader<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    predictions <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>batch_features<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss <span class="syntax-operator">=</span> loss_function<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> batch_targets<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> batch_features<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    example_count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> batch_features<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-operator">/</span> example_count</span>
+<span class="source-line"><span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    direct_loss <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss_function<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>epoch_loss <span class="syntax-operator">-</span> direct_loss<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-4</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>direct_loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>An unweighted mean of batch means gives the short final batch the same weight as every full batch. It is correct only when all batches are the same size or the loss function returns a sum and the denominator is handled accordingly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>

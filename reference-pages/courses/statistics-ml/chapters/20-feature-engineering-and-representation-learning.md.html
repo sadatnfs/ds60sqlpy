@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A feature is a measurement available when a decision is made. Its transformation may change numerical conditioning, model assumptions and leakage risk. Fit preprocessing on training data, apply the fitted transformation to held-out data, and keep all learned preprocessing inside the validation pipeline. A correct transformation applied at the wrong time is still leakage.</p>
 <h4 id="derive-pca-as-reconstruction">Derive PCA as reconstruction<a class="heading-anchor" href="#derive-pca-as-reconstruction" aria-label="Link to this section">#</a></h4>
-<p>Center X by subtracting training column means and compute X=U S V-transpose. The first k right singular vectors form loading directions V_k; scores are X V_k. Reconstruct with scores times V_k-transpose and add the training means. This minimizes squared reconstruction error among rank-k linear approximations. Explained variances are s_j^2/(n-1), so retained variance ratios follow directly from singular values.</p>
+<p>Center X by subtracting training column means and compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mi>U</mi><mi>Σ</mi><msup><mi>V</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">X=U\Sigma V^{\mathsf T}</annotation></semantics></math>. The first k right singular vectors form loading directions V_k; scores are X V_k. Reconstruct with scores times V_k-transpose and add the training means. This minimizes squared reconstruction error among rank-k linear approximations. Explained variances are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msubsup><mi>s</mi><mi>j</mi><mn>2</mn></msubsup></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{s_j^2}{n-1}</annotation></semantics></math>, so retained variance ratios follow directly from singular values.</p>
 <p>PCA maximizes variance, not predictive value, independence or causal relevance. A low-variance feature can strongly predict the target. Raw-unit PCA lets large-scale features dominate; standardized PCA answers a correlation-scale question instead. Component signs are arbitrary, and nearly tied singular values make individual directions unstable even when the subspace is stable. Select dimension inside the training process and evaluate the downstream task.</p>
 <h4 id="encoding-and-temporal-availability">Encoding and temporal availability<a class="heading-anchor" href="#encoding-and-temporal-availability" aria-label="Link to this section">#</a></h4>
 <p>One-hot encoding preserves nominal categories without inventing order. Target encoding replaces a category with an outcome summary, but using each row&#x27;s own label can leak almost the entire target for rare categories. Cross-fitted encodings and smoothing toward a training prior reduce this problem. Rolling features must use only values available before the prediction timestamp; a centered window or same-day final total can expose future information.</p>
@@ -172,7 +218,7 @@
 <p>Probe whether representations encode labels, future information or sensitive identities unavailable or inappropriate at deployment. A downstream train-test split cannot repair representations trained with leaked evaluation information.</p>
 <h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="case-study-derive-the-first-principal-component-numerically">Case study: derive the first principal component numerically<a class="heading-anchor" href="#case-study-derive-the-first-principal-component-numerically" aria-label="Link to this section">#</a></h4>
-<p>For rows (1,2),(2,4),(3,6),(4,8), the column means are (2.5,5). The sample covariance is [[5/3,10/3],[10/3,20/3]]. Its trace is 25/3, the total sample variance. The vector (1,2)/sqrt(5) is an eigenvector with eigenvalue 25/3, and its orthogonal direction has eigenvalue zero. Every centered observation lies on the first direction, so one component reconstructs the data exactly.</p>
+<p>For rows (1,2),(2,4),(3,6),(4,8), the column means are (2.5,5). The sample covariance is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>5</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>20</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[\frac{5}{3},\frac{10}{3}],[\frac{10}{3},\frac{20}{3}]]</annotation></semantics></math>. Its trace is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>25</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{25}{3}</annotation></semantics></math>, the total sample variance. The vector <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><msqrt><mrow><mn>5</mn></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{(1,2)}{\sqrt{5}}</annotation></semantics></math> is an eigenvector with eigenvalue <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>25</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{25}{3}</annotation></semantics></math>, and its orthogonal direction has eigenvalue zero. Every centered observation lies on the first direction, so one component reconstructs the data exactly.</p>
 <p>The loading vector tells how original coordinates combine into a component. The score is each row&#x27;s projection onto that direction. A sign-flipped loading and sign-flipped scores reconstruct the same matrix, so component signs have no intrinsic meaning. With two nearly equal eigenvalues, even orientations within their shared subspace can rotate substantially across samples. Compare subspaces or align components before interpreting instability as a changed phenomenon.</p>
 <p>If the second column&#x27;s units are changed from meters to millimeters, its raw variance grows by a million and raw PCA changes accordingly. Standardizing both columns uses a correlation-scale geometry instead. Neither is automatically correct: raw-unit PCA might be appropriate if physical magnitude defines reconstruction cost, while standardized PCA gives each variable equal initial variance. State the loss implicit in the scaling decision.</p>
 <h4 id="case-study-high-explained-variance-can-discard-the-target">Case study: high explained variance can discard the target<a class="heading-anchor" href="#case-study-high-explained-variance-can-discard-the-target" aria-label="Link to this section">#</a></h4>
@@ -192,7 +238,7 @@
 <p>If an image augmentation removes a small defect, a contrastive objective may learn to ignore the very signal the inspection task needs. If text chunks are paired by document rather than factual content, the embedding may encode style or source identity. Inspect the data construction and evaluate useful invariances directly. A compact representation is valuable only when it preserves the information the decision requires.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_20.py.html">chapter_20.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_20.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_20.py</code></pre>
 <h4 id="recover-a-rank-one-dataset-exactly">Recover a rank-one dataset exactly<a class="heading-anchor" href="#recover-a-rank-one-dataset-exactly" aria-label="Link to this section">#</a></h4>
 <p>The second column is twice the first, so centered rank is one. The first PCA component captures all variance and reconstructs every observation. The loading is parallel to (1,2), with either sign allowed. This checks the optimization geometry and avoids treating an arbitrary sign flip as a different scientific result.</p>
 <h4 id="a-holdout-must-not-move-the-training-origin">A holdout must not move the training origin<a class="heading-anchor" href="#a-holdout-must-not-move-the-training-origin" aria-label="Link to this section">#</a></h4>
@@ -200,44 +246,44 @@
 <h4 id="features-must-respect-label-and-time-boundaries">Features must respect label and time boundaries<a class="heading-anchor" href="#features-must-respect-label-and-time-boundaries" aria-label="Link to this section">#</a></h4>
 <p>If every category is unique, a same-row target mean equals the outcome exactly. The leave-one-out global fallback removes the row&#x27;s own label but remains only a tiny illustration; real category encoders require fold-aware training and smoothing. The temporal example excludes the current row and produces historical means 10,15,20.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def pca_geometry():
-    x=np.array([[1.,2.],[2.,4.],[3.,6.],[4.,8.]])
-    mean=x.mean(axis=0);centered=x-mean
-    u,s,vt=np.linalg.svd(centered,full_matrices=False)
-    scores=centered@vt[:1].T
-    reconstruction=scores@vt[:1]+mean
-    variance=s*s/(len(x)-1)
-    assert np.allclose(reconstruction,x) and np.isclose(variance[0]/variance.sum(),1.)
-    assert np.isclose(abs(vt[0]@np.array([1.,2.])/np.sqrt(5)),1.)
-    print(&quot;PCA loading:&quot;,vt[0],&quot;explained ratio:&quot;,variance[0]/variance.sum())
+<span class="syntax-keyword">def</span> <span class="syntax-function">pca_geometry</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">8.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    mean<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>centered<span class="syntax-operator">=</span>x<span class="syntax-operator">-</span>mean
+    u<span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">,</span>vt<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>svd<span class="syntax-punctuation">(</span>centered<span class="syntax-punctuation">,</span>full_matrices<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    scores<span class="syntax-operator">=</span>centered<span class="syntax-decorator">@vt</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>T
+    reconstruction<span class="syntax-operator">=</span>scores<span class="syntax-decorator">@vt</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">+</span>mean
+    variance<span class="syntax-operator">=</span>s<span class="syntax-operator">*</span>s<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>reconstruction<span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>variance<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>vt<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-decorator">@np</span><span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">PCA loading:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>vt<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">explained ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>variance<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>variance<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def scaling_and_leakage():
-    train=np.array([0.,2.,4.]);test=np.array([100.])
-    train_mean=train.mean();train_sd=train.std(ddof=0)
-    transformed=(test-train_mean)/train_sd
-    leaked_mean=np.concatenate([train,test]).mean()
-    assert train_mean==2 and leaked_mean==26.5 and transformed[0]&gt;50
-    print(&quot;Training-only mean:&quot;,train_mean,&quot;leaked mean:&quot;,leaked_mean,&quot;held-out z:&quot;,transformed[0])
+<span class="syntax-keyword">def</span> <span class="syntax-function">scaling_and_leakage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    train<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>test<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">100.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    train_mean<span class="syntax-operator">=</span>train<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>train_sd<span class="syntax-operator">=</span>train<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    transformed<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>test<span class="syntax-operator">-</span>train_mean<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>train_sd
+    leaked_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>concatenate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">,</span>test<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> train_mean<span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> leaked_mean<span class="syntax-operator">==</span><span class="syntax-number">26.5</span> <span class="syntax-operator">and</span> transformed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-number">50</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Training-only mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>train_mean<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">leaked mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>leaked_mean<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">held-out z:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>transformed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-def target_and_time_encoding():
-    labels=np.array([0.,1.,0.,1.])
-    naive_unique_category=labels.copy()
-    leave_one_out=np.array([np.delete(labels,i).mean() for i in range(4)])
-    assert np.array_equal(naive_unique_category,labels)
-    assert not np.array_equal(leave_one_out,labels)
-    values=np.array([10.,20.,30.,40.])
-    lagged_mean=np.array([np.nan]+[values[:i].mean() for i in range(1,4)])
-    assert np.allclose(lagged_mean[1:],[10,15,20])
-    print(&quot;Naive unique-category encoding:&quot;,naive_unique_category,&quot;fallback without own label:&quot;,leave_one_out)
-    print(&quot;Strictly prior expanding means:&quot;,lagged_mean)
+<span class="syntax-keyword">def</span> <span class="syntax-function">target_and_time_encoding</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    labels<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    naive_unique_category<span class="syntax-operator">=</span>labels<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    leave_one_out<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>delete<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">,</span>i<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>naive_unique_category<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>leave_one_out<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span>
+    values<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">30.</span><span class="syntax-punctuation">,</span><span class="syntax-number">40.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    lagged_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-punctuation">[</span>values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>lagged_mean<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">15</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Naive unique-category encoding:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>naive_unique_category<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">fallback without own label:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>leave_one_out<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Strictly prior expanding means:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>lagged_mean<span class="syntax-punctuation">)</span>
 
-def main():
-    pca_geometry();scaling_and_leakage();target_and_time_encoding()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    pca_geometry<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>scaling_and_leakage<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>target_and_time_encoding<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does retaining 95% PCA variance retain 95% predictive information?</strong> No. PCA never sees the target and can discard a low-variance direction that predicts it strongly. Validate the full PCA-plus-model pipeline on the intended split.</p>
 <p><strong>Interview: Why can target encoding create a perfect training model?</strong> Rare categories can encode their own labels. Cross-fitting and smoothing reduce that direct leakage, while independent validation measures whether the category relationship generalizes.</p>

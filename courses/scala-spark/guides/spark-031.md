@@ -44,7 +44,7 @@ Complete mode writes the current full aggregate table after each microbatch. The
 
 The source limit produces three positive-input batches of three rows for the declared files. Progress can also contain zero-input entries depending on the query and trigger behavior, so the reference sums input counts and inspects positive-input batches rather than pretending every progress entry is a new file. The total observed input must be nine. Batch IDs identify this query execution progress entries and are not global business event identities.
 
-The query has a unique name and a fresh checkpoint path. Construction of readStream and groupBy creates plans; writeStream.start starts the query. The helper awaits termination with a30-second deadline and always callsstop in finally. The session has a bounded stop timeout. If a query somehow remains active after cleanup, the outer cleanup preserves its scratch root rather than deleting files underneath active work, and session shutdown still runs.
+The query has a unique name and a fresh checkpoint path. Construction of readStream and groupBy creates plans; writeStream.start starts the query. The helper awaits termination with a 30-second deadline and always calls stop in finally. The session has a bounded stop timeout. If a query somehow remains active after cleanup, the outer cleanup preserves its scratch root rather than deleting files underneath active work, and session shutdown still runs.
 
 The final batch comparison checks exactly the same three summary tuples and then checks the independent literal values. Matching streaming and batch code alone would be weaker because both might share a wrong aggregation rule. No arbitrary sleep is used to guess when records arrived or when a result became ready. File publication and the query termination condition provide the sequencing.
 
@@ -194,7 +194,7 @@ Read the final memory table, compare its ordered summary tuples with a batch rea
 
 ## Common pitfalls
 
-Do not write partially completed files into the watched input directory orreuse processed filenames. Do not call readStream construction a running query. Do not sum complete-mode snapshots as if each were new input. A memory sink is not a durable production sink, and AvailableNow termination does not prove indefinite state is bounded. Always await and stop owned queries before session cleanup, and preserve scratch if a query is still active rather than deleting its checkpoint underneath it.
+Do not write partially completed files into the watched input directory or reuse processed filenames. Do not call readStream construction a running query. Do not sum complete-mode snapshots as if each were new input. A memory sink is not a durable production sink, and AvailableNow termination does not prove indefinite state is bounded. Always await and stop owned queries before session cleanup, and preserve scratch if a query is still active rather than deleting its checkpoint underneath it.
 
 ## Self-check
 

@@ -298,7 +298,9 @@ class PortalServer(ThreadingHTTPServer):
         self.launcher = PortalLauncher(catalog, enabled=allow_launches)
         self.token = token or secrets.token_urlsafe(32)
         super().__init__((bind_host, port), PortalRequestHandler)
-        self.expected_host = f"127.0.0.1:{self.server_address[1]}"
+        self.expected_host = (
+            "127.0.0.1" if self.server_address[1] == 80 else f"127.0.0.1:{self.server_address[1]}"
+        )
 
     @property
     def url(self) -> str:

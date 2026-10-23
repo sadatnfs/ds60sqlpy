@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,44 +161,44 @@
       <h1>Llm 034 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-034_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-034: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Compute the full-precision reference</span>
-<span>    w=np.array([[.1,-.9],[1.7,-.2]]); x=np.array([1.,-2.]); reference=w@x</span>
-<span>    np.testing.assert_allclose(reference,[1.9,2.1],atol=1e-12,rtol=0)</span>
-<span> </span>
-<span>    # Exercise 2: Quantize one shared scale</span>
-<span>    scale=np.abs(w).max()/127; raw=np.rint(w/scale); q=np.clip(raw,-127,127).astype(np.int8)</span>
-<span>    np.testing.assert_array_equal(q,[[7,-67],[127,-15]]); assert scale==1.7/127</span>
-<span> </span>
-<span>    # Exercise 3: Measure output error</span>
-<span>    restored=q.astype(float)*scale; output=restored@x; error=float(np.max(np.abs(output-reference)))</span>
-<span>    assert np.isfinite(error) and 0&lt;error&lt;.02</span>
-<span> </span>
-<span>    # Exercise 4: Use per-row scales</span>
-<span>    scales=np.max(np.abs(w),axis=1,keepdims=True)/127; qr=np.clip(np.rint(w/scales),-127,127).astype(np.int8)</span>
-<span>    np.testing.assert_array_equal(qr[0],[14,-127]); np.testing.assert_allclose(scales[:,0],[.9/127,1.7/127],atol=1e-12,rtol=0)</span>
-<span>    row_error=float(np.max(np.abs((qr.astype(float)*scales)@x-reference))); assert np.isfinite(row_error)</span>
-<span> </span>
-<span>    # Exercise 5: Account for storage metadata</span>
-<span>    per_tensor=4*1+1*4; per_row=4*1+2*4</span>
-<span>    assert (per_tensor,per_row)==(8,12)</span>
-<span> </span>
-<span>    # Exercise 6: Expose clipping and tie policy</span>
-<span>    values=np.array([127.,128.]); rounded=np.rint(values); saturated=np.count_nonzero((rounded&lt;-127)|(rounded&gt;127))</span>
-<span>    assert saturated==1; np.testing.assert_array_equal(np.rint([.5,1.5,2.5]),[0,2,2])</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-034: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Compute the full-precision reference</span></span>
+<span class="source-line">    w<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> reference<span class="syntax-operator">=</span>w<span class="syntax-decorator">@x</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>reference<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Quantize one shared scale</span></span>
+<span class="source-line">    scale<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">;</span> raw<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>w<span class="syntax-operator">/</span>scale<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">67</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">15</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> scale<span class="syntax-operator">==</span><span class="syntax-number">1.7</span><span class="syntax-operator">/</span><span class="syntax-number">127</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Measure output error</span></span>
+<span class="source-line">    restored<span class="syntax-operator">=</span>q<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>scale<span class="syntax-punctuation">;</span> output<span class="syntax-operator">=</span>restored<span class="syntax-decorator">@x</span><span class="syntax-punctuation">;</span> error<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>output<span class="syntax-operator">-</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span>error<span class="syntax-operator">&lt;</span><span class="syntax-number">.02</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Use per-row scales</span></span>
+<span class="source-line">    scales<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">;</span> qr<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>w<span class="syntax-operator">/</span>scales<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>qr<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>scales<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.7</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    row_error<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>qr<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>scales<span class="syntax-punctuation">)</span><span class="syntax-decorator">@x</span><span class="syntax-operator">-</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>row_error<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Account for storage metadata</span></span>
+<span class="source-line">    per_tensor<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-operator">*</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">*</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span> per_row<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-operator">*</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>per_tensor<span class="syntax-punctuation">,</span>per_row<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Expose clipping and tie policy</span></span>
+<span class="source-line">    values<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">127.</span><span class="syntax-punctuation">,</span><span class="syntax-number">128.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> rounded<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saturated<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>rounded<span class="syntax-operator">&lt;</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span><span class="syntax-punctuation">(</span>rounded<span class="syntax-operator">&gt;</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> saturated<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

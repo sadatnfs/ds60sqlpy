@@ -11,7 +11,7 @@ executable reference and explained solutions separate. Explain every exercise's 
 and validate the answer against boundary/invalid inputs. Advanced lessons must explain
 tradeoffs and failure diagnosis, not only introduce an API. Check official documentation.
 
-Java sources run as Main.java with public class Main, no package declaration, Java21,
+Java sources run as Main.java with public class Main, no package declaration, Java 21,
 and assertions enabled. Helper classes may share that file. Multi-file builds and external
 libraries need explicit separate setup and cannot be assumed in the pad. Node uses main.mjs.
 TypeScript uses main.mts, strict NodeNext checking then Node24 execution. Only prepared

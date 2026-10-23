@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-27.html#learner">learner SQL</a> · <a href="sql-27.html#solution-1">solution reasoning</a> · <a href="sql-27.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-27 — Pivot Unpivot</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day27_pivot_unpivot.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day27_pivot_unpivot.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day27_pivot_unpivot.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,63 +466,63 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day27_pivot_unpivot.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT p.category,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 1
-       ) AS jan_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 2
-       ) AS feb_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 3
-       ) AS mar_qty
-FROM order_items oi
-JOIN orders o ON o.order_id = oi.order_id
-JOIN products p ON p.product_id = oi.product_id
-WHERE o.order_date &gt;= (
-        date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)
-        AT TIME ZONE &#x27;UTC&#x27;
-      )
-  AND o.order_date &lt; (
-        date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)
-        + INTERVAL &#x27;1 year&#x27;
-      ) AT TIME ZONE &#x27;UTC&#x27;
-GROUP BY p.category
-ORDER BY p.category;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> jan_qty<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> feb_qty<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mar_qty
+<span class="syntax-keyword">FROM</span> order_items oi
+<span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+        date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+      <span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>
+        date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span>
+      <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>o.order_date</code>, <code>order_items</code>, <code>orders</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>category</code>, <code>jan_qty</code>, <code>feb_qty</code>, and <code>mar_qty</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, <code>jan_qty</code>, <code>feb_qty</code>, and <code>mar_qty</code> from <code>o.order_date</code>, <code>order_items</code>, <code>orders</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH source AS (
-  SELECT p.category,
-         EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;)::integer
-           AS month_number,
-         oi.quantity
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.order_date &gt;= (
-          date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)
-          AT TIME ZONE &#x27;UTC&#x27;
-        )
-    AND o.order_date &lt; (
-          date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)
-          + INTERVAL &#x27;1 year&#x27;
-        ) AT TIME ZONE &#x27;UTC&#x27;
-), wide AS (
-  SELECT category,
-         SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,
-         SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty
-  FROM source
-  GROUP BY category
-)
-SELECT wide.category,
-       month_value.month_name,
-       month_value.quantity
-FROM wide
-CROSS JOIN LATERAL (
-  VALUES (&#x27;jan&#x27;, wide.jan_qty), (&#x27;feb&#x27;, wide.feb_qty)
-) AS month_value(month_name, quantity)
-ORDER BY wide.category, month_value.month_name;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">source</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span>
+           <span class="syntax-keyword">AS</span> month_number<span class="syntax-punctuation">,</span>
+         oi<span class="syntax-punctuation">.</span>quantity
+  <span class="syntax-keyword">FROM</span> order_items oi
+  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+          date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
+          <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+        <span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>
+          date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
+          <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span>
+        <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> wide <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> month_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> jan_qty<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> month_number <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> feb_qty
+  <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">source</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> category
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> wide<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       month_value<span class="syntax-punctuation">.</span>month_name<span class="syntax-punctuation">,</span>
+       month_value<span class="syntax-punctuation">.</span>quantity
+<span class="syntax-keyword">FROM</span> wide
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;jan&#x27;</span><span class="syntax-punctuation">,</span> wide<span class="syntax-punctuation">.</span>jan_qty<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;feb&#x27;</span><span class="syntax-punctuation">,</span> wide<span class="syntax-punctuation">.</span>feb_qty<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_value<span class="syntax-punctuation">(</span>month_name<span class="syntax-punctuation">,</span> quantity<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> wide<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> month_value<span class="syntax-punctuation">.</span>month_name<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>o.order_date</code>, <code>order_items</code>, <code>orders</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>category</code>, <code>month_name</code>, and <code>quantity</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>category</code> with columns <code>category</code>, <code>month_name</code>, and <code>quantity</code> from <code>o.order_date</code>, <code>order_items</code>, <code>orders</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -571,7 +619,7 @@ ORDER BY wide.category, month_value.month_name;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-27 — Pivot Unpivot.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-27 — Pivot Unpivot.
 
 I have completed the direct catalog prerequisite: `sql-26`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day27_pivot_unpivot.md
@@ -629,150 +677,150 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 27: PIVOT / UNPIVOT (PostgreSQL approaches)</span>
-<span>-- BEGINNER WORKFLOW — sql-27: Pivot Unpivot</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day27_pivot_unpivot.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-27/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: order_items, orders, products.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.</span>
-<span>-- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.</span>
-<span>-- Pitfall: Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- Approach 1: Conditional aggregation (portable)</span>
-<span>SELECT p.category,</span>
-<span>       SUM(oi.quantity) FILTER (</span>
-<span>         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 1</span>
-<span>       ) AS jan_qty,</span>
-<span>       SUM(oi.quantity) FILTER (</span>
-<span>         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 2</span>
-<span>       ) AS feb_qty,</span>
-<span>       SUM(oi.quantity) FILTER (</span>
-<span>         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;) = 3</span>
-<span>       ) AS mar_qty</span>
-<span>FROM order_items oi</span>
-<span>JOIN orders o ON o.order_id = oi.order_id</span>
-<span>JOIN products p ON p.product_id = oi.product_id</span>
-<span>WHERE o.order_date &gt;= (</span>
-<span>        date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)</span>
-<span>        AT TIME ZONE &#x27;UTC&#x27;</span>
-<span>      )</span>
-<span>  AND o.order_date &lt; (</span>
-<span>        date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)</span>
-<span>        + INTERVAL &#x27;1 year&#x27;</span>
-<span>      ) AT TIME ZONE &#x27;UTC&#x27;</span>
-<span>GROUP BY p.category</span>
-<span>ORDER BY p.category;</span>
-<span> </span>
-<span>-- Approach 2: crosstab (requires the optional tablefunc extension; an</span>
-<span>-- authorized database role must install it before this query is used)</span>
-<span>-- SELECT * FROM crosstab(</span>
-<span>--   $$</span>
-<span>--   SELECT p.category::text AS rowid,</span>
-<span>--          date_part(&#x27;month&#x27;, o.order_date)::int AS bucket,</span>
-<span>--          SUM(oi.quantity)::numeric AS value</span>
-<span>--   FROM order_items oi</span>
-<span>--   JOIN orders o ON o.order_id = oi.order_id</span>
-<span>--   JOIN products p ON p.product_id = oi.product_id</span>
-<span>--   WHERE o.order_date &gt;= date_trunc(&#x27;year&#x27;, now())</span>
-<span>--   GROUP BY p.category, date_part(&#x27;month&#x27;, o.order_date)</span>
-<span>--   ORDER BY 1,2</span>
-<span>--   $$,</span>
-<span>--   $$ SELECT m FROM generate_series(1,12) AS t(m) $$</span>
-<span>-- ) AS ct(category text, m1 numeric, m2 numeric, m3 numeric, m4 numeric, m5 numeric, m6 numeric, m7 numeric, m8 numeric, m9 numeric, m10 numeric, m11 numeric, m12 numeric);</span>
-<span> </span>
-<span>-- UNPIVOT-like: calculate the wide row once, then turn named columns into rows.</span>
-<span>WITH source AS (</span>
-<span>  SELECT p.category,</span>
-<span>         EXTRACT(MONTH FROM o.order_date AT TIME ZONE &#x27;UTC&#x27;)::integer</span>
-<span>           AS month_number,</span>
-<span>         oi.quantity</span>
-<span>  FROM order_items oi</span>
-<span>  JOIN orders o ON o.order_id = oi.order_id</span>
-<span>  JOIN products p ON p.product_id = oi.product_id</span>
-<span>  WHERE o.order_date &gt;= (</span>
-<span>          date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)</span>
-<span>          AT TIME ZONE &#x27;UTC&#x27;</span>
-<span>        )</span>
-<span>    AND o.order_date &lt; (</span>
-<span>          date_trunc(&#x27;year&#x27;, CURRENT_TIMESTAMP AT TIME ZONE &#x27;UTC&#x27;)</span>
-<span>          + INTERVAL &#x27;1 year&#x27;</span>
-<span>        ) AT TIME ZONE &#x27;UTC&#x27;</span>
-<span>), wide AS (</span>
-<span>  SELECT category,</span>
-<span>         SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,</span>
-<span>         SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty</span>
-<span>  FROM source</span>
-<span>  GROUP BY category</span>
-<span>)</span>
-<span>SELECT wide.category,</span>
-<span>       month_value.month_name,</span>
-<span>       month_value.quantity</span>
-<span>FROM wide</span>
-<span>CROSS JOIN LATERAL (</span>
-<span>  VALUES (&#x27;jan&#x27;, wide.jan_qty), (&#x27;feb&#x27;, wide.feb_qty)</span>
-<span>) AS month_value(month_name, quantity)</span>
-<span>ORDER BY wide.category, month_value.month_name;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] Pivot order counts by status into one summary row.</span>
-<span>--    Hint: Use one filtered count per known status and keep an all-orders denominator.</span>
-<span>--    Inputs: For sql-27 Exercise 1, read from `orders`. Build the answer toward `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 1, expected output: Exactly one row. The final columns are `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.</span>
-<span>--    Verify: For sql-27 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 1, inspect the source keys that survive `WHERE`.</span>
-<span>-- 2. [Query writing] Pivot customer counts for US, CA, GB, and DE by segment.</span>
-<span>--    Hint: Group at segment grain and use filtered counts for known country columns.</span>
-<span>--    Inputs: For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 2, expected output: One row per segment. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.</span>
-<span>--    Verify: For sql-27 Exercise 2, independently aggregate `customers` by `segment`; require one output row for every distinct `segment` tuple and compare `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 2, inspect the source keys that survive `WHERE`; then confirm the groups are `segment`; then check `c.segment NULLS LAST` before applying the row cap.</span>
-<span>-- 3. [Query writing] Unpivot a wide quarterly sample into quarter/amount rows.</span>
-<span>--    Hint: Use a lateral `VALUES` relation with one output row per source column.</span>
-<span>--    Inputs: For sql-27 Exercise 3, read from `wide`. Build the answer toward `company`, `quarter`, and `amount`; keep `company` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 3, expected output: Eight rows from two source rows and four quarters. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.</span>
-<span>--    Verify: For sql-27 Exercise 3, project `company` plus the raw source columns from `wide` at each join stage; record row count and distinct `company`, then assert the final `company`, `quarter`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 3, start with the first relation in `wide`; after each join, record total rows and distinct `company` so the exact fanout or loss is visible.</span>
-<span>-- 4. [Prediction] Compare a missing pivot combination with a real zero and preserve the distinction.</span>
-<span>--    Hint: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.</span>
-<span>--    Inputs: For sql-27 Exercise 4, read from `expenses`. Build the answer toward `category`, `january_observed_amount`, and `january_reported_zero_if_absent`; keep `category` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 4, expected output: One row per expense category with nullable/zero-aware columns. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.</span>
-<span>--    Verify: For sql-27 Exercise 4, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `january_observed_amount` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 4, inspect the source keys that survive `WHERE`; then confirm the groups are `category`; then check `e.category` before applying the row cap.</span>
-<span>-- 5. [Debugging] Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.</span>
-<span>--    Hint: Aggregate category/value pairs into data values so the result schema remains stable.</span>
-<span>--    Inputs: For sql-27 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, and `revenue_by_category`; keep `month_start` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 5, expected output: One row per UTC month with a JSON object of category revenue. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.</span>
-<span>--    Verify: For sql-27 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `month_start`; require one output row for every distinct `month_start` tuple and compare `revenue_by_category` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 5, run `category_month` one at a time. Record each CTE&#x27;s row count and `month_start` uniqueness before the next stage uses it.</span>
-<span>-- 6. [Extension] Round-trip a wide sample to long form and back, verifying values and NULLs.</span>
-<span>--    Hint: Unpivot with lateral values, then use conditional aggregation keyed by company.</span>
-<span>--    Inputs: For sql-27 Exercise 6, read from `wide`. Build the answer toward `company`, `q1`, and `q2`; keep `company` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.</span>
-<span>--    Verify: For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-27 Exercise 6, run `long` one at a time. Record each CTE&#x27;s row count and `company` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 27: PIVOT / UNPIVOT (PostgreSQL approaches)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-27: Pivot Unpivot</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day27_pivot_unpivot.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-27/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: order_items, orders, products.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Approach 1: Conditional aggregation (portable)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> jan_qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> feb_qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mar_qty</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Approach 2: crosstab (requires the optional tablefunc extension; an</span></span>
+<span class="source-line"><span class="syntax-comment">-- authorized database role must install it before this query is used)</span></span>
+<span class="source-line"><span class="syntax-comment">-- SELECT * FROM crosstab(</span></span>
+<span class="source-line"><span class="syntax-comment">--   $$</span></span>
+<span class="source-line"><span class="syntax-comment">--   SELECT p.category::text AS rowid,</span></span>
+<span class="source-line"><span class="syntax-comment">--          date_part(&#x27;month&#x27;, o.order_date)::int AS bucket,</span></span>
+<span class="source-line"><span class="syntax-comment">--          SUM(oi.quantity)::numeric AS value</span></span>
+<span class="source-line"><span class="syntax-comment">--   FROM order_items oi</span></span>
+<span class="source-line"><span class="syntax-comment">--   JOIN orders o ON o.order_id = oi.order_id</span></span>
+<span class="source-line"><span class="syntax-comment">--   JOIN products p ON p.product_id = oi.product_id</span></span>
+<span class="source-line"><span class="syntax-comment">--   WHERE o.order_date &gt;= date_trunc(&#x27;year&#x27;, now())</span></span>
+<span class="source-line"><span class="syntax-comment">--   GROUP BY p.category, date_part(&#x27;month&#x27;, o.order_date)</span></span>
+<span class="source-line"><span class="syntax-comment">--   ORDER BY 1,2</span></span>
+<span class="source-line"><span class="syntax-comment">--   $$,</span></span>
+<span class="source-line"><span class="syntax-comment">--   $$ SELECT m FROM generate_series(1,12) AS t(m) $$</span></span>
+<span class="source-line"><span class="syntax-comment">-- ) AS ct(category text, m1 numeric, m2 numeric, m3 numeric, m4 numeric, m5 numeric, m6 numeric, m7 numeric, m8 numeric, m9 numeric, m10 numeric, m11 numeric, m12 numeric);</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- UNPIVOT-like: calculate the wide row once, then turn named columns into rows.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">source</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span></span>
+<span class="source-line">           <span class="syntax-keyword">AS</span> month_number<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         oi<span class="syntax-punctuation">.</span>quantity</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">          date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">          <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">          date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">          <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> wide <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> month_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> jan_qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> month_number <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> feb_qty</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">source</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> category</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> wide<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       month_value<span class="syntax-punctuation">.</span>month_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       month_value<span class="syntax-punctuation">.</span>quantity</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> wide</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;jan&#x27;</span><span class="syntax-punctuation">,</span> wide<span class="syntax-punctuation">.</span>jan_qty<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;feb&#x27;</span><span class="syntax-punctuation">,</span> wide<span class="syntax-punctuation">.</span>feb_qty<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_value<span class="syntax-punctuation">(</span>month_name<span class="syntax-punctuation">,</span> quantity<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> wide<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> month_value<span class="syntax-punctuation">.</span>month_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Pivot order counts by status into one summary row.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use one filtered count per known status and keep an all-orders denominator.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 1, read from `orders`. Build the answer toward `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 1, expected output: Exactly one row. The final columns are `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 1, inspect the source keys that survive `WHERE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Pivot customer counts for US, CA, GB, and DE by segment.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Group at segment grain and use filtered counts for known country columns.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 2, expected output: One row per segment. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 2, independently aggregate `customers` by `segment`; require one output row for every distinct `segment` tuple and compare `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 2, inspect the source keys that survive `WHERE`; then confirm the groups are `segment`; then check `c.segment NULLS LAST` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Unpivot a wide quarterly sample into quarter/amount rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use a lateral `VALUES` relation with one output row per source column.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 3, read from `wide`. Build the answer toward `company`, `quarter`, and `amount`; keep `company` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 3, expected output: Eight rows from two source rows and four quarters. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 3, project `company` plus the raw source columns from `wide` at each join stage; record row count and distinct `company`, then assert the final `company`, `quarter`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 3, start with the first relation in `wide`; after each join, record total rows and distinct `company` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Compare a missing pivot combination with a real zero and preserve the distinction.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 4, read from `expenses`. Build the answer toward `category`, `january_observed_amount`, and `january_reported_zero_if_absent`; keep `category` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 4, expected output: One row per expense category with nullable/zero-aware columns. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 4, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `january_observed_amount` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 4, inspect the source keys that survive `WHERE`; then confirm the groups are `category`; then check `e.category` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Aggregate category/value pairs into data values so the result schema remains stable.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, and `revenue_by_category`; keep `month_start` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 5, expected output: One row per UTC month with a JSON object of category revenue. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `month_start`; require one output row for every distinct `month_start` tuple and compare `revenue_by_category` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 5, run `category_month` one at a time. Record each CTE&#x27;s row count and `month_start` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Round-trip a wide sample to long form and back, verifying values and NULLs.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Unpivot with lateral values, then use conditional aggregation keyed by company.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-27 Exercise 6, read from `wide`. Build the answer toward `company`, `q1`, and `q2`; keep `company` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-27 Exercise 6, run `long` one at a time. Record each CTE&#x27;s row count and `company` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -808,10 +856,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-27-solutions-pivoting-unpivoting-crosstabs-and-conditional-aggregation">Day 27 solutions — Pivoting/Unpivoting: Crosstabs and Conditional Aggregation<a class="heading-anchor" href="#solution-1--day-27-solutions-pivoting-unpivoting-crosstabs-and-conditional-aggregation" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day27_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day27_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day27_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -842,13 +890,13 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 </ul>
-<pre><code class="language-sql">SELECT COUNT(*) FILTER (WHERE o.status = &#x27;placed&#x27;) AS placed_orders,
-       COUNT(*) FILTER (WHERE o.status = &#x27;paid&#x27;) AS paid_orders,
-       COUNT(*) FILTER (WHERE o.status = &#x27;shipped&#x27;) AS shipped_orders,
-       COUNT(*) FILTER (WHERE o.status = &#x27;delivered&#x27;) AS delivered_orders,
-       COUNT(*) FILTER (WHERE o.status = &#x27;returned&#x27;) AS returned_orders,
-       COUNT(*) AS all_orders
-FROM orders AS o;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> placed_orders<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> paid_orders<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> shipped_orders<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delivered_orders<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;returned&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> returned_orders<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_orders
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Exactly one row.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -872,15 +920,15 @@ FROM orders AS o;</code></pre>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT c.segment,
-       COUNT(*) FILTER (WHERE c.country = &#x27;US&#x27;) AS us_customers,
-       COUNT(*) FILTER (WHERE c.country = &#x27;CA&#x27;) AS ca_customers,
-       COUNT(*) FILTER (WHERE c.country = &#x27;GB&#x27;) AS gb_customers,
-       COUNT(*) FILTER (WHERE c.country = &#x27;DE&#x27;) AS de_customers,
-       COUNT(*) AS all_customers
-FROM customers AS c
-GROUP BY c.segment
-ORDER BY c.segment NULLS LAST;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> us_customers<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ca_customers<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> gb_customers<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> de_customers<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_customers
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per segment.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -905,23 +953,23 @@ ORDER BY c.segment NULLS LAST;</code></pre>
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH wide(company, q1, q2, q3, q4) AS (
-  VALUES
-    (&#x27;A&#x27;, 10::numeric, 20::numeric, 30::numeric, 40::numeric),
-    (&#x27;B&#x27;, 5::numeric, NULL::numeric, 15::numeric, 25::numeric)
-)
-SELECT w.company,
-       unpivoted.quarter,
-       unpivoted.amount
-FROM wide AS w
-CROSS JOIN LATERAL (
-  VALUES
-    (&#x27;Q1&#x27;, w.q1),
-    (&#x27;Q2&#x27;, w.q2),
-    (&#x27;Q3&#x27;, w.q3),
-    (&#x27;Q4&#x27;, w.q4)
-) AS unpivoted(quarter, amount)
-ORDER BY w.company, unpivoted.quarter;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> wide<span class="syntax-punctuation">(</span>company<span class="syntax-punctuation">,</span> q1<span class="syntax-punctuation">,</span> q2<span class="syntax-punctuation">,</span> q3<span class="syntax-punctuation">,</span> q4<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">15</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span>
+       unpivoted<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">,</span>
+       unpivoted<span class="syntax-punctuation">.</span>amount
+<span class="syntax-keyword">FROM</span> wide <span class="syntax-keyword">AS</span> w
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q3&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q3<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q4&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q4<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unpivoted<span class="syntax-punctuation">(</span>quarter<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span> unpivoted<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Eight rows from two source rows and four quarters.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -947,19 +995,19 @@ ORDER BY w.company, unpivoted.quarter;</code></pre>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT e.category,
-       SUM(e.amount) FILTER (
-         WHERE EXTRACT(MONTH FROM e.expense_date) = 1
-       ) AS january_observed_amount,
-       COALESCE(
-         SUM(e.amount) FILTER (
-           WHERE EXTRACT(MONTH FROM e.expense_date) = 1
-         ),
-         0
-       ) AS january_reported_zero_if_absent
-FROM expenses AS e
-GROUP BY e.category
-ORDER BY e.category;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> january_observed_amount<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+           <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-number">0</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> january_reported_zero_if_absent
+<span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per expense category with nullable/zero-aware columns.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -985,20 +1033,20 @@ ORDER BY e.category;</code></pre>
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH category_month AS (
-  SELECT date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date AS month_start,
-         p.category,
-         ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  JOIN products AS p ON p.product_id = oi.product_id
-  GROUP BY date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;), p.category
-)
-SELECT month_start,
-       jsonb_object_agg(category, revenue ORDER BY category) AS revenue_by_category
-FROM category_month
-GROUP BY month_start
-ORDER BY month_start;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> category_month <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span>
+         p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">JOIN</span> products <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> month_start<span class="syntax-punctuation">,</span>
+       jsonb_object_agg<span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> revenue <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_by_category
+<span class="syntax-keyword">FROM</span> category_month
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> month_start
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per UTC month with a JSON object of category revenue.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -1025,23 +1073,23 @@ ORDER BY month_start;</code></pre>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH wide(company, q1, q2) AS (
-  VALUES
-    (&#x27;A&#x27;, 10::numeric, 20::numeric),
-    (&#x27;B&#x27;, NULL::numeric, 5::numeric)
-), long AS (
-  SELECT w.company, u.quarter, u.amount
-  FROM wide AS w
-  CROSS JOIN LATERAL (
-    VALUES (&#x27;Q1&#x27;, w.q1), (&#x27;Q2&#x27;, w.q2)
-  ) AS u(quarter, amount)
-)
-SELECT company,
-       MAX(amount) FILTER (WHERE quarter = &#x27;Q1&#x27;) AS q1,
-       MAX(amount) FILTER (WHERE quarter = &#x27;Q2&#x27;) AS q2
-FROM long
-GROUP BY company
-ORDER BY company;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> wide<span class="syntax-punctuation">(</span>company<span class="syntax-punctuation">,</span> q1<span class="syntax-punctuation">,</span> q2<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> long <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span> u<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">,</span> u<span class="syntax-punctuation">.</span>amount
+  <span class="syntax-keyword">FROM</span> wide <span class="syntax-keyword">AS</span> w
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q2<span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> u<span class="syntax-punctuation">(</span>quarter<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> company<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> quarter <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> q1<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> quarter <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> q2
+<span class="syntax-keyword">FROM</span> long
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> company
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> company<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Two reconstructed rows matching the source.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1094,201 +1142,201 @@ ORDER BY company;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 27 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-27: Pivot Unpivot</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day27_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day27_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.</span>
-<span>-- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.</span>
-<span>-- Pitfall: Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: Pivot order counts by status into one summary row.</span>
-<span>-- Why: Use one filtered count per known status and keep an all-orders denominator.</span>
-<span>-- Expected: Exactly one row.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>SELECT COUNT(*) FILTER (WHERE o.status = &#x27;placed&#x27;) AS placed_orders,</span>
-<span>       COUNT(*) FILTER (WHERE o.status = &#x27;paid&#x27;) AS paid_orders,</span>
-<span>       COUNT(*) FILTER (WHERE o.status = &#x27;shipped&#x27;) AS shipped_orders,</span>
-<span>       COUNT(*) FILTER (WHERE o.status = &#x27;delivered&#x27;) AS delivered_orders,</span>
-<span>       COUNT(*) FILTER (WHERE o.status = &#x27;returned&#x27;) AS returned_orders,</span>
-<span>       COUNT(*) AS all_orders</span>
-<span>FROM orders AS o;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Pivot customer counts for US, CA, GB, and DE by segment.</span>
-<span>-- Why: Group at segment grain and use filtered counts for known country columns.</span>
-<span>-- Expected: One row per segment.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT c.segment,</span>
-<span>       COUNT(*) FILTER (WHERE c.country = &#x27;US&#x27;) AS us_customers,</span>
-<span>       COUNT(*) FILTER (WHERE c.country = &#x27;CA&#x27;) AS ca_customers,</span>
-<span>       COUNT(*) FILTER (WHERE c.country = &#x27;GB&#x27;) AS gb_customers,</span>
-<span>       COUNT(*) FILTER (WHERE c.country = &#x27;DE&#x27;) AS de_customers,</span>
-<span>       COUNT(*) AS all_customers</span>
-<span>FROM customers AS c</span>
-<span>GROUP BY c.segment</span>
-<span>ORDER BY c.segment NULLS LAST;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Unpivot a wide quarterly sample into quarter/amount rows.</span>
-<span>-- Why: Use a lateral `VALUES` relation with one output row per source column.</span>
-<span>-- Expected: Eight rows from two source rows and four quarters.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH wide(company, q1, q2, q3, q4) AS (</span>
-<span>  VALUES</span>
-<span>    (&#x27;A&#x27;, 10::numeric, 20::numeric, 30::numeric, 40::numeric),</span>
-<span>    (&#x27;B&#x27;, 5::numeric, NULL::numeric, 15::numeric, 25::numeric)</span>
-<span>)</span>
-<span>SELECT w.company,</span>
-<span>       unpivoted.quarter,</span>
-<span>       unpivoted.amount</span>
-<span>FROM wide AS w</span>
-<span>CROSS JOIN LATERAL (</span>
-<span>  VALUES</span>
-<span>    (&#x27;Q1&#x27;, w.q1),</span>
-<span>    (&#x27;Q2&#x27;, w.q2),</span>
-<span>    (&#x27;Q3&#x27;, w.q3),</span>
-<span>    (&#x27;Q4&#x27;, w.q4)</span>
-<span>) AS unpivoted(quarter, amount)</span>
-<span>ORDER BY w.company, unpivoted.quarter;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Compare a missing pivot combination with a real zero and preserve the distinction.</span>
-<span>-- Why: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.</span>
-<span>-- Expected: One row per expense category with nullable/zero-aware columns.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT e.category,</span>
-<span>       SUM(e.amount) FILTER (</span>
-<span>         WHERE EXTRACT(MONTH FROM e.expense_date) = 1</span>
-<span>       ) AS january_observed_amount,</span>
-<span>       COALESCE(</span>
-<span>         SUM(e.amount) FILTER (</span>
-<span>           WHERE EXTRACT(MONTH FROM e.expense_date) = 1</span>
-<span>         ),</span>
-<span>         0</span>
-<span>       ) AS january_reported_zero_if_absent</span>
-<span>FROM expenses AS e</span>
-<span>GROUP BY e.category</span>
-<span>ORDER BY e.category;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.</span>
-<span>-- Why: Aggregate category/value pairs into data values so the result schema remains stable.</span>
-<span>-- Expected: One row per UTC month with a JSON object of category revenue.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH category_month AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date AS month_start,</span>
-<span>         p.category,</span>
-<span>         ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue</span>
-<span>  FROM orders AS o</span>
-<span>  JOIN order_items AS oi ON oi.order_id = o.order_id</span>
-<span>  JOIN products AS p ON p.product_id = oi.product_id</span>
-<span>  GROUP BY date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;), p.category</span>
-<span>)</span>
-<span>SELECT month_start,</span>
-<span>       jsonb_object_agg(category, revenue ORDER BY category) AS revenue_by_category</span>
-<span>FROM category_month</span>
-<span>GROUP BY month_start</span>
-<span>ORDER BY month_start;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Round-trip a wide sample to long form and back, verifying values and NULLs.</span>
-<span>-- Why: Unpivot with lateral values, then use conditional aggregation keyed by company.</span>
-<span>-- Expected: Two reconstructed rows matching the source.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH wide(company, q1, q2) AS (</span>
-<span>  VALUES</span>
-<span>    (&#x27;A&#x27;, 10::numeric, 20::numeric),</span>
-<span>    (&#x27;B&#x27;, NULL::numeric, 5::numeric)</span>
-<span>), long AS (</span>
-<span>  SELECT w.company, u.quarter, u.amount</span>
-<span>  FROM wide AS w</span>
-<span>  CROSS JOIN LATERAL (</span>
-<span>    VALUES (&#x27;Q1&#x27;, w.q1), (&#x27;Q2&#x27;, w.q2)</span>
-<span>  ) AS u(quarter, amount)</span>
-<span>)</span>
-<span>SELECT company,</span>
-<span>       MAX(amount) FILTER (WHERE quarter = &#x27;Q1&#x27;) AS q1,</span>
-<span>       MAX(amount) FILTER (WHERE quarter = &#x27;Q2&#x27;) AS q2</span>
-<span>FROM long</span>
-<span>GROUP BY company</span>
-<span>ORDER BY company;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 27 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-27: Pivot Unpivot</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day27_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day27_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Pivot order counts by status into one summary row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use one filtered count per known status and keep an all-orders denominator.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Exactly one row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> placed_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> paid_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> shipped_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delivered_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;returned&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> returned_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_orders</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Pivot customer counts for US, CA, GB, and DE by segment.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Group at segment grain and use filtered counts for known country columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per segment.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> us_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ca_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> gb_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> de_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_customers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Unpivot a wide quarterly sample into quarter/amount rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use a lateral `VALUES` relation with one output row per source column.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Eight rows from two source rows and four quarters.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> wide<span class="syntax-punctuation">(</span>company<span class="syntax-punctuation">,</span> q1<span class="syntax-punctuation">,</span> q2<span class="syntax-punctuation">,</span> q3<span class="syntax-punctuation">,</span> q4<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">15</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       unpivoted<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       unpivoted<span class="syntax-punctuation">.</span>amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> wide <span class="syntax-keyword">AS</span> w</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q3&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q3<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q4&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q4<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unpivoted<span class="syntax-punctuation">(</span>quarter<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span> unpivoted<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Compare a missing pivot combination with a real zero and preserve the distinction.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per expense category with nullable/zero-aware columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> january_observed_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">0</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> january_reported_zero_if_absent</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Aggregate category/value pairs into data values so the result schema remains stable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per UTC month with a JSON object of category revenue.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> category_month <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> products <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> month_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       jsonb_object_agg<span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> revenue <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_by_category</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> category_month</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> month_start</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Round-trip a wide sample to long form and back, verifying values and NULLs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Unpivot with lateral values, then use conditional aggregation keyed by company.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two reconstructed rows matching the source.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> wide<span class="syntax-punctuation">(</span>company<span class="syntax-punctuation">,</span> q1<span class="syntax-punctuation">,</span> q2<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> long <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> w<span class="syntax-punctuation">.</span>company<span class="syntax-punctuation">,</span> u<span class="syntax-punctuation">.</span>quarter<span class="syntax-punctuation">,</span> u<span class="syntax-punctuation">.</span>amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> wide <span class="syntax-keyword">AS</span> w</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>q2<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> u<span class="syntax-punctuation">(</span>quarter<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> company<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> quarter <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Q1&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> q1<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> quarter <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Q2&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> q2</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> long</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> company</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> company<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

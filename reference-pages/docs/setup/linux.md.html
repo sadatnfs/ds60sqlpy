@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,17 +162,15 @@
       <p class="source-path">Generated from <code>docs/setup/linux.md</code></p>
     </header>
     <article class="document"><h2 id="linux-setup">Linux setup<a class="heading-anchor" href="#linux-setup" aria-label="Link to this section">#</a></h2>
-<p>The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code. Commands below show Debian/Ubuntu conventions; translate package-manager commands for other distributions.</p>
-<p>Run course commands from the repository root.</p>
-<p>If this is your first terminal, notebook, or database, follow <a href="first-success.md.html">Your first successful session</a> alongside this guide. You can finish Python setup and defer PostgreSQL until you start SQL.</p>
-<h3 id="browser-lab-with-docker">Browser lab with Docker<a class="heading-anchor" href="#browser-lab-with-docker" aria-label="Link to this section">#</a></h3>
-<p>For the browser coding application, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Install a local Docker Engine with Compose v2, or the documented Docker-compatible desktop engine, and configure your ordinary user&#x27;s engine access. From the extracted course folder containing <code>compose.yaml</code>, run:</p>
-<pre><code class="language-bash">bash scripts/docker_lab.sh start</code></pre>
-<p>This route needs no host Python, native PostgreSQL, or VS Code installation. The launcher builds when needed, waits for the app, and opens <code>http://127.0.0.1:8765/learn</code> when a desktop browser is available. It also prints the URL. Saved learning work lives in the host <code>.learning</code> folder; the PostgreSQL database uses separate Docker storage. A fresh course database uses the limited login <code>admin</code> / password <code>admin</code>.</p>
-<p>Continue below for native Python, notebooks, or a native PostgreSQL server.</p>
+<p>The primary course experience is the unified Docker classroom. Every subject, including Python and SQL, opens from the same <code>/classroom</code> page. You only need a local Docker-compatible engine, Linux containers, and the documented Compose version. The language runtimes live inside the images.</p>
+<p>From the extracted course folder or checkout, run:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
+<p>The command builds locally, starts the services, checks readiness and opens the actual browser address. Follow the <a href="../one-command-classroom.md.html">one-command walkthrough</a> for first-time engine installation, WSL integration, stopping, backups and recovery. Saved work in the standard classroom uses persistent named Docker volumes. Use <code>./classroom status</code> to rediscover its address.</p>
+<h3 id="optional-native-environment">Optional native environment<a class="heading-anchor" href="#optional-native-environment" aria-label="Link to this section">#</a></h3>
+<p>The remainder of this page is for learners who also want host Python, Jupyter, VS Code or PostgreSQL. These installations are not classroom prerequisites. Keep a native environment&#x27;s <code>.learning</code> files separate from Docker-volume state.</p>
 <h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
 <p>On a distribution that provides Python 3.12:</p>
-<pre><code class="language-bash">sudo apt-get update
+<pre class="highlighted-code"><code class="language-bash">sudo apt-get update
 sudo apt-get install -y git libgomp1 python3.12 python3.12-venv python3-pip
 git --version
 python3.12 --version</code></pre>
@@ -134,41 +178,41 @@ python3.12 --version</code></pre>
 <p>Install <a href="https://code.visualstudio.com/docs/setup/linux">Visual Studio Code</a> through the supported package for your distribution.</p>
 <p>If your distribution does not provide Python 3.12, use a current vendor package or a Python version manager. Do not replace the distribution’s system Python.</p>
 <h3 id="2-clone-and-open-the-repository">2. Clone and open the repository<a class="heading-anchor" href="#2-clone-and-open-the-repository" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
-cd ds60sqlpy
+<pre class="highlighted-code"><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
+<span class="syntax-builtin">cd</span> ds60sqlpy
 code .
-test -f README.md</code></pre>
+<span class="syntax-builtin">test</span> -f README.md</code></pre>
 <p>If the repository is already cloned, <code>cd</code> to the directory containing <code>README.md</code>.</p>
 <h3 id="3-create-the-python-environment">3. Create the Python environment<a class="heading-anchor" href="#3-create-the-python-environment" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-bash">bash scripts/setup.sh
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python --version
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog</code></pre>
 <p>Activation is optional:</p>
-<pre><code class="language-bash">source .venv/bin/activate
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">source</span> .venv/bin/activate
 python scripts/course.py doctor</code></pre>
 <p>In VS Code, select <code>.venv/bin/python</code> as the interpreter and notebook kernel. See <a href="../vscode.md.html">VS Code</a>.</p>
 <p>Core setup installs notebook, data, quality, bridge, professional, and SQL notebook tooling on every operating system. It reuses a valid <code>.venv</code> and does not contact a database. It uses <code>uv.lock</code> when external <code>uv</code> is present, otherwise pip installs the declarations in <code>pyproject.toml</code>. To require the checked-in lock after installing <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --dependency-mode locked</code></pre>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --dependency-mode locked</code></pre>
 <p>Before later specialized machine-learning, production, deep-learning, natural-language-processing, or geospatial lessons, install the advanced profile while connected:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
 <p><code>libgomp1</code> supplies the OpenMP runtime used by the LightGBM and XGBoost Linux wheels. The advanced profile can take substantially longer and depends on compatible platform wheels. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
 <h3 id="4-set-up-postgresql">4. Set up PostgreSQL<a class="heading-anchor" href="#4-set-up-postgresql" aria-label="Link to this section">#</a></h3>
 <p>Install PostgreSQL 16 or newer. Ubuntu 24.04 provides PostgreSQL 16 in its standard repository:</p>
-<pre><code class="language-bash">sudo apt-get install -y postgresql postgresql-contrib
+<pre class="highlighted-code"><code class="language-bash">sudo apt-get install -y postgresql postgresql-contrib
 psql --version
-sudo systemctl enable --now postgresql</code></pre>
+sudo systemctl <span class="syntax-builtin">enable</span> --now postgresql</code></pre>
 <p>If the reported major version is older than 16, use the <a href="https://www.postgresql.org/download/linux/">PostgreSQL packages for your distribution</a>.</p>
 <p>Debian-family installations commonly use peer authentication. Create a local PostgreSQL role matching your Linux username so normal <code>psql</code> commands work without mixing <code>sudo</code> and local authentication:</p>
-<pre><code class="language-bash">sudo -u postgres createuser --createdb &quot;$USER&quot;
+<pre class="highlighted-code"><code class="language-bash">sudo -u postgres createuser --createdb <span class="syntax-string">&quot;</span>$USER<span class="syntax-string">&quot;</span>
 createdb advanced_sql_training</code></pre>
 <p>If either role or database already exists, keep it and continue.</p>
 <p>From the repository root:</p>
-<pre><code class="language-bash">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
+<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
 <p><code>00_setup.sql</code> drops and recreates the disposable <code>training</code> schema. Never run it against a database containing valuable data. <code>00_verify.sql</code> raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.</p>
 <p>Pass the same native username/socket route to doctor and guided SQL notebooks:</p>
-<pre><code class="language-bash">export DS60_DATABASE_URL=advanced_sql_training
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span>advanced_sql_training
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Expect the course database to be reachable, then launch the portal from this same terminal. Repeat the export in a new terminal. The tools otherwise use the configured course TCP connection. See <a href="postgresql.md.html">Local PostgreSQL</a> for password authentication and the separate JupySQL URL.</p>
 <p>If <code>systemctl</code> is unavailable, use your distribution&#x27;s service manager. WSL learners should keep the repository, interpreter, VS Code remote window, and PostgreSQL client in the same Linux environment, or follow the native Windows guide consistently. A Windows <code>.venv</code> cannot be used as a Linux <code>.venv</code>.</p>
@@ -176,12 +220,12 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 <p>For the full browser app, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Its shell launcher prepares host persistence and opens the ready browser without a native Python environment. For a SQL-only container server or later host notebooks, use <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a>. That guide explains seed setup, the separate host-client requirement, ports, authentication, and shutdown that preserves data.</p>
 <h3 id="5-start-learning">5. Start learning<a class="heading-anchor" href="#5-start-learning" aria-label="Link to this section">#</a></h3>
 <p>For the guided dashboard, file-backed progress, and exact VS Code/Jupyter lesson actions, start the private loopback portal and keep its terminal open:</p>
-<pre><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>
 <p>The browser page clearly identifies private launcher mode. If you instead open <code>START_HERE.html</code> directly, it is a read-only course navigator; it cannot start local programs.</p>
 <p>Python:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab python/ds-60day/notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>SQL:</p>
-<pre><code class="language-bash">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
 <p>In private launcher mode, the recommended SQL route is to open the Day 1 reader and choose <strong>Create/open guided SQL notebook</strong>. That creates a preserved, ignored working copy under <code>.learning/sql/sql-01/</code> and runs the complete script through a fixed <code>psql -f</code> path.</p>
 <p>For <code>%sql</code> and <code>%%sql</code> in the course kernel, continue with <a href="jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>.</p>
 <p>Use <a href="first-success.md.html#3-make-a-scratch-notebook-and-run-one-cell">Your first successful session</a> for the exact clicks and expected output in your first notebook.</p>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,56 +164,56 @@
     <article class="document"><h2 id="java-017-explanatory-solutions">java-017: explanatory solutions<a class="heading-anchor" href="#java-017-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not returnnull. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.</p>
+<p>Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not return null. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.</p>
 <p><strong>Optional:</strong> A container explicitly representing presence or absence.</p>
 <p><strong>Domain error:</strong> An input or operation violating the accepted business contract.</p>
 <p><strong>Lazy fallback:</strong> A fallback computation invoked only when the value is absent.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>Optional.of rejectsnull,ofNullable mapsnull toempty,andmap transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.</p>
+<p>Optional.of rejects null,ofNullable maps null to empty,and map transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.</p>
 <h3 id="exercise-1-represent-a-missing-lookup">Exercise 1: Represent a missing lookup<a class="heading-anchor" href="#exercise-1-represent-a-missing-lookup" aria-label="Link to this section">#</a></h3>
-<p>Task: Look up knowna andunknownb in a fixed map throughOptional.</p>
+<p>Task: Look up known a and unknown b in a fixed map through Optional.</p>
 <p>The absence ofb is an expected lookup outcome. It is not represented as zero because zero could be a valid stored value.</p>
-<pre><code class="language-java">Map&lt;String,Integer&gt; data=Map.of(&quot;a&quot;,7);
-Optional&lt;Integer&gt; known=Optional.ofNullable(data.get(&quot;a&quot;)); Optional&lt;Integer&gt; missing=Optional.ofNullable(data.get(&quot;b&quot;));
-assert known.orElseThrow()==7 &amp;&amp; missing.isEmpty();</code></pre>
-<p><strong>Expected:</strong> a present with7;b empty.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with a present with7;b empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java">Map<span class="syntax-operator">&lt;</span>String<span class="syntax-punctuation">,</span>Integer<span class="syntax-operator">&gt;</span> data<span class="syntax-operator">=</span>Map<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Optional<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> known<span class="syntax-operator">=</span>Optional<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofNullable</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> Optional<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> missing<span class="syntax-operator">=</span>Optional<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofNullable</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> known<span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseThrow</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> missing<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> a present with 7; b empty.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with a present with 7; b empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-transform-only-present-values">Exercise 2: Transform only present values<a class="heading-anchor" href="#exercise-2-transform-only-present-values" aria-label="Link to this section">#</a></h3>
-<p>Task: Map the known value todouble and apply the same mapping toempty.</p>
-<p>The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeatednull conditionals.</p>
-<pre><code class="language-java">assert known.map(value -&gt; value*2).orElseThrow()==14;
-assert missing.map(value -&gt; value*2).isEmpty();</code></pre>
-<p><strong>Expected:</strong> 14 andempty.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with 14 andempty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Map the known value to double and apply the same mapping to empty.</p>
+<p>The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeated null conditionals.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">assert</span> known<span class="syntax-punctuation">.</span><span class="syntax-attribute">map</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> value<span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseThrow</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">14</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> missing<span class="syntax-punctuation">.</span><span class="syntax-attribute">map</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> value<span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> 14 and empty.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with 14 and empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-compare-eager-and-lazy-fallback">Exercise 3: Compare eager and lazy fallback<a class="heading-anchor" href="#exercise-3-compare-eager-and-lazy-fallback" aria-label="Link to this section">#</a></h3>
 <p>Task: Use a counter-producing fallback withorElse andorElseGet on a present value.</p>
 <p>Method arguments are evaluated beforeorElse is invoked. A supplier delays the computation and avoids unnecessary expensive or side-effecting work.</p>
-<pre><code class="language-java">var calls=new java.util.concurrent.atomic.AtomicInteger();
-assert known.orElse(calls.incrementAndGet())==7 &amp;&amp; calls.get()==1;
-assert known.orElseGet(calls::incrementAndGet)==7 &amp;&amp; calls.get()==1;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> calls<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">atomic</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">AtomicInteger</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> known<span class="syntax-punctuation">.</span><span class="syntax-attribute">orElse</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">.</span><span class="syntax-attribute">incrementAndGet</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> calls<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> known<span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseGet</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>incrementAndGet<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> calls<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> orElse increments;orElseGet does not.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with orElse increments;orElseGet does not. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-reject-malformed-lookup-input">Exercise 4: Reject malformed lookup input<a class="heading-anchor" href="#exercise-4-reject-malformed-lookup-input" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate an empty identifier before consulting the map.</p>
 <p>An invalid request and a valid request with no result are different outcomes. Conflating them makes error diagnosis and user feedback less precise.</p>
-<pre><code class="language-java">boolean invalid=false;
-try { lookup(data,&quot; &quot;); } catch(IllegalArgumentException expected){invalid=true;}
-assert invalid &amp;&amp; lookup(data,&quot;b&quot;).isEmpty();</code></pre>
-<p><strong>Expected:</strong> IllegalArgumentException rather thanempty.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IllegalArgumentException rather thanempty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> invalid<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> lookup<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>IllegalArgumentException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>invalid<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> invalid <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> lookup<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> IllegalArgumentException rather than empty.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with IllegalArgumentException rather than empty. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-flatten-a-nullable-transformation">Exercise 5: Flatten a nullable transformation<a class="heading-anchor" href="#exercise-5-flatten-a-nullable-transformation" aria-label="Link to this section">#</a></h3>
 <p>Task: Parse an optional numeric string through a helper returningOptional&lt;Integer&gt;.</p>
 <p>The helper deliberately treats parse failure as absence for this small API. A richer application may need to retain the error reason instead of discarding it.</p>
-<pre><code class="language-java">assert Optional.of(&quot;12&quot;).flatMap(Main::tryParse).orElseThrow()==12;
-assert Optional.of(&quot;bad&quot;).flatMap(Main::tryParse).isEmpty();</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">assert</span> Optional<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">flatMap</span><span class="syntax-punctuation">(</span>Main<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tryParse<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseThrow</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">12</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> Optional<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">flatMap</span><span class="syntax-punctuation">(</span>Main<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tryParse<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> valid12 present;badtext empty under this declared parser policy.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with valid12 present;badtext empty under this declared parser policy. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-expose-unsafeget">Exercise 6: Expose unsafeget<a class="heading-anchor" href="#exercise-6-expose-unsafeget" aria-label="Link to this section">#</a></h3>
-<p>Task: Callget onempty and catchNoSuchElementException.</p>
+<p>Task: Callget on empty and catchNoSuchElementException.</p>
 <p>Optional does not make unchecked access safe. Prefer an explicit fallback,orElseThrow with context,or a branching operation that matches the caller contract.</p>
-<pre><code class="language-java">boolean absent=false;
-try { Optional.empty().get(); } catch(NoSuchElementException expected){absent=true;}
-assert absent;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> absent<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> Optional<span class="syntax-punctuation">.</span><span class="syntax-attribute">empty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>NoSuchElementException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>absent<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> absent<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> specific absence failure.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with specific absence failure. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>

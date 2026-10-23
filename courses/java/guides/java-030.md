@@ -6,17 +6,17 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-029`
 
 ## Learning objectives
 
-Explain wire schema, schema evolution, length bound, deserialization boundary using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Encode accounta1,balance125,noteCafé withversion2 anddecode. The final exercise transfers the mechanism to reject trailing data andinvalid domain state.
+Explain wire schema, schema evolution, length bound, deserialization boundary using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Encode account a1, balance 125, note Café with version 2 and decode. The final exercise transfers the mechanism to reject trailing data and invalid domain state.
 
 ## Purpose and mental model
 
-Serialization turns domain values into a representation that another process orversion can read. A format needs an explicit schema,version,encoding andsize policy. A reader should validate before allocating large buffers orconstructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default orupgrade rule. Unknown versions should not be guessed at silently.
+Serialization turns domain values into a representation that another process or version can read. A format needs an explicit schema,version,encoding and size policy. A reader should validate before allocating large buffers or constructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default or upgrade rule. Unknown versions should not be guessed at silently.
 
-This lesson defines a small explicit binary format using DataInputStream andDataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents andan optional version2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes anddomain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.
+This lesson defines a small explicit binary format using DataInputStream and DataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents and an optional version 2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes and domain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.
 
 ## Vocabulary and concepts
 
-**Wire schema:** The field order,types,encoding andversion of serialized data.
+**Wire schema:** The field order,types,encoding and version of serialized data.
 
 **Schema evolution:** A declared compatibility policy between format versions.
 
@@ -26,7 +26,7 @@ This lesson defines a small explicit binary format using DataInputStream andData
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-030/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Write a fixed magicint andversion number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read thelength,validate it,then read exactly thatmany bytes. A CharsetDecoder withREPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents andidentifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.
+Write a fixed magicint and version number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read the length,validate it,then read exactly that many bytes. A CharsetDecoder with REPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents and identifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.
 
 ## Worked example / walkthrough
 
-### Example A: Round-trip version2 data
+### Example A: Round-trip version 2 data
 
-The comparison includes both domain values andtext identity. A successful bytewrite alone would not show that the reader agrees onencoding andfield order.
+The comparison includes both domain values and text identity. A successful byte write alone would not show that the reader agrees on encoding and field order.
 
 ```java
 import java.util.*;
@@ -72,11 +72,11 @@ public class Main {
 
 ```
 
-**Expected:** equal domain record andexact Unicode note.
+**Expected:** equal domain record and exact Unicode note.
 
 ### Example B: Apply a version1 default
 
-The default is an explicit compatibility rule. It should not be inferred from an emptyString orwhatever value happened to initialize a field.
+The default is an explicit compatibility rule. It should not be inferred from an emptyString or whatever value happened to initialize a field.
 
 ```java
 import java.util.*;
@@ -112,29 +112,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Round-trip version2 data.** Encode accounta1,balance125,noteCafé withversion2 anddecode.
-   **Expected:** equal domain record andexact Unicode note.
-   **Verify:** Compare your assertion values or captured diagnostic with equal domain record andexact Unicode note.
+1. **Round-trip version 2 data.** Encode account a1, balance 125, note Café with version 2 and decode.
+   **Expected:** equal domain record and exact Unicode note.
+   **Verify:** Compare your assertion values or captured diagnostic with equal domain record and exact Unicode note.
 
-2. **Apply a version1 default.** Encode the same core fields usingversion1,which lacksnote.
+2. **Apply a version1 default.** Encode the same core fields usingversion1,which lacks note.
    **Expected:** decoded noteunlabelled.
    **Verify:** Compare your assertion values or captured diagnostic with decoded noteunlabelled.
 
-3. **Reject an unknown version.** Change theversion bytes to99 anddecode.
-   **Expected:** IOException namingversion.
-   **Verify:** Compare your assertion values or captured diagnostic with IOException namingversion.
+3. **Reject an unknown version.** Change the version bytes to99 and decode.
+   **Expected:** IOException naming version.
+   **Verify:** Compare your assertion values or captured diagnostic with IOException naming version.
 
-4. **Detect truncation.** Remove thefinalbyte from a validversion2payload.
-   **Expected:** IOException orEOFException before returning a record.
-   **Verify:** Compare your assertion values or captured diagnostic with IOException orEOFException before returning a record.
+4. **Detect truncation.** Remove the final byte from a validversion2payload.
+   **Expected:** IOException or EOFException before returning a record.
+   **Verify:** Compare your assertion values or captured diagnostic with IOException or EOFException before returning a record.
 
-5. **Reject an oversized declared text length.** Replace thefirsttextlength withInteger.MAX_VALUE.
-   **Expected:** IOException forlength before allocating thatsize.
-   **Verify:** Compare your assertion values or captured diagnostic with IOException forlength before allocating thatsize.
+5. **Reject an oversized declared text length.** Replace the first text length withInteger.MAX_VALUE.
+   **Expected:** IOException for length before allocating that size.
+   **Verify:** Compare your assertion values or captured diagnostic with IOException for length before allocating that size.
 
-6. **Reject trailing data andinvalid domain state.** Append anextra byte,then try constructing a negative-balance account.
-   **Expected:** trailing payloadIOException;negative balanceIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with trailing payloadIOException;negative balanceIllegalArgumentException.
+6. **Reject trailing data and invalid domain state.** Append an extra byte,then try constructing a negative-balance account.
+   **Expected:** trailing payload IOException; negative balance IllegalArgumentException.
+   **Verify:** Compare your assertion values or captured diagnostic with trailing payload IOException; negative balance IllegalArgumentException.
 
 ## Common pitfalls and diagnosis
 

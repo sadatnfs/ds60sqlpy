@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-021`
 
 ## Learning objectives
 
-Explain future, timeout, backpressure using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Submit a callable returning42 and get it within2seconds. The final exercise transfers the mechanism to enforce a bounded queue.
+Explain future, timeout, backpressure using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Submit a callable returning 42 and get it within 2 seconds. The final exercise transfers the mechanism to enforce a bounded queue.
 
 ## Purpose and mental model
 
@@ -24,7 +24,7 @@ A fixed thread pool normally has an unbounded queue,which can retain more work t
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-022/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -39,7 +39,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-submit returns a Future;get(timeout,unit) returns a value or throws a named completion/timeout exception. ExecutionException wraps the task failure in getCause. cancel(true) requests interruption. try-with-resources closes the executor in Java21,but tasks still need bounded cooperative behavior. A ThreadPoolExecutor with an ArrayBlockingQueue and AbortPolicy rejects excess submissions rather than silently growing memory.
+submit returns a Future;get(timeout,unit) returns a value or throws a named completion/timeout exception. ExecutionException wraps the task failure in getCause. cancel(true) requests interruption. try-with-resources closes the executor in Java 21,but tasks still need bounded cooperative behavior. A ThreadPoolExecutor with an ArrayBlockingQueue and AbortPolicy rejects excess submissions rather than silently growing memory.
 
 ## Worked example / walkthrough
 
@@ -62,7 +62,7 @@ public class Main {
 
 ```
 
-**Expected:** result42.
+**Expected:** result 42.
 
 ### Example B: Preserve task failure identity
 
@@ -97,11 +97,11 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Retrieve a bounded result.** Submit a callable returning42 and get it within2seconds.
-   **Expected:** result42.
-   **Verify:** Compare your assertion values or captured diagnostic with result42.
+1. **Retrieve a bounded result.** Submit a callable returning 42 and get it within 2 seconds.
+   **Expected:** result 42.
+   **Verify:** Compare your assertion values or captured diagnostic with result 42.
 
-2. **Preserve task failure identity.** Submit a callable throwingIllegalArgumentException and inspectFuture.get.
+2. **Preserve task failure identity.** Submit a callable throwing IllegalArgumentException and inspectFuture.get.
    **Expected:** ExecutionException cause isIllegalArgumentException.
    **Verify:** Compare your assertion values or captured diagnostic with ExecutionException cause isIllegalArgumentException.
 
@@ -118,8 +118,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with RejectedExecutionException.
 
 6. **Enforce a bounded queue.** Use one worker and one queue slot,hold the worker,fill the queue,then submit a third task.
-   **Expected:** third submission rejected;admitted tasks finish after release.
-   **Verify:** Compare your assertion values or captured diagnostic with third submission rejected;admitted tasks finish after release.
+   **Expected:** third submission rejected; admitted tasks finish after release.
+   **Verify:** Compare your assertion values or captured diagnostic with third submission rejected; admitted tasks finish after release.
 
 ## Common pitfalls and diagnosis
 

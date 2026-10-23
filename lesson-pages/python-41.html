@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,30 +427,32 @@
 </tbody></table></div>
 <p>A classifier produces scores; a threshold turns scores into actions. Model ranking quality and operating-policy quality are related but distinct.</p>
 <h4 id="guide--worked-example-report-the-minority-outcome-explicitly">Worked example: report the minority outcome explicitly<a class="heading-anchor" href="#guide--worked-example-report-the-minority-outcome-explicitly" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from sklearn.datasets import make_classification
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import average_precision_score, classification_report
-from sklearn.model_selection import train_test_split
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_classification
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> average_precision_score<span class="syntax-punctuation">,</span> classification_report
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 
-X, y = make_classification(
-    n_samples=5_000,
-    weights=[0.95, 0.05],
-    flip_y=0.01,
-    random_state=42,
-)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
-model = LogisticRegression(
-    class_weight=&quot;balanced&quot;,
-    max_iter=1_000,
-).fit(X_train, y_train)
-scores = model.predict_proba(X_test)[:, 1]
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_classification<span class="syntax-punctuation">(</span>
+    n_samples<span class="syntax-operator">=</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span>
+    weights<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.05</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    flip_y<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span>
+    random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_test <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span>
+<span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>
+    class_weight<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">balanced</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    max_iter<span class="syntax-operator">=</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+scores <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>X_test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
 
-print(classification_report(y_test, scores &gt;= 0.5, digits=3))
-print(&quot;average precision:&quot;, average_precision_score(y_test, scores))</code></pre>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>y_test<span class="syntax-punctuation">,</span> scores <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">average precision:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> average_precision_score<span class="syntax-punctuation">(</span>y_test<span class="syntax-punctuation">,</span> scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The 0.5 threshold is a starting convention, not a law. Select an operating point using validation data and an explicit cost, capacity, recall, or precision goal.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 41 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -412,9 +460,9 @@ print(&quot;average precision:&quot;, average_precision_score(y_test, scores))</
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy">Concept deep dive — rare-class metrics, training interventions, and threshold policy<a class="heading-anchor" href="#guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -429,35 +477,35 @@ print(&quot;average precision:&quot;, average_precision_score(y_test, scores))</
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-expose-the-majority-class-accuracy-trap">Focused example A — expose the majority-class accuracy trap<a class="heading-anchor" href="#guide--focused-example-a-expose-the-majority-class-accuracy-trap" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.metrics import accuracy_score, recall_score
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> accuracy_score<span class="syntax-punctuation">,</span> recall_score
 
-y_true = np.array([0] * 95 + [1] * 5)
-always_negative = np.zeros_like(y_true)
-print({
-    &quot;prevalence&quot;: y_true.mean(),
-    &quot;accuracy&quot;: accuracy_score(y_true, always_negative),
-    &quot;positive_recall&quot;: recall_score(y_true, always_negative),
-})
-assert accuracy_score(y_true, always_negative) == 0.95
-assert recall_score(y_true, always_negative) == 0.0</code></pre>
+y_true <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">95</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+always_negative <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">prevalence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> y_true<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accuracy_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">positive_recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> accuracy_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.95</span>
+<span class="syntax-keyword">assert</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span></code></pre>
 <p><strong>Expected observation:</strong> The classifier is 95% accurate while finding none of the positive cases.</p>
 <p><strong>Assumption to name:</strong> Positive cases are the operational focus; missing all of them is unacceptable.</p>
 <h5 id="guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint">Focused example B — choose a threshold from an explicit recall constraint<a class="heading-anchor" href="#guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.metrics import precision_recall_curve
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> precision_recall_curve
 
-y_valid = np.array([0, 0, 0, 0, 1, 1, 1, 1])
-scores = np.array([0.05, 0.15, 0.35, 0.55, 0.30, 0.50, 0.70, 0.90])
-precision, recall, thresholds = precision_recall_curve(y_valid, scores)
-candidates = [
-    (threshold, p, r)
-    for threshold, p, r in zip(thresholds, precision[:-1], recall[:-1])
-    if r &gt;= 0.75
-]
-chosen = max(candidates, key=lambda row: row[1])
-print({&quot;threshold&quot;: chosen[0], &quot;precision&quot;: chosen[1], &quot;recall&quot;: chosen[2]})</code></pre>
+y_valid <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+scores <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.15</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.35</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.55</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.70</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.90</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+precision<span class="syntax-punctuation">,</span> recall<span class="syntax-punctuation">,</span> thresholds <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>y_valid<span class="syntax-punctuation">,</span> scores<span class="syntax-punctuation">)</span>
+candidates <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span>threshold<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> threshold<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> r <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>thresholds<span class="syntax-punctuation">,</span> precision<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> recall<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> r <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.75</span>
+<span class="syntax-punctuation">]</span>
+chosen <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">precision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The chosen threshold satisfies the stated recall floor and maximizes precision only among eligible validation candidates.</p>
 <p><strong>Assumption to name:</strong> The tiny array is a mechanics demo; a real threshold needs sufficient representative validation support and uncertainty.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -580,7 +628,7 @@ print({&quot;threshold&quot;: chosen[0], &quot;precision&quot;: chosen[1], &quot
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize rare-class metrics, training interventions, and threshold policy. Use exactly these maintained learner materials:
@@ -647,27 +695,27 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Techniques: class weights, resampling (SMOTE/undersample).</li>
 <li>Threshold tuning.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import make_classification</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.metrics import classification_report, roc_auc_score</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>X,y = make_classification(n_samples=5000, weights=[0.95,0.05], flip_y=0.01, random_state=42)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y, stratify=y, random_state=42)</span>
-<span>clf = LogisticRegression(max_iter=1000, class_weight=&#x27;balanced&#x27;).fit(Xtr,ytr)</span>
-<span>pred = clf.predict(Xte)</span>
-<span>proba = clf.predict_proba(Xte)[:,1]</span>
-<span>print(classification_report(yte, pred, digits=3))</span>
-<span>roc_auc_score(yte, proba)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_classification</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> classification_report<span class="syntax-punctuation">,</span> roc_auc_score</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> make_classification<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span> weights<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> flip_y<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> class_weight<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">balanced</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">pred <span class="syntax-operator">=</span> clf<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span></span>
+<span class="source-line">proba <span class="syntax-operator">=</span> clf<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> pred<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h5 id="learner--cell-3--optional-smote">Optional: SMOTE<a class="heading-anchor" href="#learner--cell-3--optional-smote" aria-label="Link to this section">#</a></h5>
 <p>Note: imblearn may be needed: <code>pip install imbalanced-learn</code></p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># from imblearn.over_sampling import SMOTE</span>
-<span># sm = SMOTE(random_state=42)</span>
-<span># Xtr2, ytr2 = sm.fit_resample(Xtr, ytr)</span>
-<span># clf2 = LogisticRegression(max_iter=1000).fit(Xtr2,ytr2)</span>
-<span># roc_auc_score(yte, clf2.predict_proba(Xte)[:,1])</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># from imblearn.over_sampling import SMOTE</span></span>
+<span class="source-line"><span class="syntax-comment"># sm = SMOTE(random_state=42)</span></span>
+<span class="source-line"><span class="syntax-comment"># Xtr2, ytr2 = sm.fit_resample(Xtr, ytr)</span></span>
+<span class="source-line"><span class="syntax-comment"># clf2 = LogisticRegression(max_iter=1000).fit(Xtr2,ytr2)</span></span>
+<span class="source-line"><span class="syntax-comment"># roc_auc_score(yte, clf2.predict_proba(Xte)[:,1])</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-5--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-5--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -685,37 +733,37 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h5 id="learner--cell-6--focused-example-a-expose-the-majority-class-accuracy-trap">Focused example A — expose the majority-class accuracy trap<a class="heading-anchor" href="#learner--cell-6--focused-example-a-expose-the-majority-class-accuracy-trap" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Positive cases are the operational focus; missing all of them is unacceptable.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.metrics import accuracy_score, recall_score</span>
-<span> </span>
-<span>y_true = np.array([0] * 95 + [1] * 5)</span>
-<span>always_negative = np.zeros_like(y_true)</span>
-<span>print({</span>
-<span>    &quot;prevalence&quot;: y_true.mean(),</span>
-<span>    &quot;accuracy&quot;: accuracy_score(y_true, always_negative),</span>
-<span>    &quot;positive_recall&quot;: recall_score(y_true, always_negative),</span>
-<span>})</span>
-<span>assert accuracy_score(y_true, always_negative) == 0.95</span>
-<span>assert recall_score(y_true, always_negative) == 0.0</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> accuracy_score<span class="syntax-punctuation">,</span> recall_score</span>
+<span class="source-line"></span>
+<span class="source-line">y_true <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">95</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">always_negative <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">prevalence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> y_true<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accuracy_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">positive_recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> accuracy_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.95</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The classifier is 95% accurate while finding none of the positive cases.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-9--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint">Focused example B — choose a threshold from an explicit recall constraint<a class="heading-anchor" href="#learner--cell-9--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The tiny array is a mechanics demo; a real threshold needs sufficient representative validation support and uncertainty.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.metrics import precision_recall_curve</span>
-<span> </span>
-<span>y_valid = np.array([0, 0, 0, 0, 1, 1, 1, 1])</span>
-<span>scores = np.array([0.05, 0.15, 0.35, 0.55, 0.30, 0.50, 0.70, 0.90])</span>
-<span>precision, recall, thresholds = precision_recall_curve(y_valid, scores)</span>
-<span>candidates = [</span>
-<span>    (threshold, p, r)</span>
-<span>    for threshold, p, r in zip(thresholds, precision[:-1], recall[:-1])</span>
-<span>    if r &gt;= 0.75</span>
-<span>]</span>
-<span>chosen = max(candidates, key=lambda row: row[1])</span>
-<span>print({&quot;threshold&quot;: chosen[0], &quot;precision&quot;: chosen[1], &quot;recall&quot;: chosen[2]})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> precision_recall_curve</span>
+<span class="source-line"></span>
+<span class="source-line">y_valid <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.15</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.35</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.55</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.70</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.90</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">precision<span class="syntax-punctuation">,</span> recall<span class="syntax-punctuation">,</span> thresholds <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>y_valid<span class="syntax-punctuation">,</span> scores<span class="syntax-punctuation">)</span></span>
+<span class="source-line">candidates <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>threshold<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> threshold<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> r <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>thresholds<span class="syntax-punctuation">,</span> precision<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> recall<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> r <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.75</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line">chosen <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">precision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> chosen<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> The chosen threshold satisfies the stated recall floor and maximizes precision only among eligible validation candidates.</p>
 <h5 id="learner--cell-11--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-11--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -789,19 +837,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Prevalence-shift reasoning</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Grouped imbalance split</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Calibration after resampling</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Prevalence-shift reasoning</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Grouped imbalance split</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Calibration after resampling</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -845,43 +893,43 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (classification_report, roc_auc_score,
-                             precision_recall_curve, average_precision_score, f1_score)
-from sklearn.linear_model import LogisticRegression
-import numpy as np
-import matplotlib.pyplot as plt
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_classification
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">,</span> roc_auc_score<span class="syntax-punctuation">,</span>&#32;
+                             precision_recall_curve<span class="syntax-punctuation">,</span> average_precision_score<span class="syntax-punctuation">,</span> f1_score<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
-X, y = make_classification(n_samples=5000, weights=[0.95, 0.05],
-                           flip_y=0.01, random_state=42)
-Xtr, Xte, ytr, yte = train_test_split(X, y, stratify=y, random_state=42)</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_classification<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span> weights<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.05</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+                           flip_y<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — class_weight vs SMOTE</p>
-<pre><code class="language-python"># Class weighting
-clf_bal = LogisticRegression(max_iter=1000, class_weight=&#x27;balanced&#x27;, n_jobs=1)
-clf_bal.fit(Xtr, ytr)
-proba_bal = clf_bal.predict_proba(Xte)[:,1]
-yhat_bal  = (proba_bal &gt;= 0.5).astype(int)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Class weighting</span>
+clf_bal <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> class_weight<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">balanced</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+clf_bal<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+proba_bal <span class="syntax-operator">=</span> clf_bal<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+yhat_bal  <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_bal <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
 
-print(&#x27;Balanced weights — report at 0.5 threshold:&#x27;)
-print(classification_report(yte, yhat_bal, digits=3))
-print({&#x27;roc_auc&#x27;: roc_auc_score(yte, proba_bal),
-       &#x27;avg_precision&#x27;: average_precision_score(yte, proba_bal)})
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Balanced weights — report at 0.5 threshold:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_bal<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&#x27;</span><span class="syntax-string">avg_precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 
-# Optional: SMOTE
-try:
-    from imblearn.over_sampling import SMOTE
-    sm = SMOTE(random_state=42)
-    Xtr_sm, ytr_sm = sm.fit_resample(Xtr, ytr)
-    clf_sm = LogisticRegression(max_iter=1000, n_jobs=1).fit(Xtr_sm, ytr_sm)
-    proba_sm = clf_sm.predict_proba(Xte)[:,1]
-    yhat_sm  = (proba_sm &gt;= 0.5).astype(int)
-    print(&#x27;SMOTE — report at 0.5 threshold:&#x27;)
-    print(classification_report(yte, yhat_sm, digits=3))
-    print({&#x27;roc_auc&#x27;: roc_auc_score(yte, proba_sm),
-           &#x27;avg_precision&#x27;: average_precision_score(yte, proba_sm)})
-except Exception as e:
-    print(&#x27;SMOTE unavailable — pip install imbalanced-learn to enable.\n&#x27;, e)</code></pre>
+<span class="syntax-comment"># Optional: SMOTE</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">from</span> imblearn.over_sampling <span class="syntax-keyword">import</span> SMOTE
+    sm <span class="syntax-operator">=</span> SMOTE<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    Xtr_sm<span class="syntax-punctuation">,</span> ytr_sm <span class="syntax-operator">=</span> sm<span class="syntax-operator">.</span>fit_resample<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+    clf_sm <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr_sm<span class="syntax-punctuation">,</span> ytr_sm<span class="syntax-punctuation">)</span>
+    proba_sm <span class="syntax-operator">=</span> clf_sm<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    yhat_sm  <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_sm <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SMOTE — report at 0.5 threshold:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_sm<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_sm<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+           <span class="syntax-string">&#x27;</span><span class="syntax-string">avg_precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_sm<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SMOTE unavailable — pip install imbalanced-learn to enable.</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>class_weight=&#x27;balanced&#x27; reweights the loss; very cheap and often effective</li>
@@ -889,21 +937,21 @@ except Exception as e:
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Threshold tuning for minority F1</p>
-<pre><code class="language-python">def best_f1_threshold(y_true, proba):
-    prec, rec, th = precision_recall_curve(y_true, proba)
-    # precision_recall_curve returns thresholds for all but first point
-    th = np.r_[0.0, th]  # align lengths
-    f1s = 2 * prec * rec / (prec + rec + 1e-12)
-    i = np.nanargmax(f1s)
-    return th[i], f1s[i], prec[i], rec[i]
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">best_f1_threshold</span><span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> th <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># precision_recall_curve returns thresholds for all but first point</span>
+    th <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>r_<span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> th<span class="syntax-punctuation">]</span>  <span class="syntax-comment"># align lengths</span>
+    f1s <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> prec <span class="syntax-operator">*</span> rec <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>prec <span class="syntax-operator">+</span> rec <span class="syntax-operator">+</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+    i <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>nanargmax<span class="syntax-punctuation">(</span>f1s<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> th<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> f1s<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> prec<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span>
 
-th_star, f1_star, p_star, r_star = best_f1_threshold(yte, proba_bal)
-print({&#x27;best_threshold&#x27;: float(th_star), &#x27;best_f1&#x27;: float(f1_star),
-       &#x27;precision&#x27;: float(p_star), &#x27;recall&#x27;: float(r_star)})
+th_star<span class="syntax-punctuation">,</span> f1_star<span class="syntax-punctuation">,</span> p_star<span class="syntax-punctuation">,</span> r_star <span class="syntax-operator">=</span> best_f1_threshold<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">best_threshold</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>th_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">best_f1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>f1_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&#x27;</span><span class="syntax-string">precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">recall</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>r_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 
-# Apply tuned threshold
-yhat_star = (proba_bal &gt;= th_star).astype(int)
-print(classification_report(yte, yhat_star, digits=3))</code></pre>
+<span class="syntax-comment"># Apply tuned threshold</span>
+yhat_star <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_bal <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> th_star<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_star<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Tips</p>
 <ul>
 <li>Pick a threshold using PR-based criteria when positive class is rare</li>
@@ -911,11 +959,11 @@ print(classification_report(yte, yhat_star, digits=3))</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — PR curve</p>
-<pre><code class="language-python">prec, rec, _ = precision_recall_curve(yte, proba_bal)
-ap = average_precision_score(yte, proba_bal)
-plt.plot(rec, prec, label=f&#x27;LogReg (AP={ap:.3f})&#x27;)
-plt.xlabel(&#x27;Recall&#x27;); plt.ylabel(&#x27;Precision&#x27;); plt.title(&#x27;Precision–Recall curve&#x27;)
-plt.legend(); plt.tight_layout(); plt.show()</code></pre>
+<pre class="highlighted-code"><code class="language-python">prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span>
+ap <span class="syntax-operator">=</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>rec<span class="syntax-punctuation">,</span> prec<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LogReg (AP=</span><span class="syntax-string">{</span>ap<span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Recall</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Precision–Recall curve</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>PR curves reflect performance on the positive class directly; small AP indicates difficulty under imbalance</li>
@@ -1011,56 +1059,56 @@ plt.legend(); plt.tight_layout(); plt.show()</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-41-solutions-handling-class-imbalance">Day 41 — Solutions: Handling Class Imbalance<a class="heading-anchor" href="#solution-2--cell-1--day-41-solutions-handling-class-imbalance" aria-label="Link to this section">#</a></h3>
 <p>Class weighting vs SMOTE, threshold tuning for F1, and PR curves.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import make_classification</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.metrics import classification_report, roc_auc_score, precision_recall_curve, average_precision_score, f1_score</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>import numpy as np, matplotlib.pyplot as plt</span>
-<span> </span>
-<span>X, y = make_classification(n_samples=5000, weights=[0.95,0.05], flip_y=0.01, random_state=42)</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, stratify=y, random_state=42)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_classification</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> classification_report<span class="syntax-punctuation">,</span> roc_auc_score<span class="syntax-punctuation">,</span> precision_recall_curve<span class="syntax-punctuation">,</span> average_precision_score<span class="syntax-punctuation">,</span> f1_score</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_classification<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span> weights<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> flip_y<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-classweight-vs-smote">Exercise 1 — class_weight vs SMOTE<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-classweight-vs-smote" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>clf_bal = LogisticRegression(max_iter=1000, class_weight=&#x27;balanced&#x27;, n_jobs=-1).fit(Xtr,ytr)</span>
-<span>proba_bal = clf_bal.predict_proba(Xte)[:,1]</span>
-<span>yhat_bal = (proba_bal &gt;= 0.5).astype(int)</span>
-<span>print(&#x27;Balanced weights — report (threshold 0.5):&#x27;)</span>
-<span>print(classification_report(yte, yhat_bal, digits=3))</span>
-<span>{&#x27;roc_auc&#x27;: roc_auc_score(yte, proba_bal), &#x27;avg_precision&#x27;: average_precision_score(yte, proba_bal)}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">clf_bal <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> class_weight<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">balanced</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">proba_bal <span class="syntax-operator">=</span> clf_bal<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">yhat_bal <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_bal <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Balanced weights — report (threshold 0.5):</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_bal<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">avg_precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Optional SMOTE (requires imblearn)</span>
-<span>try:</span>
-<span>    from imblearn.over_sampling import SMOTE</span>
-<span>    sm = SMOTE(random_state=42)</span>
-<span>    Xtr_sm, ytr_sm = sm.fit_resample(Xtr, ytr)</span>
-<span>    clf_sm = LogisticRegression(max_iter=1000, n_jobs=-1).fit(Xtr_sm, ytr_sm)</span>
-<span>    proba_sm = clf_sm.predict_proba(Xte)[:,1]</span>
-<span>    yhat_sm  = (proba_sm &gt;= 0.5).astype(int)</span>
-<span>    print(&#x27;SMOTE — report (threshold 0.5):&#x27;)</span>
-<span>    print(classification_report(yte, yhat_sm, digits=3))</span>
-<span>    {&#x27;roc_auc&#x27;: roc_auc_score(yte, proba_sm), &#x27;avg_precision&#x27;: average_precision_score(yte, proba_sm)}</span>
-<span>except Exception as e:</span>
-<span>    print(&#x27;SMOTE unavailable; pip install imbalanced-learn to enable.\n&#x27;, e)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Optional SMOTE (requires imblearn)</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">from</span> imblearn.over_sampling <span class="syntax-keyword">import</span> SMOTE</span>
+<span class="source-line">    sm <span class="syntax-operator">=</span> SMOTE<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    Xtr_sm<span class="syntax-punctuation">,</span> ytr_sm <span class="syntax-operator">=</span> sm<span class="syntax-operator">.</span>fit_resample<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    clf_sm <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr_sm<span class="syntax-punctuation">,</span> ytr_sm<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    proba_sm <span class="syntax-operator">=</span> clf_sm<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    yhat_sm  <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_sm <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SMOTE — report (threshold 0.5):</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_sm<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_sm<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">avg_precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_sm<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SMOTE unavailable; pip install imbalanced-learn to enable.</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-6--exercise-2-threshold-tuning-for-minority-f1">Exercise 2 — Threshold tuning for minority F1<a class="heading-anchor" href="#solution-2--cell-6--exercise-2-threshold-tuning-for-minority-f1" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>def best_f1_threshold(y_true, proba):</span>
-<span>    prec, rec, th = precision_recall_curve(y_true, proba)</span>
-<span>    th = np.r_[0.0, th]  # align</span>
-<span>    f1s = 2*prec*rec/(prec+rec+1e-12)</span>
-<span>    i = np.nanargmax(f1s)</span>
-<span>    return th[i], f1s[i], prec[i], rec[i]</span>
-<span> </span>
-<span>th_star, f1_star, p_star, r_star = best_f1_threshold(yte, proba_bal)</span>
-<span>{&#x27;best_threshold&#x27;: float(th_star), &#x27;best_f1&#x27;: float(f1_star), &#x27;precision&#x27;: float(p_star), &#x27;recall&#x27;: float(r_star)}</span>
-<span>yhat_star = (proba_bal &gt;= th_star).astype(int)</span>
-<span>print(classification_report(yte, yhat_star, digits=3))</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">best_f1_threshold</span><span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> th <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    th <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>r_<span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> th<span class="syntax-punctuation">]</span>  <span class="syntax-comment"># align</span></span>
+<span class="source-line">    f1s <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-operator">*</span>prec<span class="syntax-operator">*</span>rec<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>prec<span class="syntax-operator">+</span>rec<span class="syntax-operator">+</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    i <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>nanargmax<span class="syntax-punctuation">(</span>f1s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> th<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> f1s<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> prec<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">th_star<span class="syntax-punctuation">,</span> f1_star<span class="syntax-punctuation">,</span> p_star<span class="syntax-punctuation">,</span> r_star <span class="syntax-operator">=</span> best_f1_threshold<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">best_threshold</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>th_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">best_f1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>f1_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">recall</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>r_star<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">yhat_star <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>proba_bal <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> th_star<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>classification_report<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yhat_star<span class="syntax-punctuation">,</span> digits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-8--exercise-3-precision-recall-curve">Exercise 3 — Precision–Recall curve<a class="heading-anchor" href="#solution-2--cell-8--exercise-3-precision-recall-curve" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>prec, rec, _ = precision_recall_curve(yte, proba_bal)</span>
-<span>ap = average_precision_score(yte, proba_bal)</span>
-<span>plt.plot(rec, prec, label=f&#x27;LogReg (AP={ap:.3f})&#x27;)</span>
-<span>plt.xlabel(&#x27;Recall&#x27;); plt.ylabel(&#x27;Precision&#x27;); plt.title(&#x27;Precision–Recall curve&#x27;)</span>
-<span>plt.legend(); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line">prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span></span>
+<span class="source-line">ap <span class="syntax-operator">=</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>rec<span class="syntax-punctuation">,</span> prec<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LogReg (AP=</span><span class="syntax-string">{</span>ap<span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Recall</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Precision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Precision–Recall curve</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
 <h4 id="solution-2--cell-10--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-10--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>

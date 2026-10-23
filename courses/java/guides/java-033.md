@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-032`
 
 ## Learning objectives
 
-Explain allowlist, path containment, resource bound, safe diagnostic using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Createinput.txt inside anownedroot andread atmost10bytes. The final exercise transfers the mechanism to build a restricted diagnostic record.
+Explain allowlist, path containment, resource bound, safe diagnostic using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create `input.txt` inside an owned root and read at most 10 bytes. The final exercise transfers the mechanism to build a restricted diagnostic record.
 
 ## Purpose and mental model
 
-An application boundary converts untrusted input into a limited set of permitted operations. Type andsyntax checks are necessary butnot sufficient:an identifier can be avalidString while naming an unauthorized file,andan accepted operation can still consume unbounded resources. Prefer explicit operation andidentifier allowlists when the task is small. Keep validation close to the resource use andreport a named failure instead of silently choosing a broader fallback.
+An application boundary converts untrusted input into a limited set of permitted operations. Type and syntax checks are necessary but not sufficient:an identifier can be avalidString while naming an unauthorized file,and an accepted operation can still consume unbounded resources. Prefer explicit operation and identifier allowlists when the task is small. Keep validation close to the resource use and report a named failure instead of silently choosing a broader fallback.
 
-Filesystem containment has both lexical andreal-path concerns. Normalizing awaydot segments can detect a simpleparent traversal,but a symbolic link can redirect a seemingly contained path. This lesson uses anowned temporary directory andknown fixtures,checks both forms ofcontainment,andbounds reads withlimit+1 bytes. It doesnot claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets orrawsource bodies.
+Filesystem containment has both lexical andreal-path concerns. Normalizing awaydot segments can detect a simple parent traversal,but a symbolic link can redirect a seemingly contained path. This lesson uses an owned temporary directory and known fixtures,checks both forms of containment,and bounds reads with limit+1 bytes. It does not claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets orrawsource bodies.
 
 ## Vocabulary and concepts
 
-**Allowlist:** An explicit set of admitted operations oridentifiers.
+**Allowlist:** An explicit set of admitted operations or identifiers.
 
 **Path containment:** A check that a resource remains within its declared owned root.
 
-**Resource bound:** A limit enforced before unbounded allocation orwork.
+**Resource bound:** A limit enforced before unbounded allocation or work.
 
 **Safe diagnostic:** A useful failure record that excludes unnecessary sensitive content.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-033/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Resolve a relativepath under a real root,normalize it,andreject absolute orescaping paths. Reject symbolic-linkcomponents under thissimplepolicy,thencheck theexisting realpath remains inside theroot. Read atmostlimit+1bytes andreject anoversizedpayload. A fixed dispatcher maps admitted operationnames to knownfunctions;it neverpasses input to a shell orreflection loader. Build logs from anallowlistedmetadata schema.
+Resolve a relative path under a real root,normalize it,and reject absolute orescaping paths. Reject symbolic-linkcomponents under this simple policy,then check the existing realpath remains inside the root. Read atmostlimit+1bytes and reject an oversized payload. A fixed dispatcher maps admitted operation names to known functions;it never passes input to a shell or reflection loader. Build logs from allowlisted metadata schema.
 
 ## Worked example / walkthrough
 
 ### Example A: Read an admitted owned file
 
-The helper reads actual localbytes under a bounded contract. The fixture root is owned by thelesson andcontains no user data.
+The helper reads actual local bytes under a bounded contract. The fixture root is owned by the lesson and contains no user data.
 
 ```java
 import java.util.*;
@@ -67,11 +67,11 @@ public class Main {
 
 ```
 
-**Expected:** contenthello.
+**Expected:** content hello.
 
-### Example B: Reject lexical traversal andabsolute paths
+### Example B: Reject lexical traversal and absolute paths
 
-A path's string appearance isnot a permission decision. Normalization andrelative-path validation make the simple boundary explicit.
+A path's string appearance is not a permission decision. Normalization andrelative-path validation make the simple boundary explicit.
 
 ```java
 import java.util.*;
@@ -95,7 +95,7 @@ public class Main {
 
 ```
 
-**Expected:** SecurityException forboth.
+**Expected:** SecurityException for both.
 
 ## Prediction before your attempt
 
@@ -103,27 +103,27 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Read an admitted owned file.** Createinput.txt inside anownedroot andread atmost10bytes.
-   **Expected:** contenthello.
-   **Verify:** Compare your assertion values or captured diagnostic with contenthello.
+1. **Read an admitted owned file.** Create `input.txt` inside an owned root and read at most 10 bytes.
+   **Expected:** content hello.
+   **Verify:** Compare your assertion values or captured diagnostic with content hello.
 
-2. **Reject lexical traversal andabsolute paths.** Attempt../outside.txt andanabsolutechildpath.
-   **Expected:** SecurityException forboth.
-   **Verify:** Compare your assertion values or captured diagnostic with SecurityException forboth.
+2. **Reject lexical traversal and absolute paths.** Attempt../outside.txt andanabsolutechildpath.
+   **Expected:** SecurityException for both.
+   **Verify:** Compare your assertion values or captured diagnostic with SecurityException for both.
 
-3. **Enforce the byte limit after reading a bounded amount.** Writefivebytes andrequest a four-byte maximum.
-   **Expected:** IOException foroversizedcontent.
-   **Verify:** Compare your assertion values or captured diagnostic with IOException foroversizedcontent.
+3. **Enforce the byte limit after reading a bounded amount.** Writefivebytes and request a four-byte maximum.
+   **Expected:** IOException for oversized content.
+   **Verify:** Compare your assertion values or captured diagnostic with IOException for oversized content.
 
-4. **Reject symbolic-link access under the declared policy.** Create a link inside theownedroot toanotherownedfile andattempt toread throughit.
+4. **Reject symbolic-link access under the declared policy.** Create a link inside the owned root to another owned file and attempt to read throughit.
    **Expected:** link rejected when platform supports creation;unsupported capability recorded explicitly.
    **Verify:** Compare your assertion values or captured diagnostic with link rejected when platform supports creation;unsupported capability recorded explicitly.
 
-5. **Keep operation names out ofcode execution.** Admitonlyread_fixture andrejectrun_shell.
+5. **Keep operation names out of code execution.** Admitonlyread_fixture andrejectrun_shell.
    **Expected:** unknownoperationIllegalArgumentException.
    **Verify:** Compare your assertion values or captured diagnostic with unknownoperationIllegalArgumentException.
 
-6. **Build a restricted diagnostic record.** Copy onlyrequest_id,operation andstatus from a map containingtoken andsource_text.
+6. **Build a restricted diagnostic record.** Copy onlyrequest_id,operation and status from a map containing token andsource_text.
    **Expected:** diagnostic excludes both sensitive fields.
    **Verify:** Compare your assertion values or captured diagnostic with diagnostic excludes both sensitive fields.
 

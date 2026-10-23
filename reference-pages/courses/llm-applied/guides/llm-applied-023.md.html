@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -173,37 +219,37 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-check-evidence-freshness">Example A: Check evidence freshness<a class="heading-anchor" href="#example-a-check-evidence-freshness" aria-label="Link to this section">#</a></h4>
 <p>The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.</p>
-<pre><code class="language-python">from datetime import datetime,timedelta,timezone
-def fresh(published,now,maximum_age):
-    if published.tzinfo is None or now.tzinfo is None or published.utcoffset() is None or now.utcoffset() is None: raise ValueError(&#x27;aware timestamps required&#x27;)
-    if maximum_age&lt;timedelta(0): raise ValueError(&#x27;nonnegative age limit&#x27;)
-    age=now-published
-    return timedelta(0)&lt;=age&lt;=maximum_age
-class Budget:
-    def __init__(self,limit):
-        if type(limit) is not int or limit&lt;0: raise ValueError(&#x27;nonnegative integer limit&#x27;)
-        self.limit=limit; self.used=0
-    def consume(self):
-        if self.used&gt;=self.limit: raise RuntimeError(&#x27;operation budget exhausted&#x27;)
-        self.used+=1
-def trace_record(value):
-    return {key:value[key] for key in [&#x27;request_id&#x27;,&#x27;corpus_version&#x27;,&#x27;policy&#x27;,&#x27;result&#x27;]}
-now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
-assert fresh(published,now,timedelta(days=2))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> datetime<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">,</span>timezone
+<span class="syntax-keyword">def</span> <span class="syntax-function">fresh</span><span class="syntax-punctuation">(</span>published<span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>maximum_age<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> published<span class="syntax-operator">.</span>tzinfo <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">or</span> now<span class="syntax-operator">.</span>tzinfo <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">or</span> published<span class="syntax-operator">.</span>utcoffset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">or</span> now<span class="syntax-operator">.</span>utcoffset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">aware timestamps required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> maximum_age<span class="syntax-operator">&lt;</span>timedelta<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nonnegative age limit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    age<span class="syntax-operator">=</span>now<span class="syntax-operator">-</span>published
+    <span class="syntax-keyword">return</span> timedelta<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>age<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>maximum_age
+<span class="syntax-keyword">class</span> <span class="syntax-class">Budget</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> limit<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nonnegative integer limit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>limit<span class="syntax-operator">=</span>limit<span class="syntax-punctuation">;</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>used<span class="syntax-operator">=</span><span class="syntax-number">0</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">consume</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>used<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>limit<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">operation budget exhausted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>used<span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">trace_record</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span>value<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">request_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">corpus_version</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">result</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+now<span class="syntax-operator">=</span>datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">22</span><span class="syntax-punctuation">,</span>tzinfo<span class="syntax-operator">=</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> published<span class="syntax-operator">=</span>now<span class="syntax-operator">-</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> fresh<span class="syntax-punctuation">(</span>published<span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> fresh True.</p>
 <h4 id="example-b-reject-stale-and-future-evidence">Example B: Reject stale and future evidence<a class="heading-anchor" href="#example-b-reject-stale-and-future-evidence" aria-label="Link to this section">#</a></h4>
 <p>Future timestamps can indicate clock or metadata errors. Accepting them as indefinitely fresh would conceal that data-quality problem.</p>
-<pre><code class="language-python">assert not fresh(now-timedelta(days=3),now,timedelta(days=2))
-assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> fresh<span class="syntax-punctuation">(</span>now<span class="syntax-operator">-</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> fresh<span class="syntax-punctuation">(</span>now<span class="syntax-operator">+</span>timedelta<span class="syntax-punctuation">(</span>hours<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both fail freshness admission.</p>
 <h4 id="example-c-enforce-a-three-call-budget">Example C: Enforce a three-call budget<a class="heading-anchor" href="#example-c-enforce-a-three-call-budget" aria-label="Link to this section">#</a></h4>
 <p>The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.</p>
-<pre><code class="language-python">budget=Budget(3)
-for _ in range(3): budget.consume()
-try: budget.consume()
-except RuntimeError: pass
-else: raise AssertionError(&#x27;budget exceeded&#x27;)
-assert budget.used==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">budget<span class="syntax-operator">=</span>Budget<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> budget<span class="syntax-operator">.</span>consume<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> budget<span class="syntax-operator">.</span>consume<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">budget exceeded</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> budget<span class="syntax-operator">.</span>used<span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> used 3; fourth raisesRuntimeError before increment.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: fresh True. answer admission False; reason stale evidence. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -238,7 +284,7 @@ assert budget.used==3</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://docs.python.org/3.12/library/datetime.html">Python datetime documentation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-023, Domain assistant boundaries: freshness, injection, budgets and traces.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-023, Domain assistant boundaries: freshness, injection, budgets and traces.
 Read courses/llm-applied/guides/llm-applied-023.md and courses/llm-applied/lessons/llm-applied-023.py. Direct prerequisites: `llm-applied-022`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

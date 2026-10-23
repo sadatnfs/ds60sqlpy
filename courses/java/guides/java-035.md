@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-034`
 
 ## Learning objectives
 
-Explain response grain, repository port, http adapter, contract test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is SummarizegroupAoveramounts10,20 andgroupBover5. The final exercise transfers the mechanism to preserve storage andclose theownedlistener.
+Explain response grain, repository port, http adapter, contract test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Summarize group A over amounts 10,20 and group B over 5. The final exercise transfers the mechanism to preserve storage and close the owned listener.
 
 ## Purpose and mental model
 
-A small data service combines domain rules,storage andtransport contracts. Its correctness is more than a200status:the response grain,columns,ordering,error semantics andresource lifetime must agree. This capstone serves a read-only grouped summary over three authored records. Storage is anexplicit in-memory repository,not a simulatedJDBCclaim. The earlierJDBC lesson separately exercised a real database.
+A small data service combines domain rules, storage and transport contracts. Its correctness is more than an HTTP 200 status: the response grain, columns, ordering, error semantics and resource lifetime must agree. This capstone serves a read-only grouped summary over three authored records. Storage is an explicit in-memory repository, not a simulated JDBC claim. The earlier JDBC lesson separately exercised a real database.
 
-The service binds only toloopback on anephemeralport andstops when theownedfixture closes. It accepts oneGETroute withonegroupqueryparameter. The group must be a single uppercaseletter;unknown validgroups return404,malformedqueries return400,andunsupportedmethods return405. The domain summary is tested directly andthrough actualHTTPrequests. This is a bounded local service demonstration,not a deployed authenticated application.
+The service binds only to loopback on an ephemeral port and stops when the owned fixture closes. It accepts one GET route with one group query parameter. The group must be a single uppercase letter; unknown valid groups return 404, malformed queries return 400, and unsupported methods return 405. The domain summary is tested directly and through actual HTTP requests. This is a bounded local service demonstration, not a deployed authenticated application.
 
 ## Vocabulary and concepts
 
-**Response grain:** The identity of one row orobject in a service result.
+**Response grain:** The identity of one row or object in a service result.
 
 **Repository port:** The contract through which domain logic reads stored records.
 
-**HTTP adapter:** Code translating validated requests into domain calls andresponses.
+**HTTP adapter:** Code translating validated requests into domain calls and responses.
 
 **Contract test:** A check of observable behavior across a component boundary.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-035/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-ARepository port exposes animmutable row list. The pure summary function filters bygroup andreturns count andinteger total. TheHTTPadapter validates exactpath,method andquerystructure beforecalling thecore. Since the admitted group is one uppercaseASCIIletter,thefixedJSONencoder cannot be influenced by arbitraryquotes. HttpClient requests use timeouts,and everyexchange,responsebody andserverinstance isclosed.
+A Repository port exposes an immutable row list. The pure summary function filters by group and returns count and integer total. The HTTP adapter validates exact path, method and query structure before calling the core. Since the admitted group is one uppercase ASCII letter, the fixed JSON encoder cannot be influenced by arbitrary quotes. HttpClient requests use timeouts, and every exchange, response body and server instance is closed.
 
 ## Worked example / walkthrough
 
 ### Example A: Verify the domain summary
 
-The domain result has one objectperrequestedgroup. It is checked independently ofHTTPformatting andstatus handling.
+The domain result has one object per requested group. It is checked independently of HTTP formatting and status handling.
 
 ```java
 import java.util.*;
@@ -81,11 +81,11 @@ public class Main {
 
 ```
 
-**Expected:** Acount2,total30;Bcount1,total5.
+**Expected:** A count 2, total 30; B count 1, total 5.
 
 ### Example B: Read a successful HTTPsummary
 
-The exact body check fixes the publicschema andinteger representation. The source counts remain independently known.
+The exact body check fixes the public schema and integer representation. The source counts remain independently known.
 
 ```java
 import java.util.*;
@@ -124,7 +124,7 @@ public class Main {
 
 ```
 
-**Expected:** status200 andexactJSONwithcount2,total30.
+**Expected:** status 200 andexactJSONwithcount2,total 30.
 
 ## Prediction before your attempt
 
@@ -132,29 +132,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Verify the domain summary.** SummarizegroupAoveramounts10,20 andgroupBover5.
-   **Expected:** Acount2,total30;Bcount1,total5.
-   **Verify:** Compare your assertion values or captured diagnostic with Acount2,total30;Bcount1,total5.
+1. **Verify the domain summary.** Summarize group A over amounts 10,20 and group B over 5.
+   **Expected:** A count 2, total 30; B count 1, total 5.
+   **Verify:** Compare your assertion values or captured diagnostic with A count 2, total 30; B count 1, total 5.
 
 2. **Read a successful HTTPsummary.** GET/summary?group=Afromtheownedserver.
-   **Expected:** status200 andexactJSONwithcount2,total30.
-   **Verify:** Compare your assertion values or captured diagnostic with status200 andexactJSONwithcount2,total30.
+   **Expected:** status 200 andexactJSONwithcount2,total 30.
+   **Verify:** Compare your assertion values or captured diagnostic with status 200 andexactJSONwithcount2,total 30.
 
-3. **Report an unknown validgroup.** GETgroupC,whichpasses syntax buthasnorecords.
+3. **Report an unknown valid group.** GETgroupC,which passes syntax buthasnorecords.
    **Expected:** status404 withnot_found error.
    **Verify:** Compare your assertion values or captured diagnostic with status404 withnot_found error.
 
-4. **Reject ambiguous ormalformedqueries.** Sendduplicategroupparameters andalowercasegroup.
+4. **Reject ambiguous or malformed queries.** Send duplicate group parameters andalowercasegroup.
    **Expected:** bothstatus400.
    **Verify:** Compare your assertion values or captured diagnostic with bothstatus400.
 
-5. **Reject unsupportedmethods andpathlookalikes.** POSTtothesummaryroute andGET/summary-extra.
+5. **Reject unsupported methods andpathlookalikes.** POST to the summary route andGET/summary-extra.
    **Expected:** 405 and404 respectively.
    **Verify:** Compare your assertion values or captured diagnostic with 405 and404 respectively.
 
-6. **Preserve storage andclose theownedlistener.** Comparetherepositorybefore/afterrequests andclose theserver.
-   **Expected:** 3unchangedrecords;closedflagtrue.
-   **Verify:** Compare your assertion values or captured diagnostic with 3unchangedrecords;closedflagtrue.
+6. **Preserve storage and close the owned listener.** Comparetherepositorybefore/afterrequests and close the server.
+   **Expected:** 3 unchanged records; closed flag true.
+   **Verify:** Compare your assertion values or captured diagnostic with 3 unchanged records; closed flag true.
 
 ## Common pitfalls and diagnosis
 

@@ -136,9 +136,9 @@ top=cosine_rank(query,misleading)[0][0]
 assert top=='wrong' and top not in relevant
 ```
 
-**Expected:** top-ranked IDwrong is outside the authored relevant set.
+**Expected:** top-ranked ID wrong is outside the authored relevant set.
 
-**Verify:** Compare the computed values or written argument with top-ranked IDwrong is outside the authored relevant set.
+**Verify:** Compare the computed values or written argument with top-ranked ID wrong is outside the authored relevant set.
 
 ## Review after comparison
 

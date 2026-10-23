@@ -7,7 +7,13 @@ from xml.etree import ElementTree
 
 import pytest
 
-from ds60sqlpy.lesson_reader import LinkResolver, render_artifact, render_inline, render_markdown
+from ds60sqlpy.lesson_reader import (
+    LinkResolver,
+    _clean_generated_html,
+    render_artifact,
+    render_inline,
+    render_markdown,
+)
 from ds60sqlpy.reader_content import highlight_source, render_code_block, rich_content_styles
 from ds60sqlpy.reader_math import render_math
 
@@ -57,6 +63,8 @@ def resolver(tmp_path: Path) -> LinkResolver:
         ("r", "values <- c(1, 2, 3)"),
         ("html", '<script>alert("do not run")</script>'),
         ("css", "body { color: blue; }"),
+        ("c#", 'public class Program { static void Main() { Console.WriteLine("Hello"); } }'),
+        ("f#", 'let square x = x * x\nprintfn "%d" (square 3)'),
         ("toml", "[settings]\nport = 8765"),
     ],
 )
@@ -211,3 +219,42 @@ def test_shared_css_needs_no_external_resource() -> None:
     css = rich_content_styles()
     assert ".math-display" in css and ".syntax-keyword" in css
     assert "@import" not in css and "url(" not in css
+
+
+@pytest.mark.parametrize("opening,closing", [("```", "````"), ("~~~~", "~~~~~")])
+def test_fence_closure_requires_only_matching_markers(
+    tmp_path: Path, opening: str, closing: str
+) -> None:
+    source = (
+        opening
+        + "text\n"
+        + "literal \\(x^2\\) and $x$\n"
+        + opening
+        + "not-a-closing-fence\n"
+        + "<!-- keep this source comment -->\n"
+        + closing
+        + "\nAfter \\(y^2\\)."
+    )
+    document = render_markdown(source, resolver=resolver(tmp_path))
+    assert document.count("<math ") == 1
+    assert opening + "not-a-closing-fence" in "".join(parse(document).text)
+    assert "<!-- keep this source comment -->" in "".join(parse(document).text)
+    assert "literal \\(x^2\\) and $x$" in "".join(parse(document).text)
+
+
+def test_unterminated_fence_and_mismatched_markers_protect_the_rest_of_source(
+    tmp_path: Path,
+) -> None:
+    source = "```text\nliteral \\(x^2\\)\n~~~\n<!-- keep comment -->\n$x$"
+    document = render_markdown(source, resolver=resolver(tmp_path))
+    assert "<math " not in document
+    assert "".join(parse(document).text) == source.split("\n", 1)[1]
+
+
+@pytest.mark.parametrize("language", ["text", "python", "future-language"])
+def test_static_html_cleanup_keeps_code_line_ending_whitespace(language: str) -> None:
+    source = "value = 1  \t\n\t\n# trailing comment  \nlast = 2  "
+    rendered = render_code_block(source, language)
+    cleaned = _clean_generated_html(rendered).removesuffix("\n")
+    assert "".join(parse(cleaned).text) == source
+    assert all(line == line.rstrip() for line in cleaned.splitlines())

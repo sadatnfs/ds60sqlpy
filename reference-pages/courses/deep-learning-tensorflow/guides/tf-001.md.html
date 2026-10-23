@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -140,15 +186,15 @@
 <p>The demonstration holdout distinguishes these particular rules, but repeatedly inventing new rules after reading all its outcomes uses it for selection. A new untouched assessment would be needed for a fresh final claim. This is why the split policy belongs to the sequence of decisions, not merely to separate file names. In practice, begin by stating whether the next prediction concerns a new record from a known customer, a previously unseen customer, or a future time. Each setting changes which overlap is acceptable.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-a-training-only-constant-baseline">Example A: A training-only constant baseline<a class="heading-anchor" href="#example-a-a-training-only-constant-baseline" aria-label="Link to this section">#</a></h4>
-<p>The training-target mean is (2+4+6)/3 = 4. Keep that constant fixed when you inspect the demonstration holdout.</p>
-<pre><code class="language-text">Training residuals:  4-2=2, 4-4=0, 4-6=-2
+<p>The training-target mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>6</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2+4+6}{3}</annotation></semantics></math> = 4. Keep that constant fixed when you inspect the demonstration holdout.</p>
+<pre class="highlighted-code"><code class="language-text">Training residuals:  4-2=2, 4-4=0, 4-6=-2
 Training MSE: (4+0+4)/3 = 8/3
 Holdout residuals: 4-8=-4, 4-10=-6, 4-12=-8, 4-14=-10
 Holdout MSE: (16+36+64+100)/4 = 54</code></pre>
 <p><strong>Expected:</strong> The two means measure the same fixed rule on different sets. The holdout target mean would be 11, but using it to choose the constant would break this training-only comparison.</p>
 <h4 id="example-b-different-row-ids-can-still-leak-a-source">Example B: Different row IDs can still leak a source<a class="heading-anchor" href="#example-b-different-row-ids-can-still-leak-a-source" aria-label="Link to this section">#</a></h4>
 <p>Suppose training row t1 and holdout row h1 were two measurements from account A. Their names differ, but their shared account can reveal information about the evaluation case.</p>
-<pre><code class="language-text">train:   row=t1, group=A
+<pre class="highlighted-code"><code class="language-text">train:   row=t1, group=A
 holdout: row=h1, group=A
 Row-ID intersection: empty
 Source-group intersection: A
@@ -161,7 +207,7 @@ Decision: reject this grouped split for an account-held-out claim.</code></pre>
 <li><strong>Name the units and roles.</strong> Create the seven-row demonstration table above. Mark which rows may influence a fitted mean and which are evaluated later. <strong>Expected:</strong> Three training rows and four holdout rows; the row-ID and group-ID intersections are empty. <strong>Verify:</strong> Inspect the row-count table and assert the two ID-set intersections are empty.</li>
 </ol>
 <ol>
-<li><strong>Compare a fixed baseline.</strong> Calculate the training-target mean without using holdout labels, then compute its training and holdout MSE. <strong>Expected:</strong> The constant is 4, training MSE is 8/3 and holdout MSE is 54. <strong>Verify:</strong> Record all seven residuals and compare their two separately labeled sums and denominators.</li>
+<li><strong>Compare a fixed baseline.</strong> Calculate the training-target mean without using holdout labels, then compute its training and holdout MSE. <strong>Expected:</strong> The constant is 4, training MSE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{3}</annotation></semantics></math> and holdout MSE is 54. <strong>Verify:</strong> Record all seven residuals and compare their two separately labeled sums and denominators.</li>
 </ol>
 <ol>
 <li><strong>Separate a sum from a mean.</strong> For predictions [7,11] and targets [8,10], calculate the two residuals, squared-error sum and MSE. State the target units. <strong>Expected:</strong> Residuals [-1,1], squared-error sum 2 and MSE 1; squared target units. <strong>Verify:</strong> Assert the sum equals twice the mean for these two records; do not compare 2 with another dataset mean.</li>
@@ -173,7 +219,7 @@ Decision: reject this grouped split for an account-held-out claim.</code></pre>
 <li><strong>Refuse an empty score.</strong> Remove every holdout row. Decide whether its MSE is zero, perfect, or undefined, and design the smallest useful rejection message. <strong>Expected:</strong> An empty evaluation set has no mean; the reference raises ValueError instead of reporting zero. <strong>Verify:</strong> Capture the empty-input exception and confirm the original four-row evaluation still yields 54 afterward.</li>
 </ol>
 <ol>
-<li><strong>Bound the conclusion.</strong> A rule y=2*x has zero error on all seven published points. Write a defensible conclusion and one unsupported conclusion, then name a fresh assessment. <strong>Expected:</strong> The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported. <strong>Verify:</strong> The evidence note names seven observations, the already visible rule, and a new source/time fixture that has not influenced selection.</li>
+<li><strong>Bound the conclusion.</strong> A rule <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>y</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">y=2\cdot x</annotation></semantics></math> has zero error on all seven published points. Write a defensible conclusion and one unsupported conclusion, then name a fresh assessment. <strong>Expected:</strong> The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported. <strong>Verify:</strong> The evidence note names seven observations, the already visible rule, and a new source/time fixture that has not influenced selection.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -187,11 +233,11 @@ Decision: reject this grouped split for an account-held-out claim.</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Close the table and explain why a holdout is a decision policy. Then change the training targets to [1,3] and the evaluation target to [5]. Derive the fixed training-mean prediction and its single squared error without looking at the reference.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>tf-002</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-001,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-001,
 A bounded deep-learning investigation. Read courses/deep-learning-tensorflow/guides/tf-001.md
 and courses/deep-learning-tensorflow/lessons/tf-001.md. Respect direct prerequisites
 python-16 and beginner depth. Explain the actual fixture&#x27;s

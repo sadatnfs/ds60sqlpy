@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -138,9 +184,9 @@
 <h4 id="stat-05-08">Survey weights<a class="heading-anchor" href="#stat-05-08" aria-label="Link to this section">#</a></h4>
 <p>Base weights invert inclusion probabilities; later adjustments may address nonresponse or known population composition. Large weights increase variance and sensitivity. Trimming reduces instability but changes bias and must be reported.</p>
 <h4 id="stat-05-09">Horvitz–Thompson estimation<a class="heading-anchor" href="#stat-05-09" aria-label="Link to this section">#</a></h4>
-<p>Estimate a finite population total by summing observed y_i/pi_i. Design unbiasedness follows because E[I_i]=pi_i. Zero inclusion probability for some population units prevents identification of their contribution.</p>
+<p>Estimate a finite population total by summing observed <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow><mrow><msub><mi>π</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{y_i}{\pi_i}</annotation></semantics></math>. Design unbiasedness follows because <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><msub><mi>I</mi><mi>i</mi></msub><mo stretchy="false">]</mo><mo>=</mo><msub><mi>π</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathbb{E}[I_i]=\pi_i</annotation></semantics></math>. Zero inclusion probability for some population units prevents identification of their contribution.</p>
 <h4 id="stat-05-10">Hájek estimation<a class="heading-anchor" href="#stat-05-10" aria-label="Link to this section">#</a></h4>
-<p>Normalize inverse-probability weights and compute sum(w*y)/sum(w). This ratio often stabilizes mean estimation but is generally not exactly design unbiased. It differs from dividing a Horvitz-Thompson total by a known population size.</p>
+<p>Normalize inverse-probability weights and compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>w</mi><mi>i</mi></msub><msub><mi>y</mi><mi>i</mi></msub></mrow><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\sum_i w_i y_i}{\sum_i w_i}</annotation></semantics></math>. This ratio often stabilizes mean estimation but is generally not exactly design unbiased. It differs from dividing a Horvitz-Thompson total by a known population size.</p>
 <h4 id="stat-05-11">Poststratification<a class="heading-anchor" href="#stat-05-11" aria-label="Link to this section">#</a></h4>
 <p>Use known population cell counts to reweight sample cell means. Empty sampled cells cannot be repaired by weighting alone and require pooling or modeling, with additional assumptions.</p>
 <h4 id="stat-05-12">Raking<a class="heading-anchor" href="#stat-05-12" aria-label="Link to this section">#</a></h4>
@@ -148,9 +194,9 @@
 <h4 id="stat-05-13">Calibration weighting<a class="heading-anchor" href="#stat-05-13" aria-label="Link to this section">#</a></h4>
 <p>Choose weights close to base weights while satisfying known auxiliary totals. Useful auxiliaries predict the outcome or response mechanism. Calibration constraints do not create information about unmeasured selection drivers.</p>
 <h4 id="stat-05-14">Design effects<a class="heading-anchor" href="#stat-05-14" aria-label="Link to this section">#</a></h4>
-<p>Compare the design-based variance with simple-random-sampling variance for the same nominal sample size. For equal clusters, 1+(m-1)*ICC is a useful approximation, not a universal formula for every design.</p>
+<p>Compare the design-based variance with simple-random-sampling variance for the same nominal sample size. For equal clusters, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>+</mo><mo stretchy="false">(</mo><mi>m</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>·</mo><mrow><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">C</mi></mrow></mrow><annotation encoding="application/x-tex">1+(m-1)\cdot \mathrm{ICC}</annotation></semantics></math> is a useful approximation, not a universal formula for every design.</p>
 <h4 id="stat-05-15">Finite population correction<a class="heading-anchor" href="#stat-05-15" aria-label="Link to this section">#</a></h4>
-<p>Without-replacement sampling reduces uncertainty as the sampled fraction grows. The variance correction is approximately 1-n/N; use only for an appropriate finite target and design, not an unlimited superpopulation claim.</p>
+<p>Without-replacement sampling reduces uncertainty as the sampled fraction grows. The variance correction is approximately <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mfrac><mrow><mi>n</mi></mrow><mrow><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">1-\frac{n}{N}</annotation></semantics></math>; use only for an appropriate finite target and design, not an unlimited superpopulation claim.</p>
 <h4 id="stat-05-16">Coverage error<a class="heading-anchor" href="#stat-05-16" aria-label="Link to this section">#</a></h4>
 <p>A frame omitting offline customers excludes part of the target population. No adjustment based solely on included customers verifies their missing outcomes. Audit frame construction and define the reachable population explicitly.</p>
 <h4 id="stat-05-17">Nonresponse bias<a class="heading-anchor" href="#stat-05-17" aria-label="Link to this section">#</a></h4>
@@ -160,7 +206,7 @@
 <h4 id="stat-05-19">Selection bias<a class="heading-anchor" href="#stat-05-19" aria-label="Link to this section">#</a></h4>
 <p>Conditioning on inclusion can distort associations when inclusion depends on causes of multiple variables. Drawing a selection diagram helps distinguish missing population coverage from collider-induced association bias.</p>
 <h4 id="stat-05-20">Capture–recapture estimation<a class="heading-anchor" href="#stat-05-20" aria-label="Link to this section">#</a></h4>
-<p>Two lists with sizes n1 and n2 and overlap m suggest population size near n1*n2/m. Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.</p>
+<p>Two lists with sizes n1 and n2 and overlap m suggest population size near <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>n</mi><mrow><mn>1</mn></mrow></msub><mo>·</mo><msub><mi>n</mi><mrow><mn>2</mn></mrow></msub></mrow><mrow><mi>m</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{n_{1}\cdot n_{2}}{m}</annotation></semantics></math>. Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.</p>
 <h4 id="stat-05-21">Adaptive sampling<a class="heading-anchor" href="#stat-05-21" aria-label="Link to this section">#</a></h4>
 <p>Sampling may expand around detected rare events or high-value regions. Retain the adaptive design probabilities and stopping rules. Ordinary fixed-design estimators can become biased when discovery changes who is observed.</p>
 <h4 id="stat-05-22">Optimal allocation<a class="heading-anchor" href="#stat-05-22" aria-label="Link to this section">#</a></h4>
@@ -177,51 +223,51 @@
 <p>Joint distributions matter as well. Matching age and region margins does not ensure that every age-by-region cell is represented correctly. Poststratification on joint cells can help when cell totals are known and sample information exists. Empty cells require a model, pooling or a narrower target. Weighting cannot manufacture observed outcomes for a cell with zero support.</p>
 <p>Report weight ranges, effective sample information and sensitivity to trimming. Trimming extreme weights can reduce variance but introduces bias relative to the original design correction. That tradeoff should be visible, especially when extreme weights represent small or underserved groups. A stable dashboard is not sufficient justification for silently removing their population influence.</p>
 <h4 id="case-study-sampling-costs-and-precision-targets">Case study: sampling costs and precision targets<a class="heading-anchor" href="#case-study-sampling-costs-and-precision-targets" aria-label="Link to this section">#</a></h4>
-<p>A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because 800<em>1 equals 200</em>4. Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.</p>
+<p>A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>800</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">800\cdot 1</annotation></semantics></math> equals <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>200</mn><mo>·</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">200\cdot 4</annotation></semantics></math>. Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.</p>
 <p>If the high-variability stratum costs four times as much per observation, a cost-constrained allocation adjusts for the square root of cost. If the objective is instead a precise estimate for the small stratum, the optimal allocation changes again. There is no universally optimal sample independent of the target and budget.</p>
 <p>Adaptive sampling can improve discovery of rare clusters, but the selection process changes as observations arrive. Retain the design history and inclusion probabilities needed for valid estimation. Treating the final adaptively selected set as a simple random sample overstates representativeness. Design-based and model-based analyses can both be useful, but their assumptions should not be mixed silently.</p>
 <h4 id="case-study-capture-recapture-and-list-dependence">Case study: capture-recapture and list dependence<a class="heading-anchor" href="#case-study-capture-recapture-and-list-dependence" aria-label="Link to this section">#</a></h4>
-<p>Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is 100*80/20=400 entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.</p>
+<p>Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>100</mn><mo>·</mo><mn>80</mn></mrow><mrow><mn>20</mn></mrow></mfrac><mo>=</mo><mn>400</mn></mrow><annotation encoding="application/x-tex">\frac{100\cdot 80}{20}=400</annotation></semantics></math> entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.</p>
 <p>If the second search deliberately avoids entities found by the first, overlap can be too small and the estimate can be exaggerated. Heterogeneous capture probabilities and list dependence are therefore central assumptions, not minor corrections. Use additional lists, covariates or sensitivity analysis where appropriate, and communicate uncertainty when overlap is sparse.</p>
 <p>A measurement study can sometimes be more valuable than more ordinary observations. Repeated measurements, gold-standard validation or targeted collection in missing strata can identify error mechanisms that routine large-volume logging cannot. Choose additional data by the uncertainty it can reduce in the actual decision.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_05.py.html">chapter_05.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_05.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_05.py</code></pre>
 <h4 id="weighting-defines-the-population-contribution">Weighting defines the population contribution<a class="heading-anchor" href="#weighting-defines-the-population-contribution" aria-label="Link to this section">#</a></h4>
 <p>An observed value 10 with inclusion probability 0.5 contributes 20 to a population total; a value 30 with probability 0.25 contributes 120. Their normalized weighted mean is 23.3333. In another population, combining cell means 2 and 8 with population shares 0.8 and 0.2 gives 3.2, not the unweighted cell average 5.</p>
 <h4 id="count-independent-information-and-allocate-deliberately">Count independent information and allocate deliberately<a class="heading-anchor" href="#count-independent-information-and-allocate-deliberately" aria-label="Link to this section">#</a></h4>
 <p>With cluster size 10 and intraclass correlation 0.2, a design-effect approximation is 2.8, so 100 records have roughly the precision of 35.7 independent records for that comparison. Neyman allocation assigns equal samples to a large low-variance stratum and a small high-variance stratum in this fixture.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def weights_and_population():
-    values = np.array([10., 30.])
-    inclusion = np.array([.5, .25])
-    total = np.sum(values/inclusion)
-    hajek = np.sum(values/inclusion)/np.sum(1/inclusion)
-    assert total == 140 and np.isclose(hajek, 70/3)
-    sample_cell_mean, population_share = np.array([2., 8.]), np.array([.8, .2])
-    standardized = sample_cell_mean @ population_share
-    assert np.isclose(standardized, 3.2)
-    print(&quot;HT total:&quot;, total, &quot;Hajek mean:&quot;, round(hajek, 4), &quot;poststratified mean:&quot;, standardized)
+<span class="syntax-keyword">def</span> <span class="syntax-function">weights_and_population</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    inclusion <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    total <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>values<span class="syntax-operator">/</span>inclusion<span class="syntax-punctuation">)</span>
+    hajek <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>values<span class="syntax-operator">/</span>inclusion<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>inclusion<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> total <span class="syntax-operator">==</span> <span class="syntax-number">140</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>hajek<span class="syntax-punctuation">,</span> <span class="syntax-number">70</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    sample_cell_mean<span class="syntax-punctuation">,</span> population_share <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    standardized <span class="syntax-operator">=</span> sample_cell_mean <span class="syntax-operator">@</span> population_share
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>standardized<span class="syntax-punctuation">,</span> <span class="syntax-number">3.2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">HT total:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> total<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hajek mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>hajek<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">poststratified mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> standardized<span class="syntax-punctuation">)</span>
 
-def design_and_allocation():
-    cluster_size, icc, nominal_n = 10, .2, 100
-    deff = 1+(cluster_size-1)*icc
-    effective_n = nominal_n/deff
-    assert np.isclose(deff, 2.8) and effective_n &lt; nominal_n
-    population = np.array([800., 200.])
-    sd = np.array([1., 4.])
-    allocation = population*sd/(population @ sd)*100
-    assert np.allclose(allocation, [50, 50])
-    print(&quot;Design effect:&quot;, deff, &quot;effective n:&quot;, round(effective_n,2), &quot;allocation:&quot;, allocation)
+<span class="syntax-keyword">def</span> <span class="syntax-function">design_and_allocation</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    cluster_size<span class="syntax-punctuation">,</span> icc<span class="syntax-punctuation">,</span> nominal_n <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span>
+    deff <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span>cluster_size<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>icc
+    effective_n <span class="syntax-operator">=</span> nominal_n<span class="syntax-operator">/</span>deff
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>deff<span class="syntax-punctuation">,</span> <span class="syntax-number">2.8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> effective_n <span class="syntax-operator">&lt;</span> nominal_n
+    population <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">800.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    sd <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    allocation <span class="syntax-operator">=</span> population<span class="syntax-operator">*</span>sd<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>population <span class="syntax-operator">@</span> sd<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">100</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>allocation<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Design effect:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> deff<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">effective n:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>effective_n<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">allocation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> allocation<span class="syntax-punctuation">)</span>
 
-def main():
-    weights_and_population()
-    design_and_allocation()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    weights_and_population<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    design_and_allocation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Can weighting fix an unrepresentative sample?</strong> It can correct specified inclusion or response mechanisms when positivity holds and the relevant adjustment information is adequate. It cannot establish outcomes for a group that never appears or remove unmeasured selection bias by itself.</p>
 <p><strong>Interview: Why might a smaller stratified sample outperform a larger clustered one?</strong> Stratification can remove composition uncertainty, while clustering repeats similar information. Compare estimator variances under each design and the actual collection budget, not only raw record counts.</p>

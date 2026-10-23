@@ -67,11 +67,13 @@ colors. Adding a syntax lexer does not implement execution for a new language.
 formulas. `scripts/normalize_math_prose.py` applies only exact scoped mappings,
 preserving existing math, links, inline code, fenced code, notebook code cells
 and the supplied statistics outline. New lessons should use explicit LaTeX at
-source. For legacy authoring generators, run the normalization step after
+source. The consolidated `scripts/normalize_lesson_prose.py` pipeline also
+applies `curriculum/prose-repairs.json` to reviewed display-text spacing, while
+protecting code, math, IDs and runtime metadata. For legacy authoring generators, run the normalization step after
 regeneration and before building readers:
 
 ```sh
-python scripts/normalize_math_prose.py --write --report work/math-prose-audit.json
+python scripts/normalize_lesson_prose.py --write --report work/math-prose-audit.json
 python scripts/build_lesson_readers.py
 ```
 

@@ -18,7 +18,7 @@ A method declaration includes return type,name and parameter list. return sends 
 
 ## Exercise 1: Call a pure calculation
 
-Task: ImplementdoubleValue(intx) and evaluate7 and0.
+Task: Implement doubleValue(int x) and evaluate 7 and 0.
 
 The result depends only on the argument and the method changes no external state. That makes normal and boundary cases easy to test independently.
 
@@ -27,13 +27,13 @@ assert doubleValue(7) == 14;
 assert doubleValue(0) == 0;
 ```
 
-**Expected:** 14 and0.
+**Expected:** 14 and 0.
 
-**Verify:** Compare the program values or named exception with 14 and0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 14 and 0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Validate a precondition
 
-Task: ImplementpositiveArea(width,height) rejecting nonpositive dimensions.
+Task: Implement positiveArea(width,height) rejecting nonpositive dimensions.
 
 A zero dimension is rejected because this method models a strictly positive rectangle. Another domain could allow zero, but its contract must say so.
 
@@ -102,9 +102,9 @@ assert describe(1).equals("int");
 assert describe(1L).equals("long");
 ```
 
-**Expected:** int andlong respectively.
+**Expected:** int and long respectively.
 
-**Verify:** Compare the program values or named exception with int andlong respectively. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with int and long respectively. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

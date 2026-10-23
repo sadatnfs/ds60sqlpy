@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <p><strong>Gradient accumulation:</strong> Combining gradients before one optimizer update.</p>
 <p><strong>Global denominator:</strong> The total participating example count across partitions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>tf-030</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-030/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-030</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-030/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>The identity global_mean=sum(count*local_mean)/sum(count) is independent of a communication library. tf.reduce_sum exposes numerators. Hold weights fixed while accumulating gradients, then assign once. A regularization term needs a deliberate global scaling convention so it is not accidentally multiplied by the number of shards. The examples distinguish mathematical reduction from runtime placement.</p>
@@ -139,22 +185,22 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-weight-shard-means">Example A: Weight shard means<a class="heading-anchor" href="#example-a-weight-shard-means" aria-label="Link to this section">#</a></h4>
 <p>Multiplying each local mean by its count restores the gradient numerator. The final division then gives each example equal weight.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-means=np.array([2.,6.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==5 and means.mean()==4</code></pre>
+means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> global5; naive4.</p>
 <h4 id="example-b-recover-a-full-batch-mean">Example B: Recover a full-batch mean<a class="heading-anchor" href="#example-b-recover-a-full-batch-mean" aria-label="Link to this section">#</a></h4>
 <p>The explicit per-example values are an independent oracle for the shard calculation. A test that compares two formulas using the same wrong weights would miss the error.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-means=np.array([2.,6.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==5 and means.mean()==4
-g=np.array([2.,4.,6.,8.]); parts=[g[:1],g[1:]]
-recombined=sum(p.sum() for p in parts)/sum(len(p) for p in parts)
-assert recombined==g.mean()==5</code></pre>
+means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span>
+g<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">8.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> parts<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>g<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>g<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+recombined<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> recombined<span class="syntax-operator">==</span>g<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span></code></pre>
 <p><strong>Expected:</strong> both full and reconstructed means5.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Shard means 2 and 6 combine to 5 when weighted 1:3, not 4. A microbatch accumulator matches the full-batch mean before any optional distributed runtime. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -163,13 +209,13 @@ assert recombined==g.mean()==5</code></pre>
 <li><strong>Weight shard means.</strong> Combine means2,6 with counts1,3 and compare equal shard averaging. <strong>Expected:</strong> global5; naive4. <strong>Verify:</strong> Save the assertion results for exercise 1, including global5; naive4.</li>
 </ol>
 <ol>
-<li><strong>Recover a full-batch mean.</strong> Partition gradients[2,4,6,8] into sizes1 and3 and reconstruct their mean. <strong>Expected:</strong> both full and reconstructed means5. <strong>Verify:</strong> Save the assertion results for exercise 2, including both full and reconstructed means5.</li>
+<li><strong>Recover a full-batch mean.</strong> Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean. <strong>Expected:</strong> both full and reconstructed means5. <strong>Verify:</strong> Save the assertion results for exercise 2, including both full and reconstructed means5.</li>
 </ol>
 <ol>
-<li><strong>Accumulate squared-loss gradients.</strong> Atw0 use x1,2,3,4,y2x; compare full-batch gradient with sum-then-divide microbatches. <strong>Expected:</strong> gradient-30 for both. <strong>Verify:</strong> Save the assertion results for exercise 3, including gradient-30 for both.</li>
+<li><strong>Accumulate squared-loss gradients.</strong> At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches. <strong>Expected:</strong> gradient-30 for both. <strong>Verify:</strong> Save the assertion results for exercise 3, including gradient-30 for both.</li>
 </ol>
 <ol>
-<li><strong>Apply exactly one update.</strong> Use rate.01 with accumulated global gradient-30. <strong>Expected:</strong> updated weight.3. <strong>Verify:</strong> Save the assertion results for exercise 4, including updated weight.3.</li>
+<li><strong>Apply exactly one update.</strong> Use rate 0.01 with accumulated global gradient-30. <strong>Expected:</strong> updated weight.3. <strong>Verify:</strong> Save the assertion results for exercise 4, including updated weight.3.</li>
 </ol>
 <ol>
 <li><strong>Expose per-batch updates.</strong> Update separately for the two microbatches and compare the final weight with.3. <strong>Expected:</strong> endpoint differs from.3. <strong>Verify:</strong> Save the assertion results for exercise 5, including endpoint differs from.3.</li>
@@ -188,7 +234,7 @@ assert recombined==g.mean()==5</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://www.tensorflow.org/guide">TensorFlow guide</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-030, Distributed gradient semantics on one CPU.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-030, Distributed gradient semantics on one CPU.
 Read courses/deep-learning-tensorflow/guides/tf-030.md and courses/deep-learning-tensorflow/lessons/tf-030.py. Direct prerequisites: `tf-029`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

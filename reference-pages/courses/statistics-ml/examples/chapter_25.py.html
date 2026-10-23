@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,42 +161,42 @@
       <h1>Chapter 25</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_25.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def differencing_trace():</span>
-<span>    t=np.arange(16,dtype=float)</span>
-<span>    seasonal=np.tile([0.,2.,0.,-2.],4)</span>
-<span>    y=10+3*t+seasonal</span>
-<span>    seasonal_difference=y[4:]-y[:-4]</span>
-<span>    assert np.allclose(seasonal_difference,12.)</span>
-<span>    assert np.allclose(np.diff(seasonal_difference),0.)</span>
-<span>    print(&quot;Seasonal difference:&quot;,seasonal_difference[:4],&quot;then first difference:&quot;,np.diff(seasonal_difference)[:3])</span>
-<span> </span>
-<span>def frequency_trace():</span>
-<span>    t=np.arange(32,dtype=float)</span>
-<span>    y=np.sin(2*np.pi*t/8)</span>
-<span>    power=np.abs(np.fft.rfft(y-y.mean()))**2</span>
-<span>    frequency=np.fft.rfftfreq(len(y),d=1.)</span>
-<span>    peak=frequency[np.argmax(power[1:])+1]</span>
-<span>    assert np.isclose(peak,1/8)</span>
-<span>    print(&quot;Peak cycles per observation:&quot;,peak,&quot;period:&quot;,1/peak)</span>
-<span> </span>
-<span>def information_order():</span>
-<span>    event_time=np.array([1,2,3,4]);available_time=np.array([1,3,3,5])</span>
-<span>    origin=3</span>
-<span>    allowed=(event_time&lt;=origin)&amp;(available_time&lt;=origin)</span>
-<span>    assert allowed.tolist()==[True,True,True,False]</span>
-<span>    y=np.array([10.,12.,15.,18.])</span>
-<span>    lag1=np.r_[np.nan,y[:-1]]</span>
-<span>    assert lag1[3]==15 and lag1[3]!=y[3]</span>
-<span>    print(&quot;Available rows at origin 3:&quot;,np.flatnonzero(allowed),&quot;lagged feature at time 4:&quot;,lag1[3])</span>
-<span> </span>
-<span>def main():</span>
-<span>    differencing_trace();frequency_trace();information_order()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">differencing_trace</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    t<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    seasonal<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    y<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>t<span class="syntax-operator">+</span>seasonal</span>
+<span class="source-line">    seasonal_difference<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Seasonal difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>seasonal_difference<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">then first difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">frequency_trace</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    t<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sin<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>pi<span class="syntax-operator">*</span>t<span class="syntax-operator">/</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    power<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>fft<span class="syntax-operator">.</span>rfft<span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>y<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span></span>
+<span class="source-line">    frequency<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>fft<span class="syntax-operator">.</span>rfftfreq<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>d<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    peak<span class="syntax-operator">=</span>frequency<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>power<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Peak cycles per observation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>peak<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">period:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>peak<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">information_order</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    event_time<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>available_time<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    origin<span class="syntax-operator">=</span><span class="syntax-number">3</span></span>
+<span class="source-line">    allowed<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>event_time<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>origin<span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>available_time<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>origin<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> allowed<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">,</span><span class="syntax-number">15.</span><span class="syntax-punctuation">,</span><span class="syntax-number">18.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    lag1<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>r_<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">15</span> <span class="syntax-operator">and</span> lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Available rows at origin 3:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">lagged feature at time 4:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    differencing_trace<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>frequency_trace<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>information_order<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

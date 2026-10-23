@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,66 +161,66 @@
       <h1>Llm Applied 002 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-002_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-002: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import re</span>
-<span> </span>
-<span>def validate(value):</span>
-<span>    if not isinstance(value,dict): raise TypeError(&#x27;object required&#x27;)</span>
-<span>    if set(value)!={&#x27;visits&#x27;,&#x27;purchases&#x27;,&#x27;assignment_unit&#x27;}: raise ValueError(&#x27;exact fields required&#x27;)</span>
-<span>    if any(type(value[k]) is not int for k in (&#x27;visits&#x27;,&#x27;purchases&#x27;)): raise TypeError(&#x27;integer counts required&#x27;)</span>
-<span>    if not 0&lt;=value[&#x27;purchases&#x27;]&lt;=value[&#x27;visits&#x27;]: raise ValueError(&#x27;inconsistent counts&#x27;)</span>
-<span>    if value[&#x27;assignment_unit&#x27;]!=&#x27;account&#x27;: raise ValueError(&#x27;account assignment required&#x27;)</span>
-<span>    return dict(value)</span>
-<span>def rate(record):</span>
-<span>    if record[&#x27;visits&#x27;]==0: raise ValueError(&#x27;positive denominator required&#x27;)</span>
-<span>    return record[&#x27;purchases&#x27;]/record[&#x27;visits&#x27;]</span>
-<span>def extract(text):</span>
-<span>    match=re.fullmatch(r&#x27;Visits: (\d+); Purchases: (\d+); Unit: (account)&#x27;,text)</span>
-<span>    if match is None: raise ValueError(&#x27;unsupported source grammar&#x27;)</span>
-<span>    result=validate({&#x27;visits&#x27;:int(match[1]),&#x27;purchases&#x27;:int(match[2]),&#x27;assignment_unit&#x27;:match[3]})</span>
-<span>    return result,{name:match.span(i) for i,name in enumerate([&#x27;visits&#x27;,&#x27;purchases&#x27;,&#x27;assignment_unit&#x27;],1)}</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Validate a correct proposal</span>
-<span>    record=validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:3,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})</span>
-<span>    assert rate(record)==.3</span>
-<span> </span>
-<span>    # Exercise 2: Reject a plausible but impossible record</span>
-<span>    try: validate({&#x27;visits&#x27;:2,&#x27;purchases&#x27;:3,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})</span>
-<span>    except ValueError: pass</span>
-<span>    else: raise AssertionError(&#x27;impossible counts accepted&#x27;)</span>
-<span> </span>
-<span>    # Exercise 3: Trace extracted values to text</span>
-<span>    text=&#x27;Visits: 10; Purchases: 3; Unit: account&#x27;</span>
-<span>    parsed,spans=extract(text)</span>
-<span>    assert parsed==record</span>
-<span>    assert text[slice(*spans[&#x27;visits&#x27;])]==&#x27;10&#x27; and text[slice(*spans[&#x27;purchases&#x27;])]==&#x27;3&#x27;</span>
-<span> </span>
-<span>    # Exercise 4: Distinguish missing from zero</span>
-<span>    try: validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:None,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})</span>
-<span>    except TypeError: pass</span>
-<span>    else: raise AssertionError(&#x27;missing treated as count&#x27;)</span>
-<span>    assert rate(validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:0,&#x27;assignment_unit&#x27;:&#x27;account&#x27;}))==0</span>
-<span> </span>
-<span>    # Exercise 5: Reject boolean and extra fields</span>
-<span>    for candidate,kind in [({&#x27;visits&#x27;:True,&#x27;purchases&#x27;:0,&#x27;assignment_unit&#x27;:&#x27;account&#x27;},TypeError),({**record,&#x27;p_value&#x27;:.01},ValueError)]:</span>
-<span>        try: validate(candidate)</span>
-<span>        except kind: pass</span>
-<span>        else: raise AssertionError(&#x27;schema bypass accepted&#x27;)</span>
-<span> </span>
-<span>    # Exercise 6: Preserve the assignment unit</span>
-<span>    try: validate({**record,&#x27;assignment_unit&#x27;:&#x27;visit&#x27;})</span>
-<span>    except ValueError: pass</span>
-<span>    else: raise AssertionError(&#x27;unsupported assignment unit&#x27;)</span>
-<span>    assert record[&#x27;assignment_unit&#x27;]==&#x27;account&#x27;</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-applied-002: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">object required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact fields required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">integer counts required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">inconsistent counts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account assignment required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">rate</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">positive denominator required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">extract</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    match<span class="syntax-operator">=</span>re<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Visits: (</span><span class="syntax-string">\</span><span class="syntax-string">d+); Purchases: (</span><span class="syntax-string">\</span><span class="syntax-string">d+); Unit: (account)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> match <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unsupported source grammar</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span>match<span class="syntax-operator">.</span>span<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>name <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Validate a correct proposal</span></span>
+<span class="source-line">    record<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> rate<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.3</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Reject a plausible but impossible record</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">impossible counts accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Trace extracted values to text</span></span>
+<span class="source-line">    text<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Visits: 10; Purchases: 3; Unit: account</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">    parsed<span class="syntax-punctuation">,</span>spans<span class="syntax-operator">=</span>extract<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> parsed<span class="syntax-operator">==</span>record</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">10</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">3</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Distinguish missing from zero</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> TypeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">missing treated as count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> rate<span class="syntax-punctuation">(</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Reject boolean and extra fields</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> candidate<span class="syntax-punctuation">,</span>kind <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>record<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">p_value</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">.01</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span>candidate<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> kind<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">schema bypass accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Preserve the assignment unit</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>record<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unsupported assignment unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

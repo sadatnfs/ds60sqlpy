@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,8 +169,8 @@
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <h4 id="a-restart-must-preserve-the-state-that-determines-the-next-step">A restart must preserve the state that determines the next step<a class="heading-anchor" href="#a-restart-must-preserve-the-state-that-determines-the-next-step" aria-label="Link to this section">#</a></h4>
 <p>Saving model weights is enough for some inference tasks: given the same architecture and input, those weights can reproduce a prediction under the required modes and numerical conditions. Continuing training asks more. The next update may depend on optimizer history, a schedule, random-number state and where the data iterator stopped. A checkpoint is sufficient only relative to the continuation claim being made.</p>
-<p>The scalar experiment isolates optimizer history. It trains the parameter w on (w-2)^2 using Adam with learning rate 0.1. Adam maintains a running first moment of gradients, a running second moment of squared gradients and a step count used by bias correction. These values are part of its state. Reconstructing a new Adam object at the same w does not reconstruct those histories automatically.</p>
-<p>For intuition, use Adam&#x27;s default moment coefficients beta1=0.9 and beta2=0.999. At w=0 the gradient is -4. Starting from zero moments gives m1=-0.4 and v1=0.016. Correcting their initial bias gives m_hat=-4 and v_hat=16. The update is approximately -0.1*(-4)/(4+epsilon), moving w to about 0.1. The next gradient is about -3.8, but the moments now combine it with the previous gradient rather than treating it as the first observation. The <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.Adam.html">Adam API</a> defines the stateful update convention used by the fixture.</p>
+<p>The scalar experiment isolates optimizer history. It trains the parameter w on <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math> using Adam with learning rate 0.1. Adam maintains a running first moment of gradients, a running second moment of squared gradients and a step count used by bias correction. These values are part of its state. Reconstructing a new Adam object at the same w does not reconstruct those histories automatically.</p>
+<p>For intuition, use Adam&#x27;s default moment coefficients beta1=0.9 and beta2=0.999. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math> the gradient is -4. Starting from zero moments gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>m</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mo>−</mo><mn>0.4</mn></mrow><annotation encoding="application/x-tex">m_{1}=-0.4</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>v</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>0.016</mn></mrow><annotation encoding="application/x-tex">v_{1}=0.016</annotation></semantics></math>. Correcting their initial bias gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mover><mrow><mi>m</mi></mrow><mo>^</mo></mover><mo>=</mo><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">\widehat{m}=-4</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mover><mrow><mi>v</mi></mrow><mo>^</mo></mover><mo>=</mo><mn>16</mn></mrow><annotation encoding="application/x-tex">\widehat{v}=16</annotation></semantics></math>. The update is approximately <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>0.1</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><mrow><mn>4</mn><mo>+</mo><mi>ϵ</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-0.1\cdot (-4)}{4+\epsilon}</annotation></semantics></math>, moving w to about 0.1. The next gradient is about -3.8, but the moments now combine it with the previous gradient rather than treating it as the first observation. The <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.Adam.html">Adam API</a> defines the stateful update convention used by the fixture.</p>
 <p>After two updates, the reference saves both the parameter and optimizer state. It then takes the third step uninterrupted and records the resulting weight. A fresh Python interpreter loads the saved state, reconstructs the parameter and optimizer, and takes the same next step. Comparing those two results tests continuation, not merely the ability to deserialize a file. The separate weights-only branch deliberately starts a new optimizer and produces a different next weight, exposing the missing history.</p>
 <p>The new interpreter is important evidence because it cannot accidentally reuse the original in-memory optimizer. The test still has a narrow scope: it uses one deterministic scalar objective and a trusted local checkpoint in a temporary directory. A stochastic training job would additionally need the relevant RNG state, data ordering and scheduler state to make an equivalent next-update claim. A seed written at the top of a script is not a replacement for the exact random state at the interruption point.</p>
 <p>Evaluation mode and gradient recording are independent settings. The Dropout example calls eval so that the layer returns the supplied ones unchanged. no_grad would disable construction of a backward graph, but would not by itself change Dropout&#x27;s training behavior. Conversely, eval does not generally prohibit gradients. A reproducibility report should name the forward mode and the gradient-recording mode separately instead of treating both as one &quot;inference switch.&quot;</p>
@@ -134,12 +180,12 @@
 <p><strong>Optimizer checkpoint:</strong> State needed to reproduce a subsequent optimization update.</p>
 <p><strong>Next-step parity:</strong> Agreement after one identical update from saved state.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>llm-022</code>. Start its <code>llm-torch-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-022/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-022</code>. Start its <code>llm-torch-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-022/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Use torch.save on a dictionary containing model state and optimizer state. Load only the locally created trusted checkpoint with weights_only=True. Reconstruct fresh objects before load_state_dict. A subprocess takes the same next step and returns its weight as JSON. A seed controls initial random draws but is not a substitute for restoring the exact optimizer state.</p>
 <h3 id="why-weights-alone-do-not-specify-the-next-adam-step">Why weights alone do not specify the next Adam step<a class="heading-anchor" href="#why-weights-alone-do-not-specify-the-next-adam-step" aria-label="Link to this section">#</a></h3>
-<p>Adam&#x27;s update depends on a first-moment estimate, a second-moment estimate and a step count as well as the current parameter. At the first gradient g=-4, default beta values 0.9 and 0.999 give moments -0.4 and 0.016. Bias correction divides them by 0.1 and 0.001, recovering -4 and 16 for that first step. With learning rate 0.1 and the small epsilon term, the parameter moves from zero to approximately 0.1.</p>
+<p>Adam&#x27;s update depends on a first-moment estimate, a second-moment estimate and a step count as well as the current parameter. At the first gradient <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo>=</mo><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">g=-4</annotation></semantics></math>, default beta values 0.9 and 0.999 give moments -0.4 and 0.016. Bias correction divides them by 0.1 and 0.001, recovering -4 and 16 for that first step. With learning rate 0.1 and the small epsilon term, the parameter moves from zero to approximately 0.1.</p>
 <p>After more steps, the stored moments summarize earlier gradients. Starting a fresh optimizer at the same current weight instead initializes those moments to zero and starts the bias-correction counter again. The next update can therefore differ even with the same loss function, batch, learning rate and weight value. The reference compares that weights-only continuation against a restored optimizer rather than treating successful weight loading as a restart proof.</p>
 <h3 id="what-the-fresh-process-test-actually-preserves">What the fresh-process test actually preserves<a class="heading-anchor" href="#what-the-fresh-process-test-actually-preserves" aria-label="Link to this section">#</a></h3>
 <p>The parent saves one scalar weight and the optimizer state after two updates, then computes the uninterrupted third update. A child interpreter constructs new objects, restores both components and computes the same next update. Matching those values within the stated tolerance tests reconstruction rather than another reference to the parent&#x27;s live objects. Optimizer parameter-group structure and parameter ordering must match the state being restored.</p>
@@ -148,32 +194,32 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-create-adam-history">Example A: Create Adam history<a class="heading-anchor" href="#example-a-create-adam-history" aria-label="Link to this section">#</a></h4>
 <p>The checkpoint must contain nontrivial history. Saving before the first update would not distinguish a full optimizer restore from a fresh optimizer.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">import</span> tempfile<span class="syntax-operator">,</span>json<span class="syntax-operator">,</span>subprocess<span class="syntax-operator">,</span>sys<span class="syntax-operator">,</span>textwrap
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-w=nn.Parameter(torch.tensor(0.)); opt=torch.optim.Adam([w],lr=.1)
-for _ in range(2): opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
-assert w.item()&gt;0 and opt.state[w][&#x27;step&#x27;].item()==2</code></pre>
+w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> positive weight and optimizer step2.</p>
 <h4 id="example-b-save-a-trusted-local-checkpoint">Example B: Save a trusted local checkpoint<a class="heading-anchor" href="#example-b-save-a-trusted-local-checkpoint" aria-label="Link to this section">#</a></h4>
 <p>The file is created by this lesson and loaded only for this local test. Loading arbitrary untrusted serialized objects is outside the fixture.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">import</span> tempfile<span class="syntax-operator">,</span>json<span class="syntax-operator">,</span>subprocess<span class="syntax-operator">,</span>sys<span class="syntax-operator">,</span>textwrap
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-w=nn.Parameter(torch.tensor(0.)); opt=torch.optim.Adam([w],lr=.1)
-for _ in range(2): opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
-assert w.item()&gt;0 and opt.state[w][&#x27;step&#x27;].item()==2
-temporary=tempfile.TemporaryDirectory(); path=Path(temporary.name)/&#x27;state.pt&#x27;
-torch.save({&#x27;weight&#x27;:w.detach().clone(),&#x27;optimizer&#x27;:opt.state_dict()},path)
-assert path.is_file(); saved=w.item()</code></pre>
+w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span>
+temporary<span class="syntax-operator">=</span>tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> path<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">state.pt</span><span class="syntax-string">&#x27;</span>
+torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weight</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>w<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>opt<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> path<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saved<span class="syntax-operator">=</span>w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> checkpoint file exists.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Eval-mode prefix tests pass with dropout disabled. Restored next-step tensors agree within 1e-6; cross-platform bitwise equality is not promised. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -188,7 +234,7 @@ assert path.is_file(); saved=w.item()</code></pre>
 <li><strong>Calculate the uninterrupted next step.</strong> Take one more update and save the expected weight. <strong>Expected:</strong> step3 and changed weight. <strong>Verify:</strong> Save the assertion results for exercise 3, including step3 and changed weight.</li>
 </ol>
 <ol>
-<li><strong>Restore in a new interpreter.</strong> Load the trusted checkpoint into fresh weight and Adam objects, then take one step. <strong>Expected:</strong> child weight agrees within1e-6. <strong>Verify:</strong> Save the assertion results for exercise 4, including child weight agrees within1e-6.</li>
+<li><strong>Restore in a new interpreter.</strong> Load the trusted checkpoint into fresh weight and Adam objects, then take one step. <strong>Expected:</strong> child weight agrees within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 4, including child weight agrees within 1e-6.</li>
 </ol>
 <ol>
 <li><strong>Expose weights-only continuation.</strong> Initialize a fresh optimizer at the saved weight and compare its next update. <strong>Expected:</strong> weight differs from full-state continuation. <strong>Verify:</strong> Save the assertion results for exercise 5, including weight differs from full-state continuation.</li>
@@ -207,7 +253,7 @@ assert path.is_file(); saved=w.item()</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html">PyTorch saving and loading</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-022, Reproducibility, evaluation mode and restart.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-022, Reproducibility, evaluation mode and restart.
 Read courses/llm-theory/guides/llm-022.md and courses/llm-theory/lessons/llm-022.py. Direct prerequisites: `llm-021`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

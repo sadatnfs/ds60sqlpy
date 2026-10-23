@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,51 +176,51 @@
 <h3 id="exercise-1-run-a-passing-pure-function-test">Exercise 1: Run a passing pure-function test<a class="heading-anchor" href="#exercise-1-run-a-passing-pure-function-test" aria-label="Link to this section">#</a></h3>
 <p>Task: Start a real node --test process asserting add(2,3)=5.</p>
 <p>The child actually evaluates an assertion through the built-in runner. Process status supplies a machine-readable success signal; text is retained for diagnosis.</p>
-<pre><code class="language-javascript">const result = await runTests(&quot;test(&#x27;addition&#x27;, () =&gt; { assert.equal(2 + 3, 5); });&quot;);
-assert.equal(result.status, 0, result.stderr + result.stdout);
-assert.match(result.stdout, /# pass 1/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;test(&#x27;addition&#x27;, () =&gt; { assert.equal(2 + 3, 5); });&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr <span class="syntax-operator">+</span> result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">,</span> <span class="syntax-string">/# pass 1/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> child exit status 0; one passing test.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-prove-a-wrong-result-fails-the-runner">Exercise 2: Prove a wrong result fails the runner<a class="heading-anchor" href="#exercise-2-prove-a-wrong-result-fails-the-runner" aria-label="Link to this section">#</a></h3>
 <p>Task: Deliberately assert 2+3=6 in a child fixture.</p>
 <p>A test suite that never fails cannot establish that its checks are connected. This controlled mutation proves that the assertion reaches the runner and influences the exit result.</p>
-<pre><code class="language-javascript">const result = await runTests(&quot;test(&#x27;deliberate regression&#x27;, () =&gt; { assert.equal(2 + 3, 6); });&quot;);
-assert.notEqual(result.status, 0);
-assert.match(result.stdout, /# fail 1/u);
-assert.match(result.stdout, /AssertionError/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;test(&#x27;deliberate regression&#x27;, () =&gt; { assert.equal(2 + 3, 6); });&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">,</span> <span class="syntax-string">/# fail 1/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">,</span> <span class="syntax-string">/AssertionError/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> nonzero child exit; one failing test.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-await-an-asynchronous-test">Exercise 3: Await an asynchronous test<a class="heading-anchor" href="#exercise-3-await-an-asynchronous-test" aria-label="Link to this section">#</a></h3>
 <p>Task: Declare an async test that awaits Promise resolution before checking the value.</p>
 <p>Returning the async function Promise gives the runner ownership of its lifetime. A detached Promise would need separate handling and could escape the intended observation window.</p>
-<pre><code class="language-javascript">const result = await runTests(&quot;test(&#x27;awaited value&#x27;, async () =&gt; { const value = await Promise.resolve(7); assert.equal(value, 7); });&quot;);
-assert.equal(result.status, 0, result.stderr + result.stdout);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;test(&#x27;awaited value&#x27;, async () =&gt; { const value = await Promise.resolve(7); assert.equal(value, 7); });&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr <span class="syntax-operator">+</span> result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> child exit status 0.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-check-rejection-with-rejects">Exercise 4: Check rejection with rejects<a class="heading-anchor" href="#exercise-4-check-rejection-with-rejects" aria-label="Link to this section">#</a></h3>
 <p>Task: Assert that an async operation rejects with a RangeError.</p>
 <p>An async function converts its thrown error into Promise rejection. assert.throws would inspect only the immediate call and therefore test the wrong channel.</p>
-<pre><code class="language-javascript">const result = await runTests(&quot;test(&#x27;async boundary&#x27;, async () =&gt; { await assert.rejects(async () =&gt; { throw new RangeError(&#x27;negative&#x27;); }, RangeError); });&quot;);
-assert.equal(result.status, 0, result.stderr + result.stdout);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;test(&#x27;async boundary&#x27;, async () =&gt; { await assert.rejects(async () =&gt; { throw new RangeError(&#x27;negative&#x27;); }, RangeError); });&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr <span class="syntax-operator">+</span> result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> child exit status 0.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-cover-a-table-of-boundary-cases">Exercise 5: Cover a table of boundary cases<a class="heading-anchor" href="#exercise-5-cover-a-table-of-boundary-cases" aria-label="Link to this section">#</a></h3>
 <p>Task: Use a table for sums of empty, singleton and signed arrays.</p>
 <p>The cases share a mechanism but target different failure boundaries. An explicit reduction identity makes the empty case valid rather than silently excluding it from coverage.</p>
-<pre><code class="language-javascript">const body = `for (const [name, values, expected] of [[&#x27;empty&#x27;, [], 0], [&#x27;one&#x27;, [4], 4], [&#x27;signed&#x27;, [-2, 2], 0]]) {
-  test(name, () =&gt; assert.equal(values.reduce((sum, value) =&gt; sum + value, 0), expected));
-}`;
-const result = await runTests(body);
-assert.equal(result.status, 0, result.stderr + result.stdout);
-assert.match(result.stdout, /# pass 3/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> body <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">for (const [name, values, expected] of [[&#x27;empty&#x27;, [], 0], [&#x27;one&#x27;, [4], 4], [&#x27;signed&#x27;, [-2, 2], 0]]) {</span>
+<span class="syntax-string">  test(name, () =&gt; assert.equal(values.reduce((sum, value) =&gt; sum + value, 0), expected));</span>
+<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span>body<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr <span class="syntax-operator">+</span> result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">,</span> <span class="syntax-string">/# pass 3/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> three passing child tests.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-keep-fixtures-independent">Exercise 6: Keep fixtures independent<a class="heading-anchor" href="#exercise-6-keep-fixtures-independent" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a fresh array inside each test and mutate it in only one test.</p>
 <p>A fresh fixture prevents one test from making another pass or fail through leftover state. Ordering assumptions often conceal a shared-state defect rather than a product requirement.</p>
-<pre><code class="language-javascript">const result = await runTests(&quot;test(&#x27;mutate local&#x27;, () =&gt; { const rows = [1]; rows.push(2); assert.deepEqual(rows, [1,2]); });\ntest(&#x27;fresh local&#x27;, () =&gt; { const rows = [1]; assert.deepEqual(rows, [1]); });&quot;);
-assert.equal(result.status, 0, result.stderr + result.stdout);
-assert.match(result.stdout, /# pass 2/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runTests<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;test(&#x27;mutate local&#x27;, () =&gt; { const rows = [1]; rows.push(2); assert.deepEqual(rows, [1,2]); });\ntest(&#x27;fresh local&#x27;, () =&gt; { const rows = [1]; assert.deepEqual(rows, [1]); });&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr <span class="syntax-operator">+</span> result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">,</span> <span class="syntax-string">/# pass 2/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> two tests pass without shared mutable state.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

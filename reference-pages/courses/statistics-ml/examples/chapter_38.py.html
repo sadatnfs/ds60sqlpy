@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,46 +161,46 @@
       <h1>Chapter 38</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_38.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def funnel_and_retention():</span>
-<span>    stages=np.array([1000,400,100])</span>
-<span>    step=stages[1:]/stages[:-1];overall=stages[-1]/stages[0]</span>
-<span>    assert np.allclose(step,[.4,.25]) and np.isclose(np.prod(step),overall)</span>
-<span>    cohort_size=np.array([100,80]);retained=np.array([60,56]);mature=np.array([True,False])</span>
-<span>    observed=retained[mature].sum()/cohort_size[mature].sum()</span>
-<span>    assert observed==.6</span>
-<span>    print(&quot;Step conversions:&quot;,step,&quot;overall:&quot;,overall,&quot;mature-cohort retention:&quot;,observed)</span>
-<span> </span>
-<span>def carryover_and_saturation():</span>
-<span>    spend=np.array([10.,0.,0.,0.]);state=0.;adstock=[]</span>
-<span>    for x in spend:state=x+.5*state;adstock.append(state)</span>
-<span>    assert adstock==[10.,5.,2.5,1.25]</span>
-<span>    exposure=np.array([0.,1.,2.,4.]);response=exposure/(1+exposure)</span>
-<span>    assert np.allclose(response,[0.,.5,2/3,.8])</span>
-<span>    print(&quot;Adstock:&quot;,adstock,&quot;saturation:&quot;,response)</span>
-<span> </span>
-<span>def price_quantity_decomposition():</span>
-<span>    p0,q0=10.,100.;p1,q1=12.,110.</span>
-<span>    change=p1*q1-p0*q0</span>
-<span>    price=(p1-p0)*q0;quantity=p0*(q1-q0);interaction=(p1-p0)*(q1-q0)</span>
-<span>    assert change==320 and price+quantity+interaction==change</span>
-<span>    print(&quot;Value change and components:&quot;,change,price,quantity,interaction)</span>
-<span> </span>
-<span>def verified_narrative_input():</span>
-<span>    numerator,denominator=100,1000</span>
-<span>    computed=numerator/denominator</span>
-<span>    model_claim=.25</span>
-<span>    assert computed==.1 and not np.isclose(model_claim,computed)</span>
-<span>    packet={&quot;numerator&quot;:numerator,&quot;denominator&quot;:denominator,&quot;conversion&quot;:computed}</span>
-<span>    print(&quot;Code-verified report packet:&quot;,packet,&quot;reject unsupported 25-percent narrative&quot;)</span>
-<span> </span>
-<span>def main():</span>
-<span>    funnel_and_retention();carryover_and_saturation();price_quantity_decomposition();verified_narrative_input()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">funnel_and_retention</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    stages<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">400</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    step<span class="syntax-operator">=</span>stages<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>stages<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>overall<span class="syntax-operator">=</span>stages<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>stages<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">.25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>prod<span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>overall<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cohort_size<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">80</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>retained<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">60</span><span class="syntax-punctuation">,</span><span class="syntax-number">56</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>mature<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    observed<span class="syntax-operator">=</span>retained<span class="syntax-punctuation">[</span>mature<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>cohort_size<span class="syntax-punctuation">[</span>mature<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> observed<span class="syntax-operator">==</span><span class="syntax-number">.6</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Step conversions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>step<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">overall:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>overall<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">mature-cohort retention:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>observed<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">carryover_and_saturation</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    spend<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>state<span class="syntax-operator">=</span><span class="syntax-number">0.</span><span class="syntax-punctuation">;</span>adstock<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> spend<span class="syntax-punctuation">:</span>state<span class="syntax-operator">=</span>x<span class="syntax-operator">+</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span>state<span class="syntax-punctuation">;</span>adstock<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> adstock<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.25</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    exposure<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>response<span class="syntax-operator">=</span>exposure<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">+</span>exposure<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Adstock:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>adstock<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">saturation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>response<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">price_quantity_decomposition</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p0<span class="syntax-punctuation">,</span>q0<span class="syntax-operator">=</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">100.</span><span class="syntax-punctuation">;</span>p1<span class="syntax-punctuation">,</span>q1<span class="syntax-operator">=</span><span class="syntax-number">12.</span><span class="syntax-punctuation">,</span><span class="syntax-number">110.</span></span>
+<span class="source-line">    change<span class="syntax-operator">=</span>p1<span class="syntax-operator">*</span>q1<span class="syntax-operator">-</span>p0<span class="syntax-operator">*</span>q0</span>
+<span class="source-line">    price<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>p1<span class="syntax-operator">-</span>p0<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>q0<span class="syntax-punctuation">;</span>quantity<span class="syntax-operator">=</span>p0<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>q1<span class="syntax-operator">-</span>q0<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>interaction<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>p1<span class="syntax-operator">-</span>p0<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>q1<span class="syntax-operator">-</span>q0<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> change<span class="syntax-operator">==</span><span class="syntax-number">320</span> <span class="syntax-operator">and</span> price<span class="syntax-operator">+</span>quantity<span class="syntax-operator">+</span>interaction<span class="syntax-operator">==</span>change</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Value change and components:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>change<span class="syntax-punctuation">,</span>price<span class="syntax-punctuation">,</span>quantity<span class="syntax-punctuation">,</span>interaction<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verified_narrative_input</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    numerator<span class="syntax-punctuation">,</span>denominator<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">1000</span></span>
+<span class="source-line">    computed<span class="syntax-operator">=</span>numerator<span class="syntax-operator">/</span>denominator</span>
+<span class="source-line">    model_claim<span class="syntax-operator">=</span><span class="syntax-number">.25</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> computed<span class="syntax-operator">==</span><span class="syntax-number">.1</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>model_claim<span class="syntax-punctuation">,</span>computed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    packet<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">numerator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>numerator<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>denominator<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">conversion</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>computed<span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Code-verified report packet:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>packet<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">reject unsupported 25-percent narrative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    funnel_and_retention<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>carryover_and_saturation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>price_quantity_decomposition<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>verified_narrative_input<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

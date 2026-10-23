@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -142,14 +188,14 @@
 </tbody></table></div>
 <p>The Windows launcher asks before a connected first setup. It never requests or stores a database credential and never resets PostgreSQL. Keep its terminal open while learning; <code>Ctrl+C</code> stops the private portal.</p>
 <p>Manual private-portal commands are:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\learning_portal.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>learning_portal<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/learning_portal.py</code></pre>
 <p>The private launcher binds only to <code>127.0.0.1</code>. It can open the repository, exact cataloged artifacts, exact notebook lessons, and catalog-restricted guided SQL notebooks; it cannot accept arbitrary commands or paths. Pass <code>--no-launches</code> if you want file-backed progress with every native process action disabled.</p>
 <p>Static mode remains useful without Python or a server, but a browser cannot safely execute Python, notebooks, or SQL. Its optional <code>vscode://</code> link is a best-effort handoff to a registered VS Code installation. If it does not work, open the repository in VS Code and use the catalog path printed on the lesson page.</p>
@@ -179,23 +225,23 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <p>For a normal SQL lesson, choose <strong>Create/open guided SQL notebook</strong>. The launcher creates an ignored notebook plus editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> and opens that exact notebook in JupyterLab. It preserves existing learner edits. The notebook runs the complete course script through a fixed, non-shell <code>psql -f</code> path so <code>psql</code> meta-commands continue to work; database preparation remains a separate, explicitly confirmed reset of only <code>advanced_sql_training</code>. Use <code>bridge-jupyter-01</code> instead when the learning objective is short JupySQL <code>%sql</code>/<code>%%sql</code> exploration. See <a href="guided-sql-notebooks.md.html">Guided SQL lesson notebooks</a>.</p>
 <h3 id="use-the-tutor-skill">Use the tutor skill<a class="heading-anchor" href="#use-the-tutor-skill" aria-label="Link to this section">#</a></h3>
 <p>Explicit invocation is the most predictable starting point:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to assess my current level and guide me through the next lesson.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to assess my current level and guide me through the next lesson.</code></pre>
 <p>You can also ask:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning. I am on a new Windows machine and have never programmed. Help me verify setup, then start Python Day 1.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to resume SQL. Quiz me on prerequisites before recommending the next lesson.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start the Python/PostgreSQL bridge. Verify
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning. I am on a new Windows machine and have never programmed. Help me verify setup, then start Python Day 1.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to resume SQL. Quiz me on prerequisites before recommending the next lesson.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to start the Python/PostgreSQL bridge. Verify
 that I am ready, use fakes before a live database, and make me explain each
 transaction boundary.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start SQL Day 1 as a complete beginner. Teach
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to start SQL Day 1 as a complete beginner. Teach
 table, row, column, result set, row grain, SELECT, WHERE, and deterministic
 ORDER BY before asking me to write a query.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to guide bridge-jupyter-01. Verify the selected
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to guide bridge-jupyter-01. Verify the selected
 kernel and disposable database, keep my connection secret, and make me explain
 bound parameters versus Jinja SQL rendering.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to choose my next professional module from the
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to choose my next professional module from the
 catalog based on demonstrated prerequisites rather than the lesson number.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to review my current notebook. Give one hint at a time and do not open the official solution.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to check whether this lesson will run offline on my machine.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to review my current notebook. Give one hint at a time and do not open the official solution.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to check whether this lesson will run offline on my machine.</code></pre>
 <h3 id="a-good-tutoring-session">A good tutoring session<a class="heading-anchor" href="#a-good-tutoring-session" aria-label="Link to this section">#</a></h3>
 <p>The expected flow is:</p>
 <ol>
@@ -220,15 +266,15 @@ catalog based on demonstrated prerequisites rather than the lesson number.</code
 </ol>
 <h3 id="ask-codex-to-inspect-evidence">Ask Codex to inspect evidence<a class="heading-anchor" href="#ask-codex-to-inspect-evidence" aria-label="Link to this section">#</a></h3>
 <p>Useful debugging prompt:</p>
-<pre><code class="language-text">Inspect my selected interpreter, the exact error, and the lesson&#x27;s declared dependencies before suggesting a fix. Do not assume package installation succeeded.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Inspect my selected interpreter, the exact error, and the lesson&#x27;s declared dependencies before suggesting a fix. Do not assume package installation succeeded.</code></pre>
 <p>Useful SQL prompt:</p>
-<pre><code class="language-text">Run this only against the disposable advanced_sql_training database with psql -X -v ON_ERROR_STOP=1. Explain the first failing statement and keep the lesson transaction safe.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Run this only against the disposable advanced_sql_training database with psql -X -v ON_ERROR_STOP=1. Explain the first failing statement and keep the lesson transaction safe.</code></pre>
 <p>Useful bridge prompt:</p>
-<pre><code class="language-text">Test my solution offline with the provided fake first. If a live PostgreSQL
+<pre class="highlighted-code"><code class="language-text">Test my solution offline with the provided fake first. If a live PostgreSQL
 check would add evidence, resolve DS60_DATABASE_URL and explain the exact
 rollback-safe operation before running it.</code></pre>
 <p>Useful review prompt:</p>
-<pre><code class="language-text">Compare my answer with the exercise requirements, not just the official solution. Tell me what is correct, what fails on an edge case, and the smallest next improvement.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Compare my answer with the exercise requirements, not just the official solution. Tell me what is correct, what fails on an edge case, and the smallest next improvement.</code></pre>
 <h3 id="progress-and-privacy">Progress and privacy<a class="heading-anchor" href="#progress-and-privacy" aria-label="Link to this section">#</a></h3>
 <p>You decide whether progress is stored.</p>
 <ul>
@@ -248,13 +294,13 @@ rollback-safe operation before running it.</code></pre>
 <li>Next review date</li>
 </ul>
 <p>The course CLI and private portal share the same minimal ignored progress record:</p>
-<pre><code class="language-text">python scripts/course.py progress show
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py progress show
 python scripts/course.py progress complete python-01 --notes &quot;Can explain values, variables, and the selected kernel.&quot;</code></pre>
 <p>Use the stable lesson ID printed by <code>catalog</code>. Codex should ask before marking a lesson complete and should base completion on your explanation or working attempt—not on merely opening the file. On Windows, substitute <code>&amp; $CoursePython</code> from the launcher block for <code>python</code> when the repository environment is not activated.</p>
 <p>The portal&#x27;s <strong>Export progress</strong> button creates a portable JSON backup. In static-file mode, import/export is also the deliberate bridge between browsers. Never commit either the <code>.learning/</code> directory or a personal progress export. Before making a source-only USB copy, export progress and separately preserve any <code>.learning/sql/</code> exercises you want to resume.</p>
 <h3 id="avoid-answer-leakage">Avoid answer leakage<a class="heading-anchor" href="#avoid-answer-leakage" aria-label="Link to this section">#</a></h3>
 <p>Say this explicitly when you want active learning:</p>
-<pre><code class="language-text">Do not read files under solutions/ until I ask. Use the learner notebook and companion guide first.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Do not read files under solutions/ until I ask. Use the learner notebook and companion guide first.</code></pre>
 <p>If you want a worked example, ask for a new analogous example before requesting the official answer.</p>
 <h3 id="use-codex-for-setup-carefully">Use Codex for setup carefully<a class="heading-anchor" href="#use-codex-for-setup-carefully" aria-label="Link to this section">#</a></h3>
 <p>Codex should:</p>

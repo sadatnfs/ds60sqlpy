@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,180 +161,180 @@
       <h1>K8S 019 Solution</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-019_solution.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;apiVersion&quot;: &quot;v1&quot;,</span>
-<span>  &quot;kind&quot;: &quot;List&quot;,</span>
-<span>  &quot;items&quot;: [</span>
-<span>    {</span>
-<span>      &quot;apiVersion&quot;: &quot;v1&quot;,</span>
-<span>      &quot;kind&quot;: &quot;Secret&quot;,</span>
-<span>      &quot;metadata&quot;: {</span>
-<span>        &quot;name&quot;: &quot;synthetic-message&quot;,</span>
-<span>        &quot;labels&quot;: {</span>
-<span>          &quot;app&quot;: &quot;synthetic-secret-observer&quot;,</span>
-<span>          &quot;ds60-lesson&quot;: &quot;k8s-019&quot;</span>
-<span>        }</span>
-<span>      },</span>
-<span>      &quot;type&quot;: &quot;Opaque&quot;,</span>
-<span>      &quot;stringData&quot;: {</span>
-<span>        &quot;lesson-message&quot;: &quot;DUMMY_LESSON_ONLY&quot;</span>
-<span>      }</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;apiVersion&quot;: &quot;v1&quot;,</span>
-<span>      &quot;kind&quot;: &quot;ConfigMap&quot;,</span>
-<span>      &quot;metadata&quot;: {</span>
-<span>        &quot;name&quot;: &quot;synthetic-secret-observer-program&quot;,</span>
-<span>        &quot;labels&quot;: {</span>
-<span>          &quot;app&quot;: &quot;synthetic-secret-observer&quot;,</span>
-<span>          &quot;ds60-lesson&quot;: &quot;k8s-019&quot;</span>
-<span>        }</span>
-<span>      },</span>
-<span>      &quot;data&quot;: {</span>
-<span>        &quot;app.py&quot;: &quot;\&quot;\&quot;\&quot;Observe only two public teaching markers; never return marker bytes.\&quot;\&quot;\&quot;\n\nfrom __future__ import annotations\n\nimport json\nimport os\nimport threading\nimport uuid\nfrom http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\nfrom pathlib import Path\n\nMARKERS = {b\&quot;DUMMY_LESSON_ONLY\&quot;: \&quot;initial\&quot;, b\&quot;DUMMY_LESSON_ROTATED\&quot;: \&quot;rotated\&quot;}\n\n\ndef marker_label(path: Path) -&gt; str:\n    with path.open(\&quot;rb\&quot;) as stream:\n        value = stream.read(65)\n    if value not in MARKERS:\n        raise ValueError(\&quot;Only the two public teaching markers are accepted\&quot;)\n    return MARKERS[value]\n\n\nclass Observation:\n    def __init__(self, path: Path, environment: str, pod_uid: str) -&gt; None:\n        encoded = environment.encode(\&quot;ascii\&quot;)\n        if encoded not in MARKERS:\n            raise ValueError(\&quot;A public teaching environment marker is required\&quot;)\n        self.path = path\n        self.environment = MARKERS[encoded]\n        self.cached = marker_label(path)\n        self.pod_uid = pod_uid\n        self.boot_id = uuid.uuid4().hex\n        self.lock = threading.Lock()\n\n    def _snapshot(self, projected: str) -&gt; dict[str, str]:\n        return {\n            \&quot;pod_uid\&quot;: self.pod_uid,\n            \&quot;boot_id\&quot;: self.boot_id,\n            \&quot;environment\&quot;: self.environment,\n            \&quot;projected_file\&quot;: projected,\n            \&quot;application_cache\&quot;: self.cached,\n        }\n\n    def observe(self) -&gt; dict[str, str]:\n        with self.lock:\n            return self._snapshot(marker_label(self.path))\n\n    def reload(self) -&gt; dict[str, str]:\n        with self.lock:\n            projected = marker_label(self.path)\n            self.cached = projected\n            return self._snapshot(projected)\n\n\ndef handler_for(observation: Observation) -&gt; type[BaseHTTPRequestHandler]:\n    class Handler(BaseHTTPRequestHandler):\n        def log_message(self, format: str, *args: object) -&gt; None:\n            return\n\n        def send_json(self, status: int, value: dict[str, str]) -&gt; None:\n            content = json.dumps(value).encode()\n            self.send_response(status)\n            self.send_header(\&quot;Content-Type\&quot;, \&quot;application/json\&quot;)\n            self.send_header(\&quot;Content-Length\&quot;, str(len(content)))\n            self.send_header(\&quot;Cache-Control\&quot;, \&quot;no-store\&quot;)\n            self.end_headers()\n            self.wfile.write(content)\n\n        def do_GET(self) -&gt; None:\n            if self.path not in (\&quot;/observe\&quot;, \&quot;/ready\&quot;):\n                self.send_json(404, {\&quot;error\&quot;: \&quot;Unknown teaching endpoint\&quot;})\n                return\n            try:\n                self.send_json(200, observation.observe())\n            except (OSError, ValueError):\n                self.send_json(503, {\&quot;error\&quot;: \&quot;Synthetic marker unavailable or invalid\&quot;})\n\n        def do_POST(self) -&gt; None:\n            if self.path != \&quot;/reload\&quot;:\n                self.send_json(404, {\&quot;error\&quot;: \&quot;Unknown teaching endpoint\&quot;})\n                return\n            if self.headers.get_all(\&quot;Transfer-Encoding\&quot;) is not None or self.headers.get_all(\n                \&quot;Content-Length\&quot;, [\&quot;0\&quot;]\n            ) != [\&quot;0\&quot;]:\n                self.send_json(400, {\&quot;error\&quot;: \&quot;Reload accepts no request body\&quot;})\n                return\n            try:\n                self.send_json(200, observation.reload())\n            except (OSError, ValueError):\n                self.send_json(503, {\&quot;error\&quot;: \&quot;Synthetic marker unavailable or invalid\&quot;})\n\n    return Handler\n\n\ndef main() -&gt; None:\n    observation = Observation(\n        Path(\&quot;/synthetic/message\&quot;),\n        os.environ[\&quot;SYNTHETIC_MARKER\&quot;],\n        os.environ[\&quot;POD_UID\&quot;],\n    )\n    with ThreadingHTTPServer((\&quot;0.0.0.0\&quot;, 8080), handler_for(observation)) as server:\n        server.serve_forever()\n\n\nif __name__ == \&quot;__main__\&quot;:\n    main()\n&quot;</span>
-<span>      }</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;apiVersion&quot;: &quot;apps/v1&quot;,</span>
-<span>      &quot;kind&quot;: &quot;Deployment&quot;,</span>
-<span>      &quot;metadata&quot;: {</span>
-<span>        &quot;name&quot;: &quot;synthetic-secret-observer&quot;,</span>
-<span>        &quot;labels&quot;: {</span>
-<span>          &quot;app&quot;: &quot;synthetic-secret-observer&quot;,</span>
-<span>          &quot;ds60-lesson&quot;: &quot;k8s-019&quot;</span>
-<span>        }</span>
-<span>      },</span>
-<span>      &quot;spec&quot;: {</span>
-<span>        &quot;replicas&quot;: 1,</span>
-<span>        &quot;revisionHistoryLimit&quot;: 0,</span>
-<span>        &quot;progressDeadlineSeconds&quot;: 60,</span>
-<span>        &quot;selector&quot;: {</span>
-<span>          &quot;matchLabels&quot;: {</span>
-<span>            &quot;app&quot;: &quot;synthetic-secret-observer&quot;</span>
-<span>          }</span>
-<span>        },</span>
-<span>        &quot;template&quot;: {</span>
-<span>          &quot;metadata&quot;: {</span>
-<span>            &quot;labels&quot;: {</span>
-<span>              &quot;app&quot;: &quot;synthetic-secret-observer&quot;,</span>
-<span>              &quot;ds60-lesson&quot;: &quot;k8s-019&quot;</span>
-<span>            }</span>
-<span>          },</span>
-<span>          &quot;spec&quot;: {</span>
-<span>            &quot;automountServiceAccountToken&quot;: false,</span>
-<span>            &quot;terminationGracePeriodSeconds&quot;: 1,</span>
-<span>            &quot;securityContext&quot;: {</span>
-<span>              &quot;runAsNonRoot&quot;: true,</span>
-<span>              &quot;runAsUser&quot;: 65532,</span>
-<span>              &quot;runAsGroup&quot;: 65532,</span>
-<span>              &quot;fsGroup&quot;: 65532,</span>
-<span>              &quot;seccompProfile&quot;: {</span>
-<span>                &quot;type&quot;: &quot;RuntimeDefault&quot;</span>
-<span>              }</span>
-<span>            },</span>
-<span>            &quot;containers&quot;: [</span>
-<span>              {</span>
-<span>                &quot;name&quot;: &quot;observer&quot;,</span>
-<span>                &quot;image&quot;: &quot;ds60sqlpy-k8s-fixture:0.2.0&quot;,</span>
-<span>                &quot;imagePullPolicy&quot;: &quot;Never&quot;,</span>
-<span>                &quot;command&quot;: [</span>
-<span>                  &quot;python&quot;,</span>
-<span>                  &quot;-u&quot;,</span>
-<span>                  &quot;/lesson/app.py&quot;</span>
-<span>                ],</span>
-<span>                &quot;env&quot;: [</span>
-<span>                  {</span>
-<span>                    &quot;name&quot;: &quot;SYNTHETIC_MARKER&quot;,</span>
-<span>                    &quot;valueFrom&quot;: {</span>
-<span>                      &quot;secretKeyRef&quot;: {</span>
-<span>                        &quot;name&quot;: &quot;synthetic-message&quot;,</span>
-<span>                        &quot;key&quot;: &quot;lesson-message&quot;</span>
-<span>                      }</span>
-<span>                    }</span>
-<span>                  },</span>
-<span>                  {</span>
-<span>                    &quot;name&quot;: &quot;POD_UID&quot;,</span>
-<span>                    &quot;valueFrom&quot;: {</span>
-<span>                      &quot;fieldRef&quot;: {</span>
-<span>                        &quot;fieldPath&quot;: &quot;metadata.uid&quot;</span>
-<span>                      }</span>
-<span>                    }</span>
-<span>                  }</span>
-<span>                ],</span>
-<span>                &quot;ports&quot;: [</span>
-<span>                  {</span>
-<span>                    &quot;containerPort&quot;: 8080</span>
-<span>                  }</span>
-<span>                ],</span>
-<span>                &quot;resources&quot;: {</span>
-<span>                  &quot;requests&quot;: {</span>
-<span>                    &quot;cpu&quot;: &quot;25m&quot;,</span>
-<span>                    &quot;memory&quot;: &quot;32Mi&quot;</span>
-<span>                  },</span>
-<span>                  &quot;limits&quot;: {</span>
-<span>                    &quot;cpu&quot;: &quot;100m&quot;,</span>
-<span>                    &quot;memory&quot;: &quot;96Mi&quot;</span>
-<span>                  }</span>
-<span>                },</span>
-<span>                &quot;securityContext&quot;: {</span>
-<span>                  &quot;allowPrivilegeEscalation&quot;: false,</span>
-<span>                  &quot;readOnlyRootFilesystem&quot;: true,</span>
-<span>                  &quot;capabilities&quot;: {</span>
-<span>                    &quot;drop&quot;: [</span>
-<span>                      &quot;ALL&quot;</span>
-<span>                    ]</span>
-<span>                  }</span>
-<span>                },</span>
-<span>                &quot;readinessProbe&quot;: {</span>
-<span>                  &quot;httpGet&quot;: {</span>
-<span>                    &quot;path&quot;: &quot;/ready&quot;,</span>
-<span>                    &quot;port&quot;: 8080</span>
-<span>                  },</span>
-<span>                  &quot;periodSeconds&quot;: 2,</span>
-<span>                  &quot;timeoutSeconds&quot;: 1</span>
-<span>                },</span>
-<span>                &quot;volumeMounts&quot;: [</span>
-<span>                  {</span>
-<span>                    &quot;name&quot;: &quot;program&quot;,</span>
-<span>                    &quot;mountPath&quot;: &quot;/lesson&quot;,</span>
-<span>                    &quot;readOnly&quot;: true</span>
-<span>                  },</span>
-<span>                  {</span>
-<span>                    &quot;name&quot;: &quot;marker&quot;,</span>
-<span>                    &quot;mountPath&quot;: &quot;/synthetic&quot;,</span>
-<span>                    &quot;readOnly&quot;: true</span>
-<span>                  }</span>
-<span>                ]</span>
-<span>              }</span>
-<span>            ],</span>
-<span>            &quot;volumes&quot;: [</span>
-<span>              {</span>
-<span>                &quot;name&quot;: &quot;program&quot;,</span>
-<span>                &quot;configMap&quot;: {</span>
-<span>                  &quot;name&quot;: &quot;synthetic-secret-observer-program&quot;</span>
-<span>                }</span>
-<span>              },</span>
-<span>              {</span>
-<span>                &quot;name&quot;: &quot;marker&quot;,</span>
-<span>                &quot;secret&quot;: {</span>
-<span>                  &quot;secretName&quot;: &quot;synthetic-message&quot;,</span>
-<span>                  &quot;defaultMode&quot;: 288,</span>
-<span>                  &quot;items&quot;: [</span>
-<span>                    {</span>
-<span>                      &quot;key&quot;: &quot;lesson-message&quot;,</span>
-<span>                      &quot;path&quot;: &quot;message&quot;</span>
-<span>                    }</span>
-<span>                  ]</span>
-<span>                }</span>
-<span>              }</span>
-<span>            ]</span>
-<span>          }</span>
-<span>        }</span>
-<span>      }</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;apiVersion&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;v1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;List&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;items&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;apiVersion&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;v1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Secret&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-message&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;labels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;app&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;ds60-lesson&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;k8s-019&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">},</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;type&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Opaque&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;stringData&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;lesson-message&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;DUMMY_LESSON_ONLY&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;apiVersion&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;v1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ConfigMap&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer-program&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;labels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;app&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;ds60-lesson&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;k8s-019&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">},</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;data&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;app.py&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;\&quot;\&quot;\&quot;Observe only two public teaching markers; never return marker bytes.\&quot;\&quot;\&quot;\n\nfrom __future__ import annotations\n\nimport json\nimport os\nimport threading\nimport uuid\nfrom http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\nfrom pathlib import Path\n\nMARKERS = {b\&quot;DUMMY_LESSON_ONLY\&quot;: \&quot;initial\&quot;, b\&quot;DUMMY_LESSON_ROTATED\&quot;: \&quot;rotated\&quot;}\n\n\ndef marker_label(path: Path) -&gt; str:\n    with path.open(\&quot;rb\&quot;) as stream:\n        value = stream.read(65)\n    if value not in MARKERS:\n        raise ValueError(\&quot;Only the two public teaching markers are accepted\&quot;)\n    return MARKERS[value]\n\n\nclass Observation:\n    def __init__(self, path: Path, environment: str, pod_uid: str) -&gt; None:\n        encoded = environment.encode(\&quot;ascii\&quot;)\n        if encoded not in MARKERS:\n            raise ValueError(\&quot;A public teaching environment marker is required\&quot;)\n        self.path = path\n        self.environment = MARKERS[encoded]\n        self.cached = marker_label(path)\n        self.pod_uid = pod_uid\n        self.boot_id = uuid.uuid4().hex\n        self.lock = threading.Lock()\n\n    def _snapshot(self, projected: str) -&gt; dict[str, str]:\n        return {\n            \&quot;pod_uid\&quot;: self.pod_uid,\n            \&quot;boot_id\&quot;: self.boot_id,\n            \&quot;environment\&quot;: self.environment,\n            \&quot;projected_file\&quot;: projected,\n            \&quot;application_cache\&quot;: self.cached,\n        }\n\n    def observe(self) -&gt; dict[str, str]:\n        with self.lock:\n            return self._snapshot(marker_label(self.path))\n\n    def reload(self) -&gt; dict[str, str]:\n        with self.lock:\n            projected = marker_label(self.path)\n            self.cached = projected\n            return self._snapshot(projected)\n\n\ndef handler_for(observation: Observation) -&gt; type[BaseHTTPRequestHandler]:\n    class Handler(BaseHTTPRequestHandler):\n        def log_message(self, format: str, *args: object) -&gt; None:\n            return\n\n        def send_json(self, status: int, value: dict[str, str]) -&gt; None:\n            content = json.dumps(value).encode()\n            self.send_response(status)\n            self.send_header(\&quot;Content-Type\&quot;, \&quot;application/json\&quot;)\n            self.send_header(\&quot;Content-Length\&quot;, str(len(content)))\n            self.send_header(\&quot;Cache-Control\&quot;, \&quot;no-store\&quot;)\n            self.end_headers()\n            self.wfile.write(content)\n\n        def do_GET(self) -&gt; None:\n            if self.path not in (\&quot;/observe\&quot;, \&quot;/ready\&quot;):\n                self.send_json(404, {\&quot;error\&quot;: \&quot;Unknown teaching endpoint\&quot;})\n                return\n            try:\n                self.send_json(200, observation.observe())\n            except (OSError, ValueError):\n                self.send_json(503, {\&quot;error\&quot;: \&quot;Synthetic marker unavailable or invalid\&quot;})\n\n        def do_POST(self) -&gt; None:\n            if self.path != \&quot;/reload\&quot;:\n                self.send_json(404, {\&quot;error\&quot;: \&quot;Unknown teaching endpoint\&quot;})\n                return\n            if self.headers.get_all(\&quot;Transfer-Encoding\&quot;) is not None or self.headers.get_all(\n                \&quot;Content-Length\&quot;, [\&quot;0\&quot;]\n            ) != [\&quot;0\&quot;]:\n                self.send_json(400, {\&quot;error\&quot;: \&quot;Reload accepts no request body\&quot;})\n                return\n            try:\n                self.send_json(200, observation.reload())\n            except (OSError, ValueError):\n                self.send_json(503, {\&quot;error\&quot;: \&quot;Synthetic marker unavailable or invalid\&quot;})\n\n    return Handler\n\n\ndef main() -&gt; None:\n    observation = Observation(\n        Path(\&quot;/synthetic/message\&quot;),\n        os.environ[\&quot;SYNTHETIC_MARKER\&quot;],\n        os.environ[\&quot;POD_UID\&quot;],\n    )\n    with ThreadingHTTPServer((\&quot;0.0.0.0\&quot;, 8080), handler_for(observation)) as server:\n        server.serve_forever()\n\n\nif __name__ == \&quot;__main__\&quot;:\n    main()\n&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;apiVersion&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;apps/v1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Deployment&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;labels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;app&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;ds60-lesson&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;k8s-019&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">},</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;spec&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;replicas&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;revisionHistoryLimit&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;progressDeadlineSeconds&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">60</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;selector&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;matchLabels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;app&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;template&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;labels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;app&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;ds60-lesson&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;k8s-019&quot;</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span></span>
+<span class="source-line">          <span class="syntax-punctuation">},</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;spec&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;automountServiceAccountToken&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;terminationGracePeriodSeconds&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;securityContext&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;runAsNonRoot&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;runAsUser&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">65532</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;runAsGroup&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">65532</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;fsGroup&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">65532</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;seccompProfile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;type&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;RuntimeDefault&quot;</span></span>
+<span class="source-line">              <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-punctuation">},</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;containers&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">              <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;observer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;image&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ds60sqlpy-k8s-fixture:0.2.0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;imagePullPolicy&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Never&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;command&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;-u&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;/lesson/app.py&quot;</span></span>
+<span class="source-line">                <span class="syntax-punctuation">],</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;env&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;SYNTHETIC_MARKER&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;valueFrom&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                      <span class="syntax-tag">&quot;secretKeyRef&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-message&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-tag">&quot;key&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;lesson-message&quot;</span></span>
+<span class="source-line">                      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;POD_UID&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;valueFrom&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                      <span class="syntax-tag">&quot;fieldRef&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                        <span class="syntax-tag">&quot;fieldPath&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;metadata.uid&quot;</span></span>
+<span class="source-line">                      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">],</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;ports&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;containerPort&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8080</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">],</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;resources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;requests&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;cpu&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;25m&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;memory&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;32Mi&quot;</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;limits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;cpu&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;100m&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;memory&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;96Mi&quot;</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;securityContext&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;allowPrivilegeEscalation&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;readOnlyRootFilesystem&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;capabilities&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;drop&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                      <span class="syntax-string">&quot;ALL&quot;</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;readinessProbe&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;httpGet&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;/ready&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;port&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8080</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;periodSeconds&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;timeoutSeconds&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span></span>
+<span class="source-line">                <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;volumeMounts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;program&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;mountPath&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;/lesson&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;readOnly&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">},</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;marker&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;mountPath&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;/synthetic&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;readOnly&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">]</span></span>
+<span class="source-line">              <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-punctuation">],</span></span>
+<span class="source-line">            <span class="syntax-tag">&quot;volumes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">              <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;program&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;configMap&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-secret-observer-program&quot;</span></span>
+<span class="source-line">                <span class="syntax-punctuation">}</span></span>
+<span class="source-line">              <span class="syntax-punctuation">},</span></span>
+<span class="source-line">              <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;marker&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;secret&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;secretName&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic-message&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;defaultMode&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">288</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-tag">&quot;items&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                      <span class="syntax-tag">&quot;key&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;lesson-message&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                      <span class="syntax-tag">&quot;path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;message&quot;</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                  <span class="syntax-punctuation">]</span></span>
+<span class="source-line">                <span class="syntax-punctuation">}</span></span>
+<span class="source-line">              <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-punctuation">]</span></span>
+<span class="source-line">          <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -719,7 +719,7 @@
       "runtime": "k8s-kind",
       "outcome": "Handle resource-version conflicts and watch expiration without losing state.",
       "lab": "Apply conditional edits to an owned object and replay a supplied expired-watch trace.",
-      "verification": "One stale update receives409, relist/reconcile recovers and resourceVersion is not treated as a user-defined clock.",
+      "verification": "One stale update receives 409, relist/reconcile recovers and resourceVersion is not treated as a user-defined clock.",
       "concepts": [
         "watch",
         "resourceVersion",
@@ -984,7 +984,7 @@
       "supports": "Preload node/workload images and record exact content digests before disconnected study."
     },
     {
-      "title": "kind Using WSL2",
+      "title": "kind Using WSL 2",
       "url": "https://kind.sigs.k8s.io/docs/user/using-wsl2/",
       "checked": "2026-10-22",
       "supports": "Windows Linux-container/WSL2 route; current engine prerequisites require separate verification."

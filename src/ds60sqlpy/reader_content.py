@@ -47,7 +47,7 @@ def normalize_language(language: str) -> str:
     """Return a bounded class-safe lexer alias, retaining unknown safe names."""
 
     value = language.strip().lower()
-    if not re.fullmatch(r"[a-z0-9_+.-]{0,64}", value):
+    if not re.fullmatch(r"[a-z0-9_+#.-]{0,64}", value):
         return "text"
     return _ALIASES.get(value, value)
 
@@ -120,6 +120,13 @@ def render_code_block(source: str, language: str = "text", *, line_numbers: bool
     language = normalize_language(language)
     normalized = source.replace("\r\n", "\n").replace("\r", "\n")
     content = highlight_source(normalized, language)
+    # Static documents trim HTML line endings. Entities retain source whitespace
+    # through that cleanup and decode back to the same copied spaces and tabs.
+    content = re.sub(
+        r"[ \t]+(?=\n|$)",
+        lambda match: "".join("&#32;" if char == " " else "&#9;" for char in match.group()),
+        content,
+    )
     if line_numbers:
         content = "\n".join(
             f'<span class="source-line">{line}</span>' for line in content.split("\n")

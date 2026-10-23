@@ -42,7 +42,7 @@ The paired Keras guide uses trainable flags and a deliberate training argument f
 
 ## Exercise 1: Freeze a known base
 
-The question is: Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.
+The question is: Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.
 
 The identity fixture isolates ownership. A learned base would have different values but should obey the same freeze contract.
 

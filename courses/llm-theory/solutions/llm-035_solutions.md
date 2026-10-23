@@ -18,7 +18,7 @@ Maintain a dictionary from(request,model_version,tokenizer_version) to K/V state
 
 ## Exercise 1: Define unequal requests
 
-The question is: Use requestA tokens2,5,7 andB tokens1,3 with separate cache keys.
+The question is: Use requestA tokens2,5,7 and B tokens1,3 with separate cache keys.
 
 Different request lengths require different offsets. A shared cache tensor without per-request bookkeeping would confuse the next position.
 
@@ -104,9 +104,9 @@ caps={'A':3,'B':2}; consumed={r:len(outputs[r]) for r in requests}
 assert consumed==caps and consumed['B']>=caps['B']
 ```
 
-**Expected:** A andB at their own caps;B cannot advance.
+**Expected:** A and B at their own caps;B cannot advance.
 
-**Verify:** Compare the computed values or written argument with A andB at their own caps;B cannot advance.
+**Verify:** Compare the computed values or written argument with A and B at their own caps;B cannot advance.
 
 ## Review after comparison
 

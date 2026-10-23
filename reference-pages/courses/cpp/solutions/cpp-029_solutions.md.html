@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,7 +168,7 @@
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Thread startup, cancellation request and completion are separate events. The promise reports startup, the atomic flag requests cancellation and join confirms completion. A fixed delay cannot replace any of these events because scheduling may be slower or faster than expected. A reference capture borrows a local variable, so scope must not end first. jthread adds automatic joining and stop support, but cooperative code still has to inspect its token.</p>
 <h3 id="thread-lifetime-and-cooperative-cancellation">Thread lifetime and cooperative cancellation<a class="heading-anchor" href="#thread-lifetime-and-cooperative-cancellation" aria-label="Link to this section">#</a></h3>
-<p>Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker&#x27;s last access. In the first program, answer belongs to main, the thread writes42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.</p>
+<p>Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker&#x27;s last access. In the first program, answer belongs to main, the thread writes 42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.</p>
 <p>A thread object that remains joinable at destruction is a serious lifecycle error for std::thread. Every path after successful creation needs an ownership decision: join the work or deliberately transfer its management. Detaching makes lifetime reasoning harder because the creating scope can disappear while the worker still uses borrowed state. The course examples retain and join every worker instead.</p>
 <p>Cancellation is a request, not an asynchronous kill. The second example uses a promise/future to establish that the worker reached its startup point, then an atomic flag to request stop. The worker repeatedly observes the flag and exits its loop. join confirms actual completion. A fixed sleep would prove neither startup nor completion and can fail on a slower or more heavily loaded machine.</p>
 <p>The memory used for the flag must support concurrent access. A plain bool read and written by different threads without synchronization would introduce a data race. Atomic access makes the flag communication defined. That does not imply every other shared object is safe; each shared value needs its own ownership or synchronization argument.</p>
@@ -130,10 +176,10 @@
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
 <p>If a test occasionally reads0 instead of 42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-cpp">int answer=0; std::thread t([&amp;]{answer=42;}); t.join(); assert(answer==42);</code></pre>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">int</span> answer<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">thread</span> t<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">{</span>answer<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> t<span class="syntax-punctuation">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span>answer<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected: After join the result is 42 and the borrowed local is still alive.</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-cpp">std::atomic&lt;bool&gt; stop{false}; // worker checks stop; owner requests and joins</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>atomic<span class="syntax-operator">&lt;</span><span class="syntax-keyword">bool</span><span class="syntax-operator">&gt;</span> stop<span class="syntax-punctuation">{</span><span class="syntax-builtin">false</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> worker checks stop<span class="syntax-punctuation">;</span> owner requests <span class="syntax-keyword">and</span> joins</code></pre>
 <p>Expected: A stop flag requests cooperation; the owner still waits for termination.</p>
 <h3 id="exercise-1-trace-lifetimes">Exercise 1: Trace lifetimes<a class="heading-anchor" href="#exercise-1-trace-lifetimes" aria-label="Link to this section">#</a></h3>
 <p>Draw result, worker creation, write, join and scope exit.</p>

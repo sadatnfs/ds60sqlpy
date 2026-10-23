@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-A stream is a single-use computation pipeline over a source. Intermediate operations such asfilter andmap are lazy: defining them does not necessarily process elements. A terminal operation such ascollect orsum triggers the computation. The pipeline describes transformations, not a mutable container. Reduction requires an identity and an associative combination rule if it is to behave predictably under partitioning. Side effects in stream operations can make execution order and parallel behavior difficult to reason about. Prefer collectors and pure mappings over appending to a shared list from a parallelforEach.
+A stream is a single-use computation pipeline over a source. Intermediate operations such as filter and map are lazy: defining them does not necessarily process elements. A terminal operation such as collect or sum triggers the computation. The pipeline describes transformations, not a mutable container. Reduction requires an identity and an associative combination rule if it is to behave predictably under partitioning. Side effects in stream operations can make execution order and parallel behavior difficult to reason about. Prefer collectors and pure mappings over appending to a shared list from a parallelforEach.
 
 **Lazy pipeline:** A computation whose intermediate stages wait for a terminal operation.
 
@@ -18,7 +18,7 @@ stream() creates a pipeline,filter keeps matching elements,andmapToInt selects a
 
 ## Exercise 1: Filter and sum
 
-Task: Keep even values from1,2,3,4 and sum their squares.
+Task: Keep even values from 1,2,3,4 and sum their squares.
 
 The pipeline preserves the order of conceptual operations: selection happens before squaring and reduction. The result is a scalar rather than a modified source list.
 
@@ -50,7 +50,7 @@ assert pipeline.toList().equals(List.of(2,4,6)) && calls.get() == 3;
 
 ## Exercise 3: Group with a collector
 
-Task: Count red,blue,red withgroupingBy andcounting.
+Task: Count red,blue,red withgroupingBy and counting.
 
 The collector owns accumulation rather than relying on shared external mutation. The map ordering is unspecified unless a specific ordered map supplier is chosen.
 
@@ -84,7 +84,7 @@ assert reused;
 
 Task: Compare sum reduction with identity0 against a deliberately wrong identity10.
 
-An identity is not an arbitrary initial offset when parallel partitions may each receive it. The neutral value for addition is0.
+An identity is not an arbitrary initial offset when parallel partitions may each receive it. The neutral value for addition is 0.
 
 ```java
 int correct = List.of(1,2,3).stream().reduce(0,Integer::sum);
@@ -107,9 +107,9 @@ assert (10-3)-2 == 5 && 10-(3-2) == 9;
 assert java.util.stream.IntStream.rangeClosed(1,100).parallel().sum() == 5050;
 ```
 
-**Expected:** 5 versus9;parallel sum5050.
+**Expected:** 5 versus 9; parallel sum 5050.
 
-**Verify:** Compare the program values or named exception with 5 versus9;parallel sum5050. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 5 versus 9; parallel sum 5050. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

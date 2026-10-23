@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-35.html#learner">learner SQL</a> · <a href="sql-35.html#solution-1">solution reasoning</a> · <a href="sql-35.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-35 — Avoiding Pitfalls</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day35_avoiding_pitfalls.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day35_avoiding_pitfalls.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day35_avoiding_pitfalls.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,11 +466,11 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day35_avoiding_pitfalls.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">EXPLAIN ANALYZE SELECT * FROM orders WHERE date_trunc(&#x27;day&#x27;, order_date) = date_trunc(&#x27;day&#x27;, now());</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its the primary/business key of <code>orders</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">EXPLAIN ANALYZE SELECT * FROM orders WHERE order_date &gt;= date_trunc(&#x27;day&#x27;, now()) AND order_date &lt; date_trunc(&#x27;day&#x27;, now()) + interval &#x27;1 day&#x27;;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its the primary/business key of <code>orders</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -484,7 +532,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>Fix fanout at the grain boundary instead of hiding it with <code>DISTINCT</code>. <code>COUNT(*)</code> counts rows; <code>COUNT(email)</code> counts only non-NULL emails. Neither is universally “correct”—the metric definition decides.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-35 — Avoiding Pitfalls.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-35 — Avoiding Pitfalls.
 
 I have completed the direct catalog prerequisite: `sql-34`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day35_avoiding_pitfalls.md
@@ -542,87 +590,87 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 35: Avoiding Common Performance Pitfalls</span>
-<span>-- BEGINNER WORKFLOW — sql-35: Avoiding Pitfalls</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day35_avoiding_pitfalls.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-35/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: orders, customers.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Pitfall: function on column prevents index usage</span>
-<span>EXPLAIN ANALYZE SELECT * FROM orders WHERE date_trunc(&#x27;day&#x27;, order_date) = date_trunc(&#x27;day&#x27;, now());</span>
-<span>-- Better:</span>
-<span>EXPLAIN ANALYZE SELECT * FROM orders WHERE order_date &gt;= date_trunc(&#x27;day&#x27;, now()) AND order_date &lt; date_trunc(&#x27;day&#x27;, now()) + interval &#x27;1 day&#x27;;</span>
-<span> </span>
-<span>-- Pitfall: Correlated subquery per row</span>
-<span>EXPLAIN ANALYZE</span>
-<span>SELECT c.customer_id,</span>
-<span>       (SELECT SUM(o.total_amount) FROM orders o WHERE o.customer_id = c.customer_id)</span>
-<span>FROM customers c;</span>
-<span>-- Better: pre-aggregate and join</span>
-<span>EXPLAIN ANALYZE</span>
-<span>WITH agg AS (</span>
-<span>  SELECT customer_id, SUM(total_amount) AS sum_total FROM orders GROUP BY customer_id</span>
-<span>)</span>
-<span>SELECT c.customer_id, a.sum_total</span>
-<span>FROM customers c LEFT JOIN agg a ON a.customer_id = c.customer_id;</span>
-<span> </span>
-<span>-- N+1 pattern in application layer (illustrated only)</span>
-<span>-- Prefer set-based queries over per-row queries.</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Rewrite 3 queries to avoid functions on indexed columns.</span>
-<span>--    Inputs: For sql-35 Exercise 1, run the underlying read-only query over `orders`, `order_date`, and `CURRENT_DATE` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`.</span>
-<span>--    Verify: For sql-35 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
-<span>-- 2. Replace correlated subqueries with joins/CTEs.</span>
-<span>--    Inputs: For sql-35 Exercise 2, run the underlying read-only query over `orders`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 2, expected output: one row per customer in both forms. The `LEFT JOIN` is required to retain customers with no orders; changing it to an inner join would alter the answer. The final columns are `customer_id`, and `lifetime_revenue`.</span>
-<span>--    Verify: For sql-35 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 2, run `order_totals` one at a time. Record each CTE&#x27;s row count and `customer_id` uniqueness before the next stage uses it.</span>
-<span>-- 3. Prediction: compare LIKE &#x27;A%&#x27; with LIKE &#x27;%A%&#x27;. State which pattern can use</span>
-<span>--    a normal B-tree text index more directly and why the leading wildcard</span>
-<span>--    changes the search.</span>
-<span>--    Inputs: For sql-35 Exercise 3, run the underlying read-only query over `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`.</span>
-<span>--    Verify: For sql-35 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span>
-<span>-- 4. Construction: replace an OFFSET-based “next page” query with keyset</span>
-<span>--    pagination ordered by (order_date DESC, order_id DESC).</span>
-<span>--    Inputs: For sql-35 Exercise 4, read from `orders`. Build the answer toward `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 4, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.</span>
-<span>--    Verify: For sql-35 Exercise 4, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, and `order_date` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_date DESC, o.order_id DESC`.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 4, run `boundary` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 5. Debugging: find and repair a join that calculates revenue after joining</span>
-<span>--    both payments and order_items at their raw grains.</span>
-<span>--    Inputs: For sql-35 Exercise 5, read from `payments`, `order_items`, and `orders`. Build the answer toward `order_id`, `paid`, and `sold`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid`, and `sold`. The final order is `o.order_id`.</span>
-<span>--    Verify: For sql-35 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid`, and `sold` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 5, run `paid`, and `sold` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 6. Edge case: compare COUNT(*) and COUNT(email) for customers, and explain</span>
-<span>--    why nullable inputs make the two counts intentionally different.</span>
-<span>--    Inputs: For sql-35 Exercise 6, read from `customers`. Build the answer toward `customer_rows`, `customers_with_email`, and `customers_without_email`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-35 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.</span>
-<span>--    Verify: For sql-35 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_rows`, `customers_with_email`, and `customers_without_email` against `customers`. Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-35 Exercise 6, select `customer_id` from `customers` before adding derived columns.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 35: Avoiding Common Performance Pitfalls</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-35: Avoiding Pitfalls</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day35_avoiding_pitfalls.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-35/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: orders, customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: function on column prevents index usage</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Better:</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Correlated subquery per row</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders o <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Better: pre-aggregate and join</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> agg <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sum_total <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>sum_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> agg a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- N+1 pattern in application layer (illustrated only)</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prefer set-based queries over per-row queries.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Rewrite 3 queries to avoid functions on indexed columns.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 1, run the underlying read-only query over `orders`, `order_date`, and `CURRENT_DATE` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Replace correlated subqueries with joins/CTEs.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 2, run the underlying read-only query over `orders`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 2, expected output: one row per customer in both forms. The `LEFT JOIN` is required to retain customers with no orders; changing it to an inner join would alter the answer. The final columns are `customer_id`, and `lifetime_revenue`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 2, run `order_totals` one at a time. Record each CTE&#x27;s row count and `customer_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: compare LIKE &#x27;A%&#x27; with LIKE &#x27;%A%&#x27;. State which pattern can use</span></span>
+<span class="source-line"><span class="syntax-comment">--    a normal B-tree text index more directly and why the leading wildcard</span></span>
+<span class="source-line"><span class="syntax-comment">--    changes the search.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 3, run the underlying read-only query over `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: replace an OFFSET-based “next page” query with keyset</span></span>
+<span class="source-line"><span class="syntax-comment">--    pagination ordered by (order_date DESC, order_id DESC).</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 4, read from `orders`. Build the answer toward `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 4, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 4, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, and `order_date` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_date DESC, o.order_id DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 4, run `boundary` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: find and repair a join that calculates revenue after joining</span></span>
+<span class="source-line"><span class="syntax-comment">--    both payments and order_items at their raw grains.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 5, read from `payments`, `order_items`, and `orders`. Build the answer toward `order_id`, `paid`, and `sold`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid`, and `sold`. The final order is `o.order_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid`, and `sold` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 5, run `paid`, and `sold` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: compare COUNT(*) and COUNT(email) for customers, and explain</span></span>
+<span class="source-line"><span class="syntax-comment">--    why nullable inputs make the two counts intentionally different.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-35 Exercise 6, read from `customers`. Build the answer toward `customer_rows`, `customers_with_email`, and `customers_without_email`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-35 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-35 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_rows`, `customers_with_email`, and `customers_without_email` against `customers`. Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-35 Exercise 6, select `customer_id` from `customers` before adding derived columns.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -658,10 +706,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-35-solutions-avoiding-performance-pitfalls">Day 35 — Solutions: Avoiding Performance Pitfalls<a class="heading-anchor" href="#solution-1--day-35-solutions-avoiding-performance-pitfalls" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day35_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day35_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day35_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -678,43 +726,43 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>This learner day asks for three rewrites that keep functions off an indexed column and one rewrite of a correlated subquery. The examples use half-open timestamp ranges because they are precise and B-tree friendly.</p>
 <h4 id="solution-1--exercise-1-three-sargable-predicate-rewrites">Exercise 1 — Three sargable predicate rewrites<a class="heading-anchor" href="#solution-1--exercise-1-three-sargable-predicate-rewrites" aria-label="Link to this section">#</a></h4>
 <p>Each “better” predicate leaves <code>order_date</code> bare, allowing an index on that column to define a contiguous range.</p>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
--- 1. One calendar day
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE date_trunc(&#x27;day&#x27;, order_date) = date_trunc(&#x27;day&#x27;, CURRENT_TIMESTAMP);
+<span class="syntax-comment">-- 1. One calendar day</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE order_date &gt;= date_trunc(&#x27;day&#x27;, CURRENT_TIMESTAMP)
-  AND order_date &lt; date_trunc(&#x27;day&#x27;, CURRENT_TIMESTAMP) + interval &#x27;1 day&#x27;;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span>
 
--- 2. Current calendar year
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE EXTRACT(year FROM order_date) = EXTRACT(year FROM CURRENT_DATE);
+<span class="syntax-comment">-- 2. Current calendar year</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE order_date &gt;= date_trunc(&#x27;year&#x27;, CURRENT_DATE)
-  AND order_date &lt; date_trunc(&#x27;year&#x27;, CURRENT_DATE) + interval &#x27;1 year&#x27;;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 year&#x27;</span><span class="syntax-punctuation">;</span>
 
--- 3. Last seven calendar dates, including today
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE order_date::date &gt;= CURRENT_DATE - 6;
+<span class="syntax-comment">-- 3. Last seven calendar dates, including today</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id
-FROM orders
-WHERE order_date &gt;= (CURRENT_DATE - 6)::timestamptz
-  AND order_date &lt; (CURRENT_DATE + 1)::timestamptz;</code></pre>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz
+  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected result sets within each pair are equivalent under the session time zone. Plan nodes can remain sequential scans because the dataset is small or because the demonstration index from Day 32 was rolled back.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -727,28 +775,28 @@ WHERE order_date &gt;= (CURRENT_DATE - 6)::timestamptz
 <li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
 </ul>
 <h4 id="solution-1--exercise-2-replace-a-per-customer-correlated-aggregate">Exercise 2 — Replace a per-customer correlated aggregate<a class="heading-anchor" href="#solution-1--exercise-2-replace-a-per-customer-correlated-aggregate" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT c.customer_id,
-       (
-         SELECT SUM(o.total_amount)
-         FROM orders o
-         WHERE o.customer_id = c.customer_id
-       ) AS lifetime_revenue
-FROM customers c;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span>
+         <span class="syntax-keyword">FROM</span> orders o
+         <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-WITH order_totals AS (
-  SELECT customer_id,
-         SUM(total_amount) AS lifetime_revenue
-  FROM orders
-  GROUP BY customer_id
-)
-SELECT c.customer_id,
-       ot.lifetime_revenue
-FROM customers c
-LEFT JOIN order_totals ot ON ot.customer_id = c.customer_id;</code></pre>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WITH</span> order_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       ot<span class="syntax-punctuation">.</span>lifetime_revenue
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_totals ot <span class="syntax-keyword">ON</span> ot<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: one row per customer in both forms. The <code>LEFT JOIN</code> is required to retain customers with no orders; changing it to an inner join would alter the answer.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -847,98 +895,98 @@ LEFT JOIN order_totals ot ON ot.customer_id = c.customer_id;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 35 solutions: avoiding common query pitfalls</span>
-<span>-- SOLUTION READING MAP — sql-35: Avoiding Pitfalls</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day35_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day35_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: three sargable rewrites.</span>
-<span>-- 1a. Range bounds instead of date_trunc(order_date).</span>
-<span>SELECT COUNT(*)</span>
-<span>FROM orders</span>
-<span>WHERE order_date &gt;= date_trunc(&#x27;month&#x27;, CURRENT_TIMESTAMP)</span>
-<span>  AND order_date &lt; date_trunc(&#x27;month&#x27;, CURRENT_TIMESTAMP) + interval &#x27;1 month&#x27;;</span>
-<span> </span>
-<span>-- 1b. Exact comparison can use the unique email B-tree.</span>
-<span>SELECT customer_id</span>
-<span>FROM customers</span>
-<span>WHERE email = &#x27;customer100@example.com&#x27;;</span>
-<span> </span>
-<span>-- 1c. country is NOT NULL, so COALESCE is unnecessary.</span>
-<span>SELECT COUNT(*)</span>
-<span>FROM customers</span>
-<span>WHERE country = &#x27;US&#x27;;</span>
-<span> </span>
-<span>-- Exercise 2: replace a per-customer correlated aggregate with one grouped CTE.</span>
-<span>WITH order_totals AS (</span>
-<span>  SELECT customer_id,</span>
-<span>         COUNT(*) AS orders,</span>
-<span>         SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY customer_id</span>
-<span>)</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.full_name,</span>
-<span>       COALESCE(ot.orders, 0) AS orders,</span>
-<span>       COALESCE(ot.revenue, 0) AS revenue</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN order_totals ot USING (customer_id)</span>
-<span>ORDER BY revenue DESC, c.customer_id;</span>
-<span> </span>
-<span>-- Exercise 3: a prefix has a searchable starting point; a leading wildcard</span>
-<span>-- generally cannot seek into a normal B-tree text index.</span>
-<span>EXPLAIN SELECT customer_id FROM customers WHERE full_name LIKE &#x27;A%&#x27;;</span>
-<span>EXPLAIN SELECT customer_id FROM customers WHERE full_name LIKE &#x27;%A%&#x27;;</span>
-<span> </span>
-<span>-- Exercise 4: keyset paging starts strictly after the final tuple from the</span>
-<span>-- previous page and repeats the identical deterministic ordering.</span>
-<span>WITH boundary AS (</span>
-<span>  SELECT order_date, order_id</span>
-<span>  FROM orders</span>
-<span>  ORDER BY order_date DESC, order_id DESC</span>
-<span>  OFFSET 19 LIMIT 1</span>
-<span>)</span>
-<span>SELECT o.order_id, o.order_date</span>
-<span>FROM orders o</span>
-<span>CROSS JOIN boundary b</span>
-<span>WHERE (o.order_date, o.order_id) &lt; (b.order_date, b.order_id)</span>
-<span>ORDER BY o.order_date DESC, o.order_id DESC</span>
-<span>LIMIT 20;</span>
-<span> </span>
-<span>-- Exercise 5: independent pre-aggregations prevent payment/item fanout.</span>
-<span>WITH paid AS (</span>
-<span>  SELECT order_id, SUM(amount) AS paid FROM payments GROUP BY order_id</span>
-<span>), sold AS (</span>
-<span>  SELECT order_id, SUM(quantity * unit_price * (1 - discount)) AS sold</span>
-<span>  FROM order_items GROUP BY order_id</span>
-<span>)</span>
-<span>SELECT o.order_id, p.paid, s.sold</span>
-<span>FROM orders o</span>
-<span>LEFT JOIN paid p USING (order_id)</span>
-<span>LEFT JOIN sold s USING (order_id)</span>
-<span>ORDER BY o.order_id</span>
-<span>LIMIT 20;</span>
-<span> </span>
-<span>-- Exercise 6: COUNT(expression) intentionally ignores NULL expression values.</span>
-<span>SELECT COUNT(*) AS customer_rows,</span>
-<span>       COUNT(email) AS customers_with_email,</span>
-<span>       COUNT(*) - COUNT(email) AS customers_without_email</span>
-<span>FROM customers;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 35 solutions: avoiding common query pitfalls</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-35: Avoiding Pitfalls</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day35_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day35_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: three sargable rewrites.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1a. Range bounds instead of date_trunc(order_date).</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1b. Exact comparison can use the unique email B-tree.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;customer100@example.com&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1c. country is NOT NULL, so COALESCE is unnecessary.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: replace a per-customer correlated aggregate with one grouped CTE.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> order_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>ot<span class="syntax-punctuation">.</span>orders<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>ot<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_totals ot <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: a prefix has a searchable starting point; a leading wildcard</span></span>
+<span class="source-line"><span class="syntax-comment">-- generally cannot seek into a normal B-tree text index.</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">WHERE</span> full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;A%&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">WHERE</span> full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%A%&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: keyset paging starts strictly after the final tuple from the</span></span>
+<span class="source-line"><span class="syntax-comment">-- previous page and repeats the identical deterministic ordering.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> boundary <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">,</span> order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> order_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">  <span class="syntax-keyword">OFFSET</span> <span class="syntax-number">19</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> boundary b</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: independent pre-aggregations prevent payment/item fanout.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> paid <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> paid <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sold <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sold</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>paid<span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">.</span>sold</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> paid p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> sold s <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: COUNT(expression) intentionally ignores NULL expression values.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers_with_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers_without_email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

@@ -222,7 +222,7 @@ For a deliberately negative case, do not wait for Complete as though success wer
 
 First record Pod UIDs and restart counts. Change only the Deployment template's readiness path in `echo.yaml` from `/ready` to `/missing`, then apply the edited file. Do not use `kubectl edit` as a replacement for saving the desired-state source. The changed template may create a new ReplicaSet; identify the current-generation Pods rather than assuming old/new Pods have the same UID.
 
-In a qualified teacher fixture, the two intended new processes can start while their readiness checks return404. Observe the rollout until the declared bounded deadline; a rollout timeout is expected for this bad configuration. Do not interpret a nonzero rollout status as an absent API object. Old ready Pods may remain during the failed rolling update, so the Service can still have old eligible backends. This is the important difference between a real rolling update and the simpler statement that two already-running Pods become unready.
+In a qualified teacher fixture, the two intended new processes can start while their readiness checks return 404. Observe the rollout until the declared bounded deadline; a rollout timeout is expected for this bad configuration. Do not interpret a nonzero rollout status as an absent API object. Old ready Pods may remain during the failed rolling update, so the Service can still have old eligible backends. This is the important difference between a real rolling update and the simpler statement that two already-running Pods become unready.
 
 To demonstrate zero eligible backends without relying on rolling-update strategy, the future host fixture also supplies a controlled `readiness-failure` case: it starts the Deployment with the bad path from an empty owned namespace, or performs a documented fixture transition that makes every selected current Pod fail readiness without keeping old replicas. Its acceptance is Running processes, Ready false and zero eligible backend UIDs. That case does not promise a container restart; no liveness probe is configured. Its in-cluster client fails within its deadline, but the exact lower-level connection-refused/timeout text can vary.
 
@@ -246,7 +246,7 @@ Starting from a fresh prepared namespace, apply the healthy `echo.yaml` and clie
 
 **Expected:** desired/updated/ready/available replicas are 2, the two UID sets agree and the client reports status 200/body `ready` with a successful Job.
 
-**Verify:** observe stable convergence twice at least 2 seconds apart within a90-second lesson window, then inspect the client Job's succeeded count and log. Do not use `apply` exit 0 or a screenshot of Running Pods as the entire check. The implementation must qualify this observation budget; it is not a universal cluster performance guarantee.
+**Verify:** observe stable convergence twice at least 2 seconds apart within a 90-second lesson window, then inspect the client Job's succeeded count and log. Do not use `apply` exit 0 or a screenshot of Running Pods as the entire check. The implementation must qualify this observation budget; it is not a universal cluster performance guarantee.
 
 Hints: (1) four observations answer four different questions; (2) compare identities, not just equal counts; (3) a successful in-cluster request closes the application-path gap left by API status alone.
 

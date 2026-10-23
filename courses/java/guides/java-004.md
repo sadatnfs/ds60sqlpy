@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-003`
 
 ## Learning objectives
 
-Explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is ImplementdoubleValue(intx) and evaluate7 and0. The final exercise transfers the mechanism to inspect overload selection.
+Explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Implement doubleValue(int x) and evaluate 7 and 0. The final exercise transfers the mechanism to inspect overload selection.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A method packages a computation behind a contract: which inputs it accepts, what
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-004/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -67,7 +67,7 @@ public class Main {
 
 ```
 
-**Expected:** 14 and0.
+**Expected:** 14 and 0.
 
 ### Example B: Validate a precondition
 
@@ -108,11 +108,11 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Call a pure calculation.** ImplementdoubleValue(intx) and evaluate7 and0.
-   **Expected:** 14 and0.
-   **Verify:** Compare your assertion values or captured diagnostic with 14 and0.
+1. **Call a pure calculation.** Implement doubleValue(int x) and evaluate 7 and 0.
+   **Expected:** 14 and 0.
+   **Verify:** Compare your assertion values or captured diagnostic with 14 and 0.
 
-2. **Validate a precondition.** ImplementpositiveArea(width,height) rejecting nonpositive dimensions.
+2. **Validate a precondition.** Implement positiveArea(width,height) rejecting nonpositive dimensions.
    **Expected:** 3by4 gives12;zero width throwsIllegalArgumentException.
    **Verify:** Compare your assertion values or captured diagnostic with 3by4 gives12;zero width throwsIllegalArgumentException.
 
@@ -129,8 +129,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with caller list remains1,2.
 
 6. **Inspect overload selection.** Call describe withint1 andlong1L using two overloads.
-   **Expected:** int andlong respectively.
-   **Verify:** Compare your assertion values or captured diagnostic with int andlong respectively.
+   **Expected:** int and long respectively.
+   **Verify:** Compare your assertion values or captured diagnostic with int and long respectively.
 
 ## Common pitfalls and diagnosis
 

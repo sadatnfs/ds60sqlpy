@@ -29,7 +29,7 @@ int main() {
 }
 ```
 
-**Expected:** stdout is exactly hello, learner followed by a newline; exit0.
+**Expected:** stdout is exactly hello, learner followed by a newline; exit 0.
 
 ### Worked example 2: Reject a failed process
 
@@ -58,7 +58,7 @@ The target must list main.cpp. A successful process requires an executable from 
 
 **Inputs/evidence:** For cpp-002 Exercise 2, unmodified hello program.
 
-**Expected result/shape:** For cpp-002 Exercise 2, stdout hello, learner\n; empty stderr; exit0.
+**Expected result/shape:** For cpp-002 Exercise 2, stdout hello, learner\n; empty stderr; exit 0.
 
 **Verify:** For cpp-002 Exercise 2, compare bytes/line ending and status independently.
 

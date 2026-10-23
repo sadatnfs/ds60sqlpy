@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -147,52 +193,52 @@
 <p>Represent byte a as (97,) and byte b as (98,). Merging the pair creates (97,98), preserving their underlying byte sequence. The marker (256,) records the word boundary and is removed by the matching decoder. A merge can include the end marker, but no training pair crosses from one word into the next because each word has its own symbol sequence.</p>
 <p>Count every neighboring pair over the current training tokenization, choose the highest count with the declared lexical tie-break, replace its nonoverlapping occurrences, and repeat up to the small merge budget. Save the ordered rules, not just an unordered vocabulary set. Encoding new text applies each saved rule in order. The fixed byte base supplies unseen byte fallback without changing the learned rules or their hash.</p>
 <h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
-<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, choose <strong>Journeys</strong> and select <code>llm-007</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
+<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, return to the classroom home and choose the LLM theory path and select <code>llm-007</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
 <p>Open <a href="../lessons/llm-007.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-007/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
-<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
-&amp; $CoursePython .learning\expansion\llm-007\practice.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
-&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/llm-007/practice.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell: selected interpreter from the course setup.</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>expansion<span class="syntax-punctuation">\</span>llm<span class="syntax-punctuation">-</span>007<span class="syntax-punctuation">\</span>practice<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux: selected course interpreter path from setup.</span>
+<span class="syntax-string">&quot;</span>$DS60_COURSE_PYTHON<span class="syntax-string">&quot;</span> .learning/expansion/llm-007/practice.py</code></pre>
 <p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-inspect-and-apply-the-tied-first-merge">Example A: Inspect and apply the tied first merge<a class="heading-anchor" href="#example-a-inspect-and-apply-the-tied-first-merge" aria-label="Link to this section">#</a></h4>
 <p>Count byte-token neighbors, choose the documented tie and replace without overlap.</p>
-<pre><code class="language-python">from collections import Counter
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
 
-corpus = [[(97,), (98,), (256,)], [(97,), (99,), (256,)]]
-counts = Counter(pair for word in corpus for pair in zip(word, word[1:]))
-maximum = max(counts.values())
-pair = min(pair for pair, count in counts.items() if count == maximum)
-assert pair == ((97,), (98,))
-
-
-def merge_once(tokens, chosen):
-    result, index = [], 0
-    while index &lt; len(tokens):
-        if index + 1 &lt; len(tokens) and (tokens[index], tokens[index + 1]) == chosen:
-            result.append(tokens[index] + tokens[index + 1])
-            index += 2
-        else:
-            result.append(tokens[index])
-            index += 1
-    return result
+corpus <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">98</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+counts <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> corpus <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> word<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+maximum <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+pair <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> pair<span class="syntax-punctuation">,</span> count <span class="syntax-operator">in</span> counts<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> count <span class="syntax-operator">==</span> maximum<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> pair <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">98</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-assert merge_once(corpus[0], pair) == [(97, 98), (256,)]
-print(pair, merge_once(corpus[0], pair))</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">merge_once</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> chosen<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    result<span class="syntax-punctuation">,</span> index <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">while</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> chosen<span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> result
+
+
+<span class="syntax-keyword">assert</span> merge_once<span class="syntax-punctuation">(</span>corpus<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span> <span class="syntax-number">98</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>pair<span class="syntax-punctuation">,</span> merge_once<span class="syntax-punctuation">(</span>corpus<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Each candidate count is one. Lexical integer-tuple ordering selects a+b, whose replacement preserves the underlying bytes. Training input order cannot decide a tie accidentally.</p>
 <h4 id="example-b-a-frozen-rule-leaves-a-new-byte-unmerged">Example B: A frozen rule leaves a new byte unmerged<a class="heading-anchor" href="#example-b-a-frozen-rule-leaves-a-new-byte-unmerged" aria-label="Link to this section">#</a></h4>
 <p>Reuse the selected rule on validation word ad without calling a fitting function.</p>
-<pre><code class="language-python">rules = [pair]
-before = tuple(rules)
-validation = [(97,), (100,), (256,)]
-for chosen in rules:
-    validation = merge_once(validation, chosen)
-assert validation == [(97,), (100,), (256,)]
-assert tuple(rules) == before
-assert bytes(value for token in validation[:-1] for value in token).decode(&quot;utf-8&quot;) == &quot;ad&quot;
-print(validation)</code></pre>
+<pre class="highlighted-code"><code class="language-python">rules <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>pair<span class="syntax-punctuation">]</span>
+before <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">)</span>
+validation <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> chosen <span class="syntax-operator">in</span> rules<span class="syntax-punctuation">:</span>
+    validation <span class="syntax-operator">=</span> merge_once<span class="syntax-punctuation">(</span>validation<span class="syntax-punctuation">,</span> chosen<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> validation <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">97</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> before
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">(</span>value <span class="syntax-keyword">for</span> token <span class="syntax-operator">in</span> validation<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> token<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ad</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>validation<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The d byte is supported by the fixed base. Encoding leaves the learned rule list unchanged; appearing in validation does not justify fitting an a+d merge.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
@@ -227,11 +273,11 @@ print(validation)</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Without the reference, explain why a merge list must be ordered and why a left-to-right scan cannot reuse one byte in two overlapping matches. Then propose a fresh tied training fixture and state its deterministic first choice.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p><a href="llm-008.md.html">llm-008</a> connects tokenizer output to model parameters through an embedding lookup. Carry forward the frozen ID mapping: the number attached to a token is a row selector, not a measure of its meaning. Changing that mapping without changing the corresponding model tables can produce legal array operations with completely wrong semantic identities.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-007,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-007,
 A tiny train-only subword vocabulary. Read courses/llm-theory/guides/llm-007.md
 and courses/llm-theory/lessons/llm-007.py. Respect direct prerequisites
 llm-006 and beginner depth. Explain the actual fixture&#x27;s

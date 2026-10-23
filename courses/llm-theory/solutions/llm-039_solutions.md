@@ -34,7 +34,7 @@ Neither establishes a zero population failure probability.
 
 ## Exercise 2: Expose a severe failure
 
-The question is: Nine minor cases pass andone severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate.
+The question is: Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate.
 
 Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.
 
@@ -44,9 +44,9 @@ Severe failures = 1
 Required severe-failure gate = fail
 ```
 
-**Expected:** 90percent passes;gatefails.
+**Expected:** 90percent passes;gate fails.
 
-**Verify:** Compare the computed values or written argument with 90percent passes;gatefails.
+**Verify:** Compare the computed values or written argument with 90percent passes;gate fails.
 
 ## Exercise 3: Analyze a counterfactual pair
 
@@ -78,13 +78,13 @@ Rate: undefined
 Claim: no evaluation evidence for this group
 ```
 
-**Expected:** rateunknown;groupuntested.
+**Expected:** rate unknown;group untested.
 
-**Verify:** Compare the computed values or written argument with rateunknown;groupuntested.
+**Verify:** Compare the computed values or written argument with rate unknown;group untested.
 
 ## Exercise 5: Separate families from paraphrases
 
-The question is: Twenty prompts are paraphrases ofone attack family. State the independent coverage count under family-based evaluation.
+The question is: Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation.
 
 Repeated variants can reveal local sensitivity, but they do not expand conceptual coverage as much as new families. The evaluation unit must match the conclusion.
 

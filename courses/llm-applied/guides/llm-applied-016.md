@@ -40,7 +40,7 @@ An output-head adapter changes how existing hidden representations are mapped to
 
 For the Methods Desk, a formatting failure and a failure to distinguish two domain concepts may respond differently to those choices. If the hidden representation already separates the relevant cases, a narrow output adaptation might be enough. If the model does not represent the distinction needed by the task, a final projection alone may be limited. Those are testable hypotheses, not guarantees based on module names.
 
-Rank and scale should be considered together. Increasing rank while keeping alpha fixed changes the alpha/r multiplier, as well as the number and initialization of the factors. Comparing two configurations without recording those choices can attribute a difference to rank while several parts of the effective update changed. Learning rate, target modules, dropout and data weighting add further conditions to the comparison.
+Rank and scale should be considered together. Increasing rank while keeping alpha fixed changes the \(\frac{\alpha}{r}\) multiplier, as well as the number and initialization of the factors. Comparing two configurations without recording those choices can attribute a difference to rank while several parts of the effective update changed. Learning rate, target modules, dropout and data weighting add further conditions to the comparison.
 
 ## Frozen weights can still carry gradients
 
@@ -72,7 +72,7 @@ Merging computes a new effective weight W+sAB for inference. Do it into a separa
 
 **Adapter rank:** The inner dimension bounding, but not guaranteeing, the rank of the learned update.
 
-**LoRA scale:** The multiplier alpha/r used in this forward function and its gradients.
+**LoRA scale:** The multiplier \(\frac{\alpha}{r}\) used in this forward function and its gradients.
 
 **Frozen base:** Weights excluded from updates while still participating in the differentiable forward computation.
 
@@ -100,7 +100,7 @@ At initialization \(B=0\). Therefore the A gradient is a connected tensor of zer
 
 ### Calculate the exact first step
 
-The input X is a row of eight ones, so XA=[1, 1]. With \(B=0\) and \(W=I_{8}\), Y is a row of eight ones. The loss is the mean of eight squared outputs against zero: \(L=1\). The output derivative is \(G=\frac{2Y}{8}\), so every entry is \(\frac{1}{4}\). With \(s=2\), every B-gradient entry is \(2\cdot 1\cdot \frac{1}{4}=\frac{1}{2}\), and every A-gradient entry is zero.
+The input X is a row of eight ones, so \(XA=[1,1]\). With \(B=0\) and \(W=I_{8}\), Y is a row of eight ones. The loss is the mean of eight squared outputs against zero: \(L=1\). The output derivative is \(G=\frac{2Y}{8}\), so every entry is \(\frac{1}{4}\). With \(s=2\), every B-gradient entry is \(2\cdot 1\cdot \frac{1}{4}=\frac{1}{2}\), and every A-gradient entry is zero.
 
 SGD with learning rate 0.1 changes every B entry to -0.05 and leaves A at 0.125. Each entry of AB is \(2\cdot 0.125\cdot (-0.05)=-0.0125\). Multiplication by s gives an effective update of -0.025 in every base-matrix entry. Multiplying by the eight-one input sums eight such contributions, producing \(Y_{\mathrm{new}}=0.8\) in every output coordinate. The new mean squared loss is therefore \({0.8}^{2}=0.64\). The reference checks these values, not merely that something changed or that a loss happened to decrease.
 
@@ -147,7 +147,7 @@ assert torch.equal(a @ b, torch.zeros((8, 8)))
 
 ### Example C: Inspect the first gradients
 
-The derivative for A contains B transpose, so it is zero at \(B=0\) while remaining connected to the graph. The derivative for B is s(XA) transpose times G. Here XA=[1, 1], G is eight copies of \(\frac{1}{4}\) and \(s=2\), giving 0.5 in every entry. This independent arithmetic is more diagnostic than only checking whether a gradient is nonzero.
+The derivative for A contains B transpose, so it is zero at \(B=0\) while remaining connected to the graph. The derivative for B is s(XA) transpose times G. Here \(XA=[1,1]\), G is eight copies of \(\frac{1}{4}\) and \(s=2\), giving 0.5 in every entry. This independent arithmetic is more diagnostic than only checking whether a gradient is nonzero.
 
 ```python
 loss = initial.square().mean()
@@ -196,7 +196,7 @@ If the initial adapter changes the base output unexpectedly, inspect whether one
 
 If the base changes, check optimizer membership and any in-place merge. If earlier adapters stop receiving gradients through a frozen layer, check whether an over-broad no_grad context removed the required input derivative path. Frozen weights can remain constants in a differentiable computation; disabling every operation is a stronger change.
 
-If the rank is lower than configured, inspect factor singular values and initialization symmetry. This fixture intentionally produces rank one after its first update. If merged predictions differ, verify factor orientation, alpha/r, base revision, dtype and evaluation mode before increasing tolerances. Finally, if training metrics improve but supported-answer quality does not, inspect the data, masking and held-out task design. The repository's optional pretrained generation probe demonstrates that mechanically successful adaptation can still produce an incorrect formula despite supplied evidence.
+If the rank is lower than configured, inspect factor singular values and initialization symmetry. This fixture intentionally produces rank one after its first update. If merged predictions differ, verify factor orientation, \(\frac{\alpha}{r}\), base revision, dtype and evaluation mode before increasing tolerances. Finally, if training metrics improve but supported-answer quality does not, inspect the data, masking and held-out task design. The repository's optional pretrained generation probe demonstrates that mechanically successful adaptation can still produce an incorrect formula despite supplied evidence.
 
 ## Progressive hints
 

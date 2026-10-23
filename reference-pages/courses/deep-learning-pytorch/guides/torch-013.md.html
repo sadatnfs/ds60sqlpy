@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,12 +165,12 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>torch-012</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>A binary logit is an unrestricted score. The central investigation is concrete: Apply sigmoid to-2, 0, 2. The finish condition is middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>A binary logit is an unrestricted score. The central investigation is concrete: Apply sigmoid to-2, 0, 2. The finish condition is middle probability 0.5 and strictly increasing values. 0 errors at.5 and 1 at.8. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model&#x27;s probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.</p>
 <p>A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
-<p>Use one logit per binary event when the target represents a yes/no outcome. Keep the training objective in logit space and apply sigmoid for a probability-oriented report ordecision policy. Choose threshold, calibration and error costs using an appropriate validation protocol rather than tuning them on a final assessment.</p>
+<p>Use one logit per binary event when the target represents a yes/no outcome. Keep the training objective in logit space and apply sigmoid for a probability-oriented report or decision policy. Choose threshold, calibration and error costs using an appropriate validation protocol rather than tuning them on a final assessment.</p>
 <p>Before using class orpositive-label weights, write the weighted objective and its denominator. Weighting changes the fitting target and can change the meaning of the raw sigmoid output. It is not equivalent to changing a decision threshold after fitting, and it does not independently establish calibrated probabilities on a new population.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-013.md.html">tf-013</a> after deriving the shared numerical contract.</p>
@@ -139,41 +185,41 @@
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>F.binary_cross_entropy_with_logits expects floating targets and logits of matching shape. torch.sigmoid is useful for reporting probabilities after the objective convention is fixed. Use probability&gt;=threshold to declare a tie policy. Compare loss at zero logit with log 2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.</p>
 <h3 id="separate-score-probability-loss-and-decision">Separate score, probability, loss and decision<a class="heading-anchor" href="#separate-score-probability-loss-and-decision" aria-label="Link to this section">#</a></h3>
-<p>The binary logit z is unrestricted. Its sigmoid is p=1/(1+exp(-z)), and the unweighted binary cross entropy is -y log p-(1-y)log(1-p). For the declared binary targets y∈{0, 1}, the stable logit-space form is:</p>
+<p>The binary logit z is unrestricted. Its sigmoid is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mi>z</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">p=\frac{1}{1+\exp(-z)}</annotation></semantics></math>, and the unweighted binary cross entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>y</mi><mi>log</mi><mi>p</mi><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-y\log p-(1-y)\log(1-p)</annotation></semantics></math>. For the declared binary targets y∈{0, 1}, the stable logit-space form is:</p>
 <p><code>loss = max(z,0) - z*y + log1p(exp(-abs(z)))</code>.</p>
-<p>The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At z=0, y=1, the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html">PyTorch 2.9 BCEWithLogitsLoss</a>.</p>
-<p>For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary log(0.8/0.2)=log 4, about 1.3863. Moving that boundary changes decisions without changing any fitted parameter orscore.</p>
-<p>The double-sigmoid error changes more than a label convention. At original z=0, the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability sigmoid(0.5), about 0.6225. The positive-label loss becomes log(1+exp(-0.5)), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective orgradient.</p>
+<p>The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">z=0</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>y</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y=1</annotation></semantics></math>, the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html">PyTorch 2.9 BCEWithLogitsLoss</a>.</p>
+<p>For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mrow><mn>0.8</mn></mrow><mrow><mn>0.2</mn></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow><mo>=</mo><mi>log</mi><mn>4</mn></mrow><annotation encoding="application/x-tex">\log\!\left(\frac{0.8}{0.2}\right)=\log4</annotation></semantics></math>, about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.</p>
+<p>The double-sigmoid error changes more than a label convention. At original <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">z=0</annotation></semantics></math>, the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>σ</mi><mo stretchy="false">(</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sigma(0.5)</annotation></semantics></math>, about 0.6225. The positive-label loss becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-0.5))</annotation></semantics></math>, about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective or gradient.</p>
 <p>Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.</p>
-<p>Decision costs require an additional probability assumption. If p is a calibrated probability for the relevant population, correct decisions have zero cost, false positives cost C_FP and false negatives cost C_FN, then choosing positive has expected cost C_FP(1-p), while choosing negative costs C_FN p. The positive decision is favored when p≥C_FP/(C_FP+C_FN). This derivation does not apply unchanged when costs vary by record, abstention is allowed, capacity is constrained or the probabilities are miscalibrated.</p>
+<p>Decision costs require an additional probability assumption. If p is a calibrated probability for the relevant population, correct decisions have zero cost, false positives cost C_FP and false negatives cost C_FN, then choosing positive has expected cost C_FP(1-p), while choosing negative costs C_FN p. The positive decision is favored when p≥<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow></mrow></msub></mrow><mrow><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow></mrow></msub><mo>+</mo><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">N</mi></mrow></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{C_{\mathrm{FP}}}{C_{\mathrm{FP}}+C_{\mathrm{FN}}}</annotation></semantics></math>. This derivation does not apply unchanged when costs vary by record, abstention is allowed, capacity is constrained or the probabilities are miscalibrated.</p>
 <p>Positive-label weighting changes the loss itself. With positive-term multiplierα, the derivative for a positive target becomesα(p-1), while a negative target contributes p. The reduction convention still matters; do not silently replace the library&#x27;s element-mean reduction with a sum-of-weights denominator. Such weighting can be useful for a declared fitting goal, but the resulting sigmoid should not be assumed to retain an unweighted population-probability interpretation without further calibration evidence.</p>
-<p>The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representationalone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one byconstruction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.</p>
+<p>The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representation alone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one by construction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-convert-fixed-logits">Example A: Convert fixed logits<a class="heading-anchor" href="#example-a-convert-fixed-logits" aria-label="Link to this section">#</a></h4>
 <p>The monotonic transformation preserves ranking. A score of zero is the exact midpoint, which makes threshold ties explicit.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-logits=torch.tensor([-2.,0.,2.],dtype=torch.float64); probabilities=torch.sigmoid(logits)
-assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)&gt;0))</code></pre>
-<p><strong>Expected:</strong> middle probability.5 and strictly increasing values.</p>
+logits<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> probabilities<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> probabilities<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> middle probability 0.5 and strictly increasing values.</p>
 <h4 id="example-b-check-the-midpoint-objective">Example B: Check the midpoint objective<a class="heading-anchor" href="#example-b-check-the-midpoint-objective" aria-label="Link to this section">#</a></h4>
 <p>A fifty-fifty prediction assigns probability one-half to the observed label. Its negative logarithm is an independent reference.</p>
-<pre><code class="language-python">loss=F.binary_cross_entropy_with_logits(torch.tensor([0.],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
-np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">loss<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>binary_cross_entropy_with_logits<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> loss log 2 within 1e-12.</p>
 <h4 id="example-c-move-the-decision-threshold">Example C: Move the decision threshold<a class="heading-anchor" href="#example-c-move-the-decision-threshold" aria-label="Link to this section">#</a></h4>
 <p>The middle decision changes while the model scores remain fixed. This is a policy change, not an optimizer update.</p>
-<pre><code class="language-python">assert (probabilities&gt;=.5).tolist()==[False,True,True]
-assert (probabilities&gt;=.8).tolist()==[False,False,True]</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>probabilities<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>probabilities<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> labels False, True, True versus False, False, True.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: middle probability 0.5 and strictly increasing values. 0 errors at.5 and 1 at.8. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Convert fixed logits.</strong> Apply sigmoid to-2, 0, 2. <strong>Expected:</strong> middle probability.5 and strictly increasing values. <strong>Verify:</strong> Save the assertion results for exercise 1, including middle probability.5 and strictly increasing values.</li>
+<li><strong>Convert fixed logits.</strong> Apply sigmoid to-2, 0, 2. <strong>Expected:</strong> middle probability 0.5 and strictly increasing values. <strong>Verify:</strong> Save the assertion results for exercise 1, including middle probability 0.5 and strictly increasing values.</li>
 </ol>
 <ol>
 <li><strong>Check the midpoint objective.</strong> Compute positive-label BCE at zero logit. <strong>Expected:</strong> loss log 2 within 1e-12. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss log 2 within 1e-12.</li>
@@ -182,7 +228,7 @@ assert (probabilities&gt;=.8).tolist()==[False,False,True]</code></pre>
 <li><strong>Move the decision threshold.</strong> Compare thresholds.5 and.8 with&gt;=ties. <strong>Expected:</strong> labels False, True, True versus False, False, True. <strong>Verify:</strong> Save the assertion results for exercise 3, including labels False, True, True versus False, False, True.</li>
 </ol>
 <ol>
-<li><strong>Expose a double-sigmoid mistake.</strong> Feed probability.5 as though it were a logit and compare with log 2. <strong>Expected:</strong> incorrect loss differs by more than.1. <strong>Verify:</strong> Save the assertion results for exercise 4, including incorrect loss differs by more than.1.</li>
+<li><strong>Expose a double-sigmoid mistake.</strong> Feed probability 0.5 as though it were a logit and compare with log 2. <strong>Expected:</strong> incorrect loss differs by more than.1. <strong>Verify:</strong> Save the assertion results for exercise 4, including incorrect loss differs by more than.1.</li>
 </ol>
 <ol>
 <li><strong>Test extreme finite scores.</strong> Use logits 1000, -1000 with labels 1, 0. <strong>Expected:</strong> finite losses approximately 0. <strong>Verify:</strong> Save the assertion results for exercise 5, including finite losses approximately 0.</li>
@@ -191,8 +237,8 @@ assert (probabilities&gt;=.8).tolist()==[False,False,True]</code></pre>
 <li><strong>Count threshold errors.</strong> Use truth 0, 1, 1 and compare the two decision policies. <strong>Expected:</strong> 0 errors at.5 and 1 at.8. <strong>Verify:</strong> Save the assertion results for exercise 6, including 0 errors at.5 and 1 at.8.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>If loss isfinite buttraining isunexpectedly weak, inspect whether sigmoid was applied before a logits-aware objective. Compare both the midpoint loss and the derivative, not only the predicted labels. If extreme scores produceNaN in a hand-written log(sigmoid()) path, use the combined objective rather than clipping until an assertion passes.</p>
-<p>If error counts change while logits stay fixed, inspect threshold and tie policy before blaming optimization. If a confidence score ispresented as an empirical success frequency, look for calibration evidence on the relevant population. If positive-label weights were introduced, record the changed objective and denominator. Validate target range and matching shape explicitly instead of treating a successful API call as a complete data contract.</p>
+<p>If loss is finite but training is unexpectedly weak, inspect whether sigmoid was applied before a logits-aware objective. Compare both the midpoint loss and the derivative, not only the predicted labels. If extreme scores produce NaN in a hand-written <code>log(sigmoid())</code> path, use the combined objective rather than clipping until an assertion passes.</p>
+<p>If error counts change while logits stay fixed, inspect threshold and tie policy before blaming optimization. If a confidence score is presented as an empirical success frequency, look for calibration evidence on the relevant population. If positive-label weights were introduced, record the changed objective and denominator. Validate target range and matching shape explicitly instead of treating a successful API call as a complete data contract.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
@@ -207,7 +253,7 @@ assert (probabilities&gt;=.8).tolist()==[False,False,True]</code></pre>
 <p><strong>Does a probability.9 mean 90 percent of such predictions are correct?</strong></p>
 <p>Only if calibration evidence supports that interpretation for the relevant population. Sigmoid alone defines a model output, not an empirical reliability guarantee.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-013, Binary logits, BCEWithLogitsLoss and thresholds.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-013, Binary logits, BCEWithLogitsLoss and thresholds.
 Read courses/deep-learning-pytorch/guides/torch-013.md and courses/deep-learning-pytorch/lessons/torch-013.py. Direct prerequisites: `torch-012`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

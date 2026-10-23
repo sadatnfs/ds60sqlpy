@@ -51,7 +51,7 @@ A stable finite loss can still optimize the wrong example pairing, class index o
 
 ## Exercise 1: Expose naive overflow
 
-The question is: Exponentiate float32 logits1000, 999 directly.
+The question is: Exponentiate float32 logits 1000, 999 directly.
 
 The underlying probabilities are well defined. The failure comes from an unstable intermediate representation, not an impossible classification task.
 

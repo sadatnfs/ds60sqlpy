@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,47 +173,47 @@
 <h3 id="exercise-1-partition-accounts">Exercise 1: Partition accounts<a class="heading-anchor" href="#exercise-1-partition-accounts" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B.</p>
 <p>The boolean mask has one position per record. Its values come from group identity, not a target-dependent ranking. Training has four values and validation has four, but equal counts are incidental to the group-isolation contract.</p>
-<pre><code class="language-python">groups=np.array(list(&#x27;AABBCCDD&#x27;)); x=np.array([1.,3.,5.,7.,20.,22.,30.,32.])
-train=np.isin(groups,[&#x27;A&#x27;,&#x27;B&#x27;]); valid=~train; mean=x[train].mean()
-assert mean==4 and set(groups[valid])=={&#x27;C&#x27;,&#x27;D&#x27;}</code></pre>
+<pre class="highlighted-code"><code class="language-python">groups<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">AABBCCDD</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">,</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">22.</span><span class="syntax-punctuation">,</span><span class="syntax-number">30.</span><span class="syntax-punctuation">,</span><span class="syntax-number">32.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+train<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> valid<span class="syntax-operator">=</span><span class="syntax-operator">~</span>train<span class="syntax-punctuation">;</span> mean<span class="syntax-operator">=</span>x<span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> mean<span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>valid<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">C</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">D</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> train mean4 and validation IDs C,D.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with train mean4 and validation IDs C,D.</p>
 <h3 id="exercise-2-expose-global-fitting">Exercise 2: Expose global fitting<a class="heading-anchor" href="#exercise-2-expose-global-fitting" aria-label="Link to this section">#</a></h3>
 <p>The question is: Change the last validation value to3200 and compare train-only and global means.</p>
 <p>A perturbation restricted to validation cannot influence a training-only mean. This controlled counterexample detects leakage more directly than inspecting the name of a preprocessing object.</p>
-<pre><code class="language-python">changed=x.copy(); changed[-1]=3200
-assert changed[train].mean()==mean
-assert changed.mean()!=x.mean()</code></pre>
+<pre class="highlighted-code"><code class="language-python">changed<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">3200</span>
+<span class="syntax-keyword">assert</span> changed<span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>mean
+<span class="syntax-keyword">assert</span> changed<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span>x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> training mean stays4; global mean changes.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with training mean stays4; global mean changes.</p>
 <h3 id="exercise-3-find-crossing-groups">Exercise 3: Find crossing groups<a class="heading-anchor" href="#exercise-3-find-crossing-groups" aria-label="Link to this section">#</a></h3>
 <p>The question is: Assign alternating rows to train and validation and inspect intersections.</p>
 <p>A row split can look balanced while violating the intended unit. Set intersection exposes the repeated accounts; disjoint row indices alone do not prove disjoint entities.</p>
-<pre><code class="language-python">wrong=np.arange(8)%2==0
-assert set(groups[wrong]) &amp; set(groups[~wrong])==set(&#x27;ABCD&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">wrong<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">2</span><span class="syntax-operator">==</span><span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>wrong<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span><span class="syntax-operator">~</span>wrong<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ABCD</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> A,B,C,D all cross the split.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with A,B,C,D all cross the split.</p>
 <h3 id="exercise-4-apply-frozen-centering">Exercise 4: Apply frozen centering<a class="heading-anchor" href="#exercise-4-apply-frozen-centering" aria-label="Link to this section">#</a></h3>
 <p>The question is: Center both partitions with training mean4 and compare validation centered values.</p>
 <p>Only the training values are guaranteed to have centered mean zero. Forcing validation to mean zero would estimate a new statistic and erase a potentially meaningful distribution shift.</p>
-<pre><code class="language-python">np.testing.assert_array_equal(x[valid]-mean,[16,18,26,28])
-assert (x[train]-mean).mean()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>valid<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>mean<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span><span class="syntax-number">18</span><span class="syntax-punctuation">,</span><span class="syntax-number">26</span><span class="syntax-punctuation">,</span><span class="syntax-number">28</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>mean<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> validation values16,18,26,28.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with validation values16,18,26,28.</p>
 <h3 id="exercise-5-freeze-selection-identity">Exercise 5: Freeze selection identity<a class="heading-anchor" href="#exercise-5-freeze-selection-identity" aria-label="Link to this section">#</a></h3>
 <p>The question is: Hash sorted training IDs before and after calculating validation errors.</p>
 <p>The hash is a compact identity receipt, not proof of good split design. It can reveal accidental mutation after evaluation. The original IDs must still be available for review.</p>
-<pre><code class="language-python">import hashlib,json
-ids=[&#x27;a1&#x27;,&#x27;a2&#x27;,&#x27;b1&#x27;,&#x27;b2&#x27;]; frozen=json.dumps(ids).encode(); digest=hashlib.sha256(frozen).hexdigest()
-validation_error=float(np.mean((x[valid]-mean)**2))
-assert validation_error&gt;0 and hashlib.sha256(json.dumps(ids).encode()).hexdigest()==digest</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib<span class="syntax-operator">,</span>json
+ids<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> frozen<span class="syntax-operator">=</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> digest<span class="syntax-operator">=</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>frozen<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+validation_error<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>valid<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>mean<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> validation_error<span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>digest</code></pre>
 <p><strong>Expected:</strong> The selection hash is unchanged.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with The selection hash is unchanged.</p>
 <h3 id="exercise-6-transfer-to-unseen-accounts">Exercise 6: Transfer to unseen accounts<a class="heading-anchor" href="#exercise-6-transfer-to-unseen-accounts" aria-label="Link to this section">#</a></h3>
 <p>The question is: Add account E with value1000 only to evaluation; specify whether its normalization can update the training mean.</p>
 <p>A deployment input is transformed using the fitted state. Updating the mean online is a separate algorithm requiring an explicit policy and new evaluation; it is not a harmless formatting adjustment.</p>
-<pre><code class="language-python">new_value=1000-mean
-assert new_value==996 and mean==4</code></pre>
+<pre class="highlighted-code"><code class="language-python">new_value<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-operator">-</span>mean
+<span class="syntax-keyword">assert</span> new_value<span class="syntax-operator">==</span><span class="syntax-number">996</span> <span class="syntax-operator">and</span> mean<span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> transformed value996; fitted mean remains4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with transformed value996; fitted mean remains4.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

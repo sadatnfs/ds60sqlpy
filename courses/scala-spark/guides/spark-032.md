@@ -46,7 +46,7 @@ Phase 4 adds an explicit administrative advancer at 00:30 with amount 0. It is a
 
 The event ledger distinguishes five accepted business events, one observed far-late dropped event and one administrative advancer whose window is pending. All seven records were consumed by the source, while only five business events contribute to the three final result rows. Source input counts, late-drop counters, state retention and sink rows are therefore different metrics. None should be substituted for another.
 
-Spark watermark guarantee is intentionally one-sided: events within the supported delay bound are protected from dropping by that watermark policy, while older events may ormay not be processed depending on operator state and progress. This lesson demonstrates one controlled older-event drop after finalization. It does not generalize that observation into an exact universal wall-clock deadline or claim that every older event will always be discarded.
+Spark watermark guarantee is intentionally one-sided: events within the supported delay bound are protected from dropping by that watermark policy, while older events may or may not be processed depending on operator state and progress. This lesson demonstrates one controlled older-event drop after finalization. It does not generalize that observation into an exact universal wall-clock deadline or claim that every older event will always be discarded.
 
 Output mode and sink support also matter. Append mode can write finalized window aggregates to a file sink when the watermark is defined on the aggregated event-time column before aggregation. Update mode represents changing results and is not supported by this Parquet file sink. An unwatermarked arbitrary aggregate cannot simply use append mode and declare itself final. The final task executes these invalid configurations in separate owned namespaces and requires their analysis errors.
 
@@ -173,7 +173,7 @@ Publish phase 3 after phase 2 has terminated. Read the actual state-operator dro
 
 **Progressive hint:** The late event is tested after an observed finalization boundary, not merely against an arithmetic timestamp comparison.
 
-### Exercise 5: Advance event time and distinguish finalized frompending output
+### Exercise 5: Advance event time and distinguish finalized from pending output
 
 Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.
 
@@ -187,7 +187,7 @@ Publish the 00:30 administrative advancer, run phase 4 and return a ledger of to
 
 Attempt two invalid configurations in separate owned paths: Update mode to Parquet, and Append mode for an unwatermarked team aggregate. Require analysis rejection and stop any unexpectedly created query in finally.
 
-**Expected result/shape:** Both configurations raiseAnalysisException; no active query remains. The valid windowed append sink stays intact.
+**Expected result/shape:** Both configurations raise AnalysisException; no active query remains. The valid windowed append sink stays intact.
 
 **Verify:** Assert each named analysis failure and the unchanged three-row valid sink after the checks.
 
@@ -195,7 +195,7 @@ Attempt two invalid configurations in separate owned paths: Update mode to Parqu
 
 ## Common pitfalls
 
-Do not translate watermark delay into a wall-clock sleep deadline. Do not assume beyond-delay data is always dropped oralways accepted. Inspect actual progress and operator counters. Keep a watermark on the same event-time column before window aggregation. Do not count the administrative advancer as finalized business output ormistake pending state for lost data. Check sink/output-mode compatibility and preserve the query/checkpoint contract across the sequential phases.
+Do not translate watermark delay into a wall-clock sleep deadline. Do not assume beyond-delay data is always dropped or always accepted. Inspect actual progress and operator counters. Keep a watermark on the same event-time column before window aggregation. Do not count the administrative advancer as finalized business output or mistake pending state for lost data. Check sink/output-mode compatibility and preserve the query/checkpoint contract across the sequential phases.
 
 ## Self-check
 

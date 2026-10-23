@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,76 +176,76 @@
 <h3 id="exercise-1-annotate-a-numeric-function">Exercise 1: Annotate a numeric function<a class="heading-anchor" href="#exercise-1-annotate-a-numeric-function" aria-label="Link to this section">#</a></h3>
 <p>Task: Define a function accepting two numbers and returning their sum; inspect its runtime value.</p>
 <p>The annotation describes accepted calls to checked TypeScript code. It is erased during compilation; the emitted function still performs JavaScript addition and would need validation at an untyped boundary.</p>
-<pre><code class="language-typescript">function add(left: number, right: number): number { return left + right; }
-const result = add(2, 3);
-assert.equal(result, 5);
-assert.equal(typeof result, &#x27;number&#x27;);
-function negativeTypeCheck(): void {
-  // @ts-expect-error A string is not a numeric argument.
-  add(&#x27;2&#x27;, 3);
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> add<span class="syntax-punctuation">(</span>left<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">,</span> right<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> left <span class="syntax-operator">+</span> right<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> result<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error A string is not a numeric argument.</span>
+  add<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> sum 5 with runtime typeof number.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-show-that-an-assertion-does-not-convert-data">Exercise 2: Show that an assertion does not convert data<a class="heading-anchor" href="#exercise-2-show-that-an-assertion-does-not-convert-data" aria-label="Link to this section">#</a></h3>
 <p>Task: Assert that an unknown string is a number, then inspect the actual runtime type.</p>
 <p>This intentionally unsafe assertion demonstrates the escape hatch. The correct repair for external data is a runtime check or parser, not a stronger-looking cast.</p>
-<pre><code class="language-typescript">const external: unknown = &#x27;wrong&#x27;;
-const claimed = external as number;
-assert.equal(typeof claimed, &#x27;string&#x27;);
-assert.equal(String(claimed), &#x27;wrong&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> external<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;wrong&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> claimed <span class="syntax-operator">=</span> external <span class="syntax-keyword">as</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> claimed<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;string&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">String</span><span class="syntax-punctuation">(</span>claimed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;wrong&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> the runtime value remains the string wrong.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-compare-literal-preservation-and-widening">Exercise 3: Compare literal preservation and widening<a class="heading-anchor" href="#exercise-3-compare-literal-preservation-and-widening" aria-label="Link to this section">#</a></h3>
 <p>Task: Use const for a fixed tag and let for a changing text value.</p>
 <p>A literal type can describe one exact protocol tag. A mutable binding must allow its intended future values; inference therefore often widens it to string.</p>
-<pre><code class="language-typescript">const fixed = &#x27;ready&#x27;;
-let mutable = &#x27;ready&#x27;;
-mutable = &#x27;done&#x27;;
-function acceptReady(value: &#x27;ready&#x27;): string { return value; }
-assert.equal(acceptReady(fixed), &#x27;ready&#x27;);
-assert.equal(mutable, &#x27;done&#x27;);
-function negativeTypeCheck(): void {
-  // @ts-expect-error mutable is string, not the literal type ready.
-  acceptReady(mutable);
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> fixed <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> mutable <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span>
+mutable <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> acceptReady<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>acceptReady<span class="syntax-punctuation">(</span>fixed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>mutable<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error mutable is string, not the literal type ready.</span>
+  acceptReady<span class="syntax-punctuation">(</span>mutable<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> fixed tag remains ready; mutable text can change to done.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-handle-null-explicitly-under-strict-checking">Exercise 4: Handle null explicitly under strict checking<a class="heading-anchor" href="#exercise-4-handle-null-explicitly-under-strict-checking" aria-label="Link to this section">#</a></h3>
 <p>Task: Write a length function accepting string or null.</p>
 <p>The null branch establishes a runtime fact that the checker can use. A non-null assertion would silence the diagnostic without adding this behavior.</p>
-<pre><code class="language-typescript">function lengthOrZero(value: string | null): number {
-  return value === null ? 0 : value.length;
-}
-assert.equal(lengthOrZero(&#x27;abc&#x27;), 3);
-assert.equal(lengthOrZero(null), 0);
-function negativeTypeCheck(value: string | null): void {
-  // @ts-expect-error value may be null before a guard.
-  void value.length;
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> lengthOrZero<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">return</span> value <span class="syntax-operator">===</span> <span class="syntax-keyword">null</span> <span class="syntax-operator">?</span> 0 <span class="syntax-operator">:</span> <span class="syntax-keyword">value.length</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lengthOrZero<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;abc&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lengthOrZero<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error value may be null before a guard.</span>
+  <span class="syntax-operator">void</span> value<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> length 3 for abc and 0 for null.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-observe-type-erasure-through-object-keys">Exercise 5: Observe type erasure through object keys<a class="heading-anchor" href="#exercise-5-observe-type-erasure-through-object-keys" aria-label="Link to this section">#</a></h3>
 <p>Task: Declare a record type and create a compatible object.</p>
 <p>A type alias is not a constructor or a runtime schema. Code that needs a schema must represent and execute validation separately.</p>
-<pre><code class="language-typescript">type Item = { id: string; count: number };
-const item: Item = { id: &#x27;A&#x27;, count: 2 };
-assert.deepEqual(Object.keys(item), [&#x27;id&#x27;, &#x27;count&#x27;]);
-assert.equal(&#x27;Item&#x27; in item, false);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> Item <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> item<span class="syntax-operator">:</span> <span class="syntax-keyword">Item</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;count&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Item&#x27;</span> <span class="syntax-operator">in</span> item<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> runtime keys contain only id and count, with no type alias metadata.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-narrow-unknown-before-numeric-use">Exercise 6: Narrow unknown before numeric use<a class="heading-anchor" href="#exercise-6-narrow-unknown-before-numeric-use" aria-label="Link to this section">#</a></h3>
 <p>Task: Accept only a finite number from an unknown value.</p>
 <p>The typeof branch narrows the static type, while the finite check enforces an additional domain property that ordinary number typing does not guarantee.</p>
-<pre><code class="language-typescript">function doubleFinite(value: unknown): number {
-  if (typeof value !== &#x27;number&#x27; || !Number.isFinite(value)) throw new TypeError(&#x27;finite number required&#x27;);
-  return value * 2;
-}
-assert.equal(doubleFinite(12), 24);
-assert.throws(() =&gt; doubleFinite(&#x27;12&#x27;), TypeError);
-assert.throws(() =&gt; doubleFinite(Infinity), TypeError);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> doubleFinite<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> value <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;number&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite number required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;12&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-keyword">Infinity</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 12 doubles to 24; string 12 and Infinity reject.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

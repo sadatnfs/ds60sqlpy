@@ -57,9 +57,9 @@ recall,rr=retrieval_metrics(['b','c','a'],{'a','c'})
 assert recall==1 and rr==.5
 ```
 
-**Expected:** recall1; reciprocal rank.5.
+**Expected:** recall 1; reciprocal rank 0.5.
 
-**Verify:** Compare the computed values or written argument with recall1; reciprocal rank.5.
+**Verify:** Compare the computed values or written argument with recall 1; reciprocal rank 0.5.
 
 ## Exercise 2: Measure a retrieval miss
 

@@ -6,19 +6,19 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-031`
 
 ## Learning objectives
 
-Explain warmup, measurement bias, jfr event, observable result using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Sum1..1000 with a loop andcompare withn*(n+1)/2. The final exercise transfers the mechanism to keep instrumented anduninstrumented claims separate.
+Explain warmup, measurement bias, jfr event, observable result using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Sum 1..1000 with a loop and compare with n*(n+1)/2. The final exercise transfers the mechanism to keep instrumented anduninstrumented claims separate.
 
 ## Purpose and mental model
 
-Performance measurement starts with a correct,representative workload. JVM execution can change during warmup as classes load andJIT compilation occurs. A first-call timing and a warmed repeated timing answer different questions. Dead-code elimination can remove unused work,while logging orprofiling can add work that dominates a small calculation. A benchmark must retain observable results andrecord its measurement conditions.
+Performance measurement starts with a correct,representative workload. JVM execution can change during warmup as classes load and JIT compilation occurs. A first-call timing and a warmed repeated timing answer different questions. Dead-code elimination can remove unused work,while logging orprofiling can add work that dominates a small calculation. A benchmark must retain observable results and record its measurement conditions.
 
-Java Flight Recorder,JFR,records runtime events with relatively low overhead in suitable configurations,but any instrumentation can affect the workload. This lesson creates one owned recording containing a custom calculation event,then reads that event back. It doesnot start a persistent system recording orclaim a production performance diagnosis. Simple elapsed-time samples are reported without hardcoded speed thresholds oruniversal conclusions.
+Java Flight Recorder,JFR,records runtime events with relatively low overhead in suitable configurations,but any instrumentation can affect the workload. This lesson creates one owned recording containing a custom calculation event,then reads that event back. It does not start a persistent system recording or claim a production performance diagnosis. Simple elapsed-time samples are reported without hardcoded speed thresholds or universal conclusions.
 
 ## Vocabulary and concepts
 
-**Warmup:** Initial execution used toseparate setup/JIT effects from repeated work.
+**Warmup:** Initial execution used to separate setup/JIT effects from repeated work.
 
-**Measurement bias:** A distortion introduced by workload choice,ordering orinstrumentation.
+**Measurement bias:** A distortion introduced by workload choice,ordering or instrumentation.
 
 **JFR event:** A structured runtime observation recorded under an explicit configuration.
 
@@ -26,7 +26,7 @@ Java Flight Recorder,JFR,records runtime events with relatively low overhead in 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-032/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,7 +41,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-System.nanoTime measures elapsed intervals,not wall-clock dates. Keep a checksum orvolatile sink so the calculation result remains observable. Separate warmup iterations from measured iterations. A customjdk.jfr.Event records declared fields;enable its event name,start theRecording,commit theevent,stop anddump to anownedfile. RecordingFile reads structured events forverification.
+System.nanoTime measures elapsed intervals,not wall-clock dates. Keep a checksum or volatile sink so the calculation result remains observable. Separate warmup iterations from measured iterations. A customjdk.jfr.Event records declared fields;enable its event name,start the Recording,commit the event,stop and dump to an owned file. RecordingFile reads structured events for verification.
 
 ## Worked example / walkthrough
 
@@ -87,7 +87,7 @@ public class Main {
 
 ```
 
-**Expected:** sink500500 afterwarmup.
+**Expected:** sink500500 after warmup.
 
 ## Prediction before your attempt
 
@@ -95,29 +95,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Establish a numerical oracle.** Sum1..1000 with a loop andcompare withn*(n+1)/2.
+1. **Establish a numerical oracle.** Sum 1..1000 with a loop and compare with n*(n+1)/2.
    **Expected:** 500500.
    **Verify:** Compare your assertion values or captured diagnostic with 500500.
 
-2. **Warm up without hiding results.** Run the calculation100times andstore eachresult in a volatile sink.
-   **Expected:** sink500500 afterwarmup.
-   **Verify:** Compare your assertion values or captured diagnostic with sink500500 afterwarmup.
+2. **Warm up without hiding results.** Run the calculation100times and store each result in a volatile sink.
+   **Expected:** sink500500 after warmup.
+   **Verify:** Compare your assertion values or captured diagnostic with sink500500 after warmup.
 
-3. **Measure repeated work with a checksum.** Time20calculations andsum their outputs.
+3. **Measure repeated work with a checksum.** Time20calculations and sum their outputs.
    **Expected:** checksum10010000;elapsednanosecondsnonnegative.
    **Verify:** Compare your assertion values or captured diagnostic with checksum10010000;elapsednanosecondsnonnegative.
 
-4. **Record andread an actualJFR event.** Create a bounded recording withoneCalculation event containinginput100 andoutput5050.
-   **Expected:** one matching event withthedeclared fields.
-   **Verify:** Compare your assertion values or captured diagnostic with one matching event withthedeclared fields.
+4. **Record and read an actualJFR event.** Create a bounded recording withoneCalculation event containinginput100 andoutput5050.
+   **Expected:** one matching event with the declared fields.
+   **Verify:** Compare your assertion values or captured diagnostic with one matching event with the declared fields.
 
-5. **Collect a small timing distribution.** Measure the same boundedworkfive times andinspect sorted samples.
+5. **Collect a small timing distribution.** Measure the same bounded work five times and inspect sorted samples.
    **Expected:** five nonnegative samples;minimum<=maximum;checksums preserved.
    **Verify:** Compare your assertion values or captured diagnostic with five nonnegative samples;minimum<=maximum;checksums preserved.
 
 6. **Keep instrumented anduninstrumented claims separate.** Record warmup,workload andprofiling state beside a measurement;refuse a universal speedup claim.
-   **Expected:** metadata names100warmups andprofilingfalse;universal claimfalse.
-   **Verify:** Compare your assertion values or captured diagnostic with metadata names100warmups andprofilingfalse;universal claimfalse.
+   **Expected:** metadata names 100 warmups and profiling false; universal claim false.
+   **Verify:** Compare your assertion values or captured diagnostic with metadata names 100 warmups and profiling false; universal claim false.
 
 ## Common pitfalls and diagnosis
 

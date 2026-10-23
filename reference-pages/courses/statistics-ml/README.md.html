@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,12 +162,13 @@
       <p class="source-path">Generated from <code>courses/statistics-ml/README.md</code></p>
     </header>
     <article class="document"><h2 id="statistics-and-machine-learning-for-data-scientists-end-to-end">Statistics and Machine Learning for Data Scientists End To End<a class="heading-anchor" href="#statistics-and-machine-learning-for-data-scientists-end-to-end" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>Statistics and Machine Learning for Data Scientists End To End</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
 <p>This book develops the 1,005 named methods in the supplied 40-section outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method. Each chapter explains mechanisms, assumptions, appropriate uses, failure modes and interpretation, then connects them to complete Python demonstrations and answered interview discussions.</p>
 <p>This is a tutorial and reference book. It contains no exams, problem sets or hidden solutions. The small examples explain mechanisms; their assertions check mathematical and implementation claims, not learner mastery. Advanced method descriptions are not claims that every research estimator has a production implementation in this repository.</p>
 <h3 id="running-the-worked-examples">Running the worked examples<a class="heading-anchor" href="#running-the-worked-examples" aria-label="Link to this section">#</a></h3>
 <p>Open a chapter in the classroom reader, or read its Markdown file. Reading needs no Python packages. The examples use Python 3.11 or 3.12 and the repository&#x27;s prepared scientific environment: NumPy, pandas, SciPy, scikit-learn and statsmodels. No dataset, pretrained model, API key or network connection is required after dependencies are installed. Examples construct tiny local fixtures and print interpretable results.</p>
 <p>From the repository root, run this command in a terminal whose <code>python</code> resolves to the prepared environment. The command is identical in PowerShell, Command Prompt, Bash and zsh:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
 <p>Replace <code>01</code> with the chapter number. Optional ecosystems such as PyMC/Stan, XGBoost, NetworkX, lifelines, UMAP and specialized spatial, survey or reinforcement-learning packages are discussed only where relevant. They are not required by the examples and are never installed or imported automatically.</p>
 <h3 id="scope-and-provenance">Scope and provenance<a class="heading-anchor" href="#scope-and-provenance" aria-label="Link to this section">#</a></h3>
 <p><a href="source-outline.md.html">source-outline.md</a> is an unmodified copy of the user-provided scope. <a href="manifest.json.html">manifest.json</a> records its SHA-256 digest and chapter metadata. <a href="coverage.json.html">coverage.json</a> maps each of its 1,005 bold method bullets to a stable <code>stat-SS-NN</code> anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.</p>

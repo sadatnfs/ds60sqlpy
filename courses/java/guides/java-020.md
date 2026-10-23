@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-019`
 
 ## Learning objectives
 
-Explain binary-search invariant, stable sort, dynamic programming using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is RunlowerBound on1,2,2,5 withtarget2 andtarget6. The final exercise transfers the mechanism to reject invalid recurrence inputs.
+Explain binary-search invariant, stable sort, dynamic programming using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Run lowerBound on 1,2,2,5 with target 2 and target 6. The final exercise transfers the mechanism to reject invalid recurrence inputs.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ Algorithms connect a problem contract to a sequence of operations and invariants
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-020/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A lower-bound search returns the first index whose value is at least the target,orlength if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming tabledp[amount] stores the minimum coin count for that exact amount,withdp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
+A lower-bound search returns the first index whose value is at least the target,or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming tabledp[amount] stores the minimum coin count for that exact amount,withdp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
 
 ## Worked example / walkthrough
 
@@ -65,7 +65,7 @@ public class Main {
 
 ```
 
-**Expected:** indices1 and4.
+**Expected:** indices 1 and 4.
 
 ### Example B: Handle empty and outside searches
 
@@ -102,9 +102,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Find the first duplicate boundary.** RunlowerBound on1,2,2,5 withtarget2 andtarget6.
-   **Expected:** indices1 and4.
-   **Verify:** Compare your assertion values or captured diagnostic with indices1 and4.
+1. **Find the first duplicate boundary.** Run lowerBound on 1,2,2,5 with target 2 and target 6.
+   **Expected:** indices 1 and 4.
+   **Verify:** Compare your assertion values or captured diagnostic with indices 1 and 4.
 
 2. **Handle empty and outside searches.** Search an empty array and a target below the first element.
    **Expected:** both return0.
@@ -123,8 +123,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with -1 forunreachable3;0 foramount0.
 
 6. **Reject invalid recurrence inputs.** Pass a negative amount or a zero-valued coin.
-   **Expected:** IllegalArgumentException forboth.
-   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException forboth.
+   **Expected:** IllegalArgumentException for both.
+   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException for both.
 
 ## Common pitfalls and diagnosis
 

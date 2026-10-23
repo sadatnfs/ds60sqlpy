@@ -82,7 +82,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Canonical JSON with sorted keys makes manifest hashing stable across dictionary insertion order. SHA256 fingerprints UTF-8 text. Compare family sets across partitions and validate one active version perfamily under a simple current-only policy. A missing permission field is an admission failure, not an invitation to infer permission. Do not strip or normalize text before hashing unless that normalization policy is declared and separately recorded.
+Canonical JSON with sorted keys makes manifest hashing stable across dictionary insertion order. SHA256 fingerprints UTF-8 text. Compare family sets across partitions and validate one active version per family under a simple current-only policy. A missing permission field is an admission failure, not an invitation to infer permission. Do not strip or normalize text before hashing unless that normalization policy is declared and separately recorded.
 
 ## Follow a corpus update through its derived artifacts
 

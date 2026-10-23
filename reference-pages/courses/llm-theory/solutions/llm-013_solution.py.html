@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,45 +161,45 @@
       <h1>Llm 013 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-013_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-013: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Construct next-token pairs</span>
-<span>    ids=np.array([2,5,7,3]); inputs=ids[:-1]; labels=ids[1:]</span>
-<span>    np.testing.assert_array_equal(inputs,[2,5,7]); np.testing.assert_array_equal(labels,[5,7,3])</span>
-<span> </span>
-<span>    # Exercise 2: Expose identity labels</span>
-<span>    copied=inputs.copy(); assert np.count_nonzero(copied!=labels)==3</span>
-<span> </span>
-<span>    # Exercise 3: Detect exact duplicates</span>
-<span>    import hashlib</span>
-<span>    train={&#x27;a&#x27;:&#x27;alpha beta&#x27;}; valid={&#x27;copy&#x27;:&#x27;alpha beta&#x27;}</span>
-<span>    hash_text=lambda text:hashlib.sha256(text.encode()).hexdigest()</span>
-<span>    assert {hash_text(t) for t in train.values()} &amp; {hash_text(t) for t in valid.values()}</span>
-<span> </span>
-<span>    # Exercise 4: Detect family leakage</span>
-<span>    families={&#x27;a&#x27;:&#x27;F&#x27;,&#x27;b&#x27;:&#x27;F&#x27;,&#x27;c&#x27;:&#x27;G&#x27;}</span>
-<span>    assert {families[&#x27;a&#x27;]} &amp; {families[&#x27;b&#x27;]}=={&#x27;F&#x27;}</span>
-<span> </span>
-<span>    # Exercise 5: Freeze a vocabulary</span>
-<span>    vocab={&#x27;alpha&#x27;:0,&#x27;beta&#x27;:1}; before=dict(vocab); unknown=vocab.get(&#x27;gamma&#x27;,-1)</span>
-<span>    assert unknown==-1 and vocab==before</span>
-<span> </span>
-<span>    # Exercise 6: Count active targets</span>
-<span>    documents=[[2,5,7,3],[8,3]]</span>
-<span>    pairs=[(a,b) for doc in documents for a,b in zip(doc[:-1],doc[1:])]</span>
-<span>    assert len(pairs)==4 and (3,8) not in pairs</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-013: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Construct next-token pairs</span></span>
+<span class="source-line">    ids<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Expose identity labels</span></span>
+<span class="source-line">    copied<span class="syntax-operator">=</span>inputs<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>copied<span class="syntax-operator">!=</span>labels<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Detect exact duplicates</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> hashlib</span>
+<span class="source-line">    train<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha beta</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> valid<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">copy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha beta</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    hash_text<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> text<span class="syntax-punctuation">:</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span>hash_text<span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> train<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">{</span>hash_text<span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> valid<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Detect family leakage</span></span>
+<span class="source-line">    families<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span>families<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">{</span>families<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Freeze a vocabulary</span></span>
+<span class="source-line">    vocab<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">beta</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> before<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>vocab<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> unknown<span class="syntax-operator">=</span>vocab<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">gamma</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> unknown<span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> vocab<span class="syntax-operator">==</span>before</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Count active targets</span></span>
+<span class="source-line">    documents<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    pairs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> doc <span class="syntax-operator">in</span> documents <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span>b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>doc<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>doc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> pairs</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

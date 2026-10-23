@@ -72,7 +72,7 @@ for h in [.1,.01,.001]:
 
 ## Exercise 3: Separate gradient from update
 
-The question is: Use learning rate.1 and gradient-4 from w0.
+The question is: Use learning rate 0.1 and gradient-4 from w = 0.
 
 The update includes direction, step size and old state. Treating the gradient as the parameter would implement a different algorithm.
 

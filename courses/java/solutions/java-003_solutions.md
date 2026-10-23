@@ -14,13 +14,13 @@ Control flow chooses which statements run and how often. A boolean expression ha
 
 ## Reading the reference
 
-if selects a branch. && evaluates the right operand only when the left istrue;|| evaluates it only when needed. A for loop has initialization,condition andupdate. Use index<length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.
+if selects a branch. && evaluates the right operand only when the left is true;|| evaluates it only when needed. A for loop has initialization,condition and update. Use index<length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.
 
 ## Exercise 1: Guard a nullable value
 
-Task: Use textnull and testtext!=null before callingisEmpty.
+Task: Use text null and test text!=null before calling isEmpty.
 
-The right operand is not evaluated when the left isfalse. Reversing the operands would attempt the method call before the guard.
+The right operand is not evaluated when the left is false. Reversing the operands would attempt the method call before the guard.
 
 ```java
 String text = null;
@@ -28,13 +28,13 @@ boolean nonempty = text != null && !text.isEmpty();
 assert !nonempty;
 ```
 
-**Expected:** conditionfalse with noNullPointerException.
+**Expected:** condition false with no NullPointerException.
 
-**Verify:** Compare the program values or named exception with conditionfalse with noNullPointerException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with condition false with no NullPointerException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Trace a prefix sum
 
-Task: Sum array2,4,6 while retaining the invariant thatsum covers indices belowi.
+Task: Sum array2,4,6 while retaining the invariant that sum covers indices belowi.
 
 The accumulator begins at the additive identity0. Each iteration adds one new element, so no record is skipped or counted twice.
 
@@ -85,7 +85,7 @@ assert visited.equals(List.of(0, 1, 2, 3, 4));
 
 Task: Search3,8,8 for the first8 and stop immediately.
 
-Without thebreak, later matches would overwrite the first index. The sentinel-1 represents absence and cannot be mistaken for index0.
+Without the break, later matches would overwrite the first index. The sentinel-1 represents absence and cannot be mistaken for index0.
 
 ```java
 int[] items = {3, 8, 8}; int found = -1;
@@ -110,9 +110,9 @@ catch (ArrayIndexOutOfBoundsException expected) { failed = true; }
 assert failed;
 ```
 
-**Expected:** wrong loop raisesArrayIndexOutOfBoundsException.
+**Expected:** wrong loop raises ArrayIndexOutOfBoundsException.
 
-**Verify:** Compare the program values or named exception with wrong loop raisesArrayIndexOutOfBoundsException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with wrong loop raises ArrayIndexOutOfBoundsException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -337,16 +383,18 @@
 <li>Audit fold membership, coverage, and error without treating one score as proof of deployment validity.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-ml-02.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python\professional\lessons\py_ml_02_group_time_evaluation.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_ml_02_group_time_evaluation<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_02_group_time_evaluation.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_02_group_time_evaluation.py</code></pre>
 <p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-ml-02.html#solution-1">explanatory solutions</a> and <a href="python-ml-02.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <p>A test set represents a future decision, not merely a random fraction of rows. If the system must predict for new customers, holding out rows from customers already seen during training can answer the wrong question. If it must operate next month, training on records whose labels arrived after the decision date gives it information unavailable at the time. Start by naming the information a real predictor would possess at its prediction instant.</p>
@@ -363,23 +411,23 @@
 <p>Group holdout and time holdout answer different questions. The first excludes entities globally; the second may allow returning entities whose past records are legitimate training information. Neither split automatically proves the other policy. If deployment requires both new entities and future time, compose both constraints and audit the resulting smaller training set. Do not claim group independence simply because row identities are disjoint.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-a-entity-overlap-can-hide-behind-different-row-ids">Example A: entity overlap can hide behind different row ids<a class="heading-anchor" href="#guide--example-a-entity-overlap-can-hide-behind-different-row-ids" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">training = [{&quot;event&quot;: &quot;a1&quot;, &quot;entity&quot;: &quot;A&quot;}, {&quot;event&quot;: &quot;b1&quot;, &quot;entity&quot;: &quot;B&quot;}]
-validation = [{&quot;event&quot;: &quot;a2&quot;, &quot;entity&quot;: &quot;A&quot;}]
-train_ids = {row[&quot;event&quot;] for row in training}
-test_ids = {row[&quot;event&quot;] for row in validation}
-train_entities = {row[&quot;entity&quot;] for row in training}
-test_entities = {row[&quot;entity&quot;] for row in validation}
-assert not train_ids &amp; test_ids
-assert train_entities &amp; test_entities == {&quot;A&quot;}</code></pre>
+<pre class="highlighted-code"><code class="language-python">training <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">event</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">event</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+validation <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">event</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+train_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> training<span class="syntax-punctuation">}</span>
+test_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> validation<span class="syntax-punctuation">}</span>
+train_entities <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> training<span class="syntax-punctuation">}</span>
+test_entities <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> validation<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> train_ids <span class="syntax-operator">&amp;</span> test_ids
+<span class="syntax-keyword">assert</span> train_entities <span class="syntax-operator">&amp;</span> test_entities <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Set intersection <code>&amp;</code> reveals shared membership. Different event ids do not guarantee different entities. Expected observation: no row overlap, but entity A appears on both sides. That is a defect for an unseen-entity question and may be allowed for a returning-entity future-time question. The score alone cannot decide which question the experiment actually answers.</p>
 <h5 id="guide--example-b-delayed-labels-change-the-legal-training-set">Example B: delayed labels change the legal training set<a class="heading-anchor" href="#guide--example-b-delayed-labels-change-the-legal-training-set" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from datetime import datetime, timedelta, timezone
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> datetime<span class="syntax-punctuation">,</span> timedelta<span class="syntax-punctuation">,</span> timezone
 
-cutoff = datetime(2026, 1, 5, tzinfo=timezone.utc)
-gap = timedelta(days=1)
-label_available = datetime(2026, 1, 4, tzinfo=timezone.utc)
-assert not (label_available &lt; cutoff - gap)
-assert label_available &lt; cutoff</code></pre>
+cutoff <span class="syntax-operator">=</span> datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> tzinfo<span class="syntax-operator">=</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span>
+gap <span class="syntax-operator">=</span> timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+label_available <span class="syntax-operator">=</span> datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> tzinfo<span class="syntax-operator">=</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span>label_available <span class="syntax-operator">&lt;</span> cutoff <span class="syntax-operator">-</span> gap<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> label_available <span class="syntax-operator">&lt;</span> cutoff</code></pre>
 <p>Expected observation: the label is earlier than validation but lies exactly at the embargo boundary, so the declared strict-before training policy excludes it. In this lab, training requires observation before cutoff and label availability strictly before cutoff minus gap. Validation owns observations in <code>[cutoff, end)</code> when an end is supplied. Excluded records are counted, not silently forgotten. The boundary is conservative and explicit; other applications can choose differently if they test and justify their policy.</p>
 <h5 id="guide--a-baseline-makes-the-experiment-inspectable">A baseline makes the experiment inspectable<a class="heading-anchor" href="#guide--a-baseline-makes-the-experiment-inspectable" aria-label="Link to this section">#</a></h5>
 <p>Fit the constant prediction as the mean of permitted training targets. Score mean absolute error on validation targets. This baseline is intentionally simple enough to calculate by hand. For training targets zero and zero with a held-out target one hundred, the permitted prediction is zero and the test error is one hundred. Including the held-out target when fitting the mean would improve that same test score, but make the experiment invalid.</p>
@@ -434,7 +482,7 @@ assert label_available &lt; cutoff</code></pre>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Bring these contracts into scikit-learn splitters, pipelines, and optional forecasting work. Keep an independent membership audit next to the model code; a library class name is useful documentation, not evidence that your inputs and availability assumptions are correct.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-ml-02.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-ml-02.
 Read python/professional/companion-guides/py_ml_02_group_time_evaluation.md and python/professional/lessons/py_ml_02_group_time_evaluation.py.
 Check my direct prerequisites: python-35, python-data-02.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -474,124 +522,124 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-ml-02: Leakage-Resistant Evaluation Across Groups and Time.</span>
-<span> </span>
-<span>Read ../companion-guides/py_ml_02_group_time_evaluation.md before attempting the exercises.</span>
-<span>The example runs; unfinished exercise functions raise NotImplementedError.</span>
-<span>Keep solutions separate until you have attempted and checked the contract.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from dataclasses import dataclass</span>
-<span>from datetime import datetime, timedelta</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Observation:</span>
-<span>    event_id: str</span>
-<span>    entity_id: str</span>
-<span>    observed_at: datetime</span>
-<span>    feature_available_at: datetime</span>
-<span>    label_available_at: datetime</span>
-<span>    feature: float</span>
-<span>    target: float</span>
-<span> </span>
-<span> </span>
-<span>def validate_observations(rows: list[Observation]) -&gt; None:</span>
-<span>    &quot;&quot;&quot;TODO: validate identities, awareness, availability, and finite numeric values.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete validate_observations&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def group_split(</span>
-<span>    rows: list[Observation], held_out: set[str]</span>
-<span>) -&gt; tuple[list[Observation], list[Observation]]:</span>
-<span>    &quot;&quot;&quot;TODO: hold out entire entities and reject empty train/test selections.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete group_split&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def time_split(</span>
-<span>    rows: list[Observation],</span>
-<span>    cutoff: datetime,</span>
-<span>    gap: timedelta = timedelta(0),</span>
-<span>    end: datetime | None = None,</span>
-<span>) -&gt; tuple[list[Observation], list[Observation], int]:</span>
-<span>    &quot;&quot;&quot;TODO: permitted past training, half-open future validation, excluded count.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete time_split&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def fit_mean(values: list[float]) -&gt; float:</span>
-<span>    &quot;&quot;&quot;TODO: fit a finite mean from nonempty permitted values.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete fit_mean&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def mae(actual: list[float], predicted: list[float]) -&gt; float:</span>
-<span>    &quot;&quot;&quot;TODO: validate dimensions/domain and compute mean absolute error.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete mae&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def evaluate_baseline(</span>
-<span>    training: list[Observation], validation: list[Observation]</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    &quot;&quot;&quot;TODO: fit only training targets, audit ids, and score validation targets.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete evaluate_baseline&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Worked train-only mean:&quot;, (2 + 4) / 2)</span>
-<span>    print(&quot;Worked held-out centered value:&quot;, 100 - (2 + 4) / 2)</span>
-<span>    print(&quot;TODO: complete six boundaries and eight exercises&quot;)</span>
-<span> </span>
-<span># Exercise 1. Validate availability before splitting</span>
-<span># Prompt: Implement `validate_observations` to reject duplicate ids, naive timestamps,</span>
-<span># nonfinite numbers, features available after observation, and labels available before</span>
-<span># observation.</span>
-<span># Verify: Each rule has a named test that captures ValueError. Equality at feature availability</span>
-<span># and equality at label availability both complete validation without exceptions.</span>
-<span> </span>
-<span># Exercise 2. Hold out whole entities</span>
-<span># Prompt: Implement `group_split(rows, held_out)` using explicit entity ids. Preserve source</span>
-<span># order and require nonempty training and validation sets.</span>
-<span># Verify: Assert validation ids [A1, A2], training ids [B1, C1], and an empty entity-set</span>
-<span># intersection when A is held out; unknown or all-inclusive holdouts raise ValueError.</span>
-<span> </span>
-<span># Exercise 3. Enforce delayed-label time policy</span>
-<span># Prompt: Implement `time_split` with aware cutoff, nonnegative gap, optional end, and strict</span>
-<span># label availability before cutoff minus gap.</span>
-<span># Verify: A label exactly at cutoff minus gap is excluded; a label one second earlier is</span>
-<span># eligible when observation is also earlier than cutoff.</span>
-<span> </span>
-<span># Exercise 4. Fit a transformation only on training</span>
-<span># Prompt: Implement `fit_mean` and use it to center feature values. Train on [2, 4] and</span>
-<span># transform validation value 100 with the fitted mean.</span>
-<span># Verify: Training mean is 3, centered train values are -1 and 1, and centered validation is 97.</span>
-<span># Adding validation before fitting would change the mean and fails the test.</span>
-<span> </span>
-<span># Exercise 5. Calculate a transparent baseline</span>
-<span># Prompt: Implement `mae` and `evaluate_baseline` with the permitted training target mean. Use</span>
-<span># train targets [0, 0] and validation target [100].</span>
-<span># Verify: The fitted prediction is 0 and MAE is 100; empty sets, unequal metric input lengths,</span>
-<span># and nonfinite values raise ValueError.</span>
-<span> </span>
-<span># Exercise 6. Rehearse walk-forward windows</span>
-<span># Prompt: Create two consecutive one-day validation windows over a tiny aware-timestamp</span>
-<span># fixture. Refit the baseline using only each fold eligible past.</span>
-<span># Verify: An observation at the shared boundary appears in the second validation window only;</span>
-<span># fold reports retain ids and counts for independent inspection.</span>
-<span> </span>
-<span># Exercise 7. Demonstrate a misleading improvement</span>
-<span># Prompt: Intentionally fit the baseline mean on train plus validation in a scratch</span>
-<span># experiment. Compare its score with the valid [0,0] versus [100] case.</span>
-<span># Verify: The leaked mean is about 33.333 and test error about 66.667, lower than 100; your note</span>
-<span># identifies target leakage rather than model progress.</span>
-<span> </span>
-<span># Exercise 8. Transfer to the deployment question</span>
-<span># Prompt: Write policies for returning-customer next-day predictions and new-customer next-day</span>
-<span># predictions. Explain which group/time constraints each needs and what a final test set</span>
-<span># protects.</span>
-<span># Verify: The second policy explicitly checks both entity disjointness and future availability.</span>
-<span># Both report excluded coverage and reserve evaluation data outside policy selection.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-ml-02: Leakage-Resistant Evaluation Across Groups and Time.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_ml_02_group_time_evaluation.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs; unfinished exercise functions raise NotImplementedError.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> datetime<span class="syntax-punctuation">,</span> timedelta</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Observation</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    event_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    entity_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    observed_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    feature_available_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    label_available_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    feature<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_observations</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate identities, awareness, availability, and finite numeric values.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete validate_observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">group_split</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> held_out<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: hold out entire entities and reject empty train/test selections.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete group_split</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">time_split</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    cutoff<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    gap<span class="syntax-punctuation">:</span> timedelta <span class="syntax-operator">=</span> timedelta<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    end<span class="syntax-punctuation">:</span> datetime <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: permitted past training, half-open future validation, excluded count.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete time_split</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_mean</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: fit a finite mean from nonempty permitted values.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete fit_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">mae</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> predicted<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate dimensions/domain and compute mean absolute error.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete mae</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">evaluate_baseline</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    training<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> validation<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: fit only training targets, audit ids, and score validation targets.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete evaluate_baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked train-only mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked held-out centered value:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span> <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: complete six boundaries and eight exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Validate availability before splitting</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `validate_observations` to reject duplicate ids, naive timestamps,</span></span>
+<span class="source-line"><span class="syntax-comment"># nonfinite numbers, features available after observation, and labels available before</span></span>
+<span class="source-line"><span class="syntax-comment"># observation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Each rule has a named test that captures ValueError. Equality at feature availability</span></span>
+<span class="source-line"><span class="syntax-comment"># and equality at label availability both complete validation without exceptions.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Hold out whole entities</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `group_split(rows, held_out)` using explicit entity ids. Preserve source</span></span>
+<span class="source-line"><span class="syntax-comment"># order and require nonempty training and validation sets.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Assert validation ids [A1, A2], training ids [B1, C1], and an empty entity-set</span></span>
+<span class="source-line"><span class="syntax-comment"># intersection when A is held out; unknown or all-inclusive holdouts raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Enforce delayed-label time policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `time_split` with aware cutoff, nonnegative gap, optional end, and strict</span></span>
+<span class="source-line"><span class="syntax-comment"># label availability before cutoff minus gap.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A label exactly at cutoff minus gap is excluded; a label one second earlier is</span></span>
+<span class="source-line"><span class="syntax-comment"># eligible when observation is also earlier than cutoff.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Fit a transformation only on training</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `fit_mean` and use it to center feature values. Train on [2, 4] and</span></span>
+<span class="source-line"><span class="syntax-comment"># transform validation value 100 with the fitted mean.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Training mean is 3, centered train values are -1 and 1, and centered validation is 97.</span></span>
+<span class="source-line"><span class="syntax-comment"># Adding validation before fitting would change the mean and fails the test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Calculate a transparent baseline</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `mae` and `evaluate_baseline` with the permitted training target mean. Use</span></span>
+<span class="source-line"><span class="syntax-comment"># train targets [0, 0] and validation target [100].</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The fitted prediction is 0 and MAE is 100; empty sets, unequal metric input lengths,</span></span>
+<span class="source-line"><span class="syntax-comment"># and nonfinite values raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Rehearse walk-forward windows</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create two consecutive one-day validation windows over a tiny aware-timestamp</span></span>
+<span class="source-line"><span class="syntax-comment"># fixture. Refit the baseline using only each fold eligible past.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: An observation at the shared boundary appears in the second validation window only;</span></span>
+<span class="source-line"><span class="syntax-comment"># fold reports retain ids and counts for independent inspection.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Demonstrate a misleading improvement</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Intentionally fit the baseline mean on train plus validation in a scratch</span></span>
+<span class="source-line"><span class="syntax-comment"># experiment. Compare its score with the valid [0,0] versus [100] case.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The leaked mean is about 33.333 and test error about 66.667, lower than 100; your note</span></span>
+<span class="source-line"><span class="syntax-comment"># identifies target leakage rather than model progress.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Transfer to the deployment question</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write policies for returning-customer next-day predictions and new-customer next-day</span></span>
+<span class="source-line"><span class="syntax-comment"># predictions. Explain which group/time constraints each needs and what a final test set</span></span>
+<span class="source-line"><span class="syntax-comment"># protects.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The second policy explicitly checks both entity disjointness and future availability.</span></span>
+<span class="source-line"><span class="syntax-comment"># Both report excluded coverage and reserve evaluation data outside policy selection.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -628,9 +676,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <p>Stable ID: <code>python-ml-02</code>.</p>
 <p>Read the <a href="python-ml-02.html#guide">guide</a> and attempt the <a href="python-ml-02.html#learner">learner artifact</a> first. The <a href="python-ml-02.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
 <p>The reference separates source validation, split policy, fitted state, and metric calculation. A constant predictor makes it possible to check the entire experiment by hand. There is no estimator dependency and no random split hiding membership. A production model can replace the baseline later without changing the availability questions.</p>
-<pre><code class="language-python">permitted_targets = [0.0, 0.0]
-prediction = sum(permitted_targets) / len(permitted_targets)
-assert abs(100.0 - prediction) == 100.0</code></pre>
+<pre class="highlighted-code"><code class="language-python">permitted_targets <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span>
+prediction <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>permitted_targets<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>permitted_targets<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-number">100.0</span> <span class="syntax-operator">-</span> prediction<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">100.0</span></code></pre>
 <p>The report retains identities and population sizes beside the score. A score from an empty set is rejected. Group and time splits remain separate because the intended deployment question decides whether both constraints apply. Membership evidence does not establish that the sampled population represents future demand, nor does it prove causal effects.</p>
 <h4 id="solution-1--exercise-1-validate-availability-before-splitting">Exercise 1. Validate availability before splitting<a class="heading-anchor" href="#solution-1--exercise-1-validate-availability-before-splitting" aria-label="Link to this section">#</a></h4>
 <p>Validate the whole source before choosing a subset. Event ids must be nonempty trimmed strings and unique; entity ids must be nonempty trimmed strings. Timestamps must have usable offsets and are compared as instants. A feature becoming usable after observation is future information. A label earlier than observation violates the teaching record contract. Equality is permitted at either availability boundary. Reject nonfinite features and targets, including booleans masquerading as numbers. These checks address representation and declared availability, not whether the recorded timestamps are factually accurate.</p>
@@ -682,146 +730,146 @@ assert abs(100.0 - prediction) == 100.0</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Inspectable group/time evaluation without an estimator dependency.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import math</span>
-<span>from dataclasses import dataclass</span>
-<span>from datetime import UTC, datetime, timedelta</span>
-<span>from statistics import fmean</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Observation:</span>
-<span>    event_id: str</span>
-<span>    entity_id: str</span>
-<span>    observed_at: datetime</span>
-<span>    feature_available_at: datetime</span>
-<span>    label_available_at: datetime</span>
-<span>    feature: float</span>
-<span>    target: float</span>
-<span> </span>
-<span> </span>
-<span>def _aware(value: datetime) -&gt; datetime:</span>
-<span>    if not isinstance(value, datetime) or value.utcoffset() is None:</span>
-<span>        raise ValueError(&quot;timestamps must be aware&quot;)</span>
-<span>    return value.astimezone(UTC)</span>
-<span> </span>
-<span> </span>
-<span>def _finite(value: float) -&gt; bool:</span>
-<span>    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)</span>
-<span> </span>
-<span> </span>
-<span>def validate_observations(rows: list[Observation]) -&gt; None:</span>
-<span>    seen: set[str] = set()</span>
-<span>    for row in rows:</span>
-<span>        if any(</span>
-<span>            not isinstance(value, str) or not value or value != value.strip()</span>
-<span>            for value in (row.event_id, row.entity_id)</span>
-<span>        ):</span>
-<span>            raise ValueError(&quot;identities must be nonempty trimmed text&quot;)</span>
-<span>        if row.event_id in seen:</span>
-<span>            raise ValueError(&quot;duplicate event id&quot;)</span>
-<span>        seen.add(row.event_id)</span>
-<span>        observed, feature_at, label_at = map(</span>
-<span>            _aware, (row.observed_at, row.feature_available_at, row.label_available_at)</span>
-<span>        )</span>
-<span>        if feature_at &gt; observed:</span>
-<span>            raise ValueError(&quot;feature unavailable at prediction time&quot;)</span>
-<span>        if label_at &lt; observed:</span>
-<span>            raise ValueError(&quot;label availability precedes observation&quot;)</span>
-<span>        if not _finite(row.feature) or not _finite(row.target):</span>
-<span>            raise ValueError(&quot;features and targets must be finite numbers&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def group_split(</span>
-<span>    rows: list[Observation], held_out: set[str]</span>
-<span>) -&gt; tuple[list[Observation], list[Observation]]:</span>
-<span>    validate_observations(rows)</span>
-<span>    entities = {row.entity_id for row in rows}</span>
-<span>    if not held_out or not held_out &lt;= entities:</span>
-<span>        raise ValueError(&quot;held-out entities must be a nonempty known subset&quot;)</span>
-<span>    training = [row for row in rows if row.entity_id not in held_out]</span>
-<span>    validation = [row for row in rows if row.entity_id in held_out]</span>
-<span>    if not training or not validation:</span>
-<span>        raise ValueError(&quot;training and validation must both be nonempty&quot;)</span>
-<span>    return training, validation</span>
-<span> </span>
-<span> </span>
-<span>def time_split(</span>
-<span>    rows: list[Observation],</span>
-<span>    cutoff: datetime,</span>
-<span>    gap: timedelta = timedelta(0),</span>
-<span>    end: datetime | None = None,</span>
-<span>) -&gt; tuple[list[Observation], list[Observation], int]:</span>
-<span>    validate_observations(rows)</span>
-<span>    cutoff = _aware(cutoff)</span>
-<span>    end = _aware(end) if end is not None else None</span>
-<span>    if gap &lt; timedelta(0) or (end is not None and end &lt;= cutoff):</span>
-<span>        raise ValueError(&quot;gap must be nonnegative and end must follow cutoff&quot;)</span>
-<span>    training = [</span>
-<span>        row</span>
-<span>        for row in rows</span>
-<span>        if _aware(row.observed_at) &lt; cutoff and _aware(row.label_available_at) &lt; cutoff - gap</span>
-<span>    ]</span>
-<span>    validation = [</span>
-<span>        row</span>
-<span>        for row in rows</span>
-<span>        if _aware(row.observed_at) &gt;= cutoff and (end is None or _aware(row.observed_at) &lt; end)</span>
-<span>    ]</span>
-<span>    if not training or not validation:</span>
-<span>        raise ValueError(&quot;training and validation must both be nonempty&quot;)</span>
-<span>    return training, validation, len(rows) - len(training) - len(validation)</span>
-<span> </span>
-<span> </span>
-<span>def fit_mean(values: list[float]) -&gt; float:</span>
-<span>    if not values or not all(_finite(value) for value in values):</span>
-<span>        raise ValueError(&quot;mean requires nonempty finite numbers&quot;)</span>
-<span>    result = fmean(values)</span>
-<span>    if not math.isfinite(result):</span>
-<span>        raise ValueError(&quot;mean overflowed&quot;)</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def mae(actual: list[float], predicted: list[float]) -&gt; float:</span>
-<span>    if (</span>
-<span>        not actual</span>
-<span>        or len(actual) != len(predicted)</span>
-<span>        or not all(_finite(value) for value in actual + predicted)</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;MAE requires equal nonempty finite vectors&quot;)</span>
-<span>    return fit_mean([abs(a - p) for a, p in zip(actual, predicted, strict=True)])</span>
-<span> </span>
-<span> </span>
-<span>def evaluate_baseline(</span>
-<span>    training: list[Observation], validation: list[Observation]</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    validate_observations(training + validation)</span>
-<span>    prediction = fit_mean([row.target for row in training])</span>
-<span>    score = mae([row.target for row in validation], [prediction] * len(validation))</span>
-<span>    return {</span>
-<span>        &quot;train_ids&quot;: [row.event_id for row in training],</span>
-<span>        &quot;validation_ids&quot;: [row.event_id for row in validation],</span>
-<span>        &quot;train_count&quot;: len(training),</span>
-<span>        &quot;validation_count&quot;: len(validation),</span>
-<span>        &quot;train_target_mean&quot;: prediction,</span>
-<span>        &quot;mae&quot;: score,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    t = datetime(2026, 1, 1, tzinfo=UTC)</span>
-<span>    rows = [</span>
-<span>        Observation(&quot;A1&quot;, &quot;A&quot;, t, t, t, 2.0, 0.0),</span>
-<span>        Observation(&quot;B1&quot;, &quot;B&quot;, t, t, t, 4.0, 0.0),</span>
-<span>        Observation(&quot;C1&quot;, &quot;C&quot;, t + timedelta(days=2), t, t + timedelta(days=3), 100.0, 100.0),</span>
-<span>    ]</span>
-<span>    training, validation = group_split(rows, {&quot;C&quot;})</span>
-<span>    report = evaluate_baseline(training, validation)</span>
-<span>    assert report[&quot;train_target_mean&quot;] == 0.0 and report[&quot;mae&quot;] == 100.0</span>
-<span>    print(report)</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Inspectable group/time evaluation without an estimator dependency.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> UTC<span class="syntax-punctuation">,</span> datetime<span class="syntax-punctuation">,</span> timedelta</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statistics <span class="syntax-keyword">import</span> fmean</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Observation</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    event_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    entity_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    observed_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    feature_available_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    label_available_at<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line">    feature<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_aware</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> datetime<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> value<span class="syntax-operator">.</span>utcoffset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">timestamps must be aware</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value<span class="syntax-operator">.</span>astimezone<span class="syntax-punctuation">(</span>UTC<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_finite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_observations</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    seen<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> value <span class="syntax-operator">or</span> value <span class="syntax-operator">!=</span> value<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>event_id<span class="syntax-punctuation">,</span> row<span class="syntax-operator">.</span>entity_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">identities must be nonempty trimmed text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> row<span class="syntax-operator">.</span>event_id <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate event id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>event_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        observed<span class="syntax-punctuation">,</span> feature_at<span class="syntax-punctuation">,</span> label_at <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            _aware<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>observed_at<span class="syntax-punctuation">,</span> row<span class="syntax-operator">.</span>feature_available_at<span class="syntax-punctuation">,</span> row<span class="syntax-operator">.</span>label_available_at<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> feature_at <span class="syntax-operator">&gt;</span> observed<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature unavailable at prediction time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> label_at <span class="syntax-operator">&lt;</span> observed<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">label availability precedes observation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> _finite<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>feature<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> _finite<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">features and targets must be finite numbers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">group_split</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> held_out<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    validate_observations<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    entities <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-operator">.</span>entity_id <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> held_out <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> held_out <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> entities<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">held-out entities must be a nonempty known subset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    training <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>row <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows <span class="syntax-keyword">if</span> row<span class="syntax-operator">.</span>entity_id <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> held_out<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    validation <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>row <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows <span class="syntax-keyword">if</span> row<span class="syntax-operator">.</span>entity_id <span class="syntax-operator">in</span> held_out<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> training <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> validation<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">training and validation must both be nonempty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> training<span class="syntax-punctuation">,</span> validation</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">time_split</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    cutoff<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    gap<span class="syntax-punctuation">:</span> timedelta <span class="syntax-operator">=</span> timedelta<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    end<span class="syntax-punctuation">:</span> datetime <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    validate_observations<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cutoff <span class="syntax-operator">=</span> _aware<span class="syntax-punctuation">(</span>cutoff<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    end <span class="syntax-operator">=</span> _aware<span class="syntax-punctuation">(</span>end<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> end <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> gap <span class="syntax-operator">&lt;</span> timedelta<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-punctuation">(</span>end <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> end <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> cutoff<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">gap must be nonnegative and end must follow cutoff</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    training <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        row</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> _aware<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>observed_at<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> cutoff <span class="syntax-operator">and</span> _aware<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>label_available_at<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> cutoff <span class="syntax-operator">-</span> gap</span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    validation <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        row</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> _aware<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>observed_at<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> cutoff <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>end <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">or</span> _aware<span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>observed_at<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> end<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> training <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> validation<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">training and validation must both be nonempty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> training<span class="syntax-punctuation">,</span> validation<span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>training<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>validation<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_mean</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> values <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>_finite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean requires nonempty finite numbers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> fmean<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean overflowed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">mae</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> predicted<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> actual</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>predicted<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>_finite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> actual <span class="syntax-operator">+</span> predicted<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">MAE requires equal nonempty finite vectors</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> fit_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>a <span class="syntax-operator">-</span> p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> p <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> predicted<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">evaluate_baseline</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    training<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> validation<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    validate_observations<span class="syntax-punctuation">(</span>training <span class="syntax-operator">+</span> validation<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    prediction <span class="syntax-operator">=</span> fit_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>row<span class="syntax-operator">.</span>target <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> training<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    score <span class="syntax-operator">=</span> mae<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>row<span class="syntax-operator">.</span>target <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> validation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>prediction<span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>validation<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">train_ids</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>row<span class="syntax-operator">.</span>event_id <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> training<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">validation_ids</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>row<span class="syntax-operator">.</span>event_id <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> validation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">train_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>training<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">validation_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>validation<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">train_target_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> prediction<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">mae</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> score<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    t <span class="syntax-operator">=</span> datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> tzinfo<span class="syntax-operator">=</span>UTC<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        Observation<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        Observation<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        Observation<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">C1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> t <span class="syntax-operator">+</span> timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">,</span> t <span class="syntax-operator">+</span> timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    training<span class="syntax-punctuation">,</span> validation <span class="syntax-operator">=</span> group_split<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    report <span class="syntax-operator">=</span> evaluate_baseline<span class="syntax-punctuation">(</span>training<span class="syntax-punctuation">,</span> validation<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">train_target_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span> <span class="syntax-operator">and</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">mae</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">100.0</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

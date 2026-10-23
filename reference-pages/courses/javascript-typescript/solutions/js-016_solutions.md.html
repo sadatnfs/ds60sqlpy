@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,62 +176,62 @@
 <h3 id="exercise-1-read-a-small-utf-8-file">Exercise 1: Read a small UTF-8 file<a class="heading-anchor" href="#exercise-1-read-a-small-utf-8-file" aria-label="Link to this section">#</a></h3>
 <p>Task: Write one line containing an emoji, then compare text length and byte length.</p>
 <p>The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters.</p>
-<pre><code class="language-javascript">await withDirectory(async directory =&gt; {
-  const path = join(directory, &#x27;message.txt&#x27;);
-  const text = &#x27;A😀B\n&#x27;;
-  await writeFile(path, text, { encoding: &#x27;utf8&#x27;, flag: &#x27;wx&#x27; });
-  assert.equal(await readFile(path, &#x27;utf8&#x27;), text);
-  assert.equal((await readFile(path)).length, 7);
-  assert.equal(text.length, 5);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;message.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A😀B\n&#x27;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> flag<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;wx&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> text round-trips; UTF-8 byte length exceeds code-unit length.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-preserve-characters-and-lines-across-chunks">Exercise 2: Preserve characters and lines across chunks<a class="heading-anchor" href="#exercise-2-preserve-characters-and-lines-across-chunks" aria-label="Link to this section">#</a></h3>
 <p>Task: Stream two lines with a two-byte highWaterMark and decode using readline.</p>
 <p>The stream decoder retains incomplete UTF-8 sequences, while readline retains incomplete lines. Chunk size is not a record size or a guarantee about the bytes held by every layer.</p>
-<pre><code class="language-javascript">await withDirectory(async directory =&gt; {
-  const path = join(directory, &#x27;lines.txt&#x27;);
-  await writeFile(path, &#x27;A😀B\r\nsecond\n&#x27;, &#x27;utf8&#x27;);
-  assert.deepEqual(await readLines(path), [&#x27;A😀B&#x27;, &#x27;second&#x27;]);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;lines.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;A😀B\r\nsecond\n&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readLines<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A😀B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> lines are A😀B and second, without a corrupt replacement character.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-refuse-accidental-overwrite">Exercise 3: Refuse accidental overwrite<a class="heading-anchor" href="#exercise-3-refuse-accidental-overwrite" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a file exclusively twice and inspect its unchanged content.</p>
 <p>Checking existence before writing introduces a race. Exclusive creation combines the check and creation at the filesystem operation boundary.</p>
-<pre><code class="language-javascript">await withDirectory(async directory =&gt; {
-  const path = join(directory, &#x27;owned.txt&#x27;);
-  await writeFile(path, &#x27;first&#x27;, { flag: &#x27;wx&#x27; });
-  await assert.rejects(writeFile(path, &#x27;second&#x27;, { flag: &#x27;wx&#x27; }), error =&gt; error.code === &#x27;EEXIST&#x27;);
-  assert.equal(await readFile(path, &#x27;utf8&#x27;), &#x27;first&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;owned.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> flag<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;wx&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> flag<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;wx&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>code <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;EEXIST&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> second creation rejects with EEXIST; original first remains.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-distinguish-a-missing-file">Exercise 4: Distinguish a missing file<a class="heading-anchor" href="#exercise-4-distinguish-a-missing-file" aria-label="Link to this section">#</a></h3>
 <p>Task: Read a path known not to exist in the fresh directory.</p>
 <p>A missing file can have an intentional application policy, but a catch-all empty result would also hide permission and I/O errors. Match the specific failure you intend to handle.</p>
-<pre><code class="language-javascript">await withDirectory(async directory =&gt; {
-  await assert.rejects(readFile(join(directory, &#x27;missing.txt&#x27;)), error =&gt; error.code === &#x27;ENOENT&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>readFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>code <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;ENOENT&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ENOENT rejection.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-restrict-a-learner-supplied-fixture-name">Exercise 5: Restrict a learner-supplied fixture name<a class="heading-anchor" href="#exercise-5-restrict-a-learner-supplied-fixture-name" aria-label="Link to this section">#</a></h3>
 <p>Task: Accept report.txt but reject traversal, separators and an absolute path.</p>
 <p>This allowlist accepts a single simple filename, avoiding platform-dependent separator interpretation. It is deliberately narrower than a general path sanitizer and makes no symlink-security claim.</p>
-<pre><code class="language-javascript">assert.equal(fixtureName(&#x27;report.txt&#x27;), &#x27;report.txt&#x27;);
-for (const name of [&#x27;../report.txt&#x27;, &#x27;/tmp/report.txt&#x27;, &#x27;a/b.txt&#x27;, &#x27;a\\b.txt&#x27;]) {
-  assert.throws(() =&gt; fixtureName(name), TypeError);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>fixtureName<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;report.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;report.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> name <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;../report.txt&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/tmp/report.txt&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;a/b.txt&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;a\\b.txt&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> fixtureName<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> only report.txt is accepted.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-handle-an-empty-text-stream">Exercise 6: Handle an empty text stream<a class="heading-anchor" href="#exercise-6-handle-an-empty-text-stream" aria-label="Link to this section">#</a></h3>
 <p>Task: Stream an empty file with the same decoder and line interface.</p>
 <p>The absence of bytes means no records. Adding a fabricated empty line would change aggregation counts and confuse empty input with one empty record.</p>
-<pre><code class="language-javascript">await withDirectory(async directory =&gt; {
-  const path = join(directory, &#x27;empty.txt&#x27;);
-  await writeFile(path, &#x27;&#x27;);
-  assert.deepEqual(await readLines(path), []);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;empty.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readLines<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> no lines.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-05.html#learner">learner SQL</a> · <a href="sql-05.html#solution-1">solution reasoning</a> · <a href="sql-05.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-05 — Cross Self Joins</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day05_cross_self_joins.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day05_cross_self_joins.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day05_cross_self_joins.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,25 +466,25 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day05_cross_self_joins.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH cats AS (
-  SELECT DISTINCT category FROM products
-), ctries AS (
-  SELECT DISTINCT country FROM customers
-)
-SELECT cats.category, ctries.country
-FROM cats CROSS JOIN ctries
-ORDER BY 1,2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> cats <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> category <span class="syntax-keyword">FROM</span> products
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ctries <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> country <span class="syntax-keyword">FROM</span> customers
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> cats<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ctries<span class="syntax-punctuation">.</span>country
+<span class="syntax-keyword">FROM</span> cats <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> ctries
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>products</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>category</code>, and <code>country</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>category</code>, and <code>country</code> with columns <code>category</code>, and <code>country</code> from <code>products</code>, and <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT e.employee_id, e.full_name AS employee, m.full_name AS manager
-FROM employees e
-LEFT JOIN employees m ON m.employee_id = e.manager_id
-ORDER BY manager NULLS FIRST,
-         m.employee_id NULLS FIRST,
-         employee,
-         e.employee_id
-LIMIT 50;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager
+<span class="syntax-keyword">FROM</span> employees e
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> manager NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
+         m<span class="syntax-punctuation">.</span>employee_id NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
+         employee<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>employees</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>employee_id</code>, <code>employee</code>, and <code>manager</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>employee_id</code>, capped at 50 rows with columns <code>employee_id</code>, <code>employee</code>, and <code>manager</code> from <code>employees</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -521,7 +569,7 @@ LIMIT 50;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-05 — Cross Self Joins.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-05 — Cross Self Joins.
 
 I have completed the direct catalog prerequisite: `sql-04`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md
@@ -579,95 +627,95 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 5: CROSS JOINs and Self-joins</span>
-<span>-- BEGINNER WORKFLOW — sql-05: Cross Self Joins</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-05/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: products, customers, employees.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.</span>
-<span>-- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.</span>
-<span>-- Pitfall: An accidental cross join multiplies row counts. Estimate left × right cardinality before materializing combinations.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- CROSS JOIN: all category-country pairs with counts</span>
-<span>WITH cats AS (</span>
-<span>  SELECT DISTINCT category FROM products</span>
-<span>), ctries AS (</span>
-<span>  SELECT DISTINCT country FROM customers</span>
-<span>)</span>
-<span>SELECT cats.category, ctries.country</span>
-<span>FROM cats CROSS JOIN ctries</span>
-<span>ORDER BY 1,2;</span>
-<span> </span>
-<span>-- Self-join: employee-manager hierarchy</span>
-<span>SELECT e.employee_id, e.full_name AS employee, m.full_name AS manager</span>
-<span>FROM employees e</span>
-<span>LEFT JOIN employees m ON m.employee_id = e.manager_id</span>
-<span>ORDER BY manager NULLS FIRST,</span>
-<span>         m.employee_id NULLS FIRST,</span>
-<span>         employee,</span>
-<span>         e.employee_id</span>
-<span>LIMIT 50;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] List every employee with their direct manager when present.</span>
-<span>--    Hint: Self join employees and use a left join so top-level employees remain visible.</span>
-<span>--    Inputs: For sql-05 Exercise 1, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_id`, and `manager_name`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 1, expected output: One row per employee. The final columns are `employee_id`, `employee_name`, `manager_id`, and `manager_name`. The final order is `e.employee_id`.</span>
-<span>--    Verify: For sql-05 Exercise 1, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_id`, and `manager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 1, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span>
-<span>-- 2. [Query writing] Find employees who manage nobody.</span>
-<span>--    Hint: Left join candidate managers to reports and retain managers with no right-side match.</span>
-<span>--    Inputs: For sql-05 Exercise 2, read from `employees`. Build the answer toward `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 2, expected output: One row per leaf employee. The final columns are `employee_id`, and `full_name`. The final order is `e.employee_id`.</span>
-<span>--    Verify: For sql-05 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, and `full_name` values match those staged rows without unintended fanout or loss. Add one row for which `(report.employee_id IS NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 2, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span>
-<span>-- 3. [Query writing] Build a complete grid of six recent months and all expense categories.</span>
-<span>--    Hint: Cross join two small declared dimensions; do not cross join raw fact tables.</span>
-<span>--    Inputs: For sql-05 Exercise 3, read from `expenses`. Build the answer toward `category`, and `month_start`; keep `category` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 3, expected output: Six rows per distinct expense category. The final columns are `category`, and `month_start`. The final order is `c.category, m.month_start`.</span>
-<span>--    Verify: For sql-05 Exercise 3, project `category` plus the raw source columns from `expenses` at each join stage; record row count and distinct `category`, then assert the final `category`, and `month_start` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 3, run `months`, and `categories` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span>
-<span>-- 4. [Prediction] Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.</span>
-<span>--    Hint: Cross-join cardinality is the product of input row counts.</span>
-<span>--    Inputs: For sql-05 Exercise 4, read from `departments`. Build the answer toward `department_month_combinations`; keep `department_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 4, expected output: One row containing 72. The final columns are `department_month_combinations`.</span>
-<span>--    Verify: For sql-05 Exercise 4, project `department_id` plus the raw source columns from `departments` at each join stage; record row count and distinct `department_id`, then assert the final `department_month_combinations` values match those staged rows without unintended fanout or loss. Add one source row with a new `department_id`; verify the result gains exactly one row carrying that `department_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 4, run `months` one at a time. Record each CTE&#x27;s row count and `department_id` uniqueness before the next stage uses it.</span>
-<span>-- 5. [Debugging] List unique employee pairs in the same department without self-pairs or mirrored duplicates.</span>
-<span>--    Hint: Use `left.employee_id &lt; right.employee_id` as both the join condition and uniqueness rule.</span>
-<span>--    Inputs: For sql-05 Exercise 5, read from `employees` twice at employee grain. Build the answer toward `department_id`, `first_employee_id`, and `second_employee_id`; keep all three columns visible as the composite pair key.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 5, expected output: One row per unordered same-department pair. The final columns are `department_id`, `first_employee_id`, and `second_employee_id`. The final order is `left_employee.department_id, left_employee.employee_id, right_employee.employee_id`.</span>
-<span>--    Verify: For sql-05 Exercise 5, assert `first_employee_id &lt; second_employee_id` for every row, require uniqueness of (`department_id`, `first_employee_id`, `second_employee_id`), and anti-check for both self-pairs and mirrored `(a, b)` / `(b, a)` pairs. For each department with `n` employees, independently require `n * (n - 1) / 2` result rows.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 5, start with the first relation in `employees`; after each join, record total rows and distinct `department_id` so the exact fanout or loss is visible.</span>
-<span>-- 6. [Extension] Show each employee, their manager, and their manager&#x27;s manager.</span>
-<span>--    Hint: Use two independently aliased left self joins; NULLs indicate the hierarchy ends.</span>
-<span>--    Inputs: For sql-05 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-05 Exercise 6, expected output: One row per employee with up to two ancestor columns. The final columns are `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`. The final order is `e.employee_id`.</span>
-<span>--    Verify: For sql-05 Exercise 6, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-05 Exercise 6, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 5: CROSS JOINs and Self-joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-05: Cross Self Joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-05/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: products, customers, employees.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: An accidental cross join multiplies row counts. Estimate left × right cardinality before materializing combinations.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- CROSS JOIN: all category-country pairs with counts</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> cats <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> category <span class="syntax-keyword">FROM</span> products</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ctries <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> country <span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cats<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ctries<span class="syntax-punctuation">.</span>country</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> cats <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> ctries</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Self-join: employee-manager hierarchy</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> manager NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         m<span class="syntax-punctuation">.</span>employee_id NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         employee<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] List every employee with their direct manager when present.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Self join employees and use a left join so top-level employees remain visible.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 1, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_id`, and `manager_name`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 1, expected output: One row per employee. The final columns are `employee_id`, `employee_name`, `manager_id`, and `manager_name`. The final order is `e.employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 1, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_id`, and `manager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 1, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Find employees who manage nobody.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Left join candidate managers to reports and retain managers with no right-side match.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 2, read from `employees`. Build the answer toward `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 2, expected output: One row per leaf employee. The final columns are `employee_id`, and `full_name`. The final order is `e.employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, and `full_name` values match those staged rows without unintended fanout or loss. Add one row for which `(report.employee_id IS NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 2, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Build a complete grid of six recent months and all expense categories.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Cross join two small declared dimensions; do not cross join raw fact tables.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 3, read from `expenses`. Build the answer toward `category`, and `month_start`; keep `category` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 3, expected output: Six rows per distinct expense category. The final columns are `category`, and `month_start`. The final order is `c.category, m.month_start`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 3, project `category` plus the raw source columns from `expenses` at each join stage; record row count and distinct `category`, then assert the final `category`, and `month_start` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 3, run `months`, and `categories` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Cross-join cardinality is the product of input row counts.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 4, read from `departments`. Build the answer toward `department_month_combinations`; keep `department_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 4, expected output: One row containing 72. The final columns are `department_month_combinations`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 4, project `department_id` plus the raw source columns from `departments` at each join stage; record row count and distinct `department_id`, then assert the final `department_month_combinations` values match those staged rows without unintended fanout or loss. Add one source row with a new `department_id`; verify the result gains exactly one row carrying that `department_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 4, run `months` one at a time. Record each CTE&#x27;s row count and `department_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] List unique employee pairs in the same department without self-pairs or mirrored duplicates.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use `left.employee_id &lt; right.employee_id` as both the join condition and uniqueness rule.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 5, read from `employees` twice at employee grain. Build the answer toward `department_id`, `first_employee_id`, and `second_employee_id`; keep all three columns visible as the composite pair key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 5, expected output: One row per unordered same-department pair. The final columns are `department_id`, `first_employee_id`, and `second_employee_id`. The final order is `left_employee.department_id, left_employee.employee_id, right_employee.employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 5, assert `first_employee_id &lt; second_employee_id` for every row, require uniqueness of (`department_id`, `first_employee_id`, `second_employee_id`), and anti-check for both self-pairs and mirrored `(a, b)` / `(b, a)` pairs. For each department with `n` employees, independently require `n * (n - 1) / 2` result rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 5, start with the first relation in `employees`; after each join, record total rows and distinct `department_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Show each employee, their manager, and their manager&#x27;s manager.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use two independently aliased left self joins; NULLs indicate the hierarchy ends.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-05 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-05 Exercise 6, expected output: One row per employee with up to two ancestor columns. The final columns are `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`. The final order is `e.employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-05 Exercise 6, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-05 Exercise 6, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -703,10 +751,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-05-solutions-cross-and-self-joins-combinatorics-and-relationships-to-self">Day 05 solutions — CROSS and SELF JOINs: Combinatorics and Relationships to Self<a class="heading-anchor" href="#solution-1--day-05-solutions-cross-and-self-joins-combinatorics-and-relationships-to-self" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day05_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day05_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day05_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -738,14 +786,14 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT e.employee_id,
-       e.full_name AS employee_name,
-       m.employee_id AS manager_id,
-       m.full_name AS manager_name
-FROM employees AS e
-LEFT JOIN employees AS m
-  ON m.employee_id = e.manager_id
-ORDER BY e.employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
+       m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
+       m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name
+<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> m
+  <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -769,13 +817,13 @@ ORDER BY e.employee_id;</code></pre>
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT e.employee_id,
-       e.full_name
-FROM employees AS e
-LEFT JOIN employees AS report
-  ON report.manager_id = e.employee_id
-WHERE report.employee_id IS NULL
-ORDER BY e.employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report
+  <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">WHERE</span> report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per leaf employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -800,21 +848,21 @@ ORDER BY e.employee_id;</code></pre>
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH months AS (
-  SELECT generate_series(
-           date_trunc(&#x27;month&#x27;, CURRENT_DATE) - INTERVAL &#x27;5 months&#x27;,
-           date_trunc(&#x27;month&#x27;, CURRENT_DATE),
-           INTERVAL &#x27;1 month&#x27;
-         )::date AS month_start
-), categories AS (
-  SELECT DISTINCT e.category
-  FROM expenses AS e
-)
-SELECT c.category,
-       m.month_start
-FROM categories AS c
-CROSS JOIN months AS m
-ORDER BY c.category, m.month_start;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span>
+           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;5 months&#x27;</span><span class="syntax-punctuation">,</span>
+           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+           <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span>
+         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>category
+  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       m<span class="syntax-punctuation">.</span>month_start
+<span class="syntax-keyword">FROM</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>month_start<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Six rows per distinct expense category.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -837,12 +885,12 @@ ORDER BY c.category, m.month_start;</code></pre>
 <li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 </ul>
-<pre><code class="language-sql">WITH months AS (
-  SELECT generate_series(1, 12) AS month_number
-)
-SELECT COUNT(*) AS department_month_combinations
-FROM departments AS d
-CROSS JOIN months AS m;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_number
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_month_combinations
+<span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row containing 72.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -865,16 +913,16 @@ CROSS JOIN months AS m;</code></pre>
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT left_employee.department_id,
-       left_employee.employee_id AS first_employee_id,
-       right_employee.employee_id AS second_employee_id
-FROM employees AS left_employee
-JOIN employees AS right_employee
-  ON right_employee.department_id = left_employee.department_id
- AND left_employee.employee_id &lt; right_employee.employee_id
-ORDER BY left_employee.department_id,
-         left_employee.employee_id,
-         right_employee.employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> first_employee_id<span class="syntax-punctuation">,</span>
+       right_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> second_employee_id
+<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> left_employee
+<span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> right_employee
+  <span class="syntax-keyword">ON</span> right_employee<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> left_employee<span class="syntax-punctuation">.</span>department_id
+ <span class="syntax-keyword">AND</span> left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">&lt;</span> right_employee<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+         left_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         right_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per unordered same-department pair.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -897,16 +945,16 @@ ORDER BY left_employee.department_id,
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT e.employee_id,
-       e.full_name AS employee_name,
-       manager.full_name AS manager_name,
-       grandmanager.full_name AS grandmanager_name
-FROM employees AS e
-LEFT JOIN employees AS manager
-  ON manager.employee_id = e.manager_id
-LEFT JOIN employees AS grandmanager
-  ON grandmanager.employee_id = manager.manager_id
-ORDER BY e.employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
+       manager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name<span class="syntax-punctuation">,</span>
+       grandmanager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> grandmanager_name
+<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager
+  <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> grandmanager
+  <span class="syntax-keyword">ON</span> grandmanager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee with up to two ancestor columns.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -959,171 +1007,171 @@ ORDER BY e.employee_id;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 05 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-05: Cross Self Joins</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day05_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day05_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.</span>
-<span>-- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.</span>
-<span>-- Pitfall: An accidental cross join multiplies row counts. Estimate left × right cardinality before materializing combinations.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: List every employee with their direct manager when present.</span>
-<span>-- Why: Self join employees and use a left join so top-level employees remain visible.</span>
-<span>-- Expected: One row per employee.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT e.employee_id,</span>
-<span>       e.full_name AS employee_name,</span>
-<span>       m.employee_id AS manager_id,</span>
-<span>       m.full_name AS manager_name</span>
-<span>FROM employees AS e</span>
-<span>LEFT JOIN employees AS m</span>
-<span>  ON m.employee_id = e.manager_id</span>
-<span>ORDER BY e.employee_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Find employees who manage nobody.</span>
-<span>-- Why: Left join candidate managers to reports and retain managers with no right-side match.</span>
-<span>-- Expected: One row per leaf employee.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT e.employee_id,</span>
-<span>       e.full_name</span>
-<span>FROM employees AS e</span>
-<span>LEFT JOIN employees AS report</span>
-<span>  ON report.manager_id = e.employee_id</span>
-<span>WHERE report.employee_id IS NULL</span>
-<span>ORDER BY e.employee_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Build a complete grid of six recent months and all expense categories.</span>
-<span>-- Why: Cross join two small declared dimensions; do not cross join raw fact tables.</span>
-<span>-- Expected: Six rows per distinct expense category.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH months AS (</span>
-<span>  SELECT generate_series(</span>
-<span>           date_trunc(&#x27;month&#x27;, CURRENT_DATE) - INTERVAL &#x27;5 months&#x27;,</span>
-<span>           date_trunc(&#x27;month&#x27;, CURRENT_DATE),</span>
-<span>           INTERVAL &#x27;1 month&#x27;</span>
-<span>         )::date AS month_start</span>
-<span>), categories AS (</span>
-<span>  SELECT DISTINCT e.category</span>
-<span>  FROM expenses AS e</span>
-<span>)</span>
-<span>SELECT c.category,</span>
-<span>       m.month_start</span>
-<span>FROM categories AS c</span>
-<span>CROSS JOIN months AS m</span>
-<span>ORDER BY c.category, m.month_start;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.</span>
-<span>-- Why: Cross-join cardinality is the product of input row counts.</span>
-<span>-- Expected: One row containing 72.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>WITH months AS (</span>
-<span>  SELECT generate_series(1, 12) AS month_number</span>
-<span>)</span>
-<span>SELECT COUNT(*) AS department_month_combinations</span>
-<span>FROM departments AS d</span>
-<span>CROSS JOIN months AS m;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: List unique employee pairs in the same department without self-pairs or mirrored duplicates.</span>
-<span>-- Why: Use `left.employee_id &lt; right.employee_id` as both the join condition and uniqueness rule.</span>
-<span>-- Expected: One row per unordered same-department pair.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT left_employee.department_id,</span>
-<span>       left_employee.employee_id AS first_employee_id,</span>
-<span>       right_employee.employee_id AS second_employee_id</span>
-<span>FROM employees AS left_employee</span>
-<span>JOIN employees AS right_employee</span>
-<span>  ON right_employee.department_id = left_employee.department_id</span>
-<span> AND left_employee.employee_id &lt; right_employee.employee_id</span>
-<span>ORDER BY left_employee.department_id,</span>
-<span>         left_employee.employee_id,</span>
-<span>         right_employee.employee_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Show each employee, their manager, and their manager&#x27;s manager.</span>
-<span>-- Why: Use two independently aliased left self joins; NULLs indicate the hierarchy ends.</span>
-<span>-- Expected: One row per employee with up to two ancestor columns.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT e.employee_id,</span>
-<span>       e.full_name AS employee_name,</span>
-<span>       manager.full_name AS manager_name,</span>
-<span>       grandmanager.full_name AS grandmanager_name</span>
-<span>FROM employees AS e</span>
-<span>LEFT JOIN employees AS manager</span>
-<span>  ON manager.employee_id = e.manager_id</span>
-<span>LEFT JOIN employees AS grandmanager</span>
-<span>  ON grandmanager.employee_id = manager.manager_id</span>
-<span>ORDER BY e.employee_id;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 05 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-05: Cross Self Joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day05_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day05_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: An accidental cross join multiplies row counts. Estimate left × right cardinality before materializing combinations.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: List every employee with their direct manager when present.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Self join employees and use a left join so top-level employees remain visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per employee.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> m</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Find employees who manage nobody.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Left join candidate managers to reports and retain managers with no right-side match.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per leaf employee.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Build a complete grid of six recent months and all expense categories.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Cross join two small declared dimensions; do not cross join raw fact tables.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Six rows per distinct expense category.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span></span>
+<span class="source-line">           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;5 months&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">           <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       m<span class="syntax-punctuation">.</span>month_start</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>month_start<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Cross-join cardinality is the product of input row counts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row containing 72.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_number</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_month_combinations</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: List unique employee pairs in the same department without self-pairs or mirrored duplicates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use `left.employee_id &lt; right.employee_id` as both the join condition and uniqueness rule.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per unordered same-department pair.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> first_employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       right_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> second_employee_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> left_employee</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> right_employee</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> right_employee<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> left_employee<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">&lt;</span> right_employee<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         left_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         right_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Show each employee, their manager, and their manager&#x27;s manager.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use two independently aliased left self joins; NULLs indicate the hierarchy ends.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per employee with up to two ancestor columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       manager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       grandmanager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> grandmanager_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> grandmanager</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> grandmanager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

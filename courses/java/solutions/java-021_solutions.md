@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds andwrites,so two threads can lose an update even if each individual access is visible.
+Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds and writes,so two threads can lose an update even if each individual access is visible.
 
 This lesson uses bounded joins,latches and a barrier to make ordering deliberate. A controlled lost-update fixture forces both workers to read the same starting value before either writes. That demonstrates the mechanism without hoping a random stress run happens to fail. Interruption is a cooperative request,not forcible termination;blocking code should respond or preserve the interrupt status when it cannot complete its work.
 
@@ -20,7 +20,7 @@ Thread.start begins a new execution;calling run directly is an ordinary method c
 
 ## Exercise 1: Publish a result through join
 
-Task: Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.
+Task: Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.
 
 The join establishes the required visibility after completion. A timed sleep would not provide the same guarantee.
 
@@ -29,9 +29,9 @@ int[] result={0}; Thread worker=Thread.ofPlatform().start(() -> result[0]=42);
 joinBounded(worker); assert result[0]==42;
 ```
 
-**Expected:** worker terminated;result42.
+**Expected:** worker terminated; result 42.
 
-**Verify:** Compare the program values or named exception with worker terminated;result42. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with worker terminated; result 42. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Publish initial state through start
 

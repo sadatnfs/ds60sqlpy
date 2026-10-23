@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,55 +177,55 @@
 <h3 id="exercise-1-handle-and-decode-a-successful-request">Exercise 1: Handle and decode a successful request<a class="heading-anchor" href="#exercise-1-handle-and-decode-a-successful-request" aria-label="Link to this section">#</a></h3>
 <p>Task: Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.</p>
 <p>The JSON boundary removes any purely static guarantee. The client decoder re-establishes the runtime schema before using the success payload.</p>
-<pre><code class="language-typescript">const reply = handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R1&#x27;, body: { a: 2, b: 3 } });
-const decoded = decodeReply(JSON.parse(JSON.stringify(reply)));
-assert.equal(decoded.status, 200);
-if (!decoded.body.ok) throw new Error(decoded.body.error.message);
-assert.equal(decoded.body.data.total, 5);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> reply <span class="syntax-operator">=</span> handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R1&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> a<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> b<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> decoded <span class="syntax-operator">=</span> decodeReply<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>parse<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>decoded<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>decoded<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span>decoded<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>decoded<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">.</span>total<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> status 200 and decoded total 5.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-return-a-stable-invalid-input-envelope">Exercise 2: Return a stable invalid-input envelope<a class="heading-anchor" href="#exercise-2-return-a-stable-invalid-input-envelope" aria-label="Link to this section">#</a></h3>
 <p>Task: Submit a string operand instead of a number.</p>
 <p>The failure is represented deliberately rather than relying on JavaScript coercion. A stable category is easier for clients to branch on than free-form error prose.</p>
-<pre><code class="language-typescript">const reply = handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R2&#x27;, body: { a: &#x27;2&#x27;, b: 3 } });
-assert.equal(reply.status, 400);
-if (reply.body.ok) throw new Error(&#x27;expected failure&#x27;);
-assert.equal(reply.body.error.code, &#x27;bad_request&#x27;);
-assert.equal(reply.body.requestId, &#x27;R2&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> reply <span class="syntax-operator">=</span> handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R2&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> a<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;2&#x27;</span><span class="syntax-punctuation">,</span> b<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected failure&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;bad_request&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">.</span>requestId<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;R2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> status 400 with bad_request and matching request id.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-distinguish-route-and-method-failures">Exercise 3: Distinguish route and method failures<a class="heading-anchor" href="#exercise-3-distinguish-route-and-method-failures" aria-label="Link to this section">#</a></h3>
 <p>Task: Use an unknown path and an unsupported method.</p>
 <p>The handler&#x27;s routing policy is explicit. Transport integration must preserve these distinctions rather than turning every error into 500 or 200.</p>
-<pre><code class="language-typescript">assert.equal(handle({ method: &#x27;POST&#x27;, path: &#x27;/missing&#x27;, requestId: &#x27;R3&#x27;, body: null }).status, 404);
-assert.equal(handle({ method: &#x27;GET&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R4&#x27;, body: null }).status, 405);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/missing&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R3&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-keyword">null</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">404</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;GET&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R4&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-keyword">null</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">405</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 404 not_found versus 405 method_not_allowed.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-reject-version-or-status-body-disagreement">Exercise 4: Reject version or status/body disagreement<a class="heading-anchor" href="#exercise-4-reject-version-or-status-body-disagreement" aria-label="Link to this section">#</a></h3>
 <p>Task: Decode an unsupported version and a success envelope paired with status 400.</p>
 <p>A client should reject a contradictory contract rather than choosing whichever part happens to be convenient. Version mismatch remains visible for migration or diagnosis.</p>
-<pre><code class="language-typescript">const valid = handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R5&#x27;, body: { a: 1, b: 1 } });
-assert.throws(() =&gt; decodeReply({ ...valid, body: { ...valid.body, version: 2 } }), TypeError);
-assert.throws(() =&gt; decodeReply({ ...valid, status: 400 }), TypeError);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> valid <span class="syntax-operator">=</span> handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R5&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> a<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> b<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> decodeReply<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>valid<span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>valid<span class="syntax-punctuation">.</span>body<span class="syntax-punctuation">,</span> version<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> decodeReply<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>valid<span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">400</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TypeError for both malformed replies.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-require-success-narrowing-in-checked-client-code">Exercise 5: Require success narrowing in checked client code<a class="heading-anchor" href="#exercise-5-require-success-narrowing-in-checked-client-code" aria-label="Link to this section">#</a></h3>
 <p>Task: Attempt data access before checking ok in an uncalled function.</p>
 <p>The compiler protects internal client logic after decoding. It does not replace the decoder that establishes the envelope at runtime.</p>
-<pre><code class="language-typescript">function negativeTypeCheck(envelope: Envelope): void {
-  // @ts-expect-error Failure envelopes do not contain data.
-  void envelope.data.total;
-}
-void negativeTypeCheck;
-assert.equal(decodeReply(handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R6&#x27;, body: { a: 0, b: 0 } })).status, 200);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span>envelope<span class="syntax-operator">:</span> <span class="syntax-keyword">Envelope</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error Failure envelopes do not contain data.</span>
+  <span class="syntax-operator">void</span> envelope<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">.</span>total<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>decodeReply<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R6&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> a<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span><span class="syntax-punctuation">,</span> b<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> expected compiler error; correctly narrowed success remains usable.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-keep-invalid-payload-details-out-of-response-errors">Exercise 6: Keep invalid payload details out of response errors<a class="heading-anchor" href="#exercise-6-keep-invalid-payload-details-out-of-response-errors" aria-label="Link to this section">#</a></h3>
 <p>Task: Include a secret-looking extra field in an invalid request.</p>
 <p>An error response is another output boundary. Generic domain diagnostics can be useful without reflecting arbitrary request content into logs or clients.</p>
-<pre><code class="language-typescript">const reply = handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R7&#x27;, body: { a: 1, b: 2, token: &#x27;fixture-secret-value&#x27; } });
-assert.equal(reply.status, 400);
-assert.equal(JSON.stringify(reply).includes(&#x27;fixture-secret-value&#x27;), false);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> reply <span class="syntax-operator">=</span> handle<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> requestId<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;R7&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> a<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> b<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> token<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;fixture-secret-value&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>reply<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;fixture-secret-value&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> bad_request response does not echo the supplied value.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

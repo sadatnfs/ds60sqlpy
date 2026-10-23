@@ -124,7 +124,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** batch sizes 2, 2, 1.
    **Verify:** Save the assertion results for exercise 2, including batch sizes 2, 2, 1.
 
-3. **Run three independent updates.** Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.
+3. **Run three independent updates.** Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each batch.
    **Expected:** three finite distinct weights.
    **Verify:** Save the assertion results for exercise 3, including three finite distinct weights.
 

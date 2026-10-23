@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,74 +161,74 @@
       <h1>Chapter 33</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_33.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def gradient_check():</span>
-<span>    x=np.array([1.,2.]);w=np.array([.2,-.1]);target=.8</span>
-<span>    def loss(weights):</span>
-<span>        prediction=np.tanh(x@weights)</span>
-<span>        return .5*(prediction-target)**2</span>
-<span>    prediction=np.tanh(x@w)</span>
-<span>    gradient=(prediction-target)*(1-prediction**2)*x</span>
-<span>    eps=1e-6;numerical=np.empty_like(w)</span>
-<span>    for i in range(len(w)):</span>
-<span>        step=np.zeros_like(w);step[i]=eps</span>
-<span>        numerical[i]=(loss(w+step)-loss(w-step))/(2*eps)</span>
-<span>    assert np.allclose(gradient,numerical,atol=1e-8)</span>
-<span>    assert loss(w-.1*gradient)&lt;loss(w)</span>
-<span>    print(&quot;Analytic and numerical gradient:&quot;,gradient,numerical)</span>
-<span> </span>
-<span>def causal_attention():</span>
-<span>    x=np.array([[1.,0.],[0.,1.],[1.,1.]])</span>
-<span>    def attention(values):</span>
-<span>        logits=values@values.T/np.sqrt(values.shape[1])</span>
-<span>        mask=np.triu(np.ones(logits.shape,dtype=bool),k=1)</span>
-<span>        logits=np.where(mask,-np.inf,logits)</span>
-<span>        weights=np.exp(logits-np.max(logits,axis=1,keepdims=True))</span>
-<span>        weights/=weights.sum(axis=1,keepdims=True)</span>
-<span>        return weights@values,weights</span>
-<span>    output,weights=attention(x)</span>
-<span>    changed=x.copy();changed[2]=[100.,-100.]</span>
-<span>    later,_=attention(changed)</span>
-<span>    assert np.allclose(weights.sum(axis=1),1.)</span>
-<span>    assert np.allclose(weights[np.triu_indices(3,k=1)],0.)</span>
-<span>    assert np.allclose(output[:2],later[:2])</span>
-<span>    print(&quot;Causal attention weights:&quot;,weights)</span>
-<span> </span>
-<span>def low_rank_update():</span>
-<span>    base=np.zeros((8,6));a=np.arange(12,dtype=float).reshape(2,6)/10</span>
-<span>    b=np.arange(16,dtype=float).reshape(8,2)/20</span>
-<span>    update=b@a;effective=base+update</span>
-<span>    assert effective.shape==(8,6) and np.linalg.matrix_rank(update)&lt;=2</span>
-<span>    assert a.size+b.size==28 and base.size==48</span>
-<span>    print(&quot;Full weights versus adapter parameters:&quot;,base.size,a.size+b.size)</span>
-<span> </span>
-<span>def response_only_loss():</span>
-<span>    target_probability=np.array([.01,.02,.8,.5])</span>
-<span>    response_mask=np.array([False,False,True,True])</span>
-<span>    loss=-np.log(target_probability[response_mask]).mean()</span>
-<span>    changed=target_probability.copy();changed[:2]=[.9,.9]</span>
-<span>    assert np.isclose(loss,-np.log(changed[response_mask]).mean())</span>
-<span>    assert np.isclose(loss,-np.log(.4)/2)</span>
-<span>    print(&quot;Response-only negative log likelihood:&quot;,loss)</span>
-<span> </span>
-<span>def evidence_packet():</span>
-<span>    docs=[(&quot;runbook-v2&quot;,&quot;restart requires an approved change&quot;),</span>
-<span>          (&quot;runtime-17&quot;,&quot;restart completed at 14:00&quot;),</span>
-<span>          (&quot;glossary-v1&quot;,&quot;a restart creates a new process&quot;)]</span>
-<span>    query=set(&quot;restart approved change&quot;.split())</span>
-<span>    scored=sorted(((len(query &amp; set(text.split())),doc_id,text) for doc_id,text in docs),reverse=True)</span>
-<span>    packet=[{&quot;source_id&quot;:doc_id,&quot;text&quot;:text} for score,doc_id,text in scored[:2]]</span>
-<span>    assert packet[0][&quot;source_id&quot;]==&quot;runbook-v2&quot;</span>
-<span>    assert all(item[&quot;source_id&quot;] and item[&quot;text&quot;] for item in packet)</span>
-<span>    print(&quot;Retrieved evidence packet:&quot;,packet)</span>
-<span> </span>
-<span>def main():</span>
-<span>    gradient_check();causal_attention();low_rank_update();response_only_loss();evidence_packet()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">gradient_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>w<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>target<span class="syntax-operator">=</span><span class="syntax-number">.8</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">loss</span><span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        prediction<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>tanh<span class="syntax-punctuation">(</span>x<span class="syntax-decorator">@weights</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>prediction<span class="syntax-operator">-</span>target<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span></span>
+<span class="source-line">    prediction<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>tanh<span class="syntax-punctuation">(</span>x<span class="syntax-decorator">@w</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    gradient<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>prediction<span class="syntax-operator">-</span>target<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>prediction<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>x</span>
+<span class="source-line">    eps<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">;</span>numerical<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>empty_like<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        step<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>step<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>eps</span>
+<span class="source-line">        numerical<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>step<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>loss<span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span>step<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>eps<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>gradient<span class="syntax-punctuation">,</span>numerical<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> loss<span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">.1</span><span class="syntax-operator">*</span>gradient<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>loss<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Analytic and numerical gradient:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>gradient<span class="syntax-punctuation">,</span>numerical<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">causal_attention</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">attention</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        logits<span class="syntax-operator">=</span>values<span class="syntax-decorator">@values</span><span class="syntax-operator">.</span>T<span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        mask<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>triu<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>k<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        logits<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">,</span>logits<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        weights<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>logits<span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        weights<span class="syntax-operator">/</span><span class="syntax-operator">=</span>weights<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> weights<span class="syntax-decorator">@values</span><span class="syntax-punctuation">,</span>weights</span>
+<span class="source-line">    output<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>attention<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    changed<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>changed<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">100.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">100.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    later<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>attention<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>triu_indices<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>k<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>later<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Causal attention weights:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weights<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">low_rank_update</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    base<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">10</span></span>
+<span class="source-line">    b<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">20</span></span>
+<span class="source-line">    update<span class="syntax-operator">=</span>b<span class="syntax-decorator">@a</span><span class="syntax-punctuation">;</span>effective<span class="syntax-operator">=</span>base<span class="syntax-operator">+</span>update</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> effective<span class="syntax-operator">.</span>shape<span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>matrix_rank<span class="syntax-punctuation">(</span>update<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>size<span class="syntax-operator">+</span>b<span class="syntax-operator">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">28</span> <span class="syntax-operator">and</span> base<span class="syntax-operator">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">48</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Full weights versus adapter parameters:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>base<span class="syntax-operator">.</span>size<span class="syntax-punctuation">,</span>a<span class="syntax-operator">.</span>size<span class="syntax-operator">+</span>b<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">response_only_loss</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    target_probability<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.01</span><span class="syntax-punctuation">,</span><span class="syntax-number">.02</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    response_mask<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    loss<span class="syntax-operator">=</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>target_probability<span class="syntax-punctuation">[</span>response_mask<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    changed<span class="syntax-operator">=</span>target_probability<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>changed<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">[</span>response_mask<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">.4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Response-only negative log likelihood:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>loss<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">evidence_packet</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    docs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">runbook-v2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">restart requires an approved change</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">runtime-17</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">restart completed at 14:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">glossary-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">a restart creates a new process</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    query<span class="syntax-operator">=</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">restart approved change</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scored<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>query <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>doc_id<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> doc_id<span class="syntax-punctuation">,</span>text <span class="syntax-operator">in</span> docs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>reverse<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    packet<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">source_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>doc_id<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>text<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> score<span class="syntax-punctuation">,</span>doc_id<span class="syntax-punctuation">,</span>text <span class="syntax-operator">in</span> scored<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> packet<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">source_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&quot;</span><span class="syntax-string">runbook-v2</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">source_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> packet<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Retrieved evidence packet:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>packet<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    gradient_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>causal_attention<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>low_rank_update<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>response_only_loss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>evidence_packet<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

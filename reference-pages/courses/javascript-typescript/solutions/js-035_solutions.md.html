@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,59 +177,59 @@
 <h3 id="exercise-1-compare-offset-spellings-of-one-instant">Exercise 1: Compare offset spellings of one instant<a class="heading-anchor" href="#exercise-1-compare-offset-spellings-of-one-instant" aria-label="Link to this section">#</a></h3>
 <p>Task: Parse UTC midnight and the equivalent previous-day offset representation.</p>
 <p>The offset changes the written clock reading, not the represented instant. Date does not preserve the original -05:00 label as part of its identity.</p>
-<pre><code class="language-javascript">const utc = new Date(&#x27;2024-01-01T00:00:00Z&#x27;);
-const offset = new Date(&#x27;2023-12-31T19:00:00-05:00&#x27;);
-assert.equal(utc.getTime(), offset.getTime());
-assert.equal(offset.toISOString(), &#x27;2024-01-01T00:00:00.000Z&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> utc <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-01-01T00:00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> offset <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2023-12-31T19:00:00-05:00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>utc<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> offset<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>offset<span class="syntax-punctuation">.</span>toISOString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2024-01-01T00:00:00.000Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> equal timestamps and UTC ISO output.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-observe-a-spring-forward-clock-gap">Exercise 2: Observe a spring-forward clock gap<a class="heading-anchor" href="#exercise-2-observe-a-spring-forward-clock-gap" aria-label="Link to this section">#</a></h3>
 <p>Task: Format two instants one hour apart across the New York spring transition.</p>
 <p>The timeline remains continuous while local civil labels skip an hour. A local scheduling problem must account for this mapping rather than assuming every day contains every clock reading.</p>
-<pre><code class="language-javascript">const before = new Date(&#x27;2024-03-10T06:30:00Z&#x27;);
-const after = new Date(&#x27;2024-03-10T07:30:00Z&#x27;);
-assert.equal(parts(before).hour, &#x27;01&#x27;);
-assert.equal(parts(after).hour, &#x27;03&#x27;);
-assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> before <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-03-10T06:30:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> after <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-03-10T07:30:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>before<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>hour<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>hour<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;03&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> before<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span> <span class="syntax-operator">*</span> <span class="syntax-number">60</span> <span class="syntax-operator">*</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> local hour changes from 01 to 03 while elapsed time is one hour.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-reject-impossible-or-ambiguous-calendar-text">Exercise 3: Reject impossible or ambiguous calendar text<a class="heading-anchor" href="#exercise-3-reject-impossible-or-ambiguous-calendar-text" aria-label="Link to this section">#</a></h3>
 <p>Task: Accept leap-day 2024-02-29 and reject 2023-02-29, slash format and month 13.</p>
 <p>A round-trip component check catches normalization of impossible dates. A strict grammar avoids choosing a day/month interpretation from host locale.</p>
-<pre><code class="language-javascript">assert.equal(calendarDate(&#x27;2024-02-29&#x27;), &#x27;2024-02-29&#x27;);
-for (const text of [&#x27;2023-02-29&#x27;, &#x27;01/02/2024&#x27;, &#x27;2024-13-01&#x27;]) assert.throws(() =&gt; calendarDate(text), RangeError);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>calendarDate<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-02-29&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2024-02-29&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> text <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;2023-02-29&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;01/02/2024&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2024-13-01&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> calendarDate<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> only the valid strict date is accepted.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-distinguish-repeated-fall-back-clock-readings">Exercise 4: Distinguish repeated fall-back clock readings<a class="heading-anchor" href="#exercise-4-distinguish-repeated-fall-back-clock-readings" aria-label="Link to this section">#</a></h3>
 <p>Task: Format two instants on either side of the fall transition.</p>
 <p>A local clock label without an offset or disambiguation policy may not identify one instant. Persisting only that label loses information.</p>
-<pre><code class="language-javascript">const first = new Date(&#x27;2024-11-03T05:30:00Z&#x27;);
-const second = new Date(&#x27;2024-11-03T06:30:00Z&#x27;);
-assert.equal(parts(first).hour, &#x27;01&#x27;);
-assert.equal(parts(second).hour, &#x27;01&#x27;);
-assert.equal(parts(first).minute, parts(second).minute);
-assert.notEqual(parts(first).timeZoneName, parts(second).timeZoneName);
-assert.equal(second.getTime() - first.getTime(), 3600000);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-11-03T05:30:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> second <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2024-11-03T06:30:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>hour<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>hour<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>minute<span class="syntax-punctuation">,</span> parts<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>minute<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>timeZoneName<span class="syntax-punctuation">,</span> parts<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>timeZoneName<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> first<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3600000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both read 01:30 locally but offsets differ and timestamps are one hour apart.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-inspect-locale-number-parts-without-parsing-display-text">Exercise 5: Inspect locale number parts without parsing display text<a class="heading-anchor" href="#exercise-5-inspect-locale-number-parts-without-parsing-display-text" aria-label="Link to this section">#</a></h3>
 <p>Task: Format 1234.5 in US English and German and inspect their decimal separators.</p>
 <p>The formatter changes presentation, not the stored number. Removing punctuation from a localized string is not a reliable general numeric parser.</p>
-<pre><code class="language-javascript">const value = 1234.5;
-const us = new Intl.NumberFormat(&#x27;en-US&#x27;).formatToParts(value);
-const de = new Intl.NumberFormat(&#x27;de-DE&#x27;).formatToParts(value);
-assert.equal(us.find(part =&gt; part.type === &#x27;decimal&#x27;).value, &#x27;.&#x27;);
-assert.equal(de.find(part =&gt; part.type === &#x27;decimal&#x27;).value, &#x27;,&#x27;);
-assert.equal(value, 1234.5);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> value <span class="syntax-operator">=</span> <span class="syntax-number">1234.5</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> us <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Intl</span><span class="syntax-punctuation">.</span>NumberFormat<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;en-US&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>formatToParts<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> de <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Intl</span><span class="syntax-punctuation">.</span>NumberFormat<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;de-DE&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>formatToParts<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>us<span class="syntax-punctuation">.</span>find<span class="syntax-punctuation">(</span>part <span class="syntax-punctuation">=&gt;</span> part<span class="syntax-punctuation">.</span>type <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;decimal&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;.&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>de<span class="syntax-punctuation">.</span>find<span class="syntax-punctuation">(</span>part <span class="syntax-punctuation">=&gt;</span> part<span class="syntax-punctuation">.</span>type <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;decimal&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;,&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">1234.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> decimal dot versus comma; numeric value remains unchanged.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-reject-invalid-timestamp-and-timezone-assumptions">Exercise 6: Reject invalid timestamp and timezone assumptions<a class="heading-anchor" href="#exercise-6-reject-invalid-timestamp-and-timezone-assumptions" aria-label="Link to this section">#</a></h3>
 <p>Task: Inspect Invalid Date and request a nonexistent timezone.</p>
 <p>Being a Date instance does not imply timestamp validity. Unsupported timezone configuration should be diagnosed explicitly rather than silently falling back to the host default.</p>
-<pre><code class="language-javascript">const invalid = new Date(&#x27;not an ISO instant&#x27;);
-assert.equal(Number.isNaN(invalid.getTime()), true);
-assert.throws(() =&gt; invalid.toISOString(), RangeError);
-assert.throws(() =&gt; new Intl.DateTimeFormat(&#x27;en-US&#x27;, { timeZone: &#x27;Invalid/Nowhere&#x27; }), RangeError);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> invalid <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;not an ISO instant&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isNaN</span><span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">.</span>getTime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> invalid<span class="syntax-punctuation">.</span>toISOString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Intl</span><span class="syntax-punctuation">.</span>DateTimeFormat<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;en-US&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> timeZone<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Invalid/Nowhere&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> NaN timestamp; toISOString and invalid timezone construction throw RangeError.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -144,20 +190,20 @@
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-recover-a-scalar-output-by-hand">Example A: Recover a scalar output by hand<a class="heading-anchor" href="#example-a-recover-a-scalar-output-by-hand" aria-label="Link to this section">#</a></h4>
 <p>Use the fixed two-record feature matrix and one-output weight. Calculate the first row before executing.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-X = np.array([[1, 2, 3], [0, 1, 0]], dtype=np.float64)
-W = np.array([[1], [0], [-1]], dtype=np.float64)
-result = X @ W + 2
-np.testing.assert_array_equal(result, [[0], [2]])
-print(result)</code></pre>
-<p><strong>Expected:</strong> The first row is 1<em>1 + 2</em>0 + 3<em>(-1) + 2 = 0. The second is 0</em>1 + 1<em>0 + 0</em>(-1) + 2 = 2. Two observations produce two rows, each with one output.</p>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+W <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+result <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> W <span class="syntax-operator">+</span> <span class="syntax-number">2</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The first row is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1\cdot 1</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">2\cdot 0</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot (-1)</annotation></semantics></math> + 2 = 0. The second is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\cdot 1</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>·</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">1\cdot 0</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">0\cdot (-1)</annotation></semantics></math> + 2 = 2. Two observations produce two rows, each with one output.</p>
 <h4 id="example-b-a-bias-can-create-a-plausible-wrong-shape">Example B: A bias can create a plausible wrong shape<a class="heading-anchor" href="#example-b-a-bias-can-create-a-plausible-wrong-shape" aria-label="Link to this section">#</a></h4>
 <p>Change only the bias to an input-feature-length vector. Observe what plain broadcasting permits.</p>
-<pre><code class="language-python">wrong = X @ W + np.array([2, 3, 4])
-assert wrong.shape == (2, 3)
-np.testing.assert_array_equal(wrong, [[0, 1, 2], [2, 3, 4]])
-print(wrong)</code></pre>
+<pre class="highlighted-code"><code class="language-python">wrong <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> W <span class="syntax-operator">+</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> wrong<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The matrix product is still (2,1), but adding (3,) broadcasts into three output columns. A declared one-output interface should reject this bias before addition.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
@@ -175,10 +221,10 @@ print(wrong)</code></pre>
 <li><strong>Guard the bias axis.</strong> Reject bias [2,3,4] for the one-output model while accepting scalar 2 and output vector [2]. <strong>Expected:</strong> Scalar and length-one vector biases give the same [[0],[2]]; feature-length bias raises ValueError. <strong>Verify:</strong> Assert equality of the two accepted outputs and capture the rejected bias case independently.</li>
 </ol>
 <ol>
-<li><strong>Extend to two outputs.</strong> Use W=[[1,0],[0,1],[-1,1]] and bias [2,-1] on the original X. <strong>Expected:</strong> The result is [[0,4],[2,0]] with shape (2,2). <strong>Verify:</strong> Check each output column by hand and assert the complete matrix, not just its shape.</li>
+<li><strong>Extend to two outputs.</strong> Use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[1,0],[0,1],[-1,1]]</annotation></semantics></math> and bias [2,-1] on the original X. <strong>Expected:</strong> The result is [[0,4],[2,0]] with shape (2,2). <strong>Verify:</strong> Check each output column by hand and assert the complete matrix, not just its shape.</li>
 </ol>
 <ol>
-<li><strong>Preserve a prediction under unit conversion.</strong> For X=[[100],[200]] centimeters, W=[[0.02]] and bias 1, convert X to meters and choose the corresponding new W. <strong>Expected:</strong> The centimeter model and meter model with W=[[2]] both predict [[3],[5]]. <strong>Verify:</strong> Assert both predictions agree and explain why changing X alone while retaining 0.02 would alter the model.</li>
+<li><strong>Preserve a prediction under unit conversion.</strong> For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>100</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>200</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">X=[[100],[200]]</annotation></semantics></math> centimeters, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>0.02</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[0.02]]</annotation></semantics></math> and bias 1, convert X to meters and choose the corresponding new W. <strong>Expected:</strong> The centimeter model and meter model with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[2]]</annotation></semantics></math> both predict [[3],[5]]. <strong>Verify:</strong> Assert both predictions agree and explain why changing X alone while retaining 0.02 would alter the model.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -192,11 +238,11 @@ print(wrong)</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Close the code and state the three matrix dimensions in words. Then choose a two-feature, two-output fixture of your own and derive its first row. Explain why a correctly shaped matrix can still use the wrong feature order.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>tf-004</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-003,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-003,
 Linear neurons and matrix contracts. Read courses/deep-learning-tensorflow/guides/tf-003.md
 and courses/deep-learning-tensorflow/lessons/tf-003.py. Respect direct prerequisites
 tf-002 and beginner depth. Explain the actual fixture&#x27;s

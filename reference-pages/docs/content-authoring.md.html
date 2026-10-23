@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -117,6 +163,22 @@
     </header>
     <article class="document"><h2 id="content-authoring-guide">Content authoring guide<a class="heading-anchor" href="#content-authoring-guide" aria-label="Link to this section">#</a></h2>
 <p>Course content must be correct, runnable, accessible to its intended learner, and explicit about prerequisites. This guide defines the shared contract; track-specific rules live in <a href="../python/AGENTS.md.html">python/AGENTS.md</a>, <a href="../sql/AGENTS.md.html">sql/AGENTS.md</a>, and <a href="../bridge/AGENTS.md.html">bridge/AGENTS.md</a>. The <a href="curriculum-design-references.md.html">curriculum design references</a> record the external tutorial patterns that informed this contract.</p>
+<h3 id="one-classroom-across-every-subject">One classroom across every subject<a class="heading-anchor" href="#one-classroom-across-every-subject" aria-label="Link to this section">#</a></h3>
+<p>The public browser entrypoint is <code>/classroom</code>. Python, PostgreSQL, the bridge and module/book subjects share its home, navigation, saved-work conventions and lesson workspace. A subject supplies identity, its individual theme and learning sequence; a runtime profile supplies execution. Do not create a new public application or hardcode an all-green theme for a new subject. Text labels must identify subjects independently of color. Prerequisites and estimated minutes support choice without imposing a study deadline.</p>
+<p>Lead run instructions with the supported classroom workflow and its capability notice. Keep native editor, Jupyter and command-line recipes under an explicit optional heading. Do not promise that a pad executes an entire notebook, stateful SQL workflow or cluster operation unless that route implements the artifact contract. Preserve stable lesson IDs and learner state when changing navigation. The tutorial-book exception still has no exam or solution gate.</p>
+<h3 id="mathematical-notation-and-code-presentation">Mathematical notation and code presentation<a class="heading-anchor" href="#mathematical-notation-and-code-presentation" aria-label="Link to this section">#</a></h3>
+<p>Author mathematical statements with explicit LaTeX delimiters: <code>\( ... \)</code> for inline notation and <code>\[ ... \]</code> on separate lines for a displayed formula. These delimiters avoid ambiguity with monetary dollar signs. The reader converts supported notation into accessible native MathML using bundled local dependencies. No CDN or network request is required to read a formula.</p>
+<p>For example, write <code>\(\widehat{\delta}=\bar{x}_A-\bar{x}_B\)</code> for a mean difference. Give the larger uncertainty expression its own paragraph:</p>
+<pre class="highlighted-code"><code class="language-text">\[
+\operatorname{SE}(\widehat{\delta})
+=\sqrt{\frac{s_A^2}{n_A}+\frac{s_B^2}{n_B}}.
+\]</code></pre>
+<p>Define each symbol, its units, indices and assumptions in nearby prose. Distinguish a population parameter, an estimate and a numerical approximation. Use <code>\frac</code>, <code>\sqrt</code>, subscripts and superscripts for actual mathematical structure; do not leave formulas as <code>sqrt(sA^2/nA+sB^2/nB)</code> in teaching prose. Keep program expressions inside code spans or fences when teaching literal syntax. Source code must remain exact, including its operators and indentation. Matrices, cases, sums, products and aligned derivations can use conventional LaTeX. Check the rendered page for fallback source rather than assuming a complicated macro is supported. Do not depend on custom macros or executable HTML. A currency amount such as <code>$20</code> remains ordinary prose.</p>
+<p>Every fenced code example needs an explicit language identifier. Use <code>python</code>, <code>sql</code>, <code>cpp</code>, <code>java</code>, <code>javascript</code>, <code>typescript</code>, <code>scala</code>, <code>bash</code>, <code>sh</code>, <code>powershell</code>, <code>yaml</code>, <code>json</code>, <code>dockerfile</code>, <code>makefile</code>, <code>html</code> or another supported lexer name. Use <code>text</code> for console output, error transcripts, copied coaching prompts and pseudocode that is intentionally not a real language. Syntax highlighting must preserve selectable text and work without a CDN. Unknown languages should remain readable escaped text; do not mislabel them as Python merely to obtain colors. Adding a syntax lexer does not implement execution for a new language.</p>
+<p><code>curriculum/math-prose.json</code> is the reviewed migration source for older ASCII formulas. <code>scripts/normalize_math_prose.py</code> applies only exact scoped mappings, preserving existing math, links, inline code, fenced code, notebook code cells and the supplied statistics outline. New lessons should use explicit LaTeX at source. The consolidated <code>scripts/normalize_lesson_prose.py</code> pipeline also applies <code>curriculum/prose-repairs.json</code> to reviewed display-text spacing, while protecting code, math, IDs and runtime metadata. For legacy authoring generators, run the normalization step after regeneration and before building readers:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/normalize_lesson_prose.py --write --report work/math-prose-audit.json
+python scripts/build_lesson_readers.py</code></pre>
+<p>Without <code>--write</code>, the command checks whether a reviewed normalization is still pending. Its candidate report is an editorial aid, not a claim that every match is a mathematical error. Literal API calls and identifiers can resemble math. Review those cases in context, and retain the report&#x27;s code-preservation check. Never solve a typography problem by changing an executable reference or hiding a failed rendering test.</p>
 <h3 id="before-authoring">Before authoring<a class="heading-anchor" href="#before-authoring" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Read the closest <code>AGENTS.md</code>.</li>
@@ -152,7 +214,7 @@
 <li><strong>Syntax or query anatomy.</strong> Break a representative expression or statement into its meaningful parts. Do not assume punctuation, indentation, aliases, clauses, or evaluation order are self-explanatory.</li>
 <li><strong>At least two focused worked examples.</strong> One should demonstrate the normal case. The other should change one meaningful condition, expose an edge case, or contrast a common wrong approach. Annotate the important lines or clauses.</li>
 <li><strong>An expected observation.</strong> Show the bounded output, result columns and row grain, assertion, or precise behavior the learner should see. When output can vary, explain the invariant instead of inventing an exact value.</li>
-<li><strong>A novice-safe run path.</strong> Name the file or notebook, tool, kernel or database, command or button, where output appears, and what success looks like. SQL guides must lead with the guided SQL notebook route and retain separately labeled PowerShell and POSIX <code>psql</code> alternatives.</li>
+<li><strong>A novice-safe run path.</strong> Name the file or notebook, tool, kernel or database, command or button, where output appears, and what success looks like. SQL guides must lead with the classroom capability notice, then retain the optional guided SQL notebook route and separately labeled PowerShell and POSIX <code>psql</code> alternatives.</li>
 <li><strong>A practice ramp.</strong> Move from prediction and tracing to a guided change, independent construction, debugging, an edge case, and transfer to a new context. A long list of equally vague tasks is not progression.</li>
 <li><strong>Diagnosis, not just warnings.</strong> For each important mistake, show the symptom or likely error, explain its cause, and give the smallest useful investigation step.</li>
 <li><strong>Retrieval and explanation.</strong> End with questions that require the learner to explain the idea without copying syntax and identify what evidence would prove their work correct.</li>
@@ -173,7 +235,7 @@
 <p>Write a bounded contract instead:</p>
 <blockquote><p>Given <code>temperatures = [18, -3, 25, 0, 14, -8]</code>, first run an ordinary loop that appends only values greater than or equal to zero. Rewrite that behavior as one list comprehension named <code>non_freezing</code>. Preserve input order, do not modify <code>temperatures</code>, and verify that the result is <code>[18, 25, 0, 14]</code>. Then test an empty list and a list containing only negative values.</p></blockquote>
 <p>The second version names the input, filter boundary, result name, ordering and mutation constraints, expected value, and edge cases without revealing the comprehension itself.</p>
-<p>An <code><strong>Expected:</strong></code> or <code><strong>Verify:</strong></code> label is not evidence by itself. Its body must name something the learner can inspect: an assertion and value, an exact exception, output columns and row grain, a bounded count, a file and hash, a metric and tolerance, a command and exit status, a transcript, or another topic-specific artifact. Do not copy the exercise behind a generic wrapper such as “a deterministic result demonstrates the requirement,” and do not apply every possible control to every task. A one-row aggregate does not need a ranking tie-breaker; a simple projection does not need a CTE-stage audit; a configuration parser does not need a database query. Verification must follow the actual mechanism and failure modes of that exercise.</p>
+<p>An <code>**Expected:**</code> or <code>**Verify:**</code> label is not evidence by itself. Its body must name something the learner can inspect: an assertion and value, an exact exception, output columns and row grain, a bounded count, a file and hash, a metric and tolerance, a command and exit status, a transcript, or another topic-specific artifact. Do not copy the exercise behind a generic wrapper such as “a deterministic result demonstrates the requirement,” and do not apply every possible control to every task. A one-row aggregate does not need a ranking tie-breaker; a simple projection does not need a CTE-stage audit; a configuration parser does not need a database query. Verification must follow the actual mechanism and failure modes of that exercise.</p>
 <p>More prose is not automatically more teaching. Do not inflate a lesson with a generated “independent verification,” “edge case,” or “alternative” paragraph whose test does not apply to that exact query or program. A wrong scalar, join, window, DML, limit, or time-boundary checklist is worse than omitting the check. Keep the exercise-specific explanation and remove boilerplate whenever the artifact cannot name literal inputs, keys, measures, expected values, and the independent evidence that proves them.</p>
 <h4 id="notebook-teaching-flow">Notebook teaching flow<a class="heading-anchor" href="#notebook-teaching-flow" aria-label="Link to this section">#</a></h4>
 <p>Historical Python notebooks should no longer be four-cell summaries. A tutorial notebook should normally separate:</p>
@@ -263,14 +325,14 @@
 </ul>
 <h3 id="cross-platform-commands">Cross-platform commands<a class="heading-anchor" href="#cross-platform-commands" aria-label="Link to this section">#</a></h3>
 <p>When commands differ, give separately labeled blocks:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Do not put Bash operators in PowerShell examples. Prefer a cross-platform Python helper when the procedure is more than a few commands.</p>
 <h3 id="offline-first-design">Offline-first design<a class="heading-anchor" href="#offline-first-design" aria-label="Link to this section">#</a></h3>
@@ -299,7 +361,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 </ul>
 <p>changes.</p>
 <p>Then regenerate and validate:</p>
-<pre><code class="language-text">python scripts/build_catalog.py
+<pre class="highlighted-code"><code class="language-text">python scripts/build_catalog.py
 python scripts/course.py validate</code></pre>
 <p>Do not guess the catalog schema; inspect the builder and checked-in generated output.</p>
 <p>Use relative Markdown links for repository navigation. Avoid plain-text file paths when a clickable link is clearer.</p>
@@ -316,7 +378,7 @@ python scripts/course.py validate</code></pre>
 <p>Every learner-visible local Markdown or SQL link from the dashboard, lesson readers, or rendered references must point to generated HTML. The generator derives a deterministic recursive closure from explicit dashboard references and links rendered from catalog artifacts; do not replace it with a scan of arbitrary untracked files. Seed each registered track&#x27;s plan from catalog metadata, including plans that the original three tracks never link to. Keep completion on the dashboard in static mode. The native private portal can show its per-lesson checkbox; lab-served readers link back to that lesson&#x27;s saved evidence workflow and hide native launch actions. A server token alone does not mean that VS Code/Jupyter launching is enabled.</p>
 <p>Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson, the private launcher derives an ignored working notebook and editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> through <code>src/ds60sqlpy/sql_notebook.py</code>. The generator must preserve existing learner files, accept only stable catalog identities, keep paths below <code>.learning/sql/</code>, run fixed non-shell <code>psql -f</code> commands, detect changed meta-commands even when they follow SQL on the same line, hide connection values, and require explicit confirmation before resetting the disposable course schema.</p>
 <p>After lesson artifacts, paths, or catalog metadata change, regenerate and check both navigation layers:</p>
-<pre><code class="language-text">python scripts/build_course_guide.py
+<pre class="highlighted-code"><code class="language-text">python scripts/build_course_guide.py
 python scripts/build_lesson_readers.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check</code></pre>

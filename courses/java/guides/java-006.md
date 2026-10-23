@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-005`
 
 ## Learning objectives
 
-Explain list, set, map using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a mutable listred,blue,red and appendgreen. The final exercise transfers the mechanism to respect unmodifiable fixtures.
+Explain list, set, map using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a mutable list red,blue,red and append green. The final exercise transfers the mechanism to respect unmodifiable fixtures.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ Lists preserve an ordered sequence and may contain duplicates. Sets represent me
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-006/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -58,7 +58,7 @@ public class Main {
 
 ```
 
-**Expected:** size4;red appears twice.
+**Expected:** size 4; red appears twice.
 
 ### Example B: Count with a map
 
@@ -89,17 +89,17 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Retain sequence multiplicity.** Create a mutable listred,blue,red and appendgreen.
-   **Expected:** size4;red appears twice.
-   **Verify:** Compare your assertion values or captured diagnostic with size4;red appears twice.
+1. **Retain sequence multiplicity.** Create a mutable list red,blue,red and append green.
+   **Expected:** size 4; red appears twice.
+   **Verify:** Compare your assertion values or captured diagnostic with size 4; red appears twice.
 
 2. **Count with a map.** Count each color withMap.merge.
    **Expected:** red2,blue1,green1.
    **Verify:** Compare your assertion values or captured diagnostic with red2,blue1,green1.
 
 3. **Inspect set insertion.** Insertred twice into a HashSet and inspect return values.
-   **Expected:** firsttrue,secondfalse,size1.
-   **Verify:** Compare your assertion values or captured diagnostic with firsttrue,secondfalse,size1.
+   **Expected:** first true,second false,size1.
+   **Verify:** Compare your assertion values or captured diagnostic with first true,second false,size1.
 
 4. **Create deterministic output order.** Sort the count-map keys before presenting them.
    **Expected:** blue,green,red.

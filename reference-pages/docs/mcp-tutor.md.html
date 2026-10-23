@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,40 +167,40 @@
 <h3 id="install-the-optional-adapter">Install the optional adapter<a class="heading-anchor" href="#install-the-optional-adapter" aria-label="Link to this section">#</a></h3>
 <p>Run normal OS setup first. Install the extra into the same course interpreter while connected. It uses the official Python MCP SDK v2; old <code>FastMCP</code> examples from SDK v1 are not this adapter&#x27;s interface.</p>
 <p>Windows PowerShell, from the repository root:</p>
-<pre><code class="language-powershell">$CourseRoot = (Resolve-Path .).Path
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython -m pip install -e &quot;.[mcp]&quot;
-$McpScript = Join-Path $CourseRoot &quot;scripts\mcp_server.py&quot;
-&amp; $CoursePython $McpScript --help</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CourseRoot <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install -e <span class="syntax-string">&quot;</span><span class="syntax-string">.[mcp]</span><span class="syntax-string">&quot;</span>
+$McpScript <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Join-Path</span> $CourseRoot <span class="syntax-string">&quot;</span><span class="syntax-string">scripts\mcp_server.py</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython $McpScript <span class="syntax-punctuation">-</span>-help</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">CourseRoot=&quot;$(pwd -P)&quot;
-&quot;${CourseRoot}/.venv/bin/python&quot; -m pip install -e &quot;.[mcp]&quot;
-&quot;${CourseRoot}/.venv/bin/python&quot; &quot;${CourseRoot}/scripts/mcp_server.py&quot; --help</code></pre>
+<pre class="highlighted-code"><code class="language-bash">CourseRoot<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span><span class="syntax-builtin">pwd</span> -P<span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/.venv/bin/python</span><span class="syntax-string">&quot;</span> -m pip install -e <span class="syntax-string">&quot;.[mcp]&quot;</span>
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/.venv/bin/python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/scripts/mcp_server.py</span><span class="syntax-string">&quot;</span> --help</code></pre>
 <p>Expect help showing the required <code>--repo</code> argument and the optional <code>--allow-progress-writes</code> flag. The installed <code>ds60-mcp</code> entry point provides the same server, but an absolute Python path is easier to diagnose in a client configuration and works with both Windows environment layouts.</p>
 <p>If you use exact locked synchronization later, remember to retain <code>--extra mcp</code> in that synchronization. Standard Core setup intentionally does not require this optional integration.</p>
 <h3 id="add-it-to-codex">Add it to Codex<a class="heading-anchor" href="#add-it-to-codex" aria-label="Link to this section">#</a></h3>
 <p>The commands below register a local server in your Codex MCP configuration. Run them yourself when you want that integration. They use absolute paths so the server starts correctly even if Codex&#x27;s working folder differs.</p>
 <p>Windows PowerShell, using the variables above:</p>
-<pre><code class="language-powershell">codex mcp add ds60-tutor -- $CoursePython $McpScript --repo $CourseRoot
+<pre class="highlighted-code"><code class="language-powershell">codex mcp add ds60-tutor <span class="syntax-punctuation">-</span><span class="syntax-punctuation">-</span> $CoursePython $McpScript <span class="syntax-punctuation">-</span>-repo $CourseRoot
 codex mcp get ds60-tutor</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">codex mcp add ds60-tutor -- &quot;${CourseRoot}/.venv/bin/python&quot; &quot;${CourseRoot}/scripts/mcp_server.py&quot; --repo &quot;$CourseRoot&quot;
+<pre class="highlighted-code"><code class="language-bash">codex mcp add ds60-tutor -- <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/.venv/bin/python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/scripts/mcp_server.py</span><span class="syntax-string">&quot;</span> --repo <span class="syntax-string">&quot;</span>$CourseRoot<span class="syntax-string">&quot;</span>
 codex mcp get ds60-tutor</code></pre>
 <p>The installed Codex CLI&#x27;s <code>codex mcp add --help</code> documents the <code>NAME -- COMMAND</code> stdio form used here. <code>codex mcp list</code> shows configured servers. Restart or refresh the Codex client if it does not immediately discover a new server. The CLI must be installed and on PATH to use these commands. No configuration file is changed by merely installing the Python extra or reading this guide.</p>
 <p>You can inspect the equivalent local configuration with <code>codex mcp get ds60-tutor</code>. The executable must be a real absolute interpreter path; <code>~</code>, an activated shell assumption, or a Python name found only in one terminal can fail when a desktop client starts the process. If you move the repository, recreate its environment and update this registration.</p>
 <h3 id="begin-a-learning-conversation">Begin a learning conversation<a class="heading-anchor" href="#begin-a-learning-conversation" aria-label="Link to this section">#</a></h3>
 <p>For example, tell Codex:</p>
-<pre><code class="language-text">Use the ds60-tutor MCP server. List the learning paths, then help me plan
+<pre class="highlighted-code"><code class="language-text">Use the ds60-tutor MCP server. List the learning paths, then help me plan
 Python foundations for five hours each week. Start with the first pending
 lesson. Explain the guide, ask me to predict a result, and wait for my attempt.
 Give one hint at a time. Do not open an official solution unless I explicitly
 ask to compare it. Ask me to explain my result from memory before completion.</code></pre>
 <p>For a specific lesson:</p>
-<pre><code class="language-text">Use ds60-tutor for python-01. Read the actual guide and learner artifact.
+<pre class="highlighted-code"><code class="language-text">Use ds60-tutor for python-01. Read the actual guide and learner artifact.
 Ask what I think the first example will do, then wait for my attempt.
 If I am stuck, give one hint. Use my observed result to help me explain why
 it works. Keep official solutions closed unless I ask for a comparison.</code></pre>
@@ -194,7 +240,7 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 </tr>
 </tbody></table></div>
 <p><code>course_lessons</code> returns at most 50 lessons per page. Use its <code>next_cursor</code> with exactly the same query, track, and limit. For example:</p>
-<pre><code class="language-json">{&quot;query&quot;: &quot;pandas&quot;, &quot;track&quot;: &quot;python&quot;, &quot;limit&quot;: 10}</code></pre>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span><span class="syntax-tag">&quot;query&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;pandas&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-tag">&quot;track&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-tag">&quot;limit&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">10</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Follow-up requests add <code>&quot;cursor&quot;: &quot;THE_RETURNED_CURSOR&quot;</code> to those same filters. No results is a valid response. Changing filters requires starting a new search.</p>
 <p>Resources expose <code>ds60://course/paths</code> and <code>ds60://course/lesson/LESSON_ID</code>. The latter contains only the checked-in guide. Resource enumeration is paginated too. The <code>coach_lesson</code> prompt accepts a stable <code>lesson_id</code> and optional <code>request</code> and starts the same guide-first coaching loop. Solutions have no resource URI; they require the gated tool.</p>
 <p>The solution flag is an explicit protocol acknowledgement. The AI host must still respect the learner&#x27;s actual request; it should never set the flag just to bypass a request for hints.</p>
@@ -222,7 +268,7 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 </tr>
 </tbody></table></div>
 <p>For example, ask Codex:</p>
-<pre><code class="language-text">Use ds60-tutor module_subjects, then module_lessons with subject scala-spark
+<pre class="highlighted-code"><code class="language-text">Use ds60-tutor module_subjects, then module_lessons with subject scala-spark
 and status authored. Read spark-013@pyspark through module_lesson for the
 PySpark variant. Explain the guide, ask me to predict the NULL behavior, and
 wait for my attempt. Give one progressive hint from the guide. Keep official
@@ -250,9 +296,9 @@ solutions closed until I explicitly request a comparison.</code></pre>
 <p>The server refuses relative or nested <code>--repo</code> paths, unknown lesson IDs, arbitrary resource/file paths, unknown tool arguments, invalid pagination cursors, and progress calls when writes are disabled. It does not require a database credential or a listening web service.</p>
 <h3 id="verification-and-source-references">Verification and source references<a class="heading-anchor" href="#verification-and-source-references" aria-label="Link to this section">#</a></h3>
 <p>Run the real protocol tests with the optional SDK installed:</p>
-<pre><code class="language-powershell"># Windows, after resolving the interpreter
-&amp; $CoursePython -m pytest tests\test_mcp_server.py tests\test_module_mcp.py -q</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows, after resolving the interpreter</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">\</span>test_mcp_server<span class="syntax-punctuation">.</span>py tests<span class="syntax-punctuation">\</span>test_module_mcp<span class="syntax-punctuation">.</span>py -q</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python -m pytest tests/test_mcp_server.py tests/test_module_mcp.py -q</code></pre>
 <p>Tests cover a client/server stdio handshake, legacy and beta discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, bounded beta reads, variants, and clean protocol stdout. Beta module tests additionally forbid worker/service construction, source subprocesses, and progress-file access during a real stdio exchange. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific Codex installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
 <p>The implementation follows the official <a href="https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/">SDK v2 low-level server API</a> for explicit schemas, structured tool results, and caller validation. The <a href="https://py.sdk.modelcontextprotocol.io/advanced/pagination/">SDK pagination guide</a> describes protocol list cursors. The current local Codex CLI help was checked for the registration commands above.</p>

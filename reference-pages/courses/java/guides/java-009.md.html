@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner, approximately 90 minutes. Direct prerequisites: <code>java-008</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open a Probe resource,recordbody,then inspect closure order. The final exercise transfers the mechanism to retain a translated cause.</p>
+<p>Explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open a Probe resource, record body, then inspect closure order. The final exercise transfers the mechanism to retain a translated cause.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Exceptions separate normal return values from failure. A checked exception is declared or handled by callers; an unchecked exception often signals an invalid argument or programming error. Resource lifetime is a different concern: a resource must close whether the body succeeds or fails. try-with-resources closes resources in reverse declaration order. If the body throws and closing also throws, the body exception remains primary and close failures are attached as suppressed exceptions. Catching everything and returning a default would erase that information. This lesson uses tiny in-memory AutoCloseable probes to make lifetime order and suppression observable without opening external files.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -127,74 +173,74 @@
 <p><strong>Resource lifetime:</strong> The interval during which an owned resource is usable.</p>
 <p><strong>Suppressed exception:</strong> A secondary close failure retained beside a primary exception.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-009/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
-<p>A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing fromfinally can replace an important earlier failure.</p>
+<p>A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-close-on-normal-completion">Example A: Close on normal completion<a class="heading-anchor" href="#example-a-close-on-normal-completion" aria-label="Link to this section">#</a></h4>
 <p>Leaving the block triggers close even without an explicit call in the body. Ownership is visible in the block structure.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static final class Probe implements AutoCloseable {
-        private final String name; private final List&lt;String&gt; events; private final boolean fail;
-        Probe(String name, List&lt;String&gt; events, boolean fail) { this.name=name; this.events=events; this.fail=fail; }
-        public void close() throws java.io.IOException { events.add(&quot;close&quot;+name); if(fail) throw new java.io.IOException(&quot;close&quot;+name); }
-    }
-    public static void main(String[] args) throws Exception {
-        List&lt;String&gt; events = new ArrayList&lt;&gt;();
-        try (Probe resource = new Probe(&quot;A&quot;, events, false)) { events.add(&quot;body&quot;); }
-        assert events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;));
-    }
-}
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Probe</span> <span class="syntax-keyword">implements</span> AutoCloseable <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> String name<span class="syntax-punctuation">;</span> <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events<span class="syntax-punctuation">;</span> <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">boolean</span> fail<span class="syntax-punctuation">;</span>
+        Probe<span class="syntax-punctuation">(</span>String name<span class="syntax-punctuation">,</span> List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">boolean</span> fail<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">name</span><span class="syntax-operator">=</span>name<span class="syntax-punctuation">;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">events</span><span class="syntax-operator">=</span>events<span class="syntax-punctuation">;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">fail</span><span class="syntax-operator">=</span>fail<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">public</span> <span class="syntax-keyword">void</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> <span class="syntax-punctuation">{</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-operator">+</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>fail<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-operator">+</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">(</span>Probe resource <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Probe<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">assert</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">closeA</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
-<p><strong>Expected:</strong> eventsbody,closeA.</p>
+<p><strong>Expected:</strong> events body, close A.</p>
 <h4 id="example-b-close-in-reverse-order">Example B: Close in reverse order<a class="heading-anchor" href="#example-b-close-in-reverse-order" aria-label="Link to this section">#</a></h4>
 <p>Later resources often depend on earlier ones, so reverse closure is deliberate. The event trace proves the actual order for this fixture.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static final class Probe implements AutoCloseable {
-        private final String name; private final List&lt;String&gt; events; private final boolean fail;
-        Probe(String name, List&lt;String&gt; events, boolean fail) { this.name=name; this.events=events; this.fail=fail; }
-        public void close() throws java.io.IOException { events.add(&quot;close&quot;+name); if(fail) throw new java.io.IOException(&quot;close&quot;+name); }
-    }
-    public static void main(String[] args) throws Exception {
-        List&lt;String&gt; events = new ArrayList&lt;&gt;();
-        try (Probe resource = new Probe(&quot;A&quot;, events, false)) { events.add(&quot;body&quot;); }
-        assert events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;));
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Probe</span> <span class="syntax-keyword">implements</span> AutoCloseable <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> String name<span class="syntax-punctuation">;</span> <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events<span class="syntax-punctuation">;</span> <span class="syntax-keyword">private</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">boolean</span> fail<span class="syntax-punctuation">;</span>
+        Probe<span class="syntax-punctuation">(</span>String name<span class="syntax-punctuation">,</span> List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">boolean</span> fail<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">name</span><span class="syntax-operator">=</span>name<span class="syntax-punctuation">;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">events</span><span class="syntax-operator">=</span>events<span class="syntax-punctuation">;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">fail</span><span class="syntax-operator">=</span>fail<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">public</span> <span class="syntax-keyword">void</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> <span class="syntax-punctuation">{</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-operator">+</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>fail<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-operator">+</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        List<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> events <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">(</span>Probe resource <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Probe<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">assert</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">closeA</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-        events.clear();
-        try (Probe a = new Probe(&quot;A&quot;, events, false); Probe b = new Probe(&quot;B&quot;, events, false)) { events.add(&quot;body&quot;); }
-        assert events.equals(List.of(&quot;body&quot;, &quot;closeB&quot;, &quot;closeA&quot;));
-    }
-}
+        events<span class="syntax-punctuation">.</span><span class="syntax-attribute">clear</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">(</span>Probe a <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Probe<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> Probe b <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Probe<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">assert</span> events<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">body</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">closeB</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">closeA</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> closeB beforecloseA.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Close on normal completion.</strong> Open a Probe resource,recordbody,then inspect closure order. <strong>Expected:</strong> eventsbody,closeA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with eventsbody,closeA.</li>
+<li><strong>Close on normal completion.</strong> Open a Probe resource, record body, then inspect closure order. <strong>Expected:</strong> events body, close A. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with events body, close A.</li>
 </ol>
 <ol>
 <li><strong>Close in reverse order.</strong> Declare resourcesA thenB and leave the block. <strong>Expected:</strong> closeB beforecloseA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with closeB beforecloseA.</li>
 </ol>
 <ol>
-<li><strong>Close after body failure.</strong> ThrowIllegalStateException in the body and inspect events after catching it. <strong>Expected:</strong> closeA stillrecorded. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with closeA stillrecorded.</li>
+<li><strong>Close after body failure.</strong> Throw IllegalStateException in the body and inspect events after catching it. <strong>Expected:</strong> close A still recorded. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with close A still recorded.</li>
 </ol>
 <ol>
-<li><strong>Preserve suppressed close failure.</strong> Make the body throw and the resource close throw too. <strong>Expected:</strong> primary messagebody;one suppressed exceptioncloseA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with primary messagebody;one suppressed exceptioncloseA.</li>
+<li><strong>Preserve suppressed close failure.</strong> Make the body throw and the resource close throw too. <strong>Expected:</strong> primary message body;one suppressed exceptioncloseA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with primary message body;one suppressed exceptioncloseA.</li>
 </ol>
 <ol>
-<li><strong>Observe close-only failure.</strong> Let the body succeed butclose throwIOException. <strong>Expected:</strong> IOExceptioncloseA is primary. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOExceptioncloseA is primary.</li>
+<li><strong>Observe close-only failure.</strong> Let the body succeed but close throwIOException. <strong>Expected:</strong> IOExceptioncloseA is primary. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOExceptioncloseA is primary.</li>
 </ol>
 <ol>
-<li><strong>Retain a translated cause.</strong> Wrap anIOException inIllegalStateException with a domain message and inspectcause. <strong>Expected:</strong> cause remains the originalIOException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with cause remains the originalIOException.</li>
+<li><strong>Retain a translated cause.</strong> Wrap an IOException in IllegalStateException with a domain message and inspect cause. <strong>Expected:</strong> cause remains the original IOException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with cause remains the original IOException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
@@ -208,7 +254,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-009: Exceptions and resource lifetime.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-009: Exceptions and resource lifetime.
 Read courses/java/guides/java-009.md and courses/java/lessons/java-009.java. Direct prerequisites: `java-008`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

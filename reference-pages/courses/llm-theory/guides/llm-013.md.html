@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -134,7 +180,7 @@
 <p><strong>Contamination:</strong> Assessment information entering training or selection.</p>
 <p><strong>Document family:</strong> Related records treated as one split unit.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>llm-013</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-013/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-013</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-013/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>For token sequence ids, use ids[:-1] as inputs and ids[1:] as targets. Hash raw or explicitly normalized text according to a declared policy. Compare both exact hashes and known family IDs across partitions; exact hashing cannot detect paraphrases on its own. Validate disjoint groups before fitting any vocabulary or count model.</p>
@@ -148,18 +194,18 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-construct-next-token-pairs">Example A: Construct next-token pairs<a class="heading-anchor" href="#example-a-construct-next-token-pairs" aria-label="Link to this section">#</a></h4>
 <p>There are three target events in a four-token sequence. The final token has no next token unless an explicit end marker is included in the original sequence.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-ids=np.array([2,5,7,3]); inputs=ids[:-1]; labels=ids[1:]
-np.testing.assert_array_equal(inputs,[2,5,7]); np.testing.assert_array_equal(labels,[5,7,3])</code></pre>
+ids<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> inputs[2,5,7],labels[5,7,3].</p>
 <h4 id="example-b-expose-identity-labels">Example B: Expose identity labels<a class="heading-anchor" href="#example-b-expose-identity-labels" aria-label="Link to this section">#</a></h4>
 <p>A model trained to reproduce its current token is not being tested on next-token prediction. A causal mask allows the current input, so it cannot detect this objective error.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-ids=np.array([2,5,7,3]); inputs=ids[:-1]; labels=ids[1:]
-np.testing.assert_array_equal(inputs,[2,5,7]); np.testing.assert_array_equal(labels,[5,7,3])
-copied=inputs.copy(); assert np.count_nonzero(copied!=labels)==3</code></pre>
+ids<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+copied<span class="syntax-operator">=</span>inputs<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>copied<span class="syntax-operator">!=</span>labels<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> all three copied labels differ from the target fixture.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Inputs [2,5,7] pair with labels [5,7,3]; document sets are disjoint and the injected duplicate is detected. Prefix invariance alone does not establish these conditions. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -180,7 +226,7 @@ copied=inputs.copy(); assert np.count_nonzero(copied!=labels)==3</code></pre>
 <li><strong>Freeze a vocabulary.</strong> Fit a vocabulary from training words alpha,beta and encode validation-only gamma without adding it. <strong>Expected:</strong> vocabulary remains alpha,beta; gamma is unknown. <strong>Verify:</strong> Save the assertion results for exercise 5, including vocabulary remains alpha,beta; gamma is unknown.</li>
 </ol>
 <ol>
-<li><strong>Count active targets.</strong> Count targets across documents of lengths4 and2 without creating a transition between documents. <strong>Expected:</strong> 3+1=4 targets, not5. <strong>Verify:</strong> Save the assertion results for exercise 6, including 3+1=4 targets, not5.</li>
+<li><strong>Count active targets.</strong> Count targets across documents of lengths4 and2 without creating a transition between documents. <strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">3+1=4</annotation></semantics></math> targets, not5. <strong>Verify:</strong> Save the assertion results for exercise 6, including <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">3+1=4</annotation></semantics></math> targets, not5.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Check the objective shift before inspecting the attention mask. Then audit document boundaries, exact duplicate hashes, known family overlap and fitted preprocessing artifacts separately. A passing causal test cannot detect a target copied from its current input or a tokenizer fitted using evaluation records. Preserve the manifest that made the assessment interpretable.</p>
@@ -193,7 +239,7 @@ copied=inputs.copy(); assert np.count_nonzero(copied!=labels)==3</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-013, A leakage audit before a model score.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-013, A leakage audit before a model score.
 Read courses/llm-theory/guides/llm-013.md and courses/llm-theory/lessons/llm-013.py. Direct prerequisites: `llm-012`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

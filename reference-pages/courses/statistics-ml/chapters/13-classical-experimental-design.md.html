@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,10 +166,10 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An experiment creates information through controlled variation. Randomization breaks systematic relationships between assignment and pre-existing potential outcomes in expectation; it does not guarantee perfect balance in every realized sample. Blocking uses known prognostic differences to improve precision before assignment. Replication estimates noise, and independent randomization units determine how much information an experiment contains.</p>
 <h4 id="main-effects-and-interactions">Main effects and interactions<a class="heading-anchor" href="#main-effects-and-interactions" aria-label="Link to this section">#</a></h4>
-<p>For two factors coded A,B in {-1,+1}, write E[Y]=beta0+betaA<em>A+betaB</em>B+betaAB<em>A</em>B. Moving A from -1 to +1 at fixed B changes the response by 2<em>betaA+2</em>betaAB<em>B. The average main effect of A across balanced B levels is 2</em>betaA. A factorial experiment estimates interactions because it varies combinations, unlike changing one factor while holding all others at a baseline.</p>
-<p>A fractional design saves runs by deliberately losing distinctions. If a third factor C is assigned as A*B, the C column equals the AB interaction column, so their effects are aliased. No regression package can separate them from that design alone. The scientific assumption that one is negligible creates the interpretation.</p>
+<p>For two factors coded A,B in {-1,+1}, write E[Y]=beta0+betaA<em>A+betaB</em>B+betaAB<em><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>·</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">A\cdot B</annotation></semantics></math>. Moving A from -1 to +1 at fixed B changes the response by 2</em>betaA+2<em>betaAB</em>B. The average main effect of A across balanced B levels is 2*betaA. A factorial experiment estimates interactions because it varies combinations, unlike changing one factor while holding all others at a baseline.</p>
+<p>A fractional design saves runs by deliberately losing distinctions. If a third factor C is assigned as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>·</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">A\cdot B</annotation></semantics></math>, the C column equals the AB interaction column, so their effects are aliased. No regression package can separate them from that design alone. The scientific assumption that one is negligible creates the interpretation.</p>
 <h4 id="design-precision-before-collection">Design precision before collection<a class="heading-anchor" href="#design-precision-before-collection" aria-label="Link to this section">#</a></h4>
-<p>For independent groups of equal size n and common SD sigma, the difference in means has SE=sigma<em>sqrt(2/n). A rough two-sided normal approximation gives n=2</em>sigma^2*(z_(1-alpha/2)+z_power)^2/delta^2 per group. This shows why halving the target effect needs about four times the sample. Clustering, attrition, unequal allocation and multiplicity must be added to the design, and simulation can evaluate realistic departures.</p>
+<p>For independent groups of equal size n and common SD sigma, the difference in means has <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><mi>σ</mi><mo>·</mo><msqrt><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\mathrm{SE}=\sigma\cdot \sqrt{\frac{2}{n}}</annotation></semantics></math>. A rough two-sided normal approximation gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mfrac><mrow><mn>2</mn><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false">(</mo><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mo>/</mo><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>z</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></mrow></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><msup><mi>δ</mi><mn>2</mn></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">n=\frac{2\sigma^2(z_{1-\alpha/2}+z_{\mathrm{power}})^2}{\delta^2}</annotation></semantics></math> per group. This shows why halving the target effect needs about four times the sample. Clustering, attrition, unequal allocation and multiplicity must be added to the design, and simulation can evaluate realistic departures.</p>
 <h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
 <h4 id="stat-13-01">Randomized controlled trials<a class="heading-anchor" href="#stat-13-01" aria-label="Link to this section">#</a></h4>
 <p>Assign interventions using a known random mechanism and analyze the assignment-defined population. Randomization supports exchangeability in expectation, while consistency, interference, missing outcomes and adherence still determine the causal interpretation.</p>
@@ -164,7 +210,7 @@
 <h4 id="stat-13-19">Optimal experimental design<a class="heading-anchor" href="#stat-13-19" aria-label="Link to this section">#</a></h4>
 <p>Choose runs to maximize an information criterion under a specified model and feasible region. The optimal design is model-dependent; robust or sequential designs may be preferable when the response structure is uncertain.</p>
 <h4 id="stat-13-20">D-optimal design<a class="heading-anchor" href="#stat-13-20" aria-label="Link to this section">#</a></h4>
-<p>Maximize the determinant of X-transpose X, reducing the volume of a coefficient uncertainty ellipsoid under the model. A singular information matrix cannot estimate all coefficients, regardless of its individual diagonal entries.</p>
+<p>Maximize the determinant of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math>, reducing the volume of a coefficient uncertainty ellipsoid under the model. A singular information matrix cannot estimate all coefficients, regardless of its individual diagonal entries.</p>
 <h4 id="stat-13-21">A-optimal design<a class="heading-anchor" href="#stat-13-21" aria-label="Link to this section">#</a></h4>
 <p>Minimize the trace of the inverse information matrix, targeting average coefficient variance. Parameter scaling affects this criterion, so choose scientifically meaningful units or standardized contrasts.</p>
 <h4 id="stat-13-22">Power and sample-size analysis<a class="heading-anchor" href="#stat-13-22" aria-label="Link to this section">#</a></h4>
@@ -193,53 +239,53 @@
 <p>A simulation-based design report should show power, false-positive behavior, bias, interval coverage and failure frequency across favorable and adverse scenarios. Report Monte Carlo uncertainty: estimating power from 100 replications is itself noisy. A design that works only when every assumption is exactly true may need a simpler estimand, better measurements or a larger independent sample rather than a more elaborate estimator.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_13.py.html">chapter_13.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_13.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_13.py</code></pre>
 <h4 id="estimate-an-interaction-and-expose-an-alias">Estimate an interaction and expose an alias<a class="heading-anchor" href="#estimate-an-interaction-and-expose-an-alias" aria-label="Link to this section">#</a></h4>
-<p>The four-run factorial recovers coefficients 10,2,3,4. The main A effect is four because coded levels differ by two, while its conditional effects depend strongly on B. Adding C=A*B makes a fifth coefficient impossible to identify from four independent directions. Rank reveals the design limitation exactly.</p>
+<p>The four-run factorial recovers coefficients 10,2,3,4. The main A effect is four because coded levels differ by two, while its conditional effects depend strongly on B. Adding <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mi>A</mi><mo>·</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">C=A\cdot B</annotation></semantics></math> makes a fifth coefficient impossible to identify from four independent directions. Rank reveals the design limitation exactly.</p>
 <h4 id="randomize-within-prognostic-groups">Randomize within prognostic groups<a class="heading-anchor" href="#randomize-within-prognostic-groups" aria-label="Link to this section">#</a></h4>
 <p>Each block has four units and exactly two receive treatment. The fixed seed makes this illustration reproducible, but a real assignment system must also protect allocation integrity and avoid rerandomizing until a favorable sample appears.</p>
 <h4 id="budget-precision">Budget precision<a class="heading-anchor" href="#budget-precision" aria-label="Link to this section">#</a></h4>
 <p>The normal approximation requires about 63 observations per arm for SD two, effect one, two-sided alpha .05 and power .8. Halving the effect requires about 252. These are planning approximations for independent observations, not a valid calculation for 63 highly correlated records from one cluster.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from itertools import product
-from scipy.stats import norm
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> product
+<span class="syntax-keyword">from</span> scipy.stats <span class="syntax-keyword">import</span> norm
 
-def factorial_and_alias():
-    ab=np.array(list(product([-1.,1.],repeat=2)))
-    a,b=ab.T
-    design=np.column_stack([np.ones(4),a,b,a*b])
-    y=10+2*a+3*b+4*a*b
-    beta=np.linalg.solve(design,y)
-    assert np.allclose(beta,[10,2,3,4])
-    assert np.isclose(y[a==1].mean()-y[a==-1].mean(),4)
-    c=a*b
-    alias=np.column_stack([np.ones(4),a,b,c,a*b])
-    assert np.linalg.matrix_rank(alias)==4 and alias.shape[1]==5
-    print(&quot;Factorial coefficients:&quot;,beta,&quot;C and AB are identical:&quot;,np.array_equal(c,a*b))
+<span class="syntax-keyword">def</span> <span class="syntax-function">factorial_and_alias</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    ab<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>repeat<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    a<span class="syntax-punctuation">,</span>b<span class="syntax-operator">=</span>ab<span class="syntax-operator">.</span>T
+    design<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</span>a<span class="syntax-operator">*</span>b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>a<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>b<span class="syntax-operator">+</span><span class="syntax-number">4</span><span class="syntax-operator">*</span>a<span class="syntax-operator">*</span>b
+    beta<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>solve<span class="syntax-punctuation">(</span>design<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>beta<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+    c<span class="syntax-operator">=</span>a<span class="syntax-operator">*</span>b
+    alias<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</span>c<span class="syntax-punctuation">,</span>a<span class="syntax-operator">*</span>b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>matrix_rank<span class="syntax-punctuation">(</span>alias<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> alias<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Factorial coefficients:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>beta<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">C and AB are identical:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">,</span>a<span class="syntax-operator">*</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def blocked_assignment():
-    rng=np.random.default_rng(13)
-    blocks=np.repeat(np.arange(4),4)
-    treatment=np.zeros(16,dtype=int)
-    for block in np.unique(blocks):
-        rows=np.flatnonzero(blocks==block)
-        treatment[rng.choice(rows,2,replace=False)]=1
-    assert all(treatment[blocks==b].sum()==2 for b in range(4))
-    print(&quot;Treated per block:&quot;,[int(treatment[blocks==b].sum()) for b in range(4)])
+<span class="syntax-keyword">def</span> <span class="syntax-function">blocked_assignment</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    rng<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">13</span><span class="syntax-punctuation">)</span>
+    blocks<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+    treatment<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> block <span class="syntax-operator">in</span> np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>blocks<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        rows<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>blocks<span class="syntax-operator">==</span>block<span class="syntax-punctuation">)</span>
+        treatment<span class="syntax-punctuation">[</span>rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>replace<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">[</span>blocks<span class="syntax-operator">==</span>b<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-keyword">for</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Treated per block:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">[</span>blocks<span class="syntax-operator">==</span>b<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-def sample_size():
-    sigma,delta=2.,1.
-    n=2*sigma**2*(norm.ppf(.975)+norm.ppf(.8))**2/delta**2
-    half_effect=2*sigma**2*(norm.ppf(.975)+norm.ppf(.8))**2/(delta/2)**2
-    assert np.isclose(half_effect,4*n)
-    print(&quot;Approximate per-arm n:&quot;,int(np.ceil(n)),&quot;half effect:&quot;,int(np.ceil(half_effect)))
+<span class="syntax-keyword">def</span> <span class="syntax-function">sample_size</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    sigma<span class="syntax-punctuation">,</span>delta<span class="syntax-operator">=</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span>
+    n<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>sigma<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.975</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">/</span>delta<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    half_effect<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>sigma<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.975</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>delta<span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>half_effect<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-operator">*</span>n<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Approximate per-arm n:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">half effect:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span>half_effect<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def main():
-    factorial_and_alias();blocked_assignment();sample_size()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    factorial_and_alias<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>blocked_assignment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>sample_size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why use a factorial experiment rather than several one-factor studies?</strong> It can estimate interactions and reuse control information across combinations. If one factor&#x27;s benefit depends on another, isolated baseline changes can miss the relevant operating setting. Feasibility and interference still constrain the design.</p>
 <p><strong>Interview: What does aliasing mean operationally?</strong> Two proposed effects make the same predictions at every chosen run. Additional numerical precision cannot distinguish them. Add design points or state which effect is assumed negligible.</p>

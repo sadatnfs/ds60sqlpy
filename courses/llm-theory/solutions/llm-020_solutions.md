@@ -33,7 +33,7 @@ np.testing.assert_allclose(torch.linalg.vector_norm(out).item(),.01*np.sqrt(10),
 
 ## Exercise 2: Increase only the scale
 
-The question is: Replace.01*identity with100*identity.
+The question is: Replace.01*identity with 100*identity.
 
 Changing both scale and random orientation would confound the comparison. Here the factor follows directly from linearity.
 

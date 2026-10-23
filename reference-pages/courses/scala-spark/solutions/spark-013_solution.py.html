@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,129 +161,129 @@
       <h1>Spark 013 Solution</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-013_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
-<span>from pyspark.sql.types import LongType, StringType, StructField, StructType</span>
-<span> </span>
-<span> </span>
-<span>def ids(df):</span>
-<span>    return [row[&quot;event_id&quot;] for row in df.select(&quot;event_id&quot;)</span>
-<span>            .orderBy(&quot;event_id&quot;).collect()]</span>
-<span> </span>
-<span> </span>
-<span>def metrics(df):</span>
-<span>    row = df.agg(</span>
-<span>        F.count(F.lit(1)).alias(&quot;rows&quot;),</span>
-<span>        F.count(&quot;amount_cents&quot;).alias(&quot;valued&quot;),</span>
-<span>        F.sum(&quot;amount_cents&quot;).alias(&quot;total_cents&quot;),</span>
-<span>    ).first()</span>
-<span>    return (row[&quot;rows&quot;], row[&quot;valued&quot;], row[&quot;total_cents&quot;])</span>
-<span> </span>
-<span> </span>
-<span>def summarize(df):</span>
-<span>    return df.groupBy(&quot;team&quot;).agg(</span>
-<span>        F.count(F.lit(1)).alias(&quot;rows&quot;),</span>
-<span>        F.count(&quot;amount_cents&quot;).alias(&quot;valued&quot;),</span>
-<span>        F.sum(&quot;amount_cents&quot;).alias(&quot;total_cents&quot;),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def canonical(df):</span>
-<span>    assert [(field.name, field.dataType.simpleString())</span>
-<span>            for field in df.schema.fields] == [</span>
-<span>        (&quot;team&quot;, &quot;string&quot;), (&quot;rows&quot;, &quot;bigint&quot;),</span>
-<span>        (&quot;valued&quot;, &quot;bigint&quot;), (&quot;total_cents&quot;, &quot;bigint&quot;),</span>
-<span>    ]</span>
-<span>    return [tuple(row) for row in</span>
-<span>            df.orderBy(F.col(&quot;team&quot;).asc_nulls_last()).collect()]</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def paid_events(raw):</span>
-<span>    return raw.filter(F.col(&quot;status&quot;) == F.lit(&quot;paid&quot;))</span>
-<span> </span>
-<span>def main():</span>
-<span>    spark = (</span>
-<span>        SparkSession.builder.appName(&quot;ds60-spark-013-solution&quot;)</span>
-<span>        .master(&quot;local[2]&quot;)</span>
-<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
-<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;)</span>
-<span>        .getOrCreate()</span>
-<span>    )</span>
-<span>    try:</span>
-<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
-<span>        schema = StructType([</span>
-<span>            StructField(&quot;event_id&quot;, LongType(), False),</span>
-<span>            StructField(&quot;team&quot;, StringType(), True),</span>
-<span>            StructField(&quot;amount_cents&quot;, LongType(), True),</span>
-<span>            StructField(&quot;status&quot;, StringType(), False),</span>
-<span>        ])</span>
-<span>        rows = [</span>
-<span>            (1, &quot;A&quot;, 100, &quot;paid&quot;), (2, &quot;A&quot;, None, &quot;paid&quot;),</span>
-<span>            (3, &quot;B&quot;, 0, &quot;paid&quot;), (4, None, 50, &quot;paid&quot;),</span>
-<span>            (5, &quot;B&quot;, 150, &quot;void&quot;), (6, &quot;A&quot;, 100, &quot;paid&quot;),</span>
-<span>            (7, &quot;C&quot;, None, &quot;paid&quot;),</span>
-<span>        ]</span>
-<span>        raw = spark.createDataFrame(rows, schema=schema)</span>
-<span>        paid = paid_events(raw)</span>
-<span>        golden = [</span>
-<span>            (&quot;A&quot;, 3, 2, 200), (&quot;B&quot;, 1, 1, 0),</span>
-<span>            (&quot;C&quot;, 1, 0, None), (None, 1, 1, 50),</span>
-<span>        ]</span>
-<span> </span>
-<span>        # Exercise 1: grain and the exact paid/excluded IDs.</span>
-<span>        assert ids(raw) == [1, 2, 3, 4, 5, 6, 7]</span>
-<span>        assert raw.filter(F.col(&quot;event_id&quot;).isNull()).count() == 0</span>
-<span>        assert raw.count() == 7</span>
-<span>        assert raw.select(&quot;event_id&quot;).distinct().count() == 7</span>
-<span>        assert ids(paid) == [1, 2, 3, 4, 6, 7]</span>
-<span>        assert ids(raw.filter(F.col(&quot;status&quot;) != F.lit(&quot;paid&quot;))) == [5]</span>
-<span>        assert paid.count() == 6</span>
-<span>        assert &quot;event_id&quot; in paid.columns</span>
-<span> </span>
-<span>        # Exercise 2: distinguish events from observed amounts.</span>
-<span>        assert metrics(raw) == (7, 5, 400)</span>
-<span>        assert metrics(paid) == (6, 4, 250)</span>
-<span> </span>
-<span>        # Exercise 3: all four groups, NULLs and zero included.</span>
-<span>        assert canonical(summarize(paid)) == golden</span>
-<span> </span>
-<span>        # Exercise 4: SQL NULL semantics expressed with Columns.</span>
-<span>        assert ids(paid.filter(F.col(&quot;amount_cents&quot;).isNull())) == [2, 7]</span>
-<span>        assert ids(paid.filter(F.col(&quot;amount_cents&quot;) == F.lit(0))) == [3]</span>
-<span>        assert ids(paid.filter(F.col(&quot;team&quot;).isNull())) == [4]</span>
-<span>        assert ids(paid.filter(F.col(&quot;team&quot;) == F.lit(None))) == []</span>
-<span>        assert ids(paid.filter(F.col(&quot;team&quot;).eqNullSafe(F.lit(None)))) == [4]</span>
-<span> </span>
-<span>        # Exercise 5: deliberately incorrect projection, then correct repartition.</span>
-<span>        wrong = paid.select(&quot;team&quot;, &quot;amount_cents&quot;).distinct()</span>
-<span>        assert metrics(wrong) == (5, 3, 150)</span>
-<span>        assert metrics(paid) == (6, 4, 250)</span>
-<span>        assert canonical(summarize(paid.repartition(3))) == golden</span>
-<span> </span>
-<span>        # Exercise 6: compare SQL to literals, not only to another implementation.</span>
-<span>        paid.createOrReplaceTempView(&quot;ds60_spark_013_paid&quot;)</span>
-<span>        sql_result = spark.sql(&quot;&quot;&quot;</span>
-<span>            SELECT team, COUNT(*) AS rows,</span>
-<span>                   COUNT(amount_cents) AS valued,</span>
-<span>                   SUM(amount_cents) AS total_cents</span>
-<span>            FROM ds60_spark_013_paid</span>
-<span>            GROUP BY team</span>
-<span>            ORDER BY team ASC NULLS LAST</span>
-<span>        &quot;&quot;&quot;)</span>
-<span>        assert canonical(sql_result) == golden</span>
-<span>        assert raw.count() == paid.count() + 1</span>
-<span>        assert metrics(paid)[2] == 250</span>
-<span>        print(&quot;PySpark checks passed: 7 raw, 6 paid, 4 observed, 250 cents.&quot;)</span>
-<span>    finally:</span>
-<span>        spark.stop()</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> LongType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> StructType</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">ids</span><span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> df<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-operator">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">metrics</span><span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    row <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">valued</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">valued</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">summarize</span><span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> df<span class="syntax-operator">.</span>groupBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">valued</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical</span><span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>field<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span> field<span class="syntax-operator">.</span>dataType<span class="syntax-operator">.</span>simpleString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> field <span class="syntax-operator">in</span> df<span class="syntax-operator">.</span>schema<span class="syntax-operator">.</span>fields<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bigint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">valued</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bigint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bigint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span></span>
+<span class="source-line">            df<span class="syntax-operator">.</span>orderBy<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>asc_nulls_last<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">paid_events</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> raw<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    spark <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        SparkSession<span class="syntax-operator">.</span>builder<span class="syntax-operator">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-013-solution</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.ui.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.host</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.bindAddress</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.session.timeZone</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span></span>
+<span class="source-line">            StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">150</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">void</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">]</span></span>
+<span class="source-line">        raw <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>createDataFrame<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        paid <span class="syntax-operator">=</span> paid_events<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        golden <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 1: grain and the exact paid/excluded IDs.</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> raw<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isNull<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> raw<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> raw<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>distinct<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> paid<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> paid<span class="syntax-operator">.</span>columns</span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 2: distinguish events from observed amounts.</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> metrics<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> metrics<span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">250</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 3: all four groups, NULLs and zero included.</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> canonical<span class="syntax-punctuation">(</span>summarize<span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> golden</span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 4: SQL NULL semantics expressed with Columns.</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isNull<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isNull<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> ids<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>eqNullSafe<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 5: deliberately incorrect projection, then correct repartition.</span></span>
+<span class="source-line">        wrong <span class="syntax-operator">=</span> paid<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount_cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>distinct<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> metrics<span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">150</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> metrics<span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">250</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> canonical<span class="syntax-punctuation">(</span>summarize<span class="syntax-punctuation">(</span>paid<span class="syntax-operator">.</span>repartition<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> golden</span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 6: compare SQL to literals, not only to another implementation.</span></span>
+<span class="source-line">        paid<span class="syntax-operator">.</span>createOrReplaceTempView<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60_spark_013_paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        sql_result <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">            SELECT team, COUNT(*) AS rows,</span></span>
+<span class="source-line"><span class="syntax-string">                   COUNT(amount_cents) AS valued,</span></span>
+<span class="source-line"><span class="syntax-string">                   SUM(amount_cents) AS total_cents</span></span>
+<span class="source-line"><span class="syntax-string">            FROM ds60_spark_013_paid</span></span>
+<span class="source-line"><span class="syntax-string">            GROUP BY team</span></span>
+<span class="source-line"><span class="syntax-string">            ORDER BY team ASC NULLS LAST</span></span>
+<span class="source-line"><span class="syntax-string">        </span><span class="syntax-string">&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> canonical<span class="syntax-punctuation">(</span>sql_result<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> golden</span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> raw<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> paid<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> metrics<span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">250</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">PySpark checks passed: 7 raw, 6 paid, 4 observed, 250 cents.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

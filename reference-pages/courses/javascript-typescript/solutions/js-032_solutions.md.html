@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,79 +177,79 @@
 <h3 id="exercise-1-run-an-actual-transform-pipeline">Exercise 1: Run an actual transform pipeline<a class="heading-anchor" href="#exercise-1-run-an-actual-transform-pipeline" aria-label="Link to this section">#</a></h3>
 <p>Task: Uppercase two byte chunks and collect the transformed output.</p>
 <p>The result is observed after pipeline resolves, so every stage has completed. A print before awaiting completion could report an incomplete collection.</p>
-<pre><code class="language-javascript">const output = [];
-const upper = new Transform({ transform(chunk, encoding, callback) { callback(null, chunk.toString(&#x27;utf8&#x27;).toUpperCase()); } });
-const sink = new Writable({ write(chunk, encoding, callback) { output.push(chunk.toString()); callback(); } });
-await pipeline(Readable.from([&#x27;ab&#x27;, &#x27;cd&#x27;]), upper, sink);
-assert.equal(output.join(&#x27;&#x27;), &#x27;ABCD&#x27;);
-assert.equal(sink.writableFinished, true);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> output <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> upper <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> transform<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> callback<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> chunk<span class="syntax-punctuation">.</span>toString<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toUpperCase<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> write<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> output<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">.</span>toString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> callback<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> pipeline<span class="syntax-punctuation">(</span>Readable<span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;ab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;cd&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">,</span> sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ABCD&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>writableFinished<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ABCD after successful pipeline completion.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-observe-false-write-and-drain-without-guessing-timing">Exercise 2: Observe false write and drain without guessing timing<a class="heading-anchor" href="#exercise-2-observe-false-write-and-drain-without-guessing-timing" aria-label="Link to this section">#</a></h3>
 <p>Task: Hold a write callback at a two-byte threshold, inspect write(), then release it.</p>
 <p>False means pause, not retry the same chunk. Retrying it would duplicate data because the original write was already accepted.</p>
-<pre><code class="language-javascript">let release;
-const sink = new Writable({ highWaterMark: 2, write(chunk, encoding, callback) { release = callback; } });
-assert.equal(sink.write(Buffer.from(&#x27;ab&#x27;)), false);
-assert.equal(sink.writableNeedDrain, true);
-const drained = once(sink, &#x27;drain&#x27;);
-release();
-await drained;
-sink.end();
-await finished(sink);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> release<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> highWaterMark<span class="syntax-operator">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> write<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> release <span class="syntax-operator">=</span> callback<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>write<span class="syntax-punctuation">(</span>Buffer<span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ab&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>writableNeedDrain<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> drained <span class="syntax-operator">=</span> once<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;drain&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+release<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> drained<span class="syntax-punctuation">;</span>
+sink<span class="syntax-punctuation">.</span>end<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> finished<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> write returns false; drain follows release; stream finishes.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-propagate-a-producer-failure-and-destroy-the-sink">Exercise 3: Propagate a producer failure and destroy the sink<a class="heading-anchor" href="#exercise-3-propagate-a-producer-failure-and-destroy-the-sink" aria-label="Link to this section">#</a></h3>
 <p>Task: Use an async source that yields once then throws.</p>
 <p>A failure may occur after earlier chunks reached the destination. Destruction releases resources but does not undo side effects the consumer already performed.</p>
-<pre><code class="language-javascript">async function* source() { yield &#x27;first&#x27;; throw new Error(&#x27;source failed&#x27;); }
-const sink = new Writable({ write(chunk, encoding, callback) { callback(); } });
-await assert.rejects(pipeline(Readable.from(source()), sink), /source failed/u);
-assert.equal(sink.destroyed, true);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span><span class="syntax-operator">*</span> source<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">yield</span> <span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source failed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> write<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> callback<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>pipeline<span class="syntax-punctuation">(</span>Readable<span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/source failed/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>destroyed<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> pipeline rejects with source failed; sink is destroyed.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-reject-an-invalid-object-in-a-transform">Exercise 4: Reject an invalid object in a transform<a class="heading-anchor" href="#exercise-4-reject-an-invalid-object-in-a-transform" aria-label="Link to this section">#</a></h3>
 <p>Task: Process numeric objects but reject a negative value through the callback.</p>
 <p>The transform reports the error through its callback exactly once. Throwing from an unrelated later callback or hiding the error would break pipeline&#x27;s error contract.</p>
-<pre><code class="language-javascript">const checked = new Transform({ objectMode: true, transform(value, encoding, callback) {
-  if (value &lt; 0) callback(new RangeError(&#x27;negative item&#x27;));
-  else callback(null, value * 2);
-} });
-const sink = new Writable({ objectMode: true, write(value, encoding, callback) { callback(); } });
-await assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> checked <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> objectMode<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> transform<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> callback<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;negative item&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">else</span> callback<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> objectMode<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> write<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> callback<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>pipeline<span class="syntax-punctuation">(</span>Readable<span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> checked<span class="syntax-punctuation">,</span> sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> pipeline rejects with RangeError.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-measure-an-object-mode-threshold-in-objects">Exercise 5: Measure an object-mode threshold in objects<a class="heading-anchor" href="#exercise-5-measure-an-object-mode-threshold-in-objects" aria-label="Link to this section">#</a></h3>
 <p>Task: Write one large-payload object to a writable with object-mode highWaterMark 1.</p>
 <p>One object can retain a large graph. An object count threshold does not establish a byte-memory budget for arbitrary payloads.</p>
-<pre><code class="language-javascript">let release;
-const sink = new Writable({ objectMode: true, highWaterMark: 1, write(value, encoding, callback) { release = callback; } });
-assert.equal(sink.write({ payload: &#x27;x&#x27;.repeat(1000) }), false);
-assert.equal(sink.writableLength, 1);
-const drained = once(sink, &#x27;drain&#x27;);
-release();
-await drained;
-sink.end();
-await finished(sink);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> release<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> objectMode<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> highWaterMark<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> write<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> release <span class="syntax-operator">=</span> callback<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>write<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> payload<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;x&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">.</span>writableLength<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> drained <span class="syntax-operator">=</span> once<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;drain&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+release<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> drained<span class="syntax-punctuation">;</span>
+sink<span class="syntax-punctuation">.</span>end<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> finished<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> write false and writableLength 1, irrespective of payload string length.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-abort-a-generator-and-its-awaited-timer">Exercise 6: Abort a generator and its awaited timer<a class="heading-anchor" href="#exercise-6-abort-a-generator-and-its-awaited-timer" aria-label="Link to this section">#</a></h3>
 <p>Task: Start a source, await its readiness signal, then abort the shared signal.</p>
 <p>The timer observes the same cancellation signal as the pipeline. Aborting only the outer wait could leave the generator&#x27;s underlying operation alive.</p>
-<pre><code class="language-javascript">const controller = new AbortController();
-let announce;
-const ready = new Promise(resolve =&gt; { announce = resolve; });
-let closed = false;
-async function* source() {
-  try { announce(); await delay(1000, undefined, { signal: controller.signal }); yield &#x27;late&#x27;; }
-  finally { closed = true; }
-}
-const sink = new Writable({ write(chunk, encoding, callback) { callback(); } });
-const pending = pipeline(Readable.from(source()), sink, { signal: controller.signal });
-await ready;
-controller.abort();
-await assert.rejects(pending, error =&gt; error.name === &#x27;AbortError&#x27;);
-assert.equal(closed, true);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> announce<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> ready <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Promise</span><span class="syntax-punctuation">(</span>resolve <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> announce <span class="syntax-operator">=</span> resolve<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> closed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span><span class="syntax-operator">*</span> source<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> announce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> controller<span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">yield</span> <span class="syntax-string">&#x27;late&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> closed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">const</span> sink <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Writable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> write<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">,</span> encoding<span class="syntax-punctuation">,</span> callback<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> callback<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> pending <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span>Readable<span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sink<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> controller<span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> ready<span class="syntax-punctuation">;</span>
+controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>pending<span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>name <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;AbortError&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>closed<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> pipeline rejects with AbortError; generator finally runs.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

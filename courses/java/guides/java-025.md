@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-024`
 
 ## Learning objectives
 
-Explain reachability, retention, garbage collection, allocation rate using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Store a small byte array in a list anddrop the local variable reference. The final exercise transfers the mechanism to record process memory cautiously.
+Explain reachability, retention, garbage collection, allocation rate using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Store a small byte array in a list and drop the local variable reference. The final exercise transfers the mechanism to record process memory cautiously.
 
 ## Purpose and mental model
 
-The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals orlisteners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.
+The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals or listeners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.
 
-System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection andimplementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.
+System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection and implementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.
 
 ## Vocabulary and concepts
 
@@ -26,7 +26,7 @@ System.gc is a request rather than proof that a particular object was reclaimed.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-025/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent ornull depending on reachability andcollection. Runtime memory values describe the current process andshould not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicitclose forfiles,sockets andexecutors.
+A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent or null depending on reachability and collection. Runtime memory values describe the current process and should not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicit close for files,sockets and executors.
 
 ## Worked example / walkthrough
 
 ### Example A: Expose a strong retention path
 
-The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache orlistener retention.
+The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache or listener retention.
 
 ```java
 import java.util.*;
@@ -84,7 +84,7 @@ public class Main {
 
 ```
 
-**Expected:** list empty;separate array stillvalid.
+**Expected:** list empty;separate array still valid.
 
 ## Prediction before your attempt
 
@@ -92,19 +92,19 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Expose a strong retention path.** Store a small byte array in a list anddrop the local variable reference.
+1. **Expose a strong retention path.** Store a small byte array in a list and drop the local variable reference.
    **Expected:** list still exposes the same array contents.
    **Verify:** Compare your assertion values or captured diagnostic with list still exposes the same array contents.
 
-2. **Remove one ownership path deliberately.** Keep a separate reference,clear the list,andinspect the separate reference.
-   **Expected:** list empty;separate array stillvalid.
-   **Verify:** Compare your assertion values or captured diagnostic with list empty;separate array stillvalid.
+2. **Remove one ownership path deliberately.** Keep a separate reference,clear the list,and inspect the separate reference.
+   **Expected:** list empty;separate array still valid.
+   **Verify:** Compare your assertion values or captured diagnostic with list empty;separate array still valid.
 
-3. **Inspect a weak reference without timing assumptions.** Create aWeakReference to the still-strongly-referenced array.
+3. **Inspect a weak reference without timing assumptions.** Create a WeakReference to the still-strongly-referenced array.
    **Expected:** weakget returns the same object while strong reference exists.
    **Verify:** Compare your assertion values or captured diagnostic with weakget returns the same object while strong reference exists.
 
-4. **Separate value size from allocation count.** Create ten arrays of128bytes andcount logical payload bytes.
+4. **Separate value size from allocation count.** Create ten arrays of 128 bytes and count logical payload bytes.
    **Expected:** 1280 logical bytes;no exact heap-overhead claim.
    **Verify:** Compare your assertion values or captured diagnostic with 1280 logical bytes;no exact heap-overhead claim.
 
@@ -112,9 +112,9 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** same buffer identity;final value9.
    **Verify:** Compare your assertion values or captured diagnostic with same buffer identity;final value9.
 
-6. **Record process memory cautiously.** ReadRuntime total/free/max memory andcheck only valid ordering relationships.
-   **Expected:** nonnegative counters;max at leasttotal;no claim of exact object size.
-   **Verify:** Compare your assertion values or captured diagnostic with nonnegative counters;max at leasttotal;no claim of exact object size.
+6. **Record process memory cautiously.** ReadRuntime total/free/max memory and check only valid ordering relationships.
+   **Expected:** nonnegative counters; max at least total; no claim of exact object size.
+   **Verify:** Compare your assertion values or captured diagnostic with nonnegative counters; max at least total; no claim of exact object size.
 
 ## Common pitfalls and diagnosis
 

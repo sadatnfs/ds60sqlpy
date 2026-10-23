@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,711 +161,711 @@
       <h1>Track</h1>
       <p class="source-path">Generated from <code>courses/java/track.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;schema_version&quot;: 1,</span>
-<span>  &quot;id&quot;: &quot;java&quot;,</span>
-<span>  &quot;title&quot;: &quot;Java: from the first compile to reliable applications&quot;,</span>
-<span>  &quot;summary&quot;: &quot;36 sequenced lessons with explanations, worked examples, six inspectable exercises and separate reference solutions. Content becomes runnable only when its complete authored set is registered.&quot;,</span>
-<span>  &quot;lessons&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-001&quot;,</span>
-<span>      &quot;title&quot;: &quot;From source file to running JVM&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;source&quot;,</span>
-<span>        &quot;bytecode&quot;,</span>
-<span>        &quot;entry point&quot;,</span>
-<span>        &quot;compiler diagnostics&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A Java program begins as text.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a message variable containing Hello,Java and print it once.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;one line Hello, Java. compiler resultfalse and at least one ERROR diagnostic.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-002&quot;,</span>
-<span>      &quot;title&quot;: &quot;Values, numeric types and conversion&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-001&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;primitives&quot;,</span>
-<span>        &quot;overflow&quot;,</span>
-<span>        &quot;casting&quot;,</span>
-<span>        &quot;BigDecimal&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A numeric type defines both a range and a set of operations.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Calculate7/2 and7/2.0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;integer3 and double3.5. exact division throws;rounded result0.33.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-003&quot;,</span>
-<span>      &quot;title&quot;: &quot;Decisions, loops and invariants&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-002&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;boolean&quot;,</span>
-<span>        &quot;short circuit&quot;,</span>
-<span>        &quot;loop invariant&quot;,</span>
-<span>        &quot;boundary&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Control flow chooses which statements run and how often.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use textnull and testtext!=null before callingisEmpty.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;conditionfalse with noNullPointerException. wrong loop raisesArrayIndexOutOfBoundsException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-004&quot;,</span>
-<span>      &quot;title&quot;: &quot;Methods and explicit contracts&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-003&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;parameters&quot;,</span>
-<span>        &quot;return&quot;,</span>
-<span>        &quot;overloading&quot;,</span>
-<span>        &quot;pass by value&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;ImplementdoubleValue(intx) and evaluate7 and0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;14 and0. int andlong respectively.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-005&quot;,</span>
-<span>      &quot;title&quot;: &quot;Arrays, strings and Unicode&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-004&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;array bounds&quot;,</span>
-<span>        &quot;UTF-16&quot;,</span>
-<span>        &quot;code points&quot;,</span>
-<span>        &quot;immutability&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An array is a fixed-length indexed container.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Copy array1,2,3,mutate the copy and compare the original.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;original starts1;copy starts9. ArrayIndexOutOfBoundsException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-006&quot;,</span>
-<span>      &quot;title&quot;: &quot;Lists, sets and maps&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-005&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;ArrayList&quot;,</span>
-<span>        &quot;HashMap&quot;,</span>
-<span>        &quot;HashSet&quot;,</span>
-<span>        &quot;iteration&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Lists preserve an ordered sequence and may contain duplicates.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a mutable listred,blue,red and appendgreen.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;size4;red appears twice. UnsupportedOperationException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-007&quot;,</span>
-<span>      &quot;title&quot;: &quot;Classes and encapsulation&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-006&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;object state&quot;,</span>
-<span>        &quot;access modifiers&quot;,</span>
-<span>        &quot;instance methods&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An object combines state with operations that preserve its rules.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Construct accounts with100 and100 cents,deposit50 into the first.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;balances150 and100. ArithmeticException;original maximum balance preserved.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-008&quot;,</span>
-<span>      &quot;title&quot;: &quot;Constructors, records and invariants&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-007&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;record&quot;,</span>
-<span>        &quot;compact constructor&quot;,</span>
-<span>        &quot;validation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A record is a concise carrier for a fixed set of components, with generated accessors, equality, hashing and a descriptive string.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create an Order with idspaceAspace and itemx.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;idA and items[x]. NullPointerException from the declaredcopy policy.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-009&quot;,</span>
-<span>      &quot;title&quot;: &quot;Exceptions and resource lifetime&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-008&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;checked exception&quot;,</span>
-<span>        &quot;try with resources&quot;,</span>
-<span>        &quot;suppressed exception&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Exceptions separate normal return values from failure.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Open a Probe resource,recordbody,then inspect closure order.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;eventsbody,closeA. cause remains the originalIOException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-010&quot;,</span>
-<span>      &quot;title&quot;: &quot;Interfaces and polymorphism&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-009&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;interface&quot;,</span>
-<span>        &quot;substitution&quot;,</span>
-<span>        &quot;composition&quot;,</span>
-<span>        &quot;dispatch&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An interface describes behavior a caller can rely on without depending on one implementation.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;UsePricing references to identity andhalf-price implementations on100 cents.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;100 and50. negative feeIllegalArgumentException;null delegateNullPointerException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-011&quot;,</span>
-<span>      &quot;title&quot;: &quot;Equality, hashing and ordering&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-010&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;equals&quot;,</span>
-<span>        &quot;hashCode&quot;,</span>
-<span>        &quot;Comparator&quot;,</span>
-<span>        &quot;mutable keys&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Equality, hashing and ordering are related contracts with different roles.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create two equalPoint records and insert one into a map.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;lookup with the other returnsorigin;hashes equal. display labels equal;points unequal.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-012&quot;,</span>
-<span>      &quot;title&quot;: &quot;Generics and variance&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-011&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;type parameter&quot;,</span>
-<span>        &quot;invariance&quot;,</span>
-<span>        &quot;extends&quot;,</span>
-<span>        &quot;super&quot;,</span>
-<span>        &quot;type erasure&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Generics express type relationships so many errors can be detected before execution.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;SumList.of(1,2,3) andList.of(1.5,2.5) throughList&lt;?extendsNumber&gt;.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;sums6.0 and4.0. runtime classes equal;compile-time contracts remain distinct.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-013&quot;,</span>
-<span>      &quot;title&quot;: &quot;Lambdas and functional interfaces&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-012&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;capture&quot;,</span>
-<span>        &quot;effectively final&quot;,</span>
-<span>        &quot;Predicate&quot;,</span>
-<span>        &quot;Function&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A lambda supplies the behavior of a functional interface, an interface with one abstract method.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a Predicate&lt;Integer&gt; accepting positive values and test3,0,-1.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;true,false,false. 7 accepted;blank rejected.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-014&quot;,</span>
-<span>      &quot;title&quot;: &quot;Streams and collectors&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-013&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;lazy pipeline&quot;,</span>
-<span>        &quot;reduce&quot;,</span>
-<span>        &quot;groupingBy&quot;,</span>
-<span>        &quot;parallel hazards&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A stream is a single-use computation pipeline over a source.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Keep even values from1,2,3,4 and sum their squares.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;20. 5 versus9;parallel sum5050.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-015&quot;,</span>
-<span>      &quot;title&quot;: &quot;Dates, time zones and formatting&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-014&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Instant&quot;,</span>
-<span>        &quot;LocalDate&quot;,</span>
-<span>        &quot;ZonedDateTime&quot;,</span>
-<span>        &quot;DST&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Time has several meanings.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;same instant;New York local date2023-12-31. start included;end excluded.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-016&quot;,</span>
-<span>      &quot;title&quot;: &quot;Files, paths and character encoding&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-015&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Path&quot;,</span>
-<span>        &quot;Files&quot;,</span>
-<span>        &quot;UTF-8&quot;,</span>
-<span>        &quot;atomic replacement&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A path names a location; it is not the file contents or a guarantee that the location exists.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;WriteCaf\u00e9 and an emoji to an owned temporary file,then read it withUTF-8.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;exact text equality. original exception propagated;owned directory absent.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-017&quot;,</span>
-<span>      &quot;title&quot;: &quot;Optional values and validation boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-016&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Optional&quot;,</span>
-<span>        &quot;null&quot;,</span>
-<span>        &quot;domain error&quot;,</span>
-<span>        &quot;parse&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Optional represents the presence or absence of a value in a return contract.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Look up knowna andunknownb in a fixed map throughOptional.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;a present with7;b empty. specific absence failure.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-018&quot;,</span>
-<span>      &quot;title&quot;: &quot;Tests that detect broken behavior&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-017&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;assert&quot;,</span>
-<span>        &quot;table driven tests&quot;,</span>
-<span>        &quot;properties&quot;,</span>
-<span>        &quot;mutation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A useful test distinguishes correct behavior from a plausible mistake.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Testclamp for values-2,0,3,9 underbounds0..5.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs0,0,3,5. all originals restored;input arrays unchanged.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-019&quot;,</span>
-<span>      &quot;title&quot;: &quot;Data structures and complexity&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-018&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;hash table&quot;,</span>
-<span>        &quot;deque&quot;,</span>
-<span>        &quot;heap&quot;,</span>
-<span>        &quot;Big O&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A data structure is a set of operations with representation and cost tradeoffs.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Adda,b,c to anArrayDeque and remove from the front.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;a,b,c order. poll returnsnull;remove throwsNoSuchElementException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-020&quot;,</span>
-<span>      &quot;title&quot;: &quot;Search, sorting and dynamic programming&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-019&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;binary search&quot;,</span>
-<span>        &quot;stable sort&quot;,</span>
-<span>        &quot;memoization&quot;,</span>
-<span>        &quot;DP&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Algorithms connect a problem contract to a sequence of operations and invariants.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;RunlowerBound on1,2,2,5 withtarget2 andtarget6.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;indices1 and4. IllegalArgumentException forboth.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-021&quot;,</span>
-<span>      &quot;title&quot;: &quot;Threads and the memory model&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-020&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Thread&quot;,</span>
-<span>        &quot;happens before&quot;,</span>
-<span>        &quot;visibility&quot;,</span>
-<span>        &quot;join&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Threads can execute concurrently while sharing memory.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;worker terminated;result42. interruption observed and worker terminated.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-022&quot;,</span>
-<span>      &quot;title&quot;: &quot;Executors, futures and cancellation&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-021&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;ExecutorService&quot;,</span>
-<span>        &quot;Future&quot;,</span>
-<span>        &quot;timeout&quot;,</span>
-<span>        &quot;cancellation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An ExecutorService owns task scheduling and worker lifetime.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Submit a callable returning42 and get it within2seconds.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;result42. third submission rejected;admitted tasks finish after release.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-023&quot;,</span>
-<span>      &quot;title&quot;: &quot;Locks, atomics and concurrent collections&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-022&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;synchronized&quot;,</span>
-<span>        &quot;AtomicInteger&quot;,</span>
-<span>        &quot;ConcurrentHashMap&quot;,</span>
-<span>        &quot;deadlock&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Synchronization protects a state transition,not merely a variable name.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Run two workers making1000 synchronized increments each.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;counter2000. 2000 increments and no blocked worker after bounded joins.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-024&quot;,</span>
-<span>      &quot;title&quot;: &quot;Virtual threads and blocking work&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 90,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-023&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;virtual thread&quot;,</span>
-<span>        &quot;task lifetime&quot;,</span>
-<span>        &quot;backpressure&quot;,</span>
-<span>        &quot;pinning&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Start a virtual thread that recordsisVirtual andjoin it.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;true and terminated. caller can acquire the monitor while the worker is waiting.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-025&quot;,</span>
-<span>      &quot;title&quot;: &quot;JVM memory, GC and allocation&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-024&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;heap&quot;,</span>
-<span>        &quot;stack&quot;,</span>
-<span>        &quot;reachability&quot;,</span>
-<span>        &quot;GC&quot;,</span>
-<span>        &quot;allocation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Store a small byte array in a list anddrop the local variable reference.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;list still exposes the same array contents. nonnegative counters;max at leasttotal;no claim of exact object size.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-026&quot;,</span>
-<span>      &quot;title&quot;: &quot;Packages, classpaths and modules&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-025&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;package&quot;,</span>
-<span>        &quot;classpath&quot;,</span>
-<span>        &quot;module path&quot;,</span>
-<span>        &quot;exports&quot;,</span>
-<span>        &quot;requires&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Packages organize class names andaccess boundaries.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;ReadString.class module andpackage names.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;modulejava.base;packagejava.lang. nonzero compiler exit andcaptured diagnostic.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-027&quot;,</span>
-<span>      &quot;title&quot;: &quot;Builds and dependency reproducibility&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-026&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;javac&quot;,</span>
-<span>        &quot;jar&quot;,</span>
-<span>        &quot;Maven&quot;,</span>
-<span>        &quot;Gradle&quot;,</span>
-<span>        &quot;locked dependencies&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A build turns source anddeclared dependencies into an artifact.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Build a Hello class whose main printsbuild-ok.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;compiler exit0;Hello.class exists. exactversionaccepted;LATESTnot treated as a pin.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-028&quot;,</span>
-<span>      &quot;title&quot;: &quot;HTTP services and clients&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-027&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;HttpClient&quot;,</span>
-<span>        &quot;HttpServer&quot;,</span>
-<span>        &quot;status&quot;,</span>
-<span>        &quot;timeout&quot;,</span>
-<span>        &quot;resource closure&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;HTTP is a request/response protocol with method,path,status,headers andbody.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Start the fixture andGET/health.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;status200 andbodyok. host127.0.0.1;portpositive;closedflagtrue.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-029&quot;,</span>
-<span>      &quot;title&quot;: &quot;JDBC and transactions&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-028&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;prepared statement&quot;,</span>
-<span>        &quot;connection&quot;,</span>
-<span>        &quot;commit&quot;,</span>
-<span>        &quot;rollback&quot;,</span>
-<span>        &quot;isolation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;JDBC is Java&#x27;s database-access API.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Open the fixture,inspect product metadata andcount the two account rows.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;database productH2;2 rows;auto-commit initiallytrue. second session sees100beforecommit and95aftercommit.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-030&quot;,</span>
-<span>      &quot;title&quot;: &quot;Serialization and schema evolution&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-029&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;data boundary&quot;,</span>
-<span>        &quot;version&quot;,</span>
-<span>        &quot;validation&quot;,</span>
-<span>        &quot;deserialization&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Serialization turns domain values into a representation that another process orversion can read.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Encode accounta1,balance125,noteCaf\u00e9 withversion2 anddecode.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;equal domain record andexact Unicode note. trailing payloadIOException;negative balanceIllegalArgumentException.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-031&quot;,</span>
-<span>      &quot;title&quot;: &quot;Reflection, annotations and service loading&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-030&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;reflection&quot;,</span>
-<span>        &quot;annotation&quot;,</span>
-<span>        &quot;ServiceLoader&quot;,</span>
-<span>        &quot;encapsulation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;ReadVersion on the knownFriendly provider.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;version2. version2accepted;version3rejected.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-032&quot;,</span>
-<span>      &quot;title&quot;: &quot;Profiling and benchmark reasoning&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-031&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;JFR&quot;,</span>
-<span>        &quot;warmup&quot;,</span>
-<span>        &quot;JIT&quot;,</span>
-<span>        &quot;measurement bias&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Performance measurement starts with a correct,representative workload.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Sum1..1000 with a loop andcompare withn*(n+1)/2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;500500. metadata names100warmups andprofilingfalse;universal claimfalse.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-033&quot;,</span>
-<span>      &quot;title&quot;: &quot;Secure application boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-032&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;untrusted input&quot;,</span>
-<span>        &quot;path traversal&quot;,</span>
-<span>        &quot;resource limits&quot;,</span>
-<span>        &quot;secrets&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An application boundary converts untrusted input into a limited set of permitted operations.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Createinput.txt inside anownedroot andread atmost10bytes.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;contenthello. diagnostic excludes both sensitive fields.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-034&quot;,</span>
-<span>      &quot;title&quot;: &quot;Application design and dependency boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-033&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;dependency inversion&quot;,</span>
-<span>        &quot;ports&quot;,</span>
-<span>        &quot;adapters&quot;,</span>
-<span>        &quot;pure core&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Application design separates domain decisions from the mechanisms that supply data,time orside effects.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Compute3items at125cents andcheckzero/negativequantity policy.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;375cents;nonpositivequantityrejected. ArithmeticException;auditsinkunused.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-035&quot;,</span>
-<span>      &quot;title&quot;: &quot;Build a tested local data service&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-034&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;domain model&quot;,</span>
-<span>        &quot;storage&quot;,</span>
-<span>        &quot;HTTP&quot;,</span>
-<span>        &quot;contract tests&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A small data service combines domain rules,storage andtransport contracts.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;SummarizegroupAoveramounts10,20 andgroupBover5.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Acount2,total30;Bcount1,total5. 3unchangedrecords;closedflagtrue.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;java-036&quot;,</span>
-<span>      &quot;title&quot;: &quot;Package, diagnose and maintain a release&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;java-035&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;java21&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;jar&quot;,</span>
-<span>        &quot;jlink&quot;,</span>
-<span>        &quot;observability&quot;,</span>
-<span>        &quot;compatibility&quot;,</span>
-<span>        &quot;release checklist&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts andhow failures are diagnosed.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Compile thefixture with--release21 andinspect itsclassheader.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;magicCAFEBABE;majorversion65. previousartifactv1 retained;custom_runtime_builtFalse.&quot;</span>
-<span>    }</span>
-<span>  ],</span>
-<span>  &quot;sources&quot;: [</span>
-<span>    {</span>
-<span>      &quot;url&quot;: &quot;https://dev.java/learn/&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;url&quot;: &quot;https://docs.oracle.com/en/java/javase/21/docs/api/index.html&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Java: from the first compile to reliable applications&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;summary&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;36 lessons in Java, from first programs and objects to collections, concurrency, testing and practical services. Worked examples and separate solutions connect language rules with observable behavior.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lessons&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;From source file to running JVM&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;source&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;bytecode&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;entry point&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;compiler diagnostics&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A Java program begins as text.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a message variable containing Hello, Java and print it once.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;one line Hello, Java. compiler result false and at least one ERROR diagnostic.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Values, numeric types and conversion&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-001&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;primitives&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;overflow&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;casting&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;BigDecimal&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A numeric type defines both a range and a set of operations.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Calculate integer division `7 / 2` and floating-point division `7 / 2.0`.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;integer 3 and double 3.5. exact division throws; rounded result 0.33.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Decisions, loops and invariants&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-002&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;boolean&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;short circuit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;loop invariant&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;boundary&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Control flow chooses which statements run and how often.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use text null and test text!=null before calling isEmpty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;condition false with no NullPointerException. wrong loop raises ArrayIndexOutOfBoundsException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Methods and explicit contracts&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-003&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;parameters&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;return&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;overloading&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;pass by value&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement doubleValue(int x) and evaluate 7 and 0.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;14 and 0. int and long respectively.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Arrays, strings and Unicode&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-004&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;array bounds&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;UTF-16&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;code points&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;immutability&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An array is a fixed-length indexed container.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Copy array 1,2,3,mutate the copy and compare the original.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;original starts 1; copy starts 9. ArrayIndexOutOfBoundsException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Lists, sets and maps&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-005&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ArrayList&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HashMap&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HashSet&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;iteration&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Lists preserve an ordered sequence and may contain duplicates.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a mutable list red,blue,red and append green.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;size 4; red appears twice. UnsupportedOperationException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Classes and encapsulation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-006&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;object state&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;access modifiers&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;instance methods&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An object combines state with operations that preserve its rules.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Construct accounts with 100 and 100 cents,deposit 50 into the first.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;balances 150 and 100. ArithmeticException;original maximum balance preserved.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Constructors, records and invariants&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-007&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;record&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;compact constructor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;validation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A record is a concise carrier for a fixed set of components, with generated accessors, equality, hashing and a descriptive string.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create an Order with ID \&quot; A \&quot; and item x.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ID A and items[x]. NullPointerException from the declared copy policy.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Exceptions and resource lifetime&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-008&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;checked exception&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;try with resources&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;suppressed exception&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Exceptions separate normal return values from failure.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Open a Probe resource, record body, then inspect closure order.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;events body, close A. cause remains the original IOException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Interfaces and polymorphism&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-009&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;interface&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;substitution&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;composition&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;dispatch&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An interface describes behavior a caller can rely on without depending on one implementation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use Pricing references to identity and half-price implementations on 100 cents.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;100 and 50. negative fee IllegalArgumentException;null delegate NullPointerException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Equality, hashing and ordering&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-010&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;equals&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;hashCode&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Comparator&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;mutable keys&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Equality, hashing and ordering are related contracts with different roles.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create two equal Point records and insert one into a map.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;lookup with the other returns origin; hashes equal. display labels equal; points unequal.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Generics and variance&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-011&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;type parameter&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;invariance&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;extends&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;super&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;type erasure&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Generics express type relationships so many errors can be detected before execution.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List&lt;?extends Number&gt;.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sums 6.0 and 4.0. runtime classes equal; compile-time contracts remain distinct.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Lambdas and functional interfaces&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-012&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;capture&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;effectively final&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Predicate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Function&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A lambda supplies the behavior of a functional interface, an interface with one abstract method.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a Predicate&lt;Integer&gt; accepting positive values and test 3,0,-1.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;true, false, false. 7 accepted; blank rejected.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Streams and collectors&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-013&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;lazy pipeline&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;reduce&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;groupingBy&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;parallel hazards&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A stream is a single-use computation pipeline over a source.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Keep even values from 1,2,3,4 and sum their squares.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;20. 5 versus 9; parallel sum 5050.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dates, time zones and formatting&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-014&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Instant&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;LocalDate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ZonedDateTime&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;DST&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Time has several meanings.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;same instant; New York local date 2023-12-31. start included; end excluded.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Files, paths and character encoding&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-015&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Path&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Files&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;UTF-8&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;atomic replacement&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A path names a location; it is not the file contents or a guarantee that the location exists.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write Café and an emoji to an owned temporary file,then read it with UTF-8.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;exact text equality. original exception propagated; owned directory absent.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Optional values and validation boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-016&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Optional&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;null&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;domain error&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;parse&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Optional represents the presence or absence of a value in a return contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Look up known a and unknown b in a fixed map through Optional.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a present with 7; b empty. specific absence failure.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Tests that detect broken behavior&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-017&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;assert&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;table driven tests&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;properties&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;mutation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A useful test distinguishes correct behavior from a plausible mistake.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Test clamp for values -2,0,3,9 under bounds 0..5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs 0,0,3,5. all originals restored; input arrays unchanged.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Data structures and complexity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-018&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;hash table&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;deque&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;heap&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Big O&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A data structure is a set of operations with representation and cost tradeoffs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Add a,b,c to an ArrayDeque and remove from the front.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a,b,c order. poll returns null; remove throws NoSuchElementException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Search, sorting and dynamic programming&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-019&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;binary search&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;stable sort&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;memoization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;DP&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Algorithms connect a problem contract to a sequence of operations and invariants.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run lowerBound on 1,2,2,5 with target 2 and target 6.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;indices 1 and 4. IllegalArgumentException for both.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Threads and the memory model&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-020&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Thread&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;happens before&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;visibility&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;join&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Threads can execute concurrently while sharing memory.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worker terminated; result 42. interruption observed and worker terminated.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Executors, futures and cancellation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-021&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ExecutorService&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Future&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;timeout&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;cancellation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An ExecutorService owns task scheduling and worker lifetime.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Submit a callable returning 42 and get it within 2 seconds.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;result 42. third submission rejected; admitted tasks finish after release.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Locks, atomics and concurrent collections&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-022&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;synchronized&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;AtomicInteger&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ConcurrentHashMap&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;deadlock&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Synchronization protects a state transition,not merely a variable name.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run two workers making 1000 synchronized increments each.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;counter 2000. 2000 increments and no blocked worker after bounded joins.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Virtual threads and blocking work&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-023&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;virtual thread&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;task lifetime&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;backpressure&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;pinning&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Start a virtual thread that records isVirtual and join it.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;true and terminated. caller can acquire the monitor while the worker is waiting.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-025&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;JVM memory, GC and allocation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-024&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;heap&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;stack&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;reachability&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;GC&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;allocation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Store a small byte array in a list and drop the local variable reference.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;list still exposes the same array contents. nonnegative counters; max at least total; no claim of exact object size.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-026&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Packages, classpaths and modules&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-025&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;package&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;classpath&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;module path&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;exports&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;requires&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Packages organize class names and access boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Read `String.class` module and package names.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;module `java.base`;package `java.lang`. nonzero compiler exit and captured diagnostic.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-027&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Builds and dependency reproducibility&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-026&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;javac&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;jar&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Maven&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradle&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;locked dependencies&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A build turns source and declared dependencies into an artifact.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a Hello class whose main prints build-ok.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;compiler exit 0;Hello.class exists. exact version accepted; LATEST not treated as a pin.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-028&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;HTTP services and clients&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-027&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HttpClient&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HttpServer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;status&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;timeout&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;resource closure&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;HTTP is a request/response protocol with method,path,status,headers and body.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Start the fixture and request `GET /health`.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;status 200 and body ok. host 127.0.0.1;port positive; closed flag true.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-029&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;JDBC and transactions&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-028&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;prepared statement&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;connection&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;commit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;rollback&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;isolation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;JDBC is Java&#x27;s database-access API.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Open the fixture,inspect product metadata and count the two account rows.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;database product H2; 2 rows; auto-commit initially true. second session sees 100 before commit and 95 after commit.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Serialization and schema evolution&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-029&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;data boundary&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;version&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;validation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;deserialization&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Serialization turns domain values into a representation that another process or version can read.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Encode account a1, balance 125, note Café with version 2 and decode.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;equal domain record and exact Unicode note. trailing payload IOException; negative balance IllegalArgumentException.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-031&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reflection, annotations and service loading&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-030&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;reflection&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;annotation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ServiceLoader&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;encapsulation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Read Version on the known Friendly provider.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;version 2. version 2 accepted;version 3 rejected.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-032&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Profiling and benchmark reasoning&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-031&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;JFR&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;warmup&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;JIT&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;measurement bias&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Performance measurement starts with a correct,representative workload.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sum 1..1000 with a loop and compare with n*(n+1)/2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;500500. metadata names 100 warmups and profiling false; universal claim false.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-033&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Secure application boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-032&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;untrusted input&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;path traversal&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;resource limits&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;secrets&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An application boundary converts untrusted input into a limited set of permitted operations.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create `input.txt` inside an owned root and read at most 10 bytes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;content hello. diagnostic excludes both sensitive fields.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-034&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Application design and dependency boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-033&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;dependency inversion&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ports&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;adapters&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;pure core&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Application design separates domain decisions from the mechanisms that supply data,time or side effects.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute 3 items at 125 cents and check the zero/negative quantity policy.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;375 cents; nonpositive quantity rejected. ArithmeticException;audit sink unused.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-035&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a tested local data service&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-034&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;domain model&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;storage&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HTTP&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;contract tests&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A small data service combines domain rules, storage and transport contracts.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Summarize group A over amounts 10,20 and group B over 5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A count 2, total 30; B count 1, total 5. 3 unchanged records; closed flag true.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-036&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Package, diagnose and maintain a release&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;java-035&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;jar&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;jlink&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;observability&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;compatibility&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;release checklist&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts and how failures are diagnosed.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compile the fixture with --release 21 and inspect its class header.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;magic CAFEBABE; major version 65. previous artifact v1 retained; custom_runtime_built False.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">],</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;sources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://dev.java/learn/&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://docs.oracle.com/en/java/javase/21/docs/api/index.html&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

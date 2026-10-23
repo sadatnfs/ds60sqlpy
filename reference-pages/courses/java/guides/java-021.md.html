@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,18 +165,18 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate, approximately 90 minutes. Direct prerequisites: <code>java-020</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result. The final exercise transfers the mechanism to respond to interruption.</p>
+<p>Explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result. The final exercise transfers the mechanism to respond to interruption.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds andwrites,so two threads can lose an update even if each individual access is visible.</p>
+<p>Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds and writes,so two threads can lose an update even if each individual access is visible.</p>
 <p>This lesson uses bounded joins,latches and a barrier to make ordering deliberate. A controlled lost-update fixture forces both workers to read the same starting value before either writes. That demonstrates the mechanism without hoping a random stress run happens to fail. Interruption is a cooperative request,not forcible termination;blocking code should respond or preserve the interrupt status when it cannot complete its work.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Happens-before:</strong> A memory-ordering relationship guaranteeing visibility of earlier actions.</p>
 <p><strong>Atomic operation:</strong> An operation that cannot be observed as separate interleaved steps.</p>
 <p><strong>Interruption:</strong> A cooperative signal requesting that a thread stop or change its work.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-021/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
@@ -138,41 +184,41 @@ java -ea Main</code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-publish-a-result-through-join">Example A: Publish a result through join<a class="heading-anchor" href="#example-a-publish-a-result-through-join" aria-label="Link to this section">#</a></h4>
 <p>The join establishes the required visibility after completion. A timed sleep would not provide the same guarantee.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static final class Publication { int data; volatile boolean ready; }
-    static void joinBounded(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError(&quot;thread did not terminate&quot;);}}
-    public static void main(String[] args) throws Exception {
-        int[] result={0}; Thread worker=Thread.ofPlatform().start(() -&gt; result[0]=42);
-        joinBounded(worker); assert result[0]==42;
-    }
-}
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Publication</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">int</span> data<span class="syntax-punctuation">;</span> <span class="syntax-keyword">volatile</span> <span class="syntax-keyword">boolean</span> ready<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">joinBounded</span><span class="syntax-punctuation">(</span>Thread thread<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> InterruptedException <span class="syntax-punctuation">{</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">join</span><span class="syntax-punctuation">(</span><span class="syntax-number">2500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">isAlive</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">interrupt</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">thread did not terminate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> result<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> Thread worker<span class="syntax-operator">=</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofPlatform</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">start</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> result<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        joinBounded<span class="syntax-punctuation">(</span>worker<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> result<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
-<p><strong>Expected:</strong> worker terminated;result42.</p>
+<p><strong>Expected:</strong> worker terminated; result 42.</p>
 <h4 id="example-b-publish-initial-state-through-start">Example B: Publish initial state through start<a class="heading-anchor" href="#example-b-publish-initial-state-through-start" aria-label="Link to this section">#</a></h4>
 <p>Actions before start happen-before actions in the started thread. The fixture does not rely on the worker noticing an unsynchronized later mutation.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static final class Publication { int data; volatile boolean ready; }
-    static void joinBounded(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError(&quot;thread did not terminate&quot;);}}
-    public static void main(String[] args) throws Exception {
-        int[] result={0}; Thread worker=Thread.ofPlatform().start(() -&gt; result[0]=42);
-        joinBounded(worker); assert result[0]==42;
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Publication</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">int</span> data<span class="syntax-punctuation">;</span> <span class="syntax-keyword">volatile</span> <span class="syntax-keyword">boolean</span> ready<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">joinBounded</span><span class="syntax-punctuation">(</span>Thread thread<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> InterruptedException <span class="syntax-punctuation">{</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">join</span><span class="syntax-punctuation">(</span><span class="syntax-number">2500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">isAlive</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">interrupt</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">thread did not terminate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> result<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> Thread worker<span class="syntax-operator">=</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofPlatform</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">start</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> result<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        joinBounded<span class="syntax-punctuation">(</span>worker<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> result<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">;</span>
 
-        int[] input={7}; var observed=new java.util.concurrent.atomic.AtomicInteger();
-        Thread reader=Thread.ofPlatform().start(() -&gt; observed.set(input[0])); joinBounded(reader);
-        assert observed.get()==7;
-    }
-}
+        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> input<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-number">7</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">var</span> observed<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">atomic</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">AtomicInteger</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        Thread reader<span class="syntax-operator">=</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofPlatform</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">start</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> observed<span class="syntax-punctuation">.</span><span class="syntax-attribute">set</span><span class="syntax-punctuation">(</span>input<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> joinBounded<span class="syntax-punctuation">(</span>reader<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> observed<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> worker observes7.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Publish a result through join.</strong> Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result. <strong>Expected:</strong> worker terminated;result42. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker terminated;result42.</li>
+<li><strong>Publish a result through join.</strong> Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result. <strong>Expected:</strong> worker terminated; result 42. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker terminated; result 42.</li>
 </ol>
 <ol>
 <li><strong>Publish initial state through start.</strong> Assign7 before starting a worker that reads the holder. <strong>Expected:</strong> worker observes7. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker observes7.</li>
@@ -201,7 +247,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-021: Threads and the memory model.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-021: Threads and the memory model.
 Read courses/java/guides/java-021.md and courses/java/lessons/java-021.java. Direct prerequisites: `java-020`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

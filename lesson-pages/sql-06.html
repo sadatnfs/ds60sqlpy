@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-06.html#learner">learner SQL</a> · <a href="sql-06.html#solution-1">solution reasoning</a> · <a href="sql-06.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-06 — Set Operations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day06_set_operations.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day06_set_operations.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day06_set_operations.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,27 +466,27 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day06_set_operations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
-), supporters AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = &#x27;support&#x27;
-)
-SELECT * FROM purchasers
-INTERSECT
-SELECT * FROM supporters
-ORDER BY customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> supporters <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers
+<span class="syntax-keyword">INTERSECT</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> supporters
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, and <code>events</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>*</code> with columns <code>*</code> from <code>orders</code>, and <code>events</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH browsers AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = &#x27;page_view&#x27;
-), purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
-)
-SELECT * FROM browsers
-EXCEPT
-SELECT * FROM purchasers
-ORDER BY customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> browsers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> browsers
+<span class="syntax-keyword">EXCEPT</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>events</code>, and <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>*</code> with columns <code>*</code> from <code>events</code>, and <code>orders</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -518,7 +566,7 @@ ORDER BY customer_id;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-06 — Set Operations.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-06 — Set Operations.
 
 I have completed the direct catalog prerequisite: `sql-05`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day06_set_operations.md
@@ -576,103 +624,103 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 6: UNION, UNION ALL, INTERSECT, EXCEPT</span>
-<span>-- BEGINNER WORKFLOW — sql-06: Set Operations</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day06_set_operations.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-06/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: orders, events, customers.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.</span>
-<span>-- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.</span>
-<span>-- Pitfall: `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- Customers who purchased AND generated support events</span>
-<span>WITH purchasers AS (</span>
-<span>  SELECT DISTINCT o.customer_id FROM orders o</span>
-<span>), supporters AS (</span>
-<span>  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = &#x27;support&#x27;</span>
-<span>)</span>
-<span>SELECT * FROM purchasers</span>
-<span>INTERSECT</span>
-<span>SELECT * FROM supporters</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- Customers who browsed but never purchased</span>
-<span>WITH browsers AS (</span>
-<span>  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = &#x27;page_view&#x27;</span>
-<span>), purchasers AS (</span>
-<span>  SELECT DISTINCT o.customer_id FROM orders o</span>
-<span>)</span>
-<span>SELECT * FROM browsers</span>
-<span>EXCEPT</span>
-<span>SELECT * FROM purchasers</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- UNION vs UNION ALL (dedupe demo)</span>
-<span>SELECT country FROM customers WHERE country IN (&#x27;US&#x27;,&#x27;CA&#x27;)</span>
-<span>UNION ALL</span>
-<span>SELECT country FROM customers WHERE country IN (&#x27;CA&#x27;,&#x27;GB&#x27;)</span>
-<span>ORDER BY country;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] Return customer IDs that have either an order or a support event.</span>
-<span>--    Hint: `UNION` expresses set membership and removes duplicates across both sources.</span>
-<span>--    Inputs: For sql-06 Exercise 1, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 1, expected output: One distinct customer ID per qualifying customer. The final columns are `customer_id`. The final order is `customer_id`.</span>
-<span>--    Verify: For sql-06 Exercise 1, run an anti-check that counts rows where NOT ((e.event_type = &#x27;support&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = &#x27;support&#x27;)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 1, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span>
-<span>-- 2. [Query writing] Return customer IDs that have both an order and a support event.</span>
-<span>--    Hint: `INTERSECT` keeps keys present in both compatible sets.</span>
-<span>--    Inputs: For sql-06 Exercise 2, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 2, expected output: One distinct customer ID in both sets. The final columns are `customer_id`. The final order is `customer_id`.</span>
-<span>--    Verify: For sql-06 Exercise 2, run an anti-check that counts rows where NOT ((e.event_type = &#x27;support&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = &#x27;support&#x27;)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span>
-<span>-- 3. [Query writing] Return customers who have no orders.</span>
-<span>--    Hint: `EXCEPT` subtracts the order-customer set from all customers.</span>
-<span>--    Inputs: For sql-06 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 3, expected output: One row per customer absent from orders. The final columns are `customer_id`. The final order is `customer_id`.</span>
-<span>--    Verify: For sql-06 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 3, check `customer_id` before applying the row cap.</span>
-<span>-- 4. [Prediction] Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.</span>
-<span>--    Hint: `UNION ALL` preserves every input row; `UNION` returns distinct rows.</span>
-<span>--    Inputs: For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count &gt;= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.</span>
-<span>--    Verify: For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 4, run `combined_all`, and `combined_distinct` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 5. [Debugging] Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.</span>
-<span>--    Hint: Each branch below returns one text label and one numeric amount at the same report grain.</span>
-<span>--    Inputs: For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.</span>
-<span>--    Verify: For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 5, check `measure` before applying the row cap.</span>
-<span>-- 6. [Extension] Return the symmetric difference between customers with orders and customers with support events.</span>
-<span>--    Hint: Subtract each set from the other, then union the two differences.</span>
-<span>--    Inputs: For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-06 Exercise 6, expected output: Customers present in exactly one of the two source sets. The final columns are `customer_id`, and `source`. The final order is `customer_id, source`.</span>
-<span>--    Verify: For sql-06 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `source` against `orders`, and `events`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-06 Exercise 6, run `ordering_customers`, `support_customers`, `only_orders`, and `only_support` one at a time. Record each CTE&#x27;s row count and `customer_id` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 6: UNION, UNION ALL, INTERSECT, EXCEPT</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-06: Set Operations</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day06_set_operations.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-06/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: orders, events, customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Customers who purchased AND generated support events</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> supporters <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers</span>
+<span class="source-line"><span class="syntax-keyword">INTERSECT</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> supporters</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Customers who browsed but never purchased</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> browsers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> browsers</span>
+<span class="source-line"><span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- UNION vs UNION ALL (dedupe demo)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> country <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">WHERE</span> country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> country <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">WHERE</span> country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Return customer IDs that have either an order or a support event.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: `UNION` expresses set membership and removes duplicates across both sources.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 1, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 1, expected output: One distinct customer ID per qualifying customer. The final columns are `customer_id`. The final order is `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 1, run an anti-check that counts rows where NOT ((e.event_type = &#x27;support&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = &#x27;support&#x27;)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 1, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Return customer IDs that have both an order and a support event.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: `INTERSECT` keeps keys present in both compatible sets.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 2, read from `orders`, and `events`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 2, expected output: One distinct customer ID in both sets. The final columns are `customer_id`. The final order is `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 2, run an anti-check that counts rows where NOT ((e.event_type = &#x27;support&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `orders`, and `events`. Add one row for which `(e.event_type = &#x27;support&#x27;)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Return customers who have no orders.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: `EXCEPT` subtracts the order-customer set from all customers.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 3, expected output: One row per customer absent from orders. The final columns are `customer_id`. The final order is `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 3, check `customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: `UNION ALL` preserves every input row; `UNION` returns distinct rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count &gt;= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 4, run `combined_all`, and `combined_distinct` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Each branch below returns one text label and one numeric amount at the same report grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 5, check `measure` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Return the symmetric difference between customers with orders and customers with support events.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Subtract each set from the other, then union the two differences.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-06 Exercise 6, expected output: Customers present in exactly one of the two source sets. The final columns are `customer_id`, and `source`. The final order is `customer_id, source`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-06 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `source` against `orders`, and `events`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-06 Exercise 6, run `ordering_customers`, `support_customers`, `only_orders`, and `only_support` one at a time. Record each CTE&#x27;s row count and `customer_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -708,10 +756,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-06-solutions-set-operations-union-intersect-except">Day 06 solutions — Set Operations: UNION, INTERSECT, EXCEPT<a class="heading-anchor" href="#solution-1--day-06-solutions-set-operations-union-intersect-except" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day06_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day06_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day06_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -744,13 +792,13 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT o.customer_id
-FROM orders AS o
-UNION
-SELECT e.customer_id
-FROM events AS e
-WHERE e.event_type = &#x27;support&#x27;
-ORDER BY customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">UNION</span>
+<span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One distinct customer ID per qualifying customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -774,13 +822,13 @@ ORDER BY customer_id;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT o.customer_id
-FROM orders AS o
-INTERSECT
-SELECT e.customer_id
-FROM events AS e
-WHERE e.event_type = &#x27;support&#x27;
-ORDER BY customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">INTERSECT</span>
+<span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One distinct customer ID in both sets.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -803,12 +851,12 @@ ORDER BY customer_id;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT c.customer_id
-FROM customers AS c
-EXCEPT
-SELECT o.customer_id
-FROM orders AS o
-ORDER BY customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">EXCEPT</span>
+<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer absent from orders.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -833,31 +881,31 @@ ORDER BY customer_id;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH combined_all AS (
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN (&#x27;paid&#x27;, &#x27;shipped&#x27;)
-  UNION ALL
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN (&#x27;shipped&#x27;, &#x27;delivered&#x27;)
-), combined_distinct AS (
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN (&#x27;paid&#x27;, &#x27;shipped&#x27;)
-  UNION
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN (&#x27;shipped&#x27;, &#x27;delivered&#x27;)
-)
-SELECT &#x27;UNION ALL&#x27; AS operation,
-       COUNT(*) AS row_count
-FROM combined_all
-UNION ALL
-SELECT &#x27;UNION&#x27; AS operation,
-       COUNT(*) AS row_count
-FROM combined_distinct
-ORDER BY operation;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> combined_all <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> combined_distinct <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">UNION</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION ALL&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span> combined_all
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span> combined_distinct
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Two labeled summary rows showing all-count &gt;= distinct-count.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -880,14 +928,14 @@ ORDER BY operation;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT &#x27;order_revenue&#x27;::text AS measure,
-       SUM(o.total_amount)::numeric AS amount
-FROM orders AS o
-UNION ALL
-SELECT &#x27;expense&#x27;::text AS measure,
-       SUM(e.amount)::numeric AS amount
-FROM expenses AS e
-ORDER BY measure;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_revenue&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;expense&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
+<span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> measure<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Rows identify revenue and expense measures with compatible types.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -912,28 +960,28 @@ ORDER BY measure;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH ordering_customers AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders AS o
-), support_customers AS (
-  SELECT DISTINCT e.customer_id
-  FROM events AS e
-  WHERE e.event_type = &#x27;support&#x27;
-), only_orders AS (
-  SELECT customer_id FROM ordering_customers
-  EXCEPT
-  SELECT customer_id FROM support_customers
-), only_support AS (
-  SELECT customer_id FROM support_customers
-  EXCEPT
-  SELECT customer_id FROM ordering_customers
-)
-SELECT customer_id, &#x27;orders_only&#x27; AS source
-FROM only_orders
-UNION ALL
-SELECT customer_id, &#x27;support_only&#x27; AS source
-FROM only_support
-ORDER BY customer_id, source;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ordering_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> support_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers
+  <span class="syntax-keyword">EXCEPT</span>
+  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_support <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers
+  <span class="syntax-keyword">EXCEPT</span>
+  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;orders_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
+<span class="syntax-keyword">FROM</span> only_orders
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;support_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
+<span class="syntax-keyword">FROM</span> only_support
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">source</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Customers present in exactly one of the two source sets.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -986,193 +1034,193 @@ ORDER BY customer_id, source;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 06 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-06: Set Operations</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day06_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day06_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.</span>
-<span>-- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.</span>
-<span>-- Pitfall: `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: Return customer IDs that have either an order or a support event.</span>
-<span>-- Why: `UNION` expresses set membership and removes duplicates across both sources.</span>
-<span>-- Expected: One distinct customer ID per qualifying customer.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT o.customer_id</span>
-<span>FROM orders AS o</span>
-<span>UNION</span>
-<span>SELECT e.customer_id</span>
-<span>FROM events AS e</span>
-<span>WHERE e.event_type = &#x27;support&#x27;</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Return customer IDs that have both an order and a support event.</span>
-<span>-- Why: `INTERSECT` keeps keys present in both compatible sets.</span>
-<span>-- Expected: One distinct customer ID in both sets.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT o.customer_id</span>
-<span>FROM orders AS o</span>
-<span>INTERSECT</span>
-<span>SELECT e.customer_id</span>
-<span>FROM events AS e</span>
-<span>WHERE e.event_type = &#x27;support&#x27;</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Return customers who have no orders.</span>
-<span>-- Why: `EXCEPT` subtracts the order-customer set from all customers.</span>
-<span>-- Expected: One row per customer absent from orders.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT c.customer_id</span>
-<span>FROM customers AS c</span>
-<span>EXCEPT</span>
-<span>SELECT o.customer_id</span>
-<span>FROM orders AS o</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.</span>
-<span>-- Why: `UNION ALL` preserves every input row; `UNION` returns distinct rows.</span>
-<span>-- Expected: Two labeled summary rows showing all-count &gt;= distinct-count.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH combined_all AS (</span>
-<span>  SELECT o.status</span>
-<span>  FROM orders AS o</span>
-<span>  WHERE o.status IN (&#x27;paid&#x27;, &#x27;shipped&#x27;)</span>
-<span>  UNION ALL</span>
-<span>  SELECT o.status</span>
-<span>  FROM orders AS o</span>
-<span>  WHERE o.status IN (&#x27;shipped&#x27;, &#x27;delivered&#x27;)</span>
-<span>), combined_distinct AS (</span>
-<span>  SELECT o.status</span>
-<span>  FROM orders AS o</span>
-<span>  WHERE o.status IN (&#x27;paid&#x27;, &#x27;shipped&#x27;)</span>
-<span>  UNION</span>
-<span>  SELECT o.status</span>
-<span>  FROM orders AS o</span>
-<span>  WHERE o.status IN (&#x27;shipped&#x27;, &#x27;delivered&#x27;)</span>
-<span>)</span>
-<span>SELECT &#x27;UNION ALL&#x27; AS operation,</span>
-<span>       COUNT(*) AS row_count</span>
-<span>FROM combined_all</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;UNION&#x27; AS operation,</span>
-<span>       COUNT(*) AS row_count</span>
-<span>FROM combined_distinct</span>
-<span>ORDER BY operation;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.</span>
-<span>-- Why: Each branch below returns one text label and one numeric amount at the same report grain.</span>
-<span>-- Expected: Rows identify revenue and expense measures with compatible types.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT &#x27;order_revenue&#x27;::text AS measure,</span>
-<span>       SUM(o.total_amount)::numeric AS amount</span>
-<span>FROM orders AS o</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;expense&#x27;::text AS measure,</span>
-<span>       SUM(e.amount)::numeric AS amount</span>
-<span>FROM expenses AS e</span>
-<span>ORDER BY measure;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Return the symmetric difference between customers with orders and customers with support events.</span>
-<span>-- Why: Subtract each set from the other, then union the two differences.</span>
-<span>-- Expected: Customers present in exactly one of the two source sets.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH ordering_customers AS (</span>
-<span>  SELECT DISTINCT o.customer_id</span>
-<span>  FROM orders AS o</span>
-<span>), support_customers AS (</span>
-<span>  SELECT DISTINCT e.customer_id</span>
-<span>  FROM events AS e</span>
-<span>  WHERE e.event_type = &#x27;support&#x27;</span>
-<span>), only_orders AS (</span>
-<span>  SELECT customer_id FROM ordering_customers</span>
-<span>  EXCEPT</span>
-<span>  SELECT customer_id FROM support_customers</span>
-<span>), only_support AS (</span>
-<span>  SELECT customer_id FROM support_customers</span>
-<span>  EXCEPT</span>
-<span>  SELECT customer_id FROM ordering_customers</span>
-<span>)</span>
-<span>SELECT customer_id, &#x27;orders_only&#x27; AS source</span>
-<span>FROM only_orders</span>
-<span>UNION ALL</span>
-<span>SELECT customer_id, &#x27;support_only&#x27; AS source</span>
-<span>FROM only_support</span>
-<span>ORDER BY customer_id, source;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 06 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-06: Set Operations</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day06_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day06_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return customer IDs that have either an order or a support event.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: `UNION` expresses set membership and removes duplicates across both sources.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One distinct customer ID per qualifying customer.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return customer IDs that have both an order and a support event.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: `INTERSECT` keeps keys present in both compatible sets.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One distinct customer ID in both sets.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">INTERSECT</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return customers who have no orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: `EXCEPT` subtracts the order-customer set from all customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer absent from orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: `UNION ALL` preserves every input row; `UNION` returns distinct rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two labeled summary rows showing all-count &gt;= distinct-count.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> combined_all <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> combined_distinct <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION ALL&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> combined_all</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> combined_distinct</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Each branch below returns one text label and one numeric amount at the same report grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Rows identify revenue and expense measures with compatible types.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_revenue&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;expense&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> measure<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return the symmetric difference between customers with orders and customers with support events.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Subtract each set from the other, then union the two differences.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Customers present in exactly one of the two source sets.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ordering_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> support_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers</span>
+<span class="source-line">  <span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_support <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers</span>
+<span class="source-line">  <span class="syntax-keyword">EXCEPT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;orders_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> only_orders</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;support_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> only_support</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">source</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

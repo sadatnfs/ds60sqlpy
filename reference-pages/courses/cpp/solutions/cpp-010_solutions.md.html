@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,10 +176,10 @@
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
 <p>If the total is too low, inspect state filtering and record counts before discarding duplicate-looking amounts. If a negative pending record passes, check whether validation was placed after an early return. If aggregate initialization looks surprising, compare values with declaration order. Use named states and explicit test fixtures to make a new enum alternative visible rather than silently accepting an unknown external code.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-cpp">Payment p{7,200,Status::paid}; assert(settled(p)==200);</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">Payment p<span class="syntax-punctuation">{</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span>Status<span class="syntax-operator">:</span><span class="syntax-operator">:</span>paid<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span>settled<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected: A paid record contributes 200 cents.</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-cpp">Payment p{8,200,Status::pending}; assert(settled(p)==0);</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">Payment p<span class="syntax-punctuation">{</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span>Status<span class="syntax-operator">:</span><span class="syntax-operator">:</span>pending<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span>settled<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected: Pending contributes zero to settled revenue while retaining its original amount.</p>
 <h3 id="exercise-1-read-the-record">Exercise 1: Read the record<a class="heading-anchor" href="#exercise-1-read-the-record" aria-label="Link to this section">#</a></h3>
 <p>Describe each field of Payment{7, 200, paid}.</p>

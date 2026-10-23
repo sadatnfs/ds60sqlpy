@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,53 +173,53 @@
 <h3 id="exercise-1-weight-shard-means">Exercise 1: Weight shard means<a class="heading-anchor" href="#exercise-1-weight-shard-means" aria-label="Link to this section">#</a></h3>
 <p>The question is: Combine means2,6 with counts1,3 and compare equal shard averaging.</p>
 <p>Multiplying each local mean by its count restores the gradient numerator. The final division then gives each example equal weight.</p>
-<pre><code class="language-python">means=np.array([2.,6.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==5 and means.mean()==4</code></pre>
+<pre class="highlighted-code"><code class="language-python">means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> global5; naive4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with global5; naive4.</p>
 <h3 id="exercise-2-recover-a-full-batch-mean">Exercise 2: Recover a full-batch mean<a class="heading-anchor" href="#exercise-2-recover-a-full-batch-mean" aria-label="Link to this section">#</a></h3>
-<p>The question is: Partition gradients[2,4,6,8] into sizes1 and3 and reconstruct their mean.</p>
+<p>The question is: Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean.</p>
 <p>The explicit per-example values are an independent oracle for the shard calculation. A test that compares two formulas using the same wrong weights would miss the error.</p>
-<pre><code class="language-python">g=np.array([2.,4.,6.,8.]); parts=[g[:1],g[1:]]
-recombined=sum(p.sum() for p in parts)/sum(len(p) for p in parts)
-assert recombined==g.mean()==5</code></pre>
+<pre class="highlighted-code"><code class="language-python">g<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">8.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> parts<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>g<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>g<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+recombined<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> recombined<span class="syntax-operator">==</span>g<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span></code></pre>
 <p><strong>Expected:</strong> both full and reconstructed means5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both full and reconstructed means5.</p>
 <h3 id="exercise-3-accumulate-squared-loss-gradients">Exercise 3: Accumulate squared-loss gradients<a class="heading-anchor" href="#exercise-3-accumulate-squared-loss-gradients" aria-label="Link to this section">#</a></h3>
-<p>The question is: Atw0 use x1,2,3,4,y2x; compare full-batch gradient with sum-then-divide microbatches.</p>
+<p>The question is: At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches.</p>
 <p>The variable remains fixed while all microbatch gradients are calculated. This is the condition under which accumulation matches the full-batch gradient.</p>
-<pre><code class="language-python">x=tf.constant([1.,2.,3.,4.]); y=2*x; w=tf.Variable(0.)
-with tf.GradientTape() as tape: full=tf.reduce_mean((w*x-y)**2)
-full_g=tape.gradient(full,w); total=0.
-for start,end in [(0,1),(1,4)]:
-    with tf.GradientTape() as tape: summed=tf.reduce_sum((w*x[start:end]-y[start:end])**2)
-    total+=float(tape.gradient(summed,w))
-assert float(full_g)==total/4==-30</code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">;</span> w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> full<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+full_g<span class="syntax-operator">=</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>full<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> total<span class="syntax-operator">=</span><span class="syntax-number">0.</span>
+<span class="syntax-keyword">for</span> start<span class="syntax-punctuation">,</span>end <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> summed<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    total<span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>summed<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>full_g<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>total<span class="syntax-operator">/</span><span class="syntax-number">4</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">30</span></code></pre>
 <p><strong>Expected:</strong> gradient-30 for both.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with gradient-30 for both.</p>
 <h3 id="exercise-4-apply-exactly-one-update">Exercise 4: Apply exactly one update<a class="heading-anchor" href="#exercise-4-apply-exactly-one-update" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use rate.01 with accumulated global gradient-30.</p>
+<p>The question is: Use rate 0.01 with accumulated global gradient-30.</p>
 <p>The update counter should increment once for this effective batch. Incrementing a learning-rate schedule once per microbatch changes the optimizer policy even if gradients are combined correctly.</p>
-<pre><code class="language-python">w.assign_sub(.01*(total/4)); np.testing.assert_allclose(float(w),.3,atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>total<span class="syntax-operator">/</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.3</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> updated weight.3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with updated weight.3.</p>
 <h3 id="exercise-5-expose-per-batch-updates">Exercise 5: Expose per-batch updates<a class="heading-anchor" href="#exercise-5-expose-per-batch-updates" aria-label="Link to this section">#</a></h3>
 <p>The question is: Update separately for the two microbatches and compare the final weight with.3.</p>
 <p>The second gradient uses the weight changed by the first update. This is ordinary minibatch training, not a numerical implementation of one full-batch step.</p>
-<pre><code class="language-python">other=tf.Variable(0.)
-for start,end in [(0,1),(1,4)]:
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((other*x[start:end]-y[start:end])**2)
-    other.assign_sub(.01*tape.gradient(loss,other))
-assert abs(float(other)-.3)&gt;1e-6</code></pre>
+<pre class="highlighted-code"><code class="language-python">other<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> start<span class="syntax-punctuation">,</span>end <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>other<span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    other<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>other<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>other<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">.3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1e-6</span></code></pre>
 <p><strong>Expected:</strong> endpoint differs from.3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with endpoint differs from.3.</p>
 <h3 id="exercise-6-handle-an-empty-shard">Exercise 6: Handle an empty shard<a class="heading-anchor" href="#exercise-6-handle-an-empty-shard" aria-label="Link to this section">#</a></h3>
 <p>The question is: Combine an empty shard and the four real gradients using sums and counts; reject a globally empty batch.</p>
 <p>A local empty shard need not invalidate a nonempty global batch, but mean(empty) is undefined. Carrying sums and counts avoids producing a NaN local mean.</p>
-<pre><code class="language-python">parts=[np.array([],dtype=float),g]
-count=sum(len(p) for p in parts)
-assert count==4 and sum(p.sum() for p in parts)/count==5
-assert sum(len(p) for p in [np.array([])])==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">parts<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>g<span class="syntax-punctuation">]</span>
+count<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> count<span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> parts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>count<span class="syntax-operator">==</span><span class="syntax-number">5</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> empty shard contributes0; total remains5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with empty shard contributes0; total remains5.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

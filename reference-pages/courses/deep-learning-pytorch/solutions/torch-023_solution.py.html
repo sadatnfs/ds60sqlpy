@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,53 +161,53 @@
       <h1>Torch 023 Solution</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-023_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;torch-023: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span>import torch</span>
-<span>from torch import nn</span>
-<span>from torch.nn import functional as F</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Expose detachment</span>
-<span>    w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); disconnected=((w-2)**2).detach()</span>
-<span>    assert not disconnected.requires_grad</span>
-<span>    try: disconnected.backward()</span>
-<span>    except RuntimeError: pass</span>
-<span>    else: raise AssertionError(&#x27;detached loss backpropagated&#x27;)</span>
-<span> </span>
-<span>    # Exercise 2: Repair two exact updates</span>
-<span>    x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; optimizer=torch.optim.SGD([w],lr=.1); history=[]</span>
-<span>    for _ in range(2):</span>
-<span>        optimizer.zero_grad(set_to_none=True); loss=((w*x-y)**2).mean(); loss.backward(); assert w.grad is not None; optimizer.step(); history.append(w.item())</span>
-<span>    np.testing.assert_allclose(history,[28/15,448/225],atol=1e-12,rtol=0)</span>
-<span> </span>
-<span>    # Exercise 3: Inspect norm clipping</span>
-<span>    parameter=nn.Parameter(torch.zeros(2)); parameter.grad=torch.tensor([3.,4.])</span>
-<span>    before=torch.nn.utils.clip_grad_norm_([parameter],1.)</span>
-<span>    assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor([.6,.8]),atol=1e-6,rtol=0)</span>
-<span> </span>
-<span>    # Exercise 4: Apply the clipped update</span>
-<span>    torch.optim.SGD([parameter],lr=.1).step()</span>
-<span>    torch.testing.assert_close(parameter.detach(),torch.tensor([-.06,-.08]),atol=1e-6,rtol=0)</span>
-<span> </span>
-<span>    # Exercise 5: Reject nonfinite gradient norms</span>
-<span>    bad=nn.Parameter(torch.zeros(1)); bad.grad=torch.tensor([float(&#x27;inf&#x27;)])</span>
-<span>    try: torch.nn.utils.clip_grad_norm_([bad],1.,error_if_nonfinite=True)</span>
-<span>    except RuntimeError: pass</span>
-<span>    else: raise AssertionError(&#x27;nonfinite gradient accepted&#x27;)</span>
-<span> </span>
-<span>    # Exercise 6: Recompute post-update loss</span>
-<span>    after=((w*x-y)**2).mean().item(); assert 0&lt;=after&lt;56/675</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;torch-023: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Expose detachment</span></span>
+<span class="source-line">    w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> disconnected<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> disconnected<span class="syntax-operator">.</span>requires_grad</span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> disconnected<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">detached loss backpropagated</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Repair two exact updates</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">;</span> optimizer<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        optimizer<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> optimizer<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">28</span><span class="syntax-operator">/</span><span class="syntax-number">15</span><span class="syntax-punctuation">,</span><span class="syntax-number">448</span><span class="syntax-operator">/</span><span class="syntax-number">225</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Inspect norm clipping</span></span>
+<span class="source-line">    parameter<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> parameter<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    before<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>utils<span class="syntax-operator">.</span>clip_grad_norm_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>parameter<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> before<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>parameter<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Apply the clipped update</span></span>
+<span class="source-line">    torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>parameter<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>parameter<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">.06</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.08</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Reject nonfinite gradient norms</span></span>
+<span class="source-line">    bad<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> bad<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">inf</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>utils<span class="syntax-operator">.</span>clip_grad_norm_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>bad<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span>error_if_nonfinite<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nonfinite gradient accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Recompute post-update loss</span></span>
+<span class="source-line">    after<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>after<span class="syntax-operator">&lt;</span><span class="syntax-number">56</span><span class="syntax-operator">/</span><span class="syntax-number">675</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

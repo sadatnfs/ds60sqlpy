@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,65 +171,65 @@
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
 <p>The class braces enclose methods, and the main-method braces enclose statements. public makes the entry point accessible, static associates it with the class, void means it returns no value, and String[] declares an array of text arguments. System.out.println writes one line. A semicolon ends most statements. javac --release21 selects the source/API target; java-ea Main loads the compiled class from the classpath. Read the first compiler diagnostic before looking for runtime output.</p>
 <h3 id="exercise-1-print-a-first-result">Exercise 1: Print a first result<a class="heading-anchor" href="#exercise-1-print-a-first-result" aria-label="Link to this section">#</a></h3>
-<p>Task: Create a message variable containing Hello,Java and print it once.</p>
+<p>Task: Create a message variable containing Hello, Java and print it once.</p>
 <p>The variable holds a reference to a String value. println adds a line separator, while the assertion checks the content independently of terminal formatting.</p>
-<pre><code class="language-java">String message = &quot;Hello, Java&quot;;
-System.out.println(message);
-assert message.equals(&quot;Hello, Java&quot;);</code></pre>
+<pre class="highlighted-code"><code class="language-java">String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> one line Hello, Java.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with one line Hello, Java. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-evaluate-before-printing">Exercise 2: Evaluate before printing<a class="heading-anchor" href="#exercise-2-evaluate-before-printing" aria-label="Link to this section">#</a></h3>
 <p>Task: Compute2+3 into an int and build the string total=5.</p>
 <p>The numeric addition happens before concatenation because it is assigned first. Mixing strings and numbers in one expression can change which plus operators mean concatenation.</p>
-<pre><code class="language-java">int total = 2 + 3;
-String line = &quot;total=&quot; + total;
-assert total == 5;
-assert line.equals(&quot;total=5&quot;);</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+String line <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> total<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> total <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> line<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total=5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> integer5 and text total=5.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with integer5 and text total=5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-trace-sequential-state">Exercise 3: Trace sequential state<a class="heading-anchor" href="#exercise-3-trace-sequential-state" aria-label="Link to this section">#</a></h3>
 <p>Task: Start count1,increment it,then multiply it by3.</p>
 <p>Statements execute in order within this single thread. Reversing the last two operations would produce4, so the final value depends on the state transition sequence.</p>
-<pre><code class="language-java">int count = 1;
-count = count + 1;
-count = count * 3;
-assert count == 6;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">int</span> count <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+count <span class="syntax-operator">=</span> count <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+count <span class="syntax-operator">=</span> count <span class="syntax-operator">*</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> final count6.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with final count6. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-verify-assertion-mode">Exercise 4: Verify assertion mode<a class="heading-anchor" href="#exercise-4-verify-assertion-mode" aria-label="Link to this section">#</a></h3>
 <p>Task: Use an assertion side effect only to detect whether this teaching launch enabled assertions; fail explicitly otherwise.</p>
 <p>Production logic must never depend on assertion side effects. This diagnostic intentionally detects the launcher mode so missing-ea cannot silently bypass the reference checks.</p>
-<pre><code class="language-java">boolean enabled = false;
-assert enabled = true;
-if (!enabled) throw new IllegalStateException(&quot;Run with -ea&quot;);
-assert enabled;</code></pre>
-<p><strong>Expected:</strong> assertion-enabled flagtrue.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with assertion-enabled flagtrue. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> enabled <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> enabled <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>enabled<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> IllegalStateException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Run with -ea</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> enabled<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> assertion-enabled flag true.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with assertion-enabled flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-separate-runtime-failure">Exercise 5: Separate runtime failure<a class="heading-anchor" href="#exercise-5-separate-runtime-failure" aria-label="Link to this section">#</a></h3>
 <p>Task: Divide an integer by a variable containing0 and catch exactly ArithmeticException.</p>
 <p>The source is well typed and can compile, but the operation fails at runtime. Catching the specific exception distinguishes this expected fixture from unrelated failures.</p>
-<pre><code class="language-java">boolean dividedByZero = false;
-try { int zero = 0; int ignored = 10 / zero; }
-catch (ArithmeticException expected) { dividedByZero = true; }
-assert dividedByZero;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> dividedByZero <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">int</span> zero <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">int</span> ignored <span class="syntax-operator">=</span> <span class="syntax-number">10</span> <span class="syntax-operator">/</span> zero<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>ArithmeticException expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> dividedByZero <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> dividedByZero<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ArithmeticException observed;program continues after the catch.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with ArithmeticException observed;program continues after the catch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-observe-a-real-compiler-diagnostic">Exercise 6: Observe a real compiler diagnostic<a class="heading-anchor" href="#exercise-6-observe-a-real-compiler-diagnostic" aria-label="Link to this section">#</a></h3>
 <p>Task: Compile a small in-memory Broken class whose return statement lacks a semicolon; capture diagnostics without executing it.</p>
 <p>The compiler checks an intentionally invalid source and returns a structured diagnostic. No class is executed. The helper is a diagnostic demonstration; a beginner can reproduce the same missing-semicolon case with javac in a saved scratch file.</p>
-<pre><code class="language-java">var compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
-assert compiler != null : &quot;A JDK compiler is required&quot;;
-var diagnostics = new javax.tools.DiagnosticCollector&lt;javax.tools.JavaFileObject&gt;();
-var source = new javax.tools.SimpleJavaFileObject(java.net.URI.create(&quot;string:///Broken.java&quot;), javax.tools.JavaFileObject.Kind.SOURCE) {
-    public CharSequence getCharContent(boolean ignore) { return &quot;class Broken { int f() { return 1 } }&quot;; }
-};
-try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {
-    boolean compiled = compiler.getTask(null, files, diagnostics, List.of(&quot;-proc:none&quot;, &quot;--release&quot;, &quot;21&quot;), null, List.of(source)).call();
-    assert !compiled;
-    assert diagnostics.getDiagnostics().stream().anyMatch(d -&gt; d.getKind() == javax.tools.Diagnostic.Kind.ERROR);
-}</code></pre>
-<p><strong>Expected:</strong> compiler resultfalse and at least one ERROR diagnostic.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with compiler resultfalse and at least one ERROR diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> compiler <span class="syntax-operator">=</span> javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ToolProvider</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">getSystemJavaCompiler</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> compiler <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-keyword">null</span> <span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A JDK compiler is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> diagnostics <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">DiagnosticCollector</span><span class="syntax-operator">&lt;</span>javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">JavaFileObject</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> source <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">SimpleJavaFileObject</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">net</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">URI</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">create</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">string:///Broken.java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">JavaFileObject</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Kind</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">SOURCE</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">public</span> CharSequence <span class="syntax-function">getCharContent</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">boolean</span> ignore<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">class Broken { int f() { return 1 } }</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> files <span class="syntax-operator">=</span> compiler<span class="syntax-punctuation">.</span><span class="syntax-attribute">getStandardFileManager</span><span class="syntax-punctuation">(</span>diagnostics<span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">boolean</span> compiled <span class="syntax-operator">=</span> compiler<span class="syntax-punctuation">.</span><span class="syntax-attribute">getTask</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> files<span class="syntax-punctuation">,</span> diagnostics<span class="syntax-punctuation">,</span> List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">-proc:none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--release</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">21</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">call</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>compiled<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> diagnostics<span class="syntax-punctuation">.</span><span class="syntax-attribute">getDiagnostics</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">stream</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">anyMatch</span><span class="syntax-punctuation">(</span>d <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> d<span class="syntax-punctuation">.</span><span class="syntax-attribute">getKind</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> javax<span class="syntax-punctuation">.</span><span class="syntax-attribute">tools</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Diagnostic</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Kind</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ERROR</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> compiler result false and at least one ERROR diagnostic.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with compiler result false and at least one ERROR diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

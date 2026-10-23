@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,50 +161,50 @@
       <h1>Chapter 19</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_19.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.tree import DecisionTreeRegressor</span>
-<span>from sklearn.ensemble import RandomForestRegressor</span>
-<span> </span>
-<span>def split_geometry():</span>
-<span>    x=np.arange(6,dtype=float)[:,None];y=np.array([0.,0.,0.,6.,6.,6.])</span>
-<span>    stump=DecisionTreeRegressor(max_depth=1,random_state=19).fit(x,y)</span>
-<span>    assert np.allclose(stump.predict(x),y)</span>
-<span>    assert np.isclose(stump.tree_.threshold[0],2.5)</span>
-<span>    print(&quot;Stump split:&quot;,stump.tree_.threshold[0],&quot;training MSE:&quot;,np.mean((stump.predict(x)-y)**2))</span>
-<span> </span>
-<span>def forest_and_variance():</span>
-<span>    x=np.linspace(0,1,80)[:,None];y=np.where(x[:,0]&lt;.5,0.,2.)</span>
-<span>    forest=RandomForestRegressor(n_estimators=40,max_depth=3,random_state=19,n_jobs=1).fit(x,y)</span>
-<span>    predictions=forest.predict([[.1],[.9]])</span>
-<span>    assert np.allclose(predictions,[0.,2.])</span>
-<span>    rho,sigma2=.3,4.</span>
-<span>    variance=lambda b:sigma2*(rho+(1-rho)/b)</span>
-<span>    assert variance(100)&lt;variance(10) and variance(100)&gt;rho*sigma2</span>
-<span>    print(&quot;Forest predictions:&quot;,predictions,&quot;ensemble variance B10/B100:&quot;,variance(10),variance(100))</span>
-<span> </span>
-<span>def boosting_update():</span>
-<span>    x=np.arange(6,dtype=float)[:,None];y=np.array([0.,0.,0.,6.,6.,6.])</span>
-<span>    current=np.full(len(y),y.mean());residual=y-current</span>
-<span>    tree=DecisionTreeRegressor(max_depth=1,random_state=19).fit(x,residual)</span>
-<span>    updated=current+.5*tree.predict(x)</span>
-<span>    before=np.mean((y-current)**2);after=np.mean((y-updated)**2)</span>
-<span>    assert before==9 and after==2.25</span>
-<span>    print(&quot;One half-step boosting MSE:&quot;,before,&quot;to&quot;,after)</span>
-<span> </span>
-<span>def second_order_leaf():</span>
-<span>    g=np.array([-2.,-1.]);h=np.ones(2);penalty=1.</span>
-<span>    weight=-g.sum()/(h.sum()+penalty)</span>
-<span>    objective=lambda w:g.sum()*w+.5*(h.sum()+penalty)*w*w</span>
-<span>    assert weight==1 and objective(weight)&lt;objective(0)</span>
-<span>    assert np.isclose(g.sum()+(h.sum()+penalty)*weight,0)</span>
-<span>    print(&quot;Regularized Newton leaf weight:&quot;,weight)</span>
-<span> </span>
-<span>def main():</span>
-<span>    split_geometry();forest_and_variance();boosting_update();second_order_leaf()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeRegressor</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestRegressor</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">split_geometry</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    stump<span class="syntax-operator">=</span>DecisionTreeRegressor<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">19</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>stump<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>stump<span class="syntax-operator">.</span>tree_<span class="syntax-operator">.</span>threshold<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stump split:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>stump<span class="syntax-operator">.</span>tree_<span class="syntax-operator">.</span>threshold<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">training MSE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>stump<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">forest_and_variance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    forest<span class="syntax-operator">=</span>RandomForestRegressor<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">40</span><span class="syntax-punctuation">,</span>max_depth<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">19</span><span class="syntax-punctuation">,</span>n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    predictions<span class="syntax-operator">=</span>forest<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    rho<span class="syntax-punctuation">,</span>sigma2<span class="syntax-operator">=</span><span class="syntax-number">.3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span></span>
+<span class="source-line">    variance<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> b<span class="syntax-punctuation">:</span>sigma2<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>rho<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>rho<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> variance<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>variance<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> variance<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span>rho<span class="syntax-operator">*</span>sigma2</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Forest predictions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>predictions<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ensemble variance B10/B100:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>variance<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>variance<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">boosting_update</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    current<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>y<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>residual<span class="syntax-operator">=</span>y<span class="syntax-operator">-</span>current</span>
+<span class="source-line">    tree<span class="syntax-operator">=</span>DecisionTreeRegressor<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">19</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>residual<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    updated<span class="syntax-operator">=</span>current<span class="syntax-operator">+</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span>tree<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    before<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>current<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>after<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>updated<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> before<span class="syntax-operator">==</span><span class="syntax-number">9</span> <span class="syntax-operator">and</span> after<span class="syntax-operator">==</span><span class="syntax-number">2.25</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">One half-step boosting MSE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>before<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">to</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>after<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">second_order_leaf</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    g<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>h<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>penalty<span class="syntax-operator">=</span><span class="syntax-number">1.</span></span>
+<span class="source-line">    weight<span class="syntax-operator">=</span><span class="syntax-operator">-</span>g<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>h<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>penalty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    objective<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> w<span class="syntax-punctuation">:</span>g<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>w<span class="syntax-operator">+</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>h<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>penalty<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>w<span class="syntax-operator">*</span>w</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> weight<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> objective<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>objective<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>g<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span>h<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>penalty<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>weight<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Regularized Newton leaf weight:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weight<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    split_geometry<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>forest_and_variance<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>boosting_update<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>second_order_leaf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -187,13 +187,13 @@ Turn the sanitized proposal into a go/no-go review record with explicit evidence
 
 **Expected result/shape:** For spark-030 Exercise 6, A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.
 
-**Verify:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram orsyntax alone.
+**Verify:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.
 
 **Progressive hint:** A checked configuration is useful evidence but is not a completed remote run.
 
 ## Common pitfalls
 
-Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives orcaptured closures. Do not assume a Scala binary suffix can be changed independently of the selectedSpark artifacts. Do not callConnect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
+Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selectedSpark artifacts. Do not callConnect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
 
 ## Self-check
 

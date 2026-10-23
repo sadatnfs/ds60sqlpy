@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-033`
 
 ## Learning objectives
 
-Explain port, adapter, pure core, dependency inversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Compute3items at125cents andcheckzero/negativequantity policy. The final exercise transfers the mechanism to detect arithmetic overflow without an event.
+Explain port, adapter, pure core, dependency inversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Compute 3 items at 125 cents and check the zero/negative quantity policy. The final exercise transfers the mechanism to detect arithmetic overflow without an event.
 
 ## Purpose and mental model
 
-Application design separates domain decisions from the mechanisms that supply data,time orside effects. A pure pricing calculation can be tested without a database,network orsystemclock. A service composes that calculation with repository andclock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on thebehavior it needs rather than on a concrete infrastructure class.
+Application design separates domain decisions from the mechanisms that supply data,time or side effects. A pure pricing calculation can be tested without a database,network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
 
-This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies thetimestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result orrecording anevent. A failing repository propagates its failure ratherthan returning a fabricatedzero price. Thefake-backed tests establish service logic andcall boundaries,not live database ornetwork acceptance.
+This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies the timestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries,not live database or network acceptance.
 
 ## Vocabulary and concepts
 
@@ -26,7 +26,7 @@ This lesson builds a small quote service. A catalog port supplies integer-cent p
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-034/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Define aCatalog interface returningOptionalLong anddeclaringIOException for anoperational read failure. Inject aSupplier<Instant> andConsumer<String> through theconstructor. Keep thepure total calculation separate anduseMath.multiplyExact foroverflow. TheQuote record carries item,quantity,total andtime. Audit only afterall requiredvalidation andcalculation succeed.
+Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate anduseMath.multiplyExact for overflow. TheQuote record carries item,quantity,total and time. Audit only after all required validation and calculation succeed.
 
 ## Worked example / walkthrough
 
 ### Example A: Test the pure calculation
 
-The core arithmetic needsno repository orclock. Isolating it makes domain boundaries andoverflow behavior easy tocheck.
+The core arithmetic needsno repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
 
 ```java
 import java.util.*;
@@ -67,11 +67,11 @@ public class Main {
 
 ```
 
-**Expected:** 375cents;nonpositivequantityrejected.
+**Expected:** 375 cents; nonpositive quantity rejected.
 
 ### Example B: Compose a deterministic service
 
-A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person orservice.
+A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person or service.
 
 ```java
 import java.util.*;
@@ -104,29 +104,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Test the pure calculation.** Compute3items at125cents andcheckzero/negativequantity policy.
-   **Expected:** 375cents;nonpositivequantityrejected.
-   **Verify:** Compare your assertion values or captured diagnostic with 375cents;nonpositivequantityrejected.
+1. **Test the pure calculation.** Compute 3 items at 125 cents and check the zero/negative quantity policy.
+   **Expected:** 375 cents; nonpositive quantity rejected.
+   **Verify:** Compare your assertion values or captured diagnostic with 375 cents; nonpositive quantity rejected.
 
-2. **Compose a deterministic service.** Inject a fixedcatalog,clock andauditlist,andrequest twoitems.
+2. **Compose a deterministic service.** Inject a fixedcatalog,clock and audit list,and request twoitems.
    **Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.
    **Verify:** Compare your assertion values or captured diagnostic with total250,time2026-01-01T00:00:00Z,oneauditevent.
 
 3. **Reject an unknown catalog item.** Requestmissing andinspecttheauditlist.
-   **Expected:** NoSuchElementException;noadditionalaudit.
-   **Verify:** Compare your assertion values or captured diagnostic with NoSuchElementException;noadditionalaudit.
+   **Expected:** NoSuchElementException;no additional audit.
+   **Verify:** Compare your assertion values or captured diagnostic with NoSuchElementException;no additional audit.
 
-4. **Propagate an infrastructure failure.** Inject aCatalog thatthrowsIOException.
-   **Expected:** samefailuretype;nosuccessaudit.
-   **Verify:** Compare your assertion values or captured diagnostic with samefailuretype;nosuccessaudit.
+4. **Propagate an infrastructure failure.** Inject a Catalog thatthrowsIOException.
+   **Expected:** same failure type;no success audit.
+   **Verify:** Compare your assertion values or captured diagnostic with same failure type;no success audit.
 
-5. **Prove invalid quantity fails before a repository call.** Use a countingcatalog andrequestnegativequantity.
+5. **Prove invalid quantity fails before a repository call.** Use a countingcatalog and request negative quantity.
    **Expected:** repositorycallcount0.
    **Verify:** Compare your assertion values or captured diagnostic with repositorycallcount0.
 
 6. **Detect arithmetic overflow without an event.** UseLong.MAX_VALUEunitprice andquantity2.
-   **Expected:** ArithmeticException;auditsinkunused.
-   **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException;auditsinkunused.
+   **Expected:** ArithmeticException;audit sink unused.
+   **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException;audit sink unused.
 
 ## Common pitfalls and diagnosis
 

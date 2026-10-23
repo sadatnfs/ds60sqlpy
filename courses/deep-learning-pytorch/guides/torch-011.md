@@ -127,7 +127,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** three zero outputs; weight unchanged.
    **Verify:** Save the assertion results for exercise 2, including three zero outputs; weight unchanged.
 
-3. **Run one explicit loop step.** Use SGD.1 and mean squared error, clearing gradients before backward.
+3. **Run one explicit loop step.** Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
    **Expected:** weight \(\frac{28}{15}\); buffer still 0.
    **Verify:** Save the assertion results for exercise 3, including weight \(\frac{28}{15}\); buffer still 0.
 

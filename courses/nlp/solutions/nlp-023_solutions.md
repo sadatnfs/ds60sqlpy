@@ -6,7 +6,7 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision.
 
-**Expected:** Only policy version2 for ops; unknown role and expired time30 yield no records.
+**Expected:** Only policy version 2 for ops; unknown role and expired time30 yield no records.
 
 ## Exercise 2: Fingerprint content reproducibly
 

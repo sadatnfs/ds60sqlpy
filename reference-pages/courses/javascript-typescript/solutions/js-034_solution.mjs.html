@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,103 +161,103 @@
       <h1>Js 034 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-034_solution.mjs</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span>import { performance, monitorEventLoopDelay } from &#x27;node:perf_hooks&#x27;;</span>
-<span>import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;</span>
-<span> </span>
-<span>function sumTo(length) {</span>
-<span>  let total = 0;</span>
-<span>  for (let value = 1; value &lt;= length; value += 1) total += value;</span>
-<span>  return total;</span>
-<span>}</span>
-<span> </span>
-<span>export async function verify() {</span>
-<span>  // Exercise 1: Measure only a checked computation</span>
-<span>  {</span>
-<span>    const start = performance.now();</span>
-<span>    const result = sumTo(10000);</span>
-<span>    const elapsed = performance.now() - start;</span>
-<span>    assert.equal(result, 50005000);</span>
-<span>    assert.ok(Number.isFinite(elapsed) &amp;&amp; elapsed &gt;= 0);</span>
-<span>    console.log(JSON.stringify({ operation: &#x27;sumTo10000&#x27;, elapsedMs: elapsed }));</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Preserve repeated samples and summarize them</span>
-<span>  {</span>
-<span>    const samples = [];</span>
-<span>    for (let trial = 0; trial &lt; 5; trial += 1) {</span>
-<span>      const start = performance.now();</span>
-<span>      assert.equal(sumTo(1000), 500500);</span>
-<span>      samples.push(performance.now() - start);</span>
-<span>    }</span>
-<span>    const sorted = [...samples].sort((a, b) =&gt; a - b);</span>
-<span>    const median = sorted[2];</span>
-<span>    assert.equal(samples.length, 5);</span>
-<span>    assert.ok(samples.every(value =&gt; Number.isFinite(value) &amp;&amp; value &gt;= 0));</span>
-<span>    assert.ok(median &gt;= sorted[0] &amp;&amp; median &lt;= sorted[4]);</span>
-<span>    console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Release owned references without claiming immediate RSS change</span>
-<span>  {</span>
-<span>    const cache = new Map();</span>
-<span>    for (let index = 0; index &lt; 100; index += 1) cache.set(index, { payload: &#x27;x&#x27;.repeat(100) });</span>
-<span>    assert.equal(cache.size, 100);</span>
-<span>    const before = process.memoryUsage();</span>
-<span>    cache.clear();</span>
-<span>    assert.equal(cache.size, 0);</span>
-<span>    const after = process.memoryUsage();</span>
-<span>    assert.ok(before.heapUsed &gt; 0 &amp;&amp; after.rss &gt; 0);</span>
-<span>    console.log(JSON.stringify({ before, after, retainedEntries: cache.size }));</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Use and clear only owned performance entries</span>
-<span>  {</span>
-<span>    const prefix = &#x27;course-js034-owned&#x27;;</span>
-<span>    try {</span>
-<span>      performance.mark(prefix + &#x27;-start&#x27;);</span>
-<span>      assert.equal(sumTo(10), 55);</span>
-<span>      performance.mark(prefix + &#x27;-end&#x27;);</span>
-<span>      performance.measure(prefix, prefix + &#x27;-start&#x27;, prefix + &#x27;-end&#x27;);</span>
-<span>      const entries = performance.getEntriesByName(prefix, &#x27;measure&#x27;);</span>
-<span>      assert.equal(entries.length, 1);</span>
-<span>      assert.ok(entries[0].duration &gt;= 0);</span>
-<span>    } finally {</span>
-<span>      performance.clearMarks(prefix + &#x27;-start&#x27;);</span>
-<span>      performance.clearMarks(prefix + &#x27;-end&#x27;);</span>
-<span>      performance.clearMeasures(prefix);</span>
-<span>    }</span>
-<span>    assert.equal(performance.getEntriesByName(prefix).length, 0);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Inspect event-loop utilization as a bounded observation</span>
-<span>  {</span>
-<span>    const baseline = performance.eventLoopUtilization();</span>
-<span>    await delay(5);</span>
-<span>    const observed = performance.eventLoopUtilization(baseline);</span>
-<span>    assert.ok(Number.isFinite(observed.utilization));</span>
-<span>    assert.ok(observed.utilization &gt;= 0 &amp;&amp; observed.utilization &lt;= 1);</span>
-<span>    console.log(JSON.stringify({ eventLoop: observed }));</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Enable and disable a real delay monitor</span>
-<span>  {</span>
-<span>    const histogram = monitorEventLoopDelay({ resolution: 10 });</span>
-<span>    histogram.enable();</span>
-<span>    try {</span>
-<span>      await delay(35);</span>
-<span>      const count = Number(histogram.count);</span>
-<span>      assert.ok(Number.isInteger(count) &amp;&amp; count &gt;= 0);</span>
-<span>      if (count &gt; 0) assert.ok(Number.isFinite(histogram.mean));</span>
-<span>      console.log(JSON.stringify({ samples: count, meanMs: count &gt; 0 ? histogram.mean / 1e6 : null }));</span>
-<span>    } finally { histogram.disable(); }</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> performance<span class="syntax-punctuation">,</span> monitorEventLoopDelay <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:perf_hooks&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> setTimeout <span class="syntax-keyword">as</span> delay <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:timers/promises&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">function</span> sumTo<span class="syntax-punctuation">(</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">let</span> total <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> value <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> value <span class="syntax-operator">&lt;=</span> length<span class="syntax-punctuation">;</span> value <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> total <span class="syntax-operator">+=</span> value<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> total<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Measure only a checked computation</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> start <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> sumTo<span class="syntax-punctuation">(</span><span class="syntax-number">10000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> elapsed <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> start<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-number">50005000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>elapsed<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> elapsed <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> operation<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;sumTo10000&#x27;</span><span class="syntax-punctuation">,</span> elapsedMs<span class="syntax-operator">:</span> elapsed <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Preserve repeated samples and summarize them</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> samples <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> trial <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> trial <span class="syntax-operator">&lt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span> trial <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">const</span> start <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sumTo<span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      samples<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>performance<span class="syntax-punctuation">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> start<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> sorted <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">...</span>samples<span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> median <span class="syntax-operator">=</span> sorted<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">.</span>every<span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=&gt;</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> value <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>median <span class="syntax-operator">&gt;=</span> sorted<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;&amp;</span> median <span class="syntax-operator">&lt;=</span> sorted<span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> samplesMs<span class="syntax-operator">:</span> samples<span class="syntax-punctuation">,</span> medianMs<span class="syntax-operator">:</span> median <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Release owned references without claiming immediate RSS change</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> cache <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Map</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> cache<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> payload<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;x&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>cache<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> before <span class="syntax-operator">=</span> process<span class="syntax-punctuation">.</span>memoryUsage<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    cache<span class="syntax-punctuation">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>cache<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> after <span class="syntax-operator">=</span> process<span class="syntax-punctuation">.</span>memoryUsage<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>before<span class="syntax-punctuation">.</span>heapUsed <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> after<span class="syntax-punctuation">.</span>rss <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> before<span class="syntax-punctuation">,</span> after<span class="syntax-punctuation">,</span> retainedEntries<span class="syntax-operator">:</span> cache<span class="syntax-punctuation">.</span>size <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Use and clear only owned performance entries</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> prefix <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;course-js034-owned&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>mark<span class="syntax-punctuation">(</span>prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-start&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sumTo<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">55</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>mark<span class="syntax-punctuation">(</span>prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-end&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>measure<span class="syntax-punctuation">(</span>prefix<span class="syntax-punctuation">,</span> prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-start&#x27;</span><span class="syntax-punctuation">,</span> prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-end&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">const</span> entries <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>getEntriesByName<span class="syntax-punctuation">(</span>prefix<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;measure&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>entries<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>entries<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>duration <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>clearMarks<span class="syntax-punctuation">(</span>prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-start&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>clearMarks<span class="syntax-punctuation">(</span>prefix <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;-end&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      performance<span class="syntax-punctuation">.</span>clearMeasures<span class="syntax-punctuation">(</span>prefix<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>performance<span class="syntax-punctuation">.</span>getEntriesByName<span class="syntax-punctuation">(</span>prefix<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Inspect event-loop utilization as a bounded observation</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> baseline <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>eventLoopUtilization<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> observed <span class="syntax-operator">=</span> performance<span class="syntax-punctuation">.</span>eventLoopUtilization<span class="syntax-punctuation">(</span>baseline<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">.</span>utilization<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">.</span>utilization <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> observed<span class="syntax-punctuation">.</span>utilization <span class="syntax-operator">&lt;=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> eventLoop<span class="syntax-operator">:</span> observed <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Enable and disable a real delay monitor</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> histogram <span class="syntax-operator">=</span> monitorEventLoopDelay<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> resolution<span class="syntax-operator">:</span> <span class="syntax-number">10</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    histogram<span class="syntax-punctuation">.</span>enable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">await</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">35</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">const</span> count <span class="syntax-operator">=</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">(</span>histogram<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> count <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>count <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>histogram<span class="syntax-punctuation">.</span>mean<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> samples<span class="syntax-operator">:</span> count<span class="syntax-punctuation">,</span> meanMs<span class="syntax-operator">:</span> count <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">?</span> histogram<span class="syntax-punctuation">.</span>mean <span class="syntax-operator">/</span> <span class="syntax-number">1e6</span> <span class="syntax-operator">:</span> <span class="syntax-keyword">null</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> histogram<span class="syntax-punctuation">.</span>disable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

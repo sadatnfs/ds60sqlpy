@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -144,30 +190,30 @@
 <p><strong>Verify:</strong> Record raw and normalized hashes for all three documents and assert the duplicate normalized pair is grouped before partitioning.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import hashlib
-import unicodedata
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> unicodedata
 
 
-def encode_record(text, policy=&quot;none&quot;):
-    if not isinstance(text, str):
-        raise TypeError(&quot;text must be a string&quot;)
-    if policy not in {&quot;none&quot;, &quot;NFC&quot;}:
-        raise ValueError(&quot;policy must be none or NFC&quot;)
-    normalized = text if policy == &quot;none&quot; else unicodedata.normalize(&quot;NFC&quot;, text)
-    payload = normalized.encode(&quot;utf-8&quot;)
-    return {
-        &quot;text&quot;: normalized,
-        &quot;payload&quot;: payload,
-        &quot;code_points&quot;: len(normalized),
-        &quot;bytes&quot;: len(payload),
-        &quot;sha256&quot;: hashlib.sha256(payload).hexdigest(),
-        &quot;policy&quot;: policy,
-    }
+<span class="syntax-keyword">def</span> <span class="syntax-function">encode_record</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> policy<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">text must be a string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> policy <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">policy must be none or NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    normalized <span class="syntax-operator">=</span> text <span class="syntax-keyword">if</span> policy <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">else</span> unicodedata<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span>
+    payload <span class="syntax-operator">=</span> normalized<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> normalized<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">payload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> payload<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">code_points</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> policy<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
 
-def decode_utf8(payload):
-    return bytes(payload).decode(&quot;utf-8&quot;)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">decode_utf8</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without the examples, explain why len(text), len(text.encode(&quot;utf-8&quot;)) and token count can all differ. Then choose a fresh combining-character fixture and state which identity policy your duplicate check uses.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-48.html#learner">learner SQL</a> · <a href="sql-48.html#solution-1">solution reasoning</a> · <a href="sql-48.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-48 — Project1 Ecommerce Part3</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day48_project1_ecommerce_part3.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day48_project1_ecommerce_part3.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day48_project1_ecommerce_part3.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,38 +466,38 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day48_project1_ecommerce_part3.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH items AS (
-  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id
-), pairs AS (
-  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together
-  FROM items a
-  JOIN items b ON a.order_id = b.order_id AND a.product_id &lt; b.product_id
-  GROUP BY a.product_id, b.product_id
-)
-SELECT p1.name AS product_a, p2.name AS product_b, together
-FROM pairs
-JOIN products p1 ON p1.product_id = pairs.p1
-JOIN products p2 ON p2.product_id = pairs.p2
-ORDER BY together DESC
-LIMIT 50;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> items <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> product_id <span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">,</span> product_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> pairs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p1<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p2<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> together
+  <span class="syntax-keyword">FROM</span> items a
+  <span class="syntax-keyword">JOIN</span> items b <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> p1<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_a<span class="syntax-punctuation">,</span> p2<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_b<span class="syntax-punctuation">,</span> together
+<span class="syntax-keyword">FROM</span> pairs
+<span class="syntax-keyword">JOIN</span> products p1 <span class="syntax-keyword">ON</span> p1<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p1
+<span class="syntax-keyword">JOIN</span> products p2 <span class="syntax-keyword">ON</span> p2<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p2
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> together <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>order_items</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>product_a</code>, <code>product_b</code>, and <code>together</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>order_id</code>, and <code>product_id</code>, capped at 50 rows with columns <code>order_id</code>, <code>product_id</code>, <code>p1</code>, <code>p2</code>, <code>together</code>, and <code>product_a</code> from <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH ev AS (
-  SELECT e.customer_id, e.event_time, coalesce(e.metadata-&gt;&gt;&#x27;campaign&#x27;,&#x27;none&#x27;) AS campaign
-  FROM events e
-), first_last AS (
-  SELECT customer_id,
-         (ARRAY_AGG(campaign ORDER BY event_time ASC))[1] AS first_touch,
-         (ARRAY_AGG(campaign ORDER BY event_time DESC))[1] AS last_touch
-  FROM ev
-  GROUP BY customer_id
-)
-SELECT first_touch, last_touch, COUNT(*)
-FROM first_last
-GROUP BY first_touch, last_touch
-ORDER BY COUNT(*) DESC
-LIMIT 50;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span> events e
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> first_last <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> first_touch<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> last_touch
+  <span class="syntax-keyword">FROM</span> ev
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> first_touch<span class="syntax-punctuation">,</span> last_touch<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> first_last
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> first_touch<span class="syntax-punctuation">,</span> last_touch
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>events</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>first_touch</code>, and <code>last_touch</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>customer_id</code>, capped at 50 rows with columns <code>customer_id</code>, <code>event_time</code>, <code>campaign</code>, <code>first_touch</code>, and <code>last_touch</code> from <code>events</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -519,7 +567,7 @@ LIMIT 50;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-48 — Project1 Ecommerce Part3.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-48 — Project1 Ecommerce Part3.
 
 I have completed the direct catalog prerequisite: `sql-47`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md
@@ -577,99 +625,99 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 48: Project 1 - E-commerce Analytics (Part 3)</span>
-<span>-- BEGINNER WORKFLOW — sql-48: Project1 Ecommerce Part3</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-48/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: order_items, products, events.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Topics: Product affinity and attribution analysis</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Product affinity (market-basket pairs by order)</span>
-<span>WITH items AS (</span>
-<span>  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id</span>
-<span>), pairs AS (</span>
-<span>  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together</span>
-<span>  FROM items a</span>
-<span>  JOIN items b ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
-<span>  GROUP BY a.product_id, b.product_id</span>
-<span>)</span>
-<span>SELECT p1.name AS product_a, p2.name AS product_b, together</span>
-<span>FROM pairs</span>
-<span>JOIN products p1 ON p1.product_id = pairs.p1</span>
-<span>JOIN products p2 ON p2.product_id = pairs.p2</span>
-<span>ORDER BY together DESC</span>
-<span>LIMIT 50;</span>
-<span> </span>
-<span>-- Attribution: first touch vs last touch (by event campaign)</span>
-<span>WITH ev AS (</span>
-<span>  SELECT e.customer_id, e.event_time, coalesce(e.metadata-&gt;&gt;&#x27;campaign&#x27;,&#x27;none&#x27;) AS campaign</span>
-<span>  FROM events e</span>
-<span>), first_last AS (</span>
-<span>  SELECT customer_id,</span>
-<span>         (ARRAY_AGG(campaign ORDER BY event_time ASC))[1] AS first_touch,</span>
-<span>         (ARRAY_AGG(campaign ORDER BY event_time DESC))[1] AS last_touch</span>
-<span>  FROM ev</span>
-<span>  GROUP BY customer_id</span>
-<span>)</span>
-<span>SELECT first_touch, last_touch, COUNT(*)</span>
-<span>FROM first_last</span>
-<span>GROUP BY first_touch, last_touch</span>
-<span>ORDER BY COUNT(*) DESC</span>
-<span>LIMIT 50;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Compute assisted conversions: campaigns that appear before purchase within 7 days.</span>
-<span>--    Inputs: For sql-48 Exercise 1, read from `events`. Build the answer toward `campaign`, `assisted_conversions`, and `assisted_customers`; keep `campaign` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 1, expected output: one row per campaign. The final columns are `campaign`, `assisted_conversions`, and `assisted_customers`. The final order is `assisted_conversions DESC, campaign`.</span>
-<span>--    Verify: For sql-48 Exercise 1, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `assisted_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `assisted_customers` for the existing `campaign` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 1, run `purchases`, and `qualifying_touches` one at a time. Record each CTE&#x27;s row count and `campaign` uniqueness before the next stage uses it.</span>
-<span>-- 2. Build multi-touch attribution with fractional credit using window functions.</span>
-<span>--    Inputs: For sql-48 Exercise 2, read from `events`. Build the answer toward `campaign`, `attributed_conversions`, and `touched_conversions`; keep `campaign` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 2, expected output: one row per `campaign`. The final columns are `campaign`, `attributed_conversions`, and `touched_conversions`. The final order is `attributed_conversions DESC, campaign`.</span>
-<span>--    Verify: For sql-48 Exercise 2, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `attributed_conversions`, and `touched_conversions` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `attributed_conversions`, and `touched_conversions` for the existing `campaign` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 2, run `purchases`, `campaign_touches`, and `credited` one at a time. Record each CTE&#x27;s row count and `campaign` uniqueness before the next stage uses it.</span>
-<span>-- 3. Prediction: explain how repeated touches from the same campaign affect</span>
-<span>--    touch-level versus campaign-level equal-credit attribution.</span>
-<span>--    Inputs: For sql-48 Exercise 3, read from `events`. Build the answer toward `purchase_id`, `campaign`, and `campaign_credit`; keep `purchase_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 3, expected output: one row per `purchase_id`. The final columns are `purchase_id`, `campaign`, and `campaign_credit`. The final order is `purchase_id, campaign`.</span>
-<span>--    Verify: For sql-48 Exercise 3, choose one complete partition from `events`; hand-calculate its first, middle, and final window values for `campaign`, and `campaign_credit`, then verify output keys remain `purchase_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 3, run `purchases`, and `eligible_campaigns` one at a time. Record each CTE&#x27;s row count and `purchase_id` uniqueness before the next stage uses it.</span>
-<span>-- 4. Construction: calculate product-pair support, confidence in both</span>
-<span>--    directions, and lift using distinct order baskets.</span>
-<span>--    Inputs: For sql-48 Exercise 4, read from `order_items`. Build the answer toward `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`; keep `order_item_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 4, expected output: at most 20 rows keyed by `order_item_id`. The final columns are `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`. The final order is `lift DESC, product_a, product_b`.</span>
-<span>--    Verify: For sql-48 Exercise 4, assert no more than 20 rows, no duplicate `order_item_id`, and no adjacent pair that violates `lift DESC, product_a, product_b`. Rejoin the returned keys to `order_items` to confirm `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, product_a, product_b`.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 4, run `baskets`, `order_count`, `product_counts`, and `pairs` one at a time. Record each CTE&#x27;s row count and `order_item_id` uniqueness before the next stage uses it.</span>
-<span>-- 5. Debugging: prevent one event touch from being credited to several purchases</span>
-<span>--    when the intended model assigns it only to the next purchase.</span>
-<span>--    Inputs: For sql-48 Exercise 5, read from `events`, and `orders`. Build the answer toward `touch_id`, `campaign`, `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 5, expected output: one row per `order_id`. The final columns are `touch_id`, `campaign`, `order_id`, and `order_date`. The final order is `e.event_id`.</span>
-<span>--    Verify: For sql-48 Exercise 5, project `order_id` plus the raw source columns from `events`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `touch_id`, `campaign`, `order_id`, and `order_date` values match those staged rows without unintended fanout or loss. Add one row for which `(e.metadata ? &#x27;campaign&#x27;)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 5, start with the first relation in `events`, and `orders`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.</span>
-<span>-- 6. Edge case: place unattributed purchases in an explicit &#x27;(direct)&#x27; bucket</span>
-<span>--    so total attributed credit reconciles to total eligible purchases.</span>
-<span>--    Inputs: For sql-48 Exercise 6, read from `orders`, and `events`. Build the answer toward `attribution_bucket`, and `purchases`; keep `attribution_bucket`, and `purchases` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-48 Exercise 6, expected output: one row per `attribution_bucket`, and `purchases`. The final columns are `attribution_bucket`, and `purchases`. The final order is `purchases DESC, attribution_bucket`.</span>
-<span>--    Verify: For sql-48 Exercise 6, independently aggregate `orders`, and `events` by `attribution_bucket`, and `purchases`; require one output row for every distinct `attribution_bucket`, and `purchases` tuple and compare `row_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `attribution_bucket`, and `purchases` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-48 Exercise 6, start with the first relation in `orders`, and `events`; after each join, record total rows and distinct `attribution_bucket`, and `purchases` so the exact fanout or loss is visible.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 48: Project 1 - E-commerce Analytics (Part 3)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-48: Project1 Ecommerce Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-48/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: order_items, products, events.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Topics: Product affinity and attribution analysis</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Product affinity (market-basket pairs by order)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> items <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> product_id <span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">,</span> product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> pairs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p1<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p2<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> together</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> items a</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> items b <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p1<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_a<span class="syntax-punctuation">,</span> p2<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_b<span class="syntax-punctuation">,</span> together</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pairs</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p1 <span class="syntax-keyword">ON</span> p1<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p1</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p2 <span class="syntax-keyword">ON</span> p2<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p2</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> together <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Attribution: first touch vs last touch (by event campaign)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> first_last <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> first_touch<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> last_touch</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> ev</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> first_touch<span class="syntax-punctuation">,</span> last_touch<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> first_last</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> first_touch<span class="syntax-punctuation">,</span> last_touch</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Compute assisted conversions: campaigns that appear before purchase within 7 days.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 1, read from `events`. Build the answer toward `campaign`, `assisted_conversions`, and `assisted_customers`; keep `campaign` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 1, expected output: one row per campaign. The final columns are `campaign`, `assisted_conversions`, and `assisted_customers`. The final order is `assisted_conversions DESC, campaign`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 1, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `assisted_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `assisted_customers` for the existing `campaign` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 1, run `purchases`, and `qualifying_touches` one at a time. Record each CTE&#x27;s row count and `campaign` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Build multi-touch attribution with fractional credit using window functions.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 2, read from `events`. Build the answer toward `campaign`, `attributed_conversions`, and `touched_conversions`; keep `campaign` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 2, expected output: one row per `campaign`. The final columns are `campaign`, `attributed_conversions`, and `touched_conversions`. The final order is `attributed_conversions DESC, campaign`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 2, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `attributed_conversions`, and `touched_conversions` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `attributed_conversions`, and `touched_conversions` for the existing `campaign` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 2, run `purchases`, `campaign_touches`, and `credited` one at a time. Record each CTE&#x27;s row count and `campaign` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: explain how repeated touches from the same campaign affect</span></span>
+<span class="source-line"><span class="syntax-comment">--    touch-level versus campaign-level equal-credit attribution.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 3, read from `events`. Build the answer toward `purchase_id`, `campaign`, and `campaign_credit`; keep `purchase_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 3, expected output: one row per `purchase_id`. The final columns are `purchase_id`, `campaign`, and `campaign_credit`. The final order is `purchase_id, campaign`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 3, choose one complete partition from `events`; hand-calculate its first, middle, and final window values for `campaign`, and `campaign_credit`, then verify output keys remain `purchase_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 3, run `purchases`, and `eligible_campaigns` one at a time. Record each CTE&#x27;s row count and `purchase_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: calculate product-pair support, confidence in both</span></span>
+<span class="source-line"><span class="syntax-comment">--    directions, and lift using distinct order baskets.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 4, read from `order_items`. Build the answer toward `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`; keep `order_item_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 4, expected output: at most 20 rows keyed by `order_item_id`. The final columns are `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`. The final order is `lift DESC, product_a, product_b`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 4, assert no more than 20 rows, no duplicate `order_item_id`, and no adjacent pair that violates `lift DESC, product_a, product_b`. Rejoin the returned keys to `order_items` to confirm `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, product_a, product_b`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 4, run `baskets`, `order_count`, `product_counts`, and `pairs` one at a time. Record each CTE&#x27;s row count and `order_item_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: prevent one event touch from being credited to several purchases</span></span>
+<span class="source-line"><span class="syntax-comment">--    when the intended model assigns it only to the next purchase.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 5, read from `events`, and `orders`. Build the answer toward `touch_id`, `campaign`, `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 5, expected output: one row per `order_id`. The final columns are `touch_id`, `campaign`, `order_id`, and `order_date`. The final order is `e.event_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 5, project `order_id` plus the raw source columns from `events`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `touch_id`, `campaign`, `order_id`, and `order_date` values match those staged rows without unintended fanout or loss. Add one row for which `(e.metadata ? &#x27;campaign&#x27;)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 5, start with the first relation in `events`, and `orders`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: place unattributed purchases in an explicit &#x27;(direct)&#x27; bucket</span></span>
+<span class="source-line"><span class="syntax-comment">--    so total attributed credit reconciles to total eligible purchases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-48 Exercise 6, read from `orders`, and `events`. Build the answer toward `attribution_bucket`, and `purchases`; keep `attribution_bucket`, and `purchases` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-48 Exercise 6, expected output: one row per `attribution_bucket`, and `purchases`. The final columns are `attribution_bucket`, and `purchases`. The final order is `purchases DESC, attribution_bucket`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-48 Exercise 6, independently aggregate `orders`, and `events` by `attribution_bucket`, and `purchases`; require one output row for every distinct `attribution_bucket`, and `purchases` tuple and compare `row_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `attribution_bucket`, and `purchases` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-48 Exercise 6, start with the first relation in `orders`, and `events`; after each join, record total rows and distinct `attribution_bucket`, and `purchases` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -705,10 +753,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-48-solutions-e-commerce-analytics-part-3">Day 48 Solutions — E-commerce Analytics, Part 3<a class="heading-anchor" href="#solution-1--day-48-solutions-e-commerce-analytics-part-3" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day48_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day48_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day48_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -724,31 +772,31 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The starter demonstrates market-basket pairs and first/last touch. The exercises ask for seven-day assisted conversions and equal-credit multi-touch attribution. The canonical file is <a href="sql-48.html#solution-2"><code>day48_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-assisted-conversions">Exercise 1 — Assisted conversions<a class="heading-anchor" href="#solution-1--exercise-1-assisted-conversions" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-WITH purchases AS (
-  SELECT event_id AS purchase_event_id,
-         customer_id,
-         event_time AS purchase_time
-  FROM events
-  WHERE event_type = &#x27;purchase&#x27;
-), qualifying_touches AS (
-  SELECT p.purchase_event_id,
-         p.customer_id,
-         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign
-  FROM purchases p
-  JOIN events t
-    ON t.customer_id = p.customer_id
-   AND t.event_type &lt;&gt; &#x27;purchase&#x27;
-   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;
-   AND t.event_time &lt; p.purchase_time
-)
-SELECT campaign,
-       COUNT(DISTINCT purchase_event_id) AS assisted_conversions,
-       COUNT(DISTINCT customer_id) AS assisted_customers
-FROM qualifying_touches
-GROUP BY campaign
-ORDER BY assisted_conversions DESC, campaign;</code></pre>
+<span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
+         customer_id<span class="syntax-punctuation">,</span>
+         event_time <span class="syntax-keyword">AS</span> purchase_time
+  <span class="syntax-keyword">FROM</span> events
+  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> qualifying_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
+         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span> purchases p
+  <span class="syntax-keyword">JOIN</span> events t
+    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_conversions<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_customers
+<span class="syntax-keyword">FROM</span> qualifying_touches
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> assisted_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per campaign. A purchase can appear under several campaigns, so <code>assisted_conversions</code> is not additive across rows.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -761,36 +809,36 @@ ORDER BY assisted_conversions DESC, campaign;</code></pre>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>assisted_customers</code> for the existing <code>campaign</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
 <h4 id="solution-1--exercise-2-equal-fractional-multi-touch-credit">Exercise 2 — Equal fractional multi-touch credit<a class="heading-anchor" href="#solution-1--exercise-2-equal-fractional-multi-touch-credit" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-WITH purchases AS (
-  SELECT event_id AS purchase_event_id,
-         customer_id,
-         event_time AS purchase_time
-  FROM events
-  WHERE event_type = &#x27;purchase&#x27;
-), campaign_touches AS (
-  SELECT DISTINCT
-         p.purchase_event_id,
-         p.customer_id,
-         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign
-  FROM purchases p
-  JOIN events t
-    ON t.customer_id = p.customer_id
-   AND t.event_type &lt;&gt; &#x27;purchase&#x27;
-   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;
-   AND t.event_time &lt; p.purchase_time
-), credited AS (
-  SELECT *,
-         1.0 / COUNT(*) OVER (PARTITION BY purchase_event_id) AS fractional_credit
-  FROM campaign_touches
-)
-SELECT campaign,
-       ROUND(SUM(fractional_credit), 4) AS attributed_conversions,
-       COUNT(DISTINCT purchase_event_id) AS touched_conversions
-FROM credited
-GROUP BY campaign
-ORDER BY attributed_conversions DESC, campaign;</code></pre>
+<span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
+         customer_id<span class="syntax-punctuation">,</span>
+         event_time <span class="syntax-keyword">AS</span> purchase_time
+  <span class="syntax-keyword">FROM</span> events
+  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> campaign_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+         p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
+         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span> purchases p
+  <span class="syntax-keyword">JOIN</span> events t
+    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
+   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> credited <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fractional_credit
+  <span class="syntax-keyword">FROM</span> campaign_touches
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fractional_credit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attributed_conversions<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> touched_conversions
+<span class="syntax-keyword">FROM</span> credited
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> attributed_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></code></pre>
 <p>For every purchase that has at least one qualifying campaign, credits across its distinct campaigns sum to 1.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -889,160 +937,160 @@ ORDER BY attributed_conversions DESC, campaign;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 48 solutions: attribution</span>
-<span>-- SOLUTION READING MAP — sql-48: Project1 Ecommerce Part3</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day48_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day48_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: campaign touches before a purchase event within seven days.</span>
-<span>WITH purchases AS (</span>
-<span>  SELECT event_id AS purchase_event_id,</span>
-<span>         customer_id,</span>
-<span>         event_time AS purchase_time</span>
-<span>  FROM events</span>
-<span>  WHERE event_type = &#x27;purchase&#x27;</span>
-<span>), qualifying_touches AS (</span>
-<span>  SELECT p.purchase_event_id,</span>
-<span>         p.customer_id,</span>
-<span>         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign</span>
-<span>  FROM purchases p</span>
-<span>  JOIN events t</span>
-<span>    ON t.customer_id = p.customer_id</span>
-<span>   AND t.event_type &lt;&gt; &#x27;purchase&#x27;</span>
-<span>   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;</span>
-<span>   AND t.event_time &lt; p.purchase_time</span>
-<span>)</span>
-<span>SELECT campaign,</span>
-<span>       COUNT(DISTINCT purchase_event_id) AS assisted_conversions,</span>
-<span>       COUNT(DISTINCT customer_id) AS assisted_customers</span>
-<span>FROM qualifying_touches</span>
-<span>GROUP BY campaign</span>
-<span>ORDER BY assisted_conversions DESC, campaign;</span>
-<span> </span>
-<span>-- Exercise 2: every qualifying campaign receives an equal fraction of one</span>
-<span>-- conversion. Deduplicate repeated campaign touches before assigning credit.</span>
-<span>WITH purchases AS (</span>
-<span>  SELECT event_id AS purchase_event_id,</span>
-<span>         customer_id,</span>
-<span>         event_time AS purchase_time</span>
-<span>  FROM events</span>
-<span>  WHERE event_type = &#x27;purchase&#x27;</span>
-<span>), campaign_touches AS (</span>
-<span>  SELECT DISTINCT</span>
-<span>         p.purchase_event_id,</span>
-<span>         p.customer_id,</span>
-<span>         COALESCE(t.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;none&#x27;) AS campaign</span>
-<span>  FROM purchases p</span>
-<span>  JOIN events t</span>
-<span>    ON t.customer_id = p.customer_id</span>
-<span>   AND t.event_type &lt;&gt; &#x27;purchase&#x27;</span>
-<span>   AND t.event_time &gt;= p.purchase_time - interval &#x27;7 days&#x27;</span>
-<span>   AND t.event_time &lt; p.purchase_time</span>
-<span>), credited AS (</span>
-<span>  SELECT *,</span>
-<span>         1.0 / COUNT(*) OVER (PARTITION BY purchase_event_id) AS fractional_credit</span>
-<span>  FROM campaign_touches</span>
-<span>)</span>
-<span>SELECT campaign,</span>
-<span>       ROUND(SUM(fractional_credit), 4) AS attributed_conversions,</span>
-<span>       COUNT(DISTINCT purchase_event_id) AS touched_conversions</span>
-<span>FROM credited</span>
-<span>GROUP BY campaign</span>
-<span>ORDER BY attributed_conversions DESC, campaign;</span>
-<span> </span>
-<span>-- Exercise 3: collapse repeated touches to campaign grain before dividing when</span>
-<span>-- policy grants equal credit per distinct campaign rather than per event.</span>
-<span>WITH purchases AS (</span>
-<span>  SELECT event_id AS purchase_id, customer_id, event_time AS purchased_at</span>
-<span>  FROM events WHERE event_type = &#x27;purchase&#x27;</span>
-<span>), eligible_campaigns AS (</span>
-<span>  SELECT DISTINCT p.purchase_id,</span>
-<span>         COALESCE(e.metadata-&gt;&gt;&#x27;campaign&#x27;, &#x27;(direct)&#x27;) AS campaign</span>
-<span>  FROM purchases p</span>
-<span>  JOIN events e</span>
-<span>    ON e.customer_id = p.customer_id</span>
-<span>   AND e.event_time &gt;= p.purchased_at - interval &#x27;7 days&#x27;</span>
-<span>   AND e.event_time &lt; p.purchased_at</span>
-<span>)</span>
-<span>SELECT purchase_id, campaign,</span>
-<span>       1.0 / COUNT(*) OVER (PARTITION BY purchase_id) AS campaign_credit</span>
-<span>FROM eligible_campaigns</span>
-<span>ORDER BY purchase_id, campaign;</span>
-<span> </span>
-<span>-- Exercise 4: distinct baskets prevent duplicate lines from inflating support.</span>
-<span>WITH baskets AS (</span>
-<span>  SELECT DISTINCT order_id, product_id FROM order_items</span>
-<span>), order_count AS (</span>
-<span>  SELECT COUNT(DISTINCT order_id)::numeric AS n FROM baskets</span>
-<span>), product_counts AS (</span>
-<span>  SELECT product_id, COUNT(*)::numeric AS baskets FROM baskets GROUP BY product_id</span>
-<span>), pairs AS (</span>
-<span>  SELECT a.product_id AS product_a, b.product_id AS product_b,</span>
-<span>         COUNT(*)::numeric AS together</span>
-<span>  FROM baskets a JOIN baskets b</span>
-<span>    ON a.order_id = b.order_id AND a.product_id &lt; b.product_id</span>
-<span>  GROUP BY a.product_id, b.product_id</span>
-<span>)</span>
-<span>SELECT p.product_a, p.product_b,</span>
-<span>       ROUND(p.together / n, 4) AS support,</span>
-<span>       ROUND(p.together / ca.baskets, 4) AS confidence_a_to_b,</span>
-<span>       ROUND(p.together / cb.baskets, 4) AS confidence_b_to_a,</span>
-<span>       ROUND((p.together * n) / NULLIF(ca.baskets * cb.baskets, 0), 4) AS lift</span>
-<span>FROM pairs p</span>
-<span>CROSS JOIN order_count</span>
-<span>JOIN product_counts ca ON ca.product_id = p.product_a</span>
-<span>JOIN product_counts cb ON cb.product_id = p.product_b</span>
-<span>ORDER BY lift DESC, product_a, product_b</span>
-<span>LIMIT 20;</span>
-<span> </span>
-<span>-- Exercise 5: LATERAL chooses only the next purchase for each touch, preventing</span>
-<span>-- one touch from being reused across several later purchases.</span>
-<span>SELECT e.event_id AS touch_id,</span>
-<span>       e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign,</span>
-<span>       next_purchase.order_id,</span>
-<span>       next_purchase.order_date</span>
-<span>FROM events e</span>
-<span>LEFT JOIN LATERAL (</span>
-<span>  SELECT o.order_id, o.order_date</span>
-<span>  FROM orders o</span>
-<span>  WHERE o.customer_id = e.customer_id</span>
-<span>    AND o.order_date &gt; e.event_time</span>
-<span>    AND o.order_date &lt;= e.event_time + interval &#x27;7 days&#x27;</span>
-<span>  ORDER BY o.order_date, o.order_id</span>
-<span>  LIMIT 1</span>
-<span>) next_purchase ON true</span>
-<span>WHERE e.metadata ? &#x27;campaign&#x27;</span>
-<span>ORDER BY e.event_id;</span>
-<span> </span>
-<span>-- Exercise 6: start from purchases and LEFT JOIN touches so every purchase</span>
-<span>-- receives either a qualifying campaign or the explicit direct bucket.</span>
-<span>SELECT COALESCE(t.campaign, &#x27;(direct)&#x27;) AS attribution_bucket,</span>
-<span>       COUNT(*) AS purchases</span>
-<span>FROM orders o</span>
-<span>LEFT JOIN LATERAL (</span>
-<span>  SELECT e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign</span>
-<span>  FROM events e</span>
-<span>  WHERE e.customer_id = o.customer_id</span>
-<span>    AND e.event_time &gt;= o.order_date - interval &#x27;7 days&#x27;</span>
-<span>    AND e.event_time &lt; o.order_date</span>
-<span>    AND e.metadata ? &#x27;campaign&#x27;</span>
-<span>  ORDER BY e.event_time DESC, e.event_id DESC</span>
-<span>  LIMIT 1</span>
-<span>) t ON true</span>
-<span>GROUP BY COALESCE(t.campaign, &#x27;(direct)&#x27;)</span>
-<span>ORDER BY purchases DESC, attribution_bucket;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 48 solutions: attribution</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-48: Project1 Ecommerce Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day48_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day48_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: campaign touches before a purchase event within seven days.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         event_time <span class="syntax-keyword">AS</span> purchase_time</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> qualifying_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> purchases p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> events t</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_conversions<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_customers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> qualifying_touches</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> assisted_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: every qualifying campaign receives an equal fraction of one</span></span>
+<span class="source-line"><span class="syntax-comment">-- conversion. Deduplicate repeated campaign touches before assigning credit.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         event_time <span class="syntax-keyword">AS</span> purchase_time</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> campaign_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span></span>
+<span class="source-line">         p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> purchases p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> events t</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> credited <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fractional_credit</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> campaign_touches</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fractional_credit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attributed_conversions<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> touched_conversions</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> credited</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> attributed_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: collapse repeated touches to campaign grain before dividing when</span></span>
+<span class="source-line"><span class="syntax-comment">-- policy grants equal credit per distinct campaign rather than per event.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_id<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> event_time <span class="syntax-keyword">AS</span> purchased_at</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> eligible_campaigns <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> p<span class="syntax-punctuation">.</span>purchase_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(direct)&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> purchases p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> events e</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchased_at <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchased_at</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> purchase_id<span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> purchase_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign_credit</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> eligible_campaigns</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> purchase_id<span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: distinct baskets prevent duplicate lines from inflating support.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> baskets <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> order_id<span class="syntax-punctuation">,</span> product_id <span class="syntax-keyword">FROM</span> order_items</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> order_count <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">FROM</span> baskets</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> product_counts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> baskets <span class="syntax-keyword">FROM</span> baskets <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> pairs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> product_a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> product_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> together</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> baskets a <span class="syntax-keyword">JOIN</span> baskets b</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_a<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>together <span class="syntax-operator">/</span> n<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> support<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>together <span class="syntax-operator">/</span> ca<span class="syntax-punctuation">.</span>baskets<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> confidence_a_to_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>together <span class="syntax-operator">/</span> cb<span class="syntax-punctuation">.</span>baskets<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> confidence_b_to_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>together <span class="syntax-operator">*</span> n<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>ca<span class="syntax-punctuation">.</span>baskets <span class="syntax-operator">*</span> cb<span class="syntax-punctuation">.</span>baskets<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lift</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pairs p</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> order_count</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> product_counts ca <span class="syntax-keyword">ON</span> ca<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_a</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> product_counts cb <span class="syntax-keyword">ON</span> cb<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_b</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> lift <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> product_a<span class="syntax-punctuation">,</span> product_b</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: LATERAL chooses only the next purchase for each touch, preventing</span></span>
+<span class="source-line"><span class="syntax-comment">-- one touch from being reused across several later purchases.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>event_id <span class="syntax-keyword">AS</span> touch_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span> <span class="syntax-keyword">AS</span> campaign<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       next_purchase<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       next_purchase<span class="syntax-punctuation">.</span>order_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> events e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span> e<span class="syntax-punctuation">.</span>event_time</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> next_purchase <span class="syntax-keyword">ON</span> <span class="syntax-keyword">true</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">?</span> <span class="syntax-string">&#x27;campaign&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: start from purchases and LEFT JOIN touches so every purchase</span></span>
+<span class="source-line"><span class="syntax-comment">-- receives either a qualifying campaign or the explicit direct bucket.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>campaign<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(direct)&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attribution_bucket<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> purchases</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span> <span class="syntax-keyword">AS</span> campaign</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> events e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> o<span class="syntax-punctuation">.</span>order_date</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">?</span> <span class="syntax-string">&#x27;campaign&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> t <span class="syntax-keyword">ON</span> <span class="syntax-keyword">true</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>campaign<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(direct)&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> purchases <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> attribution_bucket<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

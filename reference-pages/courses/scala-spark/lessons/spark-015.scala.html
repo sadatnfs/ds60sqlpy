@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,71 +161,71 @@
       <h1>Spark 015</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-015.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
-<span>import org.apache.spark.sql.functions._</span>
-<span>import org.apache.spark.sql.types._</span>
-<span> </span>
-<span> </span>
-<span>object Main {</span>
-<span>  def amountRows(frame: DataFrame): Seq[(Long,Option[Long])] =</span>
-<span>    frame.select(&quot;event_id&quot;,&quot;amount_cents&quot;).orderBy(&quot;event_id&quot;).collect().toSeq.map(row =&gt; (row.getLong(0),if(row.isNullAt(1)) None else Some(row.getLong(1))))</span>
-<span> </span>
-<span>  def withParsed(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete withParsed&quot;)</span>
-<span> </span>
-<span>  def parseLedger(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseLedger&quot;)</span>
-<span> </span>
-<span>  def acceptedProjection(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete acceptedProjection&quot;)</span>
-<span> </span>
-<span>  def sqlProjection(spark: SparkSession, frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete sqlProjection&quot;)</span>
-<span> </span>
-<span>  def strictProjection(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete strictProjection&quot;)</span>
-<span> </span>
-<span>  def nonnegativeAmounts(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete nonnegativeAmounts&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-015&quot;).master(&quot;local[2]&quot;)</span>
-<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
-<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
-<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
-<span>    try {</span>
-<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
-<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>      val schema = StructType(Seq(StructField(&quot;event_id&quot;,LongType,false),StructField(&quot;amount_text&quot;,StringType,true)))</span>
-<span>      val rows = Seq(Row(1L,&quot;100&quot;),Row(2L,&quot;0&quot;),Row(3L,&quot; 25 &quot;),Row(4L,null),Row(5L,&quot;bad&quot;),Row(6L,&quot;9223372036854775808&quot;),Row(7L,&quot;-5&quot;),Row(8L,&quot;50&quot;))</span>
-<span>      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)</span>
-<span>      locally {</span>
-<span>        val tolerant = raw.select(col(&quot;event_id&quot;),expr(&quot;try_cast(trim(amount_text) AS BIGINT)&quot;).as(&quot;parsed_amount&quot;))</span>
-<span>        assert(tolerant.filter(col(&quot;parsed_amount&quot;).isNull).select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq == Seq(4L,5L,6L))</span>
-<span>        println(&quot;Parse NULLs include both source missingness and rejected text&quot;)</span>
-<span>      }</span>
-<span>      locally {</span>
-<span>        val signed = raw.filter(col(&quot;event_id&quot;) === lit(7L)).select(expr(&quot;try_cast(amount_text AS BIGINT)&quot;).as(&quot;amount&quot;))</span>
-<span>        assert(signed.first().getLong(0) == -5L)</span>
-<span>        assert(spark.conf.get(&quot;spark.sql.ansi.enabled&quot;) == &quot;true&quot;)</span>
-<span>        println(&quot;A signed integer can be cast-valid while domain-invalid&quot;)</span>
-<span>      }</span>
-<span>      println(&quot;spark-015: worked examples passed; six task implementations remain&quot;)</span>
-<span>    } finally { spark.stop() }</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Add an explicit tolerant parse column. Inputs/task: Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS BIGINT). Preserve eight rows and distinguish this nullable parse result from a final validity decision. Expected: Ordered parsed values are 100,0,25, NULL, NULL, NULL,-5,50. The output parsed type is bigint. Verify: Compare all eight(event_id, parsed_amount) pairs and the field type with literals.</span>
-<span>// Exercise 2: Classify missing versus rejected tokens. Inputs/task: Add parse_status with missing for source NULL, rejected for a nonnull source that parsed to NULL, and valid otherwise. Keep all original rows and parsed values. Expected: IDs 1,2,3,7,8 are valid, ID 4 missing, and IDs 5,6 rejected. Counts are 5,1,2 and sum to 8. Verify: Assert the ordered status list and the exact two rejected IDs.</span>
-<span>// Exercise 3: Project the six parse-accepted events. Inputs/task: Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage. Expected: IDs[1,2,3,4,7,8] remain with amounts[100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170. Verify: Assert the exact rows and independent count/known/sum metrics.</span>
-<span>// Exercise 4: Express the same parse contract in SQL. Inputs/task: Register the raw frame as a session-local view and produce the same six event_id, amount_cents rows using a SQL parse CTE and explicit missing-or-success filter. Compare with literals rather than only with the DataFrame result. Expected: The SQL ordered rows are exactly the six rows from Exercise 3, including the NULL amount and signed-5. Verify: Assert the SQL result against the full literal row list and separately compare the DataFrame path to that list.</span>
-<span>// Exercise 5: Observe strict ANSI failure at evaluation. Inputs/task: Return a strict trimmed BIGINT cast projection. Evaluate a valid subset successfully, then intentionally evaluate the bad token at ID 5 under ANSI mode and require a CAST_INVALID_INPUT diagnostic. Do not count an unrelated exception as success. Expected: The valid subset has the same six rows. ID 5 fails when collected, and the reference records the expected failure code before continuing. Verify: Assert ANSI readback true, valid-row results, and a caught diagnostic containing CAST_INVALID_INPUT.</span>
-<span>// Exercise 6: Apply a separate nonnegative domain policy. Inputs/task: From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks. Expected: Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected. Verify: Assert final rows/metrics, negative ID 7 and the 8-row conservation equation.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">amountRows</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    frame<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>row <span class="syntax-operator">=&gt;</span> <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>isNullAt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-class">None</span> <span class="syntax-keyword">else</span> <span class="syntax-class">Some</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">withParsed</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete withParsed&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseLedger</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseLedger&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">acceptedProjection</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete acceptedProjection&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">sqlProjection</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span> frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete sqlProjection&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">strictProjection</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete strictProjection&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">nonnegativeAmounts</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete nonnegativeAmounts&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> spark <span class="syntax-operator">=</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">.</span>builder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ds60-spark-015&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.ui.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.host&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.bindAddress&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.shuffle.partitions&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;2&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.adaptive.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.session.timeZone&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;UTC&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;local-only course session&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ERROR&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> schema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_text&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> rows <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;100&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;0&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot; 25 &quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;bad&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">6L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;9223372036854775808&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">7L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;-5&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">8L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;50&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>schema<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> tolerant <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>expr<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;try_cast(trim(amount_text) AS BIGINT)&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>as<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;parsed_amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>tolerant<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;parsed_amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isNull<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span><span class="syntax-number">6L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Parse NULLs include both source missingness and rejected text&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> signed <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">===</span> lit<span class="syntax-punctuation">(</span><span class="syntax-number">7L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>expr<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;try_cast(amount_text AS BIGINT)&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>as<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>signed<span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A signed integer can be cast-valid while domain-invalid&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-015: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> spark<span class="syntax-punctuation">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Add an explicit tolerant parse column. Inputs/task: Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS BIGINT). Preserve eight rows and distinguish this nullable parse result from a final validity decision. Expected: Ordered parsed values are 100,0,25, NULL, NULL, NULL,-5,50. The output parsed type is bigint. Verify: Compare all eight(event_id, parsed_amount) pairs and the field type with literals.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Classify missing versus rejected tokens. Inputs/task: Add parse_status with missing for source NULL, rejected for a nonnull source that parsed to NULL, and valid otherwise. Keep all original rows and parsed values. Expected: IDs 1,2,3,7,8 are valid, ID 4 missing, and IDs 5,6 rejected. Counts are 5,1,2 and sum to 8. Verify: Assert the ordered status list and the exact two rejected IDs.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Project the six parse-accepted events. Inputs/task: Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage. Expected: IDs[1,2,3,4,7,8] remain with amounts[100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170. Verify: Assert the exact rows and independent count/known/sum metrics.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Express the same parse contract in SQL. Inputs/task: Register the raw frame as a session-local view and produce the same six event_id, amount_cents rows using a SQL parse CTE and explicit missing-or-success filter. Compare with literals rather than only with the DataFrame result. Expected: The SQL ordered rows are exactly the six rows from Exercise 3, including the NULL amount and signed-5. Verify: Assert the SQL result against the full literal row list and separately compare the DataFrame path to that list.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Observe strict ANSI failure at evaluation. Inputs/task: Return a strict trimmed BIGINT cast projection. Evaluate a valid subset successfully, then intentionally evaluate the bad token at ID 5 under ANSI mode and require a CAST_INVALID_INPUT diagnostic. Do not count an unrelated exception as success. Expected: The valid subset has the same six rows. ID 5 fails when collected, and the reference records the expected failure code before continuing. Verify: Assert ANSI readback true, valid-row results, and a caught diagnostic containing CAST_INVALID_INPUT.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Apply a separate nonnegative domain policy. Inputs/task: From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks. Expected: Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected. Verify: Assert final rows/metrics, negative ID 7 and the 8-row conservation equation.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

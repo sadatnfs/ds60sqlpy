@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,7 +162,7 @@
       <p class="source-path">Generated from <code>docs/expansion/learning-experience.md</code></p>
     </header>
     <article class="document"><h2 id="the-journey-and-teacher-experience">The journey and teacher experience<a class="heading-anchor" href="#the-journey-and-teacher-experience" aria-label="Link to this section">#</a></h2>
-<p>Status: interactive design prototype. Open <code>/journey-preview</code> in the learning app. The preview reads the five validated plans and provides real prediction feedback, incremental hints, and local draft recovery. Runtime execution, mastery grading, and job orchestration remain future implementation.</p>
+<p>Status: historical developer design prototype. Its standalone generated preview reads the original five plans and illustrates prediction feedback, incremental hints and local draft recovery. The public learner experience is now the unified <code>/classroom</code> shell for all subjects, including Python and SQL. <code>/journey-preview</code> is a compatibility alias to that shell. Statements below about future runtime execution describe the prototype&#x27;s original design, not the current implementation status; consult <a href="../implementation/CHECKPOINT.md.html">the checkpoint</a> for verified runtime evidence.</p>
 <h3 id="learner-journey">Learner journey<a class="heading-anchor" href="#learner-journey" aria-label="Link to this section">#</a></h3>
 <p>The starting screen asks what the learner wants to build and shows five subject paths with beginner, intermediate, and advanced outcomes. Each track exposes its actual planned lessons, estimated lesson time, prerequisites, concrete lab, and verification method. Stage labels describe increasing independence, not a promise that every learner needs the same number of days.</p>
 <p>Entry should be selective. C++ and Kubernetes teach their own first steps. Scala offers a language-first route, with Python prerequisites attached to PySpark exercises. Mathematical Python tracks offer a short diagnostic and relevant foundation lessons rather than requiring every previous production or geospatial module. A recommendation explains its prerequisite relationship and allows the learner to review or self-assess an equivalent skill.</p>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,14 +173,14 @@
 <h3 id="exercise-1-complete-a-manifest">Exercise 1: Complete a manifest<a class="heading-anchor" href="#exercise-1-complete-a-manifest" aria-label="Link to this section">#</a></h3>
 <p>The question is: Documentd1 is authored for the lesson, familyF1, training;d2 is an authored evaluation question, familyF2,test. Fill required fields.</p>
 <p>The placeholder hash labels in this worksheet identify the field to calculate from actual bytes. They are not claimed cryptographic receipts. Every real manifest row needs its actual digest.</p>
-<pre><code class="language-text">d1 | local author | course fixture permission | train | F1 | hash-of-d1
+<pre class="highlighted-code"><code class="language-text">d1 | local author | course fixture permission | train | F1 | hash-of-d1
 d2 | local author | course fixture permission | test  | F2 | hash-of-d2</code></pre>
 <p><strong>Expected:</strong> both rows have source,permission,split,family,hash.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both rows have source,permission,split,family,hash.</p>
 <h3 id="exercise-2-flag-a-benchmark-answer">Exercise 2: Flag a benchmark answer<a class="heading-anchor" href="#exercise-2-flag-a-benchmark-answer" aria-label="Link to this section">#</a></h3>
 <p>The question is: A candidate training document reproduces the answer tod2. Decide how to treat it before fitting.</p>
 <p>Changing the filename or splitting at the row level does not remove the information transfer. The answer has already exposed the assessment target.</p>
-<pre><code class="language-text">candidate d3: answer-to-d2
+<pre class="highlighted-code"><code class="language-text">candidate d3: answer-to-d2
 Relationship: evaluation-derived
 Training admission: blocked
 Selection-source admission: blocked</code></pre>
@@ -143,7 +189,7 @@ Selection-source admission: blocked</code></pre>
 <h3 id="exercise-3-follow-a-paraphrase-family">Exercise 3: Follow a paraphrase family<a class="heading-anchor" href="#exercise-3-follow-a-paraphrase-family" aria-label="Link to this section">#</a></h3>
 <p>The question is: d4 rewritesd3 without sharing an exact hash. Assign a family and audit.</p>
 <p>A hash detects exact identity, not semantic derivation. Family metadata preserves the relation that matters to this contamination scenario.</p>
-<pre><code class="language-text">d3 -&gt; paraphrase -&gt; d4
+<pre class="highlighted-code"><code class="language-text">d3 -&gt; paraphrase -&gt; d4
 Different bytes do not erase provenance.
 FamilyF2 must not cross into train or prompt-selection material.</code></pre>
 <p><strong>Expected:</strong> d4 remains in evaluation-derived familyF2.</p>
@@ -151,15 +197,15 @@ FamilyF2 must not cross into train or prompt-selection material.</code></pre>
 <h3 id="exercise-4-separate-permission-and-cleanliness">Exercise 4: Separate permission and cleanliness<a class="heading-anchor" href="#exercise-4-separate-permission-and-cleanliness" aria-label="Link to this section">#</a></h3>
 <p>The question is: A source has explicit permission but contains evaluation answers. Is it suitable training data for this assessment?</p>
 <p>Different gates answer different questions. A permitted source can still invalidate an evaluation, and a clean split does not establish permission.</p>
-<pre><code class="language-text">Permission check: pass
+<pre class="highlighted-code"><code class="language-text">Permission check: pass
 Evaluation independence check: fail
 Training decision for this experiment: exclude</code></pre>
 <p><strong>Expected:</strong> permission alone does not resolve contamination.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with permission alone does not resolve contamination.</p>
 <h3 id="exercise-5-audit-preprocessing-inputs">Exercise 5: Audit preprocessing inputs<a class="heading-anchor" href="#exercise-5-audit-preprocessing-inputs" aria-label="Link to this section">#</a></h3>
-<p>The question is: A tokenizer is fitted ontrain+test although model gradients use onlytrain. Identify the boundary failure.</p>
+<p>The question is: A tokenizer is fitted on train+test although model gradients use only train. Identify the boundary failure.</p>
 <p>The representation is fitted state. Keeping test labels out of the optimizer does not undo an earlier information leak through vocabulary selection.</p>
-<pre><code class="language-text">Tokenizer fit sources: d1,d2
+<pre class="highlighted-code"><code class="language-text">Tokenizer fit sources: d1,d2
 Allowed training sources: d1
 Unexpected assessment source: d2
 Repair: refit tokenizer on admitted training sources and rerun evaluation.</code></pre>
@@ -168,10 +214,10 @@ Repair: refit tokenizer on admitted training sources and rerun evaluation.</code
 <h3 id="exercise-6-record-an-unresolved-source">Exercise 6: Record an unresolved source<a class="heading-anchor" href="#exercise-6-record-an-unresolved-source" aria-label="Link to this section">#</a></h3>
 <p>The question is: d5 has unknown origin and unspecified permission. Write its manifest status without inventing approval.</p>
 <p>Unknown fields should remain visibly unknown. Filling them with assumed values would make an apparently complete manifest less trustworthy than an honest incomplete one.</p>
-<pre><code class="language-text">d5 | unresolved origin | unresolved permission | unassigned | unknown family | actual hash required
+<pre class="highlighted-code"><code class="language-text">d5 | unresolved origin | unresolved permission | unassigned | unknown family | actual hash required
 Action: obtain evidence before admitting to the experiment.</code></pre>
-<p><strong>Expected:</strong> origin unresolved; permission unresolved; admissionblocked.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with origin unresolved; permission unresolved; admissionblocked.</p>
+<p><strong>Expected:</strong> origin unresolved; permission unresolved; admission blocked.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with origin unresolved; permission unresolved; admission blocked.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

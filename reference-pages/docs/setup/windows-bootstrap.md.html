@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -132,12 +178,12 @@
 <p>For normal learning, double-click <code>START_DS60.cmd</code> in the repository root. Its orchestrator, <code>scripts\start_ds60.ps1</code>, checks readiness, runs this bootstrap only when the environment needs setup or repair, runs course doctor, and opens the private portal. A ready environment is reused without reinstalling packages.</p>
 <p>Use <code>bootstrap_windows.ps1</code> directly when you want to choose dependency profiles, persist narrowly scoped user <code>PATH</code> entries, preview a winget installation, or troubleshoot discovery. The guided launcher forwards <code>-Profile</code>, <code>-DependencyMode</code>, <code>-PersistUserPath</code>, <code>-InstallMissingWithWinget</code>, and <code>-SkipPostgreSql</code> when bootstrap is needed.</p>
 <p>Read-only launcher diagnostics are suitable for support or automation:</p>
-<pre><code class="language-powershell">&amp; .\scripts\start_ds60.ps1 -DiagnosticsOnly -NonInteractive</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>start_ds60<span class="syntax-punctuation">.</span>ps1 -DiagnosticsOnly -NonInteractive</code></pre>
 <p>For a noninteractive first setup, review <code>-WhatIf</code> first and then explicitly add <code>-AcceptConnectedSetup</code>. Without that acknowledgement, noninteractive mode will not begin a network-dependent package installation.</p>
 <h3 id="run-the-default-bootstrap">Run the default bootstrap<a class="heading-anchor" href="#run-the-default-bootstrap" aria-label="Link to this section">#</a></h3>
 <p>Open Windows PowerShell in the repository root, where <code>README.md</code> and <code>pyproject.toml</code> are visible:</p>
-<pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-&amp; .\scripts\bootstrap_windows.ps1</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1</code></pre>
 <p>Running the script with <code>&amp;</code> keeps its process-scoped <code>PATH</code> additions in this PowerShell window. Closing the window removes them. The <code>.venv</code>, installed packages, and registered Jupyter kernel remain available.</p>
 <p>The default <code>Core</code> profile installs:</p>
 <ul>
@@ -148,47 +194,47 @@
 </ul>
 <p>It does not install the largest deep-learning, NLP, geospatial, production, or specialized ML profiles.</p>
 <p>Activation is optional. Always-safe commands use the environment interpreter directly. Resolve either supported Windows layout once in the current shell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
 
-&amp; $CoursePython --version
-&amp; $CoursePython -c &quot;import IPython, ipykernel, jupyterlab, notebook, psycopg, sql, sqlalchemy; print(&#x27;Notebook stack imports passed.&#x27;)&quot;
-&amp; $CoursePython -m jupyter --version
-&amp; $CoursePython -m notebook --version
-&amp; $CoursePython -m jupyter kernelspec list
-&amp; $CoursePython scripts\course.py doctor
-psql --version
-&amp; $CoursePython -m jupyter lab</code></pre>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">-</span>-version
+<span class="syntax-punctuation">&amp;</span> $CoursePython -c <span class="syntax-string">&quot;</span><span class="syntax-string">import IPython, ipykernel, jupyterlab, notebook, psycopg, sql, sqlalchemy; print(&#x27;Notebook stack imports passed.&#x27;)</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter <span class="syntax-punctuation">-</span>-version
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m notebook <span class="syntax-punctuation">-</span>-version
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter kernelspec list
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
+psql <span class="syntax-punctuation">-</span>-version
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab</code></pre>
 <p>In VS Code, select the interpreter path printed by the bootstrapper—normally <code>.venv\Scripts\python.exe</code>, or <code>.venv\python.exe</code> for the conda-prefix fallback—and <code>Python (ds60sqlpy)</code> as the notebook kernel.</p>
 <p>The <code>psql</code> command above works in the same PowerShell process used to invoke the script. In a new terminal it requires <code>-PersistUserPath</code> or the full <code>psql.exe</code> path printed by the bootstrapper.</p>
 <h3 id="install-every-optional-course-profile">Install every optional course profile<a class="heading-anchor" href="#install-every-optional-course-profile" aria-label="Link to this section">#</a></h3>
 <p>The advanced profile can be large and may take a long time because it includes deep-learning, NLP, geospatial, production, and specialized ML packages:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced</code></pre>
 <p>Run it while connected to the internet. The script is idempotent: it reuses a valid <code>.venv</code>, updates declared packages, and safely refreshes the same kernel registration.</p>
 <h3 id="preview-changes-without-making-them">Preview changes without making them<a class="heading-anchor" href="#preview-changes-without-making-them" aria-label="Link to this section">#</a></h3>
 <p>PowerShell&#x27;s standard <code>-WhatIf</code> switch performs discovery and prints the planned profile, environment, PATH, kernel, and verification actions without changing anything:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced -PersistUserPath -WhatIf</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced -PersistUserPath -WhatIf</code></pre>
 <p>If a missing system tool would require an explicitly authorized install, combine the switches to preview that install:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -InstallMissingWithWinget -WhatIf</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -InstallMissingWithWinget -WhatIf</code></pre>
 <h3 id="choose-locked-or-declarative-installation">Choose locked or declarative installation<a class="heading-anchor" href="#choose-locked-or-declarative-installation" aria-label="Link to this section">#</a></h3>
 <p>The default <code>Auto</code> dependency mode uses <code>uv sync --locked</code> when <code>uv</code> is already available. This verifies and installs from the checked-in <code>uv.lock</code> without changing it. Otherwise it uses <code>python -m pip install -e ...</code> with the optional dependency groups declared in <code>pyproject.toml</code>.</p>
 <p>Require the checked-in lock explicitly:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -DependencyMode Locked</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -DependencyMode Locked</code></pre>
 <p>Use the project declarations even when <code>uv</code> is installed:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -DependencyMode Project</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -DependencyMode Project</code></pre>
 <p>Locked mode stops with remediation instructions if <code>uv</code> is unavailable. It does not silently fall back when you explicitly requested the lock.</p>
 <h3 id="make-selected-tools-available-in-future-terminals">Make selected tools available in future terminals<a class="heading-anchor" href="#make-selected-tools-available-in-future-terminals" aria-label="Link to this section">#</a></h3>
 <p>By default, the bootstrapper does not change the user or machine <code>PATH</code>. To add only narrowly needed executable directories to the current user&#x27;s <code>PATH</code>:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -PersistUserPath</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -PersistUserPath</code></pre>
 <p>This never changes the machine-wide <code>PATH</code> and does not use <code>setx</code>, which can truncate long values. PostgreSQL&#x27;s <code>bin</code> directory is eligible. A Python.org interpreter and its <code>Scripts</code> directory are eligible, but the bootstrapper never persists an Anaconda or Miniconda root. Conda&#x27;s own activation mechanism is safer because it manages the distribution&#x27;s interdependent directories. Open a new terminal after the command to receive the updated user environment.</p>
 <p>You do not need persistence for Python course commands because they use the repository interpreter printed by the bootstrapper. Persistence is convenient for running <code>psql</code> directly in later PowerShell windows.</p>
 <h3 id="opt-in-to-installing-a-truly-missing-system-tool">Opt in to installing a truly missing system tool<a class="heading-anchor" href="#opt-in-to-installing-a-truly-missing-system-tool" aria-label="Link to this section">#</a></h3>
 <p>Discovery always runs before installation. Anaconda or PostgreSQL merely being absent from <code>PATH</code> does not cause a reinstall.</p>
 <p>If supported Python or PostgreSQL is genuinely missing, the normal run stops and explains what to install. To explicitly permit <code>winget</code> installation:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -InstallMissingWithWinget</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -InstallMissingWithWinget</code></pre>
 <p>That switch may install:</p>
 <ul>
 <li><code>Python.Python.3.12</code></li>
@@ -197,17 +243,17 @@ psql --version
 </ul>
 <p>The PostgreSQL installer may present its own setup UI. The bootstrapper does not supply, retain, or print its password. If <code>winget</code> is unavailable or an installer requires a restart, complete the official installation, open a new PowerShell window, and rerun the bootstrapper.</p>
 <p>For a Python-only machine, bypass the otherwise-required PostgreSQL check explicitly:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql</code></pre>
 <p>SQL lessons and PostgreSQL-backed notebooks will not be runnable in that mode.</p>
 <h3 id="continue-to-postgresql-notebooks">Continue to PostgreSQL notebooks<a class="heading-anchor" href="#continue-to-postgresql-notebooks" aria-label="Link to this section">#</a></h3>
 <p>After bootstrap, follow <a href="jupyter-postgresql.md.html">PostgreSQL in Jupyter</a> to configure only the disposable <code>advanced_sql_training</code> database. Connection configuration is deliberately separate from software installation.</p>
 <p>Start the professional notebook folder with:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython -m jupyter lab .\bridge\professional\notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>notebooks</code></pre>
 <p>Never paste a workplace or valuable database credential into a notebook.</p>
 <h3 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h3>
 <h4 id="anaconda-was-found-but-its-base-python-version-is-unsupported">Anaconda was found, but its base Python version is unsupported<a class="heading-anchor" href="#anaconda-was-found-but-its-base-python-version-is-unsupported" aria-label="Link to this section">#</a></h4>
@@ -218,7 +264,7 @@ psql --version
 <p>The default PATH change is intentionally process-scoped. Rerun with <code>-PersistUserPath</code>, or invoke the full <code>psql.exe</code> path printed by the script.</p>
 <h4 id="the-kernel-appears-in-jupyter-but-not-vs-code">The kernel appears in Jupyter but not VS Code<a class="heading-anchor" href="#the-kernel-appears-in-jupyter-but-not-vs-code" aria-label="Link to this section">#</a></h4>
 <p>Restart VS Code, select the interpreter path printed by bootstrap, then choose <code>Python (ds60sqlpy)</code> from the notebook kernel picker. Confirm its interpreter using the <code>$CoursePython</code> resolver from the first command block:</p>
-<pre><code class="language-powershell">&amp; $CoursePython -m jupyter kernelspec list</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter kernelspec list</code></pre>
 <h4 id="package-installation-fails">Package installation fails<a class="heading-anchor" href="#package-installation-fails" aria-label="Link to this section">#</a></h4>
 <p>Stay online for the initial bootstrap, confirm the machine is 64-bit, and retry the same command. A partial <code>.venv</code> can normally be reused. For the largest optional profiles, start with <code>Core</code>, verify it, and add <code>Advanced</code> afterward.</p>
 <p>See <a href="windows.md.html">Windows setup</a>, <a href="../vscode.md.html">VS Code</a>, and <a href="../troubleshooting.md.html">Troubleshooting</a> for the rest of the learning environment.</p></article>

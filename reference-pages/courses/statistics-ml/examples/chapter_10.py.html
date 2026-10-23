@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,38 +161,38 @@
       <h1>Chapter 10</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_10.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from statsmodels.stats.multitest import multipletests</span>
-<span> </span>
-<span>def multiple_testing():</span>
-<span>    p = np.array([.001,.02,.04,.3])</span>
-<span>    holm = multipletests(p,alpha=.05,method=&quot;holm&quot;)[0]</span>
-<span>    bh = multipletests(p,alpha=.05,method=&quot;fdr_bh&quot;)[0]</span>
-<span>    assert holm.tolist() == [True,False,False,False]</span>
-<span>    assert bh.tolist() == [True,True,False,False]</span>
-<span>    print(&quot;Holm decisions:&quot;,holm,&quot;BH decisions:&quot;,bh)</span>
-<span> </span>
-<span>def spending_and_evidence():</span>
-<span>    alpha=.05</span>
-<span>    t=np.arange(1,101)</span>
-<span>    spending=alpha/(t*(t+1))</span>
-<span>    assert spending.sum() &lt; alpha</span>
-<span>    means=np.full(100,.6)</span>
-<span>    radius=np.sqrt(np.log(2/spending)/(2*t))</span>
-<span>    assert radius[-1] &lt; radius[0]</span>
-<span>    observations=np.ones(8,dtype=int)</span>
-<span>    eprocess=np.cumprod(np.where(observations==1,.8/.5,.2/.5))</span>
-<span>    assert eprocess[-1] &gt; 20</span>
-<span>    null_one_step=.5*(.8/.5)+.5*(.2/.5)</span>
-<span>    assert null_one_step == 1</span>
-<span>    print(&quot;Spent alpha:&quot;,spending.sum(),&quot;last Hoeffding radius:&quot;,radius[-1],&quot;likelihood ratio:&quot;,eprocess[-1])</span>
-<span> </span>
-<span>def main():</span>
-<span>    multiple_testing(); spending_and_evidence()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statsmodels.stats.multitest <span class="syntax-keyword">import</span> multipletests</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">multiple_testing</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.001</span><span class="syntax-punctuation">,</span><span class="syntax-number">.02</span><span class="syntax-punctuation">,</span><span class="syntax-number">.04</span><span class="syntax-punctuation">,</span><span class="syntax-number">.3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    holm <span class="syntax-operator">=</span> multipletests<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">.05</span><span class="syntax-punctuation">,</span>method<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">holm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    bh <span class="syntax-operator">=</span> multipletests<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">.05</span><span class="syntax-punctuation">,</span>method<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">fdr_bh</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> holm<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bh<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Holm decisions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>holm<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">BH decisions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>bh<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">spending_and_evidence</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    alpha<span class="syntax-operator">=</span><span class="syntax-number">.05</span></span>
+<span class="source-line">    t<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">101</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    spending<span class="syntax-operator">=</span>alpha<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> spending<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> alpha</span>
+<span class="source-line">    means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    radius<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">/</span>spending<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>t<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> radius<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> radius<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    observations<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    eprocess<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>cumprod<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>observations<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> eprocess<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">20</span></span>
+<span class="source-line">    null_one_step<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">.8</span><span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">.2</span><span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> null_one_step <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Spent alpha:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>spending<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">last Hoeffding radius:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>radius<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">likelihood ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>eprocess<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    multiple_testing<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> spending_and_evidence<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,11 +166,11 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Simulation approximates consequences of a model by generating artificial observations or trajectories. It is especially useful when a quantity is mathematically defined but difficult to integrate or solve directly. The artificial output is evidence about the implemented model, not automatically about the real system. Separate uncertainty in simulation parameters, randomness within the simulated system and numerical Monte Carlo error.</p>
 <h4 id="an-average-is-an-estimator-with-its-own-error">An average is an estimator with its own error<a class="heading-anchor" href="#an-average-is-an-estimator-with-its-own-error" aria-label="Link to this section">#</a></h4>
-<p>To estimate mu=E[f(X)], draw X_1,...,X_n from the target distribution and average f(X_i). With independent draws and finite variance sigma_f^2, the Monte Carlo standard error is approximately sample_sd/sqrt(n). Halving this numerical error generally needs four times as many independent draws. More simulation can reduce Monte Carlo error while leaving a badly chosen input distribution or model structure unchanged.</p>
+<p>To estimate <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>μ</mi><mo>=</mo><mi>𝔼</mi><mo stretchy="false">[</mo><mi>f</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mu=\mathbb{E}[f(X)]</annotation></semantics></math>, draw X_1,...,X_n from the target distribution and average f(X_i). With independent draws and finite variance <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><msub><mi>σ</mi><mrow><mi>f</mi></mrow></msub></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\sigma_{f}}^{2}</annotation></semantics></math>, the Monte Carlo standard error is approximately <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>s</mi><mi>f</mi></msub></mrow><mrow><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{s_f}{\sqrt{n}}</annotation></semantics></math>. Halving this numerical error generally needs four times as many independent draws. More simulation can reduce Monte Carlo error while leaving a badly chosen input distribution or model structure unchanged.</p>
 <p>A fixed seed makes a demonstration repeatable, but it is not a statistical guarantee. Keep independent streams or a deliberate common-random-number design when comparing alternatives. If a simulation uses autocorrelated MCMC output, the independent-draw standard error is inappropriate and must account for dependence. Rare events can produce zero observed occurrences in a small run without having zero probability.</p>
 <h4 id="change-the-computation-without-changing-the-target">Change the computation without changing the target<a class="heading-anchor" href="#change-the-computation-without-changing-the-target" aria-label="Link to this section">#</a></h4>
 <p>Variance reduction uses mathematical structure to obtain a more precise estimator per unit of work. A control variate subtracts a centered quantity with known expectation. Importance sampling changes the sampling distribution and restores the target through likelihood ratios. Antithetic sampling pairs negatively related draws. Each method needs its own validity and support conditions; a lower observed variance is not enough if the estimator became biased for an unintended target.</p>
-<p>For a control variate g with known mean m_g, estimate E[f] by the mean of f(X)-beta*(g(X)-m_g). The expectation remains E[f] for fixed beta. The variance-minimizing coefficient is Cov(f,g)/Var(g), when these quantities exist. Estimating beta from the same finite sample introduces details worth handling deliberately in formal uncertainty analysis. The example uses the analytically known coefficient for a simple uniform distribution.</p>
+<p>For a control variate g with known mean m_g, estimate E[f] by the mean of f(X)-beta*(g(X)-m_g). The expectation remains E[f] for fixed beta. The variance-minimizing coefficient is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>Cov</mo><mo stretchy="false">(</mo><mi>f</mi><mo>,</mo><mi>g</mi><mo stretchy="false">)</mo></mrow><mrow><mo>Var</mo><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\operatorname{Cov}(f,g)}{\operatorname{Var}(g)}</annotation></semantics></math>, when these quantities exist. Estimating beta from the same finite sample introduces details worth handling deliberately in formal uncertainty analysis. The example uses the analytically known coefficient for a simple uniform distribution.</p>
 <h4 id="simulate-the-decision-process-not-only-a-histogram">Simulate the decision process, not only a histogram<a class="heading-anchor" href="#simulate-the-decision-process-not-only-a-histogram" aria-label="Link to this section">#</a></h4>
 <p>A queue simulation must represent arrivals, service completion, resource availability and the observation window. An agent-based model adds heterogeneous entities and interaction rules. A system-dynamics model tracks aggregate stocks and flows. The right representation depends on which mechanism affects the decision. Calibration to one aggregate statistic can leave multiple incompatible mechanisms, so validate outputs and intermediate behavior against independent observations.</p>
 <h4 id="information-and-optimization">Information and optimization<a class="heading-anchor" href="#information-and-optimization" aria-label="Link to this section">#</a></h4>
@@ -172,53 +218,53 @@
 <p>Simulation optimization searches decisions using noisy simulation estimates of performance. Common random numbers can improve comparisons when designed appropriately, and repeated evaluation distinguishes robust improvements from noise. Searching many candidates creates selection bias toward lucky estimates. Reserve independent final simulation runs, report uncertainty and check constraints under the same information timing used in deployment.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_37.py.html">chapter_37.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_37.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_37.py</code></pre>
 <h4 id="reduce-numerical-error-without-changing-the-integral">Reduce numerical error without changing the integral<a class="heading-anchor" href="#reduce-numerical-error-without-changing-the-integral" aria-label="Link to this section">#</a></h4>
-<p>For U uniform on [0,1], E[U^2]=1/3 and E[U]=1/2. Subtracting U-1/2 with coefficient one preserves the target and strongly reduces variance because U and U^2 are correlated. A fixed seed makes the demonstration reproducible, while the printed standard errors describe independent Monte Carlo variation. Pairing U with 1-U gives exactly one-half for their average in the separate linear antithetic example.</p>
+<p>For U uniform on [0,1], E[<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>U</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{U}^{2}</annotation></semantics></math>]=1/3 and E[U]=1/2. Subtracting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>U</mi><mo>−</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">U-\frac{1}{2}</annotation></semantics></math> with coefficient one preserves the target and strongly reduces variance because U and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>U</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{U}^{2}</annotation></semantics></math> are correlated. A fixed seed makes the demonstration reproducible, while the printed standard errors describe independent Monte Carlo variation. Pairing U with 1-U gives exactly one-half for their average in the separate linear antithetic example.</p>
 <h4 id="check-a-queue-through-conservation">Check a queue through conservation<a class="heading-anchor" href="#check-a-queue-through-conservation" aria-label="Link to this section">#</a></h4>
 <p>Three arrivals at 0,0.5,1.5 each need one unit of service on one server. Departures are 1,2,3 and waiting times before service are 0,0.5,0.5. At time 2.5, three have arrived and two have departed, leaving one in the system. This identity catches event-order and state-update mistakes before estimating more complicated queue statistics.</p>
 <h4 id="put-a-value-on-knowing-the-state">Put a value on knowing the state<a class="heading-anchor" href="#put-a-value-on-knowing-the-state" aria-label="Link to this section">#</a></h4>
 <p>Two decisions have payoffs [8,-2] and [2,4] across equally likely states. Without knowing the state, both average three, so the best current value is three. Perfect information selects eight in the first state and four in the second, averaging six. EVPI is three, an upper bound on the value of information under this payoff model before acquisition costs.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def control_and_antithetic():
-    rng=np.random.default_rng(37)
-    u=rng.uniform(size=20000)
-    raw=u**2;controlled=raw-(u-.5)
-    raw_se=raw.std(ddof=1)/np.sqrt(len(u))
-    controlled_se=controlled.std(ddof=1)/np.sqrt(len(u))
-    assert abs(raw.mean()-1/3)&lt;.01 and abs(controlled.mean()-1/3)&lt;.01
-    assert controlled_se&lt;raw_se/3
-    antithetic=(u+(1-u))/2
-    assert np.allclose(antithetic,.5)
-    print(&quot;Means and MC standard errors:&quot;,raw.mean(),controlled.mean(),raw_se,controlled_se)
+<span class="syntax-keyword">def</span> <span class="syntax-function">control_and_antithetic</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    rng<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">37</span><span class="syntax-punctuation">)</span>
+    u<span class="syntax-operator">=</span>rng<span class="syntax-operator">.</span>uniform<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span>
+    raw<span class="syntax-operator">=</span>u<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span>controlled<span class="syntax-operator">=</span>raw<span class="syntax-operator">-</span><span class="syntax-punctuation">(</span>u<span class="syntax-operator">-</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+    raw_se<span class="syntax-operator">=</span>raw<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>u<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    controlled_se<span class="syntax-operator">=</span>controlled<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>u<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">.01</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>controlled<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">.01</span>
+    <span class="syntax-keyword">assert</span> controlled_se<span class="syntax-operator">&lt;</span>raw_se<span class="syntax-operator">/</span><span class="syntax-number">3</span>
+    antithetic<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>u<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>u<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>antithetic<span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Means and MC standard errors:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>raw<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>controlled<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>raw_se<span class="syntax-punctuation">,</span>controlled_se<span class="syntax-punctuation">)</span>
 
-def queue_conservation():
-    arrivals=np.array([0.,.5,1.5]);service=np.array([1.,1.,1.])
-    departure=[];previous=0.
-    for arrival,duration in zip(arrivals,service):
-        previous=max(arrival,previous)+duration;departure.append(previous)
-    waits=np.array(departure)-arrivals-service
-    assert np.allclose(departure,[1.,2.,3.]) and np.allclose(waits,[0.,.5,.5])
-    observed_time=2.5
-    arrived=np.sum(arrivals&lt;=observed_time);left=np.sum(np.array(departure)&lt;=observed_time)
-    assert arrived==3 and left==2 and arrived-left==1
-    print(&quot;Departures:&quot;,departure,&quot;queue waits:&quot;,waits,&quot;remaining at 2.5:&quot;,arrived-left)
+<span class="syntax-keyword">def</span> <span class="syntax-function">queue_conservation</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    arrivals<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>service<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    departure<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>previous<span class="syntax-operator">=</span><span class="syntax-number">0.</span>
+    <span class="syntax-keyword">for</span> arrival<span class="syntax-punctuation">,</span>duration <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>arrivals<span class="syntax-punctuation">,</span>service<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        previous<span class="syntax-operator">=</span><span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>arrival<span class="syntax-punctuation">,</span>previous<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>duration<span class="syntax-punctuation">;</span>departure<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>previous<span class="syntax-punctuation">)</span>
+    waits<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span>departure<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>arrivals<span class="syntax-operator">-</span>service
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>departure<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>waits<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    observed_time<span class="syntax-operator">=</span><span class="syntax-number">2.5</span>
+    arrived<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>arrivals<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>observed_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>left<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span>departure<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>observed_time<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> arrived<span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> left<span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> arrived<span class="syntax-operator">-</span>left<span class="syntax-operator">==</span><span class="syntax-number">1</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Departures:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>departure<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">queue waits:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>waits<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">remaining at 2.5:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>arrived<span class="syntax-operator">-</span>left<span class="syntax-punctuation">)</span>
 
-def perfect_information():
-    payoff=np.array([[8.,-2.],[2.,4.]]) # rows decisions, columns equally probable states
-    current=np.max(payoff.mean(axis=1))
-    informed=np.mean(np.max(payoff,axis=0))
-    evpi=informed-current
-    assert current==3. and informed==6. and evpi==3.
-    print(&quot;Current value, perfect-information value, EVPI:&quot;,current,informed,evpi)
+<span class="syntax-keyword">def</span> <span class="syntax-function">perfect_information</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    payoff<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-comment"># rows decisions, columns equally probable states</span>
+    current<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>payoff<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    informed<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>payoff<span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    evpi<span class="syntax-operator">=</span>informed<span class="syntax-operator">-</span>current
+    <span class="syntax-keyword">assert</span> current<span class="syntax-operator">==</span><span class="syntax-number">3.</span> <span class="syntax-operator">and</span> informed<span class="syntax-operator">==</span><span class="syntax-number">6.</span> <span class="syntax-operator">and</span> evpi<span class="syntax-operator">==</span><span class="syntax-number">3.</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Current value, perfect-information value, EVPI:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>current<span class="syntax-punctuation">,</span>informed<span class="syntax-punctuation">,</span>evpi<span class="syntax-punctuation">)</span>
 
-def main():
-    control_and_antithetic();queue_conservation();perfect_information()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    control_and_antithetic<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>queue_conservation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>perfect_information<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does a fixed random seed make a simulation result accurate?</strong> It makes the exact pseudorandom sequence reproducible. Accuracy still depends on the estimator, draw count, model and input distribution. Report Monte Carlo error separately from substantive model uncertainty.</p>
 <p><strong>Interview: Why can importance sampling be worse than ordinary Monte Carlo?</strong> A poor proposal can produce highly variable or even non-integrable weights. Matching the region that contributes to the target, ensuring support and inspecting tail behavior are essential. Changing the sampling distribution is not a free precision improvement.</p>

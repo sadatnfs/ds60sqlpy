@@ -55,9 +55,9 @@ docs={'a':'account randomization','b':'visit counts','c':'account outcomes'}; sc
 assert scores[0][0]=='a' and scores[0][1]>0 and all(score==0 for _,score in scores[1:])
 ```
 
-**Expected:** a ranks first with a positive score; the other scores are0.
+**Expected:** a ranks first with a positive score; the other scores are 0.
 
-**Verify:** Compare the computed values or written argument with a ranks first with a positive score; the other scores are0.
+**Verify:** Compare the computed values or written argument with a ranks first with a positive score; the other scores are 0.
 
 ## Exercise 2: Inspect term rarity
 

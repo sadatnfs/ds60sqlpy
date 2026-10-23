@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -379,19 +425,21 @@
 </tr>
 </tbody></table></div>
 <h4 id="guide--worked-example-replace-the-head-and-verify-trainable-state">Worked example: replace the head and verify trainable state<a class="heading-anchor" href="#guide--worked-example-replace-the-head-and-verify-trainable-state" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import torch
-from torchvision import models
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> models
 
-# DEFAULT requires a one-time download unless already cached.
-model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-for parameter in model.parameters():
-    parameter.requires_grad = False
+<span class="syntax-comment"># DEFAULT requires a one-time download unless already cached.</span>
+model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span>models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> parameter <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    parameter<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
 
-model.fc = torch.nn.Linear(model.fc.in_features, 2)
-trainable = [name for name, p in model.named_parameters() if p.requires_grad]
-print(trainable)</code></pre>
+model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>trainable<span class="syntax-punctuation">)</span></code></pre>
 <p>Only the new <code>fc.weight</code> and <code>fc.bias</code> should be trainable initially. Build the optimizer from trainable parameters so the intended phase is explicit.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 48 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -399,9 +447,9 @@ print(trainable)</code></pre>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning">Concept deep dive — offline-safe transfer learning, frozen parameters, and cautious fine-tuning<a class="heading-anchor" href="#guide--concept-deep-dive-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -416,33 +464,33 @@ print(trainable)</code></pre>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-build-and-verify-a-no-download-frozen-backbone">Focused example A — build and verify a no-download frozen backbone<a class="heading-anchor" href="#guide--focused-example-a-build-and-verify-a-no-download-frozen-backbone" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import torch
-from torchvision import models
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> models
 
-model = models.resnet18(weights=None)  # explicit offline architecture
-for parameter in model.parameters():
-    parameter.requires_grad = False
-model.fc = torch.nn.Linear(model.fc.in_features, 3)
+model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># explicit offline architecture</span>
+<span class="syntax-keyword">for</span> parameter <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    parameter<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
+model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 
-trainable = [name for name, p in model.named_parameters() if p.requires_grad]
-print(trainable)
-assert trainable == [&quot;fc.weight&quot;, &quot;fc.bias&quot;]</code></pre>
+trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>trainable<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> trainable <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fc.weight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fc.bias</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Only the newly assigned head parameters are trainable; no pretrained asset was downloaded.</p>
 <p><strong>Assumption to name:</strong> Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.</p>
 <h5 id="guide--focused-example-b-apply-the-matching-tensor-normalization-contract">Focused example B — apply the matching tensor normalization contract<a class="heading-anchor" href="#guide--focused-example-b-apply-the-matching-tensor-normalization-contract" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import torch
-from torchvision.transforms import Normalize
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torchvision.transforms <span class="syntax-keyword">import</span> Normalize
 
-image = torch.full((3, 4, 4), 0.5)
-normalize = Normalize(
-    mean=[0.485, 0.456, 0.406],
-    std=[0.229, 0.224, 0.225],
-)
-transformed = normalize(image)
-print({&quot;shape&quot;: tuple(transformed.shape),
-       &quot;channel_means&quot;: transformed.mean(dim=(1, 2)).tolist()})
-assert transformed.shape == image.shape</code></pre>
+image <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span>
+normalize <span class="syntax-operator">=</span> Normalize<span class="syntax-punctuation">(</span>
+    mean<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.485</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.456</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.406</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    std<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.229</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.224</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.225</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+transformed <span class="syntax-operator">=</span> normalize<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>transformed<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">channel_means</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> transformed<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>dim<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> transformed<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> image<span class="syntax-operator">.</span>shape</code></pre>
 <p><strong>Expected observation:</strong> Normalization preserves channel/height/width shape while applying a different affine transform to each channel.</p>
 <p><strong>Assumption to name:</strong> Those mean/std values are paired with the selected pretrained-weight recipe; arbitrary weights may require another contract.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -566,7 +614,7 @@ assert transformed.shape == image.shape</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-48` — Day 48 — Transfer Learning with CNNs.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-48` — Day 48 — Transfer Learning with CNNs.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-tuning. Use exactly these maintained learner materials:
@@ -632,14 +680,14 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Use a pretrained CNN (ResNet18) and fine-tune last layers.</li>
 <li>Small dataset or subset recommended. Note: torchvision datasets may download; adjust if offline.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import torch</span>
-<span>import torchvision.transforms as T</span>
-<span>from torchvision import models</span>
-<span>model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)</span>
-<span>for p in model.parameters(): p.requires_grad=False</span>
-<span>model.fc = torch.nn.Linear(model.fc.in_features, 2)</span>
-<span>sum(p.requires_grad for p in model.parameters()), model.fc</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">import</span> torchvision.transforms <span class="syntax-keyword">as</span> T</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> models</span>
+<span class="source-line">model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span>models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">False</span></span>
+<span class="source-line">model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>requires_grad <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> model<span class="syntax-operator">.</span>fc</span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -657,35 +705,35 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone">Focused example A — build and verify a no-download frozen backbone<a class="heading-anchor" href="#learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import torch</span>
-<span>from torchvision import models</span>
-<span> </span>
-<span>model = models.resnet18(weights=None)  # explicit offline architecture</span>
-<span>for parameter in model.parameters():</span>
-<span>    parameter.requires_grad = False</span>
-<span>model.fc = torch.nn.Linear(model.fc.in_features, 3)</span>
-<span> </span>
-<span>trainable = [name for name, p in model.named_parameters() if p.requires_grad]</span>
-<span>print(trainable)</span>
-<span>assert trainable == [&quot;fc.weight&quot;, &quot;fc.bias&quot;]</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> models</span>
+<span class="source-line"></span>
+<span class="source-line">model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># explicit offline architecture</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> parameter <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    parameter<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>trainable<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> trainable <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fc.weight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fc.bias</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Only the newly assigned head parameters are trainable; no pretrained asset was downloaded.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract">Focused example B — apply the matching tensor normalization contract<a class="heading-anchor" href="#learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Those mean/std values are paired with the selected pretrained-weight recipe; arbitrary weights may require another contract.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import torch</span>
-<span>from torchvision.transforms import Normalize</span>
-<span> </span>
-<span>image = torch.full((3, 4, 4), 0.5)</span>
-<span>normalize = Normalize(</span>
-<span>    mean=[0.485, 0.456, 0.406],</span>
-<span>    std=[0.229, 0.224, 0.225],</span>
-<span>)</span>
-<span>transformed = normalize(image)</span>
-<span>print({&quot;shape&quot;: tuple(transformed.shape),</span>
-<span>       &quot;channel_means&quot;: transformed.mean(dim=(1, 2)).tolist()})</span>
-<span>assert transformed.shape == image.shape</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torchvision.transforms <span class="syntax-keyword">import</span> Normalize</span>
+<span class="source-line"></span>
+<span class="source-line">image <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">normalize <span class="syntax-operator">=</span> Normalize<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    mean<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.485</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.456</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.406</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    std<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.229</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.224</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.225</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">transformed <span class="syntax-operator">=</span> normalize<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>transformed<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">channel_means</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> transformed<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>dim<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> transformed<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> image<span class="syntax-operator">.</span>shape</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Normalization preserves channel/height/width shape while applying a different affine transform to each channel.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -760,19 +808,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Offline fallback design — print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Transform mismatch diagnosis</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Frozen-state edge case</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Offline fallback design</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Transform mismatch diagnosis</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Frozen-state edge case</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Offline fallback design</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -816,131 +864,131 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup and dataset</p>
-<pre><code class="language-python"># 1) Imports
-import torch, torch.nn as nn
-from torchvision import datasets, transforms, models
-from torch.utils.data import DataLoader
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># 1) Imports</span>
+<span class="syntax-keyword">import</span> torch<span class="syntax-operator">,</span> torch.nn <span class="syntax-keyword">as</span> nn
+<span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> datasets<span class="syntax-punctuation">,</span> transforms<span class="syntax-punctuation">,</span> models
+<span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> DataLoader
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-# 2) Reproducibility and device
-torch.manual_seed(0)
-np.random.seed(0)
-device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)
+<span class="syntax-comment"># 2) Reproducibility and device</span>
+torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+device <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cuda</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> torch<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>is_available<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
 
-# 3) Paths and a disclosed mechanics-only fallback
-root = Path(&quot;data&quot;)
-train_dir = root / &quot;train&quot;
-valid_dir = root / &quot;valid&quot;
-using_image_folder = train_dir.is_dir() and valid_dir.is_dir()
+<span class="syntax-comment"># 3) Paths and a disclosed mechanics-only fallback</span>
+root <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+train_dir <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span>
+valid_dir <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span>
+using_image_folder <span class="syntax-operator">=</span> train_dir<span class="syntax-operator">.</span>is_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> valid_dir<span class="syntax-operator">.</span>is_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-# 4) Small CPU-friendly transforms with ImageNet normalization
-mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
-val_tfms = transforms.Compose(
-    [
-        transforms.Resize(72),
-        transforms.CenterCrop(64),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ]
-)
+<span class="syntax-comment"># 4) Small CPU-friendly transforms with ImageNet normalization</span>
+mean<span class="syntax-punctuation">,</span> std <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.485</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.456</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.406</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.229</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.224</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.225</span><span class="syntax-punctuation">]</span>
+val_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">[</span>
+        transforms<span class="syntax-operator">.</span>Resize<span class="syntax-punctuation">(</span><span class="syntax-number">72</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        transforms<span class="syntax-operator">.</span>CenterCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        transforms<span class="syntax-operator">.</span>ToTensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        transforms<span class="syntax-operator">.</span>Normalize<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> std<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">)</span>
 
-# 5) Real ImageFolder data when supplied; deterministic fake images otherwise
-if using_image_folder:
-    train_ds = datasets.ImageFolder(train_dir, transform=val_tfms)
-    valid_ds = datasets.ImageFolder(valid_dir, transform=val_tfms)
-    n_classes = len(train_ds.classes)
-else:
-    print(
-        &quot;data/train and data/valid are absent; using FakeData to verify &quot;
-        &quot;the mechanics only (not transfer-learning quality)&quot;
-    )
-    n_classes = 2
-    train_ds = datasets.FakeData(
-        size=12,
-        image_size=(3, 64, 64),
-        num_classes=n_classes,
-        transform=val_tfms,
-        random_offset=0,
-    )
-    valid_ds = datasets.FakeData(
-        size=6,
-        image_size=(3, 64, 64),
-        num_classes=n_classes,
-        transform=val_tfms,
-        random_offset=100,
-    )
+<span class="syntax-comment"># 5) Real ImageFolder data when supplied; deterministic fake images otherwise</span>
+<span class="syntax-keyword">if</span> using_image_folder<span class="syntax-punctuation">:</span>
+    train_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>train_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">)</span>
+    valid_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>valid_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">)</span>
+    n_classes <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_ds<span class="syntax-operator">.</span>classes<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">data/train and data/valid are absent; using FakeData to verify </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">the mechanics only (not transfer-learning quality)</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">)</span>
+    n_classes <span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+    train_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span>
+        size<span class="syntax-operator">=</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span>
+        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span>
+        transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">,</span>
+        random_offset<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    valid_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span>
+        size<span class="syntax-operator">=</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>
+        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span>
+        transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">,</span>
+        random_offset<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
 
-train_dl = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
-valid_dl = DataLoader(valid_ds, batch_size=3, num_workers=0)</code></pre>
+train_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>train_ds<span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+valid_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>valid_ds<span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>transforms: Always normalize to ImageNet stats for pretrained ImageNet weights</li>
 <li>ImageFolder: expects subfolders per class under train/ and valid/</li>
-<li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;:</code> guard and measuring a benefit.</li>
+<li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if __name__ == &quot;__main__&quot;:</code> guard and measuring a benefit.</li>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Linear head then unfreeze last block</p>
-<pre><code class="language-python"># 1) Reuse cached weights without making a surprise network request
-weights = models.ResNet18_Weights.DEFAULT
-checkpoint = (
-    Path(torch.hub.get_dir()) / &quot;checkpoints&quot; / Path(weights.url).name
-)
-if checkpoint.exists():
-    model = models.resnet18(weights=weights)
-    using_pretrained_weights = True
-else:
-    model = models.resnet18(weights=None)
-    using_pretrained_weights = False
-    print(
-        &quot;ResNet-18 weights are not cached; using random weights to verify &quot;
-        &quot;freeze/unfreeze mechanics only&quot;
-    )
-# 2) Freeze backbone
-for p in model.parameters():
-    p.requires_grad = False
-# 3) Replace head
-model.fc = nn.Linear(model.fc.in_features, n_classes)
-model = model.to(device)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># 1) Reuse cached weights without making a surprise network request</span>
+weights <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT
+checkpoint <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    Path<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>hub<span class="syntax-operator">.</span>get_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoints</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> Path<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>url<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>name
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> checkpoint<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span>weights<span class="syntax-punctuation">)</span>
+    using_pretrained_weights <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>
+    using_pretrained_weights <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">ResNet-18 weights are not cached; using random weights to verify </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">freeze/unfreeze mechanics only</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-comment"># 2) Freeze backbone</span>
+<span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    p<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
+<span class="syntax-comment"># 3) Replace head</span>
+model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> n_classes<span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
 
-# 4) Train head only
-opt = torch.optim.Adam(model.fc.parameters(), lr=1e-3)
-loss_fn = nn.CrossEntropyLoss()
+<span class="syntax-comment"># 4) Train head only</span>
+opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">)</span>
+loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>CrossEntropyLoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-def run_epoch(train=True):
-    dl = train_dl if train else valid_dl
-    model.train() if train else model.eval()
-    total=0; correct=0; loss_sum=0.0
-    with torch.set_grad_enabled(train):
-        for xb, yb in dl:
-            xb, yb = xb.to(device), yb.to(device)
-            if train: opt.zero_grad()
-            logits = model(xb)
-            loss = loss_fn(logits, yb)
-            if train: loss.backward(); opt.step()
-            loss_sum += loss.item()*xb.size(0)
-            correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
+<span class="syntax-keyword">def</span> <span class="syntax-function">run_epoch</span><span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    dl <span class="syntax-operator">=</span> train_dl <span class="syntax-keyword">if</span> train <span class="syntax-keyword">else</span> valid_dl
+    model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> train <span class="syntax-keyword">else</span> model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    total<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> correct<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> loss_sum<span class="syntax-operator">=</span><span class="syntax-number">0.0</span>
+    <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>set_grad_enabled<span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl<span class="syntax-punctuation">:</span>
+            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">if</span> train<span class="syntax-punctuation">:</span> opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            logits <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span>
+            loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">if</span> train<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+            correct <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>yb<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> loss_sum<span class="syntax-operator">/</span>total<span class="syntax-punctuation">,</span> correct<span class="syntax-operator">/</span>total
 
-hist_head = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}
-for _ in range(5):
-    tr_loss, tr_acc = run_epoch(train=True)
-    va_loss, va_acc = run_epoch(train=False)
-    hist_head[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_head[&#x27;va&#x27;].append((va_loss, va_acc))
+hist_head <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    hist_head<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_head<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-# 5) Unfreeze last block and use smaller LR
-for p in model.layer4.parameters(): p.requires_grad = True
-opt = torch.optim.Adam([
-    {&#x27;params&#x27;: model.fc.parameters(), &#x27;lr&#x27;: 1e-3},
-    {&#x27;params&#x27;: model.layer4.parameters(), &#x27;lr&#x27;: 3e-4},
-])
+<span class="syntax-comment"># 5) Unfreeze last block and use smaller LR</span>
+<span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>layer4<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> p<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span>
+opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">params</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1e-3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">params</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>layer4<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3e-4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-hist_tune = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}
-for _ in range(5):
-    tr_loss, tr_acc = run_epoch(train=True)
-    va_loss, va_acc = run_epoch(train=False)
-    hist_tune[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_tune[&#x27;va&#x27;].append((va_loss, va_acc))</code></pre>
+hist_tune <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    hist_tune<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_tune<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Line‑by‑line</p>
 <ul>
 <li>Freeze: prevents backbone weights from updating; only the new head learns</li>
@@ -949,36 +997,36 @@ for _ in range(5):
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Augmentation</p>
-<pre><code class="language-python">aug_tfms = transforms.Compose([
-    transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-    transforms.ToTensor(), transforms.Normalize(mean, std)
-])
-if using_image_folder:
-    train_ds_aug = datasets.ImageFolder(train_dir, transform=aug_tfms)
-else:
-    train_ds_aug = datasets.FakeData(
-        size=12,
-        image_size=(3, 64, 64),
-        num_classes=n_classes,
-        transform=aug_tfms,
-        random_offset=0,
-    )
-train_dl_aug = DataLoader(
-    train_ds_aug,
-    batch_size=4,
-    shuffle=True,
-    num_workers=0,
-)
+<pre class="highlighted-code"><code class="language-python">aug_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    transforms<span class="syntax-operator">.</span>RandomResizedCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    transforms<span class="syntax-operator">.</span>RandomHorizontalFlip<span class="syntax-punctuation">(</span>p<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    transforms<span class="syntax-operator">.</span>ColorJitter<span class="syntax-punctuation">(</span>brightness<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> contrast<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> saturation<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    transforms<span class="syntax-operator">.</span>ToTensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> transforms<span class="syntax-operator">.</span>Normalize<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> std<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> using_image_folder<span class="syntax-punctuation">:</span>
+    train_ds_aug <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>train_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>aug_tfms<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    train_ds_aug <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span>
+        size<span class="syntax-operator">=</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span>
+        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span>
+        transform<span class="syntax-operator">=</span>aug_tfms<span class="syntax-punctuation">,</span>
+        random_offset<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+train_dl_aug <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>
+    train_ds_aug<span class="syntax-punctuation">,</span>
+    batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>
+    shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+    num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
 
-# Re-train head phase with augmentation for a few epochs
-train_dl = train_dl_aug  # swap in
-hist_aug = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}
-for _ in range(5):
-    tr_loss, tr_acc = run_epoch(train=True)
-    va_loss, va_acc = run_epoch(train=False)
-    hist_aug[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_aug[&#x27;va&#x27;].append((va_loss, va_acc))</code></pre>
+<span class="syntax-comment"># Re-train head phase with augmentation for a few epochs</span>
+train_dl <span class="syntax-operator">=</span> train_dl_aug  <span class="syntax-comment"># swap in</span>
+hist_aug <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    hist_aug<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_aug<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>RandomResizedCrop increases robustness to scale/position</li>
@@ -987,23 +1035,23 @@ for _ in range(5):
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — OneCycleLR</p>
-<pre><code class="language-python"># Reset optimizer for OneCycle
-max_lr = 1e-3
-steps_per_epoch = len(train_dl)
-opt = torch.optim.Adam(model.parameters(), lr=max_lr)
-sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=max_lr,
-    epochs=5, steps_per_epoch=steps_per_epoch, pct_start=0.3, div_factor=10)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Reset optimizer for OneCycle</span>
+max_lr <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span>
+steps_per_epoch <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_dl<span class="syntax-punctuation">)</span>
+opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>max_lr<span class="syntax-punctuation">)</span>
+sched <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>lr_scheduler<span class="syntax-operator">.</span>OneCycleLR<span class="syntax-punctuation">(</span>opt<span class="syntax-punctuation">,</span> max_lr<span class="syntax-operator">=</span>max_lr<span class="syntax-punctuation">,</span>
+    epochs<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> steps_per_epoch<span class="syntax-operator">=</span>steps_per_epoch<span class="syntax-punctuation">,</span> pct_start<span class="syntax-operator">=</span><span class="syntax-number">0.3</span><span class="syntax-punctuation">,</span> div_factor<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
 
-lrs = []
-for epoch in range(5):
-    model.train()
-    for xb, yb in train_dl:
-        xb, yb = xb.to(device), yb.to(device)
-        opt.zero_grad(); loss = loss_fn(model(xb), yb)
-        loss.backward(); opt.step(); sched.step()
-        lrs.append(sched.get_last_lr()[0])
+lrs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> epoch <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> train_dl<span class="syntax-punctuation">:</span>
+        xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
+        opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span>
+        loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> sched<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        lrs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>sched<span class="syntax-operator">.</span>get_last_lr<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-plt.plot(lrs); plt.title(&#x27;OneCycle LR&#x27;); plt.xlabel(&#x27;Step&#x27;); plt.ylabel(&#x27;LR&#x27;); plt.show()</code></pre>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>lrs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">OneCycle LR</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LR</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>OneCycle warms up to max_lr then cools down; often yields faster, smoother training</li>
@@ -1111,134 +1159,134 @@ plt.plot(lrs); plt.title(&#x27;OneCycle LR&#x27;); plt.xlabel(&#x27;Step&#x27;);
 <hr>
 <p>Setup and dataset</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day48_transfer_learning_cnn/day48_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># 1) Imports</span>
-<span>import torch, torch.nn as nn</span>
-<span>from torchvision import datasets, transforms, models</span>
-<span>from torch.utils.data import DataLoader</span>
-<span>import numpy as np</span>
-<span>import matplotlib.pyplot as plt</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span># 2) Reproducibility and device</span>
-<span>torch.manual_seed(0)</span>
-<span>np.random.seed(0)</span>
-<span>device = torch.device(&#x27;cuda&#x27; if torch.cuda.is_available() else &#x27;cpu&#x27;)</span>
-<span> </span>
-<span># 3) Paths and a disclosed mechanics-only fallback</span>
-<span>root = Path(&quot;data&quot;)</span>
-<span>train_dir = root / &quot;train&quot;</span>
-<span>valid_dir = root / &quot;valid&quot;</span>
-<span>using_image_folder = train_dir.is_dir() and valid_dir.is_dir()</span>
-<span> </span>
-<span># 4) Small CPU-friendly transforms with ImageNet normalization</span>
-<span>mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]</span>
-<span>val_tfms = transforms.Compose(</span>
-<span>    [</span>
-<span>        transforms.Resize(72),</span>
-<span>        transforms.CenterCrop(64),</span>
-<span>        transforms.ToTensor(),</span>
-<span>        transforms.Normalize(mean, std),</span>
-<span>    ]</span>
-<span>)</span>
-<span> </span>
-<span># 5) Real ImageFolder data when supplied; deterministic fake images otherwise</span>
-<span>if using_image_folder:</span>
-<span>    train_ds = datasets.ImageFolder(train_dir, transform=val_tfms)</span>
-<span>    valid_ds = datasets.ImageFolder(valid_dir, transform=val_tfms)</span>
-<span>    n_classes = len(train_ds.classes)</span>
-<span>else:</span>
-<span>    print(</span>
-<span>        &quot;data/train and data/valid are absent; using FakeData to verify &quot;</span>
-<span>        &quot;the mechanics only (not transfer-learning quality)&quot;</span>
-<span>    )</span>
-<span>    n_classes = 2</span>
-<span>    train_ds = datasets.FakeData(</span>
-<span>        size=12,</span>
-<span>        image_size=(3, 64, 64),</span>
-<span>        num_classes=n_classes,</span>
-<span>        transform=val_tfms,</span>
-<span>        random_offset=0,</span>
-<span>    )</span>
-<span>    valid_ds = datasets.FakeData(</span>
-<span>        size=6,</span>
-<span>        image_size=(3, 64, 64),</span>
-<span>        num_classes=n_classes,</span>
-<span>        transform=val_tfms,</span>
-<span>        random_offset=100,</span>
-<span>    )</span>
-<span> </span>
-<span>train_dl = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)</span>
-<span>valid_dl = DataLoader(valid_ds, batch_size=3, num_workers=0)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># 1) Imports</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> torch<span class="syntax-operator">,</span> torch.nn <span class="syntax-keyword">as</span> nn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torchvision <span class="syntax-keyword">import</span> datasets<span class="syntax-punctuation">,</span> transforms<span class="syntax-punctuation">,</span> models</span>
+<span class="source-line"><span class="syntax-keyword">from</span> torch.utils.data <span class="syntax-keyword">import</span> DataLoader</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 2) Reproducibility and device</span></span>
+<span class="source-line">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>seed<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">device <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cuda</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> torch<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>is_available<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 3) Paths and a disclosed mechanics-only fallback</span></span>
+<span class="source-line">root <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">train_dir <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">valid_dir <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">using_image_folder <span class="syntax-operator">=</span> train_dir<span class="syntax-operator">.</span>is_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> valid_dir<span class="syntax-operator">.</span>is_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 4) Small CPU-friendly transforms with ImageNet normalization</span></span>
+<span class="source-line">mean<span class="syntax-punctuation">,</span> std <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.485</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.456</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.406</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.229</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.224</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.225</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">val_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        transforms<span class="syntax-operator">.</span>Resize<span class="syntax-punctuation">(</span><span class="syntax-number">72</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transforms<span class="syntax-operator">.</span>CenterCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transforms<span class="syntax-operator">.</span>ToTensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transforms<span class="syntax-operator">.</span>Normalize<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> std<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 5) Real ImageFolder data when supplied; deterministic fake images otherwise</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> using_image_folder<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    train_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>train_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    valid_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>valid_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    n_classes <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_ds<span class="syntax-operator">.</span>classes<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">data/train and data/valid are absent; using FakeData to verify </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">the mechanics only (not transfer-learning quality)</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    n_classes <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    train_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        size<span class="syntax-operator">=</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        random_offset<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    valid_ds <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        size<span class="syntax-operator">=</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transform<span class="syntax-operator">=</span>val_tfms<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        random_offset<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">train_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>train_ds<span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">valid_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span>valid_ds<span class="syntax-punctuation">,</span> batch_size<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Explanation</p>
 <ul>
 <li>transforms: Always normalize to ImageNet stats for pretrained ImageNet weights</li>
 <li>ImageFolder: expects subfolders per class under train/ and valid/</li>
-<li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;:</code> guard and measuring a benefit.</li>
+<li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if __name__ == &quot;__main__&quot;:</code> guard and measuring a benefit.</li>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Linear head then unfreeze last block</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># 1) Reuse cached weights without making a surprise network request</span>
-<span>weights = models.ResNet18_Weights.DEFAULT</span>
-<span>checkpoint = (</span>
-<span>    Path(torch.hub.get_dir()) / &quot;checkpoints&quot; / Path(weights.url).name</span>
-<span>)</span>
-<span>if checkpoint.exists():</span>
-<span>    model = models.resnet18(weights=weights)</span>
-<span>    using_pretrained_weights = True</span>
-<span>else:</span>
-<span>    model = models.resnet18(weights=None)</span>
-<span>    using_pretrained_weights = False</span>
-<span>    print(</span>
-<span>        &quot;ResNet-18 weights are not cached; using random weights to verify &quot;</span>
-<span>        &quot;freeze/unfreeze mechanics only&quot;</span>
-<span>    )</span>
-<span># 2) Freeze backbone</span>
-<span>for p in model.parameters():</span>
-<span>    p.requires_grad = False</span>
-<span># 3) Replace head</span>
-<span>model.fc = nn.Linear(model.fc.in_features, n_classes)</span>
-<span>model = model.to(device)</span>
-<span> </span>
-<span># 4) Train head only</span>
-<span>opt = torch.optim.Adam(model.fc.parameters(), lr=1e-3)</span>
-<span>loss_fn = nn.CrossEntropyLoss()</span>
-<span> </span>
-<span>def run_epoch(train=True):</span>
-<span>    dl = train_dl if train else valid_dl</span>
-<span>    model.train() if train else model.eval()</span>
-<span>    total=0; correct=0; loss_sum=0.0</span>
-<span>    with torch.set_grad_enabled(train):</span>
-<span>        for xb, yb in dl:</span>
-<span>            xb, yb = xb.to(device), yb.to(device)</span>
-<span>            if train: opt.zero_grad()</span>
-<span>            logits = model(xb)</span>
-<span>            loss = loss_fn(logits, yb)</span>
-<span>            if train: loss.backward(); opt.step()</span>
-<span>            loss_sum += loss.item()*xb.size(0)</span>
-<span>            correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)</span>
-<span>    return loss_sum/total, correct/total</span>
-<span> </span>
-<span>hist_head = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}</span>
-<span>for _ in range(5):</span>
-<span>    tr_loss, tr_acc = run_epoch(train=True)</span>
-<span>    va_loss, va_acc = run_epoch(train=False)</span>
-<span>    hist_head[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_head[&#x27;va&#x27;].append((va_loss, va_acc))</span>
-<span> </span>
-<span># 5) Unfreeze last block and use smaller LR</span>
-<span>for p in model.layer4.parameters(): p.requires_grad = True</span>
-<span>opt = torch.optim.Adam([</span>
-<span>    {&#x27;params&#x27;: model.fc.parameters(), &#x27;lr&#x27;: 1e-3},</span>
-<span>    {&#x27;params&#x27;: model.layer4.parameters(), &#x27;lr&#x27;: 3e-4},</span>
-<span>])</span>
-<span> </span>
-<span>hist_tune = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}</span>
-<span>for _ in range(5):</span>
-<span>    tr_loss, tr_acc = run_epoch(train=True)</span>
-<span>    va_loss, va_acc = run_epoch(train=False)</span>
-<span>    hist_tune[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_tune[&#x27;va&#x27;].append((va_loss, va_acc))</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># 1) Reuse cached weights without making a surprise network request</span></span>
+<span class="source-line">weights <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT</span>
+<span class="source-line">checkpoint <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    Path<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>hub<span class="syntax-operator">.</span>get_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoints</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> Path<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>url<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>name</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> checkpoint<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span>weights<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    using_pretrained_weights <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>resnet18<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    using_pretrained_weights <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">ResNet-18 weights are not cached; using random weights to verify </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">freeze/unfreeze mechanics only</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment"># 2) Freeze backbone</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"><span class="syntax-comment"># 3) Replace head</span></span>
+<span class="source-line">model<span class="syntax-operator">.</span>fc <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>in_features<span class="syntax-punctuation">,</span> n_classes<span class="syntax-punctuation">)</span></span>
+<span class="source-line">model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 4) Train head only</span></span>
+<span class="source-line">opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</span>CrossEntropyLoss<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_epoch</span><span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    dl <span class="syntax-operator">=</span> train_dl <span class="syntax-keyword">if</span> train <span class="syntax-keyword">else</span> valid_dl</span>
+<span class="source-line">    model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> train <span class="syntax-keyword">else</span> model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    total<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> correct<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> loss_sum<span class="syntax-operator">=</span><span class="syntax-number">0.0</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>set_grad_enabled<span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> dl<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> train<span class="syntax-punctuation">:</span> opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            logits <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> train<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            loss_sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            correct <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>yb<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> loss_sum<span class="syntax-operator">/</span>total<span class="syntax-punctuation">,</span> correct<span class="syntax-operator">/</span>total</span>
+<span class="source-line"></span>
+<span class="source-line">hist_head <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    hist_head<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_head<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># 5) Unfreeze last block and use smaller LR</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>layer4<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> p<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line">opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">params</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>fc<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1e-3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">params</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>layer4<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3e-4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">hist_tune <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    hist_tune<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_tune<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Line‑by‑line</p>
 <ul>
@@ -1248,37 +1296,37 @@ plt.plot(lrs); plt.title(&#x27;OneCycle LR&#x27;); plt.xlabel(&#x27;Step&#x27;);
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Augmentation</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>aug_tfms = transforms.Compose([</span>
-<span>    transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),</span>
-<span>    transforms.RandomHorizontalFlip(p=0.5),</span>
-<span>    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),</span>
-<span>    transforms.ToTensor(), transforms.Normalize(mean, std)</span>
-<span>])</span>
-<span>if using_image_folder:</span>
-<span>    train_ds_aug = datasets.ImageFolder(train_dir, transform=aug_tfms)</span>
-<span>else:</span>
-<span>    train_ds_aug = datasets.FakeData(</span>
-<span>        size=12,</span>
-<span>        image_size=(3, 64, 64),</span>
-<span>        num_classes=n_classes,</span>
-<span>        transform=aug_tfms,</span>
-<span>        random_offset=0,</span>
-<span>    )</span>
-<span>train_dl_aug = DataLoader(</span>
-<span>    train_ds_aug,</span>
-<span>    batch_size=4,</span>
-<span>    shuffle=True,</span>
-<span>    num_workers=0,</span>
-<span>)</span>
-<span> </span>
-<span># Re-train head phase with augmentation for a few epochs</span>
-<span>train_dl = train_dl_aug  # swap in</span>
-<span>hist_aug = {&#x27;tr&#x27;:[], &#x27;va&#x27;:[]}</span>
-<span>for _ in range(5):</span>
-<span>    tr_loss, tr_acc = run_epoch(train=True)</span>
-<span>    va_loss, va_acc = run_epoch(train=False)</span>
-<span>    hist_aug[&#x27;tr&#x27;].append((tr_loss, tr_acc)); hist_aug[&#x27;va&#x27;].append((va_loss, va_acc))</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">aug_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span></span>
+<span class="source-line">    transforms<span class="syntax-operator">.</span>RandomResizedCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transforms<span class="syntax-operator">.</span>RandomHorizontalFlip<span class="syntax-punctuation">(</span>p<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transforms<span class="syntax-operator">.</span>ColorJitter<span class="syntax-punctuation">(</span>brightness<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> contrast<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> saturation<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transforms<span class="syntax-operator">.</span>ToTensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> transforms<span class="syntax-operator">.</span>Normalize<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> std<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> using_image_folder<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    train_ds_aug <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>ImageFolder<span class="syntax-punctuation">(</span>train_dir<span class="syntax-punctuation">,</span> transform<span class="syntax-operator">=</span>aug_tfms<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    train_ds_aug <span class="syntax-operator">=</span> datasets<span class="syntax-operator">.</span>FakeData<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        size<span class="syntax-operator">=</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        image_size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">,</span> <span class="syntax-number">64</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        num_classes<span class="syntax-operator">=</span>n_classes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        transform<span class="syntax-operator">=</span>aug_tfms<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        random_offset<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">train_dl_aug <span class="syntax-operator">=</span> DataLoader<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    train_ds_aug<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    batch_size<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Re-train head phase with augmentation for a few epochs</span></span>
+<span class="source-line">train_dl <span class="syntax-operator">=</span> train_dl_aug  <span class="syntax-comment"># swap in</span></span>
+<span class="source-line">hist_aug <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tr_loss<span class="syntax-punctuation">,</span> tr_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    va_loss<span class="syntax-punctuation">,</span> va_acc <span class="syntax-operator">=</span> run_epoch<span class="syntax-punctuation">(</span>train<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    hist_aug<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>tr_loss<span class="syntax-punctuation">,</span> tr_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> hist_aug<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">va</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>va_loss<span class="syntax-punctuation">,</span> va_acc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Notes</p>
 <ul>
@@ -1288,24 +1336,24 @@ plt.plot(lrs); plt.title(&#x27;OneCycle LR&#x27;); plt.xlabel(&#x27;Step&#x27;);
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — OneCycleLR</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Reset optimizer for OneCycle</span>
-<span>max_lr = 1e-3</span>
-<span>steps_per_epoch = len(train_dl)</span>
-<span>opt = torch.optim.Adam(model.parameters(), lr=max_lr)</span>
-<span>sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=max_lr,</span>
-<span>    epochs=5, steps_per_epoch=steps_per_epoch, pct_start=0.3, div_factor=10)</span>
-<span> </span>
-<span>lrs = []</span>
-<span>for epoch in range(5):</span>
-<span>    model.train()</span>
-<span>    for xb, yb in train_dl:</span>
-<span>        xb, yb = xb.to(device), yb.to(device)</span>
-<span>        opt.zero_grad(); loss = loss_fn(model(xb), yb)</span>
-<span>        loss.backward(); opt.step(); sched.step()</span>
-<span>        lrs.append(sched.get_last_lr()[0])</span>
-<span> </span>
-<span>plt.plot(lrs); plt.title(&#x27;OneCycle LR&#x27;); plt.xlabel(&#x27;Step&#x27;); plt.ylabel(&#x27;LR&#x27;); plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Reset optimizer for OneCycle</span></span>
+<span class="source-line">max_lr <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span></span>
+<span class="source-line">steps_per_epoch <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_dl<span class="syntax-punctuation">)</span></span>
+<span class="source-line">opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>max_lr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">sched <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>lr_scheduler<span class="syntax-operator">.</span>OneCycleLR<span class="syntax-punctuation">(</span>opt<span class="syntax-punctuation">,</span> max_lr<span class="syntax-operator">=</span>max_lr<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    epochs<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> steps_per_epoch<span class="syntax-operator">=</span>steps_per_epoch<span class="syntax-punctuation">,</span> pct_start<span class="syntax-operator">=</span><span class="syntax-number">0.3</span><span class="syntax-punctuation">,</span> div_factor<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">lrs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> epoch <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    model<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">in</span> train_dl<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        xb<span class="syntax-punctuation">,</span> yb <span class="syntax-operator">=</span> xb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss <span class="syntax-operator">=</span> loss_fn<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>xb<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> yb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> sched<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        lrs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>sched<span class="syntax-operator">.</span>get_last_lr<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>lrs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">OneCycle LR</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LR</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p>Explanation</p>
 <ul>

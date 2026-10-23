@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,500 +161,500 @@
       <h1>Track</h1>
       <p class="source-path">Generated from <code>courses/nlp/track.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;schema_version&quot;: 1,</span>
-<span>  &quot;id&quot;: &quot;nlp&quot;,</span>
-<span>  &quot;title&quot;: &quot;Natural Language Processing: from text to reliable language systems&quot;,</span>
-<span>  &quot;summary&quot;: &quot;A detailed24lesson foundation in language data, linguistic structure, classical models, neural representations and trustworthy evaluation. Continue into LLM theory and applied domain assistants.&quot;,</span>
-<span>  &quot;lessons&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-001&quot;,</span>
-<span>      &quot;title&quot;: &quot;Language as data and the unit of analysis&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;document&quot;,</span>
-<span>        &quot;sentence&quot;,</span>
-<span>        &quot;token&quot;,</span>
-<span>        &quot;label&quot;,</span>
-<span>        &quot;task formulation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement language as data and the unit of analysis with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-002&quot;,</span>
-<span>      &quot;title&quot;: &quot;Unicode, normalization and loss of information&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-001&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;code point&quot;,</span>
-<span>        &quot;NFC&quot;,</span>
-<span>        &quot;NFKC&quot;,</span>
-<span>        &quot;encoding&quot;,</span>
-<span>        &quot;normalization&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement unicode, normalization and loss of information with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-003&quot;,</span>
-<span>      &quot;title&quot;: &quot;Regular expressions and explainable extraction&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-002&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;regex&quot;,</span>
-<span>        &quot;span&quot;,</span>
-<span>        &quot;escaping&quot;,</span>
-<span>        &quot;precision&quot;,</span>
-<span>        &quot;recall&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement regular expressions and explainable extraction with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-004&quot;,</span>
-<span>      &quot;title&quot;: &quot;Segmentation, tokenization and subwords&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-003&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;word boundary&quot;,</span>
-<span>        &quot;byte pair encoding&quot;,</span>
-<span>        &quot;unknown token&quot;,</span>
-<span>        &quot;offset&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement segmentation, tokenization and subwords with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-005&quot;,</span>
-<span>      &quot;title&quot;: &quot;Morphology, syntax and linguistic structure&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-004&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;lemma&quot;,</span>
-<span>        &quot;stem&quot;,</span>
-<span>        &quot;part of speech&quot;,</span>
-<span>        &quot;dependency&quot;,</span>
-<span>        &quot;ambiguity&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement morphology, syntax and linguistic structure with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-006&quot;,</span>
-<span>      &quot;title&quot;: &quot;N-gram models, smoothing and perplexity&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-005&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;conditional probability&quot;,</span>
-<span>        &quot;smoothing&quot;,</span>
-<span>        &quot;log likelihood&quot;,</span>
-<span>        &quot;perplexity&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement n-gram models, smoothing and perplexity with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-007&quot;,</span>
-<span>      &quot;title&quot;: &quot;Counts, TF-IDF and sparse representations&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-006&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;document frequency&quot;,</span>
-<span>        &quot;TF-IDF&quot;,</span>
-<span>        &quot;sparse matrix&quot;,</span>
-<span>        &quot;normalization&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement counts, tf-idf and sparse representations with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-008&quot;,</span>
-<span>      &quot;title&quot;: &quot;Naive Bayes as a text baseline&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-007&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;conditional independence&quot;,</span>
-<span>        &quot;log odds&quot;,</span>
-<span>        &quot;smoothing&quot;,</span>
-<span>        &quot;imbalance&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement naive bayes as a text baseline with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-009&quot;,</span>
-<span>      &quot;title&quot;: &quot;Linear text classification and calibrated scores&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-008&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;logistic regression&quot;,</span>
-<span>        &quot;regularization&quot;,</span>
-<span>        &quot;threshold&quot;,</span>
-<span>        &quot;calibration&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement linear text classification and calibrated scores with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-010&quot;,</span>
-<span>      &quot;title&quot;: &quot;Sequence labeling and Viterbi decoding&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-009&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;HMM&quot;,</span>
-<span>        &quot;transition&quot;,</span>
-<span>        &quot;emission&quot;,</span>
-<span>        &quot;Viterbi&quot;,</span>
-<span>        &quot;BIO&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement sequence labeling and viterbi decoding with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-011&quot;,</span>
-<span>      &quot;title&quot;: &quot;Entities, relations and extraction boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-010&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;named entity&quot;,</span>
-<span>        &quot;span&quot;,</span>
-<span>        &quot;relation&quot;,</span>
-<span>        &quot;coreference&quot;,</span>
-<span>        &quot;matching&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement entities, relations and extraction boundaries with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-012&quot;,</span>
-<span>      &quot;title&quot;: &quot;Distributional embeddings and similarity&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-011&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;co-occurrence&quot;,</span>
-<span>        &quot;PMI&quot;,</span>
-<span>        &quot;embedding&quot;,</span>
-<span>        &quot;cosine&quot;,</span>
-<span>        &quot;analogy&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement distributional embeddings and similarity with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-013&quot;,</span>
-<span>      &quot;title&quot;: &quot;Topic discovery and latent structure&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-012&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;LSA&quot;,</span>
-<span>        &quot;NMF&quot;,</span>
-<span>        &quot;LDA&quot;,</span>
-<span>        &quot;topic coherence&quot;,</span>
-<span>        &quot;stability&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement topic discovery and latent structure with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-014&quot;,</span>
-<span>      &quot;title&quot;: &quot;Sentence representations and semantic search&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-013&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;pooling&quot;,</span>
-<span>        &quot;embedding space&quot;,</span>
-<span>        &quot;negative sample&quot;,</span>
-<span>        &quot;semantic retrieval&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement sentence representations and semantic search with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-015&quot;,</span>
-<span>      &quot;title&quot;: &quot;Contextual encoders for classification and tagging&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-014&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;bidirectional attention&quot;,</span>
-<span>        &quot;encoder&quot;,</span>
-<span>        &quot;mask&quot;,</span>
-<span>        &quot;pooling&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement contextual encoders for classification and tagging with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-016&quot;,</span>
-<span>      &quot;title&quot;: &quot;Sequence-to-sequence learning and summarization&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-015&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;encoder decoder&quot;,</span>
-<span>        &quot;cross attention&quot;,</span>
-<span>        &quot;teacher forcing&quot;,</span>
-<span>        &quot;exposure bias&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement sequence-to-sequence learning and summarization with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-017&quot;,</span>
-<span>      &quot;title&quot;: &quot;Evaluating generated language without a single perfect answer&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-016&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;BLEU&quot;,</span>
-<span>        &quot;ROUGE&quot;,</span>
-<span>        &quot;semantic metric&quot;,</span>
-<span>        &quot;factual support&quot;,</span>
-<span>        &quot;human judgment&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement evaluating generated language without a single perfect answer with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-018&quot;,</span>
-<span>      &quot;title&quot;: &quot;Multilingual NLP and domain shift&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-017&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;language identification&quot;,</span>
-<span>        &quot;tokenization equity&quot;,</span>
-<span>        &quot;alignment&quot;,</span>
-<span>        &quot;transfer&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement multilingual nlp and domain shift with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-019&quot;,</span>
-<span>      &quot;title&quot;: &quot;Annotation, agreement and uncertain labels&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-018&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;annotation guide&quot;,</span>
-<span>        &quot;kappa&quot;,</span>
-<span>        &quot;adjudication&quot;,</span>
-<span>        &quot;soft label&quot;,</span>
-<span>        &quot;disagreement&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement annotation, agreement and uncertain labels with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-020&quot;,</span>
-<span>      &quot;title&quot;: &quot;Weak supervision and active learning&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-019&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;labeling function&quot;,</span>
-<span>        &quot;conflict&quot;,</span>
-<span>        &quot;uncertainty sampling&quot;,</span>
-<span>        &quot;selection bias&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement weak supervision and active learning with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-021&quot;,</span>
-<span>      &quot;title&quot;: &quot;Text leakage, duplicates and evaluation design&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-020&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;document family&quot;,</span>
-<span>        &quot;near duplicate&quot;,</span>
-<span>        &quot;temporal split&quot;,</span>
-<span>        &quot;bootstrap&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement text leakage, duplicates and evaluation design with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-022&quot;,</span>
-<span>      &quot;title&quot;: &quot;Retrieval pipelines and ranking evaluation&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-021&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;inverted index&quot;,</span>
-<span>        &quot;BM25&quot;,</span>
-<span>        &quot;hybrid retrieval&quot;,</span>
-<span>        &quot;nDCG&quot;,</span>
-<span>        &quot;MRR&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement retrieval pipelines and ranking evaluation with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-023&quot;,</span>
-<span>      &quot;title&quot;: &quot;Reliable NLP systems and changing corpora&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-022&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;drift&quot;,</span>
-<span>        &quot;subgroup&quot;,</span>
-<span>        &quot;privacy&quot;,</span>
-<span>        &quot;lineage&quot;,</span>
-<span>        &quot;monitoring&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement reliable nlp systems and changing corpora with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;nlp-024&quot;,</span>
-<span>      &quot;title&quot;: &quot;An end-to-end domain text analytics case study&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;nlp-023&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;corpus&quot;,</span>
-<span>        &quot;baseline&quot;,</span>
-<span>        &quot;extraction&quot;,</span>
-<span>        &quot;retrieval&quot;,</span>
-<span>        &quot;evaluation&quot;,</span>
-<span>        &quot;error analysis&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement an end-to-end domain text analytics case study with inspectable data and measured errors.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span>
-<span>    }</span>
-<span>  ],</span>
-<span>  &quot;sources&quot;: [</span>
-<span>    {</span>
-<span>      &quot;title&quot;: &quot;NLTK book and linguistic task reference&quot;,</span>
-<span>      &quot;url&quot;: &quot;https://www.nltk.org/book/&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;title&quot;: &quot;Speech and Language Processing&quot;,</span>
-<span>      &quot;url&quot;: &quot;https://web.stanford.edu/~jurafsky/slp3/&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;title&quot;: &quot;Hugging Face LLM course&quot;,</span>
-<span>      &quot;url&quot;: &quot;https://huggingface.co/learn/llm-course/chapter1/1&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Natural Language Processing: from text to reliable language systems&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;summary&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;24 lessons in natural language processing, from text representation and linguistic structure to classical models, neural methods and careful evaluation. Continue into LLM mechanisms and subject assistants when ready.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lessons&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Language as data and the unit of analysis&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;document&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;sentence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;token&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;label&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;task formulation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement language as data and the unit of analysis with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Unicode, normalization and loss of information&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-001&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;code point&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;NFC&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;NFKC&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;encoding&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;normalization&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement unicode, normalization and loss of information with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Regular expressions and explainable extraction&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-002&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;regex&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;span&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;escaping&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;precision&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;recall&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement regular expressions and explainable extraction with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Segmentation, tokenization and subwords&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-003&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;word boundary&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;byte pair encoding&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;unknown token&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;offset&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement segmentation, tokenization and subwords with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Morphology, syntax and linguistic structure&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-004&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;lemma&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;stem&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;part of speech&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;dependency&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ambiguity&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement morphology, syntax and linguistic structure with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;N-gram models, smoothing and perplexity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-005&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;conditional probability&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;smoothing&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;log likelihood&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;perplexity&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement n-gram models, smoothing and perplexity with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Counts, TF-IDF and sparse representations&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-006&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;document frequency&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;TF-IDF&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;sparse matrix&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;normalization&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement counts, tf-idf and sparse representations with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Naive Bayes as a text baseline&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-007&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;conditional independence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;log odds&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;smoothing&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;imbalance&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement naive bayes as a text baseline with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Linear text classification and calibrated scores&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-008&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;logistic regression&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;regularization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;threshold&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;calibration&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement linear text classification and calibrated scores with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sequence labeling and Viterbi decoding&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-009&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;HMM&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;transition&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;emission&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Viterbi&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;BIO&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement sequence labeling and viterbi decoding with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Entities, relations and extraction boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-010&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;named entity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;span&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;relation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;coreference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;matching&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement entities, relations and extraction boundaries with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Distributional embeddings and similarity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-011&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;co-occurrence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;PMI&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;embedding&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;cosine&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;analogy&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement distributional embeddings and similarity with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Topic discovery and latent structure&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-012&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;LSA&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;NMF&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;LDA&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;topic coherence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;stability&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement topic discovery and latent structure with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sentence representations and semantic search&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-013&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;pooling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;embedding space&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;negative sample&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;semantic retrieval&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement sentence representations and semantic search with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Contextual encoders for classification and tagging&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-014&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;bidirectional attention&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;encoder&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;mask&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;pooling&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement contextual encoders for classification and tagging with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sequence-to-sequence learning and summarization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-015&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;encoder decoder&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;cross attention&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;teacher forcing&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;exposure bias&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement sequence-to-sequence learning and summarization with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Evaluating generated language without a single perfect answer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-016&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;BLEU&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;ROUGE&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;semantic metric&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;factual support&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;human judgment&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement evaluating generated language without a single perfect answer with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Multilingual NLP and domain shift&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-017&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;language identification&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;tokenization equity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;alignment&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;transfer&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement multilingual nlp and domain shift with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Annotation, agreement and uncertain labels&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-018&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;annotation guide&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;kappa&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;adjudication&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;soft label&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;disagreement&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement annotation, agreement and uncertain labels with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Weak supervision and active learning&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-019&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;labeling function&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;conflict&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;uncertainty sampling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;selection bias&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement weak supervision and active learning with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Text leakage, duplicates and evaluation design&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-020&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;document family&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;near duplicate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;temporal split&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;bootstrap&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement text leakage, duplicates and evaluation design with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Retrieval pipelines and ranking evaluation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-021&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;inverted index&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;BM25&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;hybrid retrieval&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nDCG&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;MRR&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement retrieval pipelines and ranking evaluation with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reliable NLP systems and changing corpora&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-022&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;drift&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;subgroup&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;privacy&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;lineage&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;monitoring&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement reliable nlp systems and changing corpora with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An end-to-end domain text analytics case study&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;nlp-023&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;corpus&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;baseline&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;extraction&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;retrieval&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;evaluation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;error analysis&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain and implement an end-to-end domain text analytics case study with inspectable data and measured errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">],</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;sources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NLTK book and linguistic task reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://www.nltk.org/book/&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Speech and Language Processing&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://web.stanford.edu/~jurafsky/slp3/&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Hugging Face LLM course&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://huggingface.co/learn/llm-course/chapter1/1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

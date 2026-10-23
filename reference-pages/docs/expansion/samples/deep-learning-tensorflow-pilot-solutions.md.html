@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,154 +168,154 @@
 <p>The code blocks under Shared helpers and Exercises 1 through 6 form one Python script in order. Run that script from a fresh process, so one exercise cannot inherit a changed weight from an earlier notebook attempt. During this design phase, the TensorFlow blocks were syntax-checked and their numbers checked independently with exact rational arithmetic. TensorFlow itself was not installed or executed. A future profile must pass these assertions on each claimed platform before publication.</p>
 <h3 id="shared-helpers">Shared helpers<a class="heading-anchor" href="#shared-helpers" aria-label="Link to this section">#</a></h3>
 <p>The denominator is the number of paired observations, not the number of entries produced by an accidental broadcast. <code>assert_close</code> uses absolute error only, so a default relative tolerance cannot weaken the small oracle. The shape guard deliberately targets eager tensors in this lesson; it is not a general symbolic Keras validation layer.</p>
-<pre><code class="language-python">import math
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-with tf.device(&quot;/CPU:0&quot;):
-    x = tf.constant([1.0, 2.0, 3.0], dtype=tf.float64)
-    y = tf.constant([2.0, 4.0, 6.0], dtype=tf.float64)
-
-
-def assert_close(actual, expected):
-    assert math.isclose(float(actual), expected, rel_tol=0, abs_tol=1e-12)
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    y <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
 
 
-def make_weight(value=0.0):
-    with tf.device(&quot;/CPU:0&quot;):
-        return tf.Variable(value, dtype=tf.float64)
+<span class="syntax-keyword">def</span> <span class="syntax-function">assert_close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
 
 
-def paired_mse(prediction, target):
-    if prediction.shape.rank != 1 or target.shape.rank != 1:
-        raise ValueError(&quot;prediction and target must both be vectors&quot;)
-    if prediction.shape != target.shape:
-        raise ValueError(&quot;paired vectors must have equal shapes&quot;)
-    if int(tf.size(prediction).numpy()) == 0:
-        raise ValueError(&quot;paired vectors must be nonempty&quot;)
-    return tf.reduce_mean(tf.square(prediction - target))
+<span class="syntax-keyword">def</span> <span class="syntax-function">make_weight</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
 
 
-def recorded_gradient(weight):
-    with tf.device(&quot;/CPU:0&quot;), tf.GradientTape() as tape:
-        prediction = weight * x
-        loss = paired_mse(prediction, y)
-    gradient = tape.gradient(loss, weight)
-    if gradient is None:
-        raise ValueError(&quot;loss is disconnected from weight&quot;)
-    return loss, gradient
+<span class="syntax-keyword">def</span> <span class="syntax-function">paired_mse</span><span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> prediction<span class="syntax-operator">.</span>shape<span class="syntax-operator">.</span>rank <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> target<span class="syntax-operator">.</span>shape<span class="syntax-operator">.</span>rank <span class="syntax-operator">!=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">prediction and target must both be vectors</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> prediction<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> target<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">paired vectors must have equal shapes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>size<span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">paired vectors must be nonempty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>prediction <span class="syntax-operator">-</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-def one_step(rate):
-    weight = make_weight()
-    loss, gradient = recorded_gradient(weight)
-    with tf.device(&quot;/CPU:0&quot;):
-        weight.assign_sub(tf.constant(rate, tf.float64) * gradient)
-        after = paired_mse(weight * x, y)
-    return tuple(float(value.numpy()) for value in (loss, gradient, weight, after))</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">recorded_gradient</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        prediction <span class="syntax-operator">=</span> weight <span class="syntax-operator">*</span> x
+        loss <span class="syntax-operator">=</span> paired_mse<span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
+    gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> gradient <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">loss is disconnected from weight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> loss<span class="syntax-punctuation">,</span> gradient
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">one_step</span><span class="syntax-punctuation">(</span>rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    weight <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    loss<span class="syntax-punctuation">,</span> gradient <span class="syntax-operator">=</span> recorded_gradient<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        weight<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span>rate<span class="syntax-punctuation">,</span> tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> gradient<span class="syntax-punctuation">)</span>
+        after <span class="syntax-operator">=</span> paired_mse<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> after<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="exercise-1-trace-the-independent-oracle">Exercise 1: trace the independent oracle<a class="heading-anchor" href="#exercise-1-trace-the-independent-oracle" aria-label="Link to this section">#</a></h3>
 <p>The loss as a function of the slope is <code>L(w) = ((w-2)^2 + (2w-4)^2 + (3w-6)^2)/3 = (14/3)*(w-2)^2</code>. Therefore <code>dL/dw = (28/3)*(w-2)</code>. At zero the gradient is negative: a small increase in the slope reduces the loss locally. The supplied labels remain fixed. Only the Variable representing the slope changes during an update.</p>
 <p>The update is subtraction, so <code>0 - (1/10)*(-56/3) = 28/15</code>. Afterward the residuals are <code>[-2/15,-4/15,-6/15]</code>, whose squared mean is <code>56/675</code>.</p>
-<pre><code class="language-python">before, gradient, weight, after = one_step(0.1)
-assert_close(before, 56 / 3)
-assert_close(gradient, -56 / 3)
-assert_close(weight, 28 / 15)
-assert_close(after, 56 / 675)
-print(&quot;exercise 1:&quot;, before, gradient, weight, after)</code></pre>
+<pre class="highlighted-code"><code class="language-python">before<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> after <span class="syntax-operator">=</span> one_step<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>before<span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>gradient<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> <span class="syntax-number">28</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">675</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 1:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> before<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> after<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> all four assertions pass. <strong>Verify:</strong> compare the derivative above with the tape value, not just with a copied printout. A negative gradient is a direction statement at the old parameter, not a universal promise about every possible step size.</p>
 <h3 id="exercise-2-find-an-overly-large-step">Exercise 2: find an overly large step<a class="heading-anchor" href="#exercise-2-find-an-overly-large-step" aria-label="Link to this section">#</a></h3>
 <p>With rate <code>1/4</code>, the first gradient is unchanged because it is still computed at zero. The new weight is <code>14/3</code>, past the optimum of 2. Its distance from the optimum is <code>8/3</code>, so its loss is <code>(14/3)*(8/3)^2 = 896/27</code>. The model has made a real update and still become worse.</p>
-<pre><code class="language-python">before, gradient, weight, after = one_step(0.25)
-assert_close(gradient, -56 / 3)
-assert_close(weight, 14 / 3)
-assert_close(after, 896 / 27)
-assert after &gt; before
-print(&quot;exercise 2:&quot;, weight, after)</code></pre>
+<pre class="highlighted-code"><code class="language-python">before<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> after <span class="syntax-operator">=</span> one_step<span class="syntax-punctuation">(</span><span class="syntax-number">0.25</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>gradient<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> <span class="syntax-number">14</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span> <span class="syntax-number">896</span> <span class="syntax-operator">/</span> <span class="syntax-number">27</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> after <span class="syntax-operator">&gt;</span> before
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 2:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> after<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> the new loss exceeds <code>56/3</code>. <strong>Verify:</strong> the helper creates a fresh zero-valued Variable; changing the rate on an already updated weight would test a different experiment. The comparison should preserve the failed large-step result rather than silently select a better rate afterward.</p>
 <h3 id="exercise-3-construct-two-genuine-steps">Exercise 3: construct two genuine steps<a class="heading-anchor" href="#exercise-3-construct-two-genuine-steps" aria-label="Link to this section">#</a></h3>
 <p>Each tape records a forward computation at the current weight. After one rate-<code>1/10</code> step, the distance from 2 is multiplied by <code>1/15</code>. The second weight is <code>448/225</code> and its loss is <code>56/151875</code>. Reusing the first gradient would instead add the same large update again; it would not differentiate the new objective value.</p>
-<pre><code class="language-python">weight = make_weight()
-weights, gradients, losses = [], [], []
-for _ in range(2):
-    loss, gradient = recorded_gradient(weight)
-    gradients.append(float(gradient.numpy()))
-    with tf.device(&quot;/CPU:0&quot;):
-        weight.assign_sub(tf.constant(0.1, tf.float64) * gradient)
-        losses.append(float(paired_mse(weight * x, y).numpy()))
-    weights.append(float(weight.numpy()))
-assert_close(weights[0], 28 / 15)
-assert_close(weights[1], 448 / 225)
-assert_close(gradients[0], -56 / 3)
-assert_close(gradients[1], -56 / 45)
-assert_close(losses[1], 56 / 151875)
-assert gradients[0] != gradients[1]
-print(&quot;exercise 3:&quot;, weights, gradients, losses)</code></pre>
+<pre class="highlighted-code"><code class="language-python">weight <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+weights<span class="syntax-punctuation">,</span> gradients<span class="syntax-punctuation">,</span> losses <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    loss<span class="syntax-punctuation">,</span> gradient <span class="syntax-operator">=</span> recorded_gradient<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span>
+    gradients<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        weight<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> gradient<span class="syntax-punctuation">)</span>
+        losses<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>paired_mse<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    weights<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>weight<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">28</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">448</span> <span class="syntax-operator">/</span> <span class="syntax-number">225</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>gradients<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>gradients<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">45</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>losses<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">151875</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> gradients<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> gradients<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 3:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">,</span> gradients<span class="syntax-punctuation">,</span> losses<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> two different gradients and the two specified weights. <strong>Verify:</strong> a new call to <code>recorded_gradient</code> creates a new tape and reads the updated Variable. The logged post-update loss is recomputed; the old loss returned by the tape still describes the old weight.</p>
 <h3 id="exercise-4-reject-a-broken-pairing">Exercise 4: reject a broken pairing<a class="heading-anchor" href="#exercise-4-reject-a-broken-pairing" aria-label="Link to this section">#</a></h3>
 <p>At zero, broadcasting repeats each squared target across the input axis. Its mean accidentally matches the correct loss. Its derivative uses every input/target combination instead of matching records, yielding <code>-16</code>. A scalar loss check alone cannot detect this pairing error.</p>
-<pre><code class="language-python">with tf.device(&quot;/CPU:0&quot;):
-    column_target = tf.reshape(y, (3, 1))
-    zero = make_weight()
-    with tf.GradientTape() as tape:
-        wrong_residuals = zero * x - column_target
-        wrong_loss = tf.reduce_mean(tf.square(wrong_residuals))
-    wrong_gradient = tape.gradient(wrong_loss, zero)
-    assert tuple(wrong_residuals.shape) == (3, 3)
-    assert_close(wrong_loss.numpy(), 56 / 3)
-    assert_close(wrong_gradient.numpy(), -16.0)
-    assert_close(paired_mse(x, y).numpy(), 14 / 3)
-    empty = tf.constant([], dtype=tf.float64)
-    for left, right in ((x, column_target), (empty, empty)):
-        try:
-            paired_mse(left, right)
-        except ValueError as error:
-            assert &quot;vector&quot; in str(error) or &quot;shape&quot; in str(error)
-        else:
-            raise AssertionError(&quot;invalid pairing was accepted&quot;)
-print(&quot;exercise 4: malformed and empty pairings rejected&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    column_target <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    zero <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        wrong_residuals <span class="syntax-operator">=</span> zero <span class="syntax-operator">*</span> x <span class="syntax-operator">-</span> column_target
+        wrong_loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>wrong_residuals<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    wrong_gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>wrong_loss<span class="syntax-punctuation">,</span> zero<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>wrong_residuals<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    assert_close<span class="syntax-punctuation">(</span>wrong_loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    assert_close<span class="syntax-punctuation">(</span>wrong_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">16.0</span><span class="syntax-punctuation">)</span>
+    assert_close<span class="syntax-punctuation">(</span>paired_mse<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    empty <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> left<span class="syntax-punctuation">,</span> right <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> column_target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">,</span> empty<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+            paired_mse<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">vector</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid pairing was accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 4: malformed and empty pairings rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> the valid vector pair succeeds and both invalid cases fail before a mean is computed. <strong>Verify:</strong> keep the wrong-loss counterexample in the evidence. Automatically flattening a target is inappropriate unless its record ordering and intended meaning have been established separately.</p>
 <h3 id="exercise-5-diagnose-missing-versus-zero">Exercise 5: diagnose missing versus zero<a class="heading-anchor" href="#exercise-5-diagnose-missing-versus-zero" aria-label="Link to this section">#</a></h3>
 <p>The first forward multiplication below happens outside the recording scope. A later tape sees an already computed tensor and has no recorded path from the loss to the Variable. <code>None</code> describes that missing path. At the true optimum, the path exists and its derivative is the numeric value zero.</p>
-<pre><code class="language-python">weight = make_weight()
-with tf.device(&quot;/CPU:0&quot;):
-    precomputed = weight * x
-    with tf.GradientTape() as tape:
-        disconnected_loss = paired_mse(precomputed, y)
-    disconnected = tape.gradient(disconnected_loss, weight)
-assert disconnected is None
-_, repaired = recorded_gradient(weight)
-assert_close(repaired.numpy(), -56 / 3)
-optimum = make_weight(2.0)
-_, zero_gradient = recorded_gradient(optimum)
-assert zero_gradient is not None
-assert_close(zero_gradient.numpy(), 0.0)
-print(&quot;exercise 5:&quot;, disconnected, float(repaired.numpy()),
-      float(zero_gradient.numpy()))</code></pre>
+<pre class="highlighted-code"><code class="language-python">weight <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    precomputed <span class="syntax-operator">=</span> weight <span class="syntax-operator">*</span> x
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        disconnected_loss <span class="syntax-operator">=</span> paired_mse<span class="syntax-punctuation">(</span>precomputed<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
+    disconnected <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>disconnected_loss<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> disconnected <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span>
+_<span class="syntax-punctuation">,</span> repaired <span class="syntax-operator">=</span> recorded_gradient<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>repaired<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+optimum <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+_<span class="syntax-punctuation">,</span> zero_gradient <span class="syntax-operator">=</span> recorded_gradient<span class="syntax-punctuation">(</span>optimum<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> zero_gradient <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+assert_close<span class="syntax-punctuation">(</span>zero_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 5:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> disconnected<span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>repaired<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>zero_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> <code>None</code>, approximately <code>-18.666666666666668</code>, and <code>0.0</code>. <strong>Verify:</strong> <code>is None</code> and a numeric comparison test different facts. Replacing all missing gradients with zero hides disconnection bugs. Watching the Variable after a forward computation also cannot retroactively record that computation.</p>
 <h3 id="exercise-6-transfer-to-a-bias-and-held-out-input">Exercise 6: transfer to a bias and held-out input<a class="heading-anchor" href="#exercise-6-transfer-to-a-bias-and-held-out-input" aria-label="Link to this section">#</a></h3>
 <p>At <code>w=b=0</code>, residuals are <code>[-3,-5,-7]</code>. Multiplying by <code>2*x</code> gives the slope gradient <code>-68/3</code>; multiplying by 2 gives the bias gradient <code>-10</code>. Apply both updates from that same old state. Do not update one parameter and recompute the other gradient from a partially changed model.</p>
 <p>The new predictions at the training inputs are <code>[49/15,83/15,117/15]</code>. Subtracting <code>[3,5,7]</code> yields <code>[4/15,8/15,12/15]</code>, so training MSE is <code>224/675</code>. The untouched point receives prediction <code>151/15</code>, with squared error <code>256/225</code>.</p>
-<pre><code class="language-python">weight, bias = make_weight(), make_weight()
-with tf.device(&quot;/CPU:0&quot;):
-    shifted_y = tf.constant([3.0, 5.0, 7.0], dtype=tf.float64)
-    with tf.GradientTape() as tape:
-        loss = paired_mse(weight * x + bias, shifted_y)
-    slope_gradient, bias_gradient = tape.gradient(loss, [weight, bias])
-    assert slope_gradient is not None and bias_gradient is not None
-    assert_close(slope_gradient.numpy(), -68 / 3)
-    assert_close(bias_gradient.numpy(), -10)
-    rate = tf.constant(0.1, dtype=tf.float64)
-    weight.assign_sub(rate * slope_gradient)
-    bias.assign_sub(rate * bias_gradient)
-    training_mse = paired_mse(weight * x + bias, shifted_y)
-    holdout_prediction = weight * tf.constant(4.0, tf.float64) + bias
-    holdout_squared_error = tf.square(holdout_prediction - 9.0)
-assert_close(weight.numpy(), 34 / 15)
-assert_close(bias.numpy(), 1)
-assert_close(training_mse.numpy(), 224 / 675)
-assert_close(holdout_prediction.numpy(), 151 / 15)
-assert_close(holdout_squared_error.numpy(), 256 / 225)
-print(&quot;exercise 6:&quot;, float(training_mse.numpy()),
-      float(holdout_prediction.numpy()), float(holdout_squared_error.numpy()))</code></pre>
+<pre class="highlighted-code"><code class="language-python">weight<span class="syntax-punctuation">,</span> bias <span class="syntax-operator">=</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> make_weight<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    shifted_y <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        loss <span class="syntax-operator">=</span> paired_mse<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">*</span> x <span class="syntax-operator">+</span> bias<span class="syntax-punctuation">,</span> shifted_y<span class="syntax-punctuation">)</span>
+    slope_gradient<span class="syntax-punctuation">,</span> bias_gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>weight<span class="syntax-punctuation">,</span> bias<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> slope_gradient <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> bias_gradient <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+    assert_close<span class="syntax-punctuation">(</span>slope_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">68</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    assert_close<span class="syntax-punctuation">(</span>bias_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+    rate <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    weight<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span>rate <span class="syntax-operator">*</span> slope_gradient<span class="syntax-punctuation">)</span>
+    bias<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span>rate <span class="syntax-operator">*</span> bias_gradient<span class="syntax-punctuation">)</span>
+    training_mse <span class="syntax-operator">=</span> paired_mse<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">*</span> x <span class="syntax-operator">+</span> bias<span class="syntax-punctuation">,</span> shifted_y<span class="syntax-punctuation">)</span>
+    holdout_prediction <span class="syntax-operator">=</span> weight <span class="syntax-operator">*</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> bias
+    holdout_squared_error <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>holdout_prediction <span class="syntax-operator">-</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>weight<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">34</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>bias<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>training_mse<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">224</span> <span class="syntax-operator">/</span> <span class="syntax-number">675</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>holdout_prediction<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">151</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
+assert_close<span class="syntax-punctuation">(</span>holdout_squared_error<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">256</span> <span class="syntax-operator">/</span> <span class="syntax-number">225</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exercise 6:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>training_mse<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>holdout_prediction<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>holdout_squared_error<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> every listed value passes absolute tolerance <code>1e-12</code>. <strong>Verify:</strong> report training MSE and the one held-out squared error separately. Their difference is not an estimate of population generalization. Changing the rate after inspecting the holdout would turn that point into selection data; a new untouched evaluation would then be needed.</p>
 <h3 id="retrieval-alternatives-and-evidence-review">Retrieval, alternatives and evidence review<a class="heading-anchor" href="#retrieval-alternatives-and-evidence-review" aria-label="Link to this section">#</a></h3>
 <p>For the guide&#x27;s fresh <code>x=[1,2], y=[3,6]</code> transfer at zero, the slope gradient is <code>-15</code>. With rate <code>0.1</code>, the new weight is <code>1.5</code> and new MSE is <code>45/8</code>. A teacher should change the fixture again before treating a memorized answer as fresh evidence. A learner can also derive the quadratic directly, use a finite difference away from a nondifferentiable point, or compare sum versus mean reductions. Those methods are useful independent checks; none replaces testing that TensorFlow recorded the intended path.</p>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,16 +384,18 @@
 <li>Separate process-restart correctness from concurrency and power-loss guarantees.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-pro-03.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python\professional\lessons\py_pro_03_restartable_file_pipeline.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_pro_03_restartable_file_pipeline<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_03_restartable_file_pipeline.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_03_restartable_file_pipeline.py</code></pre>
 <p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-pro-03.html#solution-1">explanatory solutions</a> and <a href="python-pro-03.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <p>A pipeline can crash after doing work but before recording that it finished. On restart, it must know which input and committed result belong together. Treat the checkpoint as a sealed receipt containing both progress and the result at that progress. If the receipt and result lived in independent files, replacing one successfully would not make the pair an atomic transaction. This lab keeps them in the same JSON document and replaces that one file.</p>
@@ -363,16 +411,16 @@
 <p>The checkpoint contains version, source SHA-256, source byte size, next row, unique quantities by id, total quantity, and completion status. Next row is the number of source records already accounted for, including identical replays. The unique count and total only count each identity once. State is recomputed for the committed prefix when loading, catching invalid progress, unexpected keys, or inconsistent totals rather than trusting arbitrary JSON.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-a-keep-related-state-in-one-publication">Example A: keep related state in one publication<a class="heading-anchor" href="#guide--example-a-keep-related-state-in-one-publication" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">state = {&quot;next_row&quot;: 3, &quot;quantities&quot;: {&quot;A&quot;: 2, &quot;B&quot;: 5}, &quot;total_quantity&quot;: 7, &quot;complete&quot;: False}
-assert state[&quot;next_row&quot;] == 3
-assert sum(state[&quot;quantities&quot;].values()) == state[&quot;total_quantity&quot;]</code></pre>
+<pre class="highlighted-code"><code class="language-python">state <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">complete</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Expected observation: three processed source rows can represent two unique identities when one row was a replay. The mapping and total travel with the offset. Publishing an offset of three while retaining a total from only one record would be inconsistent. JSON is just a format; putting values in JSON does not automatically validate or transactionally coordinate several files.</p>
 <h5 id="guide--example-b-inspect-exact-input-identity">Example B: inspect exact input identity<a class="heading-anchor" href="#guide--example-b-inspect-exact-input-identity" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import hashlib
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 
-first = b&#x27;{&quot;id&quot;:&quot;A&quot;,&quot;quantity&quot;:2}\n&#x27;
-same_meaning_new_bytes = b&#x27;{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: 2}\n&#x27;
-assert hashlib.sha256(first).hexdigest() != hashlib.sha256(same_meaning_new_bytes).hexdigest()</code></pre>
+first <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2}</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span>
+same_meaning_new_bytes <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">: </span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-string">: 2}</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span>
+<span class="syntax-keyword">assert</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>same_meaning_new_bytes<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected observation: spacing changes the byte hash even though the parsed record has the same meaning. This lab pins byte identity deliberately so a resume cannot quietly reinterpret a different source. A semantic content hash is another legitimate design, but needs canonicalization and its own versioned contract. SHA-256 detects content differences; without a trusted signature or key it does not prove who created the source.</p>
 <h5 id="guide--replacement-sequence-and-its-limits">Replacement sequence and its limits<a class="heading-anchor" href="#guide--replacement-sequence-and-its-limits" aria-label="Link to this section">#</a></h5>
 <p>Create a temporary file in the target directory so replacement stays on the same filesystem. Write complete UTF-8 JSON, flush Python&#x27;s buffer, fsync the file, close it, then call <code>os.replace</code>. Closing before replacement is important for Windows file-handle behavior. Remove only the temporary file created by this attempt when an exception occurs. Preserve the old checkpoint and every learner-owned file. A test hook raises before replacement so a test can observe that the old published checkpoint is unchanged.</p>
@@ -428,7 +476,7 @@ assert hashlib.sha256(first).hexdigest() != hashlib.sha256(same_meaning_new_byte
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Study database transactions and idempotency in the bridge track, where several records can share a real transaction boundary. Before adding concurrent writers or external side effects, define ownership, conflict detection, and the exact failure model rather than reusing this single-writer file design unchanged.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-pro-03.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-pro-03.
 Read python/professional/companion-guides/py_pro_03_restartable_file_pipeline.md and python/professional/lessons/py_pro_03_restartable_file_pipeline.py.
 Check my direct prerequisites: python-23, python-10.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -468,100 +516,100 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-03: Restartable File Pipelines and Honest Durability Guarantees.</span>
-<span> </span>
-<span>Read ../companion-guides/py_pro_03_restartable_file_pipeline.md before attempting the exercises.</span>
-<span>The example runs; unfinished exercise functions raise NotImplementedError.</span>
-<span>Keep solutions separate until you have attempted and checked the contract.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span> </span>
-<span>def read_snapshot(source: Path) -&gt; tuple[bytes, list[dict[str, object]]]:</span>
-<span>    &quot;&quot;&quot;TODO: validate a bounded exact-key JSONL snapshot and replay conflicts.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete read_snapshot&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def state_for_prefix(</span>
-<span>    raw: bytes, records: list[dict[str, object]], next_row: int</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    &quot;&quot;&quot;TODO: derive versioned progress and unique-id aggregate in one state.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete state_for_prefix&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def atomic_write_state(</span>
-<span>    path: Path, state: dict[str, object], before_replace: Callable[[], None] | None = None</span>
-<span>) -&gt; None:</span>
-<span>    &quot;&quot;&quot;TODO: write, flush/fsync, close, replace; remove only this attempt&#x27;s temp.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete atomic_write_state&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def run_pipeline(</span>
-<span>    source: Path, checkpoint: Path, batch_size: int = 2, fail_before_commit_at: int | None = None</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    &quot;&quot;&quot;TODO: validate old state and resume committed prefixes from identical bytes.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete run_pipeline&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_quantities = {&quot;A&quot;: 2, &quot;B&quot;: 5}</span>
-<span>    print(&quot;Worked unique count/total:&quot;, len(worked_quantities), sum(worked_quantities.values()))</span>
-<span>    print(&quot;TODO: complete four boundaries and eight failure-oriented exercises&quot;)</span>
-<span> </span>
-<span># Exercise 1. Pin and validate a snapshot</span>
-<span># Prompt: Implement `read_snapshot` returning source bytes and validated records. Require</span>
-<span># exact id/quantity keys and reject blank lines, malformed JSON, wrong types, and negative</span>
-<span># quantities.</span>
-<span># Verify: A valid two-record file returns two rows and its exact bytes; `true` as quantity, a</span>
-<span># blank line, or an extra field raises ValueError before state publication.</span>
-<span> </span>
-<span># Exercise 2. Declare replay and conflict behavior</span>
-<span># Prompt: Test A/2, A/2, B/5 versus A/2, A/3. Reject a conflicting identity before publishing</span>
-<span># any prefix.</span>
-<span># Verify: Identical replays produce unique count 2 and total 7 after three source rows; the</span>
-<span># conflict snapshot raises ValueError and creates no checkpoint.</span>
-<span> </span>
-<span># Exercise 3. Derive inspectable prefix state</span>
-<span># Prompt: Implement `state_for_prefix` with version, hash, byte size, next_row, quantities,</span>
-<span># total, and completion. Validate the offset and preserve exact accounting.</span>
-<span># Verify: For A/2, A/2, B/5 at next_row 2, total is 2, unique count is 1, and complete is False;</span>
-<span># at 3, total is 7 and complete is True.</span>
-<span> </span>
-<span># Exercise 4. Publish one complete state</span>
-<span># Prompt: Implement `atomic_write_state` with a same-directory temporary file, flush/fsync,</span>
-<span># close, and replace. Add a before_replace test hook.</span>
-<span># Verify: A failure injected before replacement leaves the prior target bytes unchanged and no</span>
-<span># temporary file from that attempt. A successful replacement parses as complete JSON.</span>
-<span> </span>
-<span># Exercise 5. Resume after a failed candidate</span>
-<span># Prompt: Implement `run_pipeline` with batch_size 2. Use five unique records and inject</span>
-<span># failure before committing offset 4, then resume without failure.</span>
-<span># Verify: After failure, committed next_row remains 2; after resume it is 5, complete is True,</span>
-<span># and total matches a clean run with no double counting.</span>
-<span> </span>
-<span># Exercise 6. Reject stale or corrupt state</span>
-<span># Prompt: Resume after changing source bytes, then separately tamper the saved total or</span>
-<span># next_row. Preserve the original evidence in temporary copies.</span>
-<span># Verify: Changed source hash, invalid offset, and inconsistent prefix total each raise</span>
-<span># ValueError; none silently resets or overwrites the checkpoint.</span>
-<span> </span>
-<span># Exercise 7. Prove repeat and empty behavior</span>
-<span># Prompt: Run a completed source again and compare checkpoint bytes. Then process a new empty</span>
-<span># source with a separate checkpoint and test invalid batch sizes.</span>
-<span># Verify: A completed rerun leaves bytes unchanged; empty input commits a complete</span>
-<span># zero-row/zero-total state; zero, negative, and bool batch sizes raise ValueError.</span>
-<span> </span>
-<span># Exercise 8. Write an honest guarantee</span>
-<span># Prompt: Write a short runbook containing source identity, one-writer ownership, retry</span>
-<span># command, state inspection fields, failure test, and filesystem limits.</span>
-<span># Verify: The runbook artifact includes the checkpoint path, source hash, inspected next_row</span>
-<span># after failure, and one-file publication policy. Its guarantee table marks multi-writer and</span>
-<span># power-loss durability as unverified.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-pro-03: Restartable File Pipelines and Honest Durability Guarantees.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_pro_03_restartable_file_pipeline.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs; unfinished exercise functions raise NotImplementedError.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_snapshot</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">bytes</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate a bounded exact-key JSONL snapshot and replay conflicts.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete read_snapshot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">state_for_prefix</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">,</span> records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> next_row<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: derive versioned progress and unique-id aggregate in one state.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete state_for_prefix</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">atomic_write_state</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> before_replace<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: write, flush/fsync, close, replace; remove only this attempt&#x27;s temp.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete atomic_write_state</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_pipeline</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    source<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> checkpoint<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> batch_size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> fail_before_commit_at<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate old state and resume committed prefixes from identical bytes.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete run_pipeline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_quantities <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked unique count/total:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>worked_quantities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>worked_quantities<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: complete four boundaries and eight failure-oriented exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Pin and validate a snapshot</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `read_snapshot` returning source bytes and validated records. Require</span></span>
+<span class="source-line"><span class="syntax-comment"># exact id/quantity keys and reject blank lines, malformed JSON, wrong types, and negative</span></span>
+<span class="source-line"><span class="syntax-comment"># quantities.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A valid two-record file returns two rows and its exact bytes; `true` as quantity, a</span></span>
+<span class="source-line"><span class="syntax-comment"># blank line, or an extra field raises ValueError before state publication.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Declare replay and conflict behavior</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Test A/2, A/2, B/5 versus A/2, A/3. Reject a conflicting identity before publishing</span></span>
+<span class="source-line"><span class="syntax-comment"># any prefix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Identical replays produce unique count 2 and total 7 after three source rows; the</span></span>
+<span class="source-line"><span class="syntax-comment"># conflict snapshot raises ValueError and creates no checkpoint.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Derive inspectable prefix state</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `state_for_prefix` with version, hash, byte size, next_row, quantities,</span></span>
+<span class="source-line"><span class="syntax-comment"># total, and completion. Validate the offset and preserve exact accounting.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: For A/2, A/2, B/5 at next_row 2, total is 2, unique count is 1, and complete is False;</span></span>
+<span class="source-line"><span class="syntax-comment"># at 3, total is 7 and complete is True.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Publish one complete state</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `atomic_write_state` with a same-directory temporary file, flush/fsync,</span></span>
+<span class="source-line"><span class="syntax-comment"># close, and replace. Add a before_replace test hook.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A failure injected before replacement leaves the prior target bytes unchanged and no</span></span>
+<span class="source-line"><span class="syntax-comment"># temporary file from that attempt. A successful replacement parses as complete JSON.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Resume after a failed candidate</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `run_pipeline` with batch_size 2. Use five unique records and inject</span></span>
+<span class="source-line"><span class="syntax-comment"># failure before committing offset 4, then resume without failure.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: After failure, committed next_row remains 2; after resume it is 5, complete is True,</span></span>
+<span class="source-line"><span class="syntax-comment"># and total matches a clean run with no double counting.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Reject stale or corrupt state</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Resume after changing source bytes, then separately tamper the saved total or</span></span>
+<span class="source-line"><span class="syntax-comment"># next_row. Preserve the original evidence in temporary copies.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Changed source hash, invalid offset, and inconsistent prefix total each raise</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError; none silently resets or overwrites the checkpoint.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Prove repeat and empty behavior</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run a completed source again and compare checkpoint bytes. Then process a new empty</span></span>
+<span class="source-line"><span class="syntax-comment"># source with a separate checkpoint and test invalid batch sizes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A completed rerun leaves bytes unchanged; empty input commits a complete</span></span>
+<span class="source-line"><span class="syntax-comment"># zero-row/zero-total state; zero, negative, and bool batch sizes raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Write an honest guarantee</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write a short runbook containing source identity, one-writer ownership, retry</span></span>
+<span class="source-line"><span class="syntax-comment"># command, state inspection fields, failure test, and filesystem limits.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The runbook artifact includes the checkpoint path, source hash, inspected next_row</span></span>
+<span class="source-line"><span class="syntax-comment"># after failure, and one-file publication policy. Its guarantee table marks multi-writer and</span></span>
+<span class="source-line"><span class="syntax-comment"># power-loss durability as unverified.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -598,9 +646,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <p>Stable ID: <code>python-pro-03</code>.</p>
 <p>Read the <a href="python-pro-03.html#guide">guide</a> and attempt the <a href="python-pro-03.html#learner">learner artifact</a> first. The <a href="python-pro-03.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
 <p>The checkpoint is also the published result. That single-file boundary is the central design choice. A temporary candidate can be discarded without changing the old state. A completed state can be read repeatedly without rewriting it. Source identity and a re-derived prefix make resumption explicit instead of treating any parseable JSON as trusted progress.</p>
-<pre><code class="language-python">quantities = {&quot;A&quot;: 2, &quot;B&quot;: 5}
-assert len(quantities) == 2
-assert sum(quantities.values()) == 7</code></pre>
+<pre class="highlighted-code"><code class="language-python">quantities <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>quantities<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>quantities<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></code></pre>
 <p>The reference intentionally reads a bounded snapshot and validates all rows before committing progress. It uses one writer, small deterministic data, and same-directory replacement. Its failure injection tests a process boundary, not a physical power loss. Never run this demonstration against another learner&#x27;s state or remove files you did not create.</p>
 <h4 id="solution-1--exercise-1-pin-and-validate-a-snapshot">Exercise 1. Pin and validate a snapshot<a class="heading-anchor" href="#solution-1--exercise-1-pin-and-validate-a-snapshot" aria-label="Link to this section">#</a></h4>
 <p>Read bytes once, decode as UTF-8, and parse each physical line as one JSON object. The exact key set, trimmed nonempty text id, and nonnegative integer quantity form a small inspectable schema. Booleans are rejected despite Python considering bool an int subclass. Blank lines are rejected so a source-row offset has one unambiguous meaning. Parsing the whole snapshot before publication means an invalid suffix cannot leave a partially accepted source. This trades streaming scale for transparent teaching behavior and should be stated as a bounded-file assumption.</p>
@@ -652,178 +700,178 @@ assert sum(quantities.values()) == 7</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Single-writer, bounded-snapshot restart lab for python-pro-03.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import hashlib</span>
-<span>import json</span>
-<span>import os</span>
-<span>from collections.abc import Callable</span>
-<span>from pathlib import Path</span>
-<span>from tempfile import NamedTemporaryFile, TemporaryDirectory</span>
-<span> </span>
-<span> </span>
-<span>def _unique_object(pairs: list[tuple[str, object]]) -&gt; dict[str, object]:</span>
-<span>    result: dict[str, object] = {}</span>
-<span>    for key, value in pairs:</span>
-<span>        if key in result:</span>
-<span>            raise ValueError(&quot;duplicate JSON field&quot;)</span>
-<span>        result[key] = value</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def read_snapshot(source: Path) -&gt; tuple[bytes, list[dict[str, object]]]:</span>
-<span>    raw = source.read_bytes()</span>
-<span>    records: list[dict[str, object]] = []</span>
-<span>    seen: dict[str, int] = {}</span>
-<span>    try:</span>
-<span>        text = raw.decode(&quot;utf-8&quot;)</span>
-<span>    except UnicodeDecodeError as exc:</span>
-<span>        raise ValueError(&quot;source must be UTF-8&quot;) from exc</span>
-<span>    for number, line in enumerate(text.splitlines(), start=1):</span>
-<span>        if not line.strip():</span>
-<span>            raise ValueError(f&quot;blank source row {number}&quot;)</span>
-<span>        try:</span>
-<span>            record = json.loads(line, object_pairs_hook=_unique_object)</span>
-<span>        except json.JSONDecodeError as exc:</span>
-<span>            raise ValueError(f&quot;invalid JSON at source row {number}&quot;) from exc</span>
-<span>        if not isinstance(record, dict) or set(record) != {&quot;id&quot;, &quot;quantity&quot;}:</span>
-<span>            raise ValueError(f&quot;unexpected schema at source row {number}&quot;)</span>
-<span>        identifier, quantity = record[&quot;id&quot;], record[&quot;quantity&quot;]</span>
-<span>        if not isinstance(identifier, str) or not identifier or identifier != identifier.strip():</span>
-<span>            raise ValueError(f&quot;invalid id at source row {number}&quot;)</span>
-<span>        if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt; 0:</span>
-<span>            raise ValueError(f&quot;invalid quantity at source row {number}&quot;)</span>
-<span>        if identifier in seen and seen[identifier] != quantity:</span>
-<span>            raise ValueError(f&quot;conflicting id at source row {number}&quot;)</span>
-<span>        seen[identifier] = quantity</span>
-<span>        records.append(record)</span>
-<span>    return raw, records</span>
-<span> </span>
-<span> </span>
-<span>def state_for_prefix(</span>
-<span>    raw: bytes, records: list[dict[str, object]], next_row: object</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    if (</span>
-<span>        not isinstance(next_row, int)</span>
-<span>        or isinstance(next_row, bool)</span>
-<span>        or not 0 &lt;= next_row &lt;= len(records)</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;invalid next_row&quot;)</span>
-<span>    quantities: dict[str, int] = {}</span>
-<span>    for row in records[:next_row]:</span>
-<span>        identifier, quantity = row[&quot;id&quot;], row[&quot;quantity&quot;]</span>
-<span>        if not isinstance(identifier, str) or not isinstance(quantity, int):</span>
-<span>            raise ValueError(&quot;prefix requires validated records&quot;)</span>
-<span>        quantities[identifier] = quantity</span>
-<span>    return {</span>
-<span>        &quot;version&quot;: 1,</span>
-<span>        &quot;source_sha256&quot;: hashlib.sha256(raw).hexdigest(),</span>
-<span>        &quot;source_bytes&quot;: len(raw),</span>
-<span>        &quot;next_row&quot;: next_row,</span>
-<span>        &quot;quantities&quot;: dict(sorted(quantities.items())),</span>
-<span>        &quot;total_quantity&quot;: sum(quantities.values()),</span>
-<span>        &quot;complete&quot;: next_row == len(records),</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def atomic_write_state(</span>
-<span>    path: Path, state: dict[str, object], before_replace: Callable[[], None] | None = None</span>
-<span>) -&gt; None:</span>
-<span>    path.parent.mkdir(parents=True, exist_ok=True)</span>
-<span>    temporary: Path | None = None</span>
-<span>    try:</span>
-<span>        with NamedTemporaryFile(</span>
-<span>            mode=&quot;w&quot;,</span>
-<span>            encoding=&quot;utf-8&quot;,</span>
-<span>            newline=&quot;\n&quot;,</span>
-<span>            dir=path.parent,</span>
-<span>            prefix=f&quot;.{path.name}.&quot;,</span>
-<span>            suffix=&quot;.tmp&quot;,</span>
-<span>            delete=False,</span>
-<span>        ) as handle:</span>
-<span>            temporary = Path(handle.name)</span>
-<span>            json.dump(state, handle, sort_keys=True, indent=2)</span>
-<span>            handle.write(&quot;\n&quot;)</span>
-<span>            handle.flush()</span>
-<span>            os.fsync(handle.fileno())</span>
-<span>        if before_replace is not None:</span>
-<span>            before_replace()</span>
-<span>        temporary.replace(path)</span>
-<span>    finally:</span>
-<span>        if temporary is not None:</span>
-<span>            temporary.unlink(missing_ok=True)</span>
-<span> </span>
-<span> </span>
-<span>def run_pipeline(</span>
-<span>    source: Path, checkpoint: Path, batch_size: int = 2, fail_before_commit_at: int | None = None</span>
-<span>) -&gt; dict[str, object]:</span>
-<span>    if not isinstance(batch_size, int) or isinstance(batch_size, bool) or batch_size &lt;= 0:</span>
-<span>        raise ValueError(&quot;batch_size must be a positive integer&quot;)</span>
-<span>    if source.resolve() == checkpoint.resolve():</span>
-<span>        raise ValueError(&quot;source and checkpoint must differ&quot;)</span>
-<span>    raw, records = read_snapshot(source)</span>
-<span>    state: dict[str, object]</span>
-<span>    if checkpoint.exists():</span>
-<span>        try:</span>
-<span>            loaded = json.loads(</span>
-<span>                checkpoint.read_text(encoding=&quot;utf-8&quot;), object_pairs_hook=_unique_object</span>
-<span>            )</span>
-<span>        except (json.JSONDecodeError, UnicodeDecodeError) as exc:</span>
-<span>            raise ValueError(&quot;invalid checkpoint encoding or JSON&quot;) from exc</span>
-<span>        if not isinstance(loaded, dict):</span>
-<span>            raise ValueError(&quot;checkpoint must be an object&quot;)</span>
-<span>        expected = state_for_prefix(raw, records, loaded.get(&quot;next_row&quot;))</span>
-<span>        # Canonical JSON distinguishes booleans from integers and integers from floats.</span>
-<span>        if json.dumps(loaded, sort_keys=True) != json.dumps(expected, sort_keys=True):</span>
-<span>            raise ValueError(&quot;checkpoint does not match this source and prefix&quot;)</span>
-<span>        state = expected</span>
-<span>    else:</span>
-<span>        state = state_for_prefix(raw, records, 0)</span>
-<span>        atomic_write_state(checkpoint, state)</span>
-<span>    raw_offset = state[&quot;next_row&quot;]</span>
-<span>    assert isinstance(raw_offset, int)</span>
-<span>    offset: int = raw_offset</span>
-<span>    while offset &lt; len(records):</span>
-<span>        offset = min(offset + batch_size, len(records))</span>
-<span>        candidate = state_for_prefix(raw, records, offset)</span>
-<span> </span>
-<span>        def before_replace(target_offset: int = offset) -&gt; None:</span>
-<span>            if fail_before_commit_at == target_offset:</span>
-<span>                raise RuntimeError(f&quot;injected failure before committing row {target_offset}&quot;)</span>
-<span> </span>
-<span>        atomic_write_state(checkpoint, candidate, before_replace)</span>
-<span>        state = candidate</span>
-<span>    return state</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    with TemporaryDirectory() as directory:</span>
-<span>        root = Path(directory)</span>
-<span>        source = root / &quot;source.jsonl&quot;</span>
-<span>        source.write_text(</span>
-<span>            &quot;&quot;.join(json.dumps({&quot;id&quot;: str(i), &quot;quantity&quot;: i}) + &quot;\n&quot; for i in range(5)),</span>
-<span>            encoding=&quot;utf-8&quot;,</span>
-<span>        )</span>
-<span>        checkpoint = root / &quot;checkpoint.json&quot;</span>
-<span>        try:</span>
-<span>            run_pipeline(source, checkpoint, fail_before_commit_at=4)</span>
-<span>        except RuntimeError:</span>
-<span>            assert (</span>
-<span>                json.loads(</span>
-<span>                    checkpoint.read_text(encoding=&quot;utf-8&quot;), object_pairs_hook=_unique_object</span>
-<span>                )[&quot;next_row&quot;]</span>
-<span>                == 2</span>
-<span>            )</span>
-<span>        result = run_pipeline(source, checkpoint)</span>
-<span>        assert (</span>
-<span>            result[&quot;next_row&quot;] == 5</span>
-<span>            and result[&quot;total_quantity&quot;] == 10</span>
-<span>            and result[&quot;complete&quot;] is True</span>
-<span>        )</span>
-<span>        print(result)</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Single-writer, bounded-snapshot restart lab for python-pro-03.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> hashlib</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> os</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> NamedTemporaryFile<span class="syntax-punctuation">,</span> TemporaryDirectory</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_unique_object</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> pairs<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> key <span class="syntax-operator">in</span> result<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate JSON field</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        result<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> value</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_snapshot</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">bytes</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    raw <span class="syntax-operator">=</span> source<span class="syntax-operator">.</span>read_bytes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    seen<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        text <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> UnicodeDecodeError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source must be UTF-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">    <span class="syntax-keyword">for</span> number<span class="syntax-punctuation">,</span> line <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> start<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> line<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">blank source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            record <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>line<span class="syntax-punctuation">,</span> object_pairs_hook<span class="syntax-operator">=</span>_unique_object<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> json<span class="syntax-operator">.</span>JSONDecodeError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid JSON at source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unexpected schema at source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        identifier<span class="syntax-punctuation">,</span> quantity <span class="syntax-operator">=</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>identifier<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> identifier <span class="syntax-operator">or</span> identifier <span class="syntax-operator">!=</span> identifier<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid id at source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> quantity <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid quantity at source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> identifier <span class="syntax-operator">in</span> seen <span class="syntax-operator">and</span> seen<span class="syntax-punctuation">[</span>identifier<span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> quantity<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">conflicting id at source row </span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        seen<span class="syntax-punctuation">[</span>identifier<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> quantity</span>
+<span class="source-line">        records<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> raw<span class="syntax-punctuation">,</span> records</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">state_for_prefix</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">,</span> records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> next_row<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>next_row<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>next_row<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> next_row <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    quantities<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> records<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>next_row<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        identifier<span class="syntax-punctuation">,</span> quantity <span class="syntax-operator">=</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>identifier<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">prefix requires validated records</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        quantities<span class="syntax-punctuation">[</span>identifier<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> quantity</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">source_sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">source_bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> next_row<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">quantities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>quantities<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>quantities<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">complete</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> next_row <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">atomic_write_state</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> before_replace<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    temporary<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> NamedTemporaryFile<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            mode<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-builtin">dir</span><span class="syntax-operator">=</span>path<span class="syntax-operator">.</span>parent<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            prefix<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">.</span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string">.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            suffix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">.tmp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            delete<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            temporary <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>handle<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> handle<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            handle<span class="syntax-operator">.</span>write<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            handle<span class="syntax-operator">.</span>flush<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            os<span class="syntax-operator">.</span>fsync<span class="syntax-punctuation">(</span>handle<span class="syntax-operator">.</span>fileno<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> before_replace <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            before_replace<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        temporary<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> temporary <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            temporary<span class="syntax-operator">.</span>unlink<span class="syntax-punctuation">(</span>missing_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_pipeline</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    source<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> checkpoint<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> batch_size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> fail_before_commit_at<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>batch_size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>batch_size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> batch_size <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">batch_size must be a positive integer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> source<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> checkpoint<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source and checkpoint must differ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    raw<span class="syntax-punctuation">,</span> records <span class="syntax-operator">=</span> read_snapshot<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    state<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> checkpoint<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            loaded <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                checkpoint<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> object_pairs_hook<span class="syntax-operator">=</span>_unique_object</span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> <span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>JSONDecodeError<span class="syntax-punctuation">,</span> UnicodeDecodeError<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid checkpoint encoding or JSON</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>loaded<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">checkpoint must be an object</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        expected <span class="syntax-operator">=</span> state_for_prefix<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> records<span class="syntax-punctuation">,</span> loaded<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Canonical JSON distinguishes booleans from integers and integers from floats.</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>loaded<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">checkpoint does not match this source and prefix</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        state <span class="syntax-operator">=</span> expected</span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        state <span class="syntax-operator">=</span> state_for_prefix<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> records<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        atomic_write_state<span class="syntax-punctuation">(</span>checkpoint<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    raw_offset <span class="syntax-operator">=</span> state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw_offset<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    offset<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> raw_offset</span>
+<span class="source-line">    <span class="syntax-keyword">while</span> offset <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        offset <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>offset <span class="syntax-operator">+</span> batch_size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        candidate <span class="syntax-operator">=</span> state_for_prefix<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> records<span class="syntax-punctuation">,</span> offset<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-keyword">def</span> <span class="syntax-function">before_replace</span><span class="syntax-punctuation">(</span>target_offset<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> offset<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> fail_before_commit_at <span class="syntax-operator">==</span> target_offset<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">injected failure before committing row </span><span class="syntax-string">{</span>target_offset<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        atomic_write_state<span class="syntax-punctuation">(</span>checkpoint<span class="syntax-punctuation">,</span> candidate<span class="syntax-punctuation">,</span> before_replace<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        state <span class="syntax-operator">=</span> candidate</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> state</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        root <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        source <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">source.jsonl</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        source<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        checkpoint <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoint.json</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            run_pipeline<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span> checkpoint<span class="syntax-punctuation">,</span> fail_before_commit_at<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">                json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                    checkpoint<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> object_pairs_hook<span class="syntax-operator">=</span>_unique_object</span>
+<span class="source-line">                <span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">                <span class="syntax-operator">==</span> <span class="syntax-number">2</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> run_pipeline<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span> checkpoint<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">next_row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span></span>
+<span class="source-line">            <span class="syntax-operator">and</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">10</span></span>
+<span class="source-line">            <span class="syntax-operator">and</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

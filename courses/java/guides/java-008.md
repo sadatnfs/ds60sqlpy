@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-007`
 
 ## Learning objectives
 
-Explain record, compact constructor, defensive copy using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create an Order with idspaceAspace and itemx. The final exercise transfers the mechanism to reject null collection members.
+Explain record, compact constructor, defensive copy using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create an Order with ID " A " and item x. The final exercise transfers the mechanism to reject null collection members.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A record is a concise carrier for a fixed set of components, with generated acce
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-008/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-record Order(String id,List<String>items) declares component accessorsid() anditems(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
+record Order(String id,List<String>items) declares component accessorsid() and items(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
 
 ## Worked example / walkthrough
 
@@ -64,7 +64,7 @@ public class Main {
 
 ```
 
-**Expected:** idA and items[x].
+**Expected:** ID A and items[x].
 
 ### Example B: Copy caller-owned collections
 
@@ -100,15 +100,15 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Normalize at construction.** Create an Order with idspaceAspace and itemx.
-   **Expected:** idA and items[x].
-   **Verify:** Compare your assertion values or captured diagnostic with idA and items[x].
+1. **Normalize at construction.** Create an Order with ID " A " and item x.
+   **Expected:** ID A and items[x].
+   **Verify:** Compare your assertion values or captured diagnostic with ID A and items[x].
 
 2. **Copy caller-owned collections.** Create an Order from a mutable list,then append to the original list.
    **Expected:** record retains its original single item.
    **Verify:** Compare your assertion values or captured diagnostic with record retains its original single item.
 
-3. **Use value equality.** Construct another Order with normalizedA and itemx.
+3. **Use value equality.** Construct another Order with normalizedA and item x.
    **Expected:** equals true and equalhashCode.
    **Verify:** Compare your assertion values or captured diagnostic with equals true and equalhashCode.
 
@@ -120,9 +120,9 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** UnsupportedOperationException.
    **Verify:** Compare your assertion values or captured diagnostic with UnsupportedOperationException.
 
-6. **Reject null collection members.** Try creating an Order whose items containsnull.
-   **Expected:** NullPointerException from the declaredcopy policy.
-   **Verify:** Compare your assertion values or captured diagnostic with NullPointerException from the declaredcopy policy.
+6. **Reject null collection members.** Try creating an Order whose items contains null.
+   **Expected:** NullPointerException from the declared copy policy.
+   **Verify:** Compare your assertion values or captured diagnostic with NullPointerException from the declared copy policy.
 
 ## Common pitfalls and diagnosis
 

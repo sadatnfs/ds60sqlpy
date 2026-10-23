@@ -16,7 +16,7 @@ A classification threshold is a separate decision policy. Changing it alters pre
 
 ## Design decisions and when to use this method
 
-Use one logit per binary event when the target represents a yes/no outcome. Keep the training objective in logit space and apply sigmoid for a probability-oriented report ordecision policy. Choose threshold, calibration and error costs using an appropriate validation protocol rather than tuning them on a final assessment.
+Use one logit per binary event when the target represents a yes/no outcome. Keep the training objective in logit space and apply sigmoid for a probability-oriented report or decision policy. Choose threshold, calibration and error costs using an appropriate validation protocol rather than tuning them on a final assessment.
 
 Before using class orpositive-label weights, write the weighted objective and its denominator. Weighting changes the fitting target and can change the meaning of the raw sigmoid output. It is not equivalent to changing a decision threshold after fitting, and it does not independently establish calibrated probabilities on a new population.
 
@@ -54,7 +54,7 @@ The exponent is never applied to a large positive magnitude in the final term. T
 
 For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
 
-The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective orgradient.
+The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective or gradient.
 
 Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.
 
@@ -62,7 +62,7 @@ Decision costs require an additional probability assumption. If p is a calibrate
 
 Positive-label weighting changes the loss itself. With positive-term multiplierα, the derivative for a positive target becomesα(p-1), while a negative target contributes p. The reduction convention still matters; do not silently replace the library's element-mean reduction with a sum-of-weights denominator. Such weighting can be useful for a declared fitting goal, but the resulting sigmoid should not be assumed to retain an unweighted population-probability interpretation without further calibration evidence.
 
-The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representationalone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one byconstruction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.
+The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representation alone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one by construction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.
 
 ## Worked example / walkthrough
 
@@ -138,7 +138,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 If loss is finite but training is unexpectedly weak, inspect whether sigmoid was applied before a logits-aware objective. Compare both the midpoint loss and the derivative, not only the predicted labels. If extreme scores produce NaN in a hand-written `log(sigmoid())` path, use the combined objective rather than clipping until an assertion passes.
 
-If error counts change while logits stay fixed, inspect threshold and tie policy before blaming optimization. If a confidence score ispresented as an empirical success frequency, look for calibration evidence on the relevant population. If positive-label weights were introduced, record the changed objective and denominator. Validate target range and matching shape explicitly instead of treating a successful API call as a complete data contract.
+If error counts change while logits stay fixed, inspect threshold and tie policy before blaming optimization. If a confidence score is presented as an empirical success frequency, look for calibration evidence on the relevant population. If positive-label weights were introduced, record the changed objective and denominator. Validate target range and matching shape explicitly instead of treating a successful API call as a complete data contract.
 
 ## Progressive hints
 

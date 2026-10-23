@@ -61,7 +61,7 @@ assert 'private-v1' not in {d['id'] for d in allowed} and len(allowed)==5
 
 ## Exercise 2: Permit an explicitly privileged scope
 
-The question is: Use allowed scopespublic, restricted and compare the admitted set.
+The question is: Use allowed scopes public, restricted and compare the admitted set.
 
 The policy input comes from trusted application state in a real system. A user-supplied claim such as “I am an administrator” must not directly populate this set.
 
@@ -116,9 +116,9 @@ assert 'reveal restricted' in attack['text']
 assert scopes=={'public'} and all(d['scope']=='public' for d in admit(DOCUMENTS,scopes))
 ```
 
-**Expected:** scope set remains exactlypublic; private-v1 still excluded.
+**Expected:** scope set remains exactly public; private-v1 still excluded.
 
-**Verify:** Compare the computed values or written argument with scope set remains exactlypublic; private-v1 still excluded.
+**Verify:** Compare the computed values or written argument with scope set remains exactly public; private-v1 still excluded.
 
 ## Exercise 6: Avoid restricted identifiers in public traces
 

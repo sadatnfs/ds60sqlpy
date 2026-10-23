@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -386,12 +432,14 @@
         <div class="artifact-content"><h3 id="guide--cohort-denominators-follow-up-maturity-and-point-in-time-quality">Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality<a class="heading-anchor" href="#guide--cohort-denominators-follow-up-maturity-and-point-in-time-quality" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>sql-deep-06</code>. <strong>Estimated time:</strong> 150 minutes, split across reading and query investigation.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the private reader&#x27;s <strong>Create/open guided SQL notebook</strong> action. It creates the ignored editable copy at <code>.learning/sql/sql-deep-06/lesson/workspace/sql/professional/lessons/sql_deep_06.sql</code>. Read the supplied fixture, write a prediction, edit that copy and run the complete script. The prepared target must be the local disposable <code>advanced_sql_training</code> database. These lessons never require a production connection or a new cloud service.</p>
 <p>The learner file starts a transaction, checks the database name, creates only temporary tables, runs two worked examples and ends with ROLLBACK. Your six query attempts belong before that final rollback. Re-run the complete file after an error so the fixture and transaction state are known. Output appears in the notebook or terminal as named columns and bounded rows; a command tag alone does not verify a SELECT result.</p>
 <p>Windows PowerShell fallback, from the repository root:</p>
-<pre><code class="language-powershell">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql/professional/lessons/sql_deep_06.sql&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_deep_06.sql</span><span class="syntax-string">&quot;</span></code></pre>
 <p>macOS/Linux fallback, from the repository root:</p>
-<pre><code class="language-bash">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_deep_06.sql</code></pre>
+<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_deep_06.sql</code></pre>
 <p>If the prepared database is unavailable, return to classroom setup rather than changing the target. Keep credentials outside lesson files and command text. Read the <a href="sql-deep-06.html#learner">learner SQL</a>; keep <a href="sql-deep-06.html#solution-1">explanatory solutions</a> and <a href="sql-deep-06.html#solution-2">executable solutions</a> closed until an attempt or an explicit worked comparison. PostgreSQL 16+ syntax is used; the canonical runtime is PostgreSQL 17.</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -426,18 +474,18 @@
 <p>A calendar spine distinguishes an empty cohort from a cohort containing only pending users. Both can have zero eligible users and a NULL retention rate, but their operational meanings differ. Return total, eligible and retained counts alongside rates, and use state labels when reporting dates with no denominator. Neither a missing row nor a zero percentage communicates all of that information.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH activity(event_id,user_id) AS (VALUES(1,10),(2,10),(3,20))
-SELECT &#x27;observed_activity&#x27; AS metric_id,count(*) AS event_count,count(DISTINCT user_id) AS active_users
-FROM activity;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> activity<span class="syntax-punctuation">(</span>event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;observed_activity&#x27;</span> <span class="syntax-keyword">AS</span> metric_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_count<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> user_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_users
+<span class="syntax-keyword">FROM</span> activity<span class="syntax-punctuation">;</span></code></pre>
 <p>The one-row output has metric_id, event_count, active_users with values observed_activity,3,2. Two events belong to the same user, so counting events would overstate the number of active people. The identifier used by COUNT DISTINCT must match the denominator&#x27;s entity grain.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH instants(position,at) AS (VALUES
- (1,TIMESTAMPTZ &#x27;2026-01-08T00:00Z&#x27;),
- (2,TIMESTAMPTZ &#x27;2026-01-08T12:00Z&#x27;),
- (3,TIMESTAMPTZ &#x27;2026-01-09T00:00Z&#x27;))
-SELECT position,at&gt;=TIMESTAMPTZ &#x27;2026-01-08T00:00Z&#x27;
- AND at&lt;TIMESTAMPTZ &#x27;2026-01-09T00:00Z&#x27; AS in_window
-FROM instants ORDER BY position;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> instants<span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">at</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span>
+ <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">at</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span>
+ <span class="syntax-keyword">AND</span> <span class="syntax-keyword">at</span><span class="syntax-operator">&lt;</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> in_window
+<span class="syntax-keyword">FROM</span> instants <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">;</span></code></pre>
 <p>One row per position returns in_window true, true, false. The start is included and the exact end is excluded, preventing adjacent daily windows from both owning one instant. This fixture establishes the boundary policy before the cohort query introduces aggregation.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -447,9 +495,9 @@ FROM instants ORDER BY position;</code></pre>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 1, Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.</p>
 <ol>
-<li><strong>Define denominator eligibility using both clocks.</strong> As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</li>
+<li><strong>Define denominator eligibility using both clocks.</strong> As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 2, As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 2, As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.</p>
 <ol>
@@ -471,9 +519,9 @@ FROM instants ORDER BY position;</code></pre>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.</p>
 <ol>
-<li><strong>Distinguish empty cohorts from pending-only cohorts.</strong> Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</li>
+<li><strong>Distinguish empty cohorts from pending-only cohorts.</strong> Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 6, Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 6, Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.</p>
 <h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
@@ -496,7 +544,7 @@ FROM instants ORDER BY position;</code></pre>
 <li><a href="https://www.postgresql.org/docs/17/functions-srf.html">PostgreSQL17 generate_series</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-06: Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-06: Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality.
 Read sql/professional/companion-guides/sql_deep_06.md and sql/professional/lessons/sql_deep_06.sql. Direct prerequisites: sql-analytics-01, sql-quality-01, sql-deep-03.
 Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
 Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
@@ -533,89 +581,89 @@ Done when all six projected-result contracts and their counterexamples have insp
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- sql-deep-06: Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality</span>
-<span>-- Guide: sql/professional/companion-guides/sql_deep_06.md</span>
-<span>-- Use the complete file in the disposable advanced_sql_training database.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE deep6_users(user_id integer PRIMARY KEY,signup_at timestamptz NOT NULL,observed_through timestamptz NOT NULL) ON COMMIT DROP;</span>
-<span>INSERT INTO deep6_users VALUES</span>
-<span> (1,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (2,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (3,&#x27;2026-01-02T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (4,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (5,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;);</span>
-<span>CREATE TEMP TABLE deep6_events(event_id integer PRIMARY KEY,user_id integer NOT NULL,occurred_at timestamptz NOT NULL,available_at timestamptz NOT NULL) ON COMMIT DROP;</span>
-<span>INSERT INTO deep6_events VALUES</span>
-<span> (1,1,&#x27;2026-01-08T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (2,1,&#x27;2026-01-08T12:00Z&#x27;,&#x27;2026-01-08T12:00Z&#x27;),</span>
-<span> (3,1,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-09T00:00Z&#x27;),</span>
-<span> (4,3,&#x27;2026-01-09T09:00Z&#x27;,&#x27;2026-01-09T09:00Z&#x27;),</span>
-<span> (5,2,&#x27;2026-01-08T10:00Z&#x27;,&#x27;2026-01-11T00:00Z&#x27;),</span>
-<span> (6,4,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-09T00:00Z&#x27;),</span>
-<span> (7,1,&#x27;2025-12-31T00:00Z&#x27;,&#x27;2025-12-31T00:00Z&#x27;),</span>
-<span> (8,99,&#x27;2026-01-08T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (9,1,&#x27;2026-01-12T00:00Z&#x27;,&#x27;2026-01-12T00:00Z&#x27;);</span>
-<span> </span>
-<span>-- Worked example 1</span>
-<span>WITH activity(event_id,user_id) AS (VALUES(1,10),(2,10),(3,20))</span>
-<span>SELECT &#x27;observed_activity&#x27; AS metric_id,count(*) AS event_count,count(DISTINCT user_id) AS active_users</span>
-<span>FROM activity;</span>
-<span> </span>
-<span>-- Worked example 2</span>
-<span>WITH instants(position,at) AS (VALUES</span>
-<span> (1,TIMESTAMPTZ &#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (2,TIMESTAMPTZ &#x27;2026-01-08T12:00Z&#x27;),</span>
-<span> (3,TIMESTAMPTZ &#x27;2026-01-09T00:00Z&#x27;))</span>
-<span>SELECT position,at&gt;=TIMESTAMPTZ &#x27;2026-01-08T00:00Z&#x27;</span>
-<span> AND at&lt;TIMESTAMPTZ &#x27;2026-01-09T00:00Z&#x27; AS in_window</span>
-<span>FROM instants ORDER BY position;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Write attempts in your ignored working copy before the final ROLLBACK.</span>
-<span> </span>
-<span>-- 1. Expose invalid event relationships before aggregation</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 1, Return event_id, user_id, reason for events with an unknown user or occurrence before that user&#x27;s signup. One diagnostic row represents one invalid event, ordered by event_id. Classify unknown_user before comparing signup time.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 1, Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.</span>
-<span>-- Verify: For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.</span>
-<span> </span>
-<span>-- 2. Define denominator eligibility using both clocks</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 2, As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.</span>
-<span>-- Verify: For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.</span>
-<span> </span>
-<span>-- 3. Create one nullable retention label per user</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1&#x27;s multiple day 7 events still produce one true label; its exact window-end event is excluded.</span>
-<span>-- Verify: For sql-deep-06 Exercise 3, construct the expected label from each eligible user event history: one for observed qualifying retention, zero only for complete mature nonretention, and NULL for pending observation.</span>
-<span> </span>
-<span>-- 4. Report cohort rates with their denominators</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 4, Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 4, January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.</span>
-<span>-- Verify: For sql-deep-06 Exercise 4, sum eligible user labels and denominators independently, checking that pending labels do not silently enter either the retained count or mature denominator.</span>
-<span> </span>
-<span>-- 5. Detect a historical feature or label leakage candidate</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.</span>
-<span>-- Verify: For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.</span>
-<span> </span>
-<span>-- 6. Distinguish empty cohorts from pending-only cohorts</span>
-<span>-- Inputs/evidence: For sql-deep-06 Exercise 6, Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</span>
-<span>-- Expected result/shape: For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.</span>
-<span>-- Verify: For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- sql-deep-06: Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_deep_06.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use the complete file in the disposable advanced_sql_training database.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep6_users<span class="syntax-punctuation">(</span>user_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>signup_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>observed_through timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep6_users <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep6_events<span class="syntax-punctuation">(</span>event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>user_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>occurred_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>available_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep6_events <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T09:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T09:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T10:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-11T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2025-12-31T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2025-12-31T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-12T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-12T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Worked example 1</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> activity<span class="syntax-punctuation">(</span>event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;observed_activity&#x27;</span> <span class="syntax-keyword">AS</span> metric_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_count<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> user_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_users</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> activity<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Worked example 2</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> instants<span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">at</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">at</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span></span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">at</span><span class="syntax-operator">&lt;</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> in_window</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> instants <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Write attempts in your ignored working copy before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Expose invalid event relationships before aggregation</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 1, Return event_id, user_id, reason for events with an unknown user or occurrence before that user&#x27;s signup. One diagnostic row represents one invalid event, ordered by event_id. Classify unknown_user before comparing signup time.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 1, Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Define denominator eligibility using both clocks</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 2, As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Create one nullable retention label per user</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1&#x27;s multiple day 7 events still produce one true label; its exact window-end event is excluded.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 3, construct the expected label from each eligible user event history: one for observed qualifying retention, zero only for complete mature nonretention, and NULL for pending observation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Report cohort rates with their denominators</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 4, Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 4, January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 4, sum eligible user labels and denominators independently, checking that pending labels do not silently enter either the retained count or mature denominator.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Detect a historical feature or label leakage candidate</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Distinguish empty cohorts from pending-only cohorts</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-06 Exercise 6, Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -656,115 +704,115 @@ Done when all six projected-result contracts and their counterexamples have insp
 <p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 1, Return event_id, user_id, reason for events with an unknown user or occurrence before that user&#x27;s signup. One diagnostic row represents one invalid event, ordered by event_id. Classify unknown_user before comparing signup time.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 1, Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.</p>
-<pre><code class="language-sql">SELECT e.event_id,e.user_id,
- CASE WHEN u.user_id IS NULL THEN &#x27;unknown_user&#x27; ELSE &#x27;before_signup&#x27; END AS reason
-FROM deep6_events AS e LEFT JOIN deep6_users AS u ON u.user_id=e.user_id
-WHERE u.user_id IS NULL OR e.occurred_at&lt;u.signup_at
-ORDER BY e.event_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> u<span class="syntax-punctuation">.</span>user_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;unknown_user&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;before_signup&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> reason
+<span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> deep6_users <span class="syntax-keyword">AS</span> u <span class="syntax-keyword">ON</span> u<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id
+<span class="syntax-keyword">WHERE</span> u<span class="syntax-punctuation">.</span>user_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> e<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>u<span class="syntax-punctuation">.</span>signup_at
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The left join preserves orphan events that an inner join would erase before the quality report. Key absence is classified before a timestamp comparison because the unknown user has no signup time to compare. These defects are intentionally retained in the teaching fixture, but a real publication needs a documented repair or exclusion policy and a gate. A final rate that looks reasonable does not validate its source relationships.</p>
 <h4 id="solution-1--exercise-2-define-denominator-eligibility-using-both-clocks">Exercise 2: Define denominator eligibility using both clocks<a class="heading-anchor" href="#solution-1--exercise-2-define-denominator-eligibility-using-both-clocks" aria-label="Link to this section">#</a></h4>
-<p>As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 2, As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
+<p>As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 2, As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.</p>
-<pre><code class="language-sql">SELECT user_id,signup_at::date AS cohort_day,
- observed_through&gt;=signup_at+INTERVAL &#x27;8 days&#x27;
- AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=signup_at+INTERVAL &#x27;8 days&#x27; AS eligible
-FROM deep6_users ORDER BY user_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span>
+ observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span>
+ <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible
+<span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Eligibility concerns the end of the entire outcome window, not merely reaching its start. Both elapsed follow-up and trustworthy observation coverage are required. The equality case is deliberate: coverage through the exclusive endpoint completes all times inside the window. The watermark is a source contract that must be credible in real systems; writing this comparison does not independently prove ingestion completeness.</p>
 <h4 id="solution-1--exercise-3-create-one-nullable-retention-label-per-user">Exercise 3: Create one nullable retention label per user<a class="heading-anchor" href="#solution-1--exercise-3-create-one-nullable-retention-label-per-user" aria-label="Link to this section">#</a></h4>
 <p>Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1&#x27;s multiple day 7 events still produce one true label; its exact window-end event is excluded.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 3, construct the expected label from each eligible user event history: one for observed qualifying retention, zero only for complete mature nonretention, and NULL for pending observation.</p>
-<pre><code class="language-sql">WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,
-        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,
-        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;
-        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end
-   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;
- ) END AS retained
- FROM eligibility AS e
-)
-SELECT user_id,eligible,retained AS day7_retained FROM labels ORDER BY user_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span>
+        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible
+ <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span>
+ <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained
+ <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>eligible<span class="syntax-punctuation">,</span>retained <span class="syntax-keyword">AS</span> day7_retained <span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The eligibility CTE defines the window and denominator at user grain before the event lookup. EXISTS produces a Boolean regardless of how many qualifying events occur, preventing activity volume from multiplying retained users. CASE preserves pending follow-up as NULL rather than false. The availability filter enforces historical knowledge, while the half-open occurrence filter enforces the outcome definition; both clocks are necessary.</p>
 <h4 id="solution-1--exercise-4-report-cohort-rates-with-their-denominators">Exercise 4: Report cohort rates with their denominators<a class="heading-anchor" href="#solution-1--exercise-4-report-cohort-rates-with-their-denominators" aria-label="Link to this section">#</a></h4>
 <p>Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 4, Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 4, January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 4, sum eligible user labels and denominators independently, checking that pending labels do not silently enter either the retained count or mature denominator.</p>
-<pre><code class="language-sql">WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,
-        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,
-        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;
-        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end
-   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;
- ) END AS retained
- FROM eligibility AS e
-)
-SELECT cohort_day,count(*) AS total_users,
- count(*) FILTER(WHERE eligible) AS eligible_users,
- count(*) FILTER(WHERE retained) AS retained_users,
- (count(*) FILTER(WHERE retained))::numeric/NULLIF(count(*) FILTER(WHERE eligible),0) AS retention_rate
-FROM labels GROUP BY cohort_day ORDER BY cohort_day;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span>
+        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible
+ <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span>
+ <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained
+ <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_users<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retained_users<span class="syntax-punctuation">,</span>
+ <span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-operator">/</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate
+<span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_day <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">;</span></code></pre>
 <p>The aggregation starts from one row per user, so a retained person contributes exactly one numerator count. FILTER separates total population, completed follow-up and positive outcomes explicitly. NULLIF preserves an undefined zero-denominator rate for January 9, rather than reporting zero retention for people whose window has not matured. The result is a defined historical observation summary, not by itself a causal claim about product changes.</p>
 <h4 id="solution-1--exercise-5-detect-a-historical-feature-or-label-leakage-candidate">Exercise 5: Detect a historical feature or label leakage candidate<a class="heading-anchor" href="#solution-1--exercise-5-detect-a-historical-feature-or-label-leakage-candidate" aria-label="Link to this section">#</a></h4>
 <p>Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.</p>
-<pre><code class="language-sql">SELECT event_id,user_id,occurred_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27; AS event_before_cutoff,
- available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27; AS available_by_cutoff
-FROM deep6_events
-WHERE occurred_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;
- AND available_at&gt;TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;
-ORDER BY event_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">,</span>occurred_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> event_before_cutoff<span class="syntax-punctuation">,</span>
+ available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> available_by_cutoff
+<span class="syntax-keyword">FROM</span> deep6_events
+<span class="syntax-keyword">WHERE</span> occurred_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span>
+ <span class="syntax-keyword">AND</span> available_at<span class="syntax-operator">&gt;</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">;</span></code></pre>
 <p>A later warehouse extract can contain records that describe an earlier period but were unavailable to the original decision. Filtering only occurrence time would leak that later knowledge into a replay or model feature. This diagnostic isolates late availability from genuinely future events, which require a different exclusion reason. Retaining both timestamps and dataset versions is necessary to reproduce historical evidence accurately.</p>
 <h4 id="solution-1--exercise-6-distinguish-empty-cohorts-from-pending-only-cohorts">Exercise 6: Distinguish empty cohorts from pending-only cohorts<a class="heading-anchor" href="#solution-1--exercise-6-distinguish-empty-cohorts-from-pending-only-cohorts" aria-label="Link to this section">#</a></h4>
-<p>Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 6, Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
+<p>Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-06 Exercise 6, Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.</p>
 <p><strong>Verify:</strong> For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.</p>
-<pre><code class="language-sql">WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,
-        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,
-        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;
-        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end
-   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;
- ) END AS retained
- FROM eligibility AS e
-), summary AS (
- SELECT cohort_day,count(*) AS total_users,count(*) FILTER(WHERE eligible) AS eligible_users,
- count(*) FILTER(WHERE retained) AS retained_users FROM labels GROUP BY cohort_day
-), spine AS (
- SELECT day::date AS cohort_day FROM generate_series(DATE &#x27;2026-01-01&#x27;,DATE &#x27;2026-01-10&#x27;,INTERVAL &#x27;1 day&#x27;) AS day
-)
-SELECT s.cohort_day,
- CASE WHEN m.total_users IS NULL THEN &#x27;empty&#x27; WHEN m.eligible_users=0 THEN &#x27;pending_only&#x27; ELSE &#x27;has_eligible&#x27; END AS cohort_state,
- COALESCE(m.eligible_users,0) AS eligible_users,
- m.retained_users::numeric/NULLIF(m.eligible_users,0) AS retention_rate
-FROM spine AS s LEFT JOIN summary AS m ON m.cohort_day=s.cohort_day ORDER BY s.cohort_day;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span>
+        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span>
+        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible
+ <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end
+   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span>
+ <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained
+ <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> summary <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_users<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retained_users <span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_day
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day <span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-10&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> m<span class="syntax-punctuation">.</span>total_users <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;empty&#x27;</span> <span class="syntax-keyword">WHEN</span> m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;pending_only&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;has_eligible&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> cohort_state<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span>
+ m<span class="syntax-punctuation">.</span>retained_users<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-operator">/</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate
+<span class="syntax-keyword">FROM</span> spine <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> summary <span class="syntax-keyword">AS</span> m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-operator">=</span>s<span class="syntax-punctuation">.</span>cohort_day <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">;</span></code></pre>
 <p>The spine defines the reporting domain independently of observed data, so dates without signups do not vanish. The left join preserves their absence as a NULL summary, which is distinguishable from a real cohort whose eligible count is zero. Coalescing only the count makes the table convenient without inventing a zero retention rate. This separation prevents dashboards from presenting no data, pending follow-up and observed nonretention as the same state.</p>
 <h4 id="solution-1--verification-and-transaction-boundary">Verification and transaction boundary<a class="heading-anchor" href="#solution-1--verification-and-transaction-boundary" aria-label="Link to this section">#</a></h4>
 <p>Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.</p></div>
@@ -800,178 +848,178 @@ FROM spine AS s LEFT JOIN summary AS m ON m.cohort_day=s.cohort_day ORDER BY s.c
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- sql-deep-06: complete reference queries and exact result assertions</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE deep6_users(user_id integer PRIMARY KEY,signup_at timestamptz NOT NULL,observed_through timestamptz NOT NULL) ON COMMIT DROP;</span>
-<span>INSERT INTO deep6_users VALUES</span>
-<span> (1,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (2,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (3,&#x27;2026-01-02T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (4,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;),</span>
-<span> (5,&#x27;2026-01-01T00:00Z&#x27;,&#x27;2026-01-10T00:00Z&#x27;);</span>
-<span>CREATE TEMP TABLE deep6_events(event_id integer PRIMARY KEY,user_id integer NOT NULL,occurred_at timestamptz NOT NULL,available_at timestamptz NOT NULL) ON COMMIT DROP;</span>
-<span>INSERT INTO deep6_events VALUES</span>
-<span> (1,1,&#x27;2026-01-08T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (2,1,&#x27;2026-01-08T12:00Z&#x27;,&#x27;2026-01-08T12:00Z&#x27;),</span>
-<span> (3,1,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-09T00:00Z&#x27;),</span>
-<span> (4,3,&#x27;2026-01-09T09:00Z&#x27;,&#x27;2026-01-09T09:00Z&#x27;),</span>
-<span> (5,2,&#x27;2026-01-08T10:00Z&#x27;,&#x27;2026-01-11T00:00Z&#x27;),</span>
-<span> (6,4,&#x27;2026-01-09T00:00Z&#x27;,&#x27;2026-01-09T00:00Z&#x27;),</span>
-<span> (7,1,&#x27;2025-12-31T00:00Z&#x27;,&#x27;2025-12-31T00:00Z&#x27;),</span>
-<span> (8,99,&#x27;2026-01-08T00:00Z&#x27;,&#x27;2026-01-08T00:00Z&#x27;),</span>
-<span> (9,1,&#x27;2026-01-12T00:00Z&#x27;,&#x27;2026-01-12T00:00Z&#x27;);</span>
-<span> </span>
-<span>CREATE FUNCTION pg_temp.assert_true(ok boolean, message text)</span>
-<span>RETURNS void LANGUAGE plpgsql AS $assert$</span>
-<span>BEGIN</span>
-<span>  IF ok IS DISTINCT FROM true THEN</span>
-<span>    RAISE EXCEPTION &#x27;Contract failed: %&#x27;, message;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$assert$;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span> </span>
-<span>-- 1. Expose invalid event relationships before aggregation</span>
-<span>SAVEPOINT exercise_1;</span>
-<span>CREATE TEMP TABLE answer_1 ON COMMIT DROP AS</span>
-<span>SELECT e.event_id,e.user_id,</span>
-<span> CASE WHEN u.user_id IS NULL THEN &#x27;unknown_user&#x27; ELSE &#x27;before_signup&#x27; END AS reason</span>
-<span>FROM deep6_events AS e LEFT JOIN deep6_users AS u ON u.user_id=e.user_id</span>
-<span>WHERE u.user_id IS NULL OR e.occurred_at&lt;u.signup_at</span>
-<span>ORDER BY e.event_id;</span>
-<span>SELECT event_id,user_id,reason FROM answer_1 ORDER BY event_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_1) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_1) = &#x27;[{&quot;event_id&quot;: 7, &quot;user_id&quot;: 1, &quot;reason&quot;: &quot;before_signup&quot;}, {&quot;event_id&quot;: 8, &quot;user_id&quot;: 99, &quot;reason&quot;: &quot;unknown_user&quot;}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 1&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
-<span>RELEASE SAVEPOINT exercise_1;</span>
-<span> </span>
-<span>-- 2. Define denominator eligibility using both clocks</span>
-<span>SAVEPOINT exercise_2;</span>
-<span>CREATE TEMP TABLE answer_2 ON COMMIT DROP AS</span>
-<span>SELECT user_id,signup_at::date AS cohort_day,</span>
-<span> observed_through&gt;=signup_at+INTERVAL &#x27;8 days&#x27;</span>
-<span> AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=signup_at+INTERVAL &#x27;8 days&#x27; AS eligible</span>
-<span>FROM deep6_users ORDER BY user_id;</span>
-<span>SELECT user_id,cohort_day,eligible FROM answer_2 ORDER BY user_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_2) ORDER BY user_id),&#x27;[]&#x27;::jsonb) FROM answer_2) = &#x27;[{&quot;user_id&quot;: 1, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: true}, {&quot;user_id&quot;: 2, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: false}, {&quot;user_id&quot;: 3, &quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;eligible&quot;: true}, {&quot;user_id&quot;: 4, &quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;eligible&quot;: false}, {&quot;user_id&quot;: 5, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: true}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 2&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
-<span>RELEASE SAVEPOINT exercise_2;</span>
-<span> </span>
-<span>-- 3. Create one nullable retention label per user</span>
-<span>SAVEPOINT exercise_3;</span>
-<span>CREATE TEMP TABLE answer_3 ON COMMIT DROP AS</span>
-<span>WITH eligibility AS (</span>
-<span> SELECT u.*,u.signup_at::date AS cohort_day,</span>
-<span>        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,</span>
-<span>        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,</span>
-<span>        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;</span>
-<span>        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible</span>
-<span> FROM deep6_users AS u</span>
-<span>), labels AS (</span>
-<span> SELECT e.user_id,e.cohort_day,e.eligible,</span>
-<span> CASE WHEN e.eligible THEN EXISTS(</span>
-<span>  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id</span>
-<span>   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end</span>
-<span>   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;</span>
-<span> ) END AS retained</span>
-<span> FROM eligibility AS e</span>
-<span>)</span>
-<span>SELECT user_id,eligible,retained AS day7_retained FROM labels ORDER BY user_id;</span>
-<span>SELECT user_id,eligible,day7_retained FROM answer_3 ORDER BY user_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_3) ORDER BY user_id),&#x27;[]&#x27;::jsonb) FROM answer_3) = &#x27;[{&quot;user_id&quot;: 1, &quot;eligible&quot;: true, &quot;day7_retained&quot;: true}, {&quot;user_id&quot;: 2, &quot;eligible&quot;: false, &quot;day7_retained&quot;: null}, {&quot;user_id&quot;: 3, &quot;eligible&quot;: true, &quot;day7_retained&quot;: true}, {&quot;user_id&quot;: 4, &quot;eligible&quot;: false, &quot;day7_retained&quot;: null}, {&quot;user_id&quot;: 5, &quot;eligible&quot;: true, &quot;day7_retained&quot;: false}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 3&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
-<span>RELEASE SAVEPOINT exercise_3;</span>
-<span> </span>
-<span>-- 4. Report cohort rates with their denominators</span>
-<span>SAVEPOINT exercise_4;</span>
-<span>CREATE TEMP TABLE answer_4 ON COMMIT DROP AS</span>
-<span>WITH eligibility AS (</span>
-<span> SELECT u.*,u.signup_at::date AS cohort_day,</span>
-<span>        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,</span>
-<span>        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,</span>
-<span>        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;</span>
-<span>        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible</span>
-<span> FROM deep6_users AS u</span>
-<span>), labels AS (</span>
-<span> SELECT e.user_id,e.cohort_day,e.eligible,</span>
-<span> CASE WHEN e.eligible THEN EXISTS(</span>
-<span>  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id</span>
-<span>   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end</span>
-<span>   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;</span>
-<span> ) END AS retained</span>
-<span> FROM eligibility AS e</span>
-<span>)</span>
-<span>SELECT cohort_day,count(*) AS total_users,</span>
-<span> count(*) FILTER(WHERE eligible) AS eligible_users,</span>
-<span> count(*) FILTER(WHERE retained) AS retained_users,</span>
-<span> (count(*) FILTER(WHERE retained))::numeric/NULLIF(count(*) FILTER(WHERE eligible),0) AS retention_rate</span>
-<span>FROM labels GROUP BY cohort_day ORDER BY cohort_day;</span>
-<span>SELECT cohort_day,total_users,eligible_users,retained_users,retention_rate FROM answer_4 ORDER BY cohort_day;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_4) ORDER BY cohort_day),&#x27;[]&#x27;::jsonb) FROM answer_4) = &#x27;[{&quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;total_users&quot;: 3, &quot;eligible_users&quot;: 2, &quot;retained_users&quot;: 1, &quot;retention_rate&quot;: 0.5}, {&quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;total_users&quot;: 1, &quot;eligible_users&quot;: 1, &quot;retained_users&quot;: 1, &quot;retention_rate&quot;: 1}, {&quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;total_users&quot;: 1, &quot;eligible_users&quot;: 0, &quot;retained_users&quot;: 0, &quot;retention_rate&quot;: null}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 4&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
-<span>RELEASE SAVEPOINT exercise_4;</span>
-<span> </span>
-<span>-- 5. Detect a historical feature or label leakage candidate</span>
-<span>SAVEPOINT exercise_5;</span>
-<span>CREATE TEMP TABLE answer_5 ON COMMIT DROP AS</span>
-<span>SELECT event_id,user_id,occurred_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27; AS event_before_cutoff,</span>
-<span> available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27; AS available_by_cutoff</span>
-<span>FROM deep6_events</span>
-<span>WHERE occurred_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;</span>
-<span> AND available_at&gt;TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;</span>
-<span>ORDER BY event_id;</span>
-<span>SELECT event_id,user_id,event_before_cutoff,available_by_cutoff FROM answer_5 ORDER BY event_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_5) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_5) = &#x27;[{&quot;event_id&quot;: 5, &quot;user_id&quot;: 2, &quot;event_before_cutoff&quot;: true, &quot;available_by_cutoff&quot;: false}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 5&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
-<span>RELEASE SAVEPOINT exercise_5;</span>
-<span> </span>
-<span>-- 6. Distinguish empty cohorts from pending-only cohorts</span>
-<span>SAVEPOINT exercise_6;</span>
-<span>CREATE TEMP TABLE answer_6 ON COMMIT DROP AS</span>
-<span>WITH eligibility AS (</span>
-<span> SELECT u.*,u.signup_at::date AS cohort_day,</span>
-<span>        u.signup_at+INTERVAL &#x27;7 days&#x27; AS window_start,</span>
-<span>        u.signup_at+INTERVAL &#x27;8 days&#x27; AS window_end,</span>
-<span>        u.observed_through&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27;</span>
-<span>        AND TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;&gt;=u.signup_at+INTERVAL &#x27;8 days&#x27; AS eligible</span>
-<span> FROM deep6_users AS u</span>
-<span>), labels AS (</span>
-<span> SELECT e.user_id,e.cohort_day,e.eligible,</span>
-<span> CASE WHEN e.eligible THEN EXISTS(</span>
-<span>  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id</span>
-<span>   AND a.occurred_at&gt;=e.window_start AND a.occurred_at&lt;e.window_end</span>
-<span>   AND a.available_at&lt;=TIMESTAMPTZ &#x27;2026-01-10T00:00Z&#x27;</span>
-<span> ) END AS retained</span>
-<span> FROM eligibility AS e</span>
-<span>), summary AS (</span>
-<span> SELECT cohort_day,count(*) AS total_users,count(*) FILTER(WHERE eligible) AS eligible_users,</span>
-<span> count(*) FILTER(WHERE retained) AS retained_users FROM labels GROUP BY cohort_day</span>
-<span>), spine AS (</span>
-<span> SELECT day::date AS cohort_day FROM generate_series(DATE &#x27;2026-01-01&#x27;,DATE &#x27;2026-01-10&#x27;,INTERVAL &#x27;1 day&#x27;) AS day</span>
-<span>)</span>
-<span>SELECT s.cohort_day,</span>
-<span> CASE WHEN m.total_users IS NULL THEN &#x27;empty&#x27; WHEN m.eligible_users=0 THEN &#x27;pending_only&#x27; ELSE &#x27;has_eligible&#x27; END AS cohort_state,</span>
-<span> COALESCE(m.eligible_users,0) AS eligible_users,</span>
-<span> m.retained_users::numeric/NULLIF(m.eligible_users,0) AS retention_rate</span>
-<span>FROM spine AS s LEFT JOIN summary AS m ON m.cohort_day=s.cohort_day ORDER BY s.cohort_day;</span>
-<span>SELECT cohort_day,cohort_state,eligible_users,retention_rate FROM answer_6 ORDER BY cohort_day;</span>
-<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_6) ORDER BY cohort_day),&#x27;[]&#x27;::jsonb) FROM answer_6) = &#x27;[{&quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;cohort_state&quot;: &quot;has_eligible&quot;, &quot;eligible_users&quot;: 2, &quot;retention_rate&quot;: 0.5}, {&quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;cohort_state&quot;: &quot;has_eligible&quot;, &quot;eligible_users&quot;: 1, &quot;retention_rate&quot;: 1}, {&quot;cohort_day&quot;: &quot;2026-01-03&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-04&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-05&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-06&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-07&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-08&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;cohort_state&quot;: &quot;pending_only&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-10&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}]&#x27;::jsonb,&#x27;sql-deep-06 exercise 6&#x27;);</span>
-<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
-<span>RELEASE SAVEPOINT exercise_6;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- sql-deep-06: complete reference queries and exact result assertions</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep6_users<span class="syntax-punctuation">(</span>user_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>signup_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>observed_through timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep6_users <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep6_events<span class="syntax-punctuation">(</span>event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>user_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>occurred_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>available_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep6_events <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T09:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T09:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T10:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-11T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-09T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2025-12-31T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2025-12-31T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-08T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-12T00:00Z&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;2026-01-12T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Expose invalid event relationships before aggregation</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> u<span class="syntax-punctuation">.</span>user_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;unknown_user&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;before_signup&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> reason</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> deep6_users <span class="syntax-keyword">AS</span> u <span class="syntax-keyword">ON</span> u<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> u<span class="syntax-punctuation">.</span>user_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> e<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>u<span class="syntax-punctuation">.</span>signup_at</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">,</span>reason <span class="syntax-keyword">FROM</span> answer_1 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;event_id&quot;: 7, &quot;user_id&quot;: 1, &quot;reason&quot;: &quot;before_signup&quot;}, {&quot;event_id&quot;: 8, &quot;user_id&quot;: 99, &quot;reason&quot;: &quot;unknown_user&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Define denominator eligibility using both clocks</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span></span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>cohort_day<span class="syntax-punctuation">,</span>eligible <span class="syntax-keyword">FROM</span> answer_2 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;user_id&quot;: 1, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: true}, {&quot;user_id&quot;: 2, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: false}, {&quot;user_id&quot;: 3, &quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;eligible&quot;: true}, {&quot;user_id&quot;: 4, &quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;eligible&quot;: false}, {&quot;user_id&quot;: 5, &quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;eligible&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Create one nullable retention label per user</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span></span>
+<span class="source-line">        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span></span>
+<span class="source-line"> <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>eligible<span class="syntax-punctuation">,</span>retained <span class="syntax-keyword">AS</span> day7_retained <span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> user_id<span class="syntax-punctuation">,</span>eligible<span class="syntax-punctuation">,</span>day7_retained <span class="syntax-keyword">FROM</span> answer_3 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> user_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;user_id&quot;: 1, &quot;eligible&quot;: true, &quot;day7_retained&quot;: true}, {&quot;user_id&quot;: 2, &quot;eligible&quot;: false, &quot;day7_retained&quot;: null}, {&quot;user_id&quot;: 3, &quot;eligible&quot;: true, &quot;day7_retained&quot;: true}, {&quot;user_id&quot;: 4, &quot;eligible&quot;: false, &quot;day7_retained&quot;: null}, {&quot;user_id&quot;: 5, &quot;eligible&quot;: true, &quot;day7_retained&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Report cohort rates with their denominators</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span></span>
+<span class="source-line">        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span></span>
+<span class="source-line"> <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_users<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retained_users<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-operator">/</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_day <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span>total_users<span class="syntax-punctuation">,</span>eligible_users<span class="syntax-punctuation">,</span>retained_users<span class="syntax-punctuation">,</span>retention_rate <span class="syntax-keyword">FROM</span> answer_4 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;total_users&quot;: 3, &quot;eligible_users&quot;: 2, &quot;retained_users&quot;: 1, &quot;retention_rate&quot;: 0.5}, {&quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;total_users&quot;: 1, &quot;eligible_users&quot;: 1, &quot;retained_users&quot;: 1, &quot;retention_rate&quot;: 1}, {&quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;total_users&quot;: 1, &quot;eligible_users&quot;: 0, &quot;retained_users&quot;: 0, &quot;retention_rate&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Detect a historical feature or label leakage candidate</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">,</span>occurred_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> event_before_cutoff<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span> <span class="syntax-keyword">AS</span> available_by_cutoff</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deep6_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> occurred_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span></span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> available_at<span class="syntax-operator">&gt;</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>user_id<span class="syntax-punctuation">,</span>event_before_cutoff<span class="syntax-punctuation">,</span>available_by_cutoff <span class="syntax-keyword">FROM</span> answer_5 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;event_id&quot;: 5, &quot;user_id&quot;: 2, &quot;event_before_cutoff&quot;: true, &quot;available_by_cutoff&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Distinguish empty cohorts from pending-only cohorts</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> eligibility <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> u<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;7 days&#x27;</span> <span class="syntax-keyword">AS</span> window_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> window_end<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        u<span class="syntax-punctuation">.</span>observed_through<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span></span>
+<span class="source-line">        <span class="syntax-keyword">AND</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>u<span class="syntax-punctuation">.</span>signup_at<span class="syntax-operator">+</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;8 days&#x27;</span> <span class="syntax-keyword">AS</span> eligible</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> deep6_users <span class="syntax-keyword">AS</span> u</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> labels <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>eligible<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> e<span class="syntax-punctuation">.</span>eligible <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep6_events <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>user_id<span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>user_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>e<span class="syntax-punctuation">.</span>window_start <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-operator">&lt;</span>e<span class="syntax-punctuation">.</span>window_end</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>available_at<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10T00:00Z&#x27;</span></span>
+<span class="source-line"> <span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> retained</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> eligibility <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> summary <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_users<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> eligible<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER<span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> retained<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retained_users <span class="syntax-keyword">FROM</span> labels <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_day</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_day <span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-10&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> m<span class="syntax-punctuation">.</span>total_users <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;empty&#x27;</span> <span class="syntax-keyword">WHEN</span> m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;pending_only&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;has_eligible&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> cohort_state<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> eligible_users<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> m<span class="syntax-punctuation">.</span>retained_users<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-operator">/</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>eligible_users<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> spine <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> summary <span class="syntax-keyword">AS</span> m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-operator">=</span>s<span class="syntax-punctuation">.</span>cohort_day <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>cohort_day<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_day<span class="syntax-punctuation">,</span>cohort_state<span class="syntax-punctuation">,</span>eligible_users<span class="syntax-punctuation">,</span>retention_rate <span class="syntax-keyword">FROM</span> answer_6 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_day<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;cohort_day&quot;: &quot;2026-01-01&quot;, &quot;cohort_state&quot;: &quot;has_eligible&quot;, &quot;eligible_users&quot;: 2, &quot;retention_rate&quot;: 0.5}, {&quot;cohort_day&quot;: &quot;2026-01-02&quot;, &quot;cohort_state&quot;: &quot;has_eligible&quot;, &quot;eligible_users&quot;: 1, &quot;retention_rate&quot;: 1}, {&quot;cohort_day&quot;: &quot;2026-01-03&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-04&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-05&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-06&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-07&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-08&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-09&quot;, &quot;cohort_state&quot;: &quot;pending_only&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}, {&quot;cohort_day&quot;: &quot;2026-01-10&quot;, &quot;cohort_state&quot;: &quot;empty&quot;, &quot;eligible_users&quot;: 0, &quot;retention_rate&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-06 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

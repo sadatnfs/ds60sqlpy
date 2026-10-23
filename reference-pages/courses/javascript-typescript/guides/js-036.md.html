@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -140,98 +186,98 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-import-the-public-package-entry">Example A: Import the public package entry<a class="heading-anchor" href="#example-a-import-the-public-package-entry" aria-label="Link to this section">#</a></h4>
 <p>The import uses normal package-name resolution from the temporary main module. It does not bypass the exports map with an absolute file URL.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, mkdir, writeFile, readFile, rm } from &#x27;node:fs/promises&#x27;;
-import { writeFileSync } from &#x27;node:fs&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
-import { spawnSync } from &#x27;node:child_process&#x27;;
-import { createHash } from &#x27;node:crypto&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> mkdir<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> readFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> writeFileSync <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> spawnSync <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:child_process&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createHash <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:crypto&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withPackage(use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-package-&#x27;));
-  try {
-    const folder = join(directory, &#x27;node_modules/course-fixture&#x27;);
-    await mkdir(folder, { recursive: true });
-    await writeFile(join(folder, &#x27;package.json&#x27;), JSON.stringify({ name: &#x27;course-fixture&#x27;, version: &#x27;1.0.0&#x27;, type: &#x27;module&#x27;, engines: { node: &#x27;&gt;=99&#x27; }, exports: { &#x27;.&#x27;: &#x27;./index.mjs&#x27;, &#x27;./math&#x27;: &#x27;./math.mjs&#x27; } }));
-    await writeFile(join(folder, &#x27;index.mjs&#x27;), &#x27;export const version = 1;&#x27;);
-    await writeFile(join(folder, &#x27;math.mjs&#x27;), &#x27;export const twice = value =&gt; value * 2;&#x27;);
-    await writeFile(join(folder, &#x27;private.mjs&#x27;), &#x27;export const internal = true;&#x27;);
-    return await use(directory);
-  } finally { await rm(directory, { recursive: true, force: true }); }
-}
-function runImport(directory, source) {
-  const path = join(directory, &#x27;main.mjs&#x27;);
-  writeFileSync(path, source);
-  const result = spawnSync(process.execPath, [path], { encoding: &#x27;utf8&#x27;, timeout: 10000, maxBuffer: 1024 * 1024 });
-  if (result.error) throw result.error;
-  if (result.signal) throw new Error(`child terminated by ${result.signal}`);
-  return result;
-}
-function digest(bytes) { return createHash(&#x27;sha256&#x27;).update(bytes).digest(&#x27;hex&#x27;); }
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withPackage<span class="syntax-punctuation">(</span>use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-package-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">const</span> folder <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;node_modules/course-fixture&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> mkdir<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;package.json&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> name<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;course-fixture&#x27;</span><span class="syntax-punctuation">,</span> version<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;1.0.0&#x27;</span><span class="syntax-punctuation">,</span> type<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;module&#x27;</span><span class="syntax-punctuation">,</span> engines<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> node<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;&gt;=99&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> exports<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;.&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;./index.mjs&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;./math&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;./math.mjs&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;index.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const version = 1;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;math.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const twice = value =&gt; value * 2;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;private.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const internal = true;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> runImport<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  writeFileSync<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> spawnSync<span class="syntax-punctuation">(</span>process<span class="syntax-punctuation">.</span>execPath<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> timeout<span class="syntax-operator">:</span> <span class="syntax-number">10000</span><span class="syntax-punctuation">,</span> maxBuffer<span class="syntax-operator">:</span> <span class="syntax-number">1024</span> <span class="syntax-operator">*</span> <span class="syntax-number">1024</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> result<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">child terminated by </span><span class="syntax-string">${</span>result<span class="syntax-punctuation">.</span>signal<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> digest<span class="syntax-punctuation">(</span>bytes<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> createHash<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;sha256&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>update<span class="syntax-punctuation">(</span>bytes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>digest<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;hex&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withPackage(async directory =&gt; {
-      const result = runImport(directory, &#x27;import { version } from \&#x27;course-fixture\&#x27;; console.log(version);&#x27;);
-      assert.equal(result.status, 0, result.stderr);
-      assert.equal(result.stdout.trim(), &#x27;1&#x27;);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withPackage<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> runImport<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;import { version } from \&#x27;course-fixture\&#x27;; console.log(version);&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> actual child prints 1.</p>
 <h4 id="example-b-use-an-explicitly-exported-subpath">Example B: Use an explicitly exported subpath<a class="heading-anchor" href="#example-b-use-an-explicitly-exported-subpath" aria-label="Link to this section">#</a></h4>
 <p>A public subpath is part of the package interface. Its name can remain stable even if the internal file layout later changes.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, mkdir, writeFile, readFile, rm } from &#x27;node:fs/promises&#x27;;
-import { writeFileSync } from &#x27;node:fs&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
-import { spawnSync } from &#x27;node:child_process&#x27;;
-import { createHash } from &#x27;node:crypto&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> mkdir<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> readFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> writeFileSync <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> spawnSync <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:child_process&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createHash <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:crypto&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withPackage(use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-package-&#x27;));
-  try {
-    const folder = join(directory, &#x27;node_modules/course-fixture&#x27;);
-    await mkdir(folder, { recursive: true });
-    await writeFile(join(folder, &#x27;package.json&#x27;), JSON.stringify({ name: &#x27;course-fixture&#x27;, version: &#x27;1.0.0&#x27;, type: &#x27;module&#x27;, engines: { node: &#x27;&gt;=99&#x27; }, exports: { &#x27;.&#x27;: &#x27;./index.mjs&#x27;, &#x27;./math&#x27;: &#x27;./math.mjs&#x27; } }));
-    await writeFile(join(folder, &#x27;index.mjs&#x27;), &#x27;export const version = 1;&#x27;);
-    await writeFile(join(folder, &#x27;math.mjs&#x27;), &#x27;export const twice = value =&gt; value * 2;&#x27;);
-    await writeFile(join(folder, &#x27;private.mjs&#x27;), &#x27;export const internal = true;&#x27;);
-    return await use(directory);
-  } finally { await rm(directory, { recursive: true, force: true }); }
-}
-function runImport(directory, source) {
-  const path = join(directory, &#x27;main.mjs&#x27;);
-  writeFileSync(path, source);
-  const result = spawnSync(process.execPath, [path], { encoding: &#x27;utf8&#x27;, timeout: 10000, maxBuffer: 1024 * 1024 });
-  if (result.error) throw result.error;
-  if (result.signal) throw new Error(`child terminated by ${result.signal}`);
-  return result;
-}
-function digest(bytes) { return createHash(&#x27;sha256&#x27;).update(bytes).digest(&#x27;hex&#x27;); }
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withPackage<span class="syntax-punctuation">(</span>use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-package-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">const</span> folder <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;node_modules/course-fixture&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> mkdir<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;package.json&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> name<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;course-fixture&#x27;</span><span class="syntax-punctuation">,</span> version<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;1.0.0&#x27;</span><span class="syntax-punctuation">,</span> type<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;module&#x27;</span><span class="syntax-punctuation">,</span> engines<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> node<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;&gt;=99&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> exports<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;.&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;./index.mjs&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;./math&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;./math.mjs&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;index.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const version = 1;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;math.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const twice = value =&gt; value * 2;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;private.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;export const internal = true;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> runImport<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  writeFileSync<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> spawnSync<span class="syntax-punctuation">(</span>process<span class="syntax-punctuation">.</span>execPath<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> timeout<span class="syntax-operator">:</span> <span class="syntax-number">10000</span><span class="syntax-punctuation">,</span> maxBuffer<span class="syntax-operator">:</span> <span class="syntax-number">1024</span> <span class="syntax-operator">*</span> <span class="syntax-number">1024</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> result<span class="syntax-punctuation">.</span>error<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">child terminated by </span><span class="syntax-string">${</span>result<span class="syntax-punctuation">.</span>signal<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> digest<span class="syntax-punctuation">(</span>bytes<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> createHash<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;sha256&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>update<span class="syntax-punctuation">(</span>bytes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>digest<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;hex&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withPackage(async directory =&gt; {
-      const result = runImport(directory, &#x27;import { twice } from \&#x27;course-fixture/math\&#x27;; console.log(twice(3));&#x27;);
-      assert.equal(result.status, 0, result.stderr);
-      assert.equal(result.stdout.trim(), &#x27;6&#x27;);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withPackage<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> runImport<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;import { twice } from \&#x27;course-fixture/math\&#x27;; console.log(twice(3));&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> actual child prints 6.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
@@ -266,7 +312,7 @@ console.log(JSON.stringify(await verify()));
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://nodejs.org/download/release/v24.11.0/docs/api/packages.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-036: Package design and reproducible toolchains.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-036: Package design and reproducible toolchains.
 Read courses/javascript-typescript/guides/js-036.md and courses/javascript-typescript/lessons/js-036.mjs. Direct prerequisites: `js-035`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

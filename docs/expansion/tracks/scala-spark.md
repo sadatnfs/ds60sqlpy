@@ -41,7 +41,7 @@ Enter through Scala foundations or a tested Python bridge, then preserve identit
 
 **Objective:** Explain the JVM, Scala binary version, Python driver, Spark engine, and the difference between a proposed profile and an available runner.
 
-**Lab:** Annotate a provided version report and choose a route. Scala-first takes 002-010 before 012; PySpark-first demonstrates python-10 skills, takes 011, then 012. Record that no Spark runtime is currently registered.
+**Lab:** Annotate a provided version report and choose a route. Scala-first takes 002-010 before 012; PySpark-first demonstrates python-10 skills, takes 011, then 012. Check the classroom capability notice for the prepared Scala and PySpark runtime profiles.
 
 **Expected check:** The worksheet identifies Spark 4.2.0, Scala binary 2.13, proposed Scala patch 2.13.18, JDK 21 and Python 3.12; it rejects a Scala 3 Spark artifact and a remote master URL. No installation is required.
 
@@ -141,7 +141,7 @@ Enter through Scala foundations or a tested Python bridge, then preserve identit
 
 **Objective:** Translate known Python collections and tests into explicit Spark expressions while keeping Python and engine execution distinct.
 
-**Lab:** In the proposed Python profile, compare a Python Boolean with a Column predicate over IDs 1-4. Read the paired Scala syntax card rather than completing every Scala foundation lesson first.
+**Lab:** In the prepared PySpark profile, compare a Python Boolean with a Column predicate over IDs 1-4. Read the paired Scala syntax card rather than completing every Scala foundation lesson first.
 
 **Expected check:** Filtering amounts greater than 10 keeps IDs [2,4] from [(1,0),(2,20),(3,None),(4,20)]. Python and/or on Columns is diagnosed and replaced with parenthesized &, | or ~ as appropriate.
 

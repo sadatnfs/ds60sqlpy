@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,45 +173,45 @@
 <h3 id="exercise-1-prepare-a-tiny-training-batch">Exercise 1: Prepare a tiny training batch<a class="heading-anchor" href="#exercise-1-prepare-a-tiny-training-batch" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use two four-token sequences and shifted labels with vocabulary16.</p>
 <p>The fixture is small enough to enumerate every target. The context length and vocabulary remain below the decoder limits.</p>
-<pre><code class="language-python">torch.manual_seed(7); model=TinyDecoder(); ids=torch.tensor([[1,2,3,4],[2,3,4,5]]); inputs=ids[:,:-1]; targets=ids[:,1:]
-assert tuple(inputs.shape)==(2,3) and targets.numel()==6</code></pre>
+<pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-operator">=</span>TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> ids<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> targets<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>inputs<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> targets<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">6</span></code></pre>
 <p><strong>Expected:</strong> inputs shape(2,3);6 active targets.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with inputs shape(2,3);6 active targets.</p>
 <h3 id="exercise-2-measure-the-initial-objective">Exercise 2: Measure the initial objective<a class="heading-anchor" href="#exercise-2-measure-the-initial-objective" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate initial cross entropy before any optimizer step.</p>
 <p>The initial value is an observation for the fixed seed and implementation. It is not a promised constant across every library version.</p>
-<pre><code class="language-python">logits,_=model(inputs); initial=F.cross_entropy(logits.reshape(-1,16),targets.reshape(-1)).item()
-assert np.isfinite(initial) and initial&gt;0</code></pre>
+<pre class="highlighted-code"><code class="language-python">logits<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> initial<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>targets<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> initial<span class="syntax-operator">&gt;</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> finite positive loss.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with finite positive loss.</p>
 <h3 id="exercise-3-perform-twelve-bounded-updates">Exercise 3: Perform twelve bounded updates<a class="heading-anchor" href="#exercise-3-perform-twelve-bounded-updates" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12 times.</p>
 <p>The norm is captured before the optimizer mutates weights. Saving the entire short trace makes the first nonfinite or missing update visible.</p>
-<pre><code class="language-python">opt=torch.optim.Adam(model.parameters(),lr=.01); before=model.output.weight.detach().clone(); losses=[]; norms=[]
-for _ in range(12):
-    opt.zero_grad(set_to_none=True); logits,_=model(inputs); loss=F.cross_entropy(logits.reshape(-1,16),targets.reshape(-1)); loss.backward()
-    norm=sum(float(p.grad.square().sum()) for p in model.parameters() if p.grad is not None)**.5
-    losses.append(loss.item()); norms.append(norm); opt.step()
-assert len(losses)==12 and np.isfinite(losses+norms).all() and max(norms)&gt;0</code></pre>
+<pre class="highlighted-code"><code class="language-python">opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> before<span class="syntax-operator">=</span>model<span class="syntax-operator">.</span>output<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> losses<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> norms<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> logits<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>targets<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    norm<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">.5</span>
+    losses<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> norms<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>norm<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>losses<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">12</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>losses<span class="syntax-operator">+</span>norms<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>norms<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> 12 finite losses and norms; at least one positive norm.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 12 finite losses and norms; at least one positive norm.</p>
 <h3 id="exercise-4-verify-actual-parameter-change">Exercise 4: Verify actual parameter change<a class="heading-anchor" href="#exercise-4-verify-actual-parameter-change" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare the output projection with its detached snapshot.</p>
 <p>A printed training message or decreasing cached value cannot prove an update. The snapshot must own its data so it does not alias the live parameter.</p>
-<pre><code class="language-python">assert not torch.equal(before,model.output.weight.detach())</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>before<span class="syntax-punctuation">,</span>model<span class="syntax-operator">.</span>output<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> weights differ.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with weights differ.</p>
 <h3 id="exercise-5-clear-accumulated-gradients">Exercise 5: Clear accumulated gradients<a class="heading-anchor" href="#exercise-5-clear-accumulated-gradients" aria-label="Link to this section">#</a></h3>
 <p>The question is: Call zero_grad(set_to_none=True) after the run and inspect every parameter gradient.</p>
 <p>This confirms the intended reset policy. Accumulating gradients deliberately is possible, but requires an explicit denominator and update schedule.</p>
-<pre><code class="language-python">opt.zero_grad(set_to_none=True); assert all(p.grad is None for p in model.parameters())</code></pre>
+<pre class="highlighted-code"><code class="language-python">opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> all gradientsNone.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with all gradientsNone.</p>
 <h3 id="exercise-6-report-budget-honestly">Exercise 6: Report budget honestly<a class="heading-anchor" href="#exercise-6-report-budget-honestly" aria-label="Link to this section">#</a></h3>
 <p>The question is: Create a run record with12 completed updates and the declared200 maximum.</p>
 <p>Stopping a bounded diagnostic is not evidence of convergence. The report states what was executed and leaves held-out quality to a separate experiment.</p>
-<pre><code class="language-python">report={&#x27;steps&#x27;:12,&#x27;maximum_steps&#x27;:200,&#x27;initial_loss&#x27;:initial,&#x27;last_training_loss&#x27;:losses[-1],&#x27;convergence_established&#x27;:False}
-assert report[&#x27;steps&#x27;]&lt;=report[&#x27;maximum_steps&#x27;] and report[&#x27;convergence_established&#x27;] is False</code></pre>
+<pre class="highlighted-code"><code class="language-python">report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">maximum_steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">initial_loss</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>initial<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">last_training_loss</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>losses<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">convergence_established</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">maximum_steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">convergence_established</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">False</span></code></pre>
 <p><strong>Expected:</strong> stopped_at12; no convergence claim.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with stopped_at12; no convergence claim.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

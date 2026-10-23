@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,7 +164,7 @@
     <article class="document"><h2 id="llm-017-explanatory-solutions">llm-017: explanatory solutions<a class="heading-anchor" href="#llm-017-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Training predicts the next token at each active position. A four-token sequence gives three input-target pairs, and padding creates storage slots without creating observations. Cross entropy can ignore a sentinel target such as-100, but the denominator must still count only active targets. Summing losses and dividing by padded width understates error when sequences are short. The vocabulary dimension belongs to logits, while labels are integer class indices. This lesson uses zero logits so each active target has exactly log(vocabulary_size) loss, making padding and reduction errors visible without a trained model.</p>
+<p>Training predicts the next token at each active position. A four-token sequence gives three input-target pairs, and padding creates storage slots without creating observations. Cross entropy can ignore a sentinel target such as-100, but the denominator must still count only active targets. Summing losses and dividing by padded width understates error when sequences are short. The vocabulary dimension belongs to logits, while labels are integer class indices. This lesson uses zero logits so each active target has exactly <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="normal">v</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi><mtext> </mtext><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">z</mi><mi mathvariant="normal">e</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(\mathrm{vocabulary\ size})</annotation></semantics></math> loss, making padding and reduction errors visible without a trained model.</p>
 <p><strong>Active target:</strong> A real next-token observation included in the objective.</p>
 <p><strong>Ignore index:</strong> A sentinel label excluded from loss calculation.</p>
 <p><strong>Loss denominator:</strong> The count of participating prediction events.</p>
@@ -127,48 +173,48 @@
 <h3 id="exercise-1-shift-the-sequence">Exercise 1: Shift the sequence<a class="heading-anchor" href="#exercise-1-shift-the-sequence" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use IDs[2,5,7,3] and create three input-target pairs.</p>
 <p>The model may see the current input token but not its target at the next position. The diagonal causal mask is consistent with this shifted objective.</p>
-<pre><code class="language-python">ids=torch.tensor([[2,5,7,3]]); inputs=ids[:,:-1]; targets=ids[:,1:]
-assert inputs.tolist()==[[2,5,7]] and targets.tolist()==[[5,7,3]]</code></pre>
+<pre class="highlighted-code"><code class="language-python">ids<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> targets<span class="syntax-operator">=</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> inputs<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> targets<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> inputs2,5,7 and targets5,7,3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with inputs2,5,7 and targets5,7,3.</p>
 <h3 id="exercise-2-score-uniform-logits">Exercise 2: Score uniform logits<a class="heading-anchor" href="#exercise-2-score-uniform-logits" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use zero logits with vocabulary8 for the three targets.</p>
 <p>Each target has probability one eighth. Target identity does not change the loss under this uniform distribution, which isolates the denominator calculation.</p>
-<pre><code class="language-python">logits=torch.zeros((1,3,8)); loss=F.cross_entropy(logits.reshape(-1,8),targets.reshape(-1))
-np.testing.assert_allclose(loss.item(),np.log(8),atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">logits<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>logits<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>targets<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> mean losslog8 and count3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with mean losslog8 and count3.</p>
 <h3 id="exercise-3-append-ignored-targets">Exercise 3: Append ignored targets<a class="heading-anchor" href="#exercise-3-append-ignored-targets" aria-label="Link to this section">#</a></h3>
 <p>The question is: Add two labels-100 and corresponding zero-logit positions.</p>
 <p>Additional storage positions do not add evidence. This invariance is a strong test for a masked language-model objective.</p>
-<pre><code class="language-python">padded=torch.tensor([[5,7,3,-100,-100]]); plogits=torch.zeros((1,5,8))
-new=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100)
-assert int((padded!=-100).sum())==3; torch.testing.assert_close(new,loss,atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">padded<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plogits<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+new<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>plogits<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>padded<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>ignore_index<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>padded<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>new<span class="syntax-punctuation">,</span>loss<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> mean loss unchanged; active count3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with mean loss unchanged; active count3.</p>
 <h3 id="exercise-4-expose-the-wrong-denominator">Exercise 4: Expose the wrong denominator<a class="heading-anchor" href="#exercise-4-expose-the-wrong-denominator" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute summed active loss and divide by padded length5 instead of active count3.</p>
 <p>The wrong score appears better merely because more padding was added. It is not a model improvement.</p>
-<pre><code class="language-python">summed=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100,reduction=&#x27;sum&#x27;)
-wrong=summed/5
-np.testing.assert_allclose(wrong.item(),3*np.log(8)/5,atol=1e-6,rtol=0); assert wrong&lt;loss</code></pre>
+<pre class="highlighted-code"><code class="language-python">summed<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>plogits<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>padded<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>ignore_index<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span>reduction<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sum</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+wrong<span class="syntax-operator">=</span>summed<span class="syntax-operator">/</span><span class="syntax-number">5</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>wrong<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> wrong<span class="syntax-operator">&lt;</span>loss</code></pre>
 <p><strong>Expected:</strong> wrong loss3log8/5, below correct loss.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with wrong loss3log8/5, below correct loss.</p>
 <h3 id="exercise-5-check-gradient-masking">Exercise 5: Check gradient masking<a class="heading-anchor" href="#exercise-5-check-gradient-masking" aria-label="Link to this section">#</a></h3>
 <p>The question is: Differentiate summed loss and inspect gradient rows at ignored positions.</p>
 <p>Masking must affect the objective and its derivative. A post-hoc reporting adjustment would not prevent padded targets from influencing training.</p>
-<pre><code class="language-python">v=plogits.clone().requires_grad_(); objective=F.cross_entropy(v.reshape(-1,8),padded.reshape(-1),ignore_index=-100,reduction=&#x27;sum&#x27;); objective.backward()
-assert torch.count_nonzero(v.grad[:,3:]).item()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">v<span class="syntax-operator">=</span>plogits<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>requires_grad_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> objective<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>v<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>padded<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>ignore_index<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span>reduction<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sum</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> objective<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>v<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> ignored-position gradients exactly zero.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ignored-position gradients exactly zero.</p>
 <h3 id="exercise-6-reject-all-padding-batches">Exercise 6: Reject all-padding batches<a class="heading-anchor" href="#exercise-6-reject-all-padding-batches" aria-label="Link to this section">#</a></h3>
 <p>The question is: Check active count before a mean loss on targets[-100,-100].</p>
 <p>A mean over no observations is undefined. Returning a perfect zero loss would let a broken batching pipeline masquerade as successful learning.</p>
-<pre><code class="language-python">empty=torch.tensor([[-100,-100]]); active=int((empty!=-100).sum())
-assert active==0
-try:
-    if active==0: raise ValueError(&#x27;no active targets&#x27;)
-except ValueError: pass</code></pre>
+<pre class="highlighted-code"><code class="language-python">empty<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> active<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>empty<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> active<span class="syntax-operator">==</span><span class="syntax-number">0</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> active<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">no active targets</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></code></pre>
 <p><strong>Expected:</strong> zero active count triggers an explicit failure policy.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with zero active count triggers an explicit failure policy.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

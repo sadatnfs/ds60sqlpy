@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,100 +161,100 @@
       <h1>Js 013 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-013_solution.mjs</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span>import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;</span>
-<span> </span>
-<span>function cancellableValue(value, signal, trace) {</span>
-<span>  return new Promise((resolve, reject) =&gt; {</span>
-<span>    if (signal.aborted) { reject(signal.reason); return; }</span>
-<span>    trace.push(&#x27;started&#x27;);</span>
-<span>    let timer;</span>
-<span>    function cleanup() {</span>
-<span>      clearTimeout(timer);</span>
-<span>      signal.removeEventListener(&#x27;abort&#x27;, onAbort);</span>
-<span>      trace.push(&#x27;cleaned&#x27;);</span>
-<span>    }</span>
-<span>    function onAbort() {</span>
-<span>      trace.push(&#x27;aborted&#x27;);</span>
-<span>      cleanup();</span>
-<span>      reject(signal.reason);</span>
-<span>    }</span>
-<span>    signal.addEventListener(&#x27;abort&#x27;, onAbort, { once: true });</span>
-<span>    timer = setTimeout(() =&gt; {</span>
-<span>      trace.push(&#x27;completed&#x27;);</span>
-<span>      cleanup();</span>
-<span>      resolve(value);</span>
-<span>    }, 1);</span>
-<span>  });</span>
-<span>}</span>
-<span> </span>
-<span>export async function verify() {</span>
-<span>  // Exercise 1: Cancel a pending timer</span>
-<span>  {</span>
-<span>    const controller = new AbortController();</span>
-<span>    const reason = new Error(&#x27;learner cancelled&#x27;);</span>
-<span>    const pending = delay(1000, &#x27;unused&#x27;, { signal: controller.signal });</span>
-<span>    controller.abort(reason);</span>
-<span>    await assert.rejects(pending, error =&gt; error.name === &#x27;AbortError&#x27; &amp;&amp; error.cause === reason);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Reject an already aborted request before work</span>
-<span>  {</span>
-<span>    const controller = new AbortController();</span>
-<span>    const reason = new Error(&#x27;already stopped&#x27;);</span>
-<span>    controller.abort(reason);</span>
-<span>    const trace = [];</span>
-<span>    await assert.rejects(cancellableValue(7, controller.signal, trace), error =&gt; error === reason);</span>
-<span>    assert.deepEqual(trace, []);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Complete normally and clean up once</span>
-<span>  {</span>
-<span>    const controller = new AbortController();</span>
-<span>    const trace = [];</span>
-<span>    assert.equal(await cancellableValue(7, controller.signal, trace), 7);</span>
-<span>    controller.abort(new Error(&#x27;too late&#x27;));</span>
-<span>    assert.deepEqual(trace, [&#x27;started&#x27;, &#x27;completed&#x27;, &#x27;cleaned&#x27;]);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Cancel custom work and release its timer</span>
-<span>  {</span>
-<span>    const controller = new AbortController();</span>
-<span>    const trace = [];</span>
-<span>    const reason = new Error(&#x27;stop&#x27;);</span>
-<span>    const pending = cancellableValue(7, controller.signal, trace);</span>
-<span>    controller.abort(reason);</span>
-<span>    await assert.rejects(pending, error =&gt; error === reason);</span>
-<span>    assert.deepEqual(trace, [&#x27;started&#x27;, &#x27;aborted&#x27;, &#x27;cleaned&#x27;]);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Keep the first abort reason</span>
-<span>  {</span>
-<span>    const controller = new AbortController();</span>
-<span>    const first = new Error(&#x27;first&#x27;);</span>
-<span>    controller.abort(first);</span>
-<span>    controller.abort(new Error(&#x27;second&#x27;));</span>
-<span>    assert.equal(controller.signal.reason, first);</span>
-<span>    assert.throws(() =&gt; controller.signal.throwIfAborted(), error =&gt; error === first);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Combine caller and deadline signals</span>
-<span>  {</span>
-<span>    const caller = new AbortController();</span>
-<span>    const deadline = new AbortController();</span>
-<span>    const combined = AbortSignal.any([caller.signal, deadline.signal]);</span>
-<span>    const reason = new Error(&#x27;deadline&#x27;);</span>
-<span>    deadline.abort(reason);</span>
-<span>    assert.equal(combined.aborted, true);</span>
-<span>    assert.equal(combined.reason, reason);</span>
-<span>    assert.equal(caller.signal.aborted, false);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> setTimeout <span class="syntax-keyword">as</span> delay <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:timers/promises&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">function</span> cancellableValue<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> signal<span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Promise</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>resolve<span class="syntax-punctuation">,</span> reject<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">.</span>aborted<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> reject<span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">.</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    trace<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;started&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">let</span> timer<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> cleanup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      clearTimeout<span class="syntax-punctuation">(</span>timer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      signal<span class="syntax-punctuation">.</span>removeEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;abort&#x27;</span><span class="syntax-punctuation">,</span> onAbort<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      trace<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;cleaned&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> onAbort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      trace<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;aborted&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      cleanup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      reject<span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">.</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    signal<span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;abort&#x27;</span><span class="syntax-punctuation">,</span> onAbort<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> once<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    timer <span class="syntax-operator">=</span> setTimeout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      trace<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;completed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      cleanup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      resolve<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Cancel a pending timer</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> reason <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;learner cancelled&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> pending <span class="syntax-operator">=</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;unused&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> controller<span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>pending<span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>name <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;AbortError&#x27;</span> <span class="syntax-operator">&amp;&amp;</span> error<span class="syntax-punctuation">.</span>cause <span class="syntax-operator">===</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Reject an already aborted request before work</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> reason <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;already stopped&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>cancellableValue<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> controller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error <span class="syntax-operator">===</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Complete normally and clean up once</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> cancellableValue<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> controller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;too late&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;started&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;completed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;cleaned&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Cancel custom work and release its timer</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> reason <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;stop&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> pending <span class="syntax-operator">=</span> cancellableValue<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> controller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>pending<span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error <span class="syntax-operator">===</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;started&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;aborted&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;cleaned&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Keep the first abort reason</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>controller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">.</span>reason<span class="syntax-punctuation">,</span> first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> controller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">.</span>throwIfAborted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error <span class="syntax-operator">===</span> first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Combine caller and deadline signals</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> caller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> deadline <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> combined <span class="syntax-operator">=</span> AbortSignal<span class="syntax-punctuation">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>caller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">,</span> deadline<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> reason <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;deadline&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    deadline<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">.</span>aborted<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">.</span>reason<span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>caller<span class="syntax-punctuation">.</span>signal<span class="syntax-punctuation">.</span>aborted<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

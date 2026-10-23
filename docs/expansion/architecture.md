@@ -47,7 +47,7 @@ This diagram shows logical components, not an approved Docker Compose topology. 
 
 The existing `deep-learning` Python extra means PyTorch. Do not silently redefine it as TensorFlow or install incompatible TensorFlow requirements into the core environment. Current core NumPy constraints and any framework-specific Python/wheel limits must be resolved in the relevant isolated lock, then verified on each target architecture. A documentation version tuple is a proposal until its lock and image execute successfully.
 
-Default supported targets for future worker images are Linux amd64 and arm64. Windows uses a Linux-container engine with WSL2; macOS uses the engine's Linux VM. Native Windows, Apple Clang, GPU acceleration, distributed multi-node Spark, and externally managed Kubernetes are separate compatibility rows. An amd64 image working under emulation does not establish native arm64 support. See each track's primary references and qualification gates.
+Default supported targets for future worker images are Linux amd64 and arm64. Windows uses a Linux-container engine with WSL 2; macOS uses the engine's Linux VM. Native Windows, Apple Clang, GPU acceleration, distributed multi-node Spark, and externally managed Kubernetes are separate compatibility rows. An amd64 image working under emulation does not establish native arm64 support. See each track's primary references and qualification gates.
 
 ## How the application reaches a worker
 

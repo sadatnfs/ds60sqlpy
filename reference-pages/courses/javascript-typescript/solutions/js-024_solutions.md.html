@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,68 +176,68 @@
 <h3 id="exercise-1-validate-and-copy-a-complete-order">Exercise 1: Validate and copy a complete order<a class="heading-anchor" href="#exercise-1-validate-and-copy-a-complete-order" aria-label="Link to this section">#</a></h3>
 <p>Task: Parse an order with two line items and inspect the typed success.</p>
 <p>The successful branch provides a typed value only after all fields pass. The result contains new objects, separating validation from later mutation of the input graph.</p>
-<pre><code class="language-typescript">const raw: unknown = { id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }, { sku: &#x27;Y&#x27;, quantity: 3 }] };
-const result = validateOrder(raw);
-if (!result.ok) throw new Error(result.message);
-assert.equal(result.ok, true);
-assert.equal(result.value.items.reduce((sum, item) =&gt; sum + item.quantity, 0), 5);
-assert.notEqual(result.value, raw);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> raw<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Y&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">.</span>reduce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">,</span> item<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> sum <span class="syntax-operator">+</span> item<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> success with total quantity 5; independent copied item records.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-report-a-nested-domain-failure-precisely">Exercise 2: Report a nested domain failure precisely<a class="heading-anchor" href="#exercise-2-report-a-nested-domain-failure-precisely" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate a second item with quantity zero.</p>
 <p>Checking every element prevents a valid first row from legitimizing invalid later rows. A stable path is more useful to the caller than a generic invalid input message.</p>
-<pre><code class="language-typescript">const result = validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }, { sku: &#x27;Y&#x27;, quantity: 0 }] });
-assert.equal(result.ok, false);
-if (result.ok) throw new Error(&#x27;expected rejection&#x27;);
-assert.equal(result.code, &#x27;schema&#x27;);
-assert.equal(result.path, &#x27;items[1].quantity&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Y&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected rejection&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;items[1].quantity&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> failure code schema and path items[1].quantity.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-separate-json-syntax-failure-from-schema-failure">Exercise 3: Separate JSON syntax failure from schema failure<a class="heading-anchor" href="#exercise-3-separate-json-syntax-failure-from-schema-failure" aria-label="Link to this section">#</a></h3>
 <p>Task: Parse malformed JSON and valid JSON null.</p>
 <p>The two failure categories identify different repair actions. A client can fix JSON syntax before reasoning about missing domain fields.</p>
-<pre><code class="language-typescript">const malformed = parseOrder(&#x27;{broken&#x27;);
-const wrongShape = parseOrder(&#x27;null&#x27;);
-assert.equal(malformed.ok, false);
-assert.equal(wrongShape.ok, false);
-if (malformed.ok || wrongShape.ok) throw new Error(&#x27;expected failures&#x27;);
-assert.equal(malformed.code, &#x27;json&#x27;);
-assert.equal(wrongShape.code, &#x27;schema&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> malformed <span class="syntax-operator">=</span> parseOrder<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{broken&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> wrongShape <span class="syntax-operator">=</span> parseOrder<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;null&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongShape<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>ok <span class="syntax-operator">||</span> wrongShape<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected failures&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;json&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongShape<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> codes json and schema respectively.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-reject-unknown-fields-and-excessive-item-counts">Exercise 4: Reject unknown fields and excessive item counts<a class="heading-anchor" href="#exercise-4-reject-unknown-fields-and-excessive-item-counts" aria-label="Link to this section">#</a></h3>
 <p>Task: Add an extra top-level field, then exceed the twenty-item limit.</p>
 <p>Exact keys and bounded collection sizes are explicit choices of this schema. They prevent unnoticed extra configuration and keep work proportional to a small known limit.</p>
-<pre><code class="language-typescript">const extra = validateOrder({ id: &#x27;A&#x27;, items: [], admin: true });
-const tooMany = validateOrder({ id: &#x27;A&#x27;, items: Array.from({ length: 21 }, () =&gt; ({ sku: &#x27;X&#x27;, quantity: 1 })) });
-assert.equal(extra.ok, false);
-assert.equal(tooMany.ok, false);
-if (extra.ok || tooMany.ok) throw new Error(&#x27;expected failures&#x27;);
-assert.equal(extra.path, &#x27;$&#x27;);
-assert.equal(tooMany.path, &#x27;items&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> extra <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> admin<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> tooMany <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-keyword">Array.from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-keyword">21</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>tooMany<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>ok <span class="syntax-operator">||</span> tooMany<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected failures&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>tooMany<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> paths $ and items respectively.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-preserve-the-validated-value-after-input-mutation">Exercise 5: Preserve the validated value after input mutation<a class="heading-anchor" href="#exercise-5-preserve-the-validated-value-after-input-mutation" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate a mutable source and edit its first item afterward.</p>
 <p>Validation alone does not freeze references. Constructing a fresh output ensures that external aliases cannot silently modify the accepted state after the boundary.</p>
-<pre><code class="language-typescript">const raw = { id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }] };
-const result = validateOrder(raw);
-if (!result.ok) throw new Error(result.message);
-raw.items[0].quantity = 9;
-assert.equal(result.value.items[0].quantity, 2);
-assert.equal(raw.items[0].quantity, 9);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> raw <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+raw<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> validated quantity stays 2 while input becomes 9.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-exercise-numeric-and-string-boundaries">Exercise 6: Exercise numeric and string boundaries<a class="heading-anchor" href="#exercise-6-exercise-numeric-and-string-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Task: Reject NaN, fractional quantities, empty SKU and oversized identifiers.</p>
 <p>A number type includes NaN, infinities and fractions, so the integer domain needs explicit checks. An empty item array is deliberately accepted here; changing that business rule requires a matching validator and test change.</p>
-<pre><code class="language-typescript">for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
-  assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity }] }).ok, false);
-}
-assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;&#x27;, quantity: 1 }] }).ok, false);
-assert.equal(validateOrder({ id: &#x27;A&#x27;.repeat(41), items: [] }).ok, false);
-assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [] }).ok, true);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> quantity <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">41</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> every malformed fixture is rejected; an empty items array remains valid.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,6 +162,7 @@
       <p class="source-path">Generated from <code>docs/setup/first-success.md</code></p>
     </header>
     <article class="document"><h2 id="your-first-successful-session">Your first successful session<a class="heading-anchor" href="#your-first-successful-session" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="../classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
 <p>You do not need to know programming, SQL, or Git before starting. Set aside a first session for getting one Python cell and one SQL query to run. Setup is part of learning. The lesson sequence starts after those two small wins.</p>
 <h3 id="understand-the-tools-before-installing-them">Understand the tools before installing them<a class="heading-anchor" href="#understand-the-tools-before-installing-them" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
@@ -179,26 +226,26 @@
 <p>The first setup needs internet access. Python 3.12 is the course baseline; 3.11 is supported too. An installed newer Python can coexist with it. The course does not require you to replace your operating system&#x27;s Python.</p>
 <h3 id="2-prove-the-terminal-uses-the-course-python">2. Prove the terminal uses the course Python<a class="heading-anchor" href="#2-prove-the-terminal-uses-the-course-python" aria-label="Link to this section">#</a></h3>
 <p>Windows PowerShell, once in each new terminal:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython -c &quot;import sys; print(sys.executable); print(2 + 3)&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -c <span class="syntax-string">&quot;</span><span class="syntax-string">import sys; print(sys.executable); print(2 + 3)</span><span class="syntax-string">&quot;</span></code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -c &quot;import sys; print(sys.executable); print(2 + 3)&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -c <span class="syntax-string">&quot;import sys; print(sys.executable); print(2 + 3)&quot;</span></code></pre>
 <p>Expected: a Python path inside this course&#x27;s <code>.venv</code>, then <code>5</code>. Keep using that interpreter for installations and commands. Environment activation is optional.</p>
 <p>Run doctor with the same interpreter:</p>
-<pre><code class="language-powershell"># Windows
-&amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>A missing optional Docker/VS Code command is a warning. A missing course package requires setup repair. A database warning is expected if you have chosen to start with Python before installing PostgreSQL. Doctor&#x27;s package discovery is not an execution test of every library or lesson.</p>
 <h3 id="3-make-a-scratch-notebook-and-run-one-cell">3. Make a scratch notebook and run one cell<a class="heading-anchor" href="#3-make-a-scratch-notebook-and-run-one-cell" aria-label="Link to this section">#</a></h3>
 <p>Start JupyterLab from this terminal:</p>
-<pre><code class="language-powershell"># Windows
-&amp; $CoursePython -m jupyter lab</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python -m jupyter lab</code></pre>
 <p>Keep the terminal open. If a browser does not open, use the local Jupyter URL printed there. Treat a URL containing a token as private.</p>
 <ol>
@@ -206,13 +253,13 @@
 <li>Create a notebook with <strong>Python (ds60sqlpy)</strong>. Rename it <code>first-success.ipynb</code>.</li>
 <li>Type the following into a code cell and press <code>Shift+Enter</code>:</li>
 </ol>
-<pre><code class="language-python">   import sys
+<pre class="highlighted-code"><code class="language-python">   <span class="syntax-keyword">import</span> sys
 
-   print(sys.executable)
-   learner = &quot;Ada&quot;
-   study_minutes = 20
-   print(f&quot;Hello, {learner}. Today I studied for {study_minutes} minutes.&quot;)
-   print(2 + 3)</code></pre>
+   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">)</span>
+   learner <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span>
+   study_minutes <span class="syntax-operator">=</span> <span class="syntax-number">20</span>
+   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, </span><span class="syntax-string">{</span>learner<span class="syntax-string">}</span><span class="syntax-string">. Today I studied for </span><span class="syntax-string">{</span>study_minutes<span class="syntax-string">}</span><span class="syntax-string"> minutes.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
 <ol>
 <li>Expect the <code>.venv</code> path, the greeting, and <code>5</code>.</li>
 <li>Change the name and minutes, predict the new output, then run it again.</li>
@@ -224,9 +271,9 @@
 <p>You can study the Python fundamentals first if database setup must wait. Creating a Python environment does not install or start a PostgreSQL server.</p>
 <h3 id="5-start-the-first-lesson">5. Start the first lesson<a class="heading-anchor" href="#5-start-the-first-lesson" aria-label="Link to this section">#</a></h3>
 <p>Start the dashboard from the terminal that has your database setting:</p>
-<pre><code class="language-powershell"># Windows
-&amp; $CoursePython scripts\learning_portal.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>learning_portal<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/learning_portal.py</code></pre>
 <p>Choose Python Day 1 (<code>python-01</code>) or SQL Day 1 (<code>sql-01</code>). Read its guide, predict what the examples will do, run them, and attempt the exercises before reading solutions. SQL&#x27;s <strong>Create/open guided SQL notebook</strong> action preserves your working copy under <code>.learning/sql/</code>. Opening a lesson is a navigation step; being able to explain and reproduce its result is your learning check.</p>
 <p>At the end of the session, save your notebook and press <code>Ctrl+C</code> in the terminal to stop a server you started. Closing a browser tab alone does not stop Jupyter or the portal. Follow any visible confirmation prompt. Next time, open the repository, resolve the course interpreter, and launch the portal; you do not need to reinstall packages.</p>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,24 +161,24 @@
       <h1>Nlp 007</h1>
       <p class="source-path">Generated from <code>courses/nlp/learners/nlp-007.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>TRAIN=[&quot;tea tea cup&quot;,&quot;coffee cup&quot;]</span>
-<span> </span>
-<span>def manual_tfidf(documents):</span>
-<span>    raise NotImplementedError(&quot;Derive counts, DF, IDF and row normalization&quot;)</span>
-<span> </span>
-<span>def main():</span>
-<span>    print(&quot;Two local documents loaded. Keep the training vocabulary frozen for query tests.&quot;)</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span>
-<span># Exercise 1: Count documents, not occurrences. Calculate DF for the three sorted terms from the two-document corpus. Expected: [1,2,1] for [coffee,cup,tea].</span>
-<span># Exercise 2: Match the IDF formula. Implement the stated smoothed IDF and compare with vectorizer.idf_. Expected: [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.</span>
-<span># Exercise 3: Build the normalized rows. Construct both weighted rows manually and normalize each nonzero row. Expected: Manual dense oracle matches the 2-by-3 sparse result within tolerance.</span>
-<span># Exercise 4: Compute sparse cosine. Transform query tea and multiply X by its transpose. Expected: First score 2a/sqrt(1+4a^2); second score zero.</span>
-<span># Exercise 5: Handle OOV without refitting. Transform matcha and empty text, then compare the vocabulary before/after. Expected: Zero nonzero entries and unchanged vocabulary; record an explicit no-known-terms outcome.</span>
-<span># Exercise 6: Change one weighting choice. Enable sublinear_tf without normalization and inspect the tea weight. Expected: Tea weight becomes (1+log(2))*a, distinct from 2a.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line">TRAIN<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tea tea cup</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">coffee cup</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">manual_tfidf</span><span class="syntax-punctuation">(</span>documents<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Derive counts, DF, IDF and row normalization</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Two local documents loaded. Keep the training vocabulary frozen for query tests.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Count documents, not occurrences. Calculate DF for the three sorted terms from the two-document corpus. Expected: [1,2,1] for [coffee,cup,tea].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Match the IDF formula. Implement the stated smoothed IDF and compare with vectorizer.idf_. Expected: [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Build the normalized rows. Construct both weighted rows manually and normalize each nonzero row. Expected: Manual dense oracle matches the 2-by-3 sparse result within tolerance.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Compute sparse cosine. Transform query tea and multiply X by its transpose. Expected: First score 2a/sqrt(1+4a^2); second score zero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Handle OOV without refitting. Transform matcha and empty text, then compare the vocabulary before/after. Expected: Zero nonzero entries and unchanged vocabulary; record an explicit no-known-terms outcome.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Change one weighting choice. Enable sublinear_tf without normalization and inspect the tea weight. Expected: Tea weight becomes (1+log(2))*a, distinct from 2a.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

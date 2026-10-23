@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,9 +169,9 @@
 <p>A point anomaly asks whether one value is unusual relative to a reference distribution. A contextual anomaly asks whether it is unusual given time, location or other conditions. A changepoint asks whether the process generating observations has changed. A single large spike may be a point anomaly without a persistent process shift; a small sustained rise may be a changepoint without any spectacular individual value. Choosing the wrong target can make a technically correct detector operationally unhelpful.</p>
 <h4 id="scores-are-not-calibrated-probabilities">Scores are not calibrated probabilities<a class="heading-anchor" href="#scores-are-not-calibrated-probabilities" aria-label="Link to this section">#</a></h4>
 <p>A reconstruction error, isolation depth or local-density ratio ranks observations under a chosen mechanism. It does not automatically equal the probability that an incident is real. Feature scaling, reference-window contamination and changing operational mix alter score distributions. Fit preprocessing on the reference data and test thresholds on representative held-out periods, including known benign changes and missing-data incidents.</p>
-<p>For a binary alert, positive predictive value depends on prevalence. With event prevalence pi, sensitivity s and false-positive rate f, PPV=pi<em>s/[pi</em>s+(1-pi)*f]. A 90 percent sensitive detector with a one percent false-positive rate has PPV about 8.3 percent when real events occur in only one-tenth of one percent of cases. This base-rate calculation explains why seemingly excellent classification metrics can overwhelm a monitoring team.</p>
+<p>For a binary alert, positive predictive value depends on prevalence. With event prevalence pi, sensitivity s and false-positive rate f, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">V</mi></mrow><mo>=</mo><mfrac><mrow><mi>π</mi><mi>s</mi></mrow><mrow><mi>π</mi><mi>s</mi><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>π</mi><mo stretchy="false">)</mo><mi>f</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{PPV}=\frac{\pi s}{\pi s+(1-\pi)f}</annotation></semantics></math>. A 90 percent sensitive detector with a one percent false-positive rate has PPV about 8.3 percent when real events occur in only one-tenth of one percent of cases. This base-rate calculation explains why seemingly excellent classification metrics can overwhelm a monitoring team.</p>
 <h4 id="sequential-evidence-is-different-from-one-shot-testing">Sequential evidence is different from one-shot testing<a class="heading-anchor" href="#sequential-evidence-is-different-from-one-shot-testing" aria-label="Link to this section">#</a></h4>
-<p>A CUSUM retains positive evidence of a shift through C_t=max(0,C_(t-1)+x_t-mu0-k). The reference value k discounts fluctuations too small to matter; an alarm occurs when C exceeds a threshold h. An EWMA instead maintains a decaying weighted level. Repeated monitoring changes false-alarm behavior, so choose thresholds using run-length or event-level evaluation rather than interpreting every point as an isolated 5 percent test.</p>
+<p>A CUSUM retains positive evidence of a shift through <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>C</mi><mi>t</mi></msub><mo>=</mo><mo>max</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>0</mn><mo>,</mo><msub><mi>C</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>x</mi><mi>t</mi></msub><mo>−</mo><msub><mi>μ</mi><mn>0</mn></msub><mo>−</mo><mi>k</mi><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">C_t=\max\bigl(0,C_{t-1}+x_t-\mu_0-k\bigr)</annotation></semantics></math>. The reference value k discounts fluctuations too small to matter; an alarm occurs when C exceeds a threshold h. An EWMA instead maintains a decaying weighted level. Repeated monitoring changes false-alarm behavior, so choose thresholds using run-length or event-level evaluation rather than interpreting every point as an isolated 5 percent test.</p>
 <h4 id="an-operational-investigation-path">An operational investigation path<a class="heading-anchor" href="#an-operational-investigation-path" aria-label="Link to this section">#</a></h4>
 <p>For service latency, first distinguish changed traffic mix, missing instrumentation and genuine slower execution. Model expected latency conditional on load and endpoint before scoring residuals. Assess alerts at the incident level so one long outage does not count as hundreds of independent successes. Report false alerts per operator-day, missed incidents and detection-delay distributions. After a signal, localize contributing dimensions and test a reversible hypothesis. A correlation with an alert is a lead for investigation, not established root cause.</p>
 <h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
@@ -138,7 +184,7 @@
 <h4 id="stat-29-04">Robust z-scores<a class="heading-anchor" href="#stat-29-04" aria-label="Link to this section">#</a></h4>
 <p>A robust z-score centers at the median and scales by median absolute deviation, often using the normal-consistency factor about 1.4826. It reduces the influence of extreme observations relative to mean/standard-deviation scaling. MAD can be zero for discrete or constant data, requiring a documented fallback. Robustness does not justify a universal threshold across heavy-tailed, seasonal or dependent populations.</p>
 <h4 id="stat-29-05">Mahalanobis distance<a class="heading-anchor" href="#stat-29-05" aria-label="Link to this section">#</a></h4>
-<p>Mahalanobis distance measures displacement through the inverse covariance: d_squared=(x-mu)_transpose<em>Sigma_inverse</em>(x-mu). It accounts for scale and linear correlation, so a point can be unusual jointly even when each coordinate is ordinary. Covariance estimation is fragile with contamination or many features relative to observations. Use regularization or robust estimates and calibrate scores without assuming Gaussian tails by default.</p>
+<p>Mahalanobis distance measures displacement through the inverse covariance: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>d</mi><mn>2</mn></msup><mo>=</mo><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>μ</mi><msup><mo stretchy="false">)</mo><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><msup><mi>Σ</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d^2=(x-\mu)^{\mathsf T}\Sigma^{-1}(x-\mu)</annotation></semantics></math>. It accounts for scale and linear correlation, so a point can be unusual jointly even when each coordinate is ordinary. Covariance estimation is fragile with contamination or many features relative to observations. Use regularization or robust estimates and calibrate scores without assuming Gaussian tails by default.</p>
 <h4 id="stat-29-06">Local outlier factor<a class="heading-anchor" href="#stat-29-06" aria-label="Link to this section">#</a></h4>
 <p>Local outlier factor compares an observation&#x27;s local reachability density with neighboring densities. It can reveal points sparse relative to their neighborhood even when global density varies. Neighbor count and scaling define locality. The scikit-learn distinction between outlier detection on fitting data and novelty detection on unseen data matters; enabling novelty does not make fit-sample scoring semantics interchangeable.</p>
 <h4 id="stat-29-07">Isolation forests<a class="heading-anchor" href="#stat-29-07" aria-label="Link to this section">#</a></h4>
@@ -158,7 +204,7 @@
 <h4 id="stat-29-14">CUSUM charts<a class="heading-anchor" href="#stat-29-14" aria-label="Link to this section">#</a></h4>
 <p>A CUSUM accumulates evidence for a sustained shift while resetting negative accumulated evidence to zero in a one-sided version. The reference value k determines sensitivity to shift size, and h controls alarm frequency. Standard calibration assumes a suitable in-control model. Serial dependence, heavy tails or changing variance can alter run lengths substantially, so simulation or historical replay should match operational conditions.</p>
 <h4 id="stat-29-15">EWMA charts<a class="heading-anchor" href="#stat-29-15" aria-label="Link to this section">#</a></h4>
-<p>An EWMA chart tracks z_t=lambda<em>x_t+(1-lambda)</em>z_(t-1), giving exponentially decaying weight to older observations. Smaller lambda emphasizes sustained small shifts but responds more slowly. Control limits depend on the in-control variance and initialization, with early-time variance differing from its long-run value. It is a monitoring procedure, not merely a smoothed plot with arbitrary horizontal lines.</p>
+<p>An EWMA chart tracks <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub><mo>=</mo><mi>λ</mi><msub><mi>x</mi><mi>t</mi></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>λ</mi><mo stretchy="false">)</mo><msub><mi>z</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">z_t=\lambda x_t+(1-\lambda)z_{t-1}</annotation></semantics></math>, giving exponentially decaying weight to older observations. Smaller lambda emphasizes sustained small shifts but responds more slowly. Control limits depend on the in-control variance and initialization, with early-time variance differing from its long-run value. It is a monitoring procedure, not merely a smoothed plot with arbitrary horizontal lines.</p>
 <h4 id="stat-29-16">Shewhart charts<a class="heading-anchor" href="#stat-29-16" aria-label="Link to this section">#</a></h4>
 <p>A Shewhart chart compares individual observations or subgroup summaries with limits estimated from an in-control process. It is effective for relatively large abrupt changes. Rational subgrouping determines which variation estimates short-term common-cause noise. Repeated runs rules affect false-alarm probability and should be specified in advance. Specification limits describe acceptable output, while control limits describe process behavior.</p>
 <h4 id="stat-29-17">Multivariate control charts<a class="heading-anchor" href="#stat-29-17" aria-label="Link to this section">#</a></h4>
@@ -173,43 +219,43 @@
 <p>Root-cause localization uses the alert to identify plausible contributing components, features or temporal changes. Decomposition, traces and controlled checks can narrow the hypothesis set. The largest anomaly score contribution need not be the underlying cause, because downstream symptoms can dominate. Preserve an evidence chain from observation through hypothesis to a reversible test and confirmed recovery.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_29.py.html">chapter_29.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_29.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_29.py</code></pre>
 <h4 id="use-a-robust-reference-without-forgetting-its-limits">Use a robust reference without forgetting its limits<a class="heading-anchor" href="#use-a-robust-reference-without-forgetting-its-limits" aria-label="Link to this section">#</a></h4>
 <p>The reference [9,10,10,11,12] has median ten and MAD one. A value thirty has a normal-consistency-scaled score above thirteen. The calculation is deterministic, but the tiny reference does not establish a universal alarm threshold. A constant reference would have MAD zero and needs a separate policy.</p>
 <h4 id="accumulate-a-small-persistent-shift">Accumulate a small persistent shift<a class="heading-anchor" href="#accumulate-a-small-persistent-shift" aria-label="Link to this section">#</a></h4>
-<p>After three zeros, observations become one. With k=0.25 the CUSUM adds 0.75 each shifted period, reaching 2.25 at index five and crossing threshold two. One shifted observation is not enough; three consistent observations trigger the signal. The example shows the mechanism, not a calibrated production average run length.</p>
+<p>After three zeros, observations become one. With <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mn>0.25</mn></mrow><annotation encoding="application/x-tex">k=0.25</annotation></semantics></math> the CUSUM adds 0.75 each shifted period, reaching 2.25 at index five and crossing threshold two. One shifted observation is not enough; three consistent observations trigger the signal. The example shows the mechanism, not a calibrated production average run length.</p>
 <h4 id="explain-an-apparently-disappointing-alert-stream">Explain an apparently disappointing alert stream<a class="heading-anchor" href="#explain-an-apparently-disappointing-alert-stream" aria-label="Link to this section">#</a></h4>
 <p>At prevalence 0.001, sensitivity 0.9 and false-positive rate 0.01, only about 8.3 percent of alerts are real events. For 100,000 opportunities this corresponds to about 90 true alerts and 999 false alerts in expectation. Reducing false positives can matter more operationally than a small sensitivity improvement.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def robust_score():
-    reference=np.array([9.,10.,10.,11.,12.])
-    median=np.median(reference);mad=np.median(np.abs(reference-median))
-    score=(30-median)/(1.4826*mad)
-    assert median==10 and mad==1 and score&gt;13
-    print(&quot;Median, MAD, score for 30:&quot;,median,mad,score)
+<span class="syntax-keyword">def</span> <span class="syntax-function">robust_score</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    reference<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">11.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    median<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>mad<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>reference<span class="syntax-operator">-</span>median<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    score<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-operator">-</span>median<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.4826</span><span class="syntax-operator">*</span>mad<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> median<span class="syntax-operator">==</span><span class="syntax-number">10</span> <span class="syntax-operator">and</span> mad<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> score<span class="syntax-operator">&gt;</span><span class="syntax-number">13</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Median, MAD, score for 30:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>median<span class="syntax-punctuation">,</span>mad<span class="syntax-punctuation">,</span>score<span class="syntax-punctuation">)</span>
 
-def cumulative_shift():
-    x=np.array([0.,0.,0.,1.,1.,1.,1.]);state=0.;trace=[]
-    for value in x:
-        state=max(0.,state+value-.25);trace.append(state)
-    alarms=np.flatnonzero(np.array(trace)&gt;2.)
-    assert trace==[0.,0.,0.,.75,1.5,2.25,3.]
-    assert alarms[0]==5
-    print(&quot;CUSUM trace:&quot;,trace,&quot;first alarm index:&quot;,alarms[0])
+<span class="syntax-keyword">def</span> <span class="syntax-function">cumulative_shift</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>state<span class="syntax-operator">=</span><span class="syntax-number">0.</span><span class="syntax-punctuation">;</span>trace<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> x<span class="syntax-punctuation">:</span>
+        state<span class="syntax-operator">=</span><span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>state<span class="syntax-operator">+</span>value<span class="syntax-operator">-</span><span class="syntax-number">.25</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>trace<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">)</span>
+    alarms<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> trace<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.75</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.25</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> alarms<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUSUM trace:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>trace<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">first alarm index:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>alarms<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-def alert_precision():
-    prevalence=.001;sensitivity=.9;false_positive=.01
-    ppv=prevalence*sensitivity/(prevalence*sensitivity+(1-prevalence)*false_positive)
-    assert np.isclose(ppv,.0009/.01089) and ppv&lt;.1
-    print(&quot;Alert precision at rare prevalence:&quot;,ppv)
+<span class="syntax-keyword">def</span> <span class="syntax-function">alert_precision</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    prevalence<span class="syntax-operator">=</span><span class="syntax-number">.001</span><span class="syntax-punctuation">;</span>sensitivity<span class="syntax-operator">=</span><span class="syntax-number">.9</span><span class="syntax-punctuation">;</span>false_positive<span class="syntax-operator">=</span><span class="syntax-number">.01</span>
+    ppv<span class="syntax-operator">=</span>prevalence<span class="syntax-operator">*</span>sensitivity<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>prevalence<span class="syntax-operator">*</span>sensitivity<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>prevalence<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>false_positive<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ppv<span class="syntax-punctuation">,</span><span class="syntax-number">.0009</span><span class="syntax-operator">/</span><span class="syntax-number">.01089</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> ppv<span class="syntax-operator">&lt;</span><span class="syntax-number">.1</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Alert precision at rare prevalence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ppv<span class="syntax-punctuation">)</span>
 
-def main():
-    robust_score();cumulative_shift();alert_precision()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    robust_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>cumulative_shift<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>alert_precision<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Should an anomaly score be presented as a probability?</strong> Only after a separate justified calibration against representative labels and a defined event. Isolation depth or reconstruction error alone has no such probabilistic interpretation. Explain the scoring mechanism and threshold policy instead.</p>
 <p><strong>Interview: How do you compare two monitoring systems?</strong> Replay the same incidents and normal periods, enforce the same alert-budget accounting, and compare false alerts, missed incidents and delay. Include operator actions and deduplication so hundreds of correlated alerts do not count as independent successes.</p>

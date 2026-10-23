@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,9 +169,9 @@
 <p>An annotation guide should define the unit, label inventory, inclusion/exclusion rules, ambiguous cases and an abstention or uncertainty policy. It should include counterexamples, not only easy positive examples. Annotators need the same source context that the eventual task requires, and that context must not contain information unavailable at the intended prediction time.</p>
 <p>This lesson calculates agreement, preserves disagreement through soft labels and demonstrates an auditable adjudication record. The examples use invented binary judgments to expose mathematical behavior. Agreement measures consistency among raters under a procedure; they do not establish that the procedure measures the right construct.</p>
 <h3 id="derive-raw-agreement-and-kappa">Derive raw agreement and kappa<a class="heading-anchor" href="#derive-raw-agreement-and-kappa" aria-label="Link to this section">#</a></h3>
-<p>Raw agreement is the fraction of items on which two raters assign the same label. Cohen&#x27;s kappa adjusts it relative to agreement expected from the raters&#x27; marginal label frequencies: kappa=(p_o-p_e)/(1-p_e). For binary labels, p_e=p_A<em>p_B+(1-p_A)</em>(1-p_B), where p_A and p_B are each rater&#x27;s positive-label fractions.</p>
-<p>In the six-item fixture, the raters agree on four items and each uses positive labels half the time. Thus p_o=2/3, p_e=1/2 and kappa=1/3. The program compares this hand calculation with scikit-learn. A negative kappa means observed agreement is below this marginal-frequency baseline, not necessarily that the raters intentionally disagree.</p>
-<p>If both raters assign the same single category to every item, p_e=1 and the formula has a zero denominator. The reference returns None for kappa while preserving raw agreement one. This is an explicit undefined-result policy rather than silently returning a misleading numeric score.</p>
+<p>Raw agreement is the fraction of items on which two raters assign the same label. Cohen&#x27;s kappa adjusts it relative to agreement expected from the raters&#x27; marginal label frequencies: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>κ</mi><mo>=</mo><mfrac><mrow><msub><mi>p</mi><mrow><mi>o</mi></mrow></msub><mo>−</mo><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\kappa=\frac{p_{o}-p_{e}}{1-p_{e}}</annotation></semantics></math>. For binary labels, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub><mo>=</mo><msub><mi>p</mi><mrow><mi>A</mi></mrow></msub><mo>·</mo><msub><mi>p</mi><mrow><mi>B</mi></mrow></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mrow><mi>A</mi></mrow></msub><mo stretchy="false">)</mo><mo>·</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mrow><mi>B</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p_{e}=p_{A}\cdot p_{B}+(1-p_{A})\cdot (1-p_{B})</annotation></semantics></math>, where p_A and p_B are each rater&#x27;s positive-label fractions.</p>
+<p>In the six-item fixture, the raters agree on four items and each uses positive labels half the time. Thus <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mi>o</mi></mrow></msub><mo>=</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">p_{o}=\frac{2}{3}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">p_{e}=\frac{1}{2}</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>κ</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\kappa=\frac{1}{3}</annotation></semantics></math>. The program compares this hand calculation with scikit-learn. A negative kappa means observed agreement is below this marginal-frequency baseline, not necessarily that the raters intentionally disagree.</p>
+<p>If both raters assign the same single category to every item, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">p_{e}=1</annotation></semantics></math> and the formula has a zero denominator. The reference returns None for kappa while preserving raw agreement one. This is an explicit undefined-result policy rather than silently returning a misleading numeric score.</p>
 <h3 id="prevalence-and-disagreement-need-interpretation">Prevalence and disagreement need interpretation<a class="heading-anchor" href="#prevalence-and-disagreement-need-interpretation" aria-label="Link to this section">#</a></h3>
 <p>A highly imbalanced label distribution can yield high raw agreement and low or negative kappa. In the hundred-item example both raters label 99 items positive, but disagree on two items. Raw agreement is .98 while the chance baseline is .9802, giving slightly negative kappa. The example shows why one statistic cannot summarize annotation quality without the confusion pattern and label prevalence.</p>
 <p>Disagreement can arise from unclear instructions, missing context, ambiguous language, expertise differences or a genuinely subjective construct. Investigate examples before deciding to remove annotators or force consensus. High agreement can also occur when everyone follows the same flawed shortcut. External validity and construct definition remain separate questions.</p>
@@ -143,19 +189,19 @@
 <h4 id="worked-example-2-inspect-a-prevalence-counterexample">Worked example 2: Inspect a prevalence counterexample<a class="heading-anchor" href="#worked-example-2-inspect-a-prevalence-counterexample" aria-label="Link to this section">#</a></h4>
 <p>Both hundred-item raters use 99 positive labels, but their one negative labels occur on different items. They agree on 98 percent of items, slightly below the 98.02 percent marginal-frequency baseline. A headline of 98 percent agreement alone would conceal the lack of agreement on the rare negative category.</p>
 <h4 id="worked-example-3-keep-ambiguity-and-a-review-trail">Worked example 3: Keep ambiguity and a review trail<a class="heading-anchor" href="#worked-example-3-keep-ambiguity-and-a-review-trail" aria-label="Link to this section">#</a></h4>
-<p>Three rating rows [1,1,0],[1,1,1],[0,0,0] yield soft labels [2/3,1,0]. Only the first has positive binary entropy. An adjudicated final label for that first item is stored beside the original tuple and rationale, preserving the fact that the initial measurement was disputed.</p>
+<p>Three rating rows [1,1,0],[1,1,1],[0,0,0] yield soft labels <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{2}{3},1,0]</annotation></semantics></math>. Only the first has positive binary entropy. An adjudicated final label for that first item is stored beside the original tuple and rationale, preserving the fact that the initial measurement was disputed.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">import numpy as np
-a=np.array([1,1,0,0,1,0]);b=np.array([1,0,0,0,1,1])
-observed=np.mean(a==b);expected=a.mean()*b.mean()+(1-a.mean())*(1-b.mean())
-kappa=(observed-expected)/(1-expected)
-print(observed,expected,kappa)
-assert np.isclose(kappa,1/3)</code></pre>
-<pre><code class="language-python">ratings=np.array([[1,1,0],[1,1,1],[0,0,0]])
-soft=ratings.mean(axis=1)
-print(soft)
-assert np.allclose(soft,[2/3,1,0])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>b<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+observed<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>a<span class="syntax-operator">==</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>expected<span class="syntax-operator">=</span>a<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>b<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>a<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>b<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+kappa<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>observed<span class="syntax-operator">-</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>expected<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">,</span>kappa<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>kappa<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">ratings<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+soft<span class="syntax-operator">=</span>ratings<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>soft<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>soft<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-019.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-019-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-019.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-019_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -173,11 +219,11 @@ assert np.allclose(soft,[2/3,1,0])</code></pre>
 <p>Calculate the hundred-item prevalence counterexample.</p>
 <p><strong>Expected:</strong> Raw agreement.98 but kappa slightly below zero.</p>
 <p><strong>Verify:</strong> Raw agreement.98 but kappa slightly below zero. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
-<p><strong>Hints:</strong> Both positive fractions are.99, so p_e=.99^2+.01^2.</p>
+<p><strong>Hints:</strong> Both positive fractions are.99, so <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mi>e</mi></mrow></msub><mo>=</mo><msup><mrow><mn>0.99</mn></mrow><mrow><mn>2</mn></mrow></msup><mo>+</mo><msup><mrow><mn>0.01</mn></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">p_{e}={0.99}^{2}+{0.01}^{2}</annotation></semantics></math>.</p>
 <h4 id="exercise-4-retain-soft-labels">Exercise 4: Retain soft labels<a class="heading-anchor" href="#exercise-4-retain-soft-labels" aria-label="Link to this section">#</a></h4>
 <p>Compute proportions and entropy for the three three-rater rows.</p>
-<p><strong>Expected:</strong> Soft labels[2/3,1,0]; positive entropy only for the disputed row.</p>
-<p><strong>Verify:</strong> Soft labels[2/3,1,0]; positive entropy only for the disputed row. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> Soft labels <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{2}{3},1,0]</annotation></semantics></math>; positive entropy only for the disputed row.</p>
+<p><strong>Verify:</strong> Soft labels <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{2}{3},1,0]</annotation></semantics></math>; positive entropy only for the disputed row. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Handle probabilities zero and one without log-zero warnings.</p>
 <h4 id="exercise-5-preserve-adjudication-evidence">Exercise 5: Preserve adjudication evidence<a class="heading-anchor" href="#exercise-5-preserve-adjudication-evidence" aria-label="Link to this section">#</a></h4>
 <p>Create a final-label record without changing the independent ratings.</p>
@@ -203,7 +249,7 @@ assert np.allclose(soft,[2/3,1,0])</code></pre>
 <li><a href="https://web.stanford.edu/~jurafsky/slp3/">Jurafsky and Martin, annotation and evaluation</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-019.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-019.
 Read courses/nlp/guides/nlp-019.md and courses/nlp/learners/nlp-019.py.
 Direct prerequisites: `nlp-018`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

@@ -18,7 +18,7 @@ Let margin=beta*((policy_chosen-policy_rejected)-(reference_chosen-reference_rej
 
 ## Exercise 1: Evaluate equal margins
 
-The question is: Set both policy and reference chosen-minus-rejected differences to1 withbeta.1.
+The question is: Set both policy and reference chosen-minus-rejected differences to1 with beta.1.
 
 Equal relative preferences cancel even though absolute sequence log probabilities differ. The objective compares a change in preference relative to the reference.
 
@@ -27,13 +27,13 @@ margin=.1*((-2-(-3))-(-4-(-5))); loss=np.logaddexp(0,-margin)
 assert margin==0; np.testing.assert_allclose(loss,np.log(2),atol=1e-12,rtol=0)
 ```
 
-**Expected:** margin0 and losslog2.
+**Expected:** margin0 and loss log 2.
 
-**Verify:** Compare the computed values or written argument with margin0 and losslog2.
+**Verify:** Compare the computed values or written argument with margin0 and loss log 2.
 
 ## Exercise 2: Favor the chosen response
 
-The question is: Use policy difference2,reference difference0,beta.5.
+The question is: Use policy difference2,reference difference 0,beta.5.
 
 A positive adjusted margin reduces the logistic loss. This expresses agreement with the supplied preference label, not independent correctness.
 

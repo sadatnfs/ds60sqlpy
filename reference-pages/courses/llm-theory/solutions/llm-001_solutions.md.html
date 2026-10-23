@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,12 +165,12 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/llm-001.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="llm-001_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-classify-six-claims">Exercise 1: Classify six claims<a class="heading-anchor" href="#exercise-1-classify-six-claims" aria-label="Link to this section">#</a></h3>
-<p>A fixed mask blocking later keys and a score matrix having one row per query are mechanism claims about a specified computation. They require inspection and tests under the stated assumptions. A 2/3 correctness table and a fixture with no observed failures are empirical descriptions of finite observations. All future outputs are true and zero observed failures means zero possible risk overreach the evidence. Classification does not make an empirical claim strong by itself; the set, metric and unit still need inspection.</p>
+<p>A fixed mask blocking later keys and a score matrix having one row per query are mechanism claims about a specified computation. They require inspection and tests under the stated assumptions. A <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math> correctness table and a fixture with no observed failures are empirical descriptions of finite observations. All future outputs are true and zero observed failures means zero possible risk overreach the evidence. Classification does not make an empirical claim strong by itself; the set, metric and unit still need inspection.</p>
 <p><strong>Expected:</strong> Mechanism, empirical, unsupported, empirical, unsupported, mechanism, in that order.</p>
 <p><strong>Verify:</strong> Write the evidence type and a test or counterexample next to all six statements; do not substitute a single reliability label.</p>
 <h3 id="exercise-2-compute-two-accuracies">Exercise 2: Compute two accuracies<a class="heading-anchor" href="#exercise-2-compute-two-accuracies" aria-label="Link to this section">#</a></h3>
-<p>The record-weighted calculation averages [1,1,0], giving 2/3. Family A has mean 1 and family B has mean 0; equal-family weighting gives 1/2. These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.</p>
-<p><strong>Expected:</strong> Record-weighted 2/3 and equal-family 1/2.</p>
+<p>The record-weighted calculation averages [1,1,0], giving <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>. Family A has mean 1 and family B has mean 0; equal-family weighting gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>. These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.</p>
+<p><strong>Expected:</strong> Record-weighted <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math> and equal-family <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Inspect the three correctness values and the two separate family means before calculating the final averages.</p>
 <h3 id="exercise-3-challenge-fluent-correctness">Exercise 3: Challenge fluent correctness<a class="heading-anchor" href="#exercise-3-challenge-fluent-correctness" aria-label="Link to this section">#</a></h3>
 <p>The arithmetic reference is 15, while the observed sentence asserts 13. It is linguistically fluent and factually incorrect under this explicit reference. That one counterexample is sufficient to refute a universal implication from fluency to truth. It does not establish that every generated answer is false or that fluency is never useful. Keep the inference proportional to the evidence: this case demonstrates a possible failure, and broader frequency claims require a defined sample.</p>
@@ -137,35 +183,35 @@
 <h3 id="exercise-5-refuse-an-empty-accuracy">Exercise 5: Refuse an empty accuracy<a class="heading-anchor" href="#exercise-5-refuse-an-empty-accuracy" aria-label="Link to this section">#</a></h3>
 <p>An empty set has no mean correctness because its denominator is zero. Returning one would assert perfect performance without observations, and returning zero would confuse absence with measured failure. The reference raises ValueError. A written worksheet can state the same undefined status without running code. Follow the rejected case with the original valid table to confirm the checker does not change records or retain an erroneous global state after an invalid request.</p>
 <p><strong>Expected:</strong> The mean is undefined; the reference raises ValueError for an empty evaluation.</p>
-<p><strong>Verify:</strong> Retain the empty-set diagnosis and then recompute the original 2/3 table to show the valid result remains available.</p>
+<p><strong>Verify:</strong> Retain the empty-set diagnosis and then recompute the original <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math> table to show the valid result remains available.</p>
 <h3 id="exercise-6-transfer-to-a-new-family-balance">Exercise 6: Transfer to a new family balance<a class="heading-anchor" href="#exercise-6-transfer-to-a-new-family-balance" aria-label="Link to this section">#</a></h3>
-<p>Three correct records from family A and one incorrect record from B give 3/4 by records. The two family means remain 1 and 0, so the equal-family average is 1/2. Report four observed questions from two authored families and the exact scoring rule. This table does not establish unseen-family accuracy, language-model factuality or complete-system safety. A fresh assessment should introduce held-out source families under a protocol chosen before inspecting which policy produces the preferred number.</p>
-<p><strong>Expected:</strong> Record-weighted accuracy 3/4; equal-family accuracy 1/2. The report names four records and two families.</p>
+<p>Three correct records from family A and one incorrect record from B give <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{4}</annotation></semantics></math> by records. The two family means remain 1 and 0, so the equal-family average is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>. Report four observed questions from two authored families and the exact scoring rule. This table does not establish unseen-family accuracy, language-model factuality or complete-system safety. A fresh assessment should introduce held-out source families under a protocol chosen before inspecting which policy produces the preferred number.</p>
+<p><strong>Expected:</strong> Record-weighted accuracy <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{4}</annotation></semantics></math>; equal-family accuracy <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>. The report names four records and two families.</p>
 <p><strong>Verify:</strong> Inspect a four-row table, both denominators and a statement that unseen families remain untested.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 
-def evaluate(rows):
-    rows = list(rows)
-    if not rows:
-        raise ValueError(&quot;nonempty question evaluation required&quot;)
-    if len({row[&quot;id&quot;] for row in rows}) != len(rows):
-        raise ValueError(&quot;duplicate question ID&quot;)
-    if any(type(row[&quot;correct&quot;]) is not bool for row in rows):
-        raise TypeError(&quot;correct must be boolean&quot;)
-    groups = {}
-    for row in rows:
-        groups.setdefault(row[&quot;family&quot;], []).append(row[&quot;correct&quot;])
-    record = sum(row[&quot;correct&quot;] for row in rows) / len(rows)
-    family = sum(sum(values) / len(values) for values in groups.values()) / len(groups)
-    return {
-        &quot;records&quot;: len(rows),
-        &quot;families&quot;: len(groups),
-        &quot;record_accuracy&quot;: record,
-        &quot;family_accuracy&quot;: family,
-    }</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">evaluate</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> rows<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty question evaluation required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate question ID</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">bool</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct must be boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    groups <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span>
+        groups<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    record <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span>
+    family <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> values <span class="syntax-operator">in</span> groups<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">records</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">families</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">record_accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> record<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">family_accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> family<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without the examples, distinguish a mechanism claim from an empirical claim using one new sentence each. Then explain how a family-weighted metric can differ from a record-weighted one without either calculation being arithmetically wrong.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

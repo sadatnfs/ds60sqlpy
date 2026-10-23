@@ -132,7 +132,7 @@ Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0
 
 **Expected result/shape:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
-**Verify:** Assert a64-hex digest and equal digest after repartitioning; reject a31-row source.
+**Verify:** Assert a64-hex digest and equal digest after repartitioning; reject a 31-row source.
 
 **Progressive hint:** Schema/count/domain checks precede the bounded 30-row canonical collection.
 

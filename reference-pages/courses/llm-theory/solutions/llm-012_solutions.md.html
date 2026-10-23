@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,47 +173,47 @@
 <h3 id="exercise-1-calculate-greedy-choice">Exercise 1: Calculate greedy choice<a class="heading-anchor" href="#exercise-1-calculate-greedy-choice" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use scores[2,1,0] and choose the maximum index.</p>
 <p>Only ranking matters to greedy selection. A common shift or positive temperature preserves this particular decision.</p>
-<pre><code class="language-python">scores=np.array([2.,1.,0.]); assert int(np.argmax(scores))==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> token0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with token0.</p>
 <h3 id="exercise-2-change-temperature">Exercise 2: Change temperature<a class="heading-anchor" href="#exercise-2-change-temperature" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare probabilities at temperatures1 and.5 using stable softmax.</p>
 <p>Sharper probabilities make high-scoring tokens more likely without changing their order. They do not create new evidence that the selected token is correct.</p>
-<pre><code class="language-python">p=softmax(scores); cool=softmax(scores/.5)
-assert cool[0]&gt;p[0] and p.argmax()==cool.argmax()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">p<span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> cool<span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(</span>scores<span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> cool<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span>p<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> p<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>cool<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> token0 probability increases; argmax stays0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with token0 probability increases; argmax stays0.</p>
 <h3 id="exercise-3-use-fixed-draws">Exercise 3: Use fixed draws<a class="heading-anchor" href="#exercise-3-use-fixed-draws" aria-label="Link to this section">#</a></h3>
-<p>The question is: Sample from probabilities[.5,.3,.2] with draws.1,.6,.9.</p>
+<p>The question is: Sample from probabilities[.5,.3,.2] with draws .1,.6,.9.</p>
 <p>The intervals are[0,.5),[.5,.8),[.8,1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.</p>
-<pre><code class="language-python">mass=np.array([.5,.3,.2]); cumulative=np.cumsum(mass)
-assert [int(np.searchsorted(cumulative,d,side=&#x27;right&#x27;)) for d in [.1,.6,.9]]==[0,1,2]</code></pre>
+<pre class="highlighted-code"><code class="language-python">mass<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.3</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> cumulative<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>cumsum<span class="syntax-punctuation">(</span>mass<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>searchsorted<span class="syntax-punctuation">(</span>cumulative<span class="syntax-punctuation">,</span>d<span class="syntax-punctuation">,</span>side<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">right</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> tokens0,1,2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with tokens0,1,2.</p>
 <h3 id="exercise-4-retain-two-candidates">Exercise 4: Retain two candidates<a class="heading-anchor" href="#exercise-4-retain-two-candidates" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply top-k2 to scores[2,1,0] and normalize only retained candidates.</p>
 <p>Zeroing a probability after softmax without renormalizing would leave missing mass. Filtering is a policy that changes the final distribution.</p>
-<pre><code class="language-python">allowed=np.argsort(-scores,kind=&#x27;stable&#x27;)[:2]; filtered=np.zeros(3); filtered[allowed]=softmax(scores[allowed])
-assert filtered[2]==0; np.testing.assert_allclose(filtered.sum(),1,atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> token2 probability0; first two sum1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with token2 probability0; first two sum1.</p>
+<pre class="highlighted-code"><code class="language-python">allowed<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>scores<span class="syntax-punctuation">,</span>kind<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> filtered<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> filtered<span class="syntax-punctuation">[</span>allowed<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span>allowed<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> filtered<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>filtered<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> token 2 probability0; first two sum1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with token 2 probability0; first two sum1.</p>
 <h3 id="exercise-5-declare-ties">Exercise 5: Declare ties<a class="heading-anchor" href="#exercise-5-declare-ties" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use equal scores[1,1,0] and choose the smallest-index maximum.</p>
 <p>A deterministic tie rule makes repeated decisions explainable. Other valid policies exist, but an undocumented implementation detail should not determine a public contract.</p>
-<pre><code class="language-python">assert int(np.argmax([1,1,0]))==0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> token0 under the stated rule.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with token0 under the stated rule.</p>
 <h3 id="exercise-6-reject-invalid-draws">Exercise 6: Reject invalid draws<a class="heading-anchor" href="#exercise-6-reject-invalid-draws" aria-label="Link to this section">#</a></h3>
 <p>The question is: Validate draws0,.999,1 and-.1 before cumulative lookup.</p>
 <p>A draw of one lies outside every half-open interval and can produce an out-of-range token. Input validation keeps a random-source contract failure distinct from vocabulary indexing.</p>
-<pre><code class="language-python">def validate_draw(draw):
-    if not np.isfinite(draw) or not 0&lt;=draw&lt;1: raise ValueError(&#x27;draw in [0,1)&#x27;)
-    return draw
-assert validate_draw(0)==0 and validate_draw(.999)==.999
-for bad in [1,-.1]:
-    try: validate_draw(bad)
-    except ValueError: pass
-    else: raise AssertionError(&#x27;invalid draw&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_draw</span><span class="syntax-punctuation">(</span>draw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>draw<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>draw<span class="syntax-operator">&lt;</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">draw in [0,1)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> draw
+<span class="syntax-keyword">assert</span> validate_draw<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> validate_draw<span class="syntax-punctuation">(</span><span class="syntax-number">.999</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.999</span>
+<span class="syntax-keyword">for</span> bad <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate_draw<span class="syntax-punctuation">(</span>bad<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid draw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> 0 and.999 accepted;1 and-.1 rejected.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 0 and.999 accepted;1 and-.1 rejected.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

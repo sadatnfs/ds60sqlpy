@@ -72,12 +72,21 @@ You can revisit an earlier chapter or experiment with a new example whenever
 it helps. Changing subjects does not rename the lesson or intentionally reset
 its saved work. Old lesson identifiers remain stable through the UI migration.
 
+**Saved runs** keeps durable Python and SQL run receipts in the learning volume,
+including the submitted source and recorded output. The workspace restores the
+latest receipt when you return, and you can inspect earlier runs without
+re-executing their code or overwriting the current pad. Source version history
+is separate: an edited or saved source version does not imply that it ran.
+
 The normal Docker classroom stores progress and working data in named Docker
 volumes. `./classroom stop` preserves those volumes; rebuilding images also
 preserves them. Deleting volumes is different from pruning unused images.
 Follow [backup and transfer instructions](one-command-classroom.md) before
 moving between machines or between the old host-folder workflow and the
 standard Docker classroom.
+A full learning-volume backup includes saved code, notes and run output,
+including receipts under `classroom-runs`. The older completion-JSON export
+contains completion markers; it is not a full workspace backup.
 
 ## Existing bookmarks and offline reading
 

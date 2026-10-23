@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete the independent data investigation (<code>python-foundations-04</code>), which includes Day 10 (<code>python-10</code>). You can separate file boundaries from pure analysis and preserve concrete test evidence.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day11_debug_logging_profiling.md</code>, then open <code>python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,32 +423,32 @@
 <p><code>logger.info(&quot;loaded rows=%d&quot;, row_count)</code> separates a stable message template from its value; logging formats it only when the level is enabled. In a traceback, the last line names the exception, while the preceding frames show calls from outermost to innermost. With <code>timeit</code>, setup and repeated statement execution are deliberately separated.</p>
 <h5 id="guide--worked-example-1-add-context-at-the-boundary">Worked example 1 - Add context at the boundary<a class="heading-anchor" href="#guide--worked-example-1-add-context-at-the-boundary" aria-label="Link to this section">#</a></h5>
 <p>A small function logs an outcome without dumping the input records. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import logging
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> logging
 
-logger = logging.getLogger(&quot;day11&quot;)
-logger.setLevel(logging.INFO)
+logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">day11</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+logger<span class="syntax-operator">.</span>setLevel<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">)</span>
 
-def accepted_count(values: list[int]) -&gt; int:
-    count = sum(value &gt;= 0 for value in values)
-    logger.info(&quot;accepted=%d total=%d&quot;, count, len(values))
-    return count
+<span class="syntax-keyword">def</span> <span class="syntax-function">accepted_count</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span>
+    logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted=</span><span class="syntax-string">%d</span><span class="syntax-string"> total=</span><span class="syntax-string">%d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> count<span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> count
 
-accepted_count([4, -1, 0])</code></pre>
+accepted_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.</code></pre>
+<pre class="highlighted-code"><code class="language-text">The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-measure-two-equivalent-membership-strategies">Worked example 2 - Measure two equivalent membership strategies<a class="heading-anchor" href="#guide--worked-example-2-measure-two-equivalent-membership-strategies" aria-label="Link to this section">#</a></h5>
 <p>Use repeated representative work instead of one noisy timestamp. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">from timeit import timeit
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> timeit <span class="syntax-keyword">import</span> timeit
 
-values = list(range(1_000))
-value_set = set(values)
-list_seconds = timeit(&quot;999 in values&quot;, number=5_000, globals=globals())
-set_seconds = timeit(&quot;999 in value_set&quot;, number=5_000, globals=globals())
-{&quot;same_answer&quot;: (999 in values) == (999 in value_set),
- &quot;set_faster_here&quot;: set_seconds &lt; list_seconds}</code></pre>
+values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+value_set <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+list_seconds <span class="syntax-operator">=</span> timeit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">999 in values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">globals</span><span class="syntax-operator">=</span><span class="syntax-builtin">globals</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+set_seconds <span class="syntax-operator">=</span> timeit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">999 in value_set</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">globals</span><span class="syntax-operator">=</span><span class="syntax-builtin">globals</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">same_answer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">999</span> <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">999</span> <span class="syntax-operator">in</span> value_set<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-string">&quot;</span><span class="syntax-string">set_faster_here</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> set_seconds <span class="syntax-operator">&lt;</span> list_seconds<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -431,19 +479,19 @@ set_seconds = timeit(&quot;999 in value_set&quot;, number=5_000, globals=globals
 </ul>
 <p>A stopwatch tells you <em>that</em> work is slow; a profiler helps locate <em>where</em>.</p>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import logging
-import timeit
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> logging
+<span class="syntax-keyword">import</span> timeit
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=&quot;%(levelname)s %(message)s&quot;)
+logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span>
+logging<span class="syntax-operator">.</span>basicConfig<span class="syntax-punctuation">(</span>level<span class="syntax-operator">=</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">,</span> <span class="syntax-builtin">format</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">%(levelname)s</span><span class="syntax-string"> </span><span class="syntax-string">%(message)s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-def unique_count(values: list[int]) -&gt; int:
-    return len(set(values))
+<span class="syntax-keyword">def</span> <span class="syntax-function">unique_count</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-values = list(range(1_000))
-logger.info(&quot;benchmarking unique_count count=%d&quot;, len(values))
-elapsed = timeit.timeit(lambda: unique_count(values), number=10)
-print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
+values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">benchmarking unique_count count=</span><span class="syntax-string">%d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+elapsed <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>timeit<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> unique_count<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>elapsed<span class="syntax-string">=:</span><span class="syntax-string">.6f</span><span class="syntax-string">}</span><span class="syntax-string">s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Configure logging once at an application entry point. Library code should emit records through its module logger, not repeatedly call <code>basicConfig</code>.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -451,7 +499,7 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 <li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
 </ol>
 <ol>
-<li>Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
+<li>Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
 </ol>
 <ol>
 <li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
@@ -491,7 +539,7 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-11`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-11`
 (Day 11: Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-foundations-04`.
 I have completed the direct prerequisites: `python-foundations-04`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
 Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
@@ -567,30 +615,30 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>logger.info(&quot;loaded rows=%d&quot;, row_count)</code> separates a stable message template from its value; logging formats it only when the level is enabled. In a traceback, the last line names the exception, while the preceding frames show calls from outermost to innermost. With <code>timeit</code>, setup and repeated statement execution are deliberately separated.</p>
 <h5 id="learner--cell-5--worked-example-1-add-context-at-the-boundary">Worked example 1 - Add context at the boundary<a class="heading-anchor" href="#learner--cell-5--worked-example-1-add-context-at-the-boundary" aria-label="Link to this section">#</a></h5>
 <p>A small function logs an outcome without dumping the input records. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import logging</span>
-<span> </span>
-<span>logger = logging.getLogger(&quot;day11&quot;)</span>
-<span>logger.setLevel(logging.INFO)</span>
-<span> </span>
-<span>def accepted_count(values: list[int]) -&gt; int:</span>
-<span>    count = sum(value &gt;= 0 for value in values)</span>
-<span>    logger.info(&quot;accepted=%d total=%d&quot;, count, len(values))</span>
-<span>    return count</span>
-<span> </span>
-<span>accepted_count([4, -1, 0])</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> logging</span>
+<span class="source-line"></span>
+<span class="source-line">logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">day11</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">logger<span class="syntax-operator">.</span>setLevel<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">accepted_count</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted=</span><span class="syntax-string">%d</span><span class="syntax-string"> total=</span><span class="syntax-string">%d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> count<span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> count</span>
+<span class="source-line"></span>
+<span class="source-line">accepted_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The function returns <code>2</code>; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-7--worked-example-2-measure-two-equivalent-membership-strategies">Worked example 2 - Measure two equivalent membership strategies<a class="heading-anchor" href="#learner--cell-7--worked-example-2-measure-two-equivalent-membership-strategies" aria-label="Link to this section">#</a></h5>
 <p>Use repeated representative work instead of one noisy timestamp. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from timeit import timeit</span>
-<span> </span>
-<span>values = list(range(1_000))</span>
-<span>value_set = set(values)</span>
-<span>list_seconds = timeit(&quot;999 in values&quot;, number=5_000, globals=globals())</span>
-<span>set_seconds = timeit(&quot;999 in value_set&quot;, number=5_000, globals=globals())</span>
-<span>{&quot;same_answer&quot;: (999 in values) == (999 in value_set),</span>
-<span> &quot;set_faster_here&quot;: set_seconds &lt; list_seconds}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> timeit <span class="syntax-keyword">import</span> timeit</span>
+<span class="source-line"></span>
+<span class="source-line">values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">value_set <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">list_seconds <span class="syntax-operator">=</span> timeit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">999 in values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">globals</span><span class="syntax-operator">=</span><span class="syntax-builtin">globals</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">set_seconds <span class="syntax-operator">=</span> timeit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">999 in value_set</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">globals</span><span class="syntax-operator">=</span><span class="syntax-builtin">globals</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">same_answer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">999</span> <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">999</span> <span class="syntax-operator">in</span> value_set<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-string">&quot;</span><span class="syntax-string">set_faster_here</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> set_seconds <span class="syntax-operator">&lt;</span> list_seconds<span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.</p>
 <h4 id="learner--cell-9--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-9--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -604,18 +652,18 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.</p>
 <p><strong>Boundary to test:</strong> Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import logging, timeit</span>
-<span>logging.basicConfig(level=logging.INFO)</span>
-<span> </span>
-<span>def slow_sum(n: int) -&gt; int:</span>
-<span>    s = 0</span>
-<span>    for i in range(n):</span>
-<span>        s += i</span>
-<span>    return s</span>
-<span> </span>
-<span>logging.info(&#x27;Running timeit...&#x27;)</span>
-<span>timeit.timeit(lambda: slow_sum(10_000), number=10)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> logging<span class="syntax-operator">,</span> timeit</span>
+<span class="source-line">logging<span class="syntax-operator">.</span>basicConfig<span class="syntax-punctuation">(</span>level<span class="syntax-operator">=</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">slow_sum</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        s <span class="syntax-operator">+</span><span class="syntax-operator">=</span> i</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> s</span>
+<span class="source-line"></span>
+<span class="source-line">logging<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Running timeit...</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">timeit<span class="syntax-operator">.</span>timeit<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> slow_sum<span class="syntax-punctuation">(</span><span class="syntax-number">10_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-11--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-11--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -623,7 +671,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
 </ol>
 <ol>
-<li>Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
+<li>Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
 </ol>
 <ol>
 <li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
@@ -642,98 +690,98 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-12--practice-1-prediction-attempt-and-evidence">Practice 1 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-12--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 - your work</span>
-<span># Short contract: Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. record the call arguments, two rel...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. record the call arguments, two rel...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-14--practice-2-prediction-attempt-and-evidence">Practice 2 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-14--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
-<p><strong>Contract reminder:</strong> Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
+<p><strong>Contract reminder:</strong> Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 - your work</span>
-<span># Short contract: Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. use lazy `%s`/`%d` formatting, do not call...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. use lazy `%s`/`%d` formatting, do not call...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-16--practice-3-prediction-attempt-and-evidence">Practice 3 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-16--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 - your work</span>
-<span># Short contract: Profile a deliberately slow membership or aggregation function with `cProfile` or `timeit`, implement one behavior-preserving improvement, and compare under identical inputs. ou...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Profile a deliberately slow membership or aggregation function with `cProfile` or `timeit`, implement one behavior-preserving improvement, and compare under identical inputs. ou...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-18--practice-4-prediction-attempt-and-evidence">Practice 4 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-18--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 - your work</span>
-<span># Short contract: With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. The threshold keeps records at that level or more severe. Capture emitted rec...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. The threshold keeps records at that level or more severe. Capture emitted rec...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-20--practice-5-prediction-attempt-and-evidence">Practice 5 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-20--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 - your work</span>
-<span># Short contract: Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. Read a traceback from the final exception upward through your cod...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. Read a traceback from the final exception upward through your cod...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-22--practice-6-prediction-attempt-and-evidence">Practice 6 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-22--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 - your work</span>
-<span># Short contract: Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging. Put elapsed-time logging in `finally` so failures are still timed. Capture one success...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging. Put elapsed-time logging in `finally` so failures are still timed. Capture one success...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-24--practice-7-prediction-attempt-and-evidence">Practice 7 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-24--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one. <strong>Verify:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 - your work</span>
-<span># Short contract: Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. Configuration is process state...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. Configuration is process state...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-26--practice-8-prediction-attempt-and-evidence">Practice 8 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-26--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization. <strong>Verify:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 8 - your work</span>
-<span># Short contract: Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. A faster wrong answer is not an optimization...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 8 - your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. A faster wrong answer is not an optimization...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -787,73 +835,73 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. Evidence: record the call arguments, two relevant local variables, and the branch taken. Constraint: do not change logic until you can state one falsifiable hypothesis. Preserve that failing case, repair the violated rule, and rerun the evidence named here: record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix. The diagnosis depends on evidence-driven debugging, useful logs, and measurement before optimization.</p>
-<pre><code class="language-python">def average_positive(values: list[float]) -&gt; float:
-    positives = [value for value in values if value &gt; 0]
-    if not positives:
-        raise ValueError(&quot;at least one positive value is required&quot;)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">average_positive</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    positives <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>value <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values <span class="syntax-keyword">if</span> value <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> positives<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">at least one positive value is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-    # In VS Code, set a breakpoint on the return line. At the pause,
-    # inspect values, positives, sum(positives), and len(positives).
-    # Temporarily writing `breakpoint()` here gives the same view in a
-    # terminal; remove it after the diagnosis.
-    return sum(positives) / len(positives)
+    <span class="syntax-comment"># In VS Code, set a breakpoint on the return line. At the pause,</span>
+    <span class="syntax-comment"># inspect values, positives, sum(positives), and len(positives).</span>
+    <span class="syntax-comment"># Temporarily writing `breakpoint()` here gives the same view in a</span>
+    <span class="syntax-comment"># terminal; remove it after the diagnosis.</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>positives<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>positives<span class="syntax-punctuation">)</span>
 
 
-failing_input = [-100.0, 10.0, 20.0]
-result = average_positive(failing_input)
-assert result == 15.0</code></pre>
+failing_input <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">]</span>
+result <span class="syntax-operator">=</span> average_positive<span class="syntax-punctuation">(</span>failing_input<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-number">15.0</span></code></pre>
 <p>The original bug divided by <code>len(values)</code> and returned <code>10.0</code>. Pausing immediately before that division reveals <code>sum(positives) == 30</code> but a denominator of <code>3</code>; the violated contract says only positive values belong to both numerator and denominator. After the one-line repair, rerun the original case and the no-positive boundary.</p>
 <p><strong>Verification evidence:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
-<p><strong>Reasoning:</strong> Implement this exact contract as written: Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. Constraints: use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: demonstrate that changing the configured level changes visibility without changing the returned value. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
-<pre><code class="language-python">import logging
-from pathlib import Path
+<p><strong>Learner contract:</strong> Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. Constraints: use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: demonstrate that changing the configured level changes visibility without changing the returned value. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> logging
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-logger = logging.getLogger(__name__)
+logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span>
 
 
-def report_file(path: Path) -&gt; int:
-    logger.debug(&quot;reading file=%s&quot;, path.name)
-    try:
-        text = path.read_text(encoding=&quot;utf-8&quot;)
-    except FileNotFoundError:
-        logger.warning(&quot;missing file=%s&quot;, path.name)
-        return 0
-    line_count = len(text.splitlines())
-    logger.info(&quot;read lines=%d file=%s&quot;, line_count, path.name)
-    return line_count</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">report_file</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    logger<span class="syntax-operator">.</span>debug<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">reading file=</span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        text <span class="syntax-operator">=</span> path<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> FileNotFoundError<span class="syntax-punctuation">:</span>
+        logger<span class="syntax-operator">.</span>warning<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing file=</span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">0</span>
+    line_count <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">read lines=</span><span class="syntax-string">%d</span><span class="syntax-string"> file=</span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> line_count<span class="syntax-punctuation">,</span> path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> line_count</code></pre>
 <p>Library code emits contextual records but leaves handler/level configuration to the application. It logs a basename and counts, not file contents or credentials.</p>
 <p><strong>Verification evidence:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
 <h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. Expected behavior: outputs match exactly and the measurement identifies where time changed. Constraint: report repeated timings rather than claiming from a single run. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
-<pre><code class="language-python">from timeit import repeat
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> timeit <span class="syntax-keyword">import</span> repeat
 
 
-def contains_with_list(values: list[int], queries: list[int]) -&gt; list[bool]:
-    return [query in values for query in queries]
+<span class="syntax-keyword">def</span> <span class="syntax-function">contains_with_list</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>query <span class="syntax-operator">in</span> values <span class="syntax-keyword">for</span> query <span class="syntax-operator">in</span> queries<span class="syntax-punctuation">]</span>
 
 
-def contains_with_set(values: list[int], queries: list[int]) -&gt; list[bool]:
-    lookup = set(values)
-    return [query in lookup for query in queries]
+<span class="syntax-keyword">def</span> <span class="syntax-function">contains_with_set</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    lookup <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>query <span class="syntax-operator">in</span> lookup <span class="syntax-keyword">for</span> query <span class="syntax-operator">in</span> queries<span class="syntax-punctuation">]</span>
 
 
-values = list(range(1_000))
-queries = list(range(900, 1_100))
-expected = contains_with_list(values, queries)
-assert contains_with_set(values, queries) == expected
+values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+queries <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">900</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1_100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expected <span class="syntax-operator">=</span> contains_with_list<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> contains_with_set<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> expected
 
-list_trials = repeat(
-    lambda: contains_with_list(values, queries), repeat=5, number=100
-)
-set_trials = repeat(
-    lambda: contains_with_set(values, queries), repeat=5, number=100
-)
-assert len(list_trials) == len(set_trials) == 5</code></pre>
+list_trials <span class="syntax-operator">=</span> repeat<span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> contains_with_list<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> repeat<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">100</span>
+<span class="syntax-punctuation">)</span>
+set_trials <span class="syntax-operator">=</span> repeat<span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> contains_with_set<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> queries<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> repeat<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">100</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>list_trials<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>set_trials<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span></code></pre>
 <p>Compare distributions rather than asserting a duration that will be brittle across computers. The equality assertion proves behavior before timing; the five samples expose run-to-run variation. Save the fixture and use cProfile when call-level evidence is needed:</p>
-<pre><code class="language-text">python -m cProfile -s cumulative your_profile_fixture.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python -m cProfile -s cumulative your_profile_fixture.py</code></pre>
 <p>The list version repeatedly scans up to 1,000 values for every query. The set version pays one construction cost and then uses expected constant-time membership checks.</p>
 <p><strong>Verification evidence:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
 <h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -882,47 +930,47 @@ assert len(list_trials) == len(set_trials) == 5</code></pre>
 <h5 id="solution-1--shared-implementation-for-exercises-4-5-logging-and-traceback-reading">Shared implementation for Exercises 4–5 — Logging and traceback reading<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-logging-and-traceback-reading" aria-label="Link to this section">#</a></h5>
 <p>At <code>WARNING</code>, warning and error records are emitted. Start traceback diagnosis at the deepest frame in code you control, then inspect the input and assumption there before editing callers.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-6-8-a-timing-tool-and-a-fair-benchmark">Shared implementation for Exercises 6–8 — A timing tool and a fair benchmark<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-a-timing-tool-and-a-fair-benchmark" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-import logging
-from contextlib import contextmanager
-from time import perf_counter
-from collections.abc import Iterator
+<span class="syntax-keyword">import</span> logging
+<span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> contextmanager
+<span class="syntax-keyword">from</span> time <span class="syntax-keyword">import</span> perf_counter
+<span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterator
 
-logger = logging.getLogger(&quot;ds60.day11&quot;)
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    # Add exactly one local handler in an interactive process.
-    logger.addHandler(logging.NullHandler())
-
-
-@contextmanager
-def timed(label: str) -&gt; Iterator[None]:
-    &quot;&quot;&quot;Log elapsed time for a block, including blocks that raise.&quot;&quot;&quot;
-
-    started = perf_counter()
-    try:
-        yield
-    finally:
-        elapsed = perf_counter() - started
-        logger.info(&quot;%s completed in %.6f seconds&quot;, label, elapsed)
+logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60.day11</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+logger<span class="syntax-operator">.</span>setLevel<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> logger<span class="syntax-operator">.</span>handlers<span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># Add exactly one local handler in an interactive process.</span>
+    logger<span class="syntax-operator">.</span>addHandler<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>NullHandler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-def loop_sum(values: list[int]) -&gt; int:
-    total = 0
-    for value in values:
-        total += value
-    return total
+<span class="syntax-decorator">@contextmanager</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">timed</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Iterator<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Log elapsed time for a block, including blocks that raise.&quot;&quot;&quot;</span>
+
+    started <span class="syntax-operator">=</span> perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">yield</span>
+    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+        elapsed <span class="syntax-operator">=</span> perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started
+        logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">%s</span><span class="syntax-string"> completed in </span><span class="syntax-string">%.6f</span><span class="syntax-string"> seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">,</span> elapsed<span class="syntax-punctuation">)</span>
 
 
-values = list(range(1_000))
-with timed(&quot;loop_sum&quot;):
-    loop_result = loop_sum(values)
-with timed(&quot;built_in_sum&quot;):
-    built_in_result = sum(values)
+<span class="syntax-keyword">def</span> <span class="syntax-function">loop_sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    total <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
+        total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value
+    <span class="syntax-keyword">return</span> total
 
-# Verify equivalent behavior before comparing repeated timings.
-assert loop_result == built_in_result</code></pre>
+
+values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> timed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">loop_sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    loop_result <span class="syntax-operator">=</span> loop_sum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> timed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">built_in_sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    built_in_result <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+
+<span class="syntax-comment"># Verify equivalent behavior before comparing repeated timings.</span>
+<span class="syntax-keyword">assert</span> loop_result <span class="syntax-operator">==</span> built_in_result</code></pre>
 <p>For a real benchmark, reuse equivalent input, warm both paths, run multiple trials, report a distribution, and keep logging/I/O outside the timed region.</p></div>
       </section>
 
@@ -959,45 +1007,45 @@ assert loop_result == built_in_result</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-11-solutions-debugging-logging-profiling">Day 11 — Solutions: Debugging, Logging, Profiling<a class="heading-anchor" href="#solution-2--cell-1--day-11-solutions-debugging-logging-profiling" aria-label="Link to this section">#</a></h3>
 <p>Logging instrumentation and micro-benchmarks with timeit/cProfile.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import logging, json, csv</span>
-<span>from pathlib import Path</span>
-<span>from typing import Any</span>
-<span> </span>
-<span>logging.basicConfig(level=logging.INFO, format=&#x27;%(levelname)s %(message)s&#x27;)</span>
-<span>log = logging.getLogger(__name__)</span>
-<span> </span>
-<span>def safe_load_json(path: str | Path) -&gt; Any | None:</span>
-<span>    p = Path(path)</span>
-<span>    log.info(&#x27;loading JSON: %s&#x27;, p)</span>
-<span>    try:</span>
-<span>        return json.loads(p.read_text(encoding=&#x27;utf-8&#x27;))</span>
-<span>    except FileNotFoundError:</span>
-<span>        log.error(&#x27;not found: %s&#x27;, p)</span>
-<span>    except PermissionError:</span>
-<span>        log.error(&#x27;permission denied: %s&#x27;, p)</span>
-<span>    except json.JSONDecodeError as e:</span>
-<span>        log.error(&#x27;invalid JSON %s (line %d col %d): %s&#x27;, p, e.lineno, e.colno, e.msg)</span>
-<span>    return None</span>
-<span> </span>
-<span>safe_load_json(&#x27;missing.json&#x27;)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> logging<span class="syntax-operator">,</span> json<span class="syntax-operator">,</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line">logging<span class="syntax-operator">.</span>basicConfig<span class="syntax-punctuation">(</span>level<span class="syntax-operator">=</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">,</span> <span class="syntax-builtin">format</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">%(levelname)s</span><span class="syntax-string"> </span><span class="syntax-string">%(message)s</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">log <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">safe_load_json</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    log<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">loading JSON: </span><span class="syntax-string">%s</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> FileNotFoundError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        log<span class="syntax-operator">.</span>error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">not found: </span><span class="syntax-string">%s</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> PermissionError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        log<span class="syntax-operator">.</span>error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">permission denied: </span><span class="syntax-string">%s</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> json<span class="syntax-operator">.</span>JSONDecodeError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        log<span class="syntax-operator">.</span>error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid JSON </span><span class="syntax-string">%s</span><span class="syntax-string"> (line </span><span class="syntax-string">%d</span><span class="syntax-string"> col </span><span class="syntax-string">%d</span><span class="syntax-string">): </span><span class="syntax-string">%s</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> e<span class="syntax-operator">.</span>lineno<span class="syntax-punctuation">,</span> e<span class="syntax-operator">.</span>colno<span class="syntax-punctuation">,</span> e<span class="syntax-operator">.</span>msg<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line">safe_load_json<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">missing.json</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Profiling example: vectorization vs Python loop</span>
-<span>import timeit, numpy as np</span>
-<span> </span>
-<span>def scale_loop(xs: list[float], k: float) -&gt; list[float]:</span>
-<span>    out = []</span>
-<span>    for x in xs:</span>
-<span>        out.append(x * k)</span>
-<span>    return out</span>
-<span> </span>
-<span>def scale_vec(xs: np.ndarray, k: float) -&gt; np.ndarray:</span>
-<span>    return xs * k</span>
-<span> </span>
-<span>arr = np.arange(100_000, dtype=float)</span>
-<span>lst = arr.tolist()</span>
-<span>loop_t = timeit.timeit(lambda: scale_loop(lst, 2.0), number=5)</span>
-<span>vec_t  = timeit.timeit(lambda: scale_vec(arr, 2.0), number=5)</span>
-<span>{&#x27;loop_sec&#x27;: loop_t, &#x27;vec_sec&#x27;: vec_t}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Profiling example: vectorization vs Python loop</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> timeit<span class="syntax-operator">,</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">scale_loop</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    out <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        out<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>x <span class="syntax-operator">*</span> k<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> out</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">scale_vec</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> xs <span class="syntax-operator">*</span> k</span>
+<span class="source-line"></span>
+<span class="source-line">arr <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">100_000</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">lst <span class="syntax-operator">=</span> arr<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">loop_t <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>timeit<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> scale_loop<span class="syntax-punctuation">(</span>lst<span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">vec_t  <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>timeit<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> scale_vec<span class="syntax-punctuation">(</span>arr<span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> number<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">loop_sec</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> loop_t<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">vec_sec</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> vec_t<span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1029,48 +1077,48 @@ assert loop_result == built_in_result</code></pre>
 <h5 id="solution-2--cell-4--practices-1-2-logging-and-traceback-reading">Practices 1–2 — Logging and traceback reading<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-logging-and-traceback-reading" aria-label="Link to this section">#</a></h5>
 <p>At <code>WARNING</code>, warning and error records are emitted. Start traceback diagnosis at the deepest frame in code you control, then inspect the input and assumption there before editing callers.</p>
 <h5 id="solution-2--cell-4--practices-3-5-a-timing-tool-and-a-fair-benchmark">Practices 3–5 — A timing tool and a fair benchmark<a class="heading-anchor" href="#solution-2--cell-4--practices-3-5-a-timing-tool-and-a-fair-benchmark" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>import logging</span>
-<span>from contextlib import contextmanager</span>
-<span>from time import perf_counter</span>
-<span>from collections.abc import Iterator</span>
-<span> </span>
-<span>logger = logging.getLogger(&quot;ds60.day11&quot;)</span>
-<span>logger.setLevel(logging.INFO)</span>
-<span>if not logger.handlers:</span>
-<span>    # Add exactly one local handler in an interactive process.</span>
-<span>    logger.addHandler(logging.NullHandler())</span>
-<span> </span>
-<span> </span>
-<span>@contextmanager</span>
-<span>def timed(label: str) -&gt; Iterator[None]:</span>
-<span>    &quot;&quot;&quot;Log elapsed time for a block, including blocks that raise.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    started = perf_counter()</span>
-<span>    try:</span>
-<span>        yield</span>
-<span>    finally:</span>
-<span>        elapsed = perf_counter() - started</span>
-<span>        logger.info(&quot;%s completed in %.6f seconds&quot;, label, elapsed)</span>
-<span> </span>
-<span> </span>
-<span>def loop_sum(values: list[int]) -&gt; int:</span>
-<span>    total = 0</span>
-<span>    for value in values:</span>
-<span>        total += value</span>
-<span>    return total</span>
-<span> </span>
-<span> </span>
-<span>values = list(range(1_000))</span>
-<span>with timed(&quot;loop_sum&quot;):</span>
-<span>    loop_result = loop_sum(values)</span>
-<span>with timed(&quot;built_in_sum&quot;):</span>
-<span>    built_in_result = sum(values)</span>
-<span> </span>
-<span># Verify equivalent behavior before comparing repeated timings.</span>
-<span>assert loop_result == built_in_result</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> logging</span>
+<span class="source-line"><span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> contextmanager</span>
+<span class="source-line"><span class="syntax-keyword">from</span> time <span class="syntax-keyword">import</span> perf_counter</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterator</span>
+<span class="source-line"></span>
+<span class="source-line">logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60.day11</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">logger<span class="syntax-operator">.</span>setLevel<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>INFO<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> logger<span class="syntax-operator">.</span>handlers<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Add exactly one local handler in an interactive process.</span></span>
+<span class="source-line">    logger<span class="syntax-operator">.</span>addHandler<span class="syntax-punctuation">(</span>logging<span class="syntax-operator">.</span>NullHandler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@contextmanager</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">timed</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Iterator<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Log elapsed time for a block, including blocks that raise.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    started <span class="syntax-operator">=</span> perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">yield</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        elapsed <span class="syntax-operator">=</span> perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started</span>
+<span class="source-line">        logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">%s</span><span class="syntax-string"> completed in </span><span class="syntax-string">%.6f</span><span class="syntax-string"> seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">,</span> elapsed<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">loop_sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    total <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> total</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> timed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">loop_sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    loop_result <span class="syntax-operator">=</span> loop_sum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> timed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">built_in_sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    built_in_result <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verify equivalent behavior before comparing repeated timings.</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> loop_result <span class="syntax-operator">==</span> built_in_result</span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>For a real benchmark, reuse equivalent input, warm both paths, run multiple trials, report a distribution, and keep logging/I/O outside the timed region.</p></article></div>
       </section>

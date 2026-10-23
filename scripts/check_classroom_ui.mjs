@@ -1573,19 +1573,441 @@ await test("reading-only module worksheets remain editable without inventing a r
 });
 await test("console stdout and stderr explicitly use readable code colors in both appearances", async () => {
   const css = fs.readFileSync(filename.replace(/\.js$/, ".css"), "utf8");
-  const declarations = (text) => Object.fromEntries([...text.matchAll(/(--[a-z-]+)\s*:\s*([^;]+);/g)].map((match) => [match[1], match[2].trim()]));
+  const declarations = (text) =>
+    Object.fromEntries(
+      [...text.matchAll(/(--[a-z-]+)\s*:\s*([^;]+);/g)].map((match) => [
+        match[1],
+        match[2].trim(),
+      ]),
+    );
   const light = declarations(css.match(/:root\s*\{([^}]+)\}/)[1]);
-  const dark = {...light, ...declarations(css.match(/body\[data-mode="dark"\]\s*\{([^}]+)\}/)[1])};
+  const dark = {
+    ...light,
+    ...declarations(css.match(/body\[data-mode="dark"\]\s*\{([^}]+)\}/)[1]),
+  };
   const consoleRule = css.match(/\.result-log\s*\{([^}]+)\}/)[1];
   assert.match(consoleRule, /background:\s*var\(--code-bg\)/);
   assert.match(consoleRule, /(?:^|;)\s*color:\s*var\(--code-text\)/);
   const luminance = (hex) => {
-    const values = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
-    return .2126 * values[0] + .7152 * values[1] + .0722 * values[2];
+    const values = hex
+      .slice(1)
+      .match(/../g)
+      .map((value) => parseInt(value, 16) / 255)
+      .map((value) =>
+        value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
+      );
+    return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
   };
-  for (const [appearance, tokens] of Object.entries({light, dark})) {
-    const values = [luminance(tokens["--code-text"]), luminance(tokens["--code-bg"])].sort((a, b) => b - a);
-    assert.ok((values[0] + .05) / (values[1] + .05) >= 7, appearance + " console contrast meets 7:1");
+  for (const [appearance, tokens] of Object.entries({ light, dark })) {
+    const values = [
+      luminance(tokens["--code-text"]),
+      luminance(tokens["--code-bg"]),
+    ].sort((a, b) => b - a);
+    assert.ok(
+      (values[0] + 0.05) / (values[1] + 0.05) >= 7,
+      appearance + " console contrast meets 7:1",
+    );
   }
+});
+function guideLink(e, href, modifiers = {}) {
+  const anchor = {
+    getAttribute: (name) =>
+      name === "href" ? href : (modifiers.attributes?.[name] ?? null),
+  };
+  let prevented = false;
+  const event = {
+    target: { closest: () => anchor },
+    button: 0,
+    preventDefault() {
+      prevented = true;
+    },
+    ...modifiers,
+  };
+  e.context.linkEvent = event;
+  return {
+    event,
+    prevented: () => prevented,
+    follow: () => e.run("followGuideLink(linkEvent)"),
+  };
+}
+function linkedPlan(e) {
+  const a = {
+    id: "llm-001",
+    title: "First",
+    status: "authored",
+    level: "beginner",
+    prerequisites: [],
+  };
+  const b = { ...a, id: "llm-002", title: "Second" };
+  e.context.plan = {
+    tracks: [
+      {
+        id: "llm-theory",
+        engine: "module",
+        title: "LLM theory",
+        lessons: [a, b],
+      },
+    ],
+    lesson_links: {
+      "/reference-pages/courses/llm-theory/guides/002.md.html": "llm-002",
+    },
+  };
+  e.run("index=plan;trackId='llm-theory';");
+  return { a, b };
+}
+await test("mapped cross-lesson links wait for the current draft save and remain in the classroom", async () => {
+  const e = environment(),
+    { b } = linkedPlan(e);
+  e.current("llm-001");
+  e.element("source").value = "retained draft";
+  const heading = e.element("module-guide--attention");
+  heading.id = "module-guide--attention";
+  e.element("guide").querySelectorAll = (selector) =>
+    selector === "[id]" ? [heading] : [];
+  const link = guideLink(
+    e,
+    "/reference-pages/courses/llm-theory/guides/002.md.html#attention",
+  );
+  const following = link.follow();
+  await settle();
+  assert.equal(link.prevented(), true);
+  assert.equal(e.next("module-lesson"), undefined);
+  assert.equal(e.next("module-save").body.fields.source, "retained draft");
+  e.resolve(e.next("module-save"), { session: {} });
+  await settle();
+  assert.equal(e.next("module-lesson").body.lesson_id, "llm-002");
+  e.resolve(e.next("module-lesson"), moduleData(b));
+  await following;
+  assert.equal(e.run("current.id"), "llm-002");
+  assert.equal(e.location.pathname, "/classroom");
+  assert.equal(heading.focused, true);
+});
+await test("mapped links preserve the old lesson and URL when its save fails", async () => {
+  const e = environment();
+  linkedPlan(e);
+  e.current("llm-001");
+  e.element("source").value = "important";
+  const link = guideLink(
+    e,
+    "/reference-pages/courses/llm-theory/guides/002.md.html",
+  );
+  const following = link.follow();
+  await settle();
+  e.reject(e.next("module-save"), "disk unavailable");
+  await following;
+  assert.equal(e.run("current.id"), "llm-001");
+  assert.equal(e.next("module-lesson"), undefined);
+  assert.equal(e.element("source").value, "important");
+  assert.match(e.element("status").textContent, /Navigation paused/);
+});
+await test("external modified and new-tab guide clicks keep normal browser behavior", async () => {
+  for (const [href, modifiers] of [
+    [
+      "https://example.org/reference-pages/courses/llm-theory/guides/002.md.html",
+      {},
+    ],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { ctrlKey: true },
+    ],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { metaKey: true },
+    ],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { shiftKey: true },
+    ],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { altKey: true },
+    ],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { button: 1 }],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { attributes: { target: "_blank" } },
+    ],
+    [
+      "/reference-pages/courses/llm-theory/guides/002.md.html",
+      { attributes: { download: "" } },
+    ],
+  ]) {
+    const e = environment();
+    linkedPlan(e);
+    const link = guideLink(e, href, modifiers);
+    await link.follow();
+    assert.equal(link.prevented(), false);
+    assert.equal(e.next("module-lesson"), undefined);
+    assert.equal(e.next("module-save"), undefined);
+  }
+});
+await test("unmapped references and solution artifacts never cause implicit solution reveal", async () => {
+  for (const path of [
+    "/reference-pages/docs/guide.md.html",
+    "/reference-pages/courses/llm-theory/solutions/002.md.html",
+  ]) {
+    const e = environment();
+    linkedPlan(e);
+    const link = guideLink(e, path);
+    await link.follow();
+    assert.equal(link.prevented(), false);
+    assert.equal(e.next("module-lesson"), undefined);
+    assert.equal(e.next("classroom-solutions"), undefined);
+    assert.equal(e.next("module-solutions"), undefined);
+  }
+});
+await test("a missing lesson link map leaves references safe while known reader links still resolve", async () => {
+  const e = environment(),
+    { b } = linkedPlan(e);
+  e.run("delete index.lesson_links;");
+  const reference = guideLink(
+    e,
+    "/reference-pages/courses/llm-theory/guides/002.md.html",
+  );
+  await reference.follow();
+  assert.equal(reference.prevented(), false);
+  const reader = guideLink(e, "/lesson-pages/llm-002.html#guide--attention");
+  const heading = e.element("module-guide--attention");
+  heading.id = "module-guide--attention";
+  e.element("guide").querySelectorAll = (selector) =>
+    selector === "[id]" ? [heading] : [];
+  const following = reader.follow();
+  await settle();
+  e.resolve(e.next("module-lesson"), moduleData(b));
+  await following;
+  assert.equal(reader.prevented(), true);
+  assert.equal(heading.focused, true);
+});
+await test("late mapped-link results cannot scroll an unrelated newer lesson", async () => {
+  const e = environment(),
+    { b } = linkedPlan(e);
+  const heading = e.element("module-guide--attention");
+  heading.id = "module-guide--attention";
+  e.element("guide").querySelectorAll = (selector) =>
+    selector === "[id]" ? [heading] : [];
+  const link = guideLink(
+    e,
+    "/reference-pages/courses/llm-theory/guides/002.md.html#attention",
+  );
+  const following = link.follow();
+  await settle();
+  const pending = e.next("module-lesson");
+  e.current("java-001", "java");
+  e.run("intentVersion++;");
+  e.resolve(pending, moduleData(b));
+  await following;
+  assert.equal(e.run("current.id"), "java-001");
+  assert.notEqual(heading.focused, true);
+});
+function receiptFixture(
+  context,
+  id = "saved-1",
+  source = 'print("earlier")\n',
+) {
+  return {
+    id,
+    saved_at: "2026-10-23T21:10:00+00:00",
+    lesson_id: context.id,
+    language: context.language,
+    mode: context.mode || "snippet",
+    source,
+    source_sha256: "a".repeat(64),
+    result: {
+      returncode: 0,
+      elapsed_seconds: 0.1,
+      language: context.language,
+      mode: context.mode || "snippet",
+      output: "earlier output",
+    },
+  };
+}
+function receiptMetadata(receipt) {
+  return {
+    id: receipt.id,
+    saved_at: receipt.saved_at,
+    lesson_id: receipt.lesson_id,
+    language: receipt.language,
+    mode: receipt.mode,
+    source_sha256: receipt.source_sha256,
+    returncode: 0,
+    status: "succeeded",
+  };
+}
+await test("saved run history restores the latest durable output without replaying or changing the pad", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.element("source").value = "my current draft";
+  e.element("explanation").value = "current notes";
+  const context = e.run("contextOf()"),
+    receipt = receiptFixture(context);
+  const loading = e.run("refreshRunHistory({showLatest:true})");
+  await settle();
+  assert.deepEqual(e.next("classroom-history").body, {
+    action: "classroom-history",
+    lesson_id: "py-001",
+    language: "python",
+    mode: "snippet",
+  });
+  e.resolve(e.next("classroom-history"), {
+    history: [receiptMetadata(receipt)],
+  });
+  await settle();
+  assert.equal(e.next("classroom-run-result").body.receipt_id, "saved-1");
+  e.resolve(e.next("classroom-run-result"), { receipt });
+  await loading;
+  assert.equal(e.element("output").textContent, "earlier output");
+  assert.equal(e.element("source").value, "my current draft");
+  assert.equal(e.element("explanation").value, "current notes");
+  assert.match(e.element("run-storage-status").textContent, /Saved run/);
+  assert.equal(e.element("error-line").hidden, true);
+  assert.equal(
+    e.requests.some((request) =>
+      ["run", "run-lesson", "module-run", "save-pad"].includes(
+        request.body.action,
+      ),
+    ),
+    false,
+  );
+});
+await test("late saved history cannot start receipt loading after a language or SQL mode switch", async () => {
+  const e = environment();
+  legacyCurrent(e, "sql-001", "sql", "snippet");
+  const context = e.run("contextOf()"),
+    receipt = receiptFixture(context);
+  const loading = e.run("refreshRunHistory({showLatest:true})");
+  await settle();
+  e.run("current.mode='lesson';");
+  e.element("output").textContent = "whole lesson output";
+  e.resolve(e.next("classroom-history"), {
+    history: [receiptMetadata(receipt)],
+  });
+  await loading;
+  assert.equal(e.next("classroom-run-result"), undefined);
+  assert.equal(e.element("output").textContent, "whole lesson output");
+});
+await test("late saved receipt results cannot appear in another lesson", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.context.receiptContext = e.run("contextOf()");
+  const receipt = receiptFixture(e.context.receiptContext);
+  const loading = e.run("openRunReceipt(receiptContext,'saved-1')");
+  await settle();
+  e.current("java-001", "java");
+  e.element("output").textContent = "Java output";
+  e.element("receipt-source-details").hidden = true;
+  e.resolve(e.next("classroom-run-result"), { receipt });
+  await loading;
+  assert.equal(e.element("output").textContent, "Java output");
+  assert.equal(e.element("receipt-source-details").hidden, true);
+  assert.equal(e.next("classroom-highlight"), undefined);
+});
+await test("choosing an earlier receipt shows its recorded source without replacing newer code", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.element("source").value = "newer code";
+  const context = e.run("contextOf()"),
+    receipt = receiptFixture(context, "older", 'print("old code")\n');
+  const loading = e.run("refreshRunHistory()");
+  e.resolve(e.next("classroom-history"), {
+    history: [receiptMetadata(receipt)],
+  });
+  await loading;
+  const clicked = e.element("history").children[0].handlers.click[0]();
+  await settle();
+  e.resolve(e.next("classroom-run-result"), { receipt });
+  await clicked;
+  assert.equal(e.element("source").value, "newer code");
+  assert.equal(
+    e.element("receipt-source").children[0].textContent,
+    'print("old code")\n',
+  );
+  assert.equal(e.element("output").textContent, "earlier output");
+  assert.equal(
+    e.requests.some((request) =>
+      ["run", "run-lesson", "module-run", "save-pad"].includes(
+        request.body.action,
+      ),
+    ),
+    false,
+  );
+});
+await test("receipt save failures preserve actual output and explicitly avoid claiming persistence or retry", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.context.receiptContext = e.run("contextOf()");
+  e.context.result = {
+    returncode: 0,
+    elapsed_seconds: 1,
+    output: "actual completed result",
+    language: "python",
+    receipt_saved: false,
+    receipt_error: "Disk full",
+  };
+  e.run("showLegacyResult(result,receiptContext,'print(42)')");
+  assert.equal(e.element("output").textContent, "actual completed result");
+  assert.match(
+    e.element("run-storage-status").textContent,
+    /could not be saved/,
+  );
+  assert.match(e.element("run-storage-status").textContent, /Disk full/);
+  assert.match(
+    e.element("run-storage-status").textContent,
+    /No automatic retry/,
+  );
+  assert.equal(
+    e.requests.some((request) =>
+      ["run", "run-lesson", "module-run"].includes(request.body.action),
+    ),
+    false,
+  );
+});
+await test("new live output cannot be replaced by an older pending history result", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.context.receiptContext = e.run("contextOf()");
+  const receipt = receiptFixture(e.context.receiptContext);
+  const loading = e.run("openRunReceipt(receiptContext,'saved-1')");
+  await settle();
+  e.context.latest = {
+    returncode: 0,
+    elapsed_seconds: 1,
+    language: "python",
+    output: "new live output",
+    receipt_saved: true,
+  };
+  e.run("showLegacyResult(latest,receiptContext,'print(2)')");
+  e.resolve(e.next("classroom-run-result"), { receipt });
+  await loading;
+  assert.equal(e.element("output").textContent, "new live output");
+});
+await test("saved receipt diagnostics require the exact currently edited source", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.context.receiptContext = e.run("contextOf()");
+  const receipt = receiptFixture(e.context.receiptContext, "bad", "one\ntwo");
+  receipt.result.output = '  File "practice.py", line 2\nValueError';
+  receipt.result.returncode = 1;
+  e.element("source").value = "one\ntwo";
+  const loading = e.run("openRunReceipt(receiptContext,'bad')");
+  e.resolve(e.next("classroom-run-result"), { receipt });
+  await loading;
+  assert.equal(e.element("error-line").hidden, false);
+  e.element("source").value = "changed";
+  await e.event("source", "input");
+  assert.equal(e.element("error-line").hidden, true);
+});
+await test("mapped solution anchors focus the explicit reveal control without opening answers", async () => {
+  const e = environment(),
+    { b } = linkedPlan(e);
+  const link = guideLink(e, "/lesson-pages/llm-002.html#solution-1");
+  const following = link.follow();
+  await settle();
+  e.resolve(e.next("module-lesson"), moduleData(b));
+  await following;
+  assert.equal(e.element("reveal").focused, true);
+  assert.match(e.element("status").textContent, /Choose Reveal solutions/);
+  assert.equal(e.next("classroom-solutions"), undefined);
+  assert.equal(e.next("module-solutions"), undefined);
+  assert.equal(e.location.pathname, "/classroom");
 });
 console.log(JSON.stringify({ checks, passed: true, final: true }));

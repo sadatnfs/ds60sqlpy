@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Specialized methods become useful when the observational object or evidence structure violates the assumptions of a familiar table of independent unconstrained numbers. Studies arrive with different precision and populations; survey items measure latent traits; percentages share a total; directions wrap around a circle; curves contain many related points. The appropriate representation is part of the statistical question, not a preprocessing detail to be standardized away.</p>
 <h4 id="synthesize-compatible-evidence-before-averaging-it">Synthesize compatible evidence before averaging it<a class="heading-anchor" href="#synthesize-compatible-evidence-before-averaging-it" aria-label="Link to this section">#</a></h4>
-<p>A meta-analysis combines study estimates only after defining a common estimand or a meaningful distribution of effects. If study i estimates theta_i with sampling variance v_i, a common-effect inverse-variance mean weights by 1/v_i. A random-effects model adds between-study variance tau_squared, using weights 1/(v_i+tau_squared) in a basic formulation. This changes both interpretation and relative weights. More precise aggregation cannot repair biased studies or incompatible outcome definitions.</p>
+<p>A meta-analysis combines study estimates only after defining a common estimand or a meaningful distribution of effects. If study i estimates theta_i with sampling variance v_i, a common-effect inverse-variance mean weights by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>v</mi><mrow><mi>i</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{v_{i}}</annotation></semantics></math>. A random-effects model adds between-study variance tau_squared, using weights <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>v</mi><mrow><mi>i</mi></mrow></msub><mo>+</mo><msup><mi>τ</mi><mn>2</mn></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{v_{i}+\tau^2}</annotation></semantics></math> in a basic formulation. This changes both interpretation and relative weights. More precise aggregation cannot repair biased studies or incompatible outcome definitions.</p>
 <p>A systematic review therefore begins before the model: search strategy, eligibility, duplicate-study handling, risk-of-bias assessment and extraction protocol. Publication and selective-reporting mechanisms can distort the available evidence. An LLM can help locate candidate passages or draft an extraction table, but a human-reviewed source record should establish study identity, design, sample size, effect scale and uncertainty. Unsupported extracted numbers would contaminate the analysis before any estimator is fitted.</p>
 <h4 id="respect-the-geometry-of-the-data">Respect the geometry of the data<a class="heading-anchor" href="#respect-the-geometry-of-the-data" aria-label="Link to this section">#</a></h4>
 <p>A composition such as shares [0.1,0.2,0.7] has a fixed sum. Increasing one component necessarily changes others, so raw covariance can reflect closure rather than a meaningful independent relationship. Log ratios represent relative information, but zeros require a measurement-aware policy rather than arbitrary tiny-value replacement. Angles have another geometry: 359 and 1 degrees are close, and their ordinary arithmetic mean 180 is misleading. A circular mean uses unit-vector directions.</p>
@@ -192,46 +238,46 @@
 <p>Differential privacy bounds how much a randomized output distribution can change between neighboring datasets, with parameters epsilon and possibly delta. The privacy unit and adjacency definition determine whose contribution is protected. Noise calibration uses sensitivity, and multiple releases consume a combined privacy budget. A single noisy count example illustrates one mechanism; production guarantees additionally require correct implementation, accounting, access boundaries and review.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_39.py.html">chapter_39.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_39.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_39.py</code></pre>
 <h4 id="see-how-heterogeneity-changes-relative-study-weights">See how heterogeneity changes relative study weights<a class="heading-anchor" href="#see-how-heterogeneity-changes-relative-study-weights" aria-label="Link to this section">#</a></h4>
-<p>Effects 0.2 and 0.5 with standard errors 0.1 and 0.2 receive common-effect weights 100 and 25, giving mean 0.26 and standard error sqrt(1/125). Adding an illustrative between-study variance 0.04 produces weights 20 and 12.5, moving the mean toward the second study. The fixed tau-squared is a teaching input, not an estimated heterogeneity result.</p>
+<p>Effects 0.2 and 0.5 with standard errors 0.1 and 0.2 receive common-effect weights 100 and 25, giving mean 0.26 and standard error <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>125</mn></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\frac{1}{125}}</annotation></semantics></math>. Adding an illustrative between-study variance 0.04 produces weights 20 and 12.5, moving the mean toward the second study. The fixed tau-squared is a teaching input, not an estimated heterogeneity result.</p>
 <h4 id="preserve-relative-and-circular-geometry">Preserve relative and circular geometry<a class="heading-anchor" href="#preserve-relative-and-circular-geometry" aria-label="Link to this section">#</a></h4>
-<p>Multiplying [1,2,7] by ten leaves its composition and log ratio log(1/2) unchanged. Angles 359 and 1 degrees have arithmetic mean 180 but a circular mean near zero. These checks show why the correct representation changes the result even before any sophisticated model is fitted.</p>
+<p>Multiplying [1,2,7] by ten leaves its composition and log ratio <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(\frac{1}{2})</annotation></semantics></math> unchanged. Angles 359 and 1 degrees have arithmetic mean 180 but a circular mean near zero. These checks show why the correct representation changes the result even before any sophisticated model is fitted.</p>
 <h4 id="inspect-one-privacy-mechanism-identity">Inspect one privacy-mechanism identity<a class="heading-anchor" href="#inspect-one-privacy-mechanism-identity" aria-label="Link to this section">#</a></h4>
-<p>For a count with add/remove-one sensitivity one and epsilon one, Laplace scale is one. At output seven, the density ratio for adjacent true counts six and five is exp(1), matching the theoretical bound in this case. This is synthetic algebra, not a complete privacy implementation; composition, random-number generation and data access remain outside the demonstration.</p>
+<p>For a count with add/remove-one sensitivity one and epsilon one, Laplace scale is one. At output seven, the density ratio for adjacent true counts six and five is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(1)</annotation></semantics></math>, matching the theoretical bound in this case. This is synthetic algebra, not a complete privacy implementation; composition, random-number generation and data access remain outside the demonstration.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def meta_weights():
-    effect=np.array([.2,.5]);variance=np.array([.1,.2])**2
-    weight=1/variance;common=np.sum(weight*effect)/weight.sum();se=np.sqrt(1/weight.sum())
-    random_weight=1/(variance+.04);random_mean=np.sum(random_weight*effect)/random_weight.sum()
-    assert np.isclose(common,.26) and np.isclose(se,np.sqrt(1/125))
-    assert random_mean&gt;common and random_weight[0]/random_weight[1]&lt;weight[0]/weight[1]
-    print(&quot;Common-effect mean and SE:&quot;,common,se,&quot;illustrative tau-squared=.04 mean:&quot;,random_mean)
+<span class="syntax-keyword">def</span> <span class="syntax-function">meta_weights</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    effect<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>variance<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    weight<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>variance<span class="syntax-punctuation">;</span>common<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span>effect<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>se<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    random_weight<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>variance<span class="syntax-operator">+</span><span class="syntax-number">.04</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>random_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>random_weight<span class="syntax-operator">*</span>effect<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>random_weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>common<span class="syntax-punctuation">,</span><span class="syntax-number">.26</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>se<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">125</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> random_mean<span class="syntax-operator">&gt;</span>common <span class="syntax-operator">and</span> random_weight<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>random_weight<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span>weight<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>weight<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Common-effect mean and SE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>common<span class="syntax-punctuation">,</span>se<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">illustrative tau-squared=.04 mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>random_mean<span class="syntax-punctuation">)</span>
 
-def relative_and_circular():
-    composition=np.array([1.,2.,7.]);scaled=10*composition
-    assert np.allclose(composition/composition.sum(),scaled/scaled.sum())
-    ratio=np.log(composition[0]/composition[1])
-    assert np.isclose(ratio,np.log(scaled[0]/scaled[1]))
-    radians=np.deg2rad([359.,1.]);circular=np.rad2deg(np.angle(np.mean(np.exp(1j*radians))))
-    assert abs(circular)&lt;1e-10 and np.mean([359.,1.])==180.
-    print(&quot;Invariant log ratio:&quot;,ratio,&quot;circular mean near zero:&quot;,circular)
+<span class="syntax-keyword">def</span> <span class="syntax-function">relative_and_circular</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    composition<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">7.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>scaled<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-operator">*</span>composition
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>composition<span class="syntax-operator">/</span>composition<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>scaled<span class="syntax-operator">/</span>scaled<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    ratio<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>composition<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>composition<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ratio<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>scaled<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    radians<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>deg2rad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">359.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>circular<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rad2deg<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>angle<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-number">1</span>j<span class="syntax-operator">*</span>radians<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>circular<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-10</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">359.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">180.</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Invariant log ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ratio<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">circular mean near zero:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>circular<span class="syntax-punctuation">)</span>
 
-def laplace_ratio():
-    epsilon=1.;sensitivity=1.;scale=sensitivity/epsilon
-    def density(output,count):return np.exp(-abs(output-count)/scale)/(2*scale)
-    ratio=density(7.,6.)/density(7.,5.)
-    assert np.isclose(ratio,np.exp(epsilon))
-    assert sensitivity/.5&gt;sensitivity/2.
-    print(&quot;Adjacent-count density ratio:&quot;,ratio,&quot;bound:&quot;,np.exp(epsilon))
+<span class="syntax-keyword">def</span> <span class="syntax-function">laplace_ratio</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    epsilon<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">;</span>sensitivity<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">;</span>scale<span class="syntax-operator">=</span>sensitivity<span class="syntax-operator">/</span>epsilon
+    <span class="syntax-keyword">def</span> <span class="syntax-function">density</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span>count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>output<span class="syntax-operator">-</span>count<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>scale<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>scale<span class="syntax-punctuation">)</span>
+    ratio<span class="syntax-operator">=</span>density<span class="syntax-punctuation">(</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>density<span class="syntax-punctuation">(</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ratio<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> sensitivity<span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-operator">&gt;</span>sensitivity<span class="syntax-operator">/</span><span class="syntax-number">2.</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Adjacent-count density ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ratio<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">bound:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def main():
-    meta_weights();relative_and_circular();laplace_ratio()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    meta_weights<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>relative_and_circular<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>laplace_ratio<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does random-effects meta-analysis solve study heterogeneity?</strong> It models a distribution of effects under assumptions and changes the target to its mean. It does not explain all heterogeneity, repair biased studies or make incompatible outcomes comparable. Prediction intervals and sensitivity analyses may be more relevant than one pooled mean.</p>
 <p><strong>Interview: Why can a composition create misleading correlations?</strong> The fixed total couples components: increasing one share forces others down even without an independent substantive relationship. Ratios and an appropriate compositional geometry better represent relative information, with a separate policy for zeros.</p>

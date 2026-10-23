@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,10 +166,10 @@
 <p>The <a href="tf-007_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-trace-a-recorded-path">Exercise 1: Trace a recorded path<a class="heading-anchor" href="#exercise-1-trace-a-recorded-path" aria-label="Link to this section">#</a></h3>
 <p>The subtraction w-2 and the square of that result occur inside GradientTape, so the tape records their dependence on the trainable Variable. At zero the loss is 4 and the derivative is -4. The input dtype is float64 and CPU placement is explicit. A tape is an operational recording scope, not a symbolic parser that searches later Python text for a weight name. Its result should agree with the scalar derivative already checked in the previous lessons.</p>
-<p><strong>Expected:</strong> Loss 4 and gradient -4 at w=0, dtype float64.</p>
+<p><strong>Expected:</strong> Loss 4 and gradient -4 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>, dtype float64.</p>
 <p><strong>Verify:</strong> Assert the scalar values and inspect that subtraction and square both occur inside the tape indentation.</p>
 <h3 id="exercise-2-distinguish-a-true-zero">Exercise 2: Distinguish a true zero<a class="heading-anchor" href="#exercise-2-distinguish-a-true-zero" aria-label="Link to this section">#</a></h3>
-<p>At w=2 the same recorded path still exists. Its residual is zero and the connected derivative is the numeric tensor zero. Check that the result is not None before inspecting its scalar value. The distinction matters because a legitimate stationary point should not be diagnosed as a broken recording, and a broken recording should not be disguised as a stationary point. The fixture isolates this mechanism without asserting that every zero gradient in a larger network indicates an optimum.</p>
+<p>At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">w=2</annotation></semantics></math> the same recorded path still exists. Its residual is zero and the connected derivative is the numeric tensor zero. Check that the result is not None before inspecting its scalar value. The distinction matters because a legitimate stationary point should not be diagnosed as a broken recording, and a broken recording should not be disguised as a stationary point. The fixture isolates this mechanism without asserting that every zero gradient in a larger network indicates an optimum.</p>
 <p><strong>Expected:</strong> Connected loss 0 and numeric gradient 0, not None.</p>
 <p><strong>Verify:</strong> Use is not None before comparing the gradient value to 0.</p>
 <h3 id="exercise-3-repair-a-missing-path">Exercise 3: Repair a missing path<a class="heading-anchor" href="#exercise-3-repair-a-missing-path" aria-label="Link to this section">#</a></h3>
@@ -135,31 +181,31 @@
 <p><strong>Expected:</strong> Unwatched constant gives None; explicitly watched constant gives -4.</p>
 <p><strong>Verify:</strong> Assert both outcomes and explain why this does not make all input features trainable parameters.</p>
 <h3 id="exercise-5-preserve-variable-identity">Exercise 5: Preserve Variable identity<a class="heading-anchor" href="#exercise-5-preserve-variable-identity" aria-label="Link to this section">#</a></h3>
-<p>The expression w-0.1*gradient creates a Tensor. Assigning that result to a Python name rebinds the name and leaves the original Variable unchanged at zero. By contrast, assign_sub mutates the existing Variable, preserving its identity and bringing its value to 0.4. Retain a reference to the original object when comparing the two cases so a renamed Tensor cannot masquerade as mutable parameter state. Identity becomes important when optimizers track state for particular parameter objects.</p>
+<p>The expression <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>−</mo><mn>0.1</mn><mo>·</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi></mrow></mrow><annotation encoding="application/x-tex">w-0.1\cdot \mathrm{gradient}</annotation></semantics></math> creates a Tensor. Assigning that result to a Python name rebinds the name and leaves the original Variable unchanged at zero. By contrast, assign_sub mutates the existing Variable, preserving its identity and bringing its value to 0.4. Retain a reference to the original object when comparing the two cases so a renamed Tensor cannot masquerade as mutable parameter state. Identity becomes important when optimizers track state for particular parameter objects.</p>
 <p><strong>Expected:</strong> Rebinding yields a Tensor at 0.4 while the old Variable remains 0; assign_sub preserves the Variable object and changes its value to 0.4.</p>
 <p><strong>Verify:</strong> Inspect isinstance(...,tf.Variable), object identity and both old/new numeric values.</p>
 <h3 id="exercise-6-use-a-fresh-recording">Exercise 6: Use a fresh recording<a class="heading-anchor" href="#exercise-6-use-a-fresh-recording" aria-label="Link to this section">#</a></h3>
-<p>An ordinary nonpersistent tape releases its recorded resources after one gradient query; a second query raises RuntimeError. Build a new tape and recompute the forward loss to ask again. The scalar derivative is still -4. For fixed x=2 and loss=(2<em>w-4)^2 at zero, the chain rule gives 2</em>(-4)*2=-16. This confirms that a feature can remain constant while the weight has a connected gradient. No persistent tape or trainable feature is necessary for the example.</p>
+<p>An ordinary nonpersistent tape releases its recorded resources after one gradient query; a second query raises RuntimeError. Build a new tape and recompute the forward loss to ask again. The scalar derivative is still -4. For fixed <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x=2</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>2</mn><mo>·</mo><mi>w</mi><mo>−</mo><mn>4</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(2\cdot w-4\right)}^{2}</annotation></semantics></math> at zero, the chain rule gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo><mo>·</mo><mn>2</mn><mo>=</mo><mo>−</mo><mn>16</mn></mrow><annotation encoding="application/x-tex">2\cdot (-4)\cdot 2=-16</annotation></semantics></math>. This confirms that a feature can remain constant while the weight has a connected gradient. No persistent tape or trainable feature is necessary for the example.</p>
 <p><strong>Expected:</strong> Second use of the consumed tape raises RuntimeError; a fresh scalar tape gives -4, and the constant-feature loss gives gradient -16.</p>
 <p><strong>Verify:</strong> Capture the consumed-tape exception and assert the two fresh-path gradients separately.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import math
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
 
-def gradient_at(value):
-    with tf.device(&quot;/CPU:0&quot;):
-        weight = tf.Variable(value, dtype=tf.float64)
-        with tf.GradientTape() as tape:
-            loss = tf.square(weight - 2.0)
-        gradient = tape.gradient(loss, weight)
-    if gradient is None:
-        raise ValueError(&quot;recorded scalar path is disconnected&quot;)
-    return float(loss.numpy()), float(gradient.numpy())</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">gradient_at</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        weight <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+            loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">-</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+        gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> gradient <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">recorded scalar path is disconnected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
-<p>Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of (3*w-6)^2 at zero before running a fresh recording.</p>
+<p>Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>3</mn><mo>·</mo><mi>w</mi><mo>−</mo><mn>6</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(3\cdot w-6\right)}^{2}</annotation></semantics></math> at zero before running a fresh recording.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
   </main>
 </body>

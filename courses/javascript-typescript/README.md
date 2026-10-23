@@ -16,7 +16,7 @@ Start with [JavaScript, Node and the browser](guides/js-001.md). Predict the wor
 - 010-018: real modules, generators, Promise scheduling, cancellation, algorithms, testing, files, HTTP and a bounded CLI.
 - 019-028: strict TypeScript, unions, readonly aliasing, generics, type operators, runtime schemas, actual NodeNext projects, classes, async results and typed algorithms.
 - 029-031: actual browser starter/reference files for events and focus, forms and scoped storage, safe DOM/URL construction and CSP.
-- 032-037: streams and backpressure, workers and transfer, measurement, dates and timezones, package interfaces and retry/concurrency policies.
+- 032-037: streams and backpressure, workers and transfer, measurement, dates and time zones, package interfaces and retry/concurrency policies.
 - 038-042: typed API contracts, state machines, a real local HTTP service, incremental analytics and verified release bundles.
 
 ## Execution contracts

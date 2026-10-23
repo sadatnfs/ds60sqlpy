@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,47 +161,47 @@
       <h1>Tf 036 Solution</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-036_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-036: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span>import tensorflow as tf</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Build a literal model bundle</span>
-<span>    weights=np.array([[2.],[-1.]],dtype=&#x27;float32&#x27;); schema={&#x27;features&#x27;:[&#x27;a&#x27;,&#x27;b&#x27;],&#x27;dtype&#x27;:&#x27;float32&#x27;,&#x27;width&#x27;:2}</span>
-<span>    model=tf.keras.Sequential([tf.keras.Input(shape=(2,)),tf.keras.layers.Dense(1,use_bias=False)]); model.layers[0].set_weights([weights])</span>
-<span>    np.testing.assert_array_equal(model(np.array([[3,4]],dtype=&#x27;float32&#x27;)).numpy(),[[2]])</span>
-<span> </span>
-<span>    # Exercise 2: Freeze and hash a split manifest</span>
-<span>    import hashlib,json</span>
-<span>    split={&#x27;train&#x27;:[&#x27;a&#x27;,&#x27;b&#x27;],&#x27;test&#x27;:[&#x27;c&#x27;,&#x27;d&#x27;]}; payload=json.dumps(split,sort_keys=True,separators=(&#x27;,&#x27;,&#x27;:&#x27;)).encode(); digest=hashlib.sha256(payload).hexdigest()</span>
-<span>    assert not set(split[&#x27;train&#x27;])&amp;set(split[&#x27;test&#x27;]) and len(digest)==64</span>
-<span> </span>
-<span>    # Exercise 3: Catch tampered lineage</span>
-<span>    changed={&#x27;train&#x27;:[&#x27;a&#x27;,&#x27;b&#x27;],&#x27;test&#x27;:[&#x27;c&#x27;,&#x27;e&#x27;]}; other=hashlib.sha256(json.dumps(changed,sort_keys=True,separators=(&#x27;,&#x27;,&#x27;:&#x27;)).encode()).hexdigest()</span>
-<span>    assert other!=digest</span>
-<span> </span>
-<span>    # Exercise 4: Block incompatible schemas</span>
-<span>    incoming={&#x27;features&#x27;:[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;],&#x27;dtype&#x27;:&#x27;float32&#x27;,&#x27;width&#x27;:3}</span>
-<span>    assert incoming!=schema</span>
-<span> </span>
-<span>    # Exercise 5: Make the decision fail closed</span>
-<span>    gates={&#x27;prediction&#x27;:True,&#x27;split&#x27;:True,&#x27;restart&#x27;:None,&#x27;schema&#x27;:True}</span>
-<span>    assert not all(value is True for value in gates.values())</span>
-<span>    gates.update(restart=True,schema=False); assert not all(value is True for value in gates.values())</span>
-<span> </span>
-<span>    # Exercise 6: Retain a rollback decision</span>
-<span>    record={&#x27;candidate&#x27;:&#x27;v2&#x27;,&#x27;previous&#x27;:&#x27;v1&#x27;,&#x27;holdout_count&#x27;:2,&#x27;decision&#x27;:&#x27;go&#x27; if all(v is True for v in gates.values()) else &#x27;no-go&#x27;,&#x27;limits&#x27;:[&#x27;synthetic fixture only&#x27;]}</span>
-<span>    assert record[&#x27;decision&#x27;]==&#x27;no-go&#x27; and record[&#x27;previous&#x27;]==&#x27;v1&#x27; and record[&#x27;holdout_count&#x27;]==2</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-036: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Build a literal model bundle</span></span>
+<span class="source-line">    weights<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> schema<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">dtype</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">width</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    model<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>Sequential<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>Input<span class="syntax-punctuation">(</span>shape<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>Dense<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>use_bias<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-operator">.</span>layers<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>set_weights<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>weights<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Freeze and hash a split manifest</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> hashlib<span class="syntax-operator">,</span>json</span>
+<span class="source-line">    split<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> payload<span class="syntax-operator">=</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>split<span class="syntax-punctuation">,</span>sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">,</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> digest<span class="syntax-operator">=</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>split<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>split<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>digest<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">64</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Catch tampered lineage</span></span>
+<span class="source-line">    changed<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">e</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> other<span class="syntax-operator">=</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">,</span>sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">,</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> other<span class="syntax-operator">!=</span>digest</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Block incompatible schemas</span></span>
+<span class="source-line">    incoming<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">dtype</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">width</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> incoming<span class="syntax-operator">!=</span>schema</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Make the decision fail closed</span></span>
+<span class="source-line">    gates<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prediction</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">split</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">restart</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">schema</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> gates<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    gates<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span>restart<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>schema<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> gates<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Retain a rollback decision</span></span>
+<span class="source-line">    record<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">candidate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">previous</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">holdout_count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">decision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">go</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>v <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> gates<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">no-go</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">limits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">synthetic fixture only</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">decision</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">no-go</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">previous</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">holdout_count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

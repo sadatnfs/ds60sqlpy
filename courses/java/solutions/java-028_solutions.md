@@ -4,27 +4,27 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-HTTP is a request/response protocol with method,path,status,headers andbody. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting thebody. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies andserver exchanges own resources that need closure.
+HTTP is a request/response protocol with method,path,status,headers and body. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting the body. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies and server exchanges own resources that need closure.
 
-This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses theJDKHttpClient tocall it. It doesnot contact anexternal service orstart a persistent deployment. Thehandler accepts anexactpath andGETmethod,returns explicitUTF-8content,andcloses everyexchange. try-with-resources owns both client andserver wrapper inJava21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.
+This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses the JDK HttpClient to call it. It does not contact an external service or start a persistent deployment. Thehandler accepts an exact path and GET method,returns explicitUTF-8content,and closes every exchange. try-with-resources owns both client and server wrapper in Java 21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.
 
 **HTTP status:** The response code describing protocol/application outcome.
 
-**Loopback binding:** A listener restricted to thelocal host network interface.
+**Loopback binding:** A listener restricted to the local host network interface.
 
 **Request timeout:** A bound on client waiting for a request.
 
-**Exchange lifetime:** Ownership of request/response streams andconnection state.
+**Exchange lifetime:** Ownership of request/response streams and connection state.
 
 ## Reading the reference
 
-HttpServer.create binds anInetSocketAddress withport0,thengetAddress reveals the actualport. createContext uses prefixmatching,so thehandler should validate anexactpath when that is thecontract. HttpRequest specifies a timeout andmethod. HttpResponse exposes statusCode,headers andbody separately. stop(0) releases the ownedlistener when thefixture closes.
+HttpServer.create binds an InetSocketAddress withport0,thengetAddress reveals the actual port. createContext uses prefix matching,so the handler should validate an exact path when that is the contract. HttpRequest specifies a timeout and method. HttpResponse exposes statusCode,headers and body separately. stop(0) releases the owned listener when the fixture closes.
 
 ## Exercise 1: Call an owned loopback endpoint
 
-Task: Start the fixture andGET/health.
+Task: Start the fixture and request `GET /health`.
 
-The request reaches a real localHTTPserver. A returnedStringalonewouldnotverify routing,status orresourceclosure.
+The request reaches a real localHTTPserver. A a returned String alone would not verify routing,status or resource closure.
 
 ```java
 try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(2)).build()) {
@@ -33,15 +33,15 @@ try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.new
 }
 ```
 
-**Expected:** status200 andbodyok.
+**Expected:** status 200 and body ok.
 
-**Verify:** Compare the program values or named exception with status200 andbodyok. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with status 200 and body ok. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Inspect content metadata
 
-Task: ReadContent-Type on the successfulresponse.
+Task: ReadContent-Type on the successful response.
 
-Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess aplatform default.
+Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess a platform default.
 
 ```java
 try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
@@ -50,9 +50,9 @@ try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.new
 }
 ```
 
-**Expected:** text/plain withUTF-8 charset.
+**Expected:** text/plain with UTF-8 charset.
 
-**Verify:** Compare the program values or named exception with text/plain withUTF-8 charset. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with text/plain with UTF-8 charset. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Reject an unsupported method
 
@@ -67,15 +67,15 @@ try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.new
 }
 ```
 
-**Expected:** status405 andmethod not allowed body.
+**Expected:** status405 and method not allowed body.
 
-**Verify:** Compare the program values or named exception with status405 andmethod not allowed body. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with status405 and method not allowed body. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Reject a prefix lookalike
 
-Task: GET/health-extra,whichmatchesthecontextprefixbutnot thedeclaredexactpath.
+Task: GET/health-extra,which matches the context prefix but not the declared exact path.
 
-HttpServercontextmatchingisprefix-based. Anexactapplicationroute needsitsownpathcheck toavoidaccidentallyacceptinglookalikes.
+HttpServercontextmatchingisprefix-based. An exact application route needs its own path check toavoidaccidentallyacceptinglookalikes.
 
 ```java
 try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
@@ -91,7 +91,7 @@ try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.new
 
 Task: GETanunknownpathandinspectthecompletedresponse.
 
-Atransport-levelsuccessdoesnotmean thedomainoperation succeeded. Clientlogicshouldbranchonstatusbeforeparsingasuccessschema.
+Atransport-levelsuccessdoesnotmean the domain operation succeeded. Clientlogicshouldbranchonstatusbeforeparsingasuccessschema.
 
 ```java
 try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
@@ -99,23 +99,23 @@ try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.new
 }
 ```
 
-**Expected:** HTTPexchangecompletes with404 ratherthan a fabricated200.
+**Expected:** HTTP exchange completes with404 rather than a fabricated200.
 
-**Verify:** Compare the program values or named exception with HTTPexchangecompletes with404 ratherthan a fabricated200. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with HTTP exchange completes with404 rather than a fabricated200. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 6: Verify local-only target and closure
 
-Task: Inspecttheboundhostandpositiveephemeralport,thenclose thewrapper.
+Task: Inspect the bound host and positive ephemeral port,then close the wrapper.
 
-Thefixtureownsandstopsitslistener. Itdoesnotchangeasharedserver orleaveadeploymentrunningafterthelesson.
+Thefixtureownsandstopsitslistener. It does not change a shared server orleaveadeploymentrunningafterthelesson.
 
 ```java
 LocalServer owned=new LocalServer();assert owned.uri("/health").getHost().equals("127.0.0.1") && owned.uri("/health").getPort()>0;owned.close();assert owned.closed;
 ```
 
-**Expected:** host127.0.0.1;portpositive;closedflagtrue.
+**Expected:** host 127.0.0.1;port positive; closed flag true.
 
-**Verify:** Compare the program values or named exception with host127.0.0.1;portpositive;closedflagtrue. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with host 127.0.0.1;port positive; closed flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

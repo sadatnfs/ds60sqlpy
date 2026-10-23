@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -164,49 +210,49 @@
 <p>The final packet records source and target claims separately. For this run, the source runtime and query-shape rehearsal have actual evidence;the hypothetical target runtime does not. That distinction makes a migration review actionable:it says exactly which acceptance work remains instead of giving an unsupported compatibility approval.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
-import java.nio.charset.StandardCharsets
-import java.util.UUID
-import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
-import scala.collection.mutable.ArrayBuffer
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span><span class="syntax-class">Path</span><span class="syntax-punctuation">,</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>util<span class="syntax-punctuation">.</span><span class="syntax-class">UUID</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>jdk<span class="syntax-punctuation">.</span><span class="syntax-class">CollectionConverters</span><span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQuery</span><span class="syntax-punctuation">,</span><span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>collection<span class="syntax-punctuation">.</span>mutable<span class="syntax-punctuation">.</span><span class="syntax-class">ArrayBuffer</span>
 
-require(spark.version == &quot;4.0.1&quot;,&quot;Prepared Spark4.0.1 required&quot;)
-spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)
-ownedRoot=Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;spark-041-&quot;)
-val input=ownedRoot.resolve(&quot;input&quot;);val oldCheckpoint=ownedRoot.resolve(&quot;baseline-checkpoint&quot;);val oldOutput=ownedRoot.resolve(&quot;baseline-output&quot;)
-publishFile(ownedRoot,input,&quot;batch-01.json&quot;,Seq(&quot;&quot;&quot;{&quot;id&quot;:1,&quot;cents&quot;:100}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:2,&quot;cents&quot;:200}&quot;&quot;&quot;))
-val golden=spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,100L),Row(1L,100L),Row(2L,null),Row(3L,0L))),eventSchema)</code></pre>
-<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-from pathlib import Path
-import tempfile
-import shutil
-import json
-import uuid
+require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;Prepared Spark4.0.1 required&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.streaming.stopTimeout&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;5000&quot;</span><span class="syntax-punctuation">)</span>
+ownedRoot<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createTempDirectory<span class="syntax-punctuation">(</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toAbsolutePath<span class="syntax-punctuation">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;spark-041-&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> input<span class="syntax-operator">=</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;input&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">val</span> oldCheckpoint<span class="syntax-operator">=</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;baseline-checkpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">val</span> oldOutput<span class="syntax-operator">=</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;baseline-output&quot;</span><span class="syntax-punctuation">)</span>
+publishFile<span class="syntax-punctuation">(</span>ownedRoot<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;batch-01.json&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;id&quot;:1,&quot;cents&quot;:100}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;id&quot;:2,&quot;cents&quot;:200}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> golden<span class="syntax-operator">=</span>spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>eventSchema<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">import</span> shutil
+<span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">import</span> uuid
 
-if spark.version!=&quot;4.0.1&quot;:raise ValueError(&quot;Prepared Spark4.0.1 required&quot;)
-spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)
-owned_root=Path(tempfile.mkdtemp(prefix=&quot;spark-041-&quot;,dir=Path.cwd()))
-input_path=owned_root/&quot;input&quot;;old_checkpoint=owned_root/&quot;baseline-checkpoint&quot;;old_output=owned_root/&quot;baseline-output&quot;
-publish_file(owned_root,input_path,&quot;batch-01.json&quot;,[&#x27;{&quot;id&quot;:1,&quot;cents&quot;:100}&#x27;,&#x27;{&quot;id&quot;:2,&quot;cents&quot;:200}&#x27;])
-golden=spark.createDataFrame([(1,100),(1,100),(2,None),(3,0)],EVENT_SCHEMA)</code></pre>
+<span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version<span class="syntax-operator">!=</span><span class="syntax-string">&quot;</span><span class="syntax-string">4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared Spark4.0.1 required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.streaming.stopTimeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">5000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+owned_root<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-041-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span>Path<span class="syntax-operator">.</span>cwd<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+input_path<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>old_checkpoint<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline-checkpoint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>old_output<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline-output</span><span class="syntax-string">&quot;</span>
+publish_file<span class="syntax-punctuation">(</span>owned_root<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">batch-01.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:1,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:100}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:200}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+golden<span class="syntax-operator">=</span>spark<span class="syntax-operator">.</span>createDataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>EVENT_SCHEMA<span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-scala">val keys=Seq(&quot;id&quot;)
-val changed=Seq(&quot;id&quot;,&quot;cents&quot;)
-assert(keys!=changed)</code></pre>
-<pre><code class="language-python">keys=[&quot;id&quot;];changed=[&quot;id&quot;,&quot;cents&quot;]
-assert keys!=changed</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> keys<span class="syntax-operator">=</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> changed<span class="syntax-operator">=</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;cents&quot;</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>keys<span class="syntax-operator">!=</span>changed<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">keys<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>changed<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> keys<span class="syntax-operator">!=</span>changed</code></pre>
 <p>The state-key change is visible before any query launch. This pure comparison motivates a separate recovery namespace;it does not claim to inspect or rewrite Spark checkpoint internals.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-scala">val sameInstant=spark.sql(&quot;SELECT CAST(to_timestamp(&#x27;2026-10-23T12:00:00-07:00&#x27;) AS STRING)&quot;).first().getString(0)
-assert(sameInstant==&quot;2026-10-23 19:00:00&quot;)</code></pre>
-<pre><code class="language-python">same_instant=spark.sql(&quot;SELECT CAST(to_timestamp(&#x27;2026-10-23T12:00:00-07:00&#x27;) AS STRING)&quot;).first()[0]
-assert same_instant==&quot;2026-10-23 19:00:00&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> sameInstant<span class="syntax-operator">=</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;SELECT CAST(to_timestamp(&#x27;2026-10-23T12:00:00-07:00&#x27;) AS STRING)&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getString<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>sameInstant<span class="syntax-operator">==</span><span class="syntax-string">&quot;2026-10-23 19:00:00&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">same_instant<span class="syntax-operator">=</span>spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT CAST(to_timestamp(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">2026-10-23T12:00:00-07:00</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) AS STRING)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> same_instant<span class="syntax-operator">==</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-10-23 19:00:00</span><span class="syntax-string">&quot;</span></code></pre>
 <p>The actual SQL expression checks the instant under the UTC session. Preserving displayed local clock text instead would change meaning and fail the golden expectation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-capture-the-actual-runtime-tuple">Exercise 1: Capture the actual runtime tuple<a class="heading-anchor" href="#exercise-1-capture-the-actual-runtime-tuple" aria-label="Link to this section">#</a></h4>
@@ -253,7 +299,7 @@ assert same_instant==&quot;2026-10-23 19:00:00&quot;</code></pre>
 <li><a href="https://spark.apache.org/docs/4.0.1/sql-migration-guide.html">Spark4.0.1 SQL migration guide</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-041: Compatibility and recovery change rehearsal.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-041: Compatibility and recovery change rehearsal.
 Read courses/scala-spark/guides/spark-041.md and courses/scala-spark/lessons/spark-041.scala;the paired sources are courses/scala-spark/lessons/spark-041.scala and courses/scala-spark/lessons/spark-041.py.
 Direct prerequisites: spark-040. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
 Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.

@@ -67,7 +67,7 @@ assert grouped.shape==(4,3,2); np.testing.assert_allclose(grouped,oracle,atol=1e
 
 The question is: Combine scores 1000, 999, 998 and values 1, 3, 5 in blocks of 2.
 
-When the running maximum changes, the old numerator and denominator must both be rescaled. Updating only one produces a plausible butincorrect weighted average.
+When the running maximum changes, the old numerator and denominator must both be rescaled. Updating only one produces a plausible but incorrect weighted average.
 
 ```python
 scores=np.array([1000.,999.,998.]); values=np.array([[1.],[3.],[5.]])
@@ -103,7 +103,7 @@ for block in [1,2,3,5]:
 
 The question is: Change only value rows 3 and 4 and compare the first three online outputs.
 
-Block processing must preserve the same information boundary as dense attention. Tiling is not permission to normalize with future values orinclude masked keys in the denominator.
+Block processing must preserve the same information boundary as dense attention. Tiling is not permission to normalize with future values or include masked keys in the denominator.
 
 ```python
 changed=values.copy(); changed[3:]+=100

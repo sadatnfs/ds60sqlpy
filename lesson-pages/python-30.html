@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Days 16–29, especially cleaning (<code>python-18</code>), EDA (<code>python-24</code>), visualization (<code>python-25</code>), feature engineering (<code>python-28</code>), and schemas (<code>python-29</code>).</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day30_project_eda_preprocessing.md</code>, then open <code>python/ds-60day/notebooks/day30_project_eda_preprocessing.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,37 +423,37 @@
 <p>A robust notebook flows through named values such as <code>raw</code>, <code>profile</code>, <code>cleaned</code>, <code>validated</code>, and <code>artifact_path</code> rather than overwriting one <code>df</code>. A decision-log record can contain <code>issue</code>, <code>evidence</code>, <code>action</code>, <code>rationale</code>, <code>validation</code>, and <code>impact</code>. Assertions at each transition turn narrative expectations into executable gates.</p>
 <h5 id="guide--worked-example-1-reconcile-a-cleaning-boundary">Worked example 1 — Reconcile a cleaning boundary<a class="heading-anchor" href="#guide--worked-example-1-reconcile-a-cleaning-boundary" aria-label="Link to this section">#</a></h5>
 <p>Make every row removal visible and explainable. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
-raw = pd.DataFrame({
-    &quot;id&quot;: [1, 2, 2, 3],
-    &quot;amount&quot;: [10.0, 20.0, 20.0, None],
-})
-cleaned = raw.drop_duplicates().dropna(subset=[&quot;amount&quot;]).copy()
-reconciliation = {
-    &quot;raw_rows&quot;: len(raw),
-    &quot;clean_rows&quot;: len(cleaned),
-    &quot;rows_removed&quot;: len(raw) - len(cleaned),
-    &quot;raw_known_total&quot;: raw[&quot;amount&quot;].sum(),
-    &quot;clean_total&quot;: cleaned[&quot;amount&quot;].sum(),
-}
+raw <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+cleaned <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>drop_duplicates<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span>subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+reconciliation <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">raw_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">clean_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rows_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">raw_known_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">clean_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
 reconciliation</code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.</code></pre>
+<pre class="highlighted-code"><code class="language-text">The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-represent-a-decision-as-data">Worked example 2 — Represent a decision as data<a class="heading-anchor" href="#guide--worked-example-2-represent-a-decision-as-data" aria-label="Link to this section">#</a></h5>
 <p>A structured entry is easier to audit than a scattered comment. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">decision = {
-    &quot;issue&quot;: &quot;duplicate id=2 row&quot;,
-    &quot;evidence&quot;: &quot;two identical rows&quot;,
-    &quot;action&quot;: &quot;keep first exact duplicate&quot;,
-    &quot;rationale&quot;: &quot;duplicate adds no new information&quot;,
-    &quot;validation&quot;: &quot;id/amount pair is unique afterward&quot;,
-    &quot;impact&quot;: &quot;one row and amount=20 removed from row-level totals&quot;,
-}
-sorted(decision)</code></pre>
+<pre class="highlighted-code"><code class="language-python">decision <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate id=2 row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">two identical rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep first exact duplicate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rationale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate adds no new information</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id/amount pair is unique afterward</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one row and amount=20 removed from row-level totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>decision<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">All six required fields are listed. The impact makes clear that de-duplication changes additive totals.</code></pre>
+<pre class="highlighted-code"><code class="language-text">All six required fields are listed. The impact makes clear that de-duplication changes additive totals.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -437,7 +485,7 @@ sorted(decision)</code></pre>
 </ul>
 <h4 id="guide--worked-example-a-decision-record">Worked example: a decision record<a class="heading-anchor" href="#guide--worked-example-a-decision-record" aria-label="Link to this section">#</a></h4>
 <p>Before coding a repair, record it:</p>
-<pre><code class="language-text">Evidence: 3.2% of `amount` values are non-numeric, concentrated in source B.
+<pre class="highlighted-code"><code class="language-text">Evidence: 3.2% of `amount` values are non-numeric, concentrated in source B.
 Decision: coerce those values to missing; do not impute until source B is reviewed.
 Validation: schema rejects missing `amount` before the final save.
 Impact: final output is blocked instead of silently changing those rows.</code></pre>
@@ -497,7 +545,7 @@ Impact: final output is blocked instead of silently changing those rows.</code><
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-30`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-30`
 (Day 30 — Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
 I have completed the direct prerequisites: `python-29`. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
 Read `python/ds-60day/companion-guides/day30_project_eda_preprocessing.md` and use the learner notebook
@@ -566,35 +614,35 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p>A robust notebook flows through named values such as <code>raw</code>, <code>profile</code>, <code>cleaned</code>, <code>validated</code>, and <code>artifact_path</code> rather than overwriting one <code>df</code>. A decision-log record can contain <code>issue</code>, <code>evidence</code>, <code>action</code>, <code>rationale</code>, <code>validation</code>, and <code>impact</code>. Assertions at each transition turn narrative expectations into executable gates.</p>
 <h5 id="learner--cell-4--worked-example-1-reconcile-a-cleaning-boundary">Worked example 1 — Reconcile a cleaning boundary<a class="heading-anchor" href="#learner--cell-4--worked-example-1-reconcile-a-cleaning-boundary" aria-label="Link to this section">#</a></h5>
 <p>Make every row removal visible and explainable. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
-<span> </span>
-<span>raw = pd.DataFrame({</span>
-<span>    &quot;id&quot;: [1, 2, 2, 3],</span>
-<span>    &quot;amount&quot;: [10.0, 20.0, 20.0, None],</span>
-<span>})</span>
-<span>cleaned = raw.drop_duplicates().dropna(subset=[&quot;amount&quot;]).copy()</span>
-<span>reconciliation = {</span>
-<span>    &quot;raw_rows&quot;: len(raw),</span>
-<span>    &quot;clean_rows&quot;: len(cleaned),</span>
-<span>    &quot;rows_removed&quot;: len(raw) - len(cleaned),</span>
-<span>    &quot;raw_known_total&quot;: raw[&quot;amount&quot;].sum(),</span>
-<span>    &quot;clean_total&quot;: cleaned[&quot;amount&quot;].sum(),</span>
-<span>}</span>
-<span>reconciliation</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line">raw <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cleaned <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>drop_duplicates<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span>subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">reconciliation <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">raw_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">clean_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">rows_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">raw_known_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">clean_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line">reconciliation</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-represent-a-decision-as-data">Worked example 2 — Represent a decision as data<a class="heading-anchor" href="#learner--cell-6--worked-example-2-represent-a-decision-as-data" aria-label="Link to this section">#</a></h5>
 <p>A structured entry is easier to audit than a scattered comment. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>decision = {</span>
-<span>    &quot;issue&quot;: &quot;duplicate id=2 row&quot;,</span>
-<span>    &quot;evidence&quot;: &quot;two identical rows&quot;,</span>
-<span>    &quot;action&quot;: &quot;keep first exact duplicate&quot;,</span>
-<span>    &quot;rationale&quot;: &quot;duplicate adds no new information&quot;,</span>
-<span>    &quot;validation&quot;: &quot;id/amount pair is unique afterward&quot;,</span>
-<span>    &quot;impact&quot;: &quot;one row and amount=20 removed from row-level totals&quot;,</span>
-<span>}</span>
-<span>sorted(decision)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">decision <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate id=2 row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">two identical rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep first exact duplicate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">rationale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate adds no new information</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id/amount pair is unique afterward</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one row and amount=20 removed from row-level totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>decision<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> All six required fields are listed. The impact makes clear that de-duplication changes additive totals.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -652,122 +700,122 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-12--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-12--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Load and scope:</strong> choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. <strong>Expected behavior:</strong> a fresh-kernel run can recreate the same raw profile without hidden state or network access. <strong>Verify:</strong> assert expected columns and key/time bounds before continuing.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurab...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurab...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-14--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-14--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Explore:</strong> analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. <strong>Constraints:</strong> pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. <strong>Verify:</strong> every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. pair every table/plot with evidence, sample size/denominator, and a...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. pair every table/plot with evidence, sample size/denominator, and a...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-16--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-16--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Clean and transform:</strong> implement <code>clean(raw)</code> that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. <strong>Constraints:</strong> preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. <strong>Verify:</strong> test idempotence where promised and reconcile row/entity counts plus key totals.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: implement `clean(raw)` that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. preserve raw data, avoid broad silent row dr...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: implement `clean(raw)` that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. preserve raw data, avoid broad silent row dr...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-18--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-18--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Validate:</strong> apply the Day 29 schema to the actual final cleaned DataFrame before output. <strong>Expected behavior:</strong> one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. <strong>Constraint:</strong> do not catch and discard the validation failure. <strong>Verify:</strong> assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: apply the Day 29 schema to the actual final cleaned DataFrame before output. one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: apply the Day 29 schema to the actual final cleaned DataFrame before output. one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-20--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-20--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Save and report:</strong> write cleaned data and figures under an ignored <code>artifacts/day30/</code> path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. <strong>Constraints:</strong> handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. <strong>Verify:</strong> saved/reloaded shape, schema, and key totals match the validated in-memory frame.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. han...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. han...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-22--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-22--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. <strong>Progressive hint:</strong> A declared expectation turns a surprise into a testable discrepancy. <strong>Verify:</strong> Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. A declared expectation turns a sur...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. A declared expectation turns a sur...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-24--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-24--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. <strong>Progressive hint:</strong> Every material change needs a reason and reconciliation. <strong>Verify:</strong> Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. Every material change needs a reason and...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. Every material change needs a reason and...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-26--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-26--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. <strong>Progressive hint:</strong> Make decisions data, not scattered comments. <strong>Verify:</strong> Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
-<span># Short contract: Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. Make decisions data, not scattered comments. Validate that each decisio...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 8 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. Make decisions data, not scattered comments. Validate that each decisio...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 18</div><h5 id="learner--cell-28--practice-9-prediction-attempt-and-evidence">Practice 9 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-28--practice-9-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. <strong>Progressive hint:</strong> Put parameters/imports first and make <code>clean(raw)</code> return a copy. <strong>Verify:</strong> Restart and run top to bottom; assert <code>raw</code> remains unchanged, <code>clean(raw)</code> returns a copy, and no cell requires a later-created name.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 9 — your work</span>
-<span># Short contract: Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. Put parameters/imports first and make `clean(raw)` return a copy. Restart and...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 9 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. Put parameters/imports first and make `clean(raw)` return a copy. Restart and...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 19</div><h5 id="learner--cell-30--practice-10-prediction-attempt-and-evidence">Practice 10 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-30--practice-10-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. <strong>Progressive hint:</strong> Block artifact creation when acceptance criteria fail. <strong>Verify:</strong> Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 10 — your work</span>
-<span># Short contract: Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. Block artifact creation when acc...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 10 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. Block artifact creation when acc...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -821,215 +869,215 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Load and scope:</strong> choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. <strong>Expected behavior:</strong> a fresh-kernel run can recreate the same raw profile without hidden state or network access. <strong>Verify:</strong> assert expected columns and key/time bounds before continuing.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Load and scope: choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. Expected behavior: a fresh-kernel run can recreate the same raw profile without hidden state or network access. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert expected columns and key/time bounds before continuing. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
-raw = pd.DataFrame({
-    &quot;entity_id&quot;: [1, 2, 2, 3],
-    &quot;event_time&quot;: pd.to_datetime([
-        &quot;2025-01-01&quot;, &quot;2025-01-02&quot;, &quot;2025-01-02&quot;, &quot;2025-01-03&quot;
-    ], utc=True),
-    &quot;amount&quot;: [10.0, 20.0, 20.0, None],
-})
-scope = {
-    &quot;provenance&quot;: &quot;constructed course fixture&quot;,
-    &quot;license&quot;: &quot;course-authored fixture; CC0-style reuse permitted&quot;,
-    &quot;grain&quot;: &quot;one entity event per row&quot;,
-    &quot;keys&quot;: [&quot;entity_id&quot;, &quot;event_time&quot;],
-    &quot;shape&quot;: raw.shape,
-    &quot;time_range_utc&quot;: (
-        raw[&quot;event_time&quot;].min().isoformat(),
-        raw[&quot;event_time&quot;].max().isoformat(),
-    ),
-    &quot;question&quot;: &quot;How much known amount is recorded by day?&quot;,
-    &quot;acceptance&quot;: {
-        &quot;required_columns_present&quot;: True,
-        &quot;final_business_key_unique&quot;: True,
-        &quot;final_amount_non_negative_or_missing&quot;: True,
-    },
-}
-expected_columns = {&quot;entity_id&quot;, &quot;event_time&quot;, &quot;amount&quot;}
-assert set(raw.columns) == expected_columns
-assert set(scope[&quot;keys&quot;]).issubset(raw.columns)
-assert raw[&quot;event_time&quot;].min() &gt;= pd.Timestamp(&quot;2025-01-01&quot;, tz=&quot;UTC&quot;)
-assert raw[&quot;event_time&quot;].max() &lt;= pd.Timestamp(&quot;2025-01-03&quot;, tz=&quot;UTC&quot;)</code></pre>
+raw <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>to_datetime<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-02</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-02</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-03</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> utc<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+scope <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">provenance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">constructed course fixture</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">license</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course-authored fixture; CC0-style reuse permitted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">grain</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one entity event per row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">keys</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> raw<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">time_range_utc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
+        raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">question</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">How much known amount is recorded by day?</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">acceptance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">required_columns_present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">final_business_key_unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">final_amount_non_negative_or_missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+expected_columns <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> expected_columns
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>scope<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">keys</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>issubset<span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Timestamp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> tz<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Timestamp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-03</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> tz<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Because the data is constructed in the cell, a fresh offline kernel can reproduce the same four raw rows without hidden files or network state.</p>
 <p><strong>Verification evidence:</strong> assert expected columns and key/time bounds before continuing.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Explore:</strong> analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. <strong>Constraints:</strong> pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. <strong>Verify:</strong> every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Explore: analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. Constraints: pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
-<pre><code class="language-python">analysis_rows = raw[&quot;amount&quot;].notna()
-known_amounts = raw.loc[analysis_rows, &quot;amount&quot;]
-exploration = {
-    &quot;row_count&quot;: len(raw),
-    &quot;missing_amount&quot;: int(raw[&quot;amount&quot;].isna().sum()),
-    &quot;duplicate_key_rows&quot;: int(
-        raw.duplicated([&quot;entity_id&quot;, &quot;event_time&quot;]).sum()
-    ),
-    &quot;known_total&quot;: float(raw[&quot;amount&quot;].sum()),
-    &quot;known_amount_denominator&quot;: int(analysis_rows.sum()),
-    &quot;amount_median&quot;: float(known_amounts.median()),
-    &quot;amount_range&quot;: (
-        float(known_amounts.min()),
-        float(known_amounts.max()),
-    ),
-    &quot;entity_amount_correlation&quot;: float(
-        raw.loc[analysis_rows, [&quot;entity_id&quot;, &quot;amount&quot;]]
-        .corr()
-        .loc[&quot;entity_id&quot;, &quot;amount&quot;]
-    ),
-}
-findings = [
-    {
-        &quot;claim&quot;: &quot;one of four rows has missing amount&quot;,
-        &quot;evidence&quot;: exploration[&quot;missing_amount&quot;],
-        &quot;denominator&quot;: exploration[&quot;row_count&quot;],
-        &quot;caveat&quot;: &quot;missingness reason is not available&quot;,
-    },
-    {
-        &quot;claim&quot;: &quot;one repeated business-key row can double count amount&quot;,
-        &quot;evidence&quot;: exploration[&quot;duplicate_key_rows&quot;],
-        &quot;denominator&quot;: exploration[&quot;row_count&quot;],
-        &quot;caveat&quot;: &quot;a real source owner must confirm duplicate semantics&quot;,
-    },
-]
-leakage_prone_fields_excluded: list[str] = []
+<pre class="highlighted-code"><code class="language-python">analysis_rows <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>notna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+known_amounts <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>analysis_rows<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+exploration <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">row_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">missing_amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_key_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>
+        raw<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">known_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>analysis_rows<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount_median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>known_amounts<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount_range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>known_amounts<span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>known_amounts<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">entity_amount_correlation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>
+        raw<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>analysis_rows<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">.</span>corr<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+findings <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">claim</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one of four rows has missing amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing_amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">row_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">caveat</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missingness reason is not available</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">claim</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one repeated business-key row can double count amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_key_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">row_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">caveat</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a real source owner must confirm duplicate semantics</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+leakage_prone_fields_excluded<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 
-assert exploration[&quot;missing_amount&quot;] == 1
-assert exploration[&quot;duplicate_key_rows&quot;] == 1
-assert exploration[&quot;known_total&quot;] == 50.0
-assert exploration[&quot;known_amount_denominator&quot;] == 3
-assert all({&quot;claim&quot;, &quot;evidence&quot;, &quot;denominator&quot;, &quot;caveat&quot;} &lt;= finding.keys()
-           for finding in findings)
-assert leakage_prone_fields_excluded == []</code></pre>
+<span class="syntax-keyword">assert</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing_amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_key_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">known_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">50.0</span>
+<span class="syntax-keyword">assert</span> exploration<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">claim</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">denominator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">caveat</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> finding<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+           <span class="syntax-keyword">for</span> finding <span class="syntax-operator">in</span> findings<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> leakage_prone_fields_excluded <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <p>The correlation is a reproducible description over only three known amounts, not a causal finding. This project has no predictive target, so no leakage-prone feature is present; the explicit empty list records that review instead of silently skipping it.</p>
 <p><strong>Verification evidence:</strong> every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.</p>
 <h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Clean and transform:</strong> implement <code>clean(raw)</code> that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. <strong>Constraints:</strong> preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. <strong>Verify:</strong> test idempotence where promised and reconcile row/entity counts plus key totals.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Clean and transform: implement <code>clean(raw)</code> that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. Constraints: preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test idempotence where promised and reconcile row/entity counts plus key totals. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
-<pre><code class="language-python">def clean(raw_frame: pd.DataFrame) -&gt; pd.DataFrame:
-    result = raw_frame.copy()
-    result = result.drop_duplicates([&quot;entity_id&quot;, &quot;event_time&quot;])
-    return result.reset_index(drop=True)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">clean</span><span class="syntax-punctuation">(</span>raw_frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    result <span class="syntax-operator">=</span> raw_frame<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> result<span class="syntax-operator">.</span>drop_duplicates<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result<span class="syntax-operator">.</span>reset_index<span class="syntax-punctuation">(</span>drop<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 
-raw_snapshot = raw.copy(deep=True)
-cleaned = clean(raw)
-assert raw.shape == (4, 3)
-assert cleaned.shape == (3, 3)
-assert clean(cleaned).equals(cleaned)
-pd.testing.assert_frame_equal(raw, raw_snapshot)
+raw_snapshot <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span>deep<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+cleaned <span class="syntax-operator">=</span> clean<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> raw<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> cleaned<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> clean<span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span>
+pd<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_frame_equal<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> raw_snapshot<span class="syntax-punctuation">)</span>
 
-decisions = [
-    {
-        &quot;evidence&quot;: &quot;one exact duplicate business key&quot;,
-        &quot;action&quot;: &quot;keep first&quot;,
-        &quot;rationale&quot;: &quot;duplicate carries identical values&quot;,
-        &quot;validation&quot;: &quot;business key unique afterward&quot;,
-        &quot;impact&quot;: {&quot;rows_removed&quot;: 1, &quot;known_amount_removed&quot;: 20.0},
-    },
-    {
-        &quot;evidence&quot;: &quot;one amount is missing&quot;,
-        &quot;action&quot;: &quot;preserve missing value&quot;,
-        &quot;rationale&quot;: &quot;no defensible imputation rule is available&quot;,
-        &quot;validation&quot;: &quot;missing count remains one&quot;,
-        &quot;impact&quot;: {&quot;values_imputed&quot;: 0},
-    },
-]
-assert not cleaned.duplicated([&quot;entity_id&quot;, &quot;event_time&quot;]).any()
-assert cleaned[&quot;entity_id&quot;].nunique() == raw[&quot;entity_id&quot;].nunique() == 3
-assert raw[&quot;amount&quot;].sum() - cleaned[&quot;amount&quot;].sum() == 20.0
-assert cleaned[&quot;amount&quot;].isna().sum() == 1</code></pre>
+decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one exact duplicate business key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">rationale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate carries identical values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">business key unique afterward</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one amount is missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">preserve missing value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">rationale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">no defensible imputation rule is available</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing count remains one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">values_imputed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> cleaned<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20.0</span>
+<span class="syntax-keyword">assert</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></code></pre>
 <p><strong>Verification evidence:</strong> test idempotence where promised and reconcile row/entity counts plus key totals.</p>
 <h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Validate:</strong> apply the Day 29 schema to the actual final cleaned DataFrame before output. <strong>Expected behavior:</strong> one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. <strong>Constraint:</strong> do not catch and discard the validation failure. <strong>Verify:</strong> assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Validate: apply the Day 29 schema to the actual final cleaned DataFrame before output. Expected behavior: one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. Constraint: do not catch and discard the validation failure. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
-<pre><code class="language-python">import pandera.pandas as pa
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandera.pandas <span class="syntax-keyword">as</span> pa
 
-project_schema = pa.DataFrameSchema({
-    &quot;entity_id&quot;: pa.Column(int, checks=pa.Check.ge(1)),
-    &quot;event_time&quot;: pa.Column(
-        pd.DatetimeTZDtype(unit=&quot;ns&quot;, tz=&quot;UTC&quot;),
-        nullable=False,
-    ),
-    &quot;amount&quot;: pa.Column(float, checks=pa.Check.ge(0), nullable=True),
-})
-validated = project_schema.validate(cleaned, lazy=True)
-assert len(validated) == 3
+project_schema <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>DataFrameSchema<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pa<span class="syntax-operator">.</span>Column<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> checks<span class="syntax-operator">=</span>pa<span class="syntax-operator">.</span>Check<span class="syntax-operator">.</span>ge<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pa<span class="syntax-operator">.</span>Column<span class="syntax-punctuation">(</span>
+        pd<span class="syntax-operator">.</span>DatetimeTZDtype<span class="syntax-punctuation">(</span>unit<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> tz<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pa<span class="syntax-operator">.</span>Column<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> checks<span class="syntax-operator">=</span>pa<span class="syntax-operator">.</span>Check<span class="syntax-operator">.</span>ge<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+validated <span class="syntax-operator">=</span> project_schema<span class="syntax-operator">.</span>validate<span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">,</span> lazy<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>validated<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
 
-invalid = cleaned.assign(amount=[10.0, -0.01, None])
-validation_failure = None
-try:
-    project_schema.validate(invalid, lazy=True)
-except pa.errors.SchemaErrors as error:
-    validation_failure = error.failure_cases
-assert validation_failure is not None
-assert &quot;amount&quot; in validation_failure.to_string()
+invalid <span class="syntax-operator">=</span> cleaned<span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>amount<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+validation_failure <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    project_schema<span class="syntax-operator">.</span>validate<span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">,</span> lazy<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> pa<span class="syntax-operator">.</span>errors<span class="syntax-operator">.</span>SchemaErrors <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    validation_failure <span class="syntax-operator">=</span> error<span class="syntax-operator">.</span>failure_cases
+<span class="syntax-keyword">assert</span> validation_failure <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> validation_failure<span class="syntax-operator">.</span>to_string<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-frame_ready_to_save = validated
-assert frame_ready_to_save is validated</code></pre>
+frame_ready_to_save <span class="syntax-operator">=</span> validated
+<span class="syntax-keyword">assert</span> frame_ready_to_save <span class="syntax-operator">is</span> validated</code></pre>
 <p><code>frame_ready_to_save</code> is assigned only from the successful validation result. The negative fixture preserves its failure table as diagnostic evidence and never reaches the output code.</p>
 <p><strong>Verification evidence:</strong> assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.</p>
 <h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Save and report:</strong> write cleaned data and figures under an ignored <code>artifacts/day30/</code> path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. <strong>Constraints:</strong> handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. <strong>Verify:</strong> saved/reloaded shape, schema, and key totals match the validated in-memory frame.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Save and report: write cleaned data and figures under an ignored <code>artifacts/day30/</code> path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. Constraints: handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: saved/reloaded shape, schema, and key totals match the validated in-memory frame. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
-<pre><code class="language-python">import json
-from datetime import datetime, timezone
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> datetime<span class="syntax-punctuation">,</span> timezone
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-import matplotlib.pyplot as plt
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
-if validated.empty:
-    raise ValueError(&quot;project produced no accepted rows&quot;)
-artifact_dir = Path(&quot;artifacts/day30&quot;)
-artifact_dir.mkdir(parents=True, exist_ok=True)
-data_path = artifact_dir / &quot;clean.csv&quot;
-figure_path = artifact_dir / &quot;daily-amount.png&quot;
-manifest_path = artifact_dir / &quot;manifest.json&quot;
-report_path = artifact_dir / &quot;report.md&quot;
+<span class="syntax-keyword">if</span> validated<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">project produced no accepted rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day30</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+data_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">clean.csv</span><span class="syntax-string">&quot;</span>
+figure_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily-amount.png</span><span class="syntax-string">&quot;</span>
+manifest_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">manifest.json</span><span class="syntax-string">&quot;</span>
+report_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">report.md</span><span class="syntax-string">&quot;</span>
 
-validated.to_csv(data_path, index=False)
-daily_amount = (
-    validated.set_index(&quot;event_time&quot;)[&quot;amount&quot;].resample(&quot;D&quot;).sum(min_count=1)
-)
-axes = daily_amount.plot(
-    kind=&quot;bar&quot;,
-    title=&quot;Known amount by UTC day&quot;,
-    ylabel=&quot;Amount (course units)&quot;,
-)
-axes.figure.tight_layout()
-axes.figure.savefig(figure_path, dpi=150)
-plt.close(axes.figure)
+validated<span class="syntax-operator">.</span>to_csv<span class="syntax-punctuation">(</span>data_path<span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+daily_amount <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    validated<span class="syntax-operator">.</span>set_index<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>resample<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>min_count<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+axes <span class="syntax-operator">=</span> daily_amount<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>
+    kind<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bar</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Known amount by UTC day</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    ylabel<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Amount (course units)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+axes<span class="syntax-operator">.</span>figure<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+axes<span class="syntax-operator">.</span>figure<span class="syntax-operator">.</span>savefig<span class="syntax-punctuation">(</span>figure_path<span class="syntax-punctuation">,</span> dpi<span class="syntax-operator">=</span><span class="syntax-number">150</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span>axes<span class="syntax-operator">.</span>figure<span class="syntax-punctuation">)</span>
 
-report = (
-    &quot;# Day 30 findings\n\n&quot;
-    &quot;- Finding: one exact duplicate key was removed.\n&quot;
-    &quot;- Limitation: one amount is missing and its cause is unknown.\n&quot;
-    &quot;- Lesson: preserve raw evidence and validate before saving.\n&quot;
-)
-report_path.write_text(report, encoding=&quot;utf-8&quot;)
-manifest = {
-    &quot;source&quot;: scope[&quot;provenance&quot;],
-    &quot;generated_at_utc&quot;: datetime.now(timezone.utc).isoformat(),
-    &quot;version_policy&quot;: &quot;increment for any schema or cleaning-contract change&quot;,
-    &quot;row_count&quot;: len(validated),
-    &quot;schema_validated&quot;: True,
-    &quot;known_amount_total&quot;: float(validated[&quot;amount&quot;].sum()),
-    &quot;unique_entity_count&quot;: int(validated[&quot;entity_id&quot;].nunique()),
-    &quot;files&quot;: [data_path.name, figure_path.name, report_path.name],
-    &quot;version&quot;: 1,
-}
-manifest_path.write_text(json.dumps(manifest, indent=2), encoding=&quot;utf-8&quot;)
+report <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string"># Day 30 findings</span><span class="syntax-string">\n</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">- Finding: one exact duplicate key was removed.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">- Limitation: one amount is missing and its cause is unknown.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">- Lesson: preserve raw evidence and validate before saving.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+report_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+manifest <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">source</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> scope<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">provenance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">generated_at_utc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> datetime<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">version_policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">increment for any schema or cleaning-contract change</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">row_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>validated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">schema_validated</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>validated<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">unique_entity_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>validated<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">files</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>data_path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span> figure_path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span> report_path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+manifest_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-reloaded = pd.read_csv(data_path, parse_dates=[&quot;event_time&quot;])
-reloaded[&quot;event_time&quot;] = pd.to_datetime(reloaded[&quot;event_time&quot;], utc=True)
-revalidated = project_schema.validate(reloaded, lazy=True)
-assert len(reloaded) == manifest[&quot;row_count&quot;]
-assert float(revalidated[&quot;amount&quot;].sum()) == manifest[&quot;known_amount_total&quot;]
-assert revalidated[&quot;entity_id&quot;].nunique() == manifest[&quot;unique_entity_count&quot;]
-assert all((artifact_dir / name).exists() for name in manifest[&quot;files&quot;])
-assert set(manifest[&quot;files&quot;]) == {
-    &quot;clean.csv&quot;, &quot;daily-amount.png&quot;, &quot;report.md&quot;
-}</code></pre>
+reloaded <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>read_csv<span class="syntax-punctuation">(</span>data_path<span class="syntax-punctuation">,</span> parse_dates<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+reloaded<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_datetime<span class="syntax-punctuation">(</span>reloaded<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> utc<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+revalidated <span class="syntax-operator">=</span> project_schema<span class="syntax-operator">.</span>validate<span class="syntax-punctuation">(</span>reloaded<span class="syntax-punctuation">,</span> lazy<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>reloaded<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">row_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>revalidated<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> revalidated<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unique_entity_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>artifact_dir <span class="syntax-operator">/</span> name<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">files</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">files</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">clean.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily-amount.png</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">report.md</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Verification evidence:</strong> saved/reloaded shape, schema, and key totals match the validated in-memory frame.</p>
 <h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
@@ -1057,65 +1105,65 @@ assert set(manifest[&quot;files&quot;]) == {
 <h5 id="solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit">Shared implementation for Exercises 6–7 — Define and reconcile the analytical unit<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit" aria-label="Link to this section">#</a></h5>
 <p>Record the question and grain before inspection. At each boundary, compare row count, unique IDs, missing critical values, and additive totals. A difference is acceptable only when a decision record explains and validates it.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance">Shared implementation for Exercises 8–10 — Structured decisions and artifact acceptance<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-from dataclasses import asdict, dataclass
-from typing import Any
+<span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> asdict<span class="syntax-punctuation">,</span> dataclass
+<span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any
 
-import pandas as pd
-
-
-@dataclass(frozen=True)
-class Decision:
-    evidence: str
-    action: str
-    rationale: str
-    validation: str
-    impact: str
+<span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 
-def clean_orders(raw: pd.DataFrame) -&gt; pd.DataFrame:
-    &quot;&quot;&quot;Return a cleaned copy; never overwrite the raw evidence frame.&quot;&quot;&quot;
-
-    cleaned = raw.copy()
-    cleaned[&quot;amount&quot;] = pd.to_numeric(cleaned[&quot;amount&quot;], errors=&quot;coerce&quot;)
-    cleaned = cleaned.loc[cleaned[&quot;amount&quot;].notna() &amp; cleaned[&quot;amount&quot;].ge(0)]
-    return cleaned.reset_index(drop=True)
-
-
-def artifact_manifest(
-    frame: pd.DataFrame, *, source: str, schema_passed: bool, version: str
-) -&gt; dict[str, Any]:
-    &quot;&quot;&quot;Build manifest only for an accepted non-empty validated artifact.&quot;&quot;&quot;
-
-    if frame.empty:
-        raise ValueError(&quot;cleaned artifact must contain at least one row&quot;)
-    if not schema_passed:
-        raise ValueError(&quot;schema validation must pass before artifact creation&quot;)
-    return {
-        &quot;source&quot;: source,
-        &quot;rows&quot;: len(frame),
-        &quot;columns&quot;: list(frame.columns),
-        &quot;schema_passed&quot;: True,
-        &quot;version&quot;: version,
-    }
+<span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">class</span> <span class="syntax-class">Decision</span><span class="syntax-punctuation">:</span>
+    evidence<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+    action<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+    rationale<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+    validation<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+    impact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
 
 
-raw = pd.DataFrame({&quot;order_id&quot;: [1, 2, 3], &quot;amount&quot;: [&quot;10&quot;, &quot;bad&quot;, &quot;-2&quot;]})
-cleaned = clean_orders(raw)
-decision = Decision(
-    evidence=&quot;2 of 3 amount values are invalid or negative&quot;,
-    action=&quot;exclude invalid amount rows&quot;,
-    rationale=&quot;amount is required for revenue analysis&quot;,
-    validation=&quot;cleaned amount is numeric, non-null, and non-negative&quot;,
-    impact=&quot;1 of 3 rows remains; report this attrition&quot;,
-)
-manifest = artifact_manifest(
-    cleaned, source=&quot;constructed offline fixture&quot;, schema_passed=True, version=&quot;1&quot;
-)
-assert raw[&quot;amount&quot;].tolist() == [&quot;10&quot;, &quot;bad&quot;, &quot;-2&quot;]
-assert manifest[&quot;rows&quot;] == 1
-assert asdict(decision)[&quot;action&quot;] == &quot;exclude invalid amount rows&quot;</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">clean_orders</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return a cleaned copy; never overwrite the raw evidence frame.&quot;&quot;&quot;</span>
+
+    cleaned <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_numeric<span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">coerce</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    cleaned <span class="syntax-operator">=</span> cleaned<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>notna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>ge<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> cleaned<span class="syntax-operator">.</span>reset_index<span class="syntax-punctuation">(</span>drop<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">artifact_manifest</span><span class="syntax-punctuation">(</span>
+    frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> schema_passed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Build manifest only for an accepted non-empty validated artifact.&quot;&quot;&quot;</span>
+
+    <span class="syntax-keyword">if</span> frame<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cleaned artifact must contain at least one row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> schema_passed<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema validation must pass before artifact creation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">source</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> source<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">columns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">schema_passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> version<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+
+
+raw <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+cleaned <span class="syntax-operator">=</span> clean_orders<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+decision <span class="syntax-operator">=</span> Decision<span class="syntax-punctuation">(</span>
+    evidence<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">2 of 3 amount values are invalid or negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">exclude invalid amount rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    rationale<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount is required for revenue analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    validation<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">cleaned amount is numeric, non-null, and non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    impact<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1 of 3 rows remains; report this attrition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+manifest <span class="syntax-operator">=</span> artifact_manifest<span class="syntax-punctuation">(</span>
+    cleaned<span class="syntax-punctuation">,</span> source<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">constructed offline fixture</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> schema_passed<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> version<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> asdict<span class="syntax-punctuation">(</span>decision<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">exclude invalid amount rows</span><span class="syntax-string">&quot;</span></code></pre>
 <p>Split time-ordered or target-bearing data before learning any transform. Restart and run all cells before acceptance, and keep raw data immutable so evidence can always be reconstructed.</p></div>
       </section>
 
@@ -1152,75 +1200,75 @@ assert asdict(decision)[&quot;action&quot;] == &quot;exclude invalid amount rows
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-30-solutions-project-eda-and-preprocessing">Day 30 — Solutions: Project — EDA and Preprocessing<a class="heading-anchor" href="#solution-2--cell-1--day-30-solutions-project-eda-and-preprocessing" aria-label="Link to this section">#</a></h3>
 <p>End-to-end checklist: load → validate → clean → explore → split → save.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Imports</span>
-<span>import pandas as pd</span>
-<span>import seaborn as sns, matplotlib.pyplot as plt</span>
-<span>import pandera.pandas as pa, pandera.typing as pat</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>sns.set_theme(style=&#x27;whitegrid&#x27;)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Imports</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandera.pandas <span class="syntax-keyword">as</span> pa<span class="syntax-operator">,</span> pandera.typing <span class="syntax-keyword">as</span> pat</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line">sns<span class="syntax-operator">.</span>set_theme<span class="syntax-punctuation">(</span>style<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">whitegrid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--1-load-data-with-explicit-dtypes-replace-paths-as-needed">1) Load data with explicit dtypes (replace paths as needed)<a class="heading-anchor" href="#solution-2--cell-3--1-load-data-with-explicit-dtypes-replace-paths-as-needed" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Example: adjust to your dataset</span>
-<span># dtypes = {&#x27;city&#x27;:&#x27;string&#x27;, &#x27;price&#x27;:&#x27;float64&#x27;, &#x27;qty&#x27;:&#x27;Int64&#x27;, &#x27;date&#x27;:&#x27;string&#x27;}</span>
-<span># df = pd.read_csv(&#x27;raw.csv&#x27;, dtype=dtypes, parse_dates=[&#x27;date&#x27;])</span>
-<span># For demo, use tips</span>
-<span>df = sns.load_dataset(&#x27;tips&#x27;).rename(columns=str.lower)</span>
-<span>df.head()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Example: adjust to your dataset</span></span>
+<span class="source-line"><span class="syntax-comment"># dtypes = {&#x27;city&#x27;:&#x27;string&#x27;, &#x27;price&#x27;:&#x27;float64&#x27;, &#x27;qty&#x27;:&#x27;Int64&#x27;, &#x27;date&#x27;:&#x27;string&#x27;}</span></span>
+<span class="source-line"><span class="syntax-comment"># df = pd.read_csv(&#x27;raw.csv&#x27;, dtype=dtypes, parse_dates=[&#x27;date&#x27;])</span></span>
+<span class="source-line"><span class="syntax-comment"># For demo, use tips</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tips</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>rename<span class="syntax-punctuation">(</span>columns<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">)</span></span>
+<span class="source-line">df<span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--2-validate-schema-edit-to-match-your-data">2) Validate schema (edit to match your data)<a class="heading-anchor" href="#solution-2--cell-5--2-validate-schema-edit-to-match-your-data" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>class Schema(pa.DataFrameModel):</span>
-<span>    total_bill: pat.Series[float] = pa.Field(ge=0)</span>
-<span>    tip: pat.Series[float] = pa.Field(ge=0)</span>
-<span>    sex: pat.Series[str]</span>
-<span>    smoker: pat.Series[str]</span>
-<span>    day: pat.Series[str]</span>
-<span>    time: pat.Series[str]</span>
-<span>    size: pat.Series[int] = pa.Field(ge=1)</span>
-<span> </span>
-<span>Schema.validate(df); df.dtypes</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Schema</span><span class="syntax-punctuation">(</span>pa<span class="syntax-operator">.</span>DataFrameModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    total_bill<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>Field<span class="syntax-punctuation">(</span>ge<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tip<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>Field<span class="syntax-punctuation">(</span>ge<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    sex<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    smoker<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    day<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    time<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    size<span class="syntax-punctuation">:</span> pat<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>Field<span class="syntax-punctuation">(</span>ge<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">Schema<span class="syntax-operator">.</span>validate<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> df<span class="syntax-operator">.</span>dtypes</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--3-profile-nulls-dtypes-dupes-outliers">3) Profile nulls/dtypes/dupes/outliers<a class="heading-anchor" href="#solution-2--cell-7--3-profile-nulls-dtypes-dupes-outliers" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>summary = {</span>
-<span>    &#x27;shape&#x27;: df.shape,</span>
-<span>    &#x27;nulls_top&#x27;: df.isna().mean().sort_values(ascending=False).head(10).to_dict(),</span>
-<span>    &#x27;dtypes&#x27;: df.dtypes.astype(str).to_dict(),</span>
-<span>    &#x27;dupes&#x27;: int(df.duplicated().sum()),</span>
-<span>}</span>
-<span>summary</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;</span><span class="syntax-string">shape</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> df<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;</span><span class="syntax-string">nulls_top</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> df<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sort_values<span class="syntax-punctuation">(</span>ascending<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;</span><span class="syntax-string">dtypes</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> df<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;</span><span class="syntax-string">dupes</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>df<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line">summary</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="solution-2--cell-9--4-clean-and-transform-example-transforms">4) Clean and transform (example transforms)<a class="heading-anchor" href="#solution-2--cell-9--4-clean-and-transform-example-transforms" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>def clean(d: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    out = d.copy()</span>
-<span>    # Standardize categorical casing</span>
-<span>    for c in [&#x27;sex&#x27;,&#x27;smoker&#x27;,&#x27;day&#x27;,&#x27;time&#x27;]:</span>
-<span>        if c in out.columns:</span>
-<span>            out[c] = out[c].astype(&#x27;string&#x27;).str.strip().str.lower()</span>
-<span>    # Numeric coercions (if applicable)</span>
-<span>    for c in [&#x27;total_bill&#x27;,&#x27;tip&#x27;]:</span>
-<span>        if c in out.columns:</span>
-<span>            out[c] = pd.to_numeric(out[c], errors=&#x27;coerce&#x27;)</span>
-<span>    # Drop rows missing key fields</span>
-<span>    out = out.dropna(subset=[&#x27;total_bill&#x27;,&#x27;tip&#x27;,&#x27;size&#x27;])</span>
-<span>    return out</span>
-<span> </span>
-<span>tidy = clean(df); tidy.head()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">clean</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    out <span class="syntax-operator">=</span> d<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Standardize categorical casing</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sex</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">smoker</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">day</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">time</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> c <span class="syntax-operator">in</span> out<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            out<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> out<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">string</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>str<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>str<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Numeric coercions (if applicable)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tip</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> c <span class="syntax-operator">in</span> out<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            out<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_numeric<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">coerce</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Drop rows missing key fields</span></span>
+<span class="source-line">    out <span class="syntax-operator">=</span> out<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span>subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tip</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">size</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> out</span>
+<span class="source-line"></span>
+<span class="source-line">tidy <span class="syntax-operator">=</span> clean<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> tidy<span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h4 id="solution-2--cell-11--5-exploratory-visuals-distributions-relationships">5) Exploratory visuals (distributions &amp; relationships)<a class="heading-anchor" href="#solution-2--cell-11--5-exploratory-visuals-distributions-relationships" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span>sns.histplot(data=tidy, x=&#x27;total_bill&#x27;, kde=True); plt.title(&#x27;Total bill distribution&#x27;); plt.tight_layout(); plt.show()</span>
-<span>sns.scatterplot(data=tidy, x=&#x27;total_bill&#x27;, y=&#x27;tip&#x27;, hue=&#x27;time&#x27;); plt.title(&#x27;Tip vs total bill&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line">sns<span class="syntax-operator">.</span>histplot<span class="syntax-punctuation">(</span>data<span class="syntax-operator">=</span>tidy<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> kde<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Total bill distribution</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">sns<span class="syntax-operator">.</span>scatterplot<span class="syntax-punctuation">(</span>data<span class="syntax-operator">=</span>tidy<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tip</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> hue<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">time</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Tip vs total bill</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="solution-2--cell-13--6-split-train-test-before-target-aware-transforms">6) Split train/test before target-aware transforms<a class="heading-anchor" href="#solution-2--cell-13--6-split-train-test-before-target-aware-transforms" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span>train, test = train_test_split(tidy, test_size=0.2, random_state=42)</span>
-<span>train.shape, test.shape</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line">train<span class="syntax-punctuation">,</span> test <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>tidy<span class="syntax-punctuation">,</span> test_size<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">train<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> test<span class="syntax-operator">.</span>shape</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="solution-2--cell-15--7-save-processed-data-and-simple-data-dictionary">7) Save processed data and simple data dictionary<a class="heading-anchor" href="#solution-2--cell-15--7-save-processed-data-and-simple-data-dictionary" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span>outdir = Path(&#x27;artifacts/day30/processed&#x27;)</span>
-<span>outdir.mkdir(parents=True, exist_ok=True)</span>
-<span>train.to_parquet(outdir/&#x27;train.parquet&#x27;, index=False)</span>
-<span>test.to_parquet(outdir/&#x27;test.parquet&#x27;, index=False)</span>
-<span>metadata = {&#x27;columns&#x27;: tidy.dtypes.astype(str).to_dict(), &#x27;rows&#x27;: len(tidy)}</span>
-<span>metadata</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line">outdir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day30/processed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">outdir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">train<span class="syntax-operator">.</span>to_parquet<span class="syntax-punctuation">(</span>outdir<span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">train.parquet</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">test<span class="syntax-operator">.</span>to_parquet<span class="syntax-punctuation">(</span>outdir<span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test.parquet</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">metadata <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">columns</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> tidy<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">rows</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tidy<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">metadata</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><hr>
 <h4 id="solution-2--cell-17--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-17--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1261,66 +1309,66 @@ assert asdict(decision)[&quot;action&quot;] == &quot;exclude invalid amount rows
 <h5 id="solution-2--cell-17--practices-1-2-define-and-reconcile-the-analytical-unit">Practices 1–2 — Define and reconcile the analytical unit<a class="heading-anchor" href="#solution-2--cell-17--practices-1-2-define-and-reconcile-the-analytical-unit" aria-label="Link to this section">#</a></h5>
 <p>Record the question and grain before inspection. At each boundary, compare row count, unique IDs, missing critical values, and additive totals. A difference is acceptable only when a decision record explains and validates it.</p>
 <h5 id="solution-2--cell-17--practices-3-5-structured-decisions-and-artifact-acceptance">Practices 3–5 — Structured decisions and artifact acceptance<a class="heading-anchor" href="#solution-2--cell-17--practices-3-5-structured-decisions-and-artifact-acceptance" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>from dataclasses import asdict, dataclass</span>
-<span>from typing import Any</span>
-<span> </span>
-<span>import pandas as pd</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Decision:</span>
-<span>    evidence: str</span>
-<span>    action: str</span>
-<span>    rationale: str</span>
-<span>    validation: str</span>
-<span>    impact: str</span>
-<span> </span>
-<span> </span>
-<span>def clean_orders(raw: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Return a cleaned copy; never overwrite the raw evidence frame.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    cleaned = raw.copy()</span>
-<span>    cleaned[&quot;amount&quot;] = pd.to_numeric(cleaned[&quot;amount&quot;], errors=&quot;coerce&quot;)</span>
-<span>    cleaned = cleaned.loc[cleaned[&quot;amount&quot;].notna() &amp; cleaned[&quot;amount&quot;].ge(0)]</span>
-<span>    return cleaned.reset_index(drop=True)</span>
-<span> </span>
-<span> </span>
-<span>def artifact_manifest(</span>
-<span>    frame: pd.DataFrame, *, source: str, schema_passed: bool, version: str</span>
-<span>) -&gt; dict[str, Any]:</span>
-<span>    &quot;&quot;&quot;Build manifest only for an accepted non-empty validated artifact.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if frame.empty:</span>
-<span>        raise ValueError(&quot;cleaned artifact must contain at least one row&quot;)</span>
-<span>    if not schema_passed:</span>
-<span>        raise ValueError(&quot;schema validation must pass before artifact creation&quot;)</span>
-<span>    return {</span>
-<span>        &quot;source&quot;: source,</span>
-<span>        &quot;rows&quot;: len(frame),</span>
-<span>        &quot;columns&quot;: list(frame.columns),</span>
-<span>        &quot;schema_passed&quot;: True,</span>
-<span>        &quot;version&quot;: version,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>raw = pd.DataFrame({&quot;order_id&quot;: [1, 2, 3], &quot;amount&quot;: [&quot;10&quot;, &quot;bad&quot;, &quot;-2&quot;]})</span>
-<span>cleaned = clean_orders(raw)</span>
-<span>decision = Decision(</span>
-<span>    evidence=&quot;2 of 3 amount values are invalid or negative&quot;,</span>
-<span>    action=&quot;exclude invalid amount rows&quot;,</span>
-<span>    rationale=&quot;amount is required for revenue analysis&quot;,</span>
-<span>    validation=&quot;cleaned amount is numeric, non-null, and non-negative&quot;,</span>
-<span>    impact=&quot;1 of 3 rows remains; report this attrition&quot;,</span>
-<span>)</span>
-<span>manifest = artifact_manifest(</span>
-<span>    cleaned, source=&quot;constructed offline fixture&quot;, schema_passed=True, version=&quot;1&quot;</span>
-<span>)</span>
-<span>assert raw[&quot;amount&quot;].tolist() == [&quot;10&quot;, &quot;bad&quot;, &quot;-2&quot;]</span>
-<span>assert manifest[&quot;rows&quot;] == 1</span>
-<span>assert asdict(decision)[&quot;action&quot;] == &quot;exclude invalid amount rows&quot;</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> asdict<span class="syntax-punctuation">,</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Decision</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    evidence<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    action<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    rationale<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    validation<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    impact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">clean_orders</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a cleaned copy; never overwrite the raw evidence frame.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    cleaned <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_numeric<span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">coerce</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cleaned <span class="syntax-operator">=</span> cleaned<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>notna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>ge<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> cleaned<span class="syntax-operator">.</span>reset_index<span class="syntax-punctuation">(</span>drop<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">artifact_manifest</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> schema_passed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Build manifest only for an accepted non-empty validated artifact.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> frame<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cleaned artifact must contain at least one row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> schema_passed<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema validation must pass before artifact creation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">source</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> source<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">columns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">schema_passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> version<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">raw <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cleaned <span class="syntax-operator">=</span> clean_orders<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">decision <span class="syntax-operator">=</span> Decision<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    evidence<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">2 of 3 amount values are invalid or negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">exclude invalid amount rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    rationale<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount is required for revenue analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    validation<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">cleaned amount is numeric, non-null, and non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    impact<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1 of 3 rows remains; report this attrition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">manifest <span class="syntax-operator">=</span> artifact_manifest<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    cleaned<span class="syntax-punctuation">,</span> source<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">constructed offline fixture</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> schema_passed<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> version<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> manifest<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> asdict<span class="syntax-punctuation">(</span>decision<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">exclude invalid amount rows</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><p>Split time-ordered or target-bearing data before learning any transform. Restart and run all cells before acceptance, and keep raw data immutable so evidence can always be reconstructed.</p></article></div>
       </section>

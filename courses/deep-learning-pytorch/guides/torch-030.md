@@ -125,7 +125,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** global mean 5.
    **Verify:** Save the assertion results for exercise 2, including global mean 5.
 
-3. **Accumulate one full-batch gradient.** At \(w=0\), usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.
+3. **Accumulate one full-batch gradient.** At \(w=0\), use x 1..4, y = 2x, accumulate squared-loss sums for shards 1 and 3, and divide by 4.
    **Expected:** gradient-30, matching full-batch mean.
    **Verify:** Save the assertion results for exercise 3, including gradient-30, matching full-batch mean.
 

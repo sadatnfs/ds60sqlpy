@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-010`
 
 ## Learning objectives
 
-Explain equality contract, hash code, comparator using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create two equalPoint records and insert one into a map. The final exercise transfers the mechanism to keep identity and display separate.
+Explain equality contract, hash code, comparator using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create two equal Point records and insert one into a map. The final exercise transfers the mechanism to keep identity and display separate.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ Equality, hashing and ordering are related contracts with different roles. equal
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-011/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -64,7 +64,7 @@ public class Main {
 
 ```
 
-**Expected:** lookup with the other returnsorigin;hashes equal.
+**Expected:** lookup with the other returns origin; hashes equal.
 
 ### Example B: Sort with a tie-breaker
 
@@ -101,15 +101,15 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use immutable value keys.** Create two equalPoint records and insert one into a map.
-   **Expected:** lookup with the other returnsorigin;hashes equal.
-   **Verify:** Compare your assertion values or captured diagnostic with lookup with the other returnsorigin;hashes equal.
+1. **Use immutable value keys.** Create two equal Point records and insert one into a map.
+   **Expected:** lookup with the other returns origin; hashes equal.
+   **Verify:** Compare your assertion values or captured diagnostic with lookup with the other returns origin; hashes equal.
 
-2. **Sort with a tie-breaker.** Sort people(age20,idb),(age20,ida),(age18,idc) byage thenid.
+2. **Sort with a tie-breaker.** Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.
    **Expected:** IDs c,a,b.
    **Verify:** Compare your assertion values or captured diagnostic with IDs c,a,b.
 
-3. **Expose comparator uniqueness.** Insert two different people ofage20 into aTreeSet comparingage only.
+3. **Expose comparator uniqueness.** Insert two different people ofage20 into a TreeSet comparingage only.
    **Expected:** setsize1 despite unequal records.
    **Verify:** Compare your assertion values or captured diagnostic with setsize1 despite unequal records.
 
@@ -117,13 +117,13 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** lookup fails in this fixture while mapsize remains1.
    **Verify:** Compare your assertion values or captured diagnostic with lookup fails in this fixture while mapsize remains1.
 
-5. **Avoid comparator subtraction.** CompareInteger.MIN_VALUE and1 usingInteger.compare.
+5. **Avoid comparator subtraction.** CompareInteger.MIN_VALUE and 1 usingInteger.compare.
    **Expected:** negative result;subtraction overflows positive.
    **Verify:** Compare your assertion values or captured diagnostic with negative result;subtraction overflows positive.
 
 6. **Keep identity and display separate.** Give twoPoints the same formatted label but different coordinates;compare values.
-   **Expected:** display labels equal;points unequal.
-   **Verify:** Compare your assertion values or captured diagnostic with display labels equal;points unequal.
+   **Expected:** display labels equal; points unequal.
+   **Verify:** Compare your assertion values or captured diagnostic with display labels equal; points unequal.
 
 ## Common pitfalls and diagnosis
 

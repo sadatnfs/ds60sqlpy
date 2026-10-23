@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -138,7 +184,7 @@
 <p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-032/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-032.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-032.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
 <p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim(&#x27;batch&#x27;, min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.</p>
+<p>Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim(&#x27;batch&#x27;, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{min}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">x</mi></mrow><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">\mathrm{max}=4</annotation></semantics></math>) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.</p>
 <h3 id="compare-tensor-state-with-a-constrained-program">Compare tensor state with a constrained program<a class="heading-anchor" href="#compare-tensor-state-with-a-constrained-program" aria-label="Link to this section">#</a></h3>
 <p>The fixed Linear layer has two input features, one output and no bias. Its stored weight is[2, -1], so row[1, 2] maps to zero and row[3, 4] maps to two. The output shape is(B, 1). This explicit affine rule is the independent persistence oracle: the restored result should match the known function, not merely another object that happens to share the original weights.</p>
 <p>state_dict records named parameters and persistent buffers. Loading it into a new nn.Linear(2, 1, bias=False) checks compatibility with that reconstructed architecture. It does not serialize the Python class definition, feature names, normalization policy or arbitrary nonregistered state. Strict loading can detect missing/unexpected keys and incompatible tensor shapes, but equal shapes do not establish semantic equivalence. Reversing the two feature meanings changes[1, 2]&#x27;s prediction from zero to three while preserving every dimension.</p>
@@ -153,29 +199,29 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-create-a-known-inference-model">Example A: Create a known inference model<a class="heading-anchor" href="#example-a-create-a-known-inference-model" aria-label="Link to this section">#</a></h4>
 <p>Known coefficients make a layout or persistence error visible without depending on training randomness.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">import</span> tempfile<span class="syntax-operator">,</span>json<span class="syntax-operator">,</span>subprocess<span class="syntax-operator">,</span>sys<span class="syntax-operator">,</span>textwrap
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-model=nn.Linear(2,1,bias=False)
-with torch.no_grad(): model.weight.copy_(torch.tensor([[2.,-1.]]))
-model.eval(); x=torch.tensor([[1.,2.],[3.,4.]]); expected=model(x).detach()
-assert expected.tolist()==[[0.],[2.]]</code></pre>
+model<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>bias<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>copy_<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> expected<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> expected<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> outputs 0, 2.</p>
 <h4 id="example-b-round-trip-named-state">Example B: Round-trip named state<a class="heading-anchor" href="#example-b-round-trip-named-state" aria-label="Link to this section">#</a></h4>
 <p>The architecture is reconstructed explicitly. A compatible set of names and shapes is necessary, but the application should also retain semantic feature order and dtype metadata.</p>
-<pre><code class="language-python">temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); state_path=folder/&#x27;weights.pt&#x27;; torch.save(model.state_dict(),state_path)
-restored=nn.Linear(2,1,bias=False); restored.load_state_dict(torch.load(state_path,map_location=&#x27;cpu&#x27;,weights_only=True)); restored.eval()
-torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">temporary<span class="syntax-operator">=</span>tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> folder<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> state_path<span class="syntax-operator">=</span>folder<span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weights.pt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>state_path<span class="syntax-punctuation">)</span>
+restored<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>bias<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> restored<span class="syntax-operator">.</span>load_state_dict<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>state_path<span class="syntax-punctuation">,</span>map_location<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>weights_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> restored<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>restored<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> restored predictions match within 1e-6.</p>
 <h4 id="example-c-save-an-exported-program">Example C: Save an exported program<a class="heading-anchor" href="#example-c-save-an-exported-program" aria-label="Link to this section">#</a></h4>
 <p>The program includes shape constraints from the example. A readable archive alone would not prove that those constraints or operations execute correctly.</p>
-<pre><code class="language-python">program=torch.export.export(model,(x,),strict=True); export_path=folder/&#x27;model.pt2&#x27;; torch.export.save(program,export_path)
-loaded_program=torch.export.load(export_path); exported_module=loaded_program.module()
-torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">program<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>export<span class="syntax-operator">.</span>export<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> export_path<span class="syntax-operator">=</span>folder<span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model.pt2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>export<span class="syntax-operator">.</span>save<span class="syntax-punctuation">(</span>program<span class="syntax-punctuation">,</span>export_path<span class="syntax-punctuation">)</span>
+loaded_program<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>export<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>export_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> exported_module<span class="syntax-operator">=</span>loaded_program<span class="syntax-operator">.</span>module<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>exported_module<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> exported predictions match within 1e-6.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: outputs 0, 2. three-row parity passes; temporary directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -215,7 +261,7 @@ torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)</code><
 <p><strong>Why can an exported model reject a batch size that Linear accepts?</strong></p>
 <p>The export may specialize to the example input. Declare and validate dynamic dimensions when that flexibility is required.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-032, state_dict, torch.export and inference parity.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-032, state_dict, torch.export and inference parity.
 Read courses/deep-learning-pytorch/guides/torch-032.md and courses/deep-learning-pytorch/lessons/torch-032.py. Direct prerequisites: `torch-031`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

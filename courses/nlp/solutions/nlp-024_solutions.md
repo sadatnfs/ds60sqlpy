@@ -24,7 +24,7 @@ The fitted classifier performs genuine local learning, but an empty feature row 
 
 The deterministic filters enforce a separate evidence eligibility contract. The quote retains source identity and version, allowing a reviewer to verify what it says. Its presence supports a procedure statement, not an assertion about completed operational work.
 
-**Expected:** Exactly network version2 and the unchanged approval-rule quote; old version absent.
+**Expected:** Exactly network version 2 and the unchanged approval-rule quote; old version absent.
 
 ## Exercise 5: Exercise failure paths
 

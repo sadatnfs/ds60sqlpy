@@ -18,7 +18,7 @@ private fields are accessed by methods inside the class. this denotes the curren
 
 ## Exercise 1: Create independent accounts
 
-Task: Construct accounts with100 and100 cents,deposit50 into the first.
+Task: Construct accounts with 100 and 100 cents,deposit 50 into the first.
 
 Equal initial values do not mean shared identity. Eachnew expression creates a separate object whose field can evolve independently.
 
@@ -27,9 +27,9 @@ Account first = new Account(100); Account second = new Account(100); first.depos
 assert first.balance() == 150 && second.balance() == 100;
 ```
 
-**Expected:** balances150 and100.
+**Expected:** balances 150 and 100.
 
-**Verify:** Compare the program values or named exception with balances150 and100. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with balances 150 and 100. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Withdraw within the contract
 
@@ -81,7 +81,7 @@ assert negative && first.balance() == 110;
 
 Task: Construct an account with-1 cents.
 
-An invariant should hold from the moment an object becomes available. Requiring a laterrepair call would expose invalid intermediate state to every user.
+An invariant should hold from the moment an object becomes available. Requiring a later repair call would expose invalid intermediate state to every user.
 
 ```java
 boolean invalidStart = false;

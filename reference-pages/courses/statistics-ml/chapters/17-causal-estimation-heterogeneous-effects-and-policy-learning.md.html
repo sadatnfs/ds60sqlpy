@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -134,7 +180,7 @@
 <h4 id="stat-17-04">Propensity score matching<a class="heading-anchor" href="#stat-17-04" aria-label="Link to this section">#</a></h4>
 <p>Match units with comparable assignment scores and define the resulting target population. Calipers and discarded units alter the estimand. Matching does not remove unmeasured confounding, and matched-set dependence affects uncertainty.</p>
 <h4 id="stat-17-05">Inverse-probability treatment weighting<a class="heading-anchor" href="#stat-17-05" aria-label="Link to this section">#</a></h4>
-<p>Weight treated by 1/e and controls by 1/(1-e) for an ATE target. Stabilization or normalization changes finite-sample behavior. Extreme scores indicate weak support and high variance.</p>
+<p>Weight treated by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>e</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{e}</annotation></semantics></math> and controls by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>−</mo><mi>e</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{1-e}</annotation></semantics></math> for an ATE target. Stabilization or normalization changes finite-sample behavior. Extreme scores indicate weak support and high variance.</p>
 <h4 id="stat-17-06">Overlap weighting<a class="heading-anchor" href="#stat-17-06" aria-label="Link to this section">#</a></h4>
 <p>Weight treated by 1-e and controls by e, emphasizing covariate regions with treatment equipoise. This improves stability but targets an overlap population, not automatically the full-population ATE.</p>
 <h4 id="stat-17-07">Entropy balancing<a class="heading-anchor" href="#stat-17-07" aria-label="Link to this section">#</a></h4>
@@ -185,9 +231,9 @@
 <p>Infer candidate graphs from conditional independences, functional restrictions or interventions. Markov equivalence often leaves directions unresolved. Hidden variables, selection and faithfulness violations limit what observational discovery can establish.</p>
 <h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="case-study-trace-an-aipw-score-by-hand">Case study: trace an AIPW score by hand<a class="heading-anchor" href="#case-study-trace-an-aipw-score-by-hand" aria-label="Link to this section">#</a></h4>
-<p>For one treated observation with outcome eight, estimated treatment probability .5, predicted treated outcome six and predicted control outcome three, the score is 6-3+(8-6)/.5=7. For one control observation with outcome four and the same nuisance predictions, the score is 6-3-(4-3)/.5=1. Their average is four. The outcome model contributes a baseline contrast three, and observed residuals adjust that contrast using assignment probabilities.</p>
+<p>For one treated observation with outcome eight, estimated treatment probability .5, predicted treated outcome six and predicted control outcome three, the score is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>6</mn><mo>−</mo><mn>3</mn><mo>+</mo><mfrac><mrow><mn>8</mn><mo>−</mo><mn>6</mn></mrow><mrow><mn>0.5</mn></mrow></mfrac><mo>=</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">6-3+\frac{8-6}{0.5}=7</annotation></semantics></math>. For one control observation with outcome four and the same nuisance predictions, the score is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>6</mn><mo>−</mo><mn>3</mn><mo>−</mo><mfrac><mrow><mn>4</mn><mo>−</mo><mn>3</mn></mrow><mrow><mn>0.5</mn></mrow></mfrac><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">6-3-\frac{4-3}{0.5}=1</annotation></semantics></math>. Their average is four. The outcome model contributes a baseline contrast three, and observed residuals adjust that contrast using assignment probabilities.</p>
 <p>Each score is not an individual treatment effect. It can lie outside the outcome range and can be noisy because inverse probabilities amplify residuals. Averaging many appropriately sampled scores estimates the population target under assumptions. Treating a large score as proof that one person benefits greatly would confuse an estimating-equation contribution with a personal causal quantity.</p>
-<p>With true propensity e and estimated propensity e_hat, let delta_a=m_hat_a-m_a be outcome-model error. Conditional bias in the AIPW score can be written as (e_hat-e)*[delta_1/e_hat+delta_0/(1-e_hat)]. This product structure explains double robustness: either correct nuisance component makes this expression zero. It also explains failure when both errors are substantial, especially near propensity boundaries.</p>
+<p>With true propensity e and estimated propensity e_hat, let <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>δ</mi><mrow><mi>a</mi></mrow></msub><mo>=</mo><msub><mi>m</mi><mrow><mrow><mi mathvariant="normal">h</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">a</mi></mrow></mrow></msub><mo>−</mo><msub><mi>m</mi><mrow><mi>a</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\delta_{a}=m_{\mathrm{hat\_a}}-m_{a}</annotation></semantics></math> be outcome-model error. Conditional bias in the AIPW score can be written as (e_hat-e)*[delta_1/e_hat+delta_0/(1-e_hat)]. This product structure explains double robustness: either correct nuisance component makes this expression zero. It also explains failure when both errors are substantial, especially near propensity boundaries.</p>
 <p>Cross-fitting helps control the relationship between learned nuisance errors and evaluation noise. It does not make arbitrary slow or inconsistent learners satisfy the asymptotic conditions. In a practical report, include overlap, effective weight behavior, nuisance diagnostics, score tails and sensitivity to modeling choices. A standard error computed from the score&#x27;s sample variability is meaningful only when the assumptions supporting that approximation hold.</p>
 <h4 id="case-study-overlap-changes-the-population-you-can-answer-for">Case study: overlap changes the population you can answer for<a class="heading-anchor" href="#case-study-overlap-changes-the-population-you-can-answer-for" aria-label="Link to this section">#</a></h4>
 <p>A treatment is almost universal among high-risk units and rare among low-risk units. An ATE estimator weights the unusual high-risk controls and low-risk treated units heavily. Those few records can dominate the comparison. Trimming them may stabilize the calculation but discards the very observations used to represent unsupported counterfactuals.</p>
@@ -203,7 +249,7 @@
 <p>Off-policy evaluation requires that the historical policy sometimes chose every action the new policy would choose in relevant contexts. A deterministic logger can leave no support for alternate actions. Importance weighting cannot estimate an unobserved action&#x27;s value from zero-probability logs. Model-based extrapolation may still be considered, but its assumptions must be visible and uncertainty should reflect that evidence gap.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_17.py.html">chapter_17.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_17.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_17.py</code></pre>
 <h4 id="see-the-residual-correction-work">See the residual correction work<a class="heading-anchor" href="#see-the-residual-correction-work" aria-label="Link to this section">#</a></h4>
 <p>The toy population has effect three and exact treatment balance within each covariate stratum. Deliberately wrong outcome predictions suggest effect one, but the correct propensity-weighted residual terms restore three. Exact recovery is a property of this constructed fixture, not a guarantee that either estimated nuisance model is correct in real data.</p>
 <h4 id="keep-prediction-and-score-rows-separate">Keep prediction and score rows separate<a class="heading-anchor" href="#keep-prediction-and-score-rows-separate" aria-label="Link to this section">#</a></h4>
@@ -211,45 +257,45 @@
 <h4 id="convert-effects-into-a-policy">Convert effects into a policy<a class="heading-anchor" href="#convert-effects-into-a-policy" aria-label="Link to this section">#</a></h4>
 <p>With action cost one, only effects two and four produce positive net value. Treating those two of four eligible people yields net value one per eligible person, outperforming treating everyone in this known-effect fixture. Estimated effects require separate policy evaluation and uncertainty.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def aipw_and_balance():
-    x=np.repeat([0.,1.],4)
-    a=np.tile([0.,0.,1.,1.],2)
-    y=2*x+3*a+np.tile([-1.,1.,-1.,1.],2)
-    e=np.full(8,.5)
-    wrong_m0=np.zeros(8);wrong_m1=np.ones(8)
-    score=wrong_m1-wrong_m0+a*(y-wrong_m1)/e-(1-a)*(y-wrong_m0)/(1-e)
-    assert np.isclose(score.mean(),3.)
-    assert np.isclose(np.average(x[a==1],weights=1/e[a==1]),np.average(x[a==0],weights=1/(1-e[a==0])))
-    print(&quot;AIPW with deliberately wrong outcome models:&quot;,score.mean())
+<span class="syntax-keyword">def</span> <span class="syntax-function">aipw_and_balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+    a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>a<span class="syntax-operator">+</span>np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    e<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+    wrong_m0<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>wrong_m1<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+    score<span class="syntax-operator">=</span>wrong_m1<span class="syntax-operator">-</span>wrong_m0<span class="syntax-operator">+</span>a<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>wrong_m1<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>e<span class="syntax-operator">-</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>wrong_m0<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>e<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>score<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>e<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>e<span class="syntax-punctuation">[</span>a<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">AIPW with deliberately wrong outcome models:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>score<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def cross_fitted_nuisance():
-    x=np.arange(12,dtype=float)
-    y=1+2*x
-    prediction=np.empty_like(y)
-    folds=np.arange(len(y))%3
-    for fold in range(3):
-        train=folds!=fold;test=~train
-        assert not set(np.flatnonzero(train)) &amp; set(np.flatnonzero(test))
-        beta=np.polyfit(x[train],y[train],1)
-        prediction[test]=np.polyval(beta,x[test])
-    assert np.allclose(prediction,y)
-    print(&quot;Cross-fitted nuisance prediction maximum error:&quot;,np.max(np.abs(prediction-y)))
+<span class="syntax-keyword">def</span> <span class="syntax-function">cross_fitted_nuisance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x
+    prediction<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>empty_like<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span>
+    folds<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">3</span>
+    <span class="syntax-keyword">for</span> fold <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        train<span class="syntax-operator">=</span>folds<span class="syntax-operator">!=</span>fold<span class="syntax-punctuation">;</span>test<span class="syntax-operator">=</span><span class="syntax-operator">~</span>train
+        <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        beta<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>polyfit<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">[</span>train<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+        prediction<span class="syntax-punctuation">[</span>test<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>polyval<span class="syntax-punctuation">(</span>beta<span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">[</span>test<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Cross-fitted nuisance prediction maximum error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>prediction<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def policy_value():
-    effect=np.array([-.5,.5,2.,4.]);cost=1.
-    policy=effect&gt;cost
-    value=np.mean(policy*(effect-cost))
-    assert policy.tolist()==[False,False,True,True] and value==1.
-    assert value&gt;np.mean(effect-cost)
-    print(&quot;Treat:&quot;,policy,&quot;incremental net value per eligible unit:&quot;,value)
+<span class="syntax-keyword">def</span> <span class="syntax-function">policy_value</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    effect<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>cost<span class="syntax-operator">=</span><span class="syntax-number">1.</span>
+    policy<span class="syntax-operator">=</span>effect<span class="syntax-operator">&gt;</span>cost
+    value<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>policy<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>effect<span class="syntax-operator">-</span>cost<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> policy<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> value<span class="syntax-operator">==</span><span class="syntax-number">1.</span>
+    <span class="syntax-keyword">assert</span> value<span class="syntax-operator">&gt;</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>effect<span class="syntax-operator">-</span>cost<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Treat:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>policy<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">incremental net value per eligible unit:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>value<span class="syntax-punctuation">)</span>
 
-def main():
-    aipw_and_balance();cross_fitted_nuisance();policy_value()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    aipw_and_balance<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>cross_fitted_nuisance<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>policy_value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: What exactly is doubly robust?</strong> The estimating equation can remain consistent when either the outcome nuisance model or the propensity nuisance model is correct, assuming identification and regularity. Both wrong, hidden confounding, insufficient overlap or inappropriate dependence can still invalidate the result.</p>
 <p><strong>Interview: Why cross-fit rather than fit nuisance models on all rows?</strong> Evaluating residual scores on the same rows used for flexible fitting can couple estimation errors to observed noise. Cross-fitting separates these roles and supports orthogonal-score theory. It does not replace genuine external validation for policy decisions.</p>

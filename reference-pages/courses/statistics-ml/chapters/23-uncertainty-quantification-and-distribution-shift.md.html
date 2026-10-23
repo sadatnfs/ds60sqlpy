@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A point prediction hides at least two uncertainties: variability in future outcomes even if the model were known, and uncertainty about the model itself. Which component can be reduced depends on the intervention. More training data can reduce some parameter uncertainty; improved sensors may reduce apparent outcome noise. The decomposition is conditional on what information the model observes.</p>
 <h4 id="split-conformal-prediction-by-ranks">Split conformal prediction by ranks<a class="heading-anchor" href="#split-conformal-prediction-by-ranks" aria-label="Link to this section">#</a></h4>
-<p>Fit a prediction model on training data. On n fresh calibration observations, compute nonconformity scores, such as absolute residuals s_i=|y_i-f(x_i)|. For desired miscoverage alpha, take k=ceil((n+1)*(1-alpha)) and the kth smallest calibration score q. If k exceeds n, use an unbounded interval rather than quietly substituting the largest observed score. Predict [f(x)-q,f(x)+q]. Under exchangeability of calibration and new observations, conditional on the training fit, the new score&#x27;s rank among n+1 scores provides finite-sample marginal coverage of at least 1-alpha, with suitable handling of ties.</p>
+<p>Fit a prediction model on training data. On n fresh calibration observations, compute nonconformity scores, such as absolute residuals <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false">|</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">|</mo></mrow><annotation encoding="application/x-tex">s_i=|y_i-f(x_i)|</annotation></semantics></math>. For desired miscoverage alpha, take <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow></mrow><annotation encoding="application/x-tex">k=\left\lceil(n+1)(1-\alpha)\right\rceil</annotation></semantics></math> and the kth smallest calibration score q. If k exceeds n, use an unbounded interval rather than quietly substituting the largest observed score. Predict <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>−</mo><mi>q</mi><mo>,</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>q</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[f(x)-q,f(x)+q]</annotation></semantics></math>. Under exchangeability of calibration and new observations, conditional on the training fit, the new score&#x27;s rank among n+1 scores provides finite-sample marginal coverage of at least 1-alpha, with suitable handling of ties.</p>
 <p>This is marginal coverage across new observations, not a promise of 90% coverage at every exact x or within every subgroup. A model can meet overall coverage while systematically under-covering a rare region. Conformalized quantile regression uses scores max(lower(x)-y,y-upper(x)) to adapt interval width to heteroskedasticity, then applies an analogous rank correction. Better base models can improve efficiency, while the calibration argument supplies coverage under its assumptions.</p>
 <h4 id="shift-changes-the-guarantee">Shift changes the guarantee<a class="heading-anchor" href="#shift-changes-the-guarantee" aria-label="Link to this section">#</a></h4>
 <p>Covariate shift changes p(x) while preserving p(y|x); importance weights p_target(x)/p_source(x) can adjust target expectations when support overlaps. Label shift changes class priors while preserving p(x|y), enabling a different correction. Concept drift changes the outcome mechanism itself. These assumptions are distinct and cannot be established by one generic drift score. Once calibration exchangeability fails, an old conformal guarantee no longer automatically applies.</p>
@@ -168,8 +214,8 @@
 <p>Score novelty relative to development data or learned representations. A detector can miss harmful semantic shifts and flag benign changes. Evaluate false alarms, missed shifts and downstream performance consequences separately.</p>
 <h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="case-study-derive-the-rank-guarantee-without-a-parametric-error-model">Case study: derive the rank guarantee without a parametric error model<a class="heading-anchor" href="#case-study-derive-the-rank-guarantee-without-a-parametric-error-model" aria-label="Link to this section">#</a></h4>
-<p>Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting k=ceil((n+1)*(1-alpha)) therefore gives coverage at least 1-alpha.</p>
-<p>With n=19 and alpha=.1, k=18. Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that k=n+1, there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.</p>
+<p>Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow></mrow><annotation encoding="application/x-tex">k=\left\lceil(n+1)(1-\alpha)\right\rceil</annotation></semantics></math> therefore gives coverage at least 1-alpha.</p>
+<p>With <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>19</mn></mrow><annotation encoding="application/x-tex">n=19</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">\alpha=0.1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mn>18</mn></mrow><annotation encoding="application/x-tex">k=18</annotation></semantics></math>. Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mi>n</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k=n+1</annotation></semantics></math>, there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.</p>
 <p>Ties can make coverage conservative with the usual nonrandomized threshold. Randomized tie-breaking can produce more exact rank behavior under suitable construction, but the implementation and interpretation must be explicit. The core result concerns marginal prediction coverage, not the accuracy of the point model or the conditional coverage of every subgroup.</p>
 <h4 id="case-study-overall-coverage-hides-a-difficult-subgroup">Case study: overall coverage hides a difficult subgroup<a class="heading-anchor" href="#case-study-overall-coverage-hides-a-difficult-subgroup" aria-label="Link to this section">#</a></h4>
 <p>Suppose 90% of observations belong to an easy group with nearly deterministic outcomes and 10% to a noisy group. A constant-width interval calibrated to 90% marginal coverage can cover almost every easy case while failing most noisy cases. The aggregate target may be met even though the system is least reliable for the group where uncertainty matters most.</p>
@@ -185,46 +231,46 @@
 <p>An abstention policy similarly needs a complete fallback model. If difficult cases are routed to people, evaluate reviewer capacity, error, delay and consistency. A model with excellent accepted-case accuracy may produce a worse system if it sends an unmanageable fraction to review. Report coverage, conditional risk and end-to-end utility together.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_23.py.html">chapter_23.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_23.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_23.py</code></pre>
 <h4 id="the-finite-sample-correction-matters">The finite-sample correction matters<a class="heading-anchor" href="#the-finite-sample-correction-matters" aria-label="Link to this section">#</a></h4>
 <p>Nineteen calibration residuals and alpha .1 require the eighteenth ordered residual. Twenty illustrative equally likely new-score ranks give coverage .9. The program checks the rank arithmetic, not real-world calibration. A real guarantee needs the exchangeability argument and a predictor fitted without calibration leakage.</p>
 <h4 id="reweight-the-target-not-the-narrative">Reweight the target, not the narrative<a class="heading-anchor" href="#reweight-the-target-not-the-narrative" aria-label="Link to this section">#</a></h4>
-<p>Two strata have unchanged conditional outcomes one and nine, but their shares reverse from .8/.2 to .2/.8. The mean changes from 2.6 to 7.4. Density ratios .25 and four recover the target mean exactly. If the conditional outcomes also changed, these weights alone would not suffice.</p>
+<p>Two strata have unchanged conditional outcomes one and nine, but their shares reverse from <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>0.8</mn></mrow><mrow><mn>0.2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{0.8}{0.2}</annotation></semantics></math> to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>0.2</mn></mrow><mrow><mn>0.8</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{0.2}{0.8}</annotation></semantics></math>. The mean changes from 2.6 to 7.4. Density ratios .25 and four recover the target mean exactly. If the conditional outcomes also changed, these weights alone would not suffice.</p>
 <h4 id="zero-accepted-error-can-hide-low-coverage">Zero accepted error can hide low coverage<a class="heading-anchor" href="#zero-accepted-error-can-hide-low-coverage" aria-label="Link to this section">#</a></h4>
 <p>Accepting only the two high-confidence cases produces zero errors on accepted cases but processes only half the population. The other two cases still need a decision. Four observations are a mechanism illustration, not evidence that the policy is reliably error-free.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def conformal_rank():
-    scores=np.arange(1.,20.)
-    alpha=.1;n=len(scores);k=int(np.ceil((n+1)*(1-alpha)))
-    q=np.sort(scores)[k-1] if k&lt;=n else np.inf
-    assert k==18 and q==18
-    possible_new_scores=np.arange(.5,20.,1.)
-    rank_coverage=np.mean(possible_new_scores&lt;=q)
-    assert rank_coverage==.9
-    print(&quot;Calibration n/k/q:&quot;,n,k,q,&quot;coverage over illustrative equally likely ranks:&quot;,rank_coverage)
+<span class="syntax-keyword">def</span> <span class="syntax-function">conformal_rank</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">)</span>
+    alpha<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">;</span>n<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>k<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>k<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> k<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>n <span class="syntax-keyword">else</span> np<span class="syntax-operator">.</span>inf
+    <span class="syntax-keyword">assert</span> k<span class="syntax-operator">==</span><span class="syntax-number">18</span> <span class="syntax-operator">and</span> q<span class="syntax-operator">==</span><span class="syntax-number">18</span>
+    possible_new_scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    rank_coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>possible_new_scores<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>q<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> rank_coverage<span class="syntax-operator">==</span><span class="syntax-number">.9</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Calibration n/k/q:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>n<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>q<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">coverage over illustrative equally likely ranks:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>rank_coverage<span class="syntax-punctuation">)</span>
 
-def shift_weighting():
-    source=np.array([.8,.2]);target=np.array([.2,.8]);outcome=np.array([1.,9.])
-    weights=target/source
-    target_mean=np.sum(source*weights*outcome)
-    assert np.isclose(target_mean,target@outcome) and np.isclose(target_mean,7.4)
-    assert np.isclose(source@outcome,2.6)
-    print(&quot;Source mean:&quot;,source@outcome,&quot;target reweighted mean:&quot;,target_mean,&quot;ratios:&quot;,weights)
+<span class="syntax-keyword">def</span> <span class="syntax-function">shift_weighting</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    source<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>target<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>outcome<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    weights<span class="syntax-operator">=</span>target<span class="syntax-operator">/</span>source
+    target_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>source<span class="syntax-operator">*</span>weights<span class="syntax-operator">*</span>outcome<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span>target<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-number">7.4</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.6</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Source mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">target reweighted mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ratios:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weights<span class="syntax-punctuation">)</span>
 
-def selective_prediction():
-    confidence=np.array([.55,.6,.8,.95]);error=np.array([1.,1.,0.,0.])
-    accepted=confidence&gt;=.8
-    coverage=accepted.mean();risk=error[accepted].mean()
-    assert coverage==.5 and risk==0 and error.mean()==.5
-    print(&quot;Accepted fraction:&quot;,coverage,&quot;accepted empirical error:&quot;,risk,&quot;all-case error:&quot;,error.mean())
+<span class="syntax-keyword">def</span> <span class="syntax-function">selective_prediction</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    confidence<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.55</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.95</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>error<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    accepted<span class="syntax-operator">=</span>confidence<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.8</span>
+    coverage<span class="syntax-operator">=</span>accepted<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>risk<span class="syntax-operator">=</span>error<span class="syntax-punctuation">[</span>accepted<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> coverage<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> risk<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Accepted fraction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>coverage<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted empirical error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>risk<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">all-case error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def main():
-    conformal_rank();shift_weighting();selective_prediction()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    conformal_rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>shift_weighting<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>selective_prediction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does 90% conformal coverage mean every subgroup gets 90%?</strong> No. Standard split conformal provides marginal coverage under exchangeability. Rare subgroups can have poor coverage. Group-conditional methods need sufficient calibration data and a clearly specified grouping scheme.</p>
 <p><strong>Interview: Can an ensemble be confidently wrong?</strong> Yes. Shared training data, architecture or objective can produce similar predictions under shared misspecification. Disagreement is one signal, not a complete measure of uncertainty.</p>

@@ -189,6 +189,15 @@ lock, so two simultaneous restarts cannot remove each other's ownership. If a
 process is terminated during recovery and leaves a recovery lock, inspect it
 before retrying; the launcher preserves ambiguous state.
 
+A full backup of the learning volume preserves saved code, notes, progress,
+source versions and recorded run output. Python and SQL receipts live under
+`classroom-runs` in that volume and appear in the shared **Saved runs** view.
+Opening a prior receipt displays its recorded source and output without
+re-executing it or replacing your pad. Source version history remains separate
+from execution history. The older completion-JSON export contains completion
+markers only; use the complete learning-volume backup when transferring your
+whole workspace, and back up PostgreSQL separately when you need its state.
+
 For backup, manual Compose operation and optional host labs, continue to the
 [full classroom reference](docker-classroom.md). Direct Compose remains an
 advanced alternative; use the single entrypoint when you want it to handle the

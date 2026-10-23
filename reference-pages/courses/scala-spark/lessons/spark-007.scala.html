@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,61 +161,61 @@
       <h1>Spark 007</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-007.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span> </span>
-<span> </span>
-<span>object Main {</span>
-<span>  final case class Record(id: String, status: String, amount: Long)</span>
-<span> </span>
-<span>  def parseId(raw: String): Either[String, String] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseId&quot;)</span>
-<span> </span>
-<span>  def parseStatus(raw: String): Either[String, String] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseStatus&quot;)</span>
-<span> </span>
-<span>  def parseAmount(raw: String): Either[String, Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseAmount&quot;)</span>
-<span> </span>
-<span>  def parseRecord(raw: String): Either[String, Record] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseRecord&quot;)</span>
-<span> </span>
-<span>  def partitionRecords(lines: Seq[String]): (Seq[Record], Seq[(Int, String, String)]) =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete partitionRecords&quot;)</span>
-<span> </span>
-<span>  def paidTotal(records: Seq[Record]): (Long, Long) =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete paidTotal&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    locally {</span>
-<span>      val value: Either[String,Long] = Right(25L)</span>
-<span>      val invalid: Either[String,Long] = Left(&quot;invalid_amount&quot;)</span>
-<span>      assert(value.map(_ + 5L) == Right(30L))</span>
-<span>      assert(invalid.map(_ + 5L) == Left(&quot;invalid_amount&quot;))</span>
-<span>      println(value.map(_ / 5L))</span>
-<span>    }</span>
-<span>    locally {</span>
-<span>      val combined = for {</span>
-<span>        amount &lt;- (Right(20L): Either[String,Long])</span>
-<span>        fee &lt;- (Right(5L): Either[String,Long])</span>
-<span>      } yield amount + fee</span>
-<span>      assert(combined == Right(25L))</span>
-<span>      val blocked = for {</span>
-<span>        amount &lt;- (Left(&quot;invalid_amount&quot;): Either[String,Long])</span>
-<span>        fee &lt;- (Right(5L): Either[String,Long])</span>
-<span>      } yield amount + fee</span>
-<span>      assert(blocked == Left(&quot;invalid_amount&quot;))</span>
-<span>      println(combined)</span>
-<span>    }</span>
-<span>    println(&quot;spark-007: worked examples passed; six task implementations remain&quot;)</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Validate source identity explicitly. Inputs/task: Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier. Expected: &quot; a1 &quot; gives Right(&quot;a1&quot;);null,&quot;&quot; and&quot;  &quot; each give Left(&quot;missing_id&quot;). Verify: Assert one normalized identity and all three missing representations without throwing.</span>
-<span>// Exercise 2: Reject unsupported domain states. Inputs/task: Accept only trimmed lowercase paid or void. Return Left(unknown_status) for all other supplied values, including uppercase PAID and null. Do not silently case-fold unless the source contract explicitly permits it. Expected: &quot; paid &quot; and&quot;void&quot; return Right(&quot;paid&quot;) and Right(&quot;void&quot;);&quot;mystery&quot;,&quot;PAID&quot; and null are rejected. Verify: Assert both valid states and three unsupported forms; confirm that whitespace normalization is separate from case normalization.</span>
-<span>// Exercise 3: Preserve exact bounded cents. Inputs/task: Accept trimmed ASCII digits representing 0 through 1000000 as a Long. Return Left(invalid_amount) for null, blank, signed, decimal, overflowing or out-of-domain text. Expected: &quot;0&quot; and&quot;100&quot; become Right(0L), Right(100L);&quot;bad&quot;,&quot;-1&quot;,&quot;1.5&quot;,&quot;1000001&quot; and a huge integer token are rejected. Verify: Assert zero separately from rejection, and test both lexical failure and numeric range failure.</span>
-<span>// Exercise 4: Compose fields with declared error precedence. Inputs/task: Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation. Expected: a1|paid|100 becomes Right(Record(a1, paid,100));a2|paid| becomes invalid_amount;an empty-ID malformed-status record reports missing_id first;two fields report malformed_record. Verify: Assert a valid record, trailing-empty rejection, first-error precedence and field-count failure.</span>
-<span>// Exercise 5: Retain a complete rejection ledger. Inputs/task: Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left. Expected: The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six. Verify: Assert accepted IDs[a1, a2, a3], the exact rejected positions/reasons and count conservation.</span>
-<span>// Exercise 6: Separate valid records from eligible revenue. Inputs/task: From already accepted records, return paid-event count and checked paid cents total. Retain an observed zero paid event in the count and exclude valid void records only at this business-report stage. Expected: The three accepted records yield paid count 2, total 100. A void record with malformed amount must have been rejected by parseRecord before this function can run. Verify: Assert the paid metrics and show that a4|void|bad produces Left(invalid_amount), not a silently skipped valid void.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">final</span> <span class="syntax-keyword">case</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Record</span><span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseId</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">String</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseId&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseStatus</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">String</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseStatus&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseAmount</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseAmount&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseRecord</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Record</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseRecord&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">partitionRecords</span><span class="syntax-punctuation">(</span>lines<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Record</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-class">Int</span><span class="syntax-punctuation">,</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete partitionRecords&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">paidTotal</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Record</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete paidTotal&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> value<span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">25L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> invalid<span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-class">Left</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;invalid_amount&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">+</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">30L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">+</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Left</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;invalid_amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">/</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> combined <span class="syntax-operator">=</span> <span class="syntax-keyword">for</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        amount <span class="syntax-operator">&lt;-</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">20L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        fee <span class="syntax-operator">&lt;-</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">yield</span> amount <span class="syntax-operator">+</span> fee</span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>combined <span class="syntax-operator">==</span> <span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> blocked <span class="syntax-operator">=</span> <span class="syntax-keyword">for</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        amount <span class="syntax-operator">&lt;-</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Left</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;invalid_amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        fee <span class="syntax-operator">&lt;-</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Right</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Either</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">yield</span> amount <span class="syntax-operator">+</span> fee</span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>blocked <span class="syntax-operator">==</span> <span class="syntax-class">Left</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;invalid_amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-007: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Validate source identity explicitly. Inputs/task: Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier. Expected: &quot; a1 &quot; gives Right(&quot;a1&quot;);null,&quot;&quot; and&quot;  &quot; each give Left(&quot;missing_id&quot;). Verify: Assert one normalized identity and all three missing representations without throwing.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Reject unsupported domain states. Inputs/task: Accept only trimmed lowercase paid or void. Return Left(unknown_status) for all other supplied values, including uppercase PAID and null. Do not silently case-fold unless the source contract explicitly permits it. Expected: &quot; paid &quot; and&quot;void&quot; return Right(&quot;paid&quot;) and Right(&quot;void&quot;);&quot;mystery&quot;,&quot;PAID&quot; and null are rejected. Verify: Assert both valid states and three unsupported forms; confirm that whitespace normalization is separate from case normalization.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Preserve exact bounded cents. Inputs/task: Accept trimmed ASCII digits representing 0 through 1000000 as a Long. Return Left(invalid_amount) for null, blank, signed, decimal, overflowing or out-of-domain text. Expected: &quot;0&quot; and&quot;100&quot; become Right(0L), Right(100L);&quot;bad&quot;,&quot;-1&quot;,&quot;1.5&quot;,&quot;1000001&quot; and a huge integer token are rejected. Verify: Assert zero separately from rejection, and test both lexical failure and numeric range failure.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Compose fields with declared error precedence. Inputs/task: Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation. Expected: a1|paid|100 becomes Right(Record(a1, paid,100));a2|paid| becomes invalid_amount;an empty-ID malformed-status record reports missing_id first;two fields report malformed_record. Verify: Assert a valid record, trailing-empty rejection, first-error precedence and field-count failure.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Retain a complete rejection ledger. Inputs/task: Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left. Expected: The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six. Verify: Assert accepted IDs[a1, a2, a3], the exact rejected positions/reasons and count conservation.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Separate valid records from eligible revenue. Inputs/task: From already accepted records, return paid-event count and checked paid cents total. Retain an observed zero paid event in the count and exclude valid void records only at this business-report stage. Expected: The three accepted records yield paid count 2, total 100. A void record with malformed amount must have been rejected by parseRecord before this function can run. Verify: Assert the paid metrics and show that a4|void|bad produces Left(invalid_amount), not a silently skipped valid void.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

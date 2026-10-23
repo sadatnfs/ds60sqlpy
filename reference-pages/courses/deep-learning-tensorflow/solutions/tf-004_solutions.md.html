@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,24 +165,24 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-004.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="tf-004_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-trace-squared-units">Exercise 1: Trace squared units<a class="heading-anchor" href="#exercise-1-trace-squared-units" aria-label="Link to this section">#</a></h3>
-<p>Squaring [1,-1,2] gives [1,1,4]. The sum is 6 and division by three gives MSE 2. Root mean squared error is sqrt(2), in target units rather than squared target units. These values all describe the same residual fixture under different reporting transformations. A negative residual does not subtract error from a positive one after squaring; using the mean raw residual could hide cancellation and is a different statistic.</p>
-<p><strong>Expected:</strong> Squares [1,1,4], sum 6, mean 2 and root mean square sqrt(2).</p>
+<p>Squaring [1,-1,2] gives [1,1,4]. The sum is 6 and division by three gives MSE 2. Root mean squared error is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>2</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{2}</annotation></semantics></math>, in target units rather than squared target units. These values all describe the same residual fixture under different reporting transformations. A negative residual does not subtract error from a positive one after squaring; using the mean raw residual could hide cancellation and is a different statistic.</p>
+<p><strong>Expected:</strong> Squares [1,1,4], sum 6, mean 2 and root mean square <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>2</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{2}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Assert both reductions and state squared target units versus original target units.</p>
 <h3 id="exercise-2-duplicate-the-batch">Exercise 2: Duplicate the batch<a class="heading-anchor" href="#exercise-2-duplicate-the-batch" aria-label="Link to this section">#</a></h3>
 <p>The duplicated vector contains six residuals and squared sum 12. Dividing by six leaves mean 2. This is an invariant of duplicating the entire empirical distribution under equal observation weights. The summed objective doubles, which can also double an unnormalized gradient later. That does not make sum wrong; it means the reduction must be declared when comparing learning rates, batch sizes or reported objectives.</p>
 <p><strong>Expected:</strong> Sum 12 and mean 2 over six records.</p>
 <p><strong>Verify:</strong> Compare both outputs with the three-record fixture and record the changed denominator.</p>
 <h3 id="exercise-3-construct-a-masked-reduction">Exercise 3: Construct a masked reduction<a class="heading-anchor" href="#exercise-3-construct-a-masked-reduction" aria-label="Link to this section">#</a></h3>
-<p>Index the accepted entries first, obtaining [1,-1]. Their squared sum is 2 and their mean is 1. A broken zero-fill approach retains three denominator positions, returning 2/3. The helper validates the boolean mask and its shape before selection, then rejects a selection with no entries. Keep a counterexample whose excluded residual is nonzero so the test checks a real mask/denominator mechanism rather than coincidentally matching values.</p>
-<p><strong>Expected:</strong> Masked sum 2 and masked mean 1; the zero-then-mean bug gives 2/3.</p>
+<p>Index the accepted entries first, obtaining [1,-1]. Their squared sum is 2 and their mean is 1. A broken zero-fill approach retains three denominator positions, returning <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>. The helper validates the boolean mask and its shape before selection, then rejects a selection with no entries. Keep a counterexample whose excluded residual is nonzero so the test checks a real mask/denominator mechanism rather than coincidentally matching values.</p>
+<p><strong>Expected:</strong> Masked sum 2 and masked mean 1; the zero-then-mean bug gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Assert the selected count is two and compare the three different scalar results.</p>
 <h3 id="exercise-4-reject-an-absent-objective">Exercise 4: Reject an absent objective<a class="heading-anchor" href="#exercise-4-reject-an-absent-objective" aria-label="Link to this section">#</a></h3>
 <p>A missing residual set and an all-false selection have no mean objective. Reject them with ValueError. An integer mask is ambiguous under the explicit boolean inclusion contract and raises TypeError. The unsupported name median is not silently treated as mean or sum. After each rejected call, the original [1,-1,2] fixture must still return 2. A default zero would confuse no accepted data with genuinely zero accepted errors.</p>
 <p><strong>Expected:</strong> Empty/all-false/unknown-reduction cases raise ValueError; integer mask raises TypeError.</p>
 <p><strong>Verify:</strong> Capture the four named exceptions separately and retain the valid mean 2 afterward.</p>
 <h3 id="exercise-5-compare-objective-preferences">Exercise 5: Compare objective preferences<a class="heading-anchor" href="#exercise-5-compare-objective-preferences" aria-label="Link to this section">#</a></h3>
-<p>A has squared sum 16 and MSE 16/3, while B has squared sum 12 and MSE 4, so squared error prefers B. Absolute sums are 4 and 6, yielding MAE 4/3 versus 2 and preferring A. The disagreement reflects how strongly the objective penalizes a single large error. Choose the metric from the intended use and cost of errors, not from whichever ranking flatters a preferred system.</p>
-<p><strong>Expected:</strong> MSE prefers B: 4 versus 16/3; MAE prefers A: 4/3 versus 2.</p>
+<p>A has squared sum 16 and MSE <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>16</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{16}{3}</annotation></semantics></math>, while B has squared sum 12 and MSE 4, so squared error prefers B. Absolute sums are 4 and 6, yielding MAE <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{4}{3}</annotation></semantics></math> versus 2 and preferring A. The disagreement reflects how strongly the objective penalizes a single large error. Choose the metric from the intended use and cost of errors, not from whichever ranking flatters a preferred system.</p>
+<p><strong>Expected:</strong> MSE prefers B: 4 versus <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>16</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{16}{3}</annotation></semantics></math>; MAE prefers A: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{4}{3}</annotation></semantics></math> versus 2.</p>
 <p><strong>Verify:</strong> Write a two-model/two-metric table with the explicit denominator three; do not choose the metric after seeing the ranking.</p>
 <h3 id="exercise-6-transfer-to-unequal-groups">Exercise 6: Transfer to unequal groups<a class="heading-anchor" href="#exercise-6-transfer-to-unequal-groups" aria-label="Link to this section">#</a></h3>
 <p>The four observed squared residuals are [4,0,0,0], whose mean is 1. The two group MSEs are 4 and 0; averaging these groups equally gives 2. Neither number is an arithmetic mistake, but their units of weighting differ. Weight group means by counts one and three to recover the all-record mean. A later distributed or grouped evaluation must preserve the chosen unit instead of assuming every shard has the same cardinality.</p>
@@ -144,25 +190,25 @@
 <p><strong>Verify:</strong> Inspect the one-versus-three group counts and assert the example-weighted mean matches 1.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
 
-def reduce_squared(residuals, reduction=&quot;mean&quot;, mask=None):
-    residuals = np.asarray(residuals, dtype=np.float64)
-    if residuals.ndim != 1 or residuals.size == 0 or not np.isfinite(residuals).all():
-        raise ValueError(&quot;finite nonempty residual vector required&quot;)
-    if reduction not in {&quot;mean&quot;, &quot;sum&quot;}:
-        raise ValueError(&quot;reduction must be mean or sum&quot;)
-    if mask is not None:
-        mask = np.asarray(mask)
-        if mask.dtype != np.bool_:
-            raise TypeError(&quot;mask must be boolean&quot;)
-        if mask.shape != residuals.shape or not mask.any():
-            raise ValueError(&quot;same-shaped nonempty mask required&quot;)
-        residuals = residuals[mask]
-    squared = np.square(residuals)
-    return float(squared.mean() if reduction == &quot;mean&quot; else squared.sum())</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">reduce_squared</span><span class="syntax-punctuation">(</span>residuals<span class="syntax-punctuation">,</span> reduction<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> mask<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    residuals <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>residuals<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> residuals<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> residuals<span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>residuals<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite nonempty residual vector required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> reduction <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">reduction must be mean or sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> mask <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        mask <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> mask<span class="syntax-operator">.</span>dtype <span class="syntax-operator">!=</span> np<span class="syntax-operator">.</span>bool_<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">mask must be boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> mask<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> residuals<span class="syntax-operator">.</span>shape <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> mask<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">same-shaped nonempty mask required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        residuals <span class="syntax-operator">=</span> residuals<span class="syntax-punctuation">[</span>mask<span class="syntax-punctuation">]</span>
+    squared <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>residuals<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>squared<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> reduction <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">else</span> squared<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without the helper, derive the mean squared loss of residuals [3,0] and its value after duplicating both records. Then explain how an all-false mask differs from two accepted zero residuals.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

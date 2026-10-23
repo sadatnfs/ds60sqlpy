@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,50 +161,50 @@
       <h1>Tf 004</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/lessons/tf-004.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-004: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span>r = np.array([1.0, -1.0, 2.0])</span>
-<span>squared = np.square(r)</span>
-<span>assert squared.sum() == 6.0</span>
-<span>assert squared.mean() == 2.0</span>
-<span>print(squared, squared.sum(), squared.mean())</span>
-<span> </span>
-<span>include = np.array([True, True, False])</span>
-<span>correct = np.square(r[include]).mean()</span>
-<span>wrong = np.where(include, np.square(r), 0.0).mean()</span>
-<span>assert correct == 1.0</span>
-<span>np.testing.assert_allclose(wrong, 2 / 3, rtol=0, atol=1e-12)</span>
-<span>print(correct, wrong)</span>
-<span> </span>
-<span># Exercise 1: Trace squared units</span>
-<span># Calculate the residual squares, sum, mean and root mean square for [1,-1,2].</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 2: Duplicate the batch</span>
-<span># Append a second copy of all three residuals without changing their values.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 3: Construct a masked reduction</span>
-<span># Implement reduce_squared with mean/sum choices and an optional boolean mask; include</span>
-<span># only the first two fixture entries.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 4: Reject an absent objective</span>
-<span># Try an empty vector, an all-false mask, an integer mask and reduction name median.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 5: Compare objective preferences</span>
-<span># Model A has residuals [0,0,4] and B has [2,2,2]. Compare mean squared and mean absolute</span>
-<span># errors.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 6: Transfer to unequal groups</span>
-<span># Group A has one residual [2]; group B has three residuals [0,0,0]. Compare the all-</span>
-<span># record MSE with an unweighted mean of group MSEs.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-004: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">r <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">squared <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> squared<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6.0</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> squared<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.0</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>squared<span class="syntax-punctuation">,</span> squared<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> squared<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">include <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">correct <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">[</span>include<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">wrong <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>include<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> correct <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span></span>
+<span class="source-line">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> wrong<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Trace squared units</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate the residual squares, sum, mean and root mean square for [1,-1,2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Duplicate the batch</span></span>
+<span class="source-line"><span class="syntax-comment"># Append a second copy of all three residuals without changing their values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Construct a masked reduction</span></span>
+<span class="source-line"><span class="syntax-comment"># Implement reduce_squared with mean/sum choices and an optional boolean mask; include</span></span>
+<span class="source-line"><span class="syntax-comment"># only the first two fixture entries.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Reject an absent objective</span></span>
+<span class="source-line"><span class="syntax-comment"># Try an empty vector, an all-false mask, an integer mask and reduction name median.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Compare objective preferences</span></span>
+<span class="source-line"><span class="syntax-comment"># Model A has residuals [0,0,4] and B has [2,2,2]. Compare mean squared and mean absolute</span></span>
+<span class="source-line"><span class="syntax-comment"># errors.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer to unequal groups</span></span>
+<span class="source-line"><span class="syntax-comment"># Group A has one residual [2]; group B has three residuals [0,0,0]. Compare the all-</span></span>
+<span class="source-line"><span class="syntax-comment"># record MSE with an unweighted mean of group MSEs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,16 +176,16 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-name-an-exact-subtotal">Worked example 1: Name an exact subtotal<a class="heading-anchor" href="#worked-example-1-name-an-exact-subtotal" aria-label="Link to this section">#</a></h4>
 <p>Both operands are Long values, so the money calculation remains integral.</p>
-<pre><code class="language-scala">val subtotal: Long = 120L + 30L
-assert(subtotal == 150L)
-println(subtotal)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> subtotal<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> <span class="syntax-number">120L</span> <span class="syntax-operator">+</span> <span class="syntax-number">30L</span>
+assert<span class="syntax-punctuation">(</span>subtotal <span class="syntax-operator">==</span> <span class="syntax-number">150L</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span>subtotal<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> 150; the assertion passes.</p>
 <h4 id="worked-example-2-choose-text-using-an-expression">Worked example 2: Choose text using an expression<a class="heading-anchor" href="#worked-example-2-choose-text-using-an-expression" aria-label="Link to this section">#</a></h4>
 <p>The branches return values; no mutable label is needed.</p>
-<pre><code class="language-scala">val change: Long = -5L
-val label: String = if (change &gt;= 0L) &quot;available&quot; else &quot;short&quot;
-assert(label == &quot;short&quot;)
-println(label)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> change<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">5L</span>
+<span class="syntax-keyword">val</span> label<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>change <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span> <span class="syntax-string">&quot;available&quot;</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&quot;short&quot;</span>
+assert<span class="syntax-punctuation">(</span>label <span class="syntax-operator">==</span> <span class="syntax-string">&quot;short&quot;</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> short; only one branch supplies the assigned String.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-the-basket">Exercise 1: Compute the basket<a class="heading-anchor" href="#exercise-1-compute-the-basket" aria-label="Link to this section">#</a></h4>

@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype ofList<Number>, because a caller holdingList<Number> could insert aDouble and violate the original integer list. A producer wildcard?extendsNumber permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguishArrayList<String> fromArrayList<Integer>. Avoid raw types that bypass these checks.
+Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype of List<Number>, because a caller holdingList<Number> could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList<String> from ArrayList<Integer>. Avoid raw types that bypass these checks.
 
 **Type parameter:** A named placeholder relating types in a declaration.
 
@@ -14,28 +14,28 @@ Generics express type relationships so many errors can be detected before execut
 
 ## Reading the reference
 
-The<T> before a method return type declares a method type parameter. List<?extendsNumber> can be iterated asNumber for summation. List<?superInteger> can acceptInteger values. Use<T>voidcopy(List<?extendsT>source,List<?superT>target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
+The<T> before a method return type declares a method type parameter. List<?extends Number> can be iterated asNumber for summation. List<?superInteger> can acceptInteger values. Use<T>void copy(List<?extendsT>source,List<?superT>target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
 
 ## Exercise 1: Read from a producer
 
-Task: SumList.of(1,2,3) andList.of(1.5,2.5) throughList<?extendsNumber>.
+Task: Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.
 
-The method needs only to readNumber values, so anextends bound accepts both integer and double lists without permitting unsafe insertion.
+The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
 
 ```java
 assert sum(List.of(1,2,3))==6.0;
 assert sum(List.of(1.5,2.5))==4.0;
 ```
 
-**Expected:** sums6.0 and4.0.
+**Expected:** sums 6.0 and 4.0.
 
-**Verify:** Compare the program values or named exception with sums6.0 and4.0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with sums 6.0 and 4.0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Write to a consumer
 
-Task: Append integers1,2 to aList<Number> throughList<?superInteger>.
+Task: Append integers1,2 to a List<Number> through List<?superInteger>.
 
-ANumber list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
+A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
 
 ```java
 List<Number> numbers=new ArrayList<>(); addTwo(numbers);
@@ -63,7 +63,7 @@ assert destination.equals(List.of(3,4));
 
 ## Exercise 4: Preserve generic return type
 
-Task: Callfirst on aString list and assign directly toString.
+Task: Callfirst on a String list and assign directly toString.
 
 The generic signature carries the element type to the return value. A rawObject return would force callers to cast and shift failures to runtime.
 
@@ -71,9 +71,9 @@ The generic signature carries the element type to the return value. A rawObject 
 String value=first(List.of("alpha","beta")); assert value.equals("alpha");
 ```
 
-**Expected:** resultalpha.
+**Expected:** result alpha.
 
-**Verify:** Compare the program values or named exception with resultalpha. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with result alpha. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Handle an empty input contract
 
@@ -93,7 +93,7 @@ assert empty;
 
 ## Exercise 6: Observe erasure carefully
 
-Task: Compare runtime classes ofArrayList<String> andArrayList<Integer>;explain why this does not permit unsafe assignments.
+Task: Compare runtime classes of ArrayList<String> and ArrayList<Integer>;explain why this does not permit unsafe assignments.
 
 Erasure describes runtime representation. It does not repeal the compiler rule thatList<Integer> cannot be assigned toList<Number>. Do not use raw casts to bypass that rule.
 
@@ -103,9 +103,9 @@ assert strings.getClass().equals(integers.getClass());
 assert strings.isEmpty() && integers.isEmpty();
 ```
 
-**Expected:** runtime classes equal;compile-time contracts remain distinct.
+**Expected:** runtime classes equal; compile-time contracts remain distinct.
 
-**Verify:** Compare the program values or named exception with runtime classes equal;compile-time contracts remain distinct. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with runtime classes equal; compile-time contracts remain distinct. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

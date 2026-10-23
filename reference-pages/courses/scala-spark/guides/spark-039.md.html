@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -163,46 +209,46 @@
 <p>The stop budget is part of the experiment design:at most 20000 source rows and 8 partitions. A proposal to increase either is rejected before constructing a larger dataset. A sensible next experiment states what uncertainty it would resolve, which metric would change and when it would stop. The goal is a measured, correct comparison with honest limitations, not a dramatic benchmark at any cost.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
-import java.nio.charset.StandardCharsets
-import java.util.UUID
-import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
-import scala.collection.mutable.ArrayBuffer
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span><span class="syntax-class">Path</span><span class="syntax-punctuation">,</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>util<span class="syntax-punctuation">.</span><span class="syntax-class">UUID</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>jdk<span class="syntax-punctuation">.</span><span class="syntax-class">CollectionConverters</span><span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQuery</span><span class="syntax-punctuation">,</span><span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>collection<span class="syntax-punctuation">.</span>mutable<span class="syntax-punctuation">.</span><span class="syntax-class">ArrayBuffer</span>
 
-require(spark.version == &quot;4.0.1&quot;,&quot;Prepared Spark4.0.1 required&quot;)
-spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)
-ownedRoot=Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;spark-039-&quot;)
-val source=spark.range(0L,20000L,1L,4).withColumn(&quot;key&quot;,when(col(&quot;id&quot;)&lt;16000L,lit(0L)).otherwise(col(&quot;id&quot;)%100L))</code></pre>
-<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-from pathlib import Path
-import tempfile
-import shutil
-import json
-import uuid
+require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;Prepared Spark4.0.1 required&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.streaming.stopTimeout&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;5000&quot;</span><span class="syntax-punctuation">)</span>
+ownedRoot<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createTempDirectory<span class="syntax-punctuation">(</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toAbsolutePath<span class="syntax-punctuation">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;spark-039-&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> source<span class="syntax-operator">=</span>spark<span class="syntax-punctuation">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">,</span>when<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">16000L</span><span class="syntax-punctuation">,</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>otherwise<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">import</span> shutil
+<span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">import</span> uuid
 
-if spark.version!=&quot;4.0.1&quot;:raise ValueError(&quot;Prepared Spark4.0.1 required&quot;)
-spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)
-owned_root=Path(tempfile.mkdtemp(prefix=&quot;spark-039-&quot;,dir=Path.cwd()))
-source=spark.range(0,20000,1,4).withColumn(&quot;key&quot;,F.when(F.col(&quot;id&quot;)&lt;16000,F.lit(0).cast(&quot;long&quot;)).otherwise(F.col(&quot;id&quot;)%100))</code></pre>
+<span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version<span class="syntax-operator">!=</span><span class="syntax-string">&quot;</span><span class="syntax-string">4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared Spark4.0.1 required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.streaming.stopTimeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">5000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+owned_root<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-039-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span>Path<span class="syntax-operator">.</span>cwd<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+source<span class="syntax-operator">=</span>spark<span class="syntax-operator">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>when<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">16000</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>cast<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">long</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>otherwise<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-scala">val expected=(0L until 100L).map(k =&gt; (k,if(k==0L)16040L else 40L))
-assert(expected.size==100 &amp;&amp; expected.map(_._2).sum==20000L)</code></pre>
-<pre><code class="language-python">expected=[(key,16040 if key==0 else 40) for key in range(100)]
-assert len(expected)==100 and sum(count for _,count in expected)==20000</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> expected<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0L</span> until <span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>k <span class="syntax-operator">=&gt;</span> <span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>k<span class="syntax-operator">==</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-number">16040L</span> <span class="syntax-keyword">else</span> <span class="syntax-number">40L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">100</span> <span class="syntax-operator">&amp;&amp;</span> expected<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sum<span class="syntax-operator">==</span><span class="syntax-number">20000L</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">expected<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span><span class="syntax-number">16040</span> <span class="syntax-keyword">if</span> key<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-keyword">else</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">100</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>count <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span>count <span class="syntax-operator">in</span> expected<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">20000</span></code></pre>
 <p>This independent arithmetic oracle fixes the product before any performance measurement. The hot key remains a separate visible condition, not an accidental unknown in the benchmark.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-scala">val compute=2.0*(3600.0/3600.0)*0.05
-val storage=2.0*(30.0/30.0)*0.02
-assert(math.abs(compute+storage-0.14)&lt;1e-12)</code></pre>
-<pre><code class="language-python">compute=2*(3600/3600)*.05
-storage=2*(30/30)*.02
-assert abs(compute+storage-.14)&lt;1e-12</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> compute<span class="syntax-operator">=</span><span class="syntax-number">2.0</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">3600.0</span><span class="syntax-operator">/</span><span class="syntax-number">3600.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.05</span>
+<span class="syntax-keyword">val</span> storage<span class="syntax-operator">=</span><span class="syntax-number">2.0</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">30.0</span><span class="syntax-operator">/</span><span class="syntax-number">30.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.02</span>
+assert<span class="syntax-punctuation">(</span>math<span class="syntax-punctuation">.</span>abs<span class="syntax-punctuation">(</span>compute<span class="syntax-operator">+</span>storage<span class="syntax-operator">-</span><span class="syntax-number">0.14</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">compute<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">3600</span><span class="syntax-operator">/</span><span class="syntax-number">3600</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.05</span>
+storage<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-operator">/</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.02</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>compute<span class="syntax-operator">+</span>storage<span class="syntax-operator">-</span><span class="syntax-number">.14</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span></code></pre>
 <p>The hypothetical cost calculation exposes time/storage unit conversions. It is deliberately separate from actual Spark metrics and does not claim a cloud invoice.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-validate-the-generated-skewed-fixture">Exercise 1: Validate the generated skewed fixture<a class="heading-anchor" href="#exercise-1-validate-the-generated-skewed-fixture" aria-label="Link to this section">#</a></h4>
@@ -249,7 +295,7 @@ assert abs(compute+storage-.14)&lt;1e-12</code></pre>
 <li><a href="https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html">Spark4.0.1 SQL performance tuning</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-039: Resource budgets, spill and cost tradeoffs.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-039: Resource budgets, spill and cost tradeoffs.
 Read courses/scala-spark/guides/spark-039.md and courses/scala-spark/lessons/spark-039.scala;the paired sources are courses/scala-spark/lessons/spark-039.scala and courses/scala-spark/lessons/spark-039.py.
 Direct prerequisites: spark-038. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
 Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.

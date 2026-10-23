@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-37.html#learner">learner SQL</a> · <a href="sql-37.html#solution-1">solution reasoning</a> · <a href="sql-37.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-37 — Partitioning Sharding</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day37_partitioning_sharding.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day37_partitioning_sharding.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day37_partitioning_sharding.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,17 +466,17 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day37_partitioning_sharding.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TABLE big_events (
-  id BIGSERIAL,
-  event_time TIMESTAMPTZ NOT NULL,
-  customer_id INT,
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events <span class="syntax-punctuation">(</span>
+  id BIGSERIAL<span class="syntax-punctuation">,</span>
+  event_time TIMESTAMPTZ <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  customer_id <span class="syntax-builtin">INT</span><span class="syntax-punctuation">,</span>
   payload JSONB
-) PARTITION BY RANGE (event_time);</code></pre>
+<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>big_events</code>. Verify the object in <code>pg_catalog.pg_inherits</code>, and <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TABLE big_events_2025_01 PARTITION OF big_events
-  FOR VALUES FROM (&#x27;2025-01-01 00:00:00+00&#x27;) TO (&#x27;2025-02-01 00:00:00+00&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>big_events_2025_01</code>. Verify the object in <code>pg_catalog.pg_inherits</code>, and <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -493,7 +541,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>Range bounds are <code>[FROM, TO)</code>: midnight on February 1 belongs to the February partition, not January. A DEFAULT partition improves ingest availability but also needs monitoring so unexpected dates do not accumulate unnoticed.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-37 — Partitioning Sharding.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-37 — Partitioning Sharding.
 
 I have completed the direct catalog prerequisite: `sql-36`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md
@@ -551,92 +599,92 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 37: Partitioning &amp; Data Sharding (PostgreSQL native partitioning demo)</span>
-<span>-- BEGINNER WORKFLOW — sql-37: Partitioning Sharding</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-37/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: big_events, big_events_2025_01, big_events_2025_02.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Create a partitioned table for large events (demo table)</span>
-<span>CREATE TABLE big_events (</span>
-<span>  id BIGSERIAL,</span>
-<span>  event_time TIMESTAMPTZ NOT NULL,</span>
-<span>  customer_id INT,</span>
-<span>  payload JSONB</span>
-<span>) PARTITION BY RANGE (event_time);</span>
-<span> </span>
-<span>-- Create monthly partitions</span>
-<span>CREATE TABLE big_events_2025_01 PARTITION OF big_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-01-01 00:00:00+00&#x27;) TO (&#x27;2025-02-01 00:00:00+00&#x27;);</span>
-<span>CREATE TABLE big_events_2025_02 PARTITION OF big_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-02-01 00:00:00+00&#x27;) TO (&#x27;2025-03-01 00:00:00+00&#x27;);</span>
-<span> </span>
-<span>-- Insert sample rows</span>
-<span>INSERT INTO big_events(event_time, customer_id, payload)</span>
-<span>SELECT timestamp with time zone &#x27;2025-01-01 00:00:00+00&#x27;</span>
-<span>         + ((event_no * 37) % (59 * 24 * 60)) * interval &#x27;1 minute&#x27;,</span>
-<span>       1 + ((event_no * 29 - 1) % 500),</span>
-<span>       jsonb_build_object(&#x27;k&#x27;, &#x27;v&#x27;, &#x27;source_row&#x27;, event_no)</span>
-<span>FROM generate_series(1, 1000) AS g(event_no);</span>
-<span> </span>
-<span>-- Query with partition pruning</span>
-<span>EXPLAIN ANALYZE</span>
-<span>SELECT COUNT(*) FROM big_events</span>
-<span>WHERE event_time &gt;= &#x27;2025-01-15&#x27; AND event_time &lt; &#x27;2025-02-15&#x27;;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Add more partitions and test pruning.</span>
-<span>--    Inputs: For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 1, expected output: one row per `big_events`. The final columns are `big_events`.</span>
-<span>--    Verify: For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows.</span>
-<span>-- 2. Create indexes on partitions and compare query plans.</span>
-<span>--    Inputs: For sql-37 Exercise 2, run the underlying read-only query over `indexed_big_events`, `indexed_big_events_2025_01_time_idx`, `indexed_big_events_2025_02_time_idx`, `indexed_big_events_2025_03_time_idx`, and `indexed_big_events_2025_01` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 2, expected output: one row per `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.</span>
-<span>--    Verify: For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span>
-<span>-- 3. Prediction: remove the event_time predicate and predict how many</span>
-<span>--    partitions appear in the plan. Restore the predicate and verify pruning.</span>
-<span>--    Inputs: For sql-37 Exercise 3, run the underlying read-only query over `solution_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.</span>
-<span>--    Verify: For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span>
-<span>-- 4. Construction: add a DEFAULT partition, insert an April event, and use</span>
-<span>--    tableoid::regclass to prove which physical partition owns it.</span>
-<span>--    Inputs: For sql-37 Exercise 4, read from `solution_events`, and `solution_events_default`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 4, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.</span>
-<span>--    Verify: For sql-37 Exercise 4, run an anti-check that counts rows where NOT ((event_time = timestamptz &#x27;2025-06-15 00:00:00+00&#x27;)); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`, and `solution_events_default`. Add one row for which `(event_time = timestamptz &#x27;2025-06-15 00:00:00+00&#x27;)` is true and one for which it is false; verify only the matching `physical_partition` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 4, inspect the source keys that survive `WHERE`.</span>
-<span>-- 5. Debugging: attempt to insert a March row before adding a matching/default</span>
-<span>--    partition. Read the error and explain the range-boundary gap.</span>
-<span>--    Inputs: For sql-37 Exercise 5, read the target keys from `pg_class` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 5, expected output: the command tag and an independently counted set of affected `partition_name` values. The final columns are `partition_name`, and `partition_bound`. The final order is `c.relname`.</span>
-<span>--    Verify: For sql-37 Exercise 5, materialize the intended `partition_name` target set first; require the command tag/`RETURNING` set to match it, then query `pg_class` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `partition_name` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 5, start with the first relation in `pg_class`; after each join, record total rows and distinct `partition_name` so the exact fanout or loss is visible.</span>
-<span>-- 6. Edge case: test exactly 2025-02-01 00:00:00+00 and explain why FROM is</span>
-<span>--    inclusive while TO is exclusive.</span>
-<span>--    Inputs: For sql-37 Exercise 6, read from `solution_events`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-37 Exercise 6, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.</span>
-<span>--    Verify: For sql-37 Exercise 6, run an anti-check that counts rows where NOT ((payload-&gt;&gt;&#x27;source&#x27; = &#x27;boundary&#x27;)); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span>
-<span>--    Hint ladder, rung 1: For sql-37 Exercise 6, inspect the source keys that survive `WHERE`.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 37: Partitioning &amp; Data Sharding (PostgreSQL native partitioning demo)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-37: Partitioning Sharding</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-37/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: big_events, big_events_2025_01, big_events_2025_02.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Create a partitioned table for large events (demo table)</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  id BIGSERIAL<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  event_time TIMESTAMPTZ <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id <span class="syntax-builtin">INT</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload JSONB</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Create monthly partitions</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> big_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> big_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Insert sample rows</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> big_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">timestamp</span> <span class="syntax-keyword">with</span> <span class="syntax-keyword">time</span> <span class="syntax-keyword">zone</span> <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span></span>
+<span class="source-line">         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">37</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-punctuation">(</span><span class="syntax-number">59</span> <span class="syntax-operator">*</span> <span class="syntax-number">24</span> <span class="syntax-operator">*</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 minute&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;k&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;v&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Query with partition pruning</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> big_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2025-01-15&#x27;</span> <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> <span class="syntax-string">&#x27;2025-02-15&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Add more partitions and test pruning.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 1, expected output: one row per `big_events`. The final columns are `big_events`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Create indexes on partitions and compare query plans.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 2, run the underlying read-only query over `indexed_big_events`, `indexed_big_events_2025_01_time_idx`, `indexed_big_events_2025_02_time_idx`, `indexed_big_events_2025_03_time_idx`, and `indexed_big_events_2025_01` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 2, expected output: one row per `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: remove the event_time predicate and predict how many</span></span>
+<span class="source-line"><span class="syntax-comment">--    partitions appear in the plan. Restore the predicate and verify pruning.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 3, run the underlying read-only query over `solution_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: add a DEFAULT partition, insert an April event, and use</span></span>
+<span class="source-line"><span class="syntax-comment">--    tableoid::regclass to prove which physical partition owns it.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 4, read from `solution_events`, and `solution_events_default`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 4, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 4, run an anti-check that counts rows where NOT ((event_time = timestamptz &#x27;2025-06-15 00:00:00+00&#x27;)); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`, and `solution_events_default`. Add one row for which `(event_time = timestamptz &#x27;2025-06-15 00:00:00+00&#x27;)` is true and one for which it is false; verify only the matching `physical_partition` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 4, inspect the source keys that survive `WHERE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: attempt to insert a March row before adding a matching/default</span></span>
+<span class="source-line"><span class="syntax-comment">--    partition. Read the error and explain the range-boundary gap.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 5, read the target keys from `pg_class` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 5, expected output: the command tag and an independently counted set of affected `partition_name` values. The final columns are `partition_name`, and `partition_bound`. The final order is `c.relname`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 5, materialize the intended `partition_name` target set first; require the command tag/`RETURNING` set to match it, then query `pg_class` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `partition_name` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 5, start with the first relation in `pg_class`; after each join, record total rows and distinct `partition_name` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: test exactly 2025-02-01 00:00:00+00 and explain why FROM is</span></span>
+<span class="source-line"><span class="syntax-comment">--    inclusive while TO is exclusive.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 6, read from `solution_events`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-37 Exercise 6, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-37 Exercise 6, run an anti-check that counts rows where NOT ((payload-&gt;&gt;&#x27;source&#x27; = &#x27;boundary&#x27;)); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-37 Exercise 6, inspect the source keys that survive `WHERE`.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -672,10 +720,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-37-solutions-partitioning">Day 37 — Solutions: Partitioning<a class="heading-anchor" href="#solution-1--day-37-solutions-partitioning" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day37_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day37_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day37_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -692,45 +740,45 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>PostgreSQL partitioning divides one logical table into physical child tables. The optimizer can prune children whose bounds cannot satisfy a query predicate. “Sharding” across servers is a separate architectural concern and is not implemented by this single-database exercise.</p>
 <h4 id="solution-1--exercise-1-add-a-partition-and-test-pruning">Exercise 1 — Add a partition and test pruning<a class="heading-anchor" href="#solution-1--exercise-1-add-a-partition-and-test-pruning" aria-label="Link to this section">#</a></h4>
 <p>Temporary tables keep the answer isolated from the learner script&#x27;s <code>big_events</code> names.</p>
-<pre><code class="language-sql">BEGIN;
-SET LOCAL search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE solution_big_events (
-  id bigint GENERATED ALWAYS AS IDENTITY,
-  event_time timestamptz NOT NULL,
-  customer_id int,
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events <span class="syntax-punctuation">(</span>
+  id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span><span class="syntax-punctuation">,</span>
+  event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  customer_id <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span>
   payload jsonb
-) PARTITION BY RANGE (event_time);
+<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE solution_big_events_2025_01
-  PARTITION OF solution_big_events
-  FOR VALUES FROM (&#x27;2025-01-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-02-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_01
+  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE solution_big_events_2025_02
-  PARTITION OF solution_big_events
-  FOR VALUES FROM (&#x27;2025-02-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-03-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_02
+  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE solution_big_events_2025_03
-  PARTITION OF solution_big_events
-  FOR VALUES FROM (&#x27;2025-03-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-04-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_03
+  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-INSERT INTO solution_big_events(event_time, customer_id, payload)
-SELECT timestamptz &#x27;2025-01-01 00:00:00+00&#x27;
-         + (event_no - 1) * interval &#x27;30 minutes&#x27;,
-       1 + ((event_no * 29 - 1) % 500),
-       jsonb_build_object(&#x27;source_row&#x27;, event_no)
-FROM generate_series(1, 3000) AS g(event_no);
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_big_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span>
+         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, VERBOSE)
-SELECT COUNT(*)
-FROM solution_big_events
-WHERE event_time &gt;= timestamptz &#x27;2025-03-01 00:00:00+00&#x27;
-  AND event_time &lt; timestamptz &#x27;2025-04-01 00:00:00+00&#x27;;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">VERBOSE</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> solution_big_events
+<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span>
+  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Inspect the plan for only the March child (or for other evidence that January and February were pruned). Exact wording varies by PostgreSQL version.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -743,58 +791,58 @@ ROLLBACK;</code></pre>
 <li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
 </ul>
 <h4 id="solution-1--exercise-2-index-partitions-and-compare-plans">Exercise 2 — Index partitions and compare plans<a class="heading-anchor" href="#solution-1--exercise-2-index-partitions-and-compare-plans" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">BEGIN;
-SET LOCAL search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE indexed_big_events (
-  id bigint GENERATED ALWAYS AS IDENTITY,
-  event_time timestamptz NOT NULL,
-  customer_id int,
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events <span class="syntax-punctuation">(</span>
+  id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span><span class="syntax-punctuation">,</span>
+  event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  customer_id <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span>
   payload jsonb
-) PARTITION BY RANGE (event_time);
+<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE indexed_big_events_2025_01
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM (&#x27;2025-01-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-02-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_01
+  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE indexed_big_events_2025_02
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM (&#x27;2025-02-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-03-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_02
+  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE indexed_big_events_2025_03
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM (&#x27;2025-03-01 00:00:00+00&#x27;)
-             TO (&#x27;2025-04-01 00:00:00+00&#x27;);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_03
+  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
+             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-INSERT INTO indexed_big_events(event_time, customer_id, payload)
-SELECT timestamptz &#x27;2025-01-01 00:00:00+00&#x27;
-         + (event_no - 1) * interval &#x27;30 minutes&#x27;,
-       1 + ((event_no * 29 - 1) % 500),
-       jsonb_build_object(&#x27;source_row&#x27;, event_no)
-FROM generate_series(1, 3000) AS g(event_no);
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> indexed_big_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span>
+         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT event_time, customer_id
-FROM indexed_big_events
-WHERE event_time &gt;= timestamptz &#x27;2025-03-02 00:00:00+00&#x27;
-  AND event_time &lt; timestamptz &#x27;2025-03-03 00:00:00+00&#x27;;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> event_time<span class="syntax-punctuation">,</span> customer_id
+<span class="syntax-keyword">FROM</span> indexed_big_events
+<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
+  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-03-03 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
-CREATE INDEX indexed_big_events_2025_01_time_idx
-  ON indexed_big_events_2025_01(event_time);
-CREATE INDEX indexed_big_events_2025_02_time_idx
-  ON indexed_big_events_2025_02(event_time);
-CREATE INDEX indexed_big_events_2025_03_time_idx
-  ON indexed_big_events_2025_03(event_time);
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_01_time_idx
+  <span class="syntax-keyword">ON</span> indexed_big_events_2025_01<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_02_time_idx
+  <span class="syntax-keyword">ON</span> indexed_big_events_2025_02<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_03_time_idx
+  <span class="syntax-keyword">ON</span> indexed_big_events_2025_03<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT event_time, customer_id
-FROM indexed_big_events
-WHERE event_time &gt;= timestamptz &#x27;2025-03-02 00:00:00+00&#x27;
-  AND event_time &lt; timestamptz &#x27;2025-03-03 00:00:00+00&#x27;;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> event_time<span class="syntax-punctuation">,</span> customer_id
+<span class="syntax-keyword">FROM</span> indexed_big_events
+<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
+  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-03-03 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected logical result: the before and after queries return the same March rows. The indexed plan may use only the March index; the small child can still make a sequential scan rational.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -893,101 +941,101 @@ ROLLBACK;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 37 solutions: partitioning</span>
-<span>-- SOLUTION READING MAP — sql-37: Partitioning Sharding</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day37_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day37_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>CREATE TABLE solution_events (</span>
-<span>  event_id bigint GENERATED ALWAYS AS IDENTITY,</span>
-<span>  event_time timestamptz NOT NULL,</span>
-<span>  customer_id int,</span>
-<span>  payload jsonb</span>
-<span>) PARTITION BY RANGE (event_time);</span>
-<span> </span>
-<span>CREATE TABLE solution_events_2025_01 PARTITION OF solution_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-01-01 00:00:00+00&#x27;) TO (&#x27;2025-02-01 00:00:00+00&#x27;);</span>
-<span>CREATE TABLE solution_events_2025_02 PARTITION OF solution_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-02-01 00:00:00+00&#x27;) TO (&#x27;2025-03-01 00:00:00+00&#x27;);</span>
-<span> </span>
-<span>-- Exercise 1: add March and April partitions.</span>
-<span>CREATE TABLE solution_events_2025_03 PARTITION OF solution_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-03-01 00:00:00+00&#x27;) TO (&#x27;2025-04-01 00:00:00+00&#x27;);</span>
-<span>CREATE TABLE solution_events_2025_04 PARTITION OF solution_events</span>
-<span>  FOR VALUES FROM (&#x27;2025-04-01 00:00:00+00&#x27;) TO (&#x27;2025-05-01 00:00:00+00&#x27;);</span>
-<span> </span>
-<span>INSERT INTO solution_events(event_time, customer_id, payload)</span>
-<span>SELECT timestamptz &#x27;2025-01-01 00:00:00+00&#x27;</span>
-<span>         + ((n * 47) % (120 * 24 * 60)) * interval &#x27;1 minute&#x27;,</span>
-<span>       1 + ((n * 19 - 1) % 500),</span>
-<span>       jsonb_build_object(&#x27;source_row&#x27;, n)</span>
-<span>FROM generate_series(1, 5000) AS g(n);</span>
-<span> </span>
-<span>EXPLAIN (ANALYZE, BUFFERS)</span>
-<span>SELECT COUNT(*)</span>
-<span>FROM solution_events</span>
-<span>WHERE event_time &gt;= timestamptz &#x27;2025-03-01 00:00:00+00&#x27;</span>
-<span>  AND event_time &lt; timestamptz &#x27;2025-04-01 00:00:00+00&#x27;;</span>
-<span> </span>
-<span>-- Exercise 2: a partitioned index creates one child index per partition.</span>
-<span>CREATE INDEX idx_solution_events_customer_time</span>
-<span>  ON solution_events(customer_id, event_time);</span>
-<span> </span>
-<span>EXPLAIN (ANALYZE, BUFFERS)</span>
-<span>SELECT *</span>
-<span>FROM solution_events</span>
-<span>WHERE customer_id = 42</span>
-<span>  AND event_time &gt;= timestamptz &#x27;2025-03-01 00:00:00+00&#x27;</span>
-<span>  AND event_time &lt; timestamptz &#x27;2025-04-01 00:00:00+00&#x27;;</span>
-<span> </span>
-<span>-- Exercise 3: the unbounded query can visit every partition; the bounded query</span>
-<span>-- lets PostgreSQL prune to March.</span>
-<span>EXPLAIN SELECT COUNT(*) FROM solution_events;</span>
-<span>EXPLAIN</span>
-<span>SELECT COUNT(*) FROM solution_events</span>
-<span>WHERE event_time &gt;= timestamptz &#x27;2025-03-01 00:00:00+00&#x27;</span>
-<span>  AND event_time &lt; timestamptz &#x27;2025-04-01 00:00:00+00&#x27;;</span>
-<span> </span>
-<span>-- Exercise 4: original exercises already created April, so June is the</span>
-<span>-- deliberately uncovered value routed to DEFAULT.</span>
-<span>CREATE TABLE solution_events_default PARTITION OF solution_events DEFAULT;</span>
-<span>INSERT INTO solution_events(event_time, customer_id, payload)</span>
-<span>VALUES (&#x27;2025-06-15 00:00:00+00&#x27;, 1, &#x27;{&quot;source&quot;:&quot;default&quot;}&#x27;);</span>
-<span>SELECT tableoid::regclass AS physical_partition, event_time</span>
-<span>FROM solution_events</span>
-<span>WHERE event_time = timestamptz &#x27;2025-06-15 00:00:00+00&#x27;;</span>
-<span> </span>
-<span>-- Exercise 5: this catalog query shows the covered named ranges. Without the</span>
-<span>-- DEFAULT partition, an insert outside them raises “no partition ... found”.</span>
-<span>SELECT relid::regclass AS partition_name,</span>
-<span>       pg_get_expr(c.relpartbound, c.oid) AS partition_bound</span>
-<span>FROM pg_partition_tree(&#x27;solution_events&#x27;) pt</span>
-<span>JOIN pg_class c ON c.oid = pt.relid</span>
-<span>WHERE pt.isleaf</span>
-<span>ORDER BY c.relname;</span>
-<span> </span>
-<span>-- Exercise 6: the exact February boundary belongs to February because lower</span>
-<span>-- FROM bounds are inclusive and upper TO bounds are exclusive.</span>
-<span>INSERT INTO solution_events(event_time, customer_id, payload)</span>
-<span>VALUES (&#x27;2025-02-01 00:00:00+00&#x27;, 2, &#x27;{&quot;source&quot;:&quot;boundary&quot;}&#x27;);</span>
-<span>SELECT tableoid::regclass AS physical_partition, event_time</span>
-<span>FROM solution_events</span>
-<span>WHERE payload-&gt;&gt;&#x27;source&#x27; = &#x27;boundary&#x27;;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 37 solutions: partitioning</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-37: Partitioning Sharding</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day37_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day37_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  event_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload jsonb</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: add March and April partitions.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_03 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_04 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-05-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span></span>
+<span class="source-line">         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">*</span> <span class="syntax-number">47</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-punctuation">(</span><span class="syntax-number">120</span> <span class="syntax-operator">*</span> <span class="syntax-number">24</span> <span class="syntax-operator">*</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 minute&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">*</span> <span class="syntax-number">19</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> solution_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: a partitioned index creates one child index per partition.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_solution_events_customer_time</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> solution_events<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> solution_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">42</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: the unbounded query can visit every partition; the bounded query</span></span>
+<span class="source-line"><span class="syntax-comment">-- lets PostgreSQL prune to March.</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: original exercises already created April, so June is the</span></span>
+<span class="source-line"><span class="syntax-comment">-- deliberately uncovered value routed to DEFAULT.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_default PARTITION <span class="syntax-keyword">OF</span> solution_events <span class="syntax-keyword">DEFAULT</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-06-15 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;source&quot;:&quot;default&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> tableoid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> physical_partition<span class="syntax-punctuation">,</span> event_time</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> solution_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-06-15 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: this catalog query shows the covered named ranges. Without the</span></span>
+<span class="source-line"><span class="syntax-comment">-- DEFAULT partition, an insert outside them raises “no partition ... found”.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> relid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> partition_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       pg_get_expr<span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>relpartbound<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> partition_bound</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_partition_tree<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;solution_events&#x27;</span><span class="syntax-punctuation">)</span> pt</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> pt<span class="syntax-punctuation">.</span>relid</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> pt<span class="syntax-punctuation">.</span>isleaf</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: the exact February boundary belongs to February because lower</span></span>
+<span class="source-line"><span class="syntax-comment">-- FROM bounds are inclusive and upper TO bounds are exclusive.</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;source&quot;:&quot;boundary&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> tableoid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> physical_partition<span class="syntax-punctuation">,</span> event_time</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> solution_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> payload<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;boundary&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

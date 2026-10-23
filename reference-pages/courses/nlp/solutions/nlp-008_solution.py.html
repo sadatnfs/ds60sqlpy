@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,48 +161,48 @@
       <h1>Nlp 008 Solution</h1>
       <p class="source-path">Generated from <code>courses/nlp/solutions/nlp-008_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.naive_bayes import MultinomialNB</span>
-<span>from scipy.special import logsumexp</span>
-<span> </span>
-<span>X=np.array([[2.,1.],[1.,0.],[0.,2.],[0.,1.]])</span>
-<span>Y=np.array([1,1,0,0])</span>
-<span> </span>
-<span>def manual_nb(x,y,alpha=1.,prior=None):</span>
-<span>    if np.any(x&lt;0) or alpha&lt;=0:raise ValueError(&quot;nonnegative counts and positive alpha required&quot;)</span>
-<span>    classes=np.unique(y)</span>
-<span>    counts=np.array([x[y==label].sum(axis=0) for label in classes])</span>
-<span>    likelihood=(counts+alpha)/(counts.sum(axis=1,keepdims=True)+alpha*x.shape[1])</span>
-<span>    class_prior=np.array([np.mean(y==label) for label in classes]) if prior is None else np.asarray(prior,dtype=float)</span>
-<span>    if np.any(class_prior&lt;=0) or not np.isclose(class_prior.sum(),1):raise ValueError(&quot;positive normalized prior required&quot;)</span>
-<span>    return classes,np.log(likelihood),np.log(class_prior)</span>
-<span> </span>
-<span>def posterior(probe,log_likelihood,log_prior):</span>
-<span>    score=np.asarray(probe)@log_likelihood.T+log_prior</span>
-<span>    return np.exp(score-logsumexp(score,axis=-1,keepdims=True))</span>
-<span> </span>
-<span>def main():</span>
-<span>    classes,ll,lp=manual_nb(X,Y)</span>
-<span>    assert classes.tolist()==[0,1]</span>
-<span>    assert np.allclose(np.exp(ll),[[1/5,4/5],[4/6,2/6]])</span>
-<span>    probe=np.array([[1.,0.]])</span>
-<span>    p=posterior(probe,ll,lp)</span>
-<span>    assert np.allclose(p,[[3/13,10/13]])</span>
-<span>    model=MultinomialNB(alpha=1.).fit(X,Y)</span>
-<span>    assert np.allclose(model.feature_log_prob_,ll) and np.allclose(model.predict_proba(probe),p)</span>
-<span>    assert np.allclose(posterior([[0.,0.]],ll,lp),[[.5,.5]])</span>
-<span>    _,ll2,lp2=manual_nb(X,Y,prior=[.9,.1])</span>
-<span>    changed=posterior(probe,ll2,lp2)</span>
-<span>    assert changed[0,0]&gt;changed[0,1]</span>
-<span>    # Fixed vocabulary [urgent,thanks] cannot represent absent not.</span>
-<span>    urgent=np.array([1.,0.]);not_urgent=np.array([1.,0.])</span>
-<span>    assert np.array_equal(posterior(urgent,ll,lp),posterior(not_urgent,ll,lp))</span>
-<span>    assert np.isclose(np.exp(ll[0]).sum(),1.) and np.isclose(np.exp(ll[1]).sum(),1.)</span>
-<span>    print(&quot;nlp-008: manual/library parity; posterior [3/13,10/13]; prior and negation boundaries passed&quot;)</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.naive_bayes <span class="syntax-keyword">import</span> MultinomialNB</span>
+<span class="source-line"><span class="syntax-keyword">from</span> scipy.special <span class="syntax-keyword">import</span> logsumexp</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">manual_nb</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span>prior<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>x<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> alpha<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonnegative counts and positive alpha required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    classes<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">[</span>y<span class="syntax-operator">==</span>label<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> label <span class="syntax-operator">in</span> classes<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    likelihood<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">+</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>alpha<span class="syntax-operator">*</span>x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    class_prior<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>y<span class="syntax-operator">==</span>label<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> label <span class="syntax-operator">in</span> classes<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> prior <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">else</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>prior<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>class_prior<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>class_prior<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">positive normalized prior required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> classes<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>likelihood<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>class_prior<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">posterior</span><span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">,</span>log_likelihood<span class="syntax-punctuation">,</span>log_prior<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    score<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">)</span><span class="syntax-decorator">@log_likelihood</span><span class="syntax-operator">.</span>T<span class="syntax-operator">+</span>log_prior</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>score<span class="syntax-operator">-</span>logsumexp<span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    classes<span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">,</span>lp<span class="syntax-operator">=</span>manual_nb<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>Y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> classes<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>ll<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-operator">/</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-operator">/</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    probe<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    p<span class="syntax-operator">=</span>posterior<span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">,</span>lp<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-operator">/</span><span class="syntax-number">13</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-operator">/</span><span class="syntax-number">13</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    model<span class="syntax-operator">=</span>MultinomialNB<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>Y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>feature_log_prob_<span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>posterior<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">,</span>lp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _<span class="syntax-punctuation">,</span>ll2<span class="syntax-punctuation">,</span>lp2<span class="syntax-operator">=</span>manual_nb<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>Y<span class="syntax-punctuation">,</span>prior<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    changed<span class="syntax-operator">=</span>posterior<span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">,</span>ll2<span class="syntax-punctuation">,</span>lp2<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span>changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-comment"># Fixed vocabulary [urgent,thanks] cannot represent absent not.</span></span>
+<span class="source-line">    urgent<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>not_urgent<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>posterior<span class="syntax-punctuation">(</span>urgent<span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">,</span>lp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>posterior<span class="syntax-punctuation">(</span>not_urgent<span class="syntax-punctuation">,</span>ll<span class="syntax-punctuation">,</span>lp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>ll<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>ll<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nlp-008: manual/library parity; posterior [3/13,10/13]; prior and negation boundaries passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

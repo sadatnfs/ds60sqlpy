@@ -18,7 +18,7 @@ Formatting is part of the model interface. A pretrained chat tokenizer may inser
 
 ## Reading the implementation
 
-Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtargets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
+Concatenate prompt IDs and answer IDs, then create inputs=sequence[:-1] and targets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
 
 ## Enumerate the target positions before training
 
@@ -53,7 +53,7 @@ Packing introduces another independence boundary. Two examples in separate batch
 
 ## Exercise 1: Align an answer-only record
 
-The question is: Use promptIDs[1, 2] andanswerIDs[5, 6, 3].
+The question is: Use prompt IDs[1, 2] and answer IDs[5, 6, 3].
 
 The first answer token5 is predicted at the second input position. Masking based on input positions alone would easily exclude this target by mistake.
 
@@ -68,7 +68,7 @@ assert inputs==[1,2,5,6] and labels==[-100,5,6,3] and sum(x!=-100 for x in label
 
 ## Exercise 2: Preserve prompt context without prompt loss
 
-The question is: Change promptIDs to[8, 9] while retaining the answer; inspect labels.
+The question is: Change prompt IDs to[8, 9] while retaining the answer; inspect labels.
 
 The model sees the prompt through its forward computation even though prompt-prediction events are excluded from the supervised objective.
 

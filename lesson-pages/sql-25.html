@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-25.html#learner">learner SQL</a> · <a href="sql-25.html#solution-1">solution reasoning</a> · <a href="sql-25.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-25 — Multiple CTEs Hierarchies</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day25_multiple_ctes_hierarchies.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day25_multiple_ctes_hierarchies.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day25_multiple_ctes_hierarchies.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,85 +466,85 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day25_multiple_ctes_hierarchies.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH RECURSIVE base_org AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
-  UNION ALL
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         b.depth + 1,
-         b.path || e.employee_id
-  FROM employees e
-  JOIN base_org b ON e.manager_id = b.employee_id
-  WHERE NOT e.employee_id = ANY(b.path)
-), dept_counts AS (
-  -- Aggregate the traversed employee relation so the hierarchy CTE is an
-  -- observable, testable stage rather than an unused declaration.
-  SELECT department_id,
-         COUNT(*) AS reachable_headcount,
-         ROUND(AVG(salary), 2) AS avg_salary,
-         MAX(depth) AS deepest_level
-  FROM base_org
-  GROUP BY department_id
-)
-SELECT d.department_id,
-       d.name AS department,
-       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
-       dc.avg_salary,
-       dc.deepest_level
-FROM departments d
-LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
-ORDER BY reachable_headcount DESC, d.department_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> base_org <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span> employees e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         b<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+         b<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span> employees e
+  <span class="syntax-keyword">JOIN</span> base_org b <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dept_counts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-comment">-- Aggregate the traversed employee relation so the hierarchy CTE is an</span>
+  <span class="syntax-comment">-- observable, testable stage rather than an unused declaration.</span>
+  <span class="syntax-keyword">SELECT</span> department_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span>
+         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>salary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_salary<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> deepest_level
+  <span class="syntax-keyword">FROM</span> base_org
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> department_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>reachable_headcount<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span>
+       dc<span class="syntax-punctuation">.</span>avg_salary<span class="syntax-punctuation">,</span>
+       dc<span class="syntax-punctuation">.</span>deepest_level
+<span class="syntax-keyword">FROM</span> departments d
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> dept_counts dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reachable_headcount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>employees</code>, <code>base_org</code>, and <code>departments</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys; append branches with <code>UNION ALL</code> (duplicates are retained). The final <code>SELECT</code> displays <code>department_id</code>, <code>department</code>, <code>reachable_headcount</code>, <code>avg_salary</code>, and <code>deepest_level</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>department_id</code> with columns <code>department_id</code>, <code>department</code>, <code>reachable_headcount</code>, <code>avg_salary</code>, and <code>deepest_level</code> from <code>employees</code>, <code>base_org</code>, and <code>departments</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">-- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH RECURSIVE base_org AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
-  UNION ALL
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         b.depth + 1,
-         b.path || e.employee_id
-  FROM employees e
-  JOIN base_org b ON e.manager_id = b.employee_id
-  WHERE NOT e.employee_id = ANY(b.path)
-), dept_counts AS (
-  -- Aggregate the traversed employee relation so the hierarchy CTE is an
-  -- observable, testable stage rather than an unused declaration.
-  SELECT department_id,
-         COUNT(*) AS reachable_headcount,
-         ROUND(AVG(salary), 2) AS avg_salary,
-         MAX(depth) AS deepest_level
-  FROM base_org
-  GROUP BY department_id
-)
-SELECT d.department_id,
-       d.name AS department,
-       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
-       dc.avg_salary,
-       dc.deepest_level
-FROM departments d
-LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
-ORDER BY reachable_headcount DESC, d.department_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-comment">-- The same topic query shown as a plan instead of business rows.</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>COSTS <span class="syntax-keyword">OFF</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> base_org <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span> employees e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         b<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+         b<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span> employees e
+  <span class="syntax-keyword">JOIN</span> base_org b <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dept_counts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-comment">-- Aggregate the traversed employee relation so the hierarchy CTE is an</span>
+  <span class="syntax-comment">-- observable, testable stage rather than an unused declaration.</span>
+  <span class="syntax-keyword">SELECT</span> department_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span>
+         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>salary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_salary<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> deepest_level
+  <span class="syntax-keyword">FROM</span> base_org
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> department_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>reachable_headcount<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span>
+       dc<span class="syntax-punctuation">.</span>avg_salary<span class="syntax-punctuation">,</span>
+       dc<span class="syntax-punctuation">.</span>deepest_level
+<span class="syntax-keyword">FROM</span> departments d
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> dept_counts dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reachable_headcount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is executed by <code>psql</code> as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>department_id</code> key set and row count over <code>employees</code>, <code>base_org</code>, and <code>departments</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -579,7 +627,7 @@ ORDER BY reachable_headcount DESC, d.department_id;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-25 — Multiple CTEs Hierarchies.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-25 — Multiple CTEs Hierarchies.
 
 I have completed the direct catalog prerequisite: `sql-24`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md
@@ -637,113 +685,113 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 25: Multiple CTEs &amp; Complex Hierarchies</span>
-<span>-- BEGINNER WORKFLOW — sql-25: Multiple CTEs Hierarchies</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-25/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: employees, departments.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.</span>
-<span>-- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.</span>
-<span>-- Pitfall: Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>WITH RECURSIVE base_org AS (</span>
-<span>  SELECT e.employee_id,</span>
-<span>         e.manager_id,</span>
-<span>         e.department_id,</span>
-<span>         e.salary,</span>
-<span>         1 AS depth,</span>
-<span>         ARRAY[e.employee_id] AS path</span>
-<span>  FROM employees e</span>
-<span>  WHERE e.manager_id IS NULL</span>
-<span>  UNION ALL</span>
-<span>  SELECT e.employee_id,</span>
-<span>         e.manager_id,</span>
-<span>         e.department_id,</span>
-<span>         e.salary,</span>
-<span>         b.depth + 1,</span>
-<span>         b.path || e.employee_id</span>
-<span>  FROM employees e</span>
-<span>  JOIN base_org b ON e.manager_id = b.employee_id</span>
-<span>  WHERE NOT e.employee_id = ANY(b.path)</span>
-<span>), dept_counts AS (</span>
-<span>  -- Aggregate the traversed employee relation so the hierarchy CTE is an</span>
-<span>  -- observable, testable stage rather than an unused declaration.</span>
-<span>  SELECT department_id,</span>
-<span>         COUNT(*) AS reachable_headcount,</span>
-<span>         ROUND(AVG(salary), 2) AS avg_salary,</span>
-<span>         MAX(depth) AS deepest_level</span>
-<span>  FROM base_org</span>
-<span>  GROUP BY department_id</span>
-<span>)</span>
-<span>SELECT d.department_id,</span>
-<span>       d.name AS department,</span>
-<span>       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,</span>
-<span>       dc.avg_salary,</span>
-<span>       dc.deepest_level</span>
-<span>FROM departments d</span>
-<span>LEFT JOIN dept_counts dc ON dc.department_id = d.department_id</span>
-<span>ORDER BY reachable_headcount DESC, d.department_id;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] Build a root-based organization CTE and report headcount and payroll by depth.</span>
-<span>--    Hint: Assign depth during recursion, then aggregate employee rows once.</span>
-<span>--    Inputs: For sql-25 Exercise 1, read from `employees`, and `organization`. Build the answer toward `depth`, `headcount`, and `payroll`; keep `depth` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 1, expected output: One row per hierarchy depth. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.</span>
-<span>--    Verify: For sql-25 Exercise 1, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `headcount`, and `payroll` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 1, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `depth` so the exact fanout or loss is visible.</span>
-<span>-- 2. [Query writing] Report each manager&#x27;s direct-report count and payroll.</span>
-<span>--    Hint: Direct-team grain needs one self join, not full recursive descendants.</span>
-<span>--    Inputs: For sql-25 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 2, expected output: One row per manager with at least one direct report. The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.</span>
-<span>--    Verify: For sql-25 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 2, run `direct_teams` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span>
-<span>-- 3. [Query writing] Identify hierarchy roots and leaves in one report.</span>
-<span>--    Hint: Create root and leaf CTEs at employee grain, then union compatible labeled rows.</span>
-<span>--    Inputs: For sql-25 Exercise 3, read from `employees`. Build the answer toward `node_type`, `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 3, expected output: One labeled row per root or leaf employee. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.</span>
-<span>--    Verify: For sql-25 Exercise 3, reselect the returned keys directly from the source; require unique `employee_id` where the expected grain is one row per key and confirm the projected `node_type`, `employee_id`, and `full_name` against `employees`. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 3, run `roots`, and `leaves` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span>
-<span>-- 4. [Prediction] Count employees reachable from roots and compare with total employees.</span>
-<span>--    Hint: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.</span>
-<span>--    Inputs: For sql-25 Exercise 4, read from `employees`, and `organization`. Build the answer toward `all_employees`, `reachable_employees`, and `unreachable_employees`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 4, expected output: One row with zero unreachable employees. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.</span>
-<span>--    Verify: For sql-25 Exercise 4, project `employee_id` plus the raw source columns from `employees`, and `organization` at each join stage; record row count and distinct `employee_id`, then assert the final `all_employees`, `reachable_employees`, and `unreachable_employees` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 4, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span>
-<span>-- 5. [Debugging] Calculate full-subtree report counts per manager without counting the manager as their own report.</span>
-<span>--    Hint: Seed direct edges and recurse descendants while carrying the original manager.</span>
-<span>--    Inputs: For sql-25 Exercise 5, read from `employees`, and `descendants`. Build the answer toward `manager_id`, and `all_descendant_reports`; keep `manager_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 5, expected output: One row per manager with descendant count. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.</span>
-<span>--    Verify: For sql-25 Exercise 5, independently aggregate `employees`, and `descendants` by `manager_id`; require one output row for every distinct `manager_id` tuple and compare `all_descendant_reports` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 5, start with the first relation in `employees`, and `descendants`; after each join, record total rows and distinct `manager_id` so the exact fanout or loss is visible.</span>
-<span>-- 6. [Extension] Report department headcount split between managers and nonmanagers.</span>
-<span>--    Hint: First derive the manager ID set, then conditionally aggregate employees once.</span>
-<span>--    Inputs: For sql-25 Exercise 6, read from `employees`, and `departments`. Build the answer toward `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`; keep `department_id`, and `name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.</span>
-<span>--    Verify: For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-25 Exercise 6, run `managers` one at a time. Record each CTE&#x27;s row count and `department_id`, and `name` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 25: Multiple CTEs &amp; Complex Hierarchies</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-25: Multiple CTEs Hierarchies</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-25/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: employees, departments.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> base_org <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         b<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         b<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees e</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> base_org b <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dept_counts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-comment">-- Aggregate the traversed employee relation so the hierarchy CTE is an</span></span>
+<span class="source-line">  <span class="syntax-comment">-- observable, testable stage rather than an unused declaration.</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>salary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> deepest_level</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> base_org</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> department_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>reachable_headcount<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_headcount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dc<span class="syntax-punctuation">.</span>avg_salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dc<span class="syntax-punctuation">.</span>deepest_level</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> departments d</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> dept_counts dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reachable_headcount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Build a root-based organization CTE and report headcount and payroll by depth.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Assign depth during recursion, then aggregate employee rows once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 1, read from `employees`, and `organization`. Build the answer toward `depth`, `headcount`, and `payroll`; keep `depth` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 1, expected output: One row per hierarchy depth. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 1, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `headcount`, and `payroll` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 1, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `depth` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Report each manager&#x27;s direct-report count and payroll.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Direct-team grain needs one self join, not full recursive descendants.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 2, expected output: One row per manager with at least one direct report. The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 2, run `direct_teams` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Identify hierarchy roots and leaves in one report.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Create root and leaf CTEs at employee grain, then union compatible labeled rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 3, read from `employees`. Build the answer toward `node_type`, `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 3, expected output: One labeled row per root or leaf employee. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 3, reselect the returned keys directly from the source; require unique `employee_id` where the expected grain is one row per key and confirm the projected `node_type`, `employee_id`, and `full_name` against `employees`. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 3, run `roots`, and `leaves` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Count employees reachable from roots and compare with total employees.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 4, read from `employees`, and `organization`. Build the answer toward `all_employees`, `reachable_employees`, and `unreachable_employees`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 4, expected output: One row with zero unreachable employees. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 4, project `employee_id` plus the raw source columns from `employees`, and `organization` at each join stage; record row count and distinct `employee_id`, then assert the final `all_employees`, `reachable_employees`, and `unreachable_employees` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 4, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Calculate full-subtree report counts per manager without counting the manager as their own report.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Seed direct edges and recurse descendants while carrying the original manager.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 5, read from `employees`, and `descendants`. Build the answer toward `manager_id`, and `all_descendant_reports`; keep `manager_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 5, expected output: One row per manager with descendant count. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 5, independently aggregate `employees`, and `descendants` by `manager_id`; require one output row for every distinct `manager_id` tuple and compare `all_descendant_reports` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 5, start with the first relation in `employees`, and `descendants`; after each join, record total rows and distinct `manager_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Report department headcount split between managers and nonmanagers.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: First derive the manager ID set, then conditionally aggregate employees once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-25 Exercise 6, read from `employees`, and `departments`. Build the answer toward `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`; keep `department_id`, and `name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-25 Exercise 6, run `managers` one at a time. Record each CTE&#x27;s row count and `department_id`, and `name` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -779,10 +827,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-25-solutions-multiple-ctes-and-hierarchies-in-one-query">Day 25 solutions — Multiple CTEs and Hierarchies in One Query<a class="heading-anchor" href="#solution-1--day-25-solutions-multiple-ctes-and-hierarchies-in-one-query" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day25_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day25_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day25_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -818,31 +866,31 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH RECURSIVE organization AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.salary,
-         0 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees AS e
-  WHERE e.manager_id IS NULL
-  UNION ALL
-  SELECT child.employee_id,
-         child.manager_id,
-         child.salary,
-         parent.depth + 1,
-         parent.path || child.employee_id
-  FROM organization AS parent
-  JOIN employees AS child
-    ON child.manager_id = parent.employee_id
-  WHERE NOT child.employee_id = ANY(parent.path)
-)
-SELECT depth,
-       COUNT(*) AS headcount,
-       ROUND(SUM(salary), 2) AS payroll
-FROM organization
-GROUP BY depth
-ORDER BY depth;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> organization <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         child<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         child<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+         parent<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+         parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span> organization <span class="syntax-keyword">AS</span> parent
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child
+    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> depth<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> headcount<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>salary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payroll
+<span class="syntax-keyword">FROM</span> organization
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> depth
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> depth<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per hierarchy depth.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -868,22 +916,22 @@ ORDER BY depth;</code></pre>
 <li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH direct_teams AS (
-  SELECT e.manager_id,
-         COUNT(*) AS direct_reports,
-         SUM(e.salary) AS direct_report_payroll
-  FROM employees AS e
-  WHERE e.manager_id IS NOT NULL
-  GROUP BY e.manager_id
-)
-SELECT manager.employee_id,
-       manager.full_name,
-       dt.direct_reports,
-       ROUND(dt.direct_report_payroll, 2) AS direct_report_payroll
-FROM direct_teams AS dt
-JOIN employees AS manager
-  ON manager.employee_id = dt.manager_id
-ORDER BY dt.direct_reports DESC, manager.employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> direct_teams <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_reports<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_report_payroll
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+       manager<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       dt<span class="syntax-punctuation">.</span>direct_reports<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>dt<span class="syntax-punctuation">.</span>direct_report_payroll<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_report_payroll
+<span class="syntax-keyword">FROM</span> direct_teams <span class="syntax-keyword">AS</span> dt
+<span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager
+  <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> dt<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dt<span class="syntax-punctuation">.</span>direct_reports <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per manager with at least one direct report.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -908,22 +956,22 @@ ORDER BY dt.direct_reports DESC, manager.employee_id;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH roots AS (
-  SELECT e.employee_id, e.full_name
-  FROM employees AS e
-  WHERE e.manager_id IS NULL
-), leaves AS (
-  SELECT e.employee_id, e.full_name
-  FROM employees AS e
-  WHERE NOT EXISTS (
-    SELECT 1 FROM employees AS child
-    WHERE child.manager_id = e.employee_id
-  )
-)
-SELECT &#x27;root&#x27; AS node_type, employee_id, full_name FROM roots
-UNION ALL
-SELECT &#x27;leaf&#x27; AS node_type, employee_id, full_name FROM leaves
-ORDER BY node_type, employee_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> roots <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> leaves <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> child
+    <span class="syntax-keyword">WHERE</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;root&#x27;</span> <span class="syntax-keyword">AS</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">,</span> full_name <span class="syntax-keyword">FROM</span> roots
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;leaf&#x27;</span> <span class="syntax-keyword">AS</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">,</span> full_name <span class="syntax-keyword">FROM</span> leaves
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One labeled row per root or leaf employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -948,21 +996,21 @@ ORDER BY node_type, employee_id;</code></pre>
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 </ul>
-<pre><code class="language-sql">WITH RECURSIVE organization AS (
-  SELECT e.employee_id, ARRAY[e.employee_id] AS path
-  FROM employees AS e
-  WHERE e.manager_id IS NULL
-  UNION ALL
-  SELECT child.employee_id, parent.path || child.employee_id
-  FROM organization AS parent
-  JOIN employees AS child
-    ON child.manager_id = parent.employee_id
-  WHERE NOT child.employee_id = ANY(parent.path)
-)
-SELECT (SELECT COUNT(*) FROM employees) AS all_employees,
-       COUNT(DISTINCT employee_id) AS reachable_employees,
-       (SELECT COUNT(*) FROM employees) - COUNT(DISTINCT employee_id) AS unreachable_employees
-FROM organization;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> organization <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span> organization <span class="syntax-keyword">AS</span> parent
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child
+    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> employees<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_employees<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_employees<span class="syntax-punctuation">,</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> employees<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unreachable_employees
+<span class="syntax-keyword">FROM</span> organization<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row with zero unreachable employees.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -989,27 +1037,27 @@ FROM organization;</code></pre>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH RECURSIVE descendants AS (
-  SELECT parent.employee_id AS manager_id,
-         child.employee_id AS report_id,
-         ARRAY[parent.employee_id, child.employee_id] AS path
-  FROM employees AS parent
-  JOIN employees AS child
-    ON child.manager_id = parent.employee_id
-  UNION ALL
-  SELECT d.manager_id,
-         child.employee_id,
-         d.path || child.employee_id
-  FROM descendants AS d
-  JOIN employees AS child
-    ON child.manager_id = d.report_id
-  WHERE NOT child.employee_id = ANY(d.path)
-)
-SELECT manager_id,
-       COUNT(DISTINCT report_id) AS all_descendant_reports
-FROM descendants
-GROUP BY manager_id
-ORDER BY all_descendant_reports DESC, manager_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> descendants <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> parent<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
+         child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> report_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>parent<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> parent
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child
+    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+         child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+         d<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span> descendants <span class="syntax-keyword">AS</span> d
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child
+    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>report_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> manager_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> report_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_descendant_reports
+<span class="syntax-keyword">FROM</span> descendants
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> all_descendant_reports <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> manager_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per manager with descendant count.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -1036,27 +1084,27 @@ ORDER BY all_descendant_reports DESC, manager_id;</code></pre>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH managers AS (
-  SELECT DISTINCT e.manager_id AS employee_id
-  FROM employees AS e
-  WHERE e.manager_id IS NOT NULL
-)
-SELECT d.department_id,
-       d.name,
-       COUNT(e.employee_id) AS headcount,
-       COUNT(e.employee_id) FILTER (
-         WHERE m.employee_id IS NOT NULL
-       ) AS managers,
-       COUNT(e.employee_id) FILTER (
-         WHERE m.employee_id IS NULL
-       ) AS nonmanagers
-FROM departments AS d
-LEFT JOIN employees AS e
-  ON e.department_id = d.department_id
-LEFT JOIN managers AS m
-  ON m.employee_id = e.employee_id
-GROUP BY d.department_id, d.name
-ORDER BY d.department_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> managers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">AS</span> employee_id
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> headcount<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> managers<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> nonmanagers
+<span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> managers <span class="syntax-keyword">AS</span> m
+  <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per department.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1109,245 +1157,245 @@ ORDER BY d.department_id;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 25 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-25: Multiple CTEs Hierarchies</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day25_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day25_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.</span>
-<span>-- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.</span>
-<span>-- Pitfall: Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: Build a root-based organization CTE and report headcount and payroll by depth.</span>
-<span>-- Why: Assign depth during recursion, then aggregate employee rows once.</span>
-<span>-- Expected: One row per hierarchy depth.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH RECURSIVE organization AS (</span>
-<span>  SELECT e.employee_id,</span>
-<span>         e.manager_id,</span>
-<span>         e.salary,</span>
-<span>         0 AS depth,</span>
-<span>         ARRAY[e.employee_id] AS path</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE e.manager_id IS NULL</span>
-<span>  UNION ALL</span>
-<span>  SELECT child.employee_id,</span>
-<span>         child.manager_id,</span>
-<span>         child.salary,</span>
-<span>         parent.depth + 1,</span>
-<span>         parent.path || child.employee_id</span>
-<span>  FROM organization AS parent</span>
-<span>  JOIN employees AS child</span>
-<span>    ON child.manager_id = parent.employee_id</span>
-<span>  WHERE NOT child.employee_id = ANY(parent.path)</span>
-<span>)</span>
-<span>SELECT depth,</span>
-<span>       COUNT(*) AS headcount,</span>
-<span>       ROUND(SUM(salary), 2) AS payroll</span>
-<span>FROM organization</span>
-<span>GROUP BY depth</span>
-<span>ORDER BY depth;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Report each manager&#x27;s direct-report count and payroll.</span>
-<span>-- Why: Direct-team grain needs one self join, not full recursive descendants.</span>
-<span>-- Expected: One row per manager with at least one direct report.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH direct_teams AS (</span>
-<span>  SELECT e.manager_id,</span>
-<span>         COUNT(*) AS direct_reports,</span>
-<span>         SUM(e.salary) AS direct_report_payroll</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE e.manager_id IS NOT NULL</span>
-<span>  GROUP BY e.manager_id</span>
-<span>)</span>
-<span>SELECT manager.employee_id,</span>
-<span>       manager.full_name,</span>
-<span>       dt.direct_reports,</span>
-<span>       ROUND(dt.direct_report_payroll, 2) AS direct_report_payroll</span>
-<span>FROM direct_teams AS dt</span>
-<span>JOIN employees AS manager</span>
-<span>  ON manager.employee_id = dt.manager_id</span>
-<span>ORDER BY dt.direct_reports DESC, manager.employee_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Identify hierarchy roots and leaves in one report.</span>
-<span>-- Why: Create root and leaf CTEs at employee grain, then union compatible labeled rows.</span>
-<span>-- Expected: One labeled row per root or leaf employee.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH roots AS (</span>
-<span>  SELECT e.employee_id, e.full_name</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE e.manager_id IS NULL</span>
-<span>), leaves AS (</span>
-<span>  SELECT e.employee_id, e.full_name</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE NOT EXISTS (</span>
-<span>    SELECT 1 FROM employees AS child</span>
-<span>    WHERE child.manager_id = e.employee_id</span>
-<span>  )</span>
-<span>)</span>
-<span>SELECT &#x27;root&#x27; AS node_type, employee_id, full_name FROM roots</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;leaf&#x27; AS node_type, employee_id, full_name FROM leaves</span>
-<span>ORDER BY node_type, employee_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Count employees reachable from roots and compare with total employees.</span>
-<span>-- Why: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.</span>
-<span>-- Expected: One row with zero unreachable employees.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>WITH RECURSIVE organization AS (</span>
-<span>  SELECT e.employee_id, ARRAY[e.employee_id] AS path</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE e.manager_id IS NULL</span>
-<span>  UNION ALL</span>
-<span>  SELECT child.employee_id, parent.path || child.employee_id</span>
-<span>  FROM organization AS parent</span>
-<span>  JOIN employees AS child</span>
-<span>    ON child.manager_id = parent.employee_id</span>
-<span>  WHERE NOT child.employee_id = ANY(parent.path)</span>
-<span>)</span>
-<span>SELECT (SELECT COUNT(*) FROM employees) AS all_employees,</span>
-<span>       COUNT(DISTINCT employee_id) AS reachable_employees,</span>
-<span>       (SELECT COUNT(*) FROM employees) - COUNT(DISTINCT employee_id) AS unreachable_employees</span>
-<span>FROM organization;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Calculate full-subtree report counts per manager without counting the manager as their own report.</span>
-<span>-- Why: Seed direct edges and recurse descendants while carrying the original manager.</span>
-<span>-- Expected: One row per manager with descendant count.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH RECURSIVE descendants AS (</span>
-<span>  SELECT parent.employee_id AS manager_id,</span>
-<span>         child.employee_id AS report_id,</span>
-<span>         ARRAY[parent.employee_id, child.employee_id] AS path</span>
-<span>  FROM employees AS parent</span>
-<span>  JOIN employees AS child</span>
-<span>    ON child.manager_id = parent.employee_id</span>
-<span>  UNION ALL</span>
-<span>  SELECT d.manager_id,</span>
-<span>         child.employee_id,</span>
-<span>         d.path || child.employee_id</span>
-<span>  FROM descendants AS d</span>
-<span>  JOIN employees AS child</span>
-<span>    ON child.manager_id = d.report_id</span>
-<span>  WHERE NOT child.employee_id = ANY(d.path)</span>
-<span>)</span>
-<span>SELECT manager_id,</span>
-<span>       COUNT(DISTINCT report_id) AS all_descendant_reports</span>
-<span>FROM descendants</span>
-<span>GROUP BY manager_id</span>
-<span>ORDER BY all_descendant_reports DESC, manager_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Report department headcount split between managers and nonmanagers.</span>
-<span>-- Why: First derive the manager ID set, then conditionally aggregate employees once.</span>
-<span>-- Expected: One row per department.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH managers AS (</span>
-<span>  SELECT DISTINCT e.manager_id AS employee_id</span>
-<span>  FROM employees AS e</span>
-<span>  WHERE e.manager_id IS NOT NULL</span>
-<span>)</span>
-<span>SELECT d.department_id,</span>
-<span>       d.name,</span>
-<span>       COUNT(e.employee_id) AS headcount,</span>
-<span>       COUNT(e.employee_id) FILTER (</span>
-<span>         WHERE m.employee_id IS NOT NULL</span>
-<span>       ) AS managers,</span>
-<span>       COUNT(e.employee_id) FILTER (</span>
-<span>         WHERE m.employee_id IS NULL</span>
-<span>       ) AS nonmanagers</span>
-<span>FROM departments AS d</span>
-<span>LEFT JOIN employees AS e</span>
-<span>  ON e.department_id = d.department_id</span>
-<span>LEFT JOIN managers AS m</span>
-<span>  ON m.employee_id = e.employee_id</span>
-<span>GROUP BY d.department_id, d.name</span>
-<span>ORDER BY d.department_id;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 25 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-25: Multiple CTEs Hierarchies</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day25_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day25_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Build a root-based organization CTE and report headcount and payroll by depth.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Assign depth during recursion, then aggregate employee rows once.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per hierarchy depth.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> organization <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         child<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         child<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         parent<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> organization <span class="syntax-keyword">AS</span> parent</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> depth<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> headcount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>salary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payroll</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> organization</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> depth</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> depth<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Report each manager&#x27;s direct-report count and payroll.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Direct-team grain needs one self join, not full recursive descendants.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per manager with at least one direct report.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> direct_teams <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_reports<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_report_payroll</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       manager<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dt<span class="syntax-punctuation">.</span>direct_reports<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>dt<span class="syntax-punctuation">.</span>direct_report_payroll<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> direct_report_payroll</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> direct_teams <span class="syntax-keyword">AS</span> dt</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> dt<span class="syntax-punctuation">.</span>manager_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dt<span class="syntax-punctuation">.</span>direct_reports <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Identify hierarchy roots and leaves in one report.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Create root and leaf CTEs at employee grain, then union compatible labeled rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One labeled row per root or leaf employee.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> roots <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> leaves <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> child</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;root&#x27;</span> <span class="syntax-keyword">AS</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">,</span> full_name <span class="syntax-keyword">FROM</span> roots</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;leaf&#x27;</span> <span class="syntax-keyword">AS</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">,</span> full_name <span class="syntax-keyword">FROM</span> leaves</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> node_type<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Count employees reachable from roots and compare with total employees.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row with zero unreachable employees.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> organization <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> organization <span class="syntax-keyword">AS</span> parent</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> employees<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_employees<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reachable_employees<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> employees<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unreachable_employees</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> organization<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Calculate full-subtree report counts per manager without counting the manager as their own report.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Seed direct edges and recurse descendants while carrying the original manager.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per manager with descendant count.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> descendants <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> parent<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> report_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>parent<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> parent</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         d<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> descendants <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>report_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> manager_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> report_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_descendant_reports</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> descendants</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> manager_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> all_descendant_reports <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> manager_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Report department headcount split between managers and nonmanagers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: First derive the manager ID set, then conditionally aggregate employees once.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per department.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> managers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">AS</span> employee_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       d<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> headcount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> managers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> nonmanagers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> managers <span class="syntax-keyword">AS</span> m</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

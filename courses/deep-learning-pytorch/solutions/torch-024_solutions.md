@@ -78,7 +78,7 @@ assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol
 
 ## Exercise 3: Train a fixed classifier
 
-The question is: Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.
+The question is: Zero-initialize the weight and run 40 SGD with rate 0.1 steps with binary logits loss.
 
 The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.
 

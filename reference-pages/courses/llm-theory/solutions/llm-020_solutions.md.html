@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,46 +173,46 @@
 <h3 id="exercise-1-measure-a-small-linear-layer">Exercise 1: Measure a small linear layer<a class="heading-anchor" href="#exercise-1-measure-a-small-linear-layer" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply.01*identity to input[1,-1,2,-2].</p>
 <p>The identity orientation preserves the input direction. Only scale changes, so the norm relation is independent of random projections.</p>
-<pre><code class="language-python">x=torch.tensor([[1.,-1.,2.,-2.]]); small=.01*torch.eye(4); out=x@small
-np.testing.assert_allclose(torch.linalg.vector_norm(out).item(),.01*np.sqrt(10),atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> small<span class="syntax-operator">=</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> out<span class="syntax-operator">=</span>x<span class="syntax-decorator">@small</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>vector_norm<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> output norm.01*sqrt10.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with output norm.01*sqrt10.</p>
 <h3 id="exercise-2-increase-only-the-scale">Exercise 2: Increase only the scale<a class="heading-anchor" href="#exercise-2-increase-only-the-scale" aria-label="Link to this section">#</a></h3>
-<p>The question is: Replace.01<em>identity with100</em>identity.</p>
+<p>The question is: Replace.01<em>identity with 100</em>identity.</p>
 <p>Changing both scale and random orientation would confound the comparison. Here the factor follows directly from linearity.</p>
-<pre><code class="language-python">large=100*torch.eye(4); bigger=x@large
-np.testing.assert_allclose((torch.linalg.vector_norm(bigger)/torch.linalg.vector_norm(out)).item(),10000,atol=.01,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">large<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-operator">*</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> bigger<span class="syntax-operator">=</span>x<span class="syntax-decorator">@large</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>vector_norm<span class="syntax-punctuation">(</span>bigger<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>torch<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>vector_norm<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">10000</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">.01</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> activation norm increases by factor10000.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with activation norm increases by factor10000.</p>
 <h3 id="exercise-3-trace-gradients">Exercise 3: Trace gradients<a class="heading-anchor" href="#exercise-3-trace-gradients" aria-label="Link to this section">#</a></h3>
 <p>The question is: Differentiate mean squared output for the small and large matrices and compare norms.</p>
 <p>A finite forward output does not guarantee a useful gradient scale. Logging both makes a potential optimization problem visible before updates are applied.</p>
-<pre><code class="language-python">norms=[]
-for initial in [small,large]:
-    w=initial.clone().requires_grad_(); loss=(x@w).square().mean(); loss.backward(); norms.append(w.grad.norm().item())
-assert np.isfinite(norms).all() and norms[1]&gt;norms[0]</code></pre>
+<pre class="highlighted-code"><code class="language-python">norms<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> initial <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span>small<span class="syntax-punctuation">,</span>large<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    w<span class="syntax-operator">=</span>initial<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>requires_grad_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-decorator">@w</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> norms<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>norms<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span>norms<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> both finite; large-scale gradient norm is larger.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both finite; large-scale gradient norm is larger.</p>
 <h3 id="exercise-4-find-the-first-overflow">Exercise 4: Find the first overflow<a class="heading-anchor" href="#exercise-4-find-the-first-overflow" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply a float32 matrix scaled1e38, then inspect matrix product and squared loss.</p>
 <p>The diagnostic should identify the squared objective as nonfinite, while separately recording whether its input product already overflowed. One unlabelled NaN at the end is insufficient.</p>
-<pre><code class="language-python">extreme=x@(torch.eye(4)*1e38); objective=extreme.square().mean()
-assert not torch.isfinite(objective)</code></pre>
+<pre class="highlighted-code"><code class="language-python">extreme<span class="syntax-operator">=</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">1e38</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> objective<span class="syntax-operator">=</span>extreme<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>objective<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> squared loss is nonfinite.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with squared loss is nonfinite.</p>
 <h3 id="exercise-5-repair-on-the-same-input">Exercise 5: Repair on the same input<a class="heading-anchor" href="#exercise-5-repair-on-the-same-input" aria-label="Link to this section">#</a></h3>
 <p>The question is: Restore the small scale and recalculate output and loss for the unchangedx.</p>
 <p>Changing the fixture would not test the proposed repair. Reusing the original input isolates the effect of the initialization scale.</p>
-<pre><code class="language-python">repaired=x@small; assert torch.isfinite(repaired).all() and torch.isfinite(repaired.square().mean())</code></pre>
+<pre class="highlighted-code"><code class="language-python">repaired<span class="syntax-operator">=</span>x<span class="syntax-decorator">@small</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>repaired<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>repaired<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both output and loss finite.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both output and loss finite.</p>
 <h3 id="exercise-6-check-residual-dimensions">Exercise 6: Check residual dimensions<a class="heading-anchor" href="#exercise-6-check-residual-dimensions" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare residualx+x@small with an incompatible three-feature branch.</p>
 <p>Numeric scale and dimension compatibility are independent contracts. A stable norm cannot compensate for adding quantities with incompatible feature meaning.</p>
-<pre><code class="language-python">assert tuple((x+x@small).shape)==(1,4)
-try: x+torch.ones((1,3))
-except RuntimeError: pass
-else: raise AssertionError(&#x27;incompatible residual accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">+</span>x<span class="syntax-decorator">@small</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> x<span class="syntax-operator">+</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">incompatible residual accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> valid residual shape(1,4); width3 branch rejected.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with valid residual shape(1,4); width3 branch rejected.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

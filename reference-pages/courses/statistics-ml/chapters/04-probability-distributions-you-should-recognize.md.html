@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -152,15 +198,15 @@
 <h4 id="stat-04-15">Uniform distribution<a class="heading-anchor" href="#stat-04-15" aria-label="Link to this section">#</a></h4>
 <p>Uniform density is constant over a chosen interval, but uniformity depends on parameterization. A prior uniform on a scale is not uniform on its logarithm. Explicit bounds determine its consequences.</p>
 <h4 id="stat-04-16">Exponential distribution<a class="heading-anchor" href="#stat-04-16" aria-label="Link to this section">#</a></h4>
-<p>Exponential waiting time has constant hazard and the memoryless property. Its mean is scale=1/rate. Aging hardware or customer learning violates constant hazard even if average waiting time matches.</p>
+<p>Exponential waiting time has constant hazard and the memoryless property. Its mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{scale}=\frac{1}{\mathrm{rate}}</annotation></semantics></math>. Aging hardware or customer learning violates constant hazard even if average waiting time matches.</p>
 <h4 id="stat-04-17">Gamma distribution<a class="heading-anchor" href="#stat-04-17" aria-label="Link to this section">#</a></h4>
 <p>Gamma distributions model positive skew and sum independent exponential waits with common rate. Shape controls dispersion and behavior near zero. Check the rate-versus-scale convention in every calculation.</p>
 <h4 id="stat-04-18">Beta distribution<a class="heading-anchor" href="#stat-04-18" aria-label="Link to this section">#</a></h4>
-<p>A beta distribution lives between zero and one, with mean alpha/(alpha+beta). It can represent uncertainty about a probability. Observed values exactly zero or one need special treatment in continuous beta regression.</p>
+<p>A beta distribution lives between zero and one, with mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>α</mi></mrow><mrow><mi>α</mi><mo>+</mo><mi>β</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\alpha}{\alpha+\beta}</annotation></semantics></math>. It can represent uncertainty about a probability. Observed values exactly zero or one need special treatment in continuous beta regression.</p>
 <h4 id="stat-04-19">Dirichlet distribution<a class="heading-anchor" href="#stat-04-19" aria-label="Link to this section">#</a></h4>
 <p>The Dirichlet places probability mass on vectors of nonnegative proportions summing to one. It is conjugate to multinomial counts. Its standard dependence structure may be too restrictive for complex compositional data.</p>
 <h4 id="stat-04-20">Lognormal distribution<a class="heading-anchor" href="#stat-04-20" aria-label="Link to this section">#</a></h4>
-<p>Exponentiating a normal variable creates a lognormal variable with mean exp(mu+sigma-squared/2), not exp(mu). Multiplicative mechanisms motivate it. Large log-scale variance produces a long right tail and unstable arithmetic averages.</p>
+<p>Exponentiating a normal variable creates a lognormal variable with mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>μ</mi><mo>+</mo><mfrac><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\exp\!\left(\mu+\frac{\sigma^2}{2}\right)</annotation></semantics></math>, not <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(\mu)</annotation></semantics></math>. Multiplicative mechanisms motivate it. Large log-scale variance produces a long right tail and unstable arithmetic averages.</p>
 <h4 id="stat-04-21">Weibull distribution<a class="heading-anchor" href="#stat-04-21" aria-label="Link to this section">#</a></h4>
 <p>A Weibull shape below one gives decreasing hazard, above one increasing hazard, and one the exponential case. This flexibility helps lifetime modeling; extrapolating beyond observed follow-up remains assumption-sensitive.</p>
 <h4 id="stat-04-22">Pareto distribution<a class="heading-anchor" href="#stat-04-22" aria-label="Link to this section">#</a></h4>
@@ -181,7 +227,7 @@
 <p>A count of incidents over an exposure interval suggests a Poisson starting point if independent increments and rate assumptions are plausible. Doubling exposure doubles the expected count, so exposure must travel with the observation. A negative-binomial model adds rate heterogeneity and overdispersion. Neither automatically accounts for serial contagion or changes in the measurement process.</p>
 <p>A positive duration can be exponential, gamma, Weibull or lognormal depending on the mechanism and desired hazard behavior. The exponential has constant hazard; Weibull can increase or decrease hazard; lognormal behavior arises naturally from multiplicative variation. Compare survival or tail probabilities relevant to operations, not only whether the central histogram looks acceptable.</p>
 <h4 id="case-study-why-t-chi-square-and-f-appear-together">Case study: why t, chi-square and F appear together<a class="heading-anchor" href="#case-study-why-t-chi-square-and-f-appear-together" aria-label="Link to this section">#</a></h4>
-<p>If Z is standard normal and U is independent chi-square with nu degrees of freedom, then T=Z/sqrt(U/nu) has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.</p>
+<p>If Z is standard normal and U is independent chi-square with nu degrees of freedom, then <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>T</mi><mo>=</mo><mfrac><mrow><mi>Z</mi></mrow><mrow><msqrt><mrow><mi>U</mi><mo>/</mo><mi>ν</mi></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">T=\frac{Z}{\sqrt{U/\nu}}</annotation></semantics></math> has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.</p>
 <p>A normal sample&#x27;s residual sum of squares divided by sigma-squared has a chi-square distribution with the appropriate residual degrees of freedom. Ratios of independent scaled chi-square quantities produce F distributions, which underlie classical variance comparisons and ANOVA. Independence, normal errors and correct degrees of freedom are doing the work; the named reference distribution is not a universal property of every ratio statistic.</p>
 <p>As degrees of freedom increase, the t distribution approaches normal behavior. But replacing t by normal in a tiny sample can drastically narrow an interval. The three-point regression example in chapter11 has only one residual degree of freedom, which explains its large t critical value even though the fitted line looks compelling.</p>
 <h4 id="case-study-mixture-variation-can-imitate-heavy-tails">Case study: mixture variation can imitate heavy tails<a class="heading-anchor" href="#case-study-mixture-variation-can-imitate-heavy-tails" aria-label="Link to this section">#</a></h4>
@@ -189,8 +235,8 @@
 <p>Conversely, fitting several Gaussian components does not prove the existence of discrete regimes. A mixture can approximate one skewed continuous population. Distinguish density approximation from latent-class interpretation by using external mechanism information, stability and predictive checks. Component labels can permute without changing the mixture distribution.</p>
 <p>Zero inflation makes a particular mixture claim: one mechanism produces structural zeros and another produces a count that may also equal zero. In a hurdle model, the positive component is zero-truncated, so every zero belongs to the hurdle mechanism. A low-rate ordinary Poisson already produces many zeros; excess relative to a poorly fitted mean model is not sufficient evidence for structural inactivity.</p>
 <h4 id="case-study-truncation-and-censoring-yield-different-likelihoods">Case study: truncation and censoring yield different likelihoods<a class="heading-anchor" href="#case-study-truncation-and-censoring-yield-different-likelihoods" aria-label="Link to this section">#</a></h4>
-<p>If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by P(Y&gt;10). This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.</p>
-<p>If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is P(Y&lt;10), not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.</p>
+<p>If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>Y</mi><mo>&gt;</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pr(Y&gt;10)</annotation></semantics></math>. This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.</p>
+<p>If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>Y</mi><mo>&lt;</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pr(Y&lt;10)</annotation></semantics></math>, not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.</p>
 <p>A simple imputation such as replacing every censored value by the boundary creates artificial point masses and distorts means, variances and regression relationships. If the decision depends on the tail, model the observation mechanism directly or present bounds and sensitivity assumptions.</p>
 <h4 id="case-study-extreme-value-inference-trades-approximation-against-data">Case study: extreme-value inference trades approximation against data<a class="heading-anchor" href="#case-study-extreme-value-inference-trades-approximation-against-data" aria-label="Link to this section">#</a></h4>
 <p>Block-maxima analysis fits the distribution of maxima over fixed periods, while peaks-over-threshold analysis models exceedances above a high cutoff. The first discards nonmaximal observations in each block; the second uses more tail observations but requires a threshold choice and attention to dependent exceedance clusters.</p>
@@ -198,7 +244,7 @@
 <p>Heavy-tail parameters can determine whether moments exist. A Pareto model with an infinite variance undermines conventional mean-SE approximations; an infinite mean changes the target itself. Report these implications rather than merely naming the fitted family. Distribution choice is part of the scientific claim about rare outcomes.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_04.py.html">chapter_04.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_04.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_04.py</code></pre>
 <h4 id="same-mean-different-uncertainty">Same mean, different uncertainty<a class="heading-anchor" href="#same-mean-different-uncertainty" aria-label="Link to this section">#</a></h4>
 <p>Binomial and beta-binomial counts both have mean two in this fixture, but the beta-binomial variance is larger. Heterogeneous success probabilities change uncertainty even when the average matches. The tail assertion also verifies that a t distribution with three degrees of freedom assigns more mass beyond three than a standard normal.</p>
 <h4 id="transformation-and-observation-mechanisms">Transformation and observation mechanisms<a class="heading-anchor" href="#transformation-and-observation-mechanisms" aria-label="Link to this section">#</a></h4>
@@ -206,47 +252,47 @@
 <h4 id="similar-means-can-hide-a-different-generating-process">Similar means can hide a different generating process<a class="heading-anchor" href="#similar-means-can-hide-a-different-generating-process" aria-label="Link to this section">#</a></h4>
 <p>Mixing two unit-variance groups with means one and six produces mean two and variance five. A separate zero-inflated Poisson adds structural zero probability .3 to a Poisson rate two, giving mean 1.4 and a larger zero probability than the Poisson component alone. The formulas make the mixture assumptions explicit instead of diagnosing a mechanism from zeros alone.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
 
-def counts_and_tails():
-    n, p = 10, .2
-    assert np.isclose(stats.binom.mean(n, p), 2)
-    poisson_var = stats.poisson.var(2)
-    beta_binomial_var = stats.betabinom.var(n, 2, 8)
-    assert beta_binomial_var &gt; stats.binom.var(n, p)
-    print(&quot;Binomial variance:&quot;, stats.binom.var(n,p), &quot;beta-binomial variance:&quot;, beta_binomial_var)
-    assert poisson_var == 2
-    assert stats.t.sf(3, df=3) &gt; stats.norm.sf(3)
+<span class="syntax-keyword">def</span> <span class="syntax-function">counts_and_tails</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    n<span class="syntax-punctuation">,</span> p <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.2</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>stats<span class="syntax-operator">.</span>binom<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    poisson_var <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>poisson<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    beta_binomial_var <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>betabinom<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> beta_binomial_var <span class="syntax-operator">&gt;</span> stats<span class="syntax-operator">.</span>binom<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Binomial variance:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> stats<span class="syntax-operator">.</span>binom<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beta-binomial variance:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> beta_binomial_var<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> poisson_var <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+    <span class="syntax-keyword">assert</span> stats<span class="syntax-operator">.</span>t<span class="syntax-operator">.</span>sf<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> df<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>sf<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 
-def positive_and_truncated():
-    mu, sigma = 0., 1.
-    arithmetic = stats.lognorm.mean(s=sigma, scale=np.exp(mu))
-    median = stats.lognorm.median(s=sigma, scale=np.exp(mu))
-    assert arithmetic &gt; median == 1
-    conditional = (stats.norm.cdf(1)-stats.norm.cdf(0))/(1-stats.norm.cdf(0))
-    assert np.isclose(conditional, stats.truncnorm.cdf(1, 0, np.inf))
-    assert np.isclose(stats.expon.sf(5, scale=2)/stats.expon.sf(3, scale=2), stats.expon.sf(2, scale=2))
-    print(&quot;Lognormal mean/median:&quot;, round(arithmetic,4), median, &quot;P(Z&lt;=1 | Z&gt;0):&quot;, round(conditional,4))
+<span class="syntax-keyword">def</span> <span class="syntax-function">positive_and_truncated</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    mu<span class="syntax-punctuation">,</span> sigma <span class="syntax-operator">=</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span>
+    arithmetic <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>lognorm<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>s<span class="syntax-operator">=</span>sigma<span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>mu<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    median <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>lognorm<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>s<span class="syntax-operator">=</span>sigma<span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>mu<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> arithmetic <span class="syntax-operator">&gt;</span> median <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    conditional <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>cdf<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>cdf<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>cdf<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>conditional<span class="syntax-punctuation">,</span> stats<span class="syntax-operator">.</span>truncnorm<span class="syntax-operator">.</span>cdf<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>stats<span class="syntax-operator">.</span>expon<span class="syntax-operator">.</span>sf<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>stats<span class="syntax-operator">.</span>expon<span class="syntax-operator">.</span>sf<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> stats<span class="syntax-operator">.</span>expon<span class="syntax-operator">.</span>sf<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Lognormal mean/median:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>arithmetic<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> median<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">P(Z&lt;=1 | Z&gt;0):</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>conditional<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def mixtures_and_zeros():
-    weight=np.array([.8,.2]);means=np.array([1.,6.]);variances=np.array([1.,1.])
-    mean=weight@means
-    variance=weight@variances+weight@(means-mean)**2
-    assert np.isclose(mean,2) and np.isclose(variance,5)
-    structural_zero=.3;rate=2.
-    zero_probability=structural_zero+(1-structural_zero)*stats.poisson.pmf(0,rate)
-    assert zero_probability&gt;stats.poisson.pmf(0,rate)
-    assert np.isclose((1-structural_zero)*rate,1.4)
-    print(&quot;Mixture mean/variance:&quot;,mean,variance,&quot;zero-inflated P(0):&quot;,zero_probability)
+<span class="syntax-keyword">def</span> <span class="syntax-function">mixtures_and_zeros</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    weight<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>variances<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    mean<span class="syntax-operator">=</span>weight<span class="syntax-decorator">@means</span>
+    variance<span class="syntax-operator">=</span>weight<span class="syntax-decorator">@variances</span><span class="syntax-operator">+</span>weight<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>means<span class="syntax-operator">-</span>mean<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+    structural_zero<span class="syntax-operator">=</span><span class="syntax-number">.3</span><span class="syntax-punctuation">;</span>rate<span class="syntax-operator">=</span><span class="syntax-number">2.</span>
+    zero_probability<span class="syntax-operator">=</span>structural_zero<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>structural_zero<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>stats<span class="syntax-operator">.</span>poisson<span class="syntax-operator">.</span>pmf<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>rate<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> zero_probability<span class="syntax-operator">&gt;</span>stats<span class="syntax-operator">.</span>poisson<span class="syntax-operator">.</span>pmf<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>rate<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>structural_zero<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>rate<span class="syntax-punctuation">,</span><span class="syntax-number">1.4</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Mixture mean/variance:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>mean<span class="syntax-punctuation">,</span>variance<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">zero-inflated P(0):</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>zero_probability<span class="syntax-punctuation">)</span>
 
-def main():
-    mixtures_and_zeros()
-    counts_and_tails()
-    positive_and_truncated()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    mixtures_and_zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    counts_and_tails<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    positive_and_truncated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: A count outcome has variance much larger than its mean. What do you do?</strong> First inspect exposure, repeated units and omitted groups. A negative binomial or quasi-likelihood model can represent extra variance, but neither repairs a wrong time denominator or dependent observation design automatically.</p>
 <p><strong>Interview: Is zero-inflated Poisson always better for many zeros?</strong> No. A low-rate Poisson naturally contains many zeros, and unmodeled heterogeneity can also generate them. Compare predictive checks and plausible mechanisms before introducing a separate latent structural-zero state.</p>

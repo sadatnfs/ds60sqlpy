@@ -18,8 +18,8 @@
         "compiler diagnostics"
       ],
       "outcome": "A Java program begins as text.",
-      "lab": "Create a message variable containing Hello,Java and print it once.",
-      "verification": "one line Hello, Java. compiler resultfalse and at least one ERROR diagnostic."
+      "lab": "Create a message variable containing Hello, Java and print it once.",
+      "verification": "one line Hello, Java. compiler result false and at least one ERROR diagnostic."
     },
     {
       "id": "java-002",
@@ -37,8 +37,8 @@
         "BigDecimal"
       ],
       "outcome": "A numeric type defines both a range and a set of operations.",
-      "lab": "Calculate7/2 and7/2.0.",
-      "verification": "integer3 and double3.5. exact division throws;rounded result0.33."
+      "lab": "Calculate integer division `7 / 2` and floating-point division `7 / 2.0`.",
+      "verification": "integer 3 and double 3.5. exact division throws; rounded result 0.33."
     },
     {
       "id": "java-003",
@@ -56,8 +56,8 @@
         "boundary"
       ],
       "outcome": "Control flow chooses which statements run and how often.",
-      "lab": "Use textnull and testtext!=null before callingisEmpty.",
-      "verification": "conditionfalse with noNullPointerException. wrong loop raisesArrayIndexOutOfBoundsException."
+      "lab": "Use text null and test text!=null before calling isEmpty.",
+      "verification": "condition false with no NullPointerException. wrong loop raises ArrayIndexOutOfBoundsException."
     },
     {
       "id": "java-004",
@@ -75,8 +75,8 @@
         "pass by value"
       ],
       "outcome": "A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input.",
-      "lab": "ImplementdoubleValue(intx) and evaluate7 and0.",
-      "verification": "14 and0. int andlong respectively."
+      "lab": "Implement doubleValue(int x) and evaluate 7 and 0.",
+      "verification": "14 and 0. int and long respectively."
     },
     {
       "id": "java-005",
@@ -94,8 +94,8 @@
         "immutability"
       ],
       "outcome": "An array is a fixed-length indexed container.",
-      "lab": "Copy array1,2,3,mutate the copy and compare the original.",
-      "verification": "original starts1;copy starts9. ArrayIndexOutOfBoundsException."
+      "lab": "Copy array 1,2,3,mutate the copy and compare the original.",
+      "verification": "original starts 1; copy starts 9. ArrayIndexOutOfBoundsException."
     },
     {
       "id": "java-006",
@@ -113,8 +113,8 @@
         "iteration"
       ],
       "outcome": "Lists preserve an ordered sequence and may contain duplicates.",
-      "lab": "Create a mutable listred,blue,red and appendgreen.",
-      "verification": "size4;red appears twice. UnsupportedOperationException."
+      "lab": "Create a mutable list red,blue,red and append green.",
+      "verification": "size 4; red appears twice. UnsupportedOperationException."
     },
     {
       "id": "java-007",
@@ -131,8 +131,8 @@
         "instance methods"
       ],
       "outcome": "An object combines state with operations that preserve its rules.",
-      "lab": "Construct accounts with100 and100 cents,deposit50 into the first.",
-      "verification": "balances150 and100. ArithmeticException;original maximum balance preserved."
+      "lab": "Construct accounts with 100 and 100 cents,deposit 50 into the first.",
+      "verification": "balances 150 and 100. ArithmeticException;original maximum balance preserved."
     },
     {
       "id": "java-008",
@@ -149,8 +149,8 @@
         "validation"
       ],
       "outcome": "A record is a concise carrier for a fixed set of components, with generated accessors, equality, hashing and a descriptive string.",
-      "lab": "Create an Order with idspaceAspace and itemx.",
-      "verification": "idA and items[x]. NullPointerException from the declaredcopy policy."
+      "lab": "Create an Order with ID \" A \" and item x.",
+      "verification": "ID A and items[x]. NullPointerException from the declared copy policy."
     },
     {
       "id": "java-009",
@@ -167,8 +167,8 @@
         "suppressed exception"
       ],
       "outcome": "Exceptions separate normal return values from failure.",
-      "lab": "Open a Probe resource,recordbody,then inspect closure order.",
-      "verification": "eventsbody,closeA. cause remains the originalIOException."
+      "lab": "Open a Probe resource, record body, then inspect closure order.",
+      "verification": "events body, close A. cause remains the original IOException."
     },
     {
       "id": "java-010",
@@ -186,8 +186,8 @@
         "dispatch"
       ],
       "outcome": "An interface describes behavior a caller can rely on without depending on one implementation.",
-      "lab": "UsePricing references to identity andhalf-price implementations on100 cents.",
-      "verification": "100 and50. negative feeIllegalArgumentException;null delegateNullPointerException."
+      "lab": "Use Pricing references to identity and half-price implementations on 100 cents.",
+      "verification": "100 and 50. negative fee IllegalArgumentException;null delegate NullPointerException."
     },
     {
       "id": "java-011",
@@ -205,8 +205,8 @@
         "mutable keys"
       ],
       "outcome": "Equality, hashing and ordering are related contracts with different roles.",
-      "lab": "Create two equalPoint records and insert one into a map.",
-      "verification": "lookup with the other returnsorigin;hashes equal. display labels equal;points unequal."
+      "lab": "Create two equal Point records and insert one into a map.",
+      "verification": "lookup with the other returns origin; hashes equal. display labels equal; points unequal."
     },
     {
       "id": "java-012",
@@ -225,8 +225,8 @@
         "type erasure"
       ],
       "outcome": "Generics express type relationships so many errors can be detected before execution.",
-      "lab": "SumList.of(1,2,3) andList.of(1.5,2.5) throughList<?extendsNumber>.",
-      "verification": "sums6.0 and4.0. runtime classes equal;compile-time contracts remain distinct."
+      "lab": "Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.",
+      "verification": "sums 6.0 and 4.0. runtime classes equal; compile-time contracts remain distinct."
     },
     {
       "id": "java-013",
@@ -244,8 +244,8 @@
         "Function"
       ],
       "outcome": "A lambda supplies the behavior of a functional interface, an interface with one abstract method.",
-      "lab": "Create a Predicate<Integer> accepting positive values and test3,0,-1.",
-      "verification": "true,false,false. 7 accepted;blank rejected."
+      "lab": "Create a Predicate<Integer> accepting positive values and test 3,0,-1.",
+      "verification": "true, false, false. 7 accepted; blank rejected."
     },
     {
       "id": "java-014",
@@ -263,8 +263,8 @@
         "parallel hazards"
       ],
       "outcome": "A stream is a single-use computation pipeline over a source.",
-      "lab": "Keep even values from1,2,3,4 and sum their squares.",
-      "verification": "20. 5 versus9;parallel sum5050."
+      "lab": "Keep even values from 1,2,3,4 and sum their squares.",
+      "verification": "20. 5 versus 9; parallel sum 5050."
     },
     {
       "id": "java-015",
@@ -282,8 +282,8 @@
         "DST"
       ],
       "outcome": "Time has several meanings.",
-      "lab": "Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York.",
-      "verification": "same instant;New York local date2023-12-31. start included;end excluded."
+      "lab": "Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York.",
+      "verification": "same instant; New York local date 2023-12-31. start included; end excluded."
     },
     {
       "id": "java-016",
@@ -301,8 +301,8 @@
         "atomic replacement"
       ],
       "outcome": "A path names a location; it is not the file contents or a guarantee that the location exists.",
-      "lab": "WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.",
-      "verification": "exact text equality. original exception propagated;owned directory absent."
+      "lab": "Write Café and an emoji to an owned temporary file,then read it with UTF-8.",
+      "verification": "exact text equality. original exception propagated; owned directory absent."
     },
     {
       "id": "java-017",
@@ -320,8 +320,8 @@
         "parse"
       ],
       "outcome": "Optional represents the presence or absence of a value in a return contract.",
-      "lab": "Look up knowna andunknownb in a fixed map throughOptional.",
-      "verification": "a present with7;b empty. specific absence failure."
+      "lab": "Look up known a and unknown b in a fixed map through Optional.",
+      "verification": "a present with 7; b empty. specific absence failure."
     },
     {
       "id": "java-018",
@@ -339,8 +339,8 @@
         "mutation"
       ],
       "outcome": "A useful test distinguishes correct behavior from a plausible mistake.",
-      "lab": "Testclamp for values-2,0,3,9 underbounds0..5.",
-      "verification": "outputs0,0,3,5. all originals restored;input arrays unchanged."
+      "lab": "Test clamp for values -2,0,3,9 under bounds 0..5.",
+      "verification": "outputs 0,0,3,5. all originals restored; input arrays unchanged."
     },
     {
       "id": "java-019",
@@ -358,8 +358,8 @@
         "Big O"
       ],
       "outcome": "A data structure is a set of operations with representation and cost tradeoffs.",
-      "lab": "Adda,b,c to anArrayDeque and remove from the front.",
-      "verification": "a,b,c order. poll returnsnull;remove throwsNoSuchElementException."
+      "lab": "Add a,b,c to an ArrayDeque and remove from the front.",
+      "verification": "a,b,c order. poll returns null; remove throws NoSuchElementException."
     },
     {
       "id": "java-020",
@@ -377,8 +377,8 @@
         "DP"
       ],
       "outcome": "Algorithms connect a problem contract to a sequence of operations and invariants.",
-      "lab": "RunlowerBound on1,2,2,5 withtarget2 andtarget6.",
-      "verification": "indices1 and4. IllegalArgumentException forboth."
+      "lab": "Run lowerBound on 1,2,2,5 with target 2 and target 6.",
+      "verification": "indices 1 and 4. IllegalArgumentException for both."
     },
     {
       "id": "java-021",
@@ -396,8 +396,8 @@
         "join"
       ],
       "outcome": "Threads can execute concurrently while sharing memory.",
-      "lab": "Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.",
-      "verification": "worker terminated;result42. interruption observed and worker terminated."
+      "lab": "Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.",
+      "verification": "worker terminated; result 42. interruption observed and worker terminated."
     },
     {
       "id": "java-022",
@@ -415,8 +415,8 @@
         "cancellation"
       ],
       "outcome": "An ExecutorService owns task scheduling and worker lifetime.",
-      "lab": "Submit a callable returning42 and get it within2seconds.",
-      "verification": "result42. third submission rejected;admitted tasks finish after release."
+      "lab": "Submit a callable returning 42 and get it within 2 seconds.",
+      "verification": "result 42. third submission rejected; admitted tasks finish after release."
     },
     {
       "id": "java-023",
@@ -434,8 +434,8 @@
         "deadlock"
       ],
       "outcome": "Synchronization protects a state transition,not merely a variable name.",
-      "lab": "Run two workers making1000 synchronized increments each.",
-      "verification": "counter2000. 2000 increments and no blocked worker after bounded joins."
+      "lab": "Run two workers making 1000 synchronized increments each.",
+      "verification": "counter 2000. 2000 increments and no blocked worker after bounded joins."
     },
     {
       "id": "java-024",
@@ -453,7 +453,7 @@
         "pinning"
       ],
       "outcome": "Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.",
-      "lab": "Start a virtual thread that recordsisVirtual andjoin it.",
+      "lab": "Start a virtual thread that records isVirtual and join it.",
       "verification": "true and terminated. caller can acquire the monitor while the worker is waiting."
     },
     {
@@ -473,8 +473,8 @@
         "allocation"
       ],
       "outcome": "The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.",
-      "lab": "Store a small byte array in a list anddrop the local variable reference.",
-      "verification": "list still exposes the same array contents. nonnegative counters;max at leasttotal;no claim of exact object size."
+      "lab": "Store a small byte array in a list and drop the local variable reference.",
+      "verification": "list still exposes the same array contents. nonnegative counters; max at least total; no claim of exact object size."
     },
     {
       "id": "java-026",
@@ -492,9 +492,9 @@
         "exports",
         "requires"
       ],
-      "outcome": "Packages organize class names andaccess boundaries.",
-      "lab": "ReadString.class module andpackage names.",
-      "verification": "modulejava.base;packagejava.lang. nonzero compiler exit andcaptured diagnostic."
+      "outcome": "Packages organize class names and access boundaries.",
+      "lab": "Read `String.class` module and package names.",
+      "verification": "module `java.base`;package `java.lang`. nonzero compiler exit and captured diagnostic."
     },
     {
       "id": "java-027",
@@ -512,9 +512,9 @@
         "Gradle",
         "locked dependencies"
       ],
-      "outcome": "A build turns source anddeclared dependencies into an artifact.",
-      "lab": "Build a Hello class whose main printsbuild-ok.",
-      "verification": "compiler exit0;Hello.class exists. exactversionaccepted;LATESTnot treated as a pin."
+      "outcome": "A build turns source and declared dependencies into an artifact.",
+      "lab": "Build a Hello class whose main prints build-ok.",
+      "verification": "compiler exit 0;Hello.class exists. exact version accepted; LATEST not treated as a pin."
     },
     {
       "id": "java-028",
@@ -532,9 +532,9 @@
         "timeout",
         "resource closure"
       ],
-      "outcome": "HTTP is a request/response protocol with method,path,status,headers andbody.",
-      "lab": "Start the fixture andGET/health.",
-      "verification": "status200 andbodyok. host127.0.0.1;portpositive;closedflagtrue."
+      "outcome": "HTTP is a request/response protocol with method,path,status,headers and body.",
+      "lab": "Start the fixture and request `GET /health`.",
+      "verification": "status 200 and body ok. host 127.0.0.1;port positive; closed flag true."
     },
     {
       "id": "java-029",
@@ -553,8 +553,8 @@
         "isolation"
       ],
       "outcome": "JDBC is Java's database-access API.",
-      "lab": "Open the fixture,inspect product metadata andcount the two account rows.",
-      "verification": "database productH2;2 rows;auto-commit initiallytrue. second session sees100beforecommit and95aftercommit."
+      "lab": "Open the fixture,inspect product metadata and count the two account rows.",
+      "verification": "database product H2; 2 rows; auto-commit initially true. second session sees 100 before commit and 95 after commit."
     },
     {
       "id": "java-030",
@@ -571,9 +571,9 @@
         "validation",
         "deserialization"
       ],
-      "outcome": "Serialization turns domain values into a representation that another process orversion can read.",
-      "lab": "Encode accounta1,balance125,noteCafé withversion2 anddecode.",
-      "verification": "equal domain record andexact Unicode note. trailing payloadIOException;negative balanceIllegalArgumentException."
+      "outcome": "Serialization turns domain values into a representation that another process or version can read.",
+      "lab": "Encode account a1, balance 125, note Café with version 2 and decode.",
+      "verification": "equal domain record and exact Unicode note. trailing payload IOException; negative balance IllegalArgumentException."
     },
     {
       "id": "java-031",
@@ -590,9 +590,9 @@
         "ServiceLoader",
         "encapsulation"
       ],
-      "outcome": "Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls.",
-      "lab": "ReadVersion on the knownFriendly provider.",
-      "verification": "version2. version2accepted;version3rejected."
+      "outcome": "Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls.",
+      "lab": "Read Version on the known Friendly provider.",
+      "verification": "version 2. version 2 accepted;version 3 rejected."
     },
     {
       "id": "java-032",
@@ -610,8 +610,8 @@
         "measurement bias"
       ],
       "outcome": "Performance measurement starts with a correct,representative workload.",
-      "lab": "Sum1..1000 with a loop andcompare withn*(n+1)/2.",
-      "verification": "500500. metadata names100warmups andprofilingfalse;universal claimfalse."
+      "lab": "Sum 1..1000 with a loop and compare with n*(n+1)/2.",
+      "verification": "500500. metadata names 100 warmups and profiling false; universal claim false."
     },
     {
       "id": "java-033",
@@ -629,8 +629,8 @@
         "secrets"
       ],
       "outcome": "An application boundary converts untrusted input into a limited set of permitted operations.",
-      "lab": "Createinput.txt inside anownedroot andread atmost10bytes.",
-      "verification": "contenthello. diagnostic excludes both sensitive fields."
+      "lab": "Create `input.txt` inside an owned root and read at most 10 bytes.",
+      "verification": "content hello. diagnostic excludes both sensitive fields."
     },
     {
       "id": "java-034",
@@ -647,9 +647,9 @@
         "adapters",
         "pure core"
       ],
-      "outcome": "Application design separates domain decisions from the mechanisms that supply data,time orside effects.",
-      "lab": "Compute3items at125cents andcheckzero/negativequantity policy.",
-      "verification": "375cents;nonpositivequantityrejected. ArithmeticException;auditsinkunused."
+      "outcome": "Application design separates domain decisions from the mechanisms that supply data,time or side effects.",
+      "lab": "Compute 3 items at 125 cents and check the zero/negative quantity policy.",
+      "verification": "375 cents; nonpositive quantity rejected. ArithmeticException;audit sink unused."
     },
     {
       "id": "java-035",
@@ -666,9 +666,9 @@
         "HTTP",
         "contract tests"
       ],
-      "outcome": "A small data service combines domain rules,storage andtransport contracts.",
-      "lab": "SummarizegroupAoveramounts10,20 andgroupBover5.",
-      "verification": "Acount2,total30;Bcount1,total5. 3unchangedrecords;closedflagtrue."
+      "outcome": "A small data service combines domain rules, storage and transport contracts.",
+      "lab": "Summarize group A over amounts 10,20 and group B over 5.",
+      "verification": "A count 2, total 30; B count 1, total 5. 3 unchanged records; closed flag true."
     },
     {
       "id": "java-036",
@@ -686,9 +686,9 @@
         "compatibility",
         "release checklist"
       ],
-      "outcome": "A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts andhow failures are diagnosed.",
-      "lab": "Compile thefixture with--release21 andinspect itsclassheader.",
-      "verification": "magicCAFEBABE;majorversion65. previousartifactv1 retained;custom_runtime_builtFalse."
+      "outcome": "A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts and how failures are diagnosed.",
+      "lab": "Compile the fixture with --release 21 and inspect its class header.",
+      "verification": "magic CAFEBABE; major version 65. previous artifact v1 retained; custom_runtime_built False."
     }
   ],
   "sources": [

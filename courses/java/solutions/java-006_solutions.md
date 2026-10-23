@@ -18,7 +18,7 @@ List.of creates a fixed unmodifiable list; newArrayList<>(...) creates a mutable
 
 ## Exercise 1: Retain sequence multiplicity
 
-Task: Create a mutable listred,blue,red and appendgreen.
+Task: Create a mutable list red,blue,red and append green.
 
 A list records positions and repeated observations. Removing duplicates would change the meaning if each entry represents an event.
 
@@ -27,9 +27,9 @@ List<String> colors = new ArrayList<>(List.of("red", "blue", "red")); colors.add
 assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
 ```
 
-**Expected:** size4;red appears twice.
+**Expected:** size 4; red appears twice.
 
-**Verify:** Compare the program values or named exception with size4;red appears twice. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with size 4; red appears twice. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Count with a map
 
@@ -58,9 +58,9 @@ Set<String> unique = new HashSet<>();
 assert unique.add("red"); assert !unique.add("red"); assert unique.size() == 1;
 ```
 
-**Expected:** firsttrue,secondfalse,size1.
+**Expected:** first true,second false,size1.
 
-**Verify:** Compare the program values or named exception with firsttrue,secondfalse,size1. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with first true,second false,size1. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Create deterministic output order
 

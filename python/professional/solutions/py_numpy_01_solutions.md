@@ -114,7 +114,7 @@ assert b[0] == 7
 
 Return every step-th value from a one-dimensional array as a view. Require a positive integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.
 
-**Expected:** For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).
+**Expected:** For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 and True raise ValueError; an empty source returns shape(0,).
 
 ```python
 def stride_select(values: np.ndarray, step: int) -> np.ndarray:

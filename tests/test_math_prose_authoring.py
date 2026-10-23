@@ -126,3 +126,35 @@ Then sqrt(n).
     )
     assert hits == {"sqrt(n)": 1}
     assert output.startswith(source[: source.index("Then")])
+
+
+def test_longer_closing_fence_and_unterminated_fence_protect_programs() -> None:
+    rule = [{"source": "sqrt(n)", "latex": r"\sqrt{n}"}]
+    for source in (
+        "```python\nvalue = sqrt(n)\n````\n",
+        "~~~python\nvalue = sqrt(n)\n~~~~~\n",
+        "```python\nvalue = sqrt(n)\n",
+    ):
+        assert MIGRATION.normalize(source, "guide.md", rule) == (source, {})
+
+
+def test_indented_programs_and_multiline_code_spans_remain_exact() -> None:
+    rule = [{"source": "sqrt(n)", "latex": r"\sqrt{n}"}]
+    for source in (
+        "    value = sqrt(n)\n\n    print(value)\n",
+        "\tvalue = sqrt(n)\n",
+        "``call\nsqrt(n)\nwith `literal` ticks``",
+    ):
+        assert MIGRATION.normalize(source, "guide.md", rule) == (source, {})
+
+
+def test_every_reviewed_latex_rule_is_supported_by_the_offline_renderer() -> None:
+    from ds60sqlpy.reader_math import render_math
+
+    rules = json.loads((ROOT / "curriculum/math-prose.json").read_text())["rules"]
+    unsupported = [
+        rule["source"]
+        for rule in rules
+        if "latex" in rule and 'class="math-source"' in render_math(rule["latex"])
+    ]
+    assert not unsupported

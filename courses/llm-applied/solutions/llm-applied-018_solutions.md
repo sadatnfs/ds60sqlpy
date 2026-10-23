@@ -18,13 +18,13 @@ This chapter trains two real tiny decoders on the same literal answer task. One 
 
 ## Reading the implementation
 
-Create one base model, copy itsstate_dict into two new instances, and snapshot the initial logits. Freeze every parameter in the adapter candidate before replacing its output projection withLoRAHead. Optimize onlyparameters withrequires_gradTrue. Keep the full and adapter optimizers separate. Evaluate both with the same held-out labels underno_grad. The output head has input width32 and vocabulary16, so rank 2 adds96 trainable entries.
+Create one base model, copy itsstate_dict into two new instances, and snapshot the initial logits. Freeze every parameter in the adapter candidate before replacing its output projection with LoRAHead. Optimize only parameters withrequires_gradTrue. Keep the full and adapter optimizers separate. Evaluate both with the same held-out labels underno_grad. The output head has input width32 and vocabulary16, so rank 2 adds96 trainable entries.
 
 ## Trace the two candidate models from one base
 
 The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for64+32=96 trainable entries. The trainable ratio is96/10464=1/109, about0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
 
-The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B, T, 32]. In this fixture \(\alpha=r=2\), so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
+The output-head function is base_output(H)+(HAB)*(\(\frac{\alpha}{r}\)), with hidden states H shaped[B, T, 32]. In this fixture \(\alpha=r=2\), so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
 
 Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.
 
@@ -42,7 +42,7 @@ The held-out record again changes a prefix token while preserving a known second
 
 **Does freezing the base guarantee no gradient is needed through it?** Not universally. If trainable modules precede a frozen block, derivatives may need to pass through that block to reach them. Here the only added trainable module is the output head, so the specific dependency structure is narrower.
 
-**What does the96-parameter result establish?** The trainable size of this output-head adapter. It does not measure peak memory, latency or the quality of adapting attention projections in a different architecture.
+**What does the 96-parameter result establish?** The trainable size of this output-head adapter. It does not measure peak memory, latency or the quality of adapting attention projections in a different architecture.
 
 ## Exercise 1: Clone one base into two candidates
 
@@ -114,7 +114,7 @@ assert all(torch.equal(parameter.detach(),frozen[name]) for name,parameter in ad
 
 ## Exercise 5: Compare a frozen held-out task
 
-The question is: Evaluate prompt[7, 2] withanswer[5, 3] for both candidates using the same mask.
+The question is: Evaluate prompt[7, 2] with answer[5, 3] for both candidates using the same mask.
 
 A held-out comparison is an observation, not a test that must favor the adapter. One literal prompt remains too little evidence for a broad domain-assistant decision.
 
@@ -141,9 +141,9 @@ report={'adapter_trainable':96,'full_trainable':sum(p.numel() for p in full.para
 assert report['full_trainable']>report['adapter_trainable'] and report['steps']=={'full':20,'adapter':20}
 ```
 
-**Expected:** adapter96 entries; 20 updates each; scope literal-token task.
+**Expected:** adapter 96 entries; 20 updates each; scope literal-token task.
 
-**Verify:** Compare the computed values or written argument with adapter96 entries; 20 updates each; scope literal-token task.
+**Verify:** Compare the computed values or written argument with adapter 96 entries; 20 updates each; scope literal-token task.
 
 ## Review after comparison
 

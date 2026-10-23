@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -377,25 +423,27 @@
 </tbody></table></div>
 <p>With standardized features, the penalty treats one coefficient unit consistently across columns. Without scaling, a feature&#x27;s measurement unit can determine how strongly it is penalized.</p>
 <h4 id="guide--worked-example-inspect-validation-and-coefficients">Worked example: inspect validation and coefficients<a class="heading-anchor" href="#guide--worked-example-inspect-validation-and-coefficients" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from sklearn.datasets import load_diabetes
-from sklearn.linear_model import Lasso
-from sklearn.model_selection import cross_val_score
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_diabetes
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Lasso
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score
+<span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> make_pipeline
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-X, y = load_diabetes(return_X_y=True)
-alphas = np.logspace(-3, 1, 8)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_diabetes<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+alphas <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>logspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
 
-for alpha in alphas:
-    model = make_pipeline(
-        StandardScaler(),
-        Lasso(alpha=alpha, max_iter=20_000),
-    )
-    mean_r2 = cross_val_score(model, X, y, cv=5, scoring=&quot;r2&quot;).mean()
-    print(f&quot;{alpha=:.4f} {mean_r2=:.3f}&quot;)</code></pre>
+<span class="syntax-keyword">for</span> alpha <span class="syntax-operator">in</span> alphas<span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> make_pipeline<span class="syntax-punctuation">(</span>
+        StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>alpha<span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    mean_r2 <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">r2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>alpha<span class="syntax-string">=:</span><span class="syntax-string">.4f</span><span class="syntax-string">}</span><span class="syntax-string"> </span><span class="syntax-string">{</span>mean_r2<span class="syntax-string">=:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A stronger penalty usually increases bias and decreases variance, but the validation curve is empirical. Select <code>alpha</code> using training folds rather than the final test set.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 37 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -403,9 +451,9 @@ for alpha in alphas:
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-regularization-strength-coefficient-shrinkage-sparsity-and-stability">Concept deep dive — regularization strength, coefficient shrinkage, sparsity, and stability<a class="heading-anchor" href="#guide--concept-deep-dive-regularization-strength-coefficient-shrinkage-sparsity-and-stability" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -420,35 +468,35 @@ for alpha in alphas:
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-trace-ridge-shrinkage-as-alpha-grows">Focused example A — trace Ridge shrinkage as alpha grows<a class="heading-anchor" href="#guide--focused-example-a-trace-ridge-shrinkage-as-alpha-grows" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.datasets import make_regression
-from sklearn.linear_model import Ridge
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_regression
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-X, y = make_regression(n_samples=250, n_features=8, noise=20, random_state=3701)
-Xs = StandardScaler().fit_transform(X)
-norms = {}
-for alpha in (0.01, 1.0, 100.0):
-    coef = Ridge(alpha=alpha).fit(Xs, y).coef_
-    norms[alpha] = np.linalg.norm(coef)
-print(norms)
-assert norms[0.01] &gt; norms[1.0] &gt; norms[100.0]</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_regression<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">250</span><span class="syntax-punctuation">,</span> n_features<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> noise<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3701</span><span class="syntax-punctuation">)</span>
+Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+norms <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> alpha <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    coef <span class="syntax-operator">=</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xs<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>coef_
+    norms<span class="syntax-punctuation">[</span>alpha<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>norms<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> The L2 norm of the coefficient vector decreases as penalty strength increases.</p>
 <p><strong>Assumption to name:</strong> The same scaled design and response are used for every alpha so only regularization changes.</p>
 <h5 id="guide--focused-example-b-distinguish-lasso-sparsity-from-stable-selection">Focused example B — distinguish Lasso sparsity from stable selection<a class="heading-anchor" href="#guide--focused-example-b-distinguish-lasso-sparsity-from-stable-selection" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.datasets import make_regression
-from sklearn.linear_model import Lasso
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_regression
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Lasso
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-X, y = make_regression(n_samples=120, n_features=20, n_informative=5,
-                       noise=25, random_state=3702)
-Xs = StandardScaler().fit_transform(X)
-for alpha in (0.1, 1.0, 10.0):
-    coef = Lasso(alpha=alpha, max_iter=20_000).fit(Xs, y).coef_
-    print(alpha, {&quot;nonzero&quot;: np.count_nonzero(coef),
-                  &quot;largest_abs&quot;: np.max(np.abs(coef))})</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_regression<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">120</span><span class="syntax-punctuation">,</span> n_features<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> n_informative<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+                       noise<span class="syntax-operator">=</span><span class="syntax-number">25</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3702</span><span class="syntax-punctuation">)</span>
+Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> alpha <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    coef <span class="syntax-operator">=</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>alpha<span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xs<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>coef_
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>alpha<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonzero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+                  <span class="syntax-string">&quot;</span><span class="syntax-string">largest_abs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Stronger L1 regularization generally produces more exact zeros, but selected columns can change with data and alpha.</p>
 <p><strong>Assumption to name:</strong> The optimization converged; warnings and <code>n_iter_</code> were inspected rather than ignored.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -571,7 +619,7 @@ for alpha in (0.1, 1.0, 10.0):
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-37` — Day 37 — Regularization and Linear Models.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-37` — Day 37 — Regularization and Linear Models.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize regularization strength, coefficient shrinkage, sparsity, and stability. Use exactly these maintained learner materials:
@@ -638,18 +686,18 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Coefficient shrinkage.</li>
 <li>Tuning regularization strength.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.linear_model import Ridge, Lasso</span>
-<span>from sklearn.datasets import load_diabetes</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span>X,y = load_diabetes(return_X_y=True)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y,random_state=42)</span>
-<span>ridge = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Ridge(alpha=1.0))])</span>
-<span>lasso = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Lasso(alpha=0.01, max_iter=10000))])</span>
-<span>ridge.fit(Xtr,ytr).score(Xte,yte), lasso.fit(Xtr,ytr).score(Xte,yte)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge<span class="syntax-punctuation">,</span> Lasso</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_diabetes</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_diabetes<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">ridge <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">lasso <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">10000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">ridge<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lasso<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -667,37 +715,37 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-trace-ridge-shrinkage-as-alpha-grows">Focused example A — trace Ridge shrinkage as alpha grows<a class="heading-anchor" href="#learner--cell-4--focused-example-a-trace-ridge-shrinkage-as-alpha-grows" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The same scaled design and response are used for every alpha so only regularization changes.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.datasets import make_regression</span>
-<span>from sklearn.linear_model import Ridge</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span> </span>
-<span>X, y = make_regression(n_samples=250, n_features=8, noise=20, random_state=3701)</span>
-<span>Xs = StandardScaler().fit_transform(X)</span>
-<span>norms = {}</span>
-<span>for alpha in (0.01, 1.0, 100.0):</span>
-<span>    coef = Ridge(alpha=alpha).fit(Xs, y).coef_</span>
-<span>    norms[alpha] = np.linalg.norm(coef)</span>
-<span>print(norms)</span>
-<span>assert norms[0.01] &gt; norms[1.0] &gt; norms[100.0]</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_regression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_regression<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">250</span><span class="syntax-punctuation">,</span> n_features<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> noise<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3701</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">norms <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> alpha <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    coef <span class="syntax-operator">=</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xs<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>coef_</span>
+<span class="source-line">    norms<span class="syntax-punctuation">[</span>alpha<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>norms<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">]</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> The L2 norm of the coefficient vector decreases as penalty strength increases.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-distinguish-lasso-sparsity-from-stable-selection">Focused example B — distinguish Lasso sparsity from stable selection<a class="heading-anchor" href="#learner--cell-7--focused-example-b-distinguish-lasso-sparsity-from-stable-selection" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The optimization converged; warnings and <code>n_iter_</code> were inspected rather than ignored.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.datasets import make_regression</span>
-<span>from sklearn.linear_model import Lasso</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span> </span>
-<span>X, y = make_regression(n_samples=120, n_features=20, n_informative=5,</span>
-<span>                       noise=25, random_state=3702)</span>
-<span>Xs = StandardScaler().fit_transform(X)</span>
-<span>for alpha in (0.1, 1.0, 10.0):</span>
-<span>    coef = Lasso(alpha=alpha, max_iter=20_000).fit(Xs, y).coef_</span>
-<span>    print(alpha, {&quot;nonzero&quot;: np.count_nonzero(coef),</span>
-<span>                  &quot;largest_abs&quot;: np.max(np.abs(coef))})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_regression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Lasso</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_regression<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">120</span><span class="syntax-punctuation">,</span> n_features<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> n_informative<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                       noise<span class="syntax-operator">=</span><span class="syntax-number">25</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3702</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> alpha <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    coef <span class="syntax-operator">=</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>alpha<span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xs<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>coef_</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>alpha<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonzero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;</span><span class="syntax-string">largest_abs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>coef<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Stronger L1 regularization generally produces more exact zeros, but selected columns can change with data and alpha.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -771,22 +819,22 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Stability investigation — over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 3 — Prediction</span>
-<span> </span>
-<span> </span>
-<span># Practice 4 — Elastic Net implementation</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Scaling bug</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Stability investigation</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 3 — Prediction</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Elastic Net implementation</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Scaling bug</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Stability investigation</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -830,28 +878,28 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">import numpy as np, matplotlib.pyplot as plt
-from sklearn.datasets import load_diabetes
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import Ridge, Lasso, ElasticNet
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_diabetes
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split<span class="syntax-punctuation">,</span> cross_val_score
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
+<span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge<span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">,</span> ElasticNet
 
-X, y = load_diabetes(return_X_y=True)
-Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_diabetes<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — Alpha sweep</p>
-<pre><code class="language-python">alphas = np.logspace(-3, 2, 10)  # 0.001..100
-ridge_scores, lasso_scores = [], []
+<pre class="highlighted-code"><code class="language-python">alphas <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>logspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># 0.001..100</span>
+ridge_scores<span class="syntax-punctuation">,</span> lasso_scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 
-for a in alphas:
-    ridge = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Ridge(alpha=a))])
-    lasso = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Lasso(alpha=a, max_iter=20000))])
-    ridge_scores.append(cross_val_score(ridge, X, y, cv=5).mean())
-    lasso_scores.append(cross_val_score(lasso, X, y, cv=5).mean())
+<span class="syntax-keyword">for</span> a <span class="syntax-operator">in</span> alphas<span class="syntax-punctuation">:</span>
+    ridge <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    lasso <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>a<span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    ridge_scores<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>cross_val_score<span class="syntax-punctuation">(</span>ridge<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    lasso_scores<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>cross_val_score<span class="syntax-punctuation">(</span>lasso<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-plt.semilogx(alphas, ridge_scores, label=&#x27;Ridge CV R2&#x27;)
-plt.semilogx(alphas, lasso_scores, label=&#x27;Lasso CV R2&#x27;)
-plt.xlabel(&#x27;alpha&#x27;); plt.ylabel(&#x27;CV R2&#x27;); plt.legend(); plt.tight_layout(); plt.show()</code></pre>
+plt<span class="syntax-operator">.</span>semilogx<span class="syntax-punctuation">(</span>alphas<span class="syntax-punctuation">,</span> ridge_scores<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Ridge CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>semilogx<span class="syntax-punctuation">(</span>alphas<span class="syntax-punctuation">,</span> lasso_scores<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Lasso CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>Stronger alpha increases bias, reduces variance; sweet spot via CV</li>
@@ -859,14 +907,14 @@ plt.xlabel(&#x27;alpha&#x27;); plt.ylabel(&#x27;CV R2&#x27;); plt.legend(); plt.
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Coefficients and sparsity</p>
-<pre><code class="language-python">best_ridge = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Ridge(alpha=1.0))]).fit(Xtr, ytr)
-best_lasso = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Lasso(alpha=0.01, max_iter=20000))]).fit(Xtr, ytr)
+<pre class="highlighted-code"><code class="language-python">best_ridge <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+best_lasso <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
 
-coef_ridge = best_ridge.named_steps[&#x27;m&#x27;].coef_
-coef_lasso = best_lasso.named_steps[&#x27;m&#x27;].coef_
+coef_ridge <span class="syntax-operator">=</span> best_ridge<span class="syntax-operator">.</span>named_steps<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_
+coef_lasso <span class="syntax-operator">=</span> best_lasso<span class="syntax-operator">.</span>named_steps<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_
 
-sparsity = (coef_lasso == 0).sum()
-{&#x27;ridge_coefs&#x27;: coef_ridge, &#x27;lasso_coefs&#x27;: coef_lasso, &#x27;lasso_zeros&#x27;: int(sparsity)}</code></pre>
+sparsity <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>coef_lasso <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ridge_coefs</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> coef_ridge<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lasso_coefs</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> coef_lasso<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lasso_zeros</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sparsity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Interpretation</p>
 <ul>
 <li>Ridge shrinks but rarely zeros; Lasso promotes sparsity</li>
@@ -874,9 +922,9 @@ sparsity = (coef_lasso == 0).sum()
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — ElasticNet</p>
-<pre><code class="language-python">enet = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))])
-s = cross_val_score(enet, X, y, cv=5).mean()
-{&#x27;elasticnet_cv_r2&#x27;: s}</code></pre>
+<pre class="highlighted-code"><code class="language-python">enet <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> ElasticNet<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> l1_ratio<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+s <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>enet<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">elasticnet_cv_r2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> s<span class="syntax-punctuation">}</span></code></pre>
 <p>Takeaways</p>
 <ul>
 <li>Use CV to pick alpha (and l1_ratio for ElasticNet)</li>
@@ -919,26 +967,26 @@ s = cross_val_score(enet, X, y, cv=5).mean()
 <h5 id="solution-1--exercise-4-elastic-net-implementation">Exercise 4 — Elastic Net implementation<a class="heading-anchor" href="#solution-1--exercise-4-elastic-net-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.</p>
 <p><strong>Reasoning before implementation:</strong> Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.linear_model import ElasticNetCV
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> ElasticNetCV
+<span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-elastic = Pipeline(
-    [
-        (&quot;scale&quot;, StandardScaler()),
-        (
-            &quot;model&quot;,
-            ElasticNetCV(
-                alphas=np.logspace(-4, 1, 30),
-                l1_ratio=[0.1, 0.5, 0.9, 1.0],
-                cv=5,
-                max_iter=20_000,
-                random_state=37,
-            ),
-        ),
-    ]
-)</code></pre>
+elastic <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">[</span>
+        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">scale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">(</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+            ElasticNetCV<span class="syntax-punctuation">(</span>
+                alphas<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>logspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+                l1_ratio<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+                cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+                max_iter<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">,</span>
+                random_state<span class="syntax-operator">=</span><span class="syntax-number">37</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p>Fit only on training data, then report the selected parameters, held-out error, and near-zero coefficient count. Selection stability across folds matters more than presenting zeros as automatic feature discovery.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Elastic Net implementation — print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.</p>
@@ -991,38 +1039,38 @@ elastic = Pipeline(
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-37-solutions-regularization-and-linear-models">Day 37 — Solutions: Regularization and Linear Models<a class="heading-anchor" href="#solution-2--cell-1--day-37-solutions-regularization-and-linear-models" aria-label="Link to this section">#</a></h3>
 <p>Alpha sweeps for Ridge/Lasso, coefficient sparsity, and ElasticNet.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np, matplotlib.pyplot as plt</span>
-<span>from sklearn.datasets import load_diabetes</span>
-<span>from sklearn.model_selection import cross_val_score</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span>from sklearn.linear_model import Ridge, Lasso, ElasticNet</span>
-<span> </span>
-<span>X, y = load_diabetes(return_X_y=True)</span>
-<span>alphas = np.logspace(-3, 2, 10)</span>
-<span>ridge_scores, lasso_scores = [], []</span>
-<span>for a in alphas:</span>
-<span>    ridge = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Ridge(alpha=a))])</span>
-<span>    lasso = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Lasso(alpha=a, max_iter=20000))])</span>
-<span>    ridge_scores.append(cross_val_score(ridge, X, y, cv=5).mean())</span>
-<span>    lasso_scores.append(cross_val_score(lasso, X, y, cv=5).mean())</span>
-<span>plt.semilogx(alphas, ridge_scores, label=&#x27;Ridge CV R2&#x27;)</span>
-<span>plt.semilogx(alphas, lasso_scores, label=&#x27;Lasso CV R2&#x27;)</span>
-<span>plt.xlabel(&#x27;alpha&#x27;); plt.ylabel(&#x27;CV R2&#x27;); plt.legend(); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_diabetes</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge<span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">,</span> ElasticNet</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_diabetes<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">alphas <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>logspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">ridge_scores<span class="syntax-punctuation">,</span> lasso_scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> a <span class="syntax-operator">in</span> alphas<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    ridge <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    lasso <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span>a<span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ridge_scores<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>cross_val_score<span class="syntax-punctuation">(</span>ridge<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    lasso_scores<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>cross_val_score<span class="syntax-punctuation">(</span>lasso<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>semilogx<span class="syntax-punctuation">(</span>alphas<span class="syntax-punctuation">,</span> ridge_scores<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Ridge CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>semilogx<span class="syntax-punctuation">(</span>alphas<span class="syntax-punctuation">,</span> lasso_scores<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Lasso CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">CV R2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Fit exemplars to inspect coefficients</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</span>
-<span>ridge_ex = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Ridge(alpha=1.0))]).fit(Xtr, ytr)</span>
-<span>lasso_ex = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, Lasso(alpha=0.01, max_iter=20000))]).fit(Xtr, ytr)</span>
-<span>coef_ridge = ridge_ex.named_steps[&#x27;m&#x27;].coef_</span>
-<span>coef_lasso = lasso_ex.named_steps[&#x27;m&#x27;].coef_</span>
-<span>{&#x27;ridge&#x27;: coef_ridge, &#x27;lasso&#x27;: coef_lasso, &#x27;lasso_zeros&#x27;: int((coef_lasso==0).sum())}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Fit exemplars to inspect coefficients</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">ridge_ex <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Ridge<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">lasso_ex <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> Lasso<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">coef_ridge <span class="syntax-operator">=</span> ridge_ex<span class="syntax-operator">.</span>named_steps<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_</span>
+<span class="source-line">coef_lasso <span class="syntax-operator">=</span> lasso_ex<span class="syntax-operator">.</span>named_steps<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_</span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ridge</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> coef_ridge<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lasso</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> coef_lasso<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lasso_zeros</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>coef_lasso<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># ElasticNet quick CV</span>
-<span>enet = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;m&#x27;, ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))])</span>
-<span>cv_en = cross_val_score(enet, X, y, cv=5).mean()</span>
-<span>cv_en</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># ElasticNet quick CV</span></span>
+<span class="source-line">enet <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">m</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> ElasticNet<span class="syntax-punctuation">(</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> l1_ratio<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> max_iter<span class="syntax-operator">=</span><span class="syntax-number">20000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cv_en <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>enet<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cv_en</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-5--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
@@ -1044,27 +1092,27 @@ elastic = Pipeline(
 <h5 id="solution-2--cell-5--exercise-4-elastic-net-implementation">Exercise 4 — Elastic Net implementation<a class="heading-anchor" href="#solution-2--cell-5--exercise-4-elastic-net-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.</p>
 <p><strong>Reasoning before implementation:</strong> Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.linear_model import ElasticNetCV</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span> </span>
-<span>elastic = Pipeline(</span>
-<span>    [</span>
-<span>        (&quot;scale&quot;, StandardScaler()),</span>
-<span>        (</span>
-<span>            &quot;model&quot;,</span>
-<span>            ElasticNetCV(</span>
-<span>                alphas=np.logspace(-4, 1, 30),</span>
-<span>                l1_ratio=[0.1, 0.5, 0.9, 1.0],</span>
-<span>                cv=5,</span>
-<span>                max_iter=20_000,</span>
-<span>                random_state=37,</span>
-<span>            ),</span>
-<span>        ),</span>
-<span>    ]</span>
-<span>)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> ElasticNetCV</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"></span>
+<span class="source-line">elastic <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">scale</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            ElasticNetCV<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                alphas<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>logspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                l1_ratio<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                max_iter<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                random_state<span class="syntax-operator">=</span><span class="syntax-number">37</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Fit only on training data, then report the selected parameters, held-out error, and near-zero coefficient count. Selection stability across folds matters more than presenting zeros as automatic feature discovery.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,12 +169,12 @@
 <p>The feature order is [urgent,thanks]. Four documents have count rows [2,1],[1,0],[0,2],[0,1] and labels [1,1,0,0]. We derive the fitted probabilities by hand and compare them with a real scikit-learn MultinomialNB. This establishes implementation parity on a known fixture, not a claim of calibrated confidence or deployment accuracy.</p>
 <p>Separate the prior probability of a class from the likelihood of tokens under that class. A word can favor an urgent class while a strong nonurgent prior still makes the posterior nonurgent. Class imbalance and the target population therefore matter to the decision, not just the presence of a distinctive keyword.</p>
 <h3 id="derive-the-multinomial-likelihood-and-posterior">Derive the multinomial likelihood and posterior<a class="heading-anchor" href="#derive-the-multinomial-likelihood-and-posterior" aria-label="Link to this section">#</a></h3>
-<p>For class c and vocabulary term j, estimate theta_cj=(N_cj+alpha)/(sum_j N_cj+alpha<em>V), where N_cj is the total training count in that class and V is vocabulary size. The class prior pi_c can come from document frequencies or a specified target prior. The log score for document counts x is log pi_c+sum_j x_j</em>log theta_cj. A multinomial coefficient common to all classes cancels when comparing posterior classes for the same document.</p>
-<p>Class zero contains total counts [0,3], while class one contains [3,1]. With alpha one and V two, their token probabilities are [1/5,4/5] and [4/6,2/6]. There are two documents in each class, so priors are one-half each. For probe [1,0], unnormalized posterior weights are 0.1 and 1/3. Dividing by their sum yields [3/13,10/13].</p>
+<p>For class c and vocabulary term j, estimate <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>θ</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>N</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>α</mi></mrow><mrow><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>N</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>α</mi><mi>V</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\theta_{cj}=\frac{N_{cj}+\alpha}{\sum_j N_{cj}+\alpha V}</annotation></semantics></math>, where N_cj is the total training count in that class and V is vocabulary size. The class prior pi_c can come from document frequencies or a specified target prior. The log score for document counts x is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><msub><mi>π</mi><mi>c</mi></msub><mo>+</mo><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>x</mi><mi>j</mi></msub><mi>log</mi><msub><mi>θ</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\log\pi_c+\sum_jx_j\log\theta_{cj}</annotation></semantics></math>. A multinomial coefficient common to all classes cancels when comparing posterior classes for the same document.</p>
+<p>Class zero contains total counts [0,3], while class one contains [3,1]. With alpha one and V two, their token probabilities are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{1}{5},\frac{4}{5}]</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{4}{6},\frac{2}{6}]</annotation></semantics></math>. There are two documents in each class, so priors are one-half each. For probe [1,0], unnormalized posterior weights are 0.1 and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>. Dividing by their sum yields <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{3}{13},\frac{10}{13}]</annotation></semantics></math>.</p>
 <p>The prior counts documents, while likelihood counts token events. Mixing these denominators is a common implementation error. The normalization of each theta row provides an independent check before any posterior is calculated.</p>
 <h3 id="use-logs-and-verify-the-actual-estimator">Use logs and verify the actual estimator<a class="heading-anchor" href="#use-logs-and-verify-the-actual-estimator" aria-label="Link to this section">#</a></h3>
 <p>The model multiplies token probabilities repeatedly, so log-space addition avoids numerical underflow. To normalize scores, subtract logsumexp across classes before exponentiating. logsumexp evaluates the logarithm of the sum of exponentials stably; directly exponentiating very negative log scores can turn every class weight into zero.</p>
-<p>In the reference, model.feature_log_prob_ is compared with the hand-computed matrix, and predict_proba is compared with [3/13,10/13]. The class order is checked explicitly as [0,1]. Never assume the first probability column means urgent without reading model.classes_. A classifier can return perfectly valid numbers attached to the wrong labels if the consumer assumes a different order.</p>
+<p>In the reference, model.feature_log_prob_ is compared with the hand-computed matrix, and predict_proba is compared with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{3}{13},\frac{10}{13}]</annotation></semantics></math>. The class order is checked explicitly as [0,1]. Never assume the first probability column means urgent without reading model.classes_. A classifier can return perfectly valid numbers attached to the wrong labels if the consumer assumes a different order.</p>
 <p>An all-zero feature vector has no token evidence, so its posterior equals the prior under this formulation. This can arise from empty text or a completely out-of-vocabulary message. It is not a confident semantic judgment. A production pipeline should identify the no-evidence condition separately from ordinary classification.</p>
 <h3 id="why-naive-does-not-mean-harmless">Why naive does not mean harmless<a class="heading-anchor" href="#why-naive-does-not-mean-harmless" aria-label="Link to this section">#</a></h3>
 <p>Conditional independence assumes token events are independent given the class in the modeled likelihood. Real phrases violate this through grammar, repetition and correlated vocabulary. The assumption can overcount related evidence, producing overconfident probabilities even when the decision boundary is useful. Evaluate probability calibration separately from classification accuracy.</p>
@@ -136,22 +182,22 @@
 <p>Changing the class prior to [0.9,0.1] flips the stated urgent-only probe toward class zero, even though the token likelihoods stay fixed. Such a change is a model of a different population or decision setting, not a free accuracy trick. If label prevalence shifts, consider whether the conditional feature distributions also changed before applying a prior adjustment.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-calculate-class-conditional-word-probabilities">Worked example 1: Calculate class-conditional word probabilities<a class="heading-anchor" href="#worked-example-1-calculate-class-conditional-word-probabilities" aria-label="Link to this section">#</a></h4>
-<p>Summing the first two urgent rows gives [3,1], and summing the other rows gives [0,3]. Laplace smoothing adds one to each coordinate. The resulting likelihood rows are [0.2,0.8] for class zero and [2/3,1/3] for class one. Each sums to one.</p>
+<p>Summing the first two urgent rows gives [3,1], and summing the other rows gives [0,3]. Laplace smoothing adds one to each coordinate. The resulting likelihood rows are [0.2,0.8] for class zero and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{2}{3},\frac{1}{3}]</annotation></semantics></math> for class one. Each sums to one.</p>
 <h4 id="worked-example-2-normalize-a-posterior">Worked example 2: Normalize a posterior<a class="heading-anchor" href="#worked-example-2-normalize-a-posterior" aria-label="Link to this section">#</a></h4>
-<p>For a single urgent token, prior-times-likelihood is [0.5<em>0.2,0.5</em>(2/3)]=[0.1,1/3]. Their normalized values are [3/13,10/13]. The actual library fit must match these values and the intermediate log likelihoods within numerical tolerance.</p>
+<p>For a single urgent token, prior-times-likelihood is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mn>0.5</mn><mo>·</mo><mn>0.2</mn><mo>,</mo><mn>0.5</mn><mo>·</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo>=</mo><mo stretchy="false">[</mo><mn>0.1</mn><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.5\cdot 0.2,0.5\cdot \frac{2}{3}]=[0.1,\frac{1}{3}]</annotation></semantics></math>. Their normalized values are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{3}{13},\frac{10}{13}]</annotation></semantics></math>. The actual library fit must match these values and the intermediate log likelihoods within numerical tolerance.</p>
 <h4 id="worked-example-3-change-the-prior-and-expose-missing-context">Worked example 3: Change the prior and expose missing context<a class="heading-anchor" href="#worked-example-3-change-the-prior-and-expose-missing-context" aria-label="Link to this section">#</a></h4>
-<p>With prior [0.9,0.1], weights become [0.18,1/15], so the same token evidence favors class zero overall. Separately, urgent and not urgent remain indistinguishable if not is outside the feature vocabulary. These are different failure mechanisms: population assumptions versus missing representation.</p>
+<p>With prior [0.9,0.1], weights become <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mn>0.18</mn><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>15</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.18,\frac{1}{15}]</annotation></semantics></math>, so the same token evidence favors class zero overall. Separately, urgent and not urgent remain indistinguishable if not is outside the feature vocabulary. These are different failure mechanisms: population assumptions versus missing representation.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">import numpy as np
-counts=np.array([[0.,3.],[3.,1.]])
-likelihood=(counts+1)/(counts.sum(axis=1,keepdims=True)+2)
-print(likelihood)
-assert np.allclose(likelihood,[[1/5,4/5],[4/6,2/6]])</code></pre>
-<pre><code class="language-python">weights=np.array([.5,.5])*likelihood[:,0]
-posterior=weights/weights.sum()
-print(posterior)
-assert np.allclose(posterior,[3/13,10/13])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+likelihood<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>likelihood<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>likelihood<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-operator">/</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-operator">/</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">weights<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>likelihood<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+posterior<span class="syntax-operator">=</span>weights<span class="syntax-operator">/</span>weights<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>posterior<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>posterior<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-operator">/</span><span class="syntax-number">13</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-operator">/</span><span class="syntax-number">13</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-008.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-008-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-008.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-008_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -161,14 +207,14 @@ assert np.allclose(posterior,[3/13,10/13])</code></pre>
 <p><strong>Verify:</strong> Counts [[0,3],[3,1]] in class order[0,1]; priors [.5,.5]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Count documents for priors and tokens for likelihoods.</p>
 <h4 id="exercise-2-apply-laplace-smoothing">Exercise 2: Apply Laplace smoothing<a class="heading-anchor" href="#exercise-2-apply-laplace-smoothing" aria-label="Link to this section">#</a></h4>
-<p>Compute the class token probabilities with alpha=1 and V=2.</p>
-<p><strong>Expected:</strong> Likelihoods [[1/5,4/5],[4/6,2/6]], each summing to one.</p>
-<p><strong>Verify:</strong> Likelihoods [[1/5,4/5],[4/6,2/6]], each summing to one. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p>Compute the class token probabilities with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha=1</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>V</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">V=2</annotation></semantics></math>.</p>
+<p><strong>Expected:</strong> Likelihoods <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[\frac{1}{5},\frac{4}{5}],[\frac{4}{6},\frac{2}{6}]]</annotation></semantics></math>, each summing to one.</p>
+<p><strong>Verify:</strong> Likelihoods <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>6</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[\frac{1}{5},\frac{4}{5}],[\frac{4}{6},\frac{2}{6}]]</annotation></semantics></math>, each summing to one. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Add alpha once per vocabulary term in numerator and denominator.</p>
 <h4 id="exercise-3-compute-stable-posteriors">Exercise 3: Compute stable posteriors<a class="heading-anchor" href="#exercise-3-compute-stable-posteriors" aria-label="Link to this section">#</a></h4>
 <p>Score probe [1,0] in log space and normalize with logsumexp.</p>
-<p><strong>Expected:</strong> Posterior [3/13,10/13] for classes[0,1].</p>
-<p><strong>Verify:</strong> Posterior [3/13,10/13] for classes[0,1]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> Posterior <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{3}{13},\frac{10}{13}]</annotation></semantics></math> for classes[0,1].</p>
+<p><strong>Verify:</strong> Posterior <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>10</mn></mrow><mrow><mn>13</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{3}{13},\frac{10}{13}]</annotation></semantics></math> for classes[0,1]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Start from log prior and add count-weighted log likelihoods.</p>
 <h4 id="exercise-4-verify-library-parity">Exercise 4: Verify library parity<a class="heading-anchor" href="#exercise-4-verify-library-parity" aria-label="Link to this section">#</a></h4>
 <p>Fit MultinomialNB on the exact matrix and compare classes, feature logs and posterior.</p>
@@ -196,7 +242,7 @@ assert np.allclose(posterior,[3/13,10/13])</code></pre>
 <li><a href="https://scikit-learn.org/stable/modules/naive_bayes.html#multinomial-naive-bayes">scikit-learn multinomial Naive Bayes</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-008.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-008.
 Read courses/nlp/guides/nlp-008.md and courses/nlp/learners/nlp-008.py.
 Direct prerequisites: `nlp-007`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

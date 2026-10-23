@@ -4,55 +4,55 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Packages organize class names andaccess boundaries. Aclasspath tells the runtime where unnamed-module classes canbe found;it doesnot change the package declared in source. Java's module system adds explicitrequires andexports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
+Packages organize class names and access boundaries. Aclasspath tells the runtime where unnamed-module classes can be found;it does not change the package declared in source. Java's module system adds explicit requires and exports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
 
-This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors andruns the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
+This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors and runs the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
 
-**Package:** A namespace andaccess grouping declared by aJava source file.
+**Package:** A namespace and access grouping declared by a Java source file.
 
-**Classpath:** Locations used tofind classes in the unnamed-module model.
+**Classpath:** Locations used to find classes in the unnamed-module model.
 
-**Named module:** A unit declaring dependencies andexported packages.
+**Named module:** A unit declaring dependencies and exported packages.
 
-**Export:** Permission for other modules toaccess a package's publicAPI.
+**Export:** Permission for other modules to access a package's publicAPI.
 
 ## Reading the reference
 
-The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules tocompile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable andbounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules to compile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable and bounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Exercise 1: Inspect a platform module
 
-Task: ReadString.class module andpackage names.
+Task: Read `String.class` module and package names.
 
-The fully qualified class name,package andmodule are distinct identities. Apackage name alone doesnot establish module membership.
+The fully qualified class name,package and module are distinct identities. Apackage name alone does not establish module membership.
 
 ```java
 assert String.class.getModule().getName().equals("java.base");assert String.class.getPackageName().equals("java.lang");
 ```
 
-**Expected:** modulejava.base;packagejava.lang.
+**Expected:** module `java.base`;package `java.lang`.
 
-**Verify:** Compare the program values or named exception with modulejava.base;packagejava.lang. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with module `java.base`;package `java.lang`. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Inspect the classroom classpath context
 
 Task: ReadMain.class module metadata.
 
-The classroom compiles a singleMain.java andlaunches it byclasspath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
+The classroom compiles a singleMain.java andlaunches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
 
 ```java
 assert !Main.class.getModule().isNamed();
 ```
 
-**Expected:** Main belongs to the unnamed module in the standardclasspath launch.
+**Expected:** Main belongs to the unnamed module in the standard classpath launch.
 
-**Verify:** Compare the program values or named exception with Main belongs to the unnamed module in the standardclasspath launch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with Main belongs to the unnamed module in the standard classpath launch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Compile two real modules
 
-Task: Create the owned greeting/application fixture andcompile both with--module-source-path.
+Task: Create the owned greeting/application fixture and compile both with--module-source-path.
 
-The compiler verifies actualrequires/exports syntax andpackage layout. Merely reading a module-info string would not establish a valid build.
+The compiler verifies actualrequires/exports syntax and package layout. Merely reading a module-info string would not establish a valid build.
 
 ```java
 try(ModuleFixture fixture=new ModuleFixture()) {
@@ -62,13 +62,13 @@ try(ModuleFixture fixture=new ModuleFixture()) {
 }
 ```
 
-**Expected:** compiler exit0 andmodule-info.class files present.
+**Expected:** compiler exit 0 andmodule-info.class files present.
 
-**Verify:** Compare the program values or named exception with compiler exit0 andmodule-info.class files present. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with compiler exit 0 andmodule-info.class files present. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 4: Inspect declared dependencies andexports
+## Exercise 4: Inspect declared dependencies and exports
 
-Task: Read the compiled descriptors withModuleFinder.
+Task: Read the compiled descriptors with ModuleFinder.
 
 Descriptors provide structured evidence of the boundary. Apublic class without an export would not supply the same named-moduleAPI.
 
@@ -105,7 +105,7 @@ try(ModuleFixture fixture=new ModuleFixture()) {
 
 Task: Compile an app requiringcourse.missing instead ofcourse.greeting.
 
-The negative control proves dependency resolution is being checked. The failure is expected anddoesnot get converted into a passing runtime result.
+The negative control proves dependency resolution is being checked. The failure is expected and does not get converted into a passing runtime result.
 
 ```java
 try(ModuleFixture fixture=new ModuleFixture()) {
@@ -114,9 +114,9 @@ try(ModuleFixture fixture=new ModuleFixture()) {
 }
 ```
 
-**Expected:** nonzero compiler exit andcaptured diagnostic.
+**Expected:** nonzero compiler exit and captured diagnostic.
 
-**Verify:** Compare the program values or named exception with nonzero compiler exit andcaptured diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with nonzero compiler exit and captured diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

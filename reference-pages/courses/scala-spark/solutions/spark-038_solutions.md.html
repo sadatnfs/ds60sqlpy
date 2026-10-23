@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,68 +167,68 @@
 <h4 id="exercise-1-capture-actual-finite-streaming-progress">Exercise 1: Capture actual finite streaming progress<a class="heading-anchor" href="#exercise-1-capture-actual-finite-streaming-progress" aria-label="Link to this section">#</a></h4>
 <p>Run the supplied three-occurrence stream with ID deduplication and return a bounded observation record.</p>
 <p><strong>Expected:</strong> Input count 3, state rows 2 and exact committed bag 1:100,2:200.</p>
-<pre><code class="language-scala">def capture(spark: SparkSession,input: Path,checkpoint: Path,output: Path): Observation = {
-  observe(spark,input,checkpoint,output)
-}</code></pre>
-<pre><code class="language-python">def capture(spark,input_path,checkpoint,output):
-    return observe(spark,input_path,checkpoint,output)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">capture</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Observation</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">capture</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span></code></pre>
 <p>The actual query ingests three occurrences and retains two distinct IDs. Its state metric and committed output answer related but different questions. The literal values catch wrong payloads even if state/input counts look reasonable. Termination is observed through the query lifecycle, not an assumed wait duration.</p>
 <p><strong>Verification evidence:</strong> Join the progress record with actual readback and inactive-query evidence.</p>
 <h4 id="exercise-2-interpret-state-and-sink-metrics-with-units">Exercise 2: Interpret state and sink metrics with units<a class="heading-anchor" href="#exercise-2-interpret-state-and-sink-metrics-with-units" aria-label="Link to this section">#</a></h4>
 <p>Require a state operator and a nonnegative memory-used measurement;preserve unknown or negative sink-row sentinel values as unavailable.</p>
 <p><strong>Expected:</strong> State memory is reported in bytes. A missing or negative sink output count is not converted into zero.</p>
-<pre><code class="language-scala">def knownMetric(value: Option[Long]): Option[Long] = {
-  value.filter(_ &gt;= 0L)
-}</code></pre>
-<pre><code class="language-python">def known_metric(value):
-    return value if value is not None and value&gt;=0 else None</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">knownMetric</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  value<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">known_metric</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> value <span class="syntax-keyword">if</span> value <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> value<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span></code></pre>
 <p>A state-store memory metric is neither total JVM resident memory nor a cloud bill. A sink may not publish an exact output-row count through progress, so the example retains unavailable rather than making up zero. Actual output values come from the separate file readback.</p>
 <p><strong>Verification evidence:</strong> Check the real state record and explicit None/-1 normalization controls.</p>
 <h4 id="exercise-3-observe-bounded-state-growth-across-restart">Exercise 3: Observe bounded state growth across restart<a class="heading-anchor" href="#exercise-3-observe-bounded-state-growth-across-restart" aria-label="Link to this section">#</a></h4>
 <p>Add a new ID 3:300 and restart the same compatible checkpoint.</p>
 <p><strong>Expected:</strong> One new input row, state rows grow 2 to 3, and output gains 3:300.</p>
-<pre><code class="language-scala">def growState(spark: SparkSession,root: Path,input: Path,checkpoint: Path,output: Path): Observation = {
-  publishFile(root,input,&quot;batch-02.json&quot;,Seq(&quot;&quot;&quot;{&quot;id&quot;:3,&quot;cents&quot;:300}&quot;&quot;&quot;))
-  observe(spark,input,checkpoint,output)
-}</code></pre>
-<pre><code class="language-python">def grow_state(spark,root,input_path,checkpoint,output):
-    publish_file(root,input_path,&quot;batch-02.json&quot;,[&#x27;{&quot;id&quot;:3,&quot;cents&quot;:300}&#x27;])
-    return observe(spark,input_path,checkpoint,output)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">growState</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Observation</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  publishFile<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;batch-02.json&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;id&quot;:3,&quot;cents&quot;:300}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">grow_state</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    publish_file<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">batch-02.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:3,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:300}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>output<span class="syntax-punctuation">)</span></code></pre>
 <p>This deduplication query has no eviction policy and adds one new key, so retaining one additional state row is expected. The observation demonstrates how to connect growth to input/key policy. It does not establish a memory leak or prescribe deleting state to reduce the metric.</p>
 <p><strong>Verification evidence:</strong> Compare actual state totals, query identity and exact committed rows.</p>
 <h4 id="exercise-4-distinguish-empty-input-from-a-stuck-query">Exercise 4: Distinguish empty input from a stuck query<a class="heading-anchor" href="#exercise-4-distinguish-empty-input-from-a-stuck-query" aria-label="Link to this section">#</a></h4>
 <p>Run a separate AvailableNow query over an empty owned input directory.</p>
 <p><strong>Expected:</strong> Zero admitted rows and a terminated query;state/sink metrics may be absent.</p>
-<pre><code class="language-scala">def emptyObservation(spark: SparkSession,root: Path): Observation = {
-  val empty=Files.createDirectory(root.resolve(&quot;empty-input&quot;))
-  observe(spark,empty,root.resolve(&quot;empty-checkpoint&quot;),root.resolve(&quot;empty-output&quot;))
-}</code></pre>
-<pre><code class="language-python">def empty_observation(spark,root):
-    empty=root/&quot;empty-input&quot;;empty.mkdir()
-    return observe(spark,empty,root/&quot;empty-checkpoint&quot;,root/&quot;empty-output&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">emptyObservation</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Observation</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">val</span> empty<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createDirectory<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;empty-input&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>empty<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;empty-checkpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;empty-output&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">empty_observation</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    empty<span class="syntax-operator">=</span>root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty-input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>empty<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> observe<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>empty<span class="syntax-punctuation">,</span>root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty-checkpoint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty-output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A finite empty invocation can finish successfully without producing a readable file dataset. The program therefore does not turn missing output files into an invented zero-row schema. In a running production query, zero input would require checking source discovery, upstream supply and offsets before calling it a compute bottleneck.</p>
 <p><strong>Verification evidence:</strong> Assert zero input and termination without fabricating an output Parquet schema.</p>
 <h4 id="exercise-5-diagnose-three-seeded-incident-records">Exercise 5: Diagnose three seeded incident records<a class="heading-anchor" href="#exercise-5-diagnose-three-seeded-incident-records" aria-label="Link to this section">#</a></h4>
 <p>For the explicitly synthetic incident fixtures, choose one reversible check for skew, growing state and zero admitted input.</p>
 <p><strong>Expected:</strong> Inspect key/partition distribution;inspect watermark/key-retention policy;inspect source discovery respectively.</p>
-<pre><code class="language-scala">def nextCheck(kind: String): String = {
-  kind match { case &quot;skew&quot; =&gt; &quot;inspect_partition_keys&quot;;case &quot;state&quot; =&gt; &quot;inspect_watermark_and_key_growth&quot;;case &quot;input&quot; =&gt; &quot;inspect_source_discovery&quot;;case _ =&gt; throw new IllegalArgumentException(&quot;Unknown incident&quot;) }
-}</code></pre>
-<pre><code class="language-python">def next_check(kind):
-    checks={&quot;skew&quot;:&quot;inspect_partition_keys&quot;,&quot;state&quot;:&quot;inspect_watermark_and_key_growth&quot;,&quot;input&quot;:&quot;inspect_source_discovery&quot;}
-    if kind not in checks:raise ValueError(&quot;Unknown incident&quot;)
-    return checks[kind]</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">nextCheck</span><span class="syntax-punctuation">(</span>kind<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  kind <span class="syntax-keyword">match</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> <span class="syntax-string">&quot;skew&quot;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;inspect_partition_keys&quot;</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">case</span> <span class="syntax-string">&quot;state&quot;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;inspect_watermark_and_key_growth&quot;</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">case</span> <span class="syntax-string">&quot;input&quot;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;inspect_source_discovery&quot;</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">case</span> _ <span class="syntax-operator">=&gt;</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">IllegalArgumentException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Unknown incident&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">next_check</span><span class="syntax-punctuation">(</span>kind<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    checks<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">skew</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">inspect_partition_keys</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">state</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">inspect_watermark_and_key_growth</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">inspect_source_discovery</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">if</span> kind <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Unknown incident</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> checks<span class="syntax-punctuation">[</span>kind<span class="syntax-punctuation">]</span></code></pre>
 <p>The seeded records are reasoning fixtures, not measurements from the tiny live query. A long-tail task ratio motivates inspecting partition keys but does not prove skew without more evidence. Growing state motivates comparing watermark/key arrival/retention. Zero admitted input motivates checking source discovery before increasing executor resources.</p>
 <p><strong>Verification evidence:</strong> Compare the three exact recommendations and state one success observation for each.</p>
 <h4 id="exercise-6-sanitize-evidence-with-an-allowlist">Exercise 6: Sanitize evidence with an allowlist<a class="heading-anchor" href="#exercise-6-sanitize-evidence-with-an-allowlist" aria-label="Link to this section">#</a></h4>
 <p>Keep only stage_id, task_id, run_ms and input_records from a supplied task-event dictionary containing fake credential fields.</p>
 <p><strong>Expected:</strong> Exact four-field record, with fake token/password absent.</p>
-<pre><code class="language-scala">def sanitize(event: Map[String,String]): Map[String,String] = {
-  event.filter { case (key,_) =&gt; Set(&quot;stage_id&quot;,&quot;task_id&quot;,&quot;run_ms&quot;,&quot;input_records&quot;).contains(key) }
-}</code></pre>
-<pre><code class="language-python">def sanitize(event):
-    allowed={&quot;stage_id&quot;,&quot;task_id&quot;,&quot;run_ms&quot;,&quot;input_records&quot;}
-    return {key:value for key,value in event.items() if key in allowed}</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">sanitize</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  event<span class="syntax-punctuation">.</span>filter <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> <span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span>_<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Set</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;stage_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;task_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;run_ms&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;input_records&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">sanitize</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    allowed<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">stage_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">task_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">run_ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">input_records</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span>value <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span>value <span class="syntax-operator">in</span> event<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> key <span class="syntax-operator">in</span> allowed<span class="syntax-punctuation">}</span></code></pre>
 <p>Event logs, plans and configuration can contain paths, SQL text or application data. This small allowlist creates a reviewable sanitized task record and never prints the fake secret input. It is not a universal log-redaction system;new fields need a deliberate data-handling decision before being exported.</p>
 <p><strong>Verification evidence:</strong> Assert field set and values;do not print the unfiltered input.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>

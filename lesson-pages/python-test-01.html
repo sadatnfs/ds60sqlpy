@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -363,21 +409,23 @@
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>The learner file injects <code>FixedClock(12.0)</code> into a TTL decision. The test does not sleep and cannot become slow under load.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_test_01_architecture_generative.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_test_01_architecture_generative<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py</code></pre>
 <p>The reference solution builds:</p>
-<pre><code class="language-text">ExpiringCache -&gt; KeyValueStore Protocol -&gt; MemoryStore fake
+<pre class="highlighted-code"><code class="language-text">ExpiringCache -&gt; KeyValueStore Protocol -&gt; MemoryStore fake
                                       \-&gt; JsonFileStore real-local boundary
               -&gt; Clock Protocol       -&gt; FixedClock
 SessionService -&gt; AuditSink Protocol  -&gt; one narrow mock in the test</code></pre>
 <p>Both stores receive the same create/read/update/delete contract. Temporary-file tests prove JSON and replacement behavior that the fake cannot prove.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_test_01_architecture_generative.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_test_01_architecture_generative<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -389,36 +437,36 @@ SessionService -&gt; AuditSink Protocol  -&gt; one narrow mock in the test</code
 <li><strong>Hypothesis strategy + property:</strong> defines an input domain and invariant, with deterministic settings and no repository cache.</li>
 </ul>
 <h5 id="guide--micro-example-a-replace-wall-clock-sleep-with-an-injected-clock">Micro-example A — replace wall-clock sleep with an injected clock<a class="heading-anchor" href="#guide--micro-example-a-replace-wall-clock-sleep-with-an-injected-clock" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">class FixedClock:
-    def __init__(self, value):
-        self.value = value
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedClock</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> value
 
-    def now(self):
-        return self.value
-
-
-def is_fresh(created_at, ttl, clock):
-    if ttl &lt;= 0:
-        raise ValueError(&quot;ttl must be positive&quot;)
-    return clock.now() &lt; created_at + ttl
+    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value
 
 
-clock = FixedClock(12.0)
-assert is_fresh(10.0, 3.0, clock)
-clock.value = 13.0
-assert not is_fresh(10.0, 3.0, clock)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">is_fresh</span><span class="syntax-punctuation">(</span>created_at<span class="syntax-punctuation">,</span> ttl<span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> ttl <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ttl must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> created_at <span class="syntax-operator">+</span> ttl
+
+
+clock <span class="syntax-operator">=</span> FixedClock<span class="syntax-punctuation">(</span><span class="syntax-number">12.0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> is_fresh<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span>
+clock<span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> <span class="syntax-number">13.0</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> is_fresh<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The exact expiration boundary is tested instantly and deterministically without sleeping.</p>
 <p><strong>Why it matters:</strong> The clock represents monotonic elapsed time rather than an adjustable wall clock.</p>
 <h5 id="guide--micro-example-b-state-an-idempotence-property">Micro-example B — state an idempotence property<a class="heading-anchor" href="#guide--micro-example-b-state-an-idempotence-property" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">def normalize_tags(tags):
-    return tuple(sorted({tag.strip().lower() for tag in tags if tag.strip()}))
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">normalize_tags</span><span class="syntax-punctuation">(</span>tags<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>tag<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> tag <span class="syntax-operator">in</span> tags <span class="syntax-keyword">if</span> tag<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-original = [&quot; Python &quot;, &quot;sql&quot;, &quot;PYTHON&quot;, &quot;&quot;]
-once = normalize_tags(original)
-twice = normalize_tags(once)
-print(once)
-assert once == twice  # applying normalization twice changes nothing</code></pre>
+original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string"> Python </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">PYTHON</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+once <span class="syntax-operator">=</span> normalize_tags<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">)</span>
+twice <span class="syntax-operator">=</span> normalize_tags<span class="syntax-punctuation">(</span>once<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>once<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> once <span class="syntax-operator">==</span> twice  <span class="syntax-comment"># applying normalization twice changes nothing</span></code></pre>
 <p><strong>Expected observation:</strong> The named example demonstrates idempotence, a reusable property over a much broader input domain.</p>
 <p><strong>Why it matters:</strong> Case folding, whitespace removal, uniqueness, and sorted output are the intended public contract.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -441,7 +489,7 @@ assert once == twice  # applying normalization twice changes nothing</code></pre
 <p><strong>Verify:</strong> Complete interval merging — assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.</p>
 <h5 id="guide--3-use-hypothesis-meaningfully">3. Use Hypothesis meaningfully<a class="heading-anchor" href="#guide--3-use-hypothesis-meaningfully" aria-label="Link to this section">#</a></h5>
 <p>Generate lists of bounded integer endpoint pairs. Use:</p>
-<pre><code class="language-python">settings(max_examples=100, derandomize=True, database=None, deadline=None)</code></pre>
+<pre class="highlighted-code"><code class="language-python">settings<span class="syntax-punctuation">(</span>max_examples<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> derandomize<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> database<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> deadline<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Temporarily introduce a bug such as failing to merge adjacency. Read the smallest failing example. Restore the implementation and keep that example as a named regression test if it communicates an important rule.</p>
 <p><strong>Verify:</strong> Use Hypothesis meaningfully — run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.</p>
 <h5 id="guide--4-compare-test-doubles">4. Compare test doubles<a class="heading-anchor" href="#guide--4-compare-test-doubles" aria-label="Link to this section">#</a></h5>
@@ -491,10 +539,10 @@ assert once == twice  # applying normalization twice changes nothing</code></pre
 <li>A malformed JSON file fails visibly.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_test_01_architecture_generative -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_test_01_architecture_generative -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_test_01_architecture_generative -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_test_01_architecture_generative -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>A suite passes alone but fails together:</strong> shared mutable fixture state escaped its intended lifetime.</li>
@@ -509,7 +557,7 @@ assert once == twice  # applying normalization twice changes nothing</code></pre
 <p>Apply the same contract/fake pattern to Bridge Day 5. Continue to <code>python-lang-01</code> to make test seams precise with generics, Protocols, overloads, and runtime validation.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-test-01` — Test architecture, doubles, and generative testing.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-test-01` — Test architecture, doubles, and generative testing.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize test seams, fakes versus mocks, shared contracts, and generative properties. Use exactly these maintained learner materials:
@@ -568,219 +616,219 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-test-01 learner lab: test architecture and generative testing.</span>
-<span> </span>
-<span>Professional learner deep dive (python-test-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>A test seam makes time, storage, randomness, environment, or transport replaceable. A fake is a</span>
-<span>working simplified implementation; a mock records a narrow interaction; a real-local</span>
-<span>implementation proves serialization or filesystem behavior. Shared contract tests prevent a</span>
-<span>convenient fake from drifting away from the real boundary.  Property-based testing starts with</span>
-<span>an invariant and generates many inputs, then shrinks a failure to a small counterexample. It</span>
-<span>complements named examples and boundary tests; it does not infer the property or replace</span>
-<span>external integration evidence.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* Protocol/injected dependency: lets production policy receive a fake clock/store without</span>
-<span>  patching global implementation details.</span>
-<span>* shared contract suite: applies the same observable create/read/update/delete requirements to</span>
-<span>  fake and real-local implementations.</span>
-<span>* Hypothesis strategy + property: defines an input domain and invariant, with deterministic</span>
-<span>  settings and no repository cache.</span>
-<span> </span>
-<span>Micro-example A — replace wall-clock sleep with an injected clock::</span>
-<span> </span>
-<span>    class FixedClock:</span>
-<span>        def __init__(self, value):</span>
-<span>            self.value = value</span>
-<span>        def now(self):</span>
-<span>            return self.value</span>
-<span> </span>
-<span>    def is_fresh(created_at, ttl, clock):</span>
-<span>        if ttl &lt;= 0:</span>
-<span>            raise ValueError(&quot;ttl must be positive&quot;)</span>
-<span>        return clock.now() &lt; created_at + ttl</span>
-<span> </span>
-<span>    clock = FixedClock(12.0)</span>
-<span>    assert is_fresh(10.0, 3.0, clock)</span>
-<span>    clock.value = 13.0</span>
-<span>    assert not is_fresh(10.0, 3.0, clock)</span>
-<span> </span>
-<span>Expected: The exact expiration boundary is tested instantly and deterministically without</span>
-<span>          sleeping.</span>
-<span> </span>
-<span>Micro-example B — state an idempotence property::</span>
-<span> </span>
-<span>    def normalize_tags(tags):</span>
-<span>        return tuple(sorted({tag.strip().lower() for tag in tags if tag.strip()}))</span>
-<span> </span>
-<span>    original = [&quot; Python &quot;, &quot;sql&quot;, &quot;PYTHON&quot;, &quot;&quot;]</span>
-<span>    once = normalize_tags(original)</span>
-<span>    twice = normalize_tags(once)</span>
-<span>    print(once)</span>
-<span>    assert once == twice  # applying normalization twice changes nothing</span>
-<span> </span>
-<span>Expected: The named example demonstrates idempotence, a reusable property over a much broader</span>
-<span>          input domain.</span>
-<span> </span>
-<span>Debugging rule: Name the observable behavior, choose the smallest seam/double, run the same</span>
-<span>                contract on a real-local implementation, and retain the shrunk counterexample.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable, Iterable</span>
-<span>from typing import Protocol</span>
-<span> </span>
-<span> </span>
-<span>class Clock(Protocol):</span>
-<span>    &quot;&quot;&quot;Small seam that avoids sleeping in tests.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def now(self) -&gt; float:</span>
-<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>def ttl_is_valid(created_at: float, ttl_seconds: float, clock: Clock) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;Worked example: test time through an injected clock.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if ttl_seconds &lt;= 0:</span>
-<span>        raise ValueError(&quot;ttl_seconds must be positive&quot;)</span>
-<span>    return clock.now() &lt; created_at + ttl_seconds</span>
-<span> </span>
-<span> </span>
-<span>def merge_intervals(intervals: Iterable[tuple[int, int]]) -&gt; list[tuple[int, int]]:</span>
-<span>    &quot;&quot;&quot;Normalize and merge closed integer intervals.</span>
-<span> </span>
-<span>    TODO: normalize reversed endpoints, sort them, and merge overlapping or</span>
-<span>    touching intervals. This pure function will become the Hypothesis target.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete merge_intervals&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def choose_double(boundary: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Choose ``fake``, ``mock``, or ``real-local`` for a test boundary.</span>
-<span> </span>
-<span>    TODO: return a fake for stateful collaboration, a mock for one interaction,</span>
-<span>    and a real local implementation for a file-format contract. Reject unknown</span>
-<span>    boundary labels.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete choose_double&quot;)</span>
-<span> </span>
-<span> </span>
-<span>class FixedClock:</span>
-<span>    def __init__(self, value: float) -&gt; None:</span>
-<span>        self.value = value</span>
-<span> </span>
-<span>    def now(self) -&gt; float:</span>
-<span>        return self.value</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    clock = FixedClock(12.0)</span>
-<span>    print(&quot;Worked clock seam:&quot;, ttl_is_valid(10.0, 3.0, clock))</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;interval property target&quot;, lambda: merge_intervals([(5, 2), (3, 8)])),</span>
-<span>        (&quot;double choice&quot;, lambda: choose_double(&quot;stateful-collaborator&quot;)),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_test_01_architecture_generative.md</span>
-<span>#</span>
-<span># Exercise 1 — Choose fixture lifetime</span>
-<span># Prompt: For each resource—immutable input rows, mutable in-memory store, temporary JSON</span>
-<span># file, and database connection—choose function, class, module, or session scope. Prefer</span>
-<span># the narrowest lifetime that is fast enough and keeps tests independent.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Complete interval merging</span>
-<span># Prompt: Implement `merge_intervals`. Add examples for empty input, reversed endpoints,</span>
-<span># adjacent intervals, duplicates, and nesting. Then express properties: - output is</span>
-<span># sorted, - output intervals no longer touch, - every original integer point remains</span>
-<span># covered, and - no new point is created.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Use Hypothesis meaningfully</span>
-<span># Prompt: Generate lists of bounded integer endpoint pairs with 100 deterministic examples,</span>
-<span># no example database, and no deadline. Introduce an adjacency bug briefly, inspect the</span>
-<span># smallest counterexample, restore the implementation, and keep a useful regression case.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Compare test doubles</span>
-<span># Prompt: Complete `choose_double`. Use a fake for the stateful store, a mock only for one</span>
-<span># audit interaction, and a real temporary file for serialization behavior. Explain why</span>
-<span># mocking every store method couples tests to implementation steps.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Patch and restore process state</span>
-<span># Prompt: Use `patch.dict(os.environ, ..., clear=False)` or pytest&#x27;s `monkeypatch` fixture</span>
-<span># to change cache settings for one test. Assert the original environment is restored</span>
-<span># afterward. Prefer passing a mapping directly when the API permits it.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Add a contract failure</span>
-<span># Prompt: Create a deliberately broken store that never overwrites values. Run the shared</span>
-<span># contract and locate the exact violated behavior. Contract tests complement, rather than</span>
-<span># replace, implementation-specific failure tests.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — model a state machine</span>
-<span># Prompt: Create a deterministic rule-based state machine for `ExpiringCache`: put, get,</span>
-<span># delete, advance time, and overwrite. Compare every action with a simple in-memory model.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — add metamorphic tests</span>
-<span># Prompt: Write metamorphic relations for interval merging when the exact output is</span>
-<span># inconvenient: input permutation, duplicate insertion, endpoint translation, and applying</span>
-<span># merge twice.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — evaluate mutation-test survivors</span>
-<span># Prompt: Make three deliberate mutations: change expiry `&lt;` to `&lt;=`, stop merging</span>
-<span># adjacent intervals, and skip store overwrite. Predict which test should fail and add a</span>
-<span># focused test for any survivor.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — test concurrency without timing races</span>
-<span># Prompt: Design a two-worker cache/store test using barriers/events to force a specific</span>
-<span># interleaving. State whether the contract promises thread safety; if it does not, test</span>
-<span># the synchronization wrapper instead.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — triage a flaky test</span>
-<span># Prompt: Take a test that depends on wall-clock sleep, random data, shared files, or</span>
-<span># unordered output. Classify the cause, collect repeat evidence, and replace the unstable</span>
-<span># boundary rather than adding retries.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — design a layered verification portfolio</span>
-<span># Prompt: Map one feature across pure unit/property tests, shared store contract, real</span>
-<span># temporary-file integration, CLI/process smoke, and optional external system test. Define</span>
-<span># what each layer proves and does not prove.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-test-01 learner lab: test architecture and generative testing.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-test-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">A test seam makes time, storage, randomness, environment, or transport replaceable. A fake is a</span></span>
+<span class="source-line"><span class="syntax-string">working simplified implementation; a mock records a narrow interaction; a real-local</span></span>
+<span class="source-line"><span class="syntax-string">implementation proves serialization or filesystem behavior. Shared contract tests prevent a</span></span>
+<span class="source-line"><span class="syntax-string">convenient fake from drifting away from the real boundary.  Property-based testing starts with</span></span>
+<span class="source-line"><span class="syntax-string">an invariant and generates many inputs, then shrinks a failure to a small counterexample. It</span></span>
+<span class="source-line"><span class="syntax-string">complements named examples and boundary tests; it does not infer the property or replace</span></span>
+<span class="source-line"><span class="syntax-string">external integration evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* Protocol/injected dependency: lets production policy receive a fake clock/store without</span></span>
+<span class="source-line"><span class="syntax-string">  patching global implementation details.</span></span>
+<span class="source-line"><span class="syntax-string">* shared contract suite: applies the same observable create/read/update/delete requirements to</span></span>
+<span class="source-line"><span class="syntax-string">  fake and real-local implementations.</span></span>
+<span class="source-line"><span class="syntax-string">* Hypothesis strategy + property: defines an input domain and invariant, with deterministic</span></span>
+<span class="source-line"><span class="syntax-string">  settings and no repository cache.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — replace wall-clock sleep with an injected clock::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    class FixedClock:</span></span>
+<span class="source-line"><span class="syntax-string">        def __init__(self, value):</span></span>
+<span class="source-line"><span class="syntax-string">            self.value = value</span></span>
+<span class="source-line"><span class="syntax-string">        def now(self):</span></span>
+<span class="source-line"><span class="syntax-string">            return self.value</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def is_fresh(created_at, ttl, clock):</span></span>
+<span class="source-line"><span class="syntax-string">        if ttl &lt;= 0:</span></span>
+<span class="source-line"><span class="syntax-string">            raise ValueError(&quot;ttl must be positive&quot;)</span></span>
+<span class="source-line"><span class="syntax-string">        return clock.now() &lt; created_at + ttl</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    clock = FixedClock(12.0)</span></span>
+<span class="source-line"><span class="syntax-string">    assert is_fresh(10.0, 3.0, clock)</span></span>
+<span class="source-line"><span class="syntax-string">    clock.value = 13.0</span></span>
+<span class="source-line"><span class="syntax-string">    assert not is_fresh(10.0, 3.0, clock)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The exact expiration boundary is tested instantly and deterministically without</span></span>
+<span class="source-line"><span class="syntax-string">          sleeping.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — state an idempotence property::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def normalize_tags(tags):</span></span>
+<span class="source-line"><span class="syntax-string">        return tuple(sorted({tag.strip().lower() for tag in tags if tag.strip()}))</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    original = [&quot; Python &quot;, &quot;sql&quot;, &quot;PYTHON&quot;, &quot;&quot;]</span></span>
+<span class="source-line"><span class="syntax-string">    once = normalize_tags(original)</span></span>
+<span class="source-line"><span class="syntax-string">    twice = normalize_tags(once)</span></span>
+<span class="source-line"><span class="syntax-string">    print(once)</span></span>
+<span class="source-line"><span class="syntax-string">    assert once == twice  # applying normalization twice changes nothing</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The named example demonstrates idempotence, a reusable property over a much broader</span></span>
+<span class="source-line"><span class="syntax-string">          input domain.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Name the observable behavior, choose the smallest seam/double, run the same</span></span>
+<span class="source-line"><span class="syntax-string">                contract on a real-local implementation, and retain the shrunk counterexample.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Iterable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Protocol</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Clock</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Small seam that avoids sleeping in tests.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">ttl_is_valid</span><span class="syntax-punctuation">(</span>created_at<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> ttl_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">:</span> Clock<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked example: test time through an injected clock.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> ttl_seconds <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ttl_seconds must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> created_at <span class="syntax-operator">+</span> ttl_seconds</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_intervals</span><span class="syntax-punctuation">(</span>intervals<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Normalize and merge closed integer intervals.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: normalize reversed endpoints, sort them, and merge overlapping or</span></span>
+<span class="source-line"><span class="syntax-string">    touching intervals. This pure function will become the Hypothesis target.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete merge_intervals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_double</span><span class="syntax-punctuation">(</span>boundary<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Choose ``fake``, ``mock``, or ``real-local`` for a test boundary.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: return a fake for stateful collaboration, a mock for one interaction,</span></span>
+<span class="source-line"><span class="syntax-string">    and a real local implementation for a file-format contract. Reject unknown</span></span>
+<span class="source-line"><span class="syntax-string">    boundary labels.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete choose_double</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedClock</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    clock <span class="syntax-operator">=</span> FixedClock<span class="syntax-punctuation">(</span><span class="syntax-number">12.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked clock seam:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ttl_is_valid<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">interval property target</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> merge_intervals<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">double choice</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> choose_double<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">stateful-collaborator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_test_01_architecture_generative.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Choose fixture lifetime</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For each resource—immutable input rows, mutable in-memory store, temporary JSON</span></span>
+<span class="source-line"><span class="syntax-comment"># file, and database connection—choose function, class, module, or session scope. Prefer</span></span>
+<span class="source-line"><span class="syntax-comment"># the narrowest lifetime that is fast enough and keeps tests independent.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete interval merging</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `merge_intervals`. Add examples for empty input, reversed endpoints,</span></span>
+<span class="source-line"><span class="syntax-comment"># adjacent intervals, duplicates, and nesting. Then express properties: - output is</span></span>
+<span class="source-line"><span class="syntax-comment"># sorted, - output intervals no longer touch, - every original integer point remains</span></span>
+<span class="source-line"><span class="syntax-comment"># covered, and - no new point is created.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Use Hypothesis meaningfully</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Generate lists of bounded integer endpoint pairs with 100 deterministic examples,</span></span>
+<span class="source-line"><span class="syntax-comment"># no example database, and no deadline. Introduce an adjacency bug briefly, inspect the</span></span>
+<span class="source-line"><span class="syntax-comment"># smallest counterexample, restore the implementation, and keep a useful regression case.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Compare test doubles</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Complete `choose_double`. Use a fake for the stateful store, a mock only for one</span></span>
+<span class="source-line"><span class="syntax-comment"># audit interaction, and a real temporary file for serialization behavior. Explain why</span></span>
+<span class="source-line"><span class="syntax-comment"># mocking every store method couples tests to implementation steps.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Patch and restore process state</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use `patch.dict(os.environ, ..., clear=False)` or pytest&#x27;s `monkeypatch` fixture</span></span>
+<span class="source-line"><span class="syntax-comment"># to change cache settings for one test. Assert the original environment is restored</span></span>
+<span class="source-line"><span class="syntax-comment"># afterward. Prefer passing a mapping directly when the API permits it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Add a contract failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a deliberately broken store that never overwrites values. Run the shared</span></span>
+<span class="source-line"><span class="syntax-comment"># contract and locate the exact violated behavior. Contract tests complement, rather than</span></span>
+<span class="source-line"><span class="syntax-comment"># replace, implementation-specific failure tests.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — model a state machine</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a deterministic rule-based state machine for `ExpiringCache`: put, get,</span></span>
+<span class="source-line"><span class="syntax-comment"># delete, advance time, and overwrite. Compare every action with a simple in-memory model.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — add metamorphic tests</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write metamorphic relations for interval merging when the exact output is</span></span>
+<span class="source-line"><span class="syntax-comment"># inconvenient: input permutation, duplicate insertion, endpoint translation, and applying</span></span>
+<span class="source-line"><span class="syntax-comment"># merge twice.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — evaluate mutation-test survivors</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Make three deliberate mutations: change expiry `&lt;` to `&lt;=`, stop merging</span></span>
+<span class="source-line"><span class="syntax-comment"># adjacent intervals, and skip store overwrite. Predict which test should fail and add a</span></span>
+<span class="source-line"><span class="syntax-comment"># focused test for any survivor.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — test concurrency without timing races</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Design a two-worker cache/store test using barriers/events to force a specific</span></span>
+<span class="source-line"><span class="syntax-comment"># interleaving. State whether the contract promises thread safety; if it does not, test</span></span>
+<span class="source-line"><span class="syntax-comment"># the synchronization wrapper instead.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — triage a flaky test</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Take a test that depends on wall-clock sleep, random data, shared files, or</span></span>
+<span class="source-line"><span class="syntax-comment"># unordered output. Classify the cause, collect repeat evidence, and replace the unstable</span></span>
+<span class="source-line"><span class="syntax-comment"># boundary rather than adding retries.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — design a layered verification portfolio</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Map one feature across pure unit/property tests, shared store contract, real</span></span>
+<span class="source-line"><span class="syntax-comment"># temporary-file integration, CLI/process smoke, and optional external system test. Define</span></span>
+<span class="source-line"><span class="syntax-comment"># what each layer proves and does not prove.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -834,24 +882,24 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Run normal/boundary/failure examples, share contracts across fake/real-local, inspect a shrunk failure, prove environment restoration, and keep tests offline/deterministic.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">class FixedClock:
-    def __init__(self, value):
-        self.value = value
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedClock</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> value
 
-    def now(self):
-        return self.value
-
-
-def is_fresh(created_at, ttl, clock):
-    if ttl &lt;= 0:
-        raise ValueError(&quot;ttl must be positive&quot;)
-    return clock.now() &lt; created_at + ttl
+    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value
 
 
-clock = FixedClock(12.0)
-assert is_fresh(10.0, 3.0, clock)
-clock.value = 13.0
-assert not is_fresh(10.0, 3.0, clock)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">is_fresh</span><span class="syntax-punctuation">(</span>created_at<span class="syntax-punctuation">,</span> ttl<span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> ttl <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ttl must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> created_at <span class="syntax-operator">+</span> ttl
+
+
+clock <span class="syntax-operator">=</span> FixedClock<span class="syntax-punctuation">(</span><span class="syntax-number">12.0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> is_fresh<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span>
+clock<span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> <span class="syntax-number">13.0</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> is_fresh<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The exact expiration boundary is tested instantly and deterministically without sleeping.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -972,243 +1020,243 @@ assert not is_fresh(10.0, 3.0, clock)</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-test-01.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import json</span>
-<span>import os</span>
-<span>from collections.abc import Callable, Iterable, Mapping</span>
-<span>from dataclasses import dataclass</span>
-<span>from pathlib import Path</span>
-<span>from typing import Literal, Protocol</span>
-<span> </span>
-<span> </span>
-<span>class Clock(Protocol):</span>
-<span>    def now(self) -&gt; float:</span>
-<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class KeyValueStore(Protocol):</span>
-<span>    def get(self, key: str) -&gt; str | None:</span>
-<span>        &quot;&quot;&quot;Return a value or ``None``.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def put(self, key: str, value: str) -&gt; None:</span>
-<span>        &quot;&quot;&quot;Create or replace a value.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def delete(self, key: str) -&gt; bool:</span>
-<span>        &quot;&quot;&quot;Delete a value and report whether it existed.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class AuditSink(Protocol):</span>
-<span>    def record(self, event: str, subject: str) -&gt; None:</span>
-<span>        &quot;&quot;&quot;Record one domain event.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class CacheSettings:</span>
-<span>    ttl_seconds: float</span>
-<span>    namespace: str</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class FixedClock:</span>
-<span>    value: float</span>
-<span> </span>
-<span>    def now(self) -&gt; float:</span>
-<span>        return self.value</span>
-<span> </span>
-<span>    def advance(self, seconds: float) -&gt; None:</span>
-<span>        if seconds &lt; 0:</span>
-<span>            raise ValueError(&quot;cannot move a monotonic clock backward&quot;)</span>
-<span>        self.value += seconds</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class MemoryStore:</span>
-<span>    values: dict[str, str]</span>
-<span> </span>
-<span>    @classmethod</span>
-<span>    def empty(cls) -&gt; MemoryStore:</span>
-<span>        return cls({})</span>
-<span> </span>
-<span>    def get(self, key: str) -&gt; str | None:</span>
-<span>        return self.values.get(key)</span>
-<span> </span>
-<span>    def put(self, key: str, value: str) -&gt; None:</span>
-<span>        self.values[key] = value</span>
-<span> </span>
-<span>    def delete(self, key: str) -&gt; bool:</span>
-<span>        return self.values.pop(key, None) is not None</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class JsonFileStore:</span>
-<span>    &quot;&quot;&quot;Small real-local boundary used by the same contract tests as the fake.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    path: Path</span>
-<span> </span>
-<span>    def _read(self) -&gt; dict[str, str]:</span>
-<span>        if not self.path.exists():</span>
-<span>            return {}</span>
-<span>        payload = json.loads(self.path.read_text(encoding=&quot;utf-8&quot;))</span>
-<span>        if not isinstance(payload, dict) or not all(</span>
-<span>            isinstance(key, str) and isinstance(value, str) for key, value in payload.items()</span>
-<span>        ):</span>
-<span>            raise ValueError(&quot;store file must contain a string-to-string object&quot;)</span>
-<span>        return payload</span>
-<span> </span>
-<span>    def _write(self, values: Mapping[str, str]) -&gt; None:</span>
-<span>        self.path.parent.mkdir(parents=True, exist_ok=True)</span>
-<span>        temporary = self.path.with_suffix(&quot;.tmp&quot;)</span>
-<span>        temporary.write_text(</span>
-<span>            json.dumps(dict(sorted(values.items())), separators=(&quot;,&quot;, &quot;:&quot;)),</span>
-<span>            encoding=&quot;utf-8&quot;,</span>
-<span>        )</span>
-<span>        temporary.replace(self.path)</span>
-<span> </span>
-<span>    def get(self, key: str) -&gt; str | None:</span>
-<span>        return self._read().get(key)</span>
-<span> </span>
-<span>    def put(self, key: str, value: str) -&gt; None:</span>
-<span>        values = self._read()</span>
-<span>        values[key] = value</span>
-<span>        self._write(values)</span>
-<span> </span>
-<span>    def delete(self, key: str) -&gt; bool:</span>
-<span>        values = self._read()</span>
-<span>        existed = values.pop(key, None) is not None</span>
-<span>        if existed:</span>
-<span>            self._write(values)</span>
-<span>        return existed</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class ExpiringCache:</span>
-<span>    store: KeyValueStore</span>
-<span>    clock: Clock</span>
-<span>    settings: CacheSettings</span>
-<span> </span>
-<span>    def _key(self, key: str) -&gt; str:</span>
-<span>        return f&quot;{self.settings.namespace}:{key}&quot;</span>
-<span> </span>
-<span>    def put(self, key: str, value: str) -&gt; None:</span>
-<span>        payload = {</span>
-<span>            &quot;expires_at&quot;: self.clock.now() + self.settings.ttl_seconds,</span>
-<span>            &quot;value&quot;: value,</span>
-<span>        }</span>
-<span>        self.store.put(</span>
-<span>            self._key(key),</span>
-<span>            json.dumps(payload, separators=(&quot;,&quot;, &quot;:&quot;), sort_keys=True),</span>
-<span>        )</span>
-<span> </span>
-<span>    def get(self, key: str) -&gt; str | None:</span>
-<span>        storage_key = self._key(key)</span>
-<span>        raw = self.store.get(storage_key)</span>
-<span>        if raw is None:</span>
-<span>            return None</span>
-<span>        payload = json.loads(raw)</span>
-<span>        if not isinstance(payload, dict):</span>
-<span>            raise ValueError(&quot;cache payload must be an object&quot;)</span>
-<span>        expires_at = payload.get(&quot;expires_at&quot;)</span>
-<span>        value = payload.get(&quot;value&quot;)</span>
-<span>        if not isinstance(expires_at, int | float) or not isinstance(value, str):</span>
-<span>            raise ValueError(&quot;cache payload has the wrong schema&quot;)</span>
-<span>        if self.clock.now() &gt;= float(expires_at):</span>
-<span>            self.store.delete(storage_key)</span>
-<span>            return None</span>
-<span>        return value</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class SessionService:</span>
-<span>    cache: ExpiringCache</span>
-<span>    audit: AuditSink</span>
-<span> </span>
-<span>    def issue(self, user_id: str, session_id: str) -&gt; None:</span>
-<span>        if not user_id or not session_id:</span>
-<span>            raise ValueError(&quot;identifiers must not be blank&quot;)</span>
-<span>        self.cache.put(user_id, session_id)</span>
-<span>        self.audit.record(&quot;session_issued&quot;, user_id)</span>
-<span> </span>
-<span> </span>
-<span>def load_cache_settings(</span>
-<span>    environ: Mapping[str, str] | None = None,</span>
-<span>) -&gt; CacheSettings:</span>
-<span>    values = os.environ if environ is None else environ</span>
-<span>    namespace = values.get(&quot;DS60_CACHE_NAMESPACE&quot;, &quot;sessions&quot;).strip()</span>
-<span>    if not namespace:</span>
-<span>        raise ValueError(&quot;DS60_CACHE_NAMESPACE must not be blank&quot;)</span>
-<span>    try:</span>
-<span>        ttl_seconds = float(values.get(&quot;DS60_CACHE_TTL_SECONDS&quot;, &quot;60&quot;))</span>
-<span>    except ValueError as exc:</span>
-<span>        raise ValueError(&quot;DS60_CACHE_TTL_SECONDS must be numeric&quot;) from exc</span>
-<span>    if ttl_seconds &lt;= 0:</span>
-<span>        raise ValueError(&quot;DS60_CACHE_TTL_SECONDS must be positive&quot;)</span>
-<span>    return CacheSettings(ttl_seconds=ttl_seconds, namespace=namespace)</span>
-<span> </span>
-<span> </span>
-<span>def verify_store_contract(factory: Callable[[], KeyValueStore]) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Run reusable behavior checks against a fresh store implementation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    store = factory()</span>
-<span>    assert store.get(&quot;missing&quot;) is None</span>
-<span>    assert store.delete(&quot;missing&quot;) is False</span>
-<span>    store.put(&quot;key&quot;, &quot;first&quot;)</span>
-<span>    assert store.get(&quot;key&quot;) == &quot;first&quot;</span>
-<span>    store.put(&quot;key&quot;, &quot;second&quot;)</span>
-<span>    assert store.get(&quot;key&quot;) == &quot;second&quot;</span>
-<span>    assert store.delete(&quot;key&quot;) is True</span>
-<span>    assert store.get(&quot;key&quot;) is None</span>
-<span> </span>
-<span> </span>
-<span>def merge_intervals(intervals: Iterable[tuple[int, int]]) -&gt; list[tuple[int, int]]:</span>
-<span>    &quot;&quot;&quot;Normalize and merge overlapping or touching closed intervals.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    normalized = sorted((min(left, right), max(left, right)) for left, right in intervals)</span>
-<span>    merged: list[tuple[int, int]] = []</span>
-<span>    for left, right in normalized:</span>
-<span>        if not merged or left &gt; merged[-1][1] + 1:</span>
-<span>            merged.append((left, right))</span>
-<span>            continue</span>
-<span>        previous_left, previous_right = merged[-1]</span>
-<span>        merged[-1] = (previous_left, max(previous_right, right))</span>
-<span>    return merged</span>
-<span> </span>
-<span> </span>
-<span>DoubleChoice = Literal[&quot;fake&quot;, &quot;mock&quot;, &quot;real-local&quot;]</span>
-<span> </span>
-<span> </span>
-<span>def choose_double(boundary: str) -&gt; DoubleChoice:</span>
-<span>    choices: dict[str, DoubleChoice] = {</span>
-<span>        &quot;stateful-collaborator&quot;: &quot;fake&quot;,</span>
-<span>        &quot;single-interaction&quot;: &quot;mock&quot;,</span>
-<span>        &quot;file-format-contract&quot;: &quot;real-local&quot;,</span>
-<span>    }</span>
-<span>    try:</span>
-<span>        return choices[boundary]</span>
-<span>    except KeyError as exc:</span>
-<span>        raise ValueError(f&quot;unknown boundary: {boundary}&quot;) from exc</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    clock = FixedClock(100.0)</span>
-<span>    cache = ExpiringCache(</span>
-<span>        MemoryStore.empty(),</span>
-<span>        clock,</span>
-<span>        CacheSettings(ttl_seconds=5.0, namespace=&quot;demo&quot;),</span>
-<span>    )</span>
-<span>    cache.put(&quot;learner&quot;, &quot;session-local&quot;)</span>
-<span>    print(&quot;before expiry:&quot;, cache.get(&quot;learner&quot;))</span>
-<span>    clock.advance(5.0)</span>
-<span>    print(&quot;at expiry:&quot;, cache.get(&quot;learner&quot;))</span>
-<span>    print(&quot;merged intervals:&quot;, merge_intervals([(5, 2), (3, 8), (20, 20)]))</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-test-01.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> os</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Iterable<span class="syntax-punctuation">,</span> Mapping</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal<span class="syntax-punctuation">,</span> Protocol</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Clock</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">KeyValueStore</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return a value or ``None``.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">put</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Create or replace a value.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">delete</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Delete a value and report whether it existed.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">AuditSink</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">record</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> event<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> subject<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Record one domain event.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">CacheSettings</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    ttl_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    namespace<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedClock</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">advance</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> seconds <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cannot move a monotonic clock backward</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value <span class="syntax-operator">+</span><span class="syntax-operator">=</span> seconds</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">MemoryStore</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@classmethod</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">empty</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">cls</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> MemoryStore<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">cls</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">put</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>values<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">delete</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>values<span class="syntax-operator">.</span>pop<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">JsonFileStore</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Small real-local boundary used by the same contract tests as the fake.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">_read</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>path<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> payload<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">store file must contain a string-to-string object</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> payload</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">_write</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        temporary <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>path<span class="syntax-operator">.</span>with_suffix<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.tmp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        temporary<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        temporary<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">put</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        values <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        values<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> value</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_write<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">delete</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        values <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        existed <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>pop<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> existed<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_write<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> existed</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ExpiringCache</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    store<span class="syntax-punctuation">:</span> KeyValueStore</span>
+<span class="source-line">    clock<span class="syntax-punctuation">:</span> Clock</span>
+<span class="source-line">    settings<span class="syntax-punctuation">:</span> CacheSettings</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">_key</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>settings<span class="syntax-operator">.</span>namespace<span class="syntax-string">}</span><span class="syntax-string">:</span><span class="syntax-string">{</span>key<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">put</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        payload <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">expires_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>settings<span class="syntax-operator">.</span>ttl_seconds<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>store<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_key<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        storage_key <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_key<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        raw <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>store<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>storage_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> raw <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">        payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cache payload must be an object</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        expires_at <span class="syntax-operator">=</span> payload<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">expires_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        value <span class="syntax-operator">=</span> payload<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>expires_at<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cache payload has the wrong schema</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>expires_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>store<span class="syntax-operator">.</span>delete<span class="syntax-punctuation">(</span>storage_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">SessionService</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    cache<span class="syntax-punctuation">:</span> ExpiringCache</span>
+<span class="source-line">    audit<span class="syntax-punctuation">:</span> AuditSink</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">issue</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> user_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> session_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> user_id <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> session_id<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">identifiers must not be blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>cache<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> session_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>audit<span class="syntax-operator">.</span>record<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">session_issued</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> user_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_cache_settings</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    environ<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> CacheSettings<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> os<span class="syntax-operator">.</span>environ <span class="syntax-keyword">if</span> environ <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">else</span> environ</span>
+<span class="source-line">    namespace <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_CACHE_NAMESPACE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sessions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> namespace<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_CACHE_NAMESPACE must not be blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        ttl_seconds <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_CACHE_TTL_SECONDS</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">60</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_CACHE_TTL_SECONDS must be numeric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">    <span class="syntax-keyword">if</span> ttl_seconds <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_CACHE_TTL_SECONDS must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> CacheSettings<span class="syntax-punctuation">(</span>ttl_seconds<span class="syntax-operator">=</span>ttl_seconds<span class="syntax-punctuation">,</span> namespace<span class="syntax-operator">=</span>namespace<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify_store_contract</span><span class="syntax-punctuation">(</span>factory<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> KeyValueStore<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run reusable behavior checks against a fresh store implementation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    store <span class="syntax-operator">=</span> factory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>delete<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">    store<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    store<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">second</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">second</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>delete<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> store<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_intervals</span><span class="syntax-punctuation">(</span>intervals<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Normalize and merge overlapping or touching closed intervals.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    normalized <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> left<span class="syntax-punctuation">,</span> right <span class="syntax-operator">in</span> intervals<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    merged<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> left<span class="syntax-punctuation">,</span> right <span class="syntax-operator">in</span> normalized<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> merged <span class="syntax-operator">or</span> left <span class="syntax-operator">&gt;</span> merged<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            merged<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">continue</span></span>
+<span class="source-line">        previous_left<span class="syntax-punctuation">,</span> previous_right <span class="syntax-operator">=</span> merged<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        merged<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>previous_left<span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>previous_right<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> merged</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">DoubleChoice <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fake</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">mock</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">real-local</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_double</span><span class="syntax-punctuation">(</span>boundary<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> DoubleChoice<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    choices<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> DoubleChoice<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">stateful-collaborator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fake</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">single-interaction</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">mock</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">file-format-contract</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">real-local</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> choices<span class="syntax-punctuation">[</span>boundary<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> KeyError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown boundary: </span><span class="syntax-string">{</span>boundary<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    clock <span class="syntax-operator">=</span> FixedClock<span class="syntax-punctuation">(</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cache <span class="syntax-operator">=</span> ExpiringCache<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        MemoryStore<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        clock<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        CacheSettings<span class="syntax-punctuation">(</span>ttl_seconds<span class="syntax-operator">=</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> namespace<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">demo</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    cache<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">learner</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">session-local</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">before expiry:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> cache<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">learner</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    clock<span class="syntax-operator">.</span>advance<span class="syntax-punctuation">(</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">at expiry:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> cache<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">learner</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">merged intervals:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> merge_intervals<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

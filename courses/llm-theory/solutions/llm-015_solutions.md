@@ -62,7 +62,7 @@ PyTorch adds to existing gradients. A training loop that forgets zero_grad chang
 
 ## Exercise 4: Clear gradient state
 
-The question is: Set the gradient toNone, recompute and backpropagate once.
+The question is: Set the gradient to None, recompute and backpropagate once.
 
 Resetting before the next independent batch restores the intended one-batch derivative. Intentional accumulation needs a separate denominator and step policy.
 

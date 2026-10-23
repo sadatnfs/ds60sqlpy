@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-04.html#learner">learner SQL</a> · <a href="sql-04.html#solution-1">solution reasoning</a> · <a href="sql-04.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-04 — Outer Joins</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day04_outer_joins.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day04_outer_joins.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day04_outer_joins.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,21 +466,21 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day04_outer_joins.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT c.customer_id, c.full_name, COUNT(o.order_id) AS orders
-FROM customers c
-LEFT JOIN orders o ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name
-ORDER BY orders ASC, c.customer_id
-LIMIT 25;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> orders <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code>, and <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>customer_id</code>, <code>full_name</code>, and <code>orders</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 25</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, capped at 25 rows with columns <code>customer_id</code>, <code>full_name</code>, and <code>orders</code> from <code>customers</code>, and <code>orders</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT p.product_id, p.name, COALESCE(SUM(oi.quantity),0) AS sold_qty
-FROM order_items oi
-RIGHT JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.product_id, p.name
-ORDER BY sold_qty ASC, p.product_id
-LIMIT 25;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sold_qty
+<span class="syntax-keyword">FROM</span> order_items oi
+<span class="syntax-keyword">RIGHT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sold_qty <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>order_items</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>product_id</code>, <code>name</code>, and <code>sold_qty</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 25</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>product_id</code>, capped at 25 rows with columns <code>product_id</code>, <code>name</code>, and <code>sold_qty</code> from <code>order_items</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -519,7 +567,7 @@ LIMIT 25;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-04 — Outer Joins.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-04 — Outer Joins.
 
 I have completed the direct catalog prerequisite: `sql-03`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day04_outer_joins.md
@@ -577,104 +625,104 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 4: LEFT/RIGHT/FULL OUTER JOINs and NULL handling</span>
-<span>-- BEGINNER WORKFLOW — sql-04: Outer Joins</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day04_outer_joins.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-04/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: customers, orders, order_items, products, payments.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.</span>
-<span>-- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.</span>
-<span>-- Pitfall: A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- LEFT JOIN: customers without orders</span>
-<span>SELECT c.customer_id, c.full_name, COUNT(o.order_id) AS orders</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN orders o ON o.customer_id = c.customer_id</span>
-<span>GROUP BY c.customer_id, c.full_name</span>
-<span>ORDER BY orders ASC, c.customer_id</span>
-<span>LIMIT 25;</span>
-<span> </span>
-<span>-- RIGHT JOIN: products that appear in orders (or not)</span>
-<span>SELECT p.product_id, p.name, COALESCE(SUM(oi.quantity),0) AS sold_qty</span>
-<span>FROM order_items oi</span>
-<span>RIGHT JOIN products p ON p.product_id = oi.product_id</span>
-<span>GROUP BY p.product_id, p.name</span>
-<span>ORDER BY sold_qty ASC, p.product_id</span>
-<span>LIMIT 25;</span>
-<span> </span>
-<span>-- FULL OUTER JOIN: payments vs orders.</span>
-<span>-- A payment foreign key prevents an orphan payment in this dataset, while an</span>
-<span>-- order may legitimately have no payment. Keep both keys visible when auditing.</span>
-<span>SELECT o.order_id,</span>
-<span>       p.payment_id,</span>
-<span>       p.order_id AS payment_order_id,</span>
-<span>       o.total_amount,</span>
-<span>       p.amount AS payment_amount</span>
-<span>FROM orders o</span>
-<span>FULL OUTER JOIN payments p ON p.order_id = o.order_id</span>
-<span>WHERE o.order_id IS NULL OR p.order_id IS NULL</span>
-<span>ORDER BY COALESCE(o.order_id, p.order_id), p.payment_id; -- mismatches</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] List every customer with order count, including customers with zero orders.</span>
-<span>--    Hint: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.</span>
-<span>--    Inputs: For sql-04 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `order_count`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 1, expected output: One row per customer; zero is visible. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.</span>
-<span>--    Verify: For sql-04 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 1, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.</span>
-<span>-- 2. [Query writing] Find products that have never appeared in an order item.</span>
-<span>--    Hint: Left join and retain rows where the right-side primary key is NULL.</span>
-<span>--    Inputs: For sql-04 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.</span>
-<span>--    Verify: For sql-04 Exercise 2, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `product_id`, `name`, and `category` values match those staged rows without unintended fanout or loss. Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 2, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span>
-<span>-- 3. [Query writing] Compare monthly budgets and expenses by category with a full outer join.</span>
-<span>--    Hint: Aggregate each side to the same category/month grain before joining; preserve keys from either side.</span>
-<span>--    Inputs: For sql-04 Exercise 3, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, and `actual_amount`; keep `category` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 3, expected output: One row per category/month present in either source. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.</span>
-<span>--    Verify: For sql-04 Exercise 3, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, and `actual_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 3, run `expense_months`, and `budget_months` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span>
-<span>-- 4. [Prediction] Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.</span>
-<span>--    Hint: Place `o.status = &#x27;delivered&#x27;` in `ON`; `WHERE` would remove NULL-extended customers.</span>
-<span>--    Inputs: For sql-04 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `delivered_orders`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 4, expected output: One row per customer, including zero delivered orders. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.</span>
-<span>--    Verify: For sql-04 Exercise 4, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `delivered_orders` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 4, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.</span>
-<span>-- 5. [Debugging] Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.</span>
-<span>--    Hint: Count a non-nullable right-side key that becomes NULL for an unmatched row.</span>
-<span>--    Inputs: For sql-04 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `order_count`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 5, expected output: One row per customer with correct zero counts. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.</span>
-<span>--    Verify: For sql-04 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 5, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span>
-<span>-- 6. [Extension] Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.</span>
-<span>--    Hint: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.</span>
-<span>--    Inputs: For sql-04 Exercise 6, read from `products`, and `order_items`. Build the answer toward `matched_products`, `unsold_products`, and `orphan_item_product_ids`; keep `product_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.</span>
-<span>--    Verify: For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-04 Exercise 6, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 4: LEFT/RIGHT/FULL OUTER JOINs and NULL handling</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-04: Outer Joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day04_outer_joins.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-04/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: customers, orders, order_items, products, payments.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- LEFT JOIN: customers without orders</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> orders <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- RIGHT JOIN: products that appear in orders (or not)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sold_qty</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">RIGHT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sold_qty <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- FULL OUTER JOIN: payments vs orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A payment foreign key prevents an orphan payment in this dataset, while an</span></span>
+<span class="source-line"><span class="syntax-comment">-- order may legitimately have no payment. Keep both keys visible when auditing.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>payment_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">AS</span> payment_order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> payment_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> payments p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> p<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>payment_id<span class="syntax-punctuation">;</span> <span class="syntax-comment">-- mismatches</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] List every customer with order count, including customers with zero orders.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `order_count`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 1, expected output: One row per customer; zero is visible. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 1, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Find products that have never appeared in an order item.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Left join and retain rows where the right-side primary key is NULL.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 2, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `product_id`, `name`, and `category` values match those staged rows without unintended fanout or loss. Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 2, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Compare monthly budgets and expenses by category with a full outer join.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Aggregate each side to the same category/month grain before joining; preserve keys from either side.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 3, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, and `actual_amount`; keep `category` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 3, expected output: One row per category/month present in either source. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 3, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, and `actual_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 3, run `expense_months`, and `budget_months` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Place `o.status = &#x27;delivered&#x27;` in `ON`; `WHERE` would remove NULL-extended customers.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `delivered_orders`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 4, expected output: One row per customer, including zero delivered orders. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 4, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `delivered_orders` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 4, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `full_name` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Count a non-nullable right-side key that becomes NULL for an unmatched row.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `order_count`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 5, expected output: One row per customer with correct zero counts. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 5, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-04 Exercise 6, read from `products`, and `order_items`. Build the answer toward `matched_products`, `unsold_products`, and `orphan_item_product_ids`; keep `product_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-04 Exercise 6, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -710,10 +758,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-04-solutions-outer-joins-preserving-unmatched-rows">Day 04 solutions — OUTER JOINs: Preserving Unmatched Rows<a class="heading-anchor" href="#solution-1--day-04-solutions-outer-joins-preserving-unmatched-rows" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day04_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day04_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day04_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -746,14 +794,14 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT c.customer_id,
-       c.full_name,
-       COUNT(o.order_id) AS order_count
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name
-ORDER BY order_count DESC, c.customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_count <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer; zero is visible.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -777,14 +825,14 @@ ORDER BY order_count DESC, c.customer_id;</code></pre>
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT p.product_id,
-       p.name,
-       p.category
-FROM products AS p
-LEFT JOIN order_items AS oi
-  ON oi.product_id = p.product_id
-WHERE oi.order_item_id IS NULL
-ORDER BY p.product_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
+       p<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi
+  <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">WHERE</span> oi<span class="syntax-punctuation">.</span>order_item_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per unsold product.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -811,28 +859,28 @@ ORDER BY p.product_id;</code></pre>
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH expense_months AS (
-  SELECT e.category,
-         date_trunc(&#x27;month&#x27;, e.expense_date)::date AS period,
-         SUM(e.amount) AS actual_amount
-  FROM expenses AS e
-  GROUP BY e.category, date_trunc(&#x27;month&#x27;, e.expense_date)
-), budget_months AS (
-  SELECT b.category,
-         b.period,
-         SUM(b.amount) AS budget_amount
-  FROM budgets AS b
-  GROUP BY b.category, b.period
-)
-SELECT COALESCE(bm.category, em.category) AS category,
-       COALESCE(bm.period, em.period) AS period,
-       ROUND(bm.budget_amount, 2) AS budget_amount,
-       ROUND(em.actual_amount, 2) AS actual_amount
-FROM budget_months AS bm
-FULL JOIN expense_months AS em
-  ON em.category = bm.category
- AND em.period = bm.period
-ORDER BY period, category;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> expense_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_amount
+  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+         b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_amount
+  <span class="syntax-keyword">FROM</span> budgets <span class="syntax-keyword">AS</span> b
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> em<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span> em<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span>budget_amount<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_amount<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>em<span class="syntax-punctuation">.</span>actual_amount<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_amount
+<span class="syntax-keyword">FROM</span> budget_months <span class="syntax-keyword">AS</span> bm
+<span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> expense_months <span class="syntax-keyword">AS</span> em
+  <span class="syntax-keyword">ON</span> em<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> bm<span class="syntax-punctuation">.</span>category
+ <span class="syntax-keyword">AND</span> em<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span> <span class="syntax-operator">=</span> bm<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per category/month present in either source.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -856,15 +904,15 @@ ORDER BY period, category;</code></pre>
 <li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT c.customer_id,
-       c.full_name,
-       COUNT(o.order_id) AS delivered_orders
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
- AND o.status = &#x27;delivered&#x27;
-GROUP BY c.customer_id, c.full_name
-ORDER BY delivered_orders DESC, c.customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delivered_orders
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+ <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;delivered&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> delivered_orders <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer, including zero delivered orders.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -888,13 +936,13 @@ ORDER BY delivered_orders DESC, c.customer_id;</code></pre>
 <li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT c.customer_id,
-       COUNT(o.order_id) AS order_count
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id
-ORDER BY c.customer_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer with correct zero counts.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -918,18 +966,18 @@ ORDER BY c.customer_id;</code></pre>
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 </ul>
-<pre><code class="language-sql">SELECT COUNT(DISTINCT p.product_id) FILTER (
-         WHERE p.product_id IS NOT NULL AND oi.product_id IS NOT NULL
-       ) AS matched_products,
-       COUNT(DISTINCT p.product_id) FILTER (
-         WHERE p.product_id IS NOT NULL AND oi.product_id IS NULL
-       ) AS unsold_products,
-       COUNT(DISTINCT oi.product_id) FILTER (
-         WHERE p.product_id IS NULL AND oi.product_id IS NOT NULL
-       ) AS orphan_item_product_ids
-FROM products AS p
-FULL JOIN order_items AS oi
-  ON oi.product_id = p.product_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> matched_products<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unsold_products<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> oi<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orphan_item_product_ids
+<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi
+  <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One summary row with three mutually interpretable counts.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -982,187 +1030,187 @@ FULL JOIN order_items AS oi
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 04 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-04: Outer Joins</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day04_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day04_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.</span>
-<span>-- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.</span>
-<span>-- Pitfall: A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: List every customer with order count, including customers with zero orders.</span>
-<span>-- Why: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.</span>
-<span>-- Expected: One row per customer; zero is visible.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.full_name,</span>
-<span>       COUNT(o.order_id) AS order_count</span>
-<span>FROM customers AS c</span>
-<span>LEFT JOIN orders AS o</span>
-<span>  ON o.customer_id = c.customer_id</span>
-<span>GROUP BY c.customer_id, c.full_name</span>
-<span>ORDER BY order_count DESC, c.customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Find products that have never appeared in an order item.</span>
-<span>-- Why: Left join and retain rows where the right-side primary key is NULL.</span>
-<span>-- Expected: One row per unsold product.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT p.product_id,</span>
-<span>       p.name,</span>
-<span>       p.category</span>
-<span>FROM products AS p</span>
-<span>LEFT JOIN order_items AS oi</span>
-<span>  ON oi.product_id = p.product_id</span>
-<span>WHERE oi.order_item_id IS NULL</span>
-<span>ORDER BY p.product_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Compare monthly budgets and expenses by category with a full outer join.</span>
-<span>-- Why: Aggregate each side to the same category/month grain before joining; preserve keys from either side.</span>
-<span>-- Expected: One row per category/month present in either source.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH expense_months AS (</span>
-<span>  SELECT e.category,</span>
-<span>         date_trunc(&#x27;month&#x27;, e.expense_date)::date AS period,</span>
-<span>         SUM(e.amount) AS actual_amount</span>
-<span>  FROM expenses AS e</span>
-<span>  GROUP BY e.category, date_trunc(&#x27;month&#x27;, e.expense_date)</span>
-<span>), budget_months AS (</span>
-<span>  SELECT b.category,</span>
-<span>         b.period,</span>
-<span>         SUM(b.amount) AS budget_amount</span>
-<span>  FROM budgets AS b</span>
-<span>  GROUP BY b.category, b.period</span>
-<span>)</span>
-<span>SELECT COALESCE(bm.category, em.category) AS category,</span>
-<span>       COALESCE(bm.period, em.period) AS period,</span>
-<span>       ROUND(bm.budget_amount, 2) AS budget_amount,</span>
-<span>       ROUND(em.actual_amount, 2) AS actual_amount</span>
-<span>FROM budget_months AS bm</span>
-<span>FULL JOIN expense_months AS em</span>
-<span>  ON em.category = bm.category</span>
-<span> AND em.period = bm.period</span>
-<span>ORDER BY period, category;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.</span>
-<span>-- Why: Place `o.status = &#x27;delivered&#x27;` in `ON`; `WHERE` would remove NULL-extended customers.</span>
-<span>-- Expected: One row per customer, including zero delivered orders.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.full_name,</span>
-<span>       COUNT(o.order_id) AS delivered_orders</span>
-<span>FROM customers AS c</span>
-<span>LEFT JOIN orders AS o</span>
-<span>  ON o.customer_id = c.customer_id</span>
-<span> AND o.status = &#x27;delivered&#x27;</span>
-<span>GROUP BY c.customer_id, c.full_name</span>
-<span>ORDER BY delivered_orders DESC, c.customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.</span>
-<span>-- Why: Count a non-nullable right-side key that becomes NULL for an unmatched row.</span>
-<span>-- Expected: One row per customer with correct zero counts.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT c.customer_id,</span>
-<span>       COUNT(o.order_id) AS order_count</span>
-<span>FROM customers AS c</span>
-<span>LEFT JOIN orders AS o</span>
-<span>  ON o.customer_id = c.customer_id</span>
-<span>GROUP BY c.customer_id</span>
-<span>ORDER BY c.customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.</span>
-<span>-- Why: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.</span>
-<span>-- Expected: One summary row with three mutually interpretable counts.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span>
-<span>SELECT COUNT(DISTINCT p.product_id) FILTER (</span>
-<span>         WHERE p.product_id IS NOT NULL AND oi.product_id IS NOT NULL</span>
-<span>       ) AS matched_products,</span>
-<span>       COUNT(DISTINCT p.product_id) FILTER (</span>
-<span>         WHERE p.product_id IS NOT NULL AND oi.product_id IS NULL</span>
-<span>       ) AS unsold_products,</span>
-<span>       COUNT(DISTINCT oi.product_id) FILTER (</span>
-<span>         WHERE p.product_id IS NULL AND oi.product_id IS NOT NULL</span>
-<span>       ) AS orphan_item_product_ids</span>
-<span>FROM products AS p</span>
-<span>FULL JOIN order_items AS oi</span>
-<span>  ON oi.product_id = p.product_id;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 04 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-04: Outer Joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day04_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day04_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: List every customer with order count, including customers with zero orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer; zero is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_count <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Find products that have never appeared in an order item.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Left join and retain rows where the right-side primary key is NULL.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per unsold product.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> oi<span class="syntax-punctuation">.</span>order_item_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Compare monthly budgets and expenses by category with a full outer join.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Aggregate each side to the same category/month grain before joining; preserve keys from either side.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per category/month present in either source.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> expense_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>expense_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> budgets <span class="syntax-keyword">AS</span> b</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> em<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span> em<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>bm<span class="syntax-punctuation">.</span>budget_amount<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>em<span class="syntax-punctuation">.</span>actual_amount<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> budget_months <span class="syntax-keyword">AS</span> bm</span>
+<span class="source-line"><span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> expense_months <span class="syntax-keyword">AS</span> em</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> em<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> bm<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> em<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span> <span class="syntax-operator">=</span> bm<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Place `o.status = &#x27;delivered&#x27;` in `ON`; `WHERE` would remove NULL-extended customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer, including zero delivered orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delivered_orders</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;delivered&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> delivered_orders <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Count a non-nullable right-side key that becomes NULL for an unmatched row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer with correct zero counts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One summary row with three mutually interpretable counts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> matched_products<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unsold_products<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> oi<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orphan_item_product_ids</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> order_items <span class="syntax-keyword">AS</span> oi</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

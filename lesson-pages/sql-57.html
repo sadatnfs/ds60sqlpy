@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-57.html#learner">learner SQL</a> · <a href="sql-57.html#solution-1">solution reasoning</a> · <a href="sql-57.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-57 — Project4 BI Part3</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day57_project4_bi_part3.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day57_project4_bi_part3.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day57_project4_bi_part3.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,67 +466,67 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day57_project4_bi_part3.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH daily AS (
-  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), stats AS (
-  -- Rolling 14-day window to compute z-score style anomaly score
-  SELECT d,
-         revenue,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
-         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
-  FROM daily
-)
-SELECT d,
-       ROUND(revenue,2) AS revenue,
-       ROUND(avg14,2)   AS rolling_avg14,
-       ROUND(sd14,2)    AS rolling_sd14,
-       CASE WHEN sd14 IS NULL OR sd14 = 0 THEN 0 ELSE ROUND((revenue - avg14)/sd14, 2) END AS z_score,
-       CASE WHEN sd14 IS NOT NULL AND sd14 &gt; 0 AND ABS((revenue-avg14)/sd14) &gt;= 3 THEN &#x27;anomaly&#x27; ELSE &#x27;normal&#x27; END AS flag
-FROM stats
-ORDER BY d DESC
-LIMIT 60;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> stats <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-comment">-- Rolling 14-day window to compute z-score style anomaly score</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span>
+         revenue<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">14</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg14<span class="syntax-punctuation">,</span>
+         STDDEV_SAMP<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">14</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd14
+  <span class="syntax-keyword">FROM</span> daily
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>avg14<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>   <span class="syntax-keyword">AS</span> rolling_avg14<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>sd14<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>    <span class="syntax-keyword">AS</span> rolling_sd14<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> sd14 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> sd14 <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">ELSE</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> avg14<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>sd14<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> z_score<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> sd14 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> sd14 <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">-</span>avg14<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>sd14<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;anomaly&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;normal&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> flag
+<span class="syntax-keyword">FROM</span> stats
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">60</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>d</code>, <code>revenue</code>, <code>rolling_avg14</code>, <code>rolling_sd14</code>, <code>z_score</code>, and <code>flag</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 60</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>d</code>, <code>avg14</code>, and <code>sd14</code>, capped at 60 rows with columns <code>d</code>, <code>revenue</code>, <code>avg14</code>, <code>sd14</code>, <code>rolling_avg14</code>, and <code>rolling_sd14</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH daily AS (
-  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), med AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev FROM daily
-), dev AS (
-  SELECT d.revenue, d.d,
-         ABS(d.revenue - m.median_rev) AS abs_dev,
-         m.median_rev
-  FROM daily d CROSS JOIN med m
-), mad AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
-  FROM dev
-)
-SELECT dev.d,
-       ROUND(dev.revenue, 2) AS revenue,
-       ROUND(dev.median_rev::numeric, 2) AS median_rev,
-       CASE
-         WHEN mad.mad = 0 THEN 0
-         ELSE ROUND(
-           (0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric,
-           2
-         )
-       END AS modified_z,
-       CASE
-         WHEN mad.mad &gt; 0
-          AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) &gt;= 3.5
-         THEN &#x27;anomaly&#x27;
-         ELSE &#x27;normal&#x27;
-       END AS flag
-FROM dev
-CROSS JOIN mad
-ORDER BY dev.d DESC
-LIMIT 60;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> med <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_rev <span class="syntax-keyword">FROM</span> daily
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>d<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> m<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> abs_dev<span class="syntax-punctuation">,</span>
+         m<span class="syntax-punctuation">.</span>median_rev
+  <span class="syntax-keyword">FROM</span> daily d <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> med m
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> mad <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> abs_dev<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mad
+  <span class="syntax-keyword">FROM</span> dev
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> dev<span class="syntax-punctuation">.</span>d<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_rev<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span>
+         <span class="syntax-keyword">WHEN</span> mad<span class="syntax-punctuation">.</span>mad <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">0</span>
+         <span class="syntax-keyword">ELSE</span> ROUND<span class="syntax-punctuation">(</span>
+           <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span>
+           <span class="syntax-number">2</span>
+         <span class="syntax-punctuation">)</span>
+       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> modified_z<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span>
+         <span class="syntax-keyword">WHEN</span> mad<span class="syntax-punctuation">.</span>mad <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span>
+          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span>
+         <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;anomaly&#x27;</span>
+         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;normal&#x27;</span>
+       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> flag
+<span class="syntax-keyword">FROM</span> dev
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> mad
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dev<span class="syntax-punctuation">.</span>d <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">60</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>d</code>, <code>revenue</code>, <code>median_rev</code>, <code>modified_z</code>, and <code>flag</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 60</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>d</code>, <code>abs_dev</code>, and <code>mad</code>, capped at 60 rows with columns <code>d</code>, <code>revenue</code>, <code>median_rev</code>, <code>abs_dev</code>, <code>mad</code>, and <code>modified_z</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -547,7 +595,7 @@ LIMIT 60;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-57 — Project4 BI Part3.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-57 — Project4 BI Part3.
 
 I have completed the direct catalog prerequisite: `sql-56`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md
@@ -605,149 +653,149 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 57: Project 4 - Complex BI (Part 3)</span>
-<span>-- BEGINNER WORKFLOW — sql-57: Project4 BI Part3</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-57/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: orders.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Trend analysis, anomaly detection, and forecast accuracy</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Daily revenue baseline</span>
-<span>WITH daily AS (</span>
-<span>  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,</span>
-<span>         SUM(o.total_amount) AS revenue</span>
-<span>  FROM orders o</span>
-<span>  GROUP BY 1</span>
-<span>), stats AS (</span>
-<span>  -- Rolling 14-day window to compute z-score style anomaly score</span>
-<span>  SELECT d,</span>
-<span>         revenue,</span>
-<span>         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,</span>
-<span>         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14</span>
-<span>  FROM daily</span>
-<span>)</span>
-<span>SELECT d,</span>
-<span>       ROUND(revenue,2) AS revenue,</span>
-<span>       ROUND(avg14,2)   AS rolling_avg14,</span>
-<span>       ROUND(sd14,2)    AS rolling_sd14,</span>
-<span>       CASE WHEN sd14 IS NULL OR sd14 = 0 THEN 0 ELSE ROUND((revenue - avg14)/sd14, 2) END AS z_score,</span>
-<span>       CASE WHEN sd14 IS NOT NULL AND sd14 &gt; 0 AND ABS((revenue-avg14)/sd14) &gt;= 3 THEN &#x27;anomaly&#x27; ELSE &#x27;normal&#x27; END AS flag</span>
-<span>FROM stats</span>
-<span>ORDER BY d DESC</span>
-<span>LIMIT 60;</span>
-<span> </span>
-<span>-- MAD-based anomaly (more robust to outliers)</span>
-<span>WITH daily AS (</span>
-<span>  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,</span>
-<span>         SUM(o.total_amount) AS revenue</span>
-<span>  FROM orders o</span>
-<span>  GROUP BY 1</span>
-<span>), med AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev FROM daily</span>
-<span>), dev AS (</span>
-<span>  SELECT d.revenue, d.d,</span>
-<span>         ABS(d.revenue - m.median_rev) AS abs_dev,</span>
-<span>         m.median_rev</span>
-<span>  FROM daily d CROSS JOIN med m</span>
-<span>), mad AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad</span>
-<span>  FROM dev</span>
-<span>)</span>
-<span>SELECT dev.d,</span>
-<span>       ROUND(dev.revenue, 2) AS revenue,</span>
-<span>       ROUND(dev.median_rev::numeric, 2) AS median_rev,</span>
-<span>       CASE</span>
-<span>         WHEN mad.mad = 0 THEN 0</span>
-<span>         ELSE ROUND(</span>
-<span>           (0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric,</span>
-<span>           2</span>
-<span>         )</span>
-<span>       END AS modified_z,</span>
-<span>       CASE</span>
-<span>         WHEN mad.mad &gt; 0</span>
-<span>          AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) &gt;= 3.5</span>
-<span>         THEN &#x27;anomaly&#x27;</span>
-<span>         ELSE &#x27;normal&#x27;</span>
-<span>       END AS flag</span>
-<span>FROM dev</span>
-<span>CROSS JOIN mad</span>
-<span>ORDER BY dev.d DESC</span>
-<span>LIMIT 60;</span>
-<span> </span>
-<span>-- Forecast accuracy: compare MA(7) forecast to actual; compute MAPE for last 30 days</span>
-<span>WITH daily AS (</span>
-<span>  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,</span>
-<span>         SUM(o.total_amount) AS revenue</span>
-<span>  FROM orders o</span>
-<span>  GROUP BY 1</span>
-<span>), f AS (</span>
-<span>  SELECT d,</span>
-<span>         revenue,</span>
-<span>         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS ma7</span>
-<span>  FROM daily</span>
-<span>)</span>
-<span>SELECT d,</span>
-<span>       ROUND(revenue,2) AS actual,</span>
-<span>       ROUND(ma7,2) AS forecast,</span>
-<span>       CASE WHEN revenue IS NULL OR revenue = 0 OR ma7 IS NULL THEN NULL</span>
-<span>            ELSE ROUND(ABS(revenue - ma7)/revenue, 4) END AS ape</span>
-<span>FROM f</span>
-<span>ORDER BY d DESC</span>
-<span>LIMIT 30;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.</span>
-<span>--    Inputs: For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice. The final columns are `model`, and `mape`. The final order is `model`.</span>
-<span>--    Verify: For sql-57 Exercise 1, require exactly two rows with model values `MA(7)` and `seasonal naive (lag 7)` and require unique `model`. From the same `forecasts` rows and 180-day evaluation window, independently recompute each model&#x27;s absolute percentage-error numerator and eligible denominator, compare the resulting `mape`, and disclose that zero-revenue days and NULL forecasts are excluded.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 1, run `bounds`, `calendar`, `daily`, `complete`, and `forecasts` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 2. Flag top-10 positive and negative anomalies in the last 6 months with both SD and MAD methods.</span>
-<span>--    Inputs: For sql-57 Exercise 2, read from `orders`. Build the answer toward `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`; keep `day` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`. The final order is `direction DESC, anomaly_rank`.</span>
-<span>--    Verify: For sql-57 Exercise 2, project `day` plus the raw source columns from `orders` at each join stage; record row count and distinct `day`, then assert the final `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z` values match those staged rows without unintended fanout or loss. Give two rows the same `direction DESC` value and different `anomaly_rank` values; verify `direction DESC, anomaly_rank` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 2, run `daily`, `moments`, `median`, `deviations`, `mad`, `scored`, and `ranked` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
-<span>-- 3. Prediction: remove the calendar spine and explain why LAG(revenue, 7) now</span>
-<span>--    means seven observed rows rather than seven calendar days.</span>
-<span>--    Inputs: For sql-57 Exercise 3, read from `orders`. Build the answer toward `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`; keep `day` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 3, expected output: at most 30 rows keyed by `day`. The final columns are `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`. The final order is `c.day DESC`.</span>
-<span>--    Verify: For sql-57 Exercise 3, assert no more than 30 rows, no duplicate `day`, and no adjacent pair that violates `c.day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7` came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 3, run `bounds`, `observed_daily`, `observed_lag`, `calendar_daily`, and `calendar_lag` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
-<span>-- 4. Construction: calculate MAE, RMSE, MAPE, and the number of scored rows for</span>
-<span>--    both models over one identical evaluation window.</span>
-<span>--    Inputs: For sql-57 Exercise 4, derive `common_scoring_rows` from `orders`, reshape both forecasts to `model_name` rows, and build `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`; keep `model_name` as the final grouping key.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 4, expected output: one row per `model_name`. The final columns are `model_name`, `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`. The final order is `model_name`.</span>
-<span>--    Verify: For sql-57 Exercise 4, independently aggregate `common_scoring_rows` by `model_name` and require exactly two unique `model_name` rows. Require both models to have the same `scored_rows` and `zero_actual_rows` because they share one evaluation population; recompute `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows` for each model and compare every value, preserving NULL `mape` when the eligible percentage-error denominator is zero.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 4, run `bounds`, `daily`, `calendar_daily`, `forecasts`, and `common_scoring_rows` one at a time. Record each CTE&#x27;s row count and `model_name` uniqueness before the next stage uses it.</span>
-<span>-- 5. Debugging: repair a backtest whose moving-average frame includes CURRENT</span>
-<span>--    ROW, and prove the corrected forecast uses no information from the target day.</span>
-<span>--    Inputs: For sql-57 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, `leaky_window`, and `forecast_window`; keep `day` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, `leaky_window`, and `forecast_window`. The final order is `day DESC`.</span>
-<span>--    Verify: For sql-57 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `leaky_window`, and `forecast_window` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 5, run `daily` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
-<span>-- 6. Edge case: create a constant-valued test series and preserve NULL SD/MAD</span>
-<span>--    scores when dispersion is zero; do not silently label them normal.</span>
-<span>--    Inputs: For sql-57 Exercise 6, read from `constant`. Build the answer toward `day`, `revenue`, `sd_z`, and `modified_mad_z`; keep `day` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-57 Exercise 6, expected output: one row per `day`. The final columns are `day`, `revenue`, `sd_z`, and `modified_mad_z`. The final order is `d.day`.</span>
-<span>--    Verify: For sql-57 Exercise 6, project `day` plus the raw source columns from `constant` at each join stage; record row count and distinct `day`, then assert the final `day`, `revenue`, `sd_z`, and `modified_mad_z` values match those staged rows without unintended fanout or loss. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.</span>
-<span>--    Hint ladder, rung 1: For sql-57 Exercise 6, run `center`, `deviations`, and `dispersion` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 57: Project 4 - Complex BI (Part 3)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-57: Project4 BI Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-57/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Trend analysis, anomaly detection, and forecast accuracy</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Daily revenue baseline</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> stats <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-comment">-- Rolling 14-day window to compute z-score style anomaly score</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">14</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg14<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         STDDEV_SAMP<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">14</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd14</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>avg14<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>   <span class="syntax-keyword">AS</span> rolling_avg14<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>sd14<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>    <span class="syntax-keyword">AS</span> rolling_sd14<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> sd14 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> sd14 <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">ELSE</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> avg14<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>sd14<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> z_score<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> sd14 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> sd14 <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">-</span>avg14<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>sd14<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;anomaly&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;normal&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> flag</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> stats</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">60</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- MAD-based anomaly (more robust to outliers)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> med <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_rev <span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> m<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> abs_dev<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         m<span class="syntax-punctuation">.</span>median_rev</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily d <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> med m</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> mad <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> abs_dev<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mad</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> dev</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> dev<span class="syntax-punctuation">.</span>d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_rev<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> mad<span class="syntax-punctuation">.</span>mad <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">0</span></span>
+<span class="source-line">         <span class="syntax-keyword">ELSE</span> ROUND<span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">           <span class="syntax-number">2</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span></span>
+<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> modified_z<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> mad<span class="syntax-punctuation">.</span>mad <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>dev<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> dev<span class="syntax-punctuation">.</span>median_rev<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span></span>
+<span class="source-line">         <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;anomaly&#x27;</span></span>
+<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;normal&#x27;</span></span>
+<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> flag</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dev</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> mad</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> dev<span class="syntax-punctuation">.</span>d <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">60</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Forecast accuracy: compare MA(7) forecast to actual; compute MAPE for last 30 days</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> f <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">7</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma7</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>ma7<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> forecast<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> revenue <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> revenue <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> ma7 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">            <span class="syntax-keyword">ELSE</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> ma7<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> ape</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> f</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice. The final columns are `model`, and `mape`. The final order is `model`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 1, require exactly two rows with model values `MA(7)` and `seasonal naive (lag 7)` and require unique `model`. From the same `forecasts` rows and 180-day evaluation window, independently recompute each model&#x27;s absolute percentage-error numerator and eligible denominator, compare the resulting `mape`, and disclose that zero-revenue days and NULL forecasts are excluded.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 1, run `bounds`, `calendar`, `daily`, `complete`, and `forecasts` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Flag top-10 positive and negative anomalies in the last 6 months with both SD and MAD methods.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 2, read from `orders`. Build the answer toward `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`; keep `day` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`. The final order is `direction DESC, anomaly_rank`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 2, project `day` plus the raw source columns from `orders` at each join stage; record row count and distinct `day`, then assert the final `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z` values match those staged rows without unintended fanout or loss. Give two rows the same `direction DESC` value and different `anomaly_rank` values; verify `direction DESC, anomaly_rank` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 2, run `daily`, `moments`, `median`, `deviations`, `mad`, `scored`, and `ranked` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: remove the calendar spine and explain why LAG(revenue, 7) now</span></span>
+<span class="source-line"><span class="syntax-comment">--    means seven observed rows rather than seven calendar days.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 3, read from `orders`. Build the answer toward `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`; keep `day` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 3, expected output: at most 30 rows keyed by `day`. The final columns are `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`. The final order is `c.day DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 3, assert no more than 30 rows, no duplicate `day`, and no adjacent pair that violates `c.day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7` came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 3, run `bounds`, `observed_daily`, `observed_lag`, `calendar_daily`, and `calendar_lag` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: calculate MAE, RMSE, MAPE, and the number of scored rows for</span></span>
+<span class="source-line"><span class="syntax-comment">--    both models over one identical evaluation window.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 4, derive `common_scoring_rows` from `orders`, reshape both forecasts to `model_name` rows, and build `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`; keep `model_name` as the final grouping key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 4, expected output: one row per `model_name`. The final columns are `model_name`, `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`. The final order is `model_name`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 4, independently aggregate `common_scoring_rows` by `model_name` and require exactly two unique `model_name` rows. Require both models to have the same `scored_rows` and `zero_actual_rows` because they share one evaluation population; recompute `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows` for each model and compare every value, preserving NULL `mape` when the eligible percentage-error denominator is zero.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 4, run `bounds`, `daily`, `calendar_daily`, `forecasts`, and `common_scoring_rows` one at a time. Record each CTE&#x27;s row count and `model_name` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: repair a backtest whose moving-average frame includes CURRENT</span></span>
+<span class="source-line"><span class="syntax-comment">--    ROW, and prove the corrected forecast uses no information from the target day.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, `leaky_window`, and `forecast_window`; keep `day` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, `leaky_window`, and `forecast_window`. The final order is `day DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `leaky_window`, and `forecast_window` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 5, run `daily` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: create a constant-valued test series and preserve NULL SD/MAD</span></span>
+<span class="source-line"><span class="syntax-comment">--    scores when dispersion is zero; do not silently label them normal.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-57 Exercise 6, read from `constant`. Build the answer toward `day`, `revenue`, `sd_z`, and `modified_mad_z`; keep `day` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-57 Exercise 6, expected output: one row per `day`. The final columns are `day`, `revenue`, `sd_z`, and `modified_mad_z`. The final order is `d.day`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-57 Exercise 6, project `day` plus the raw source columns from `constant` at each join stage; record row count and distinct `day`, then assert the final `day`, `revenue`, `sd_z`, and `modified_mad_z` values match those staged rows without unintended fanout or loss. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-57 Exercise 6, run `center`, `deviations`, and `dispersion` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -783,10 +831,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-57-solutions-forecast-accuracy-and-anomalies">Day 57 Solutions — Forecast Accuracy and Anomalies<a class="heading-anchor" href="#solution-1--day-57-solutions-forecast-accuracy-and-anomalies" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day57_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day57_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day57_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -803,45 +851,45 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The exercises compare a seven-day moving average with a weekly seasonal naive, then rank recent positive and negative anomalies using standard-deviation and MAD scores. See <a href="sql-57.html#solution-2"><code>day57_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-compare-ma-7-and-lag-7-mape">Exercise 1 — Compare MA(7) and lag-7 MAPE<a class="heading-anchor" href="#solution-1--exercise-1-compare-ma-7-and-lag-7-mape" aria-label="Link to this section">#</a></h4>
 <p>The calendar spine makes “seven days ago” mean seven calendar days, including days with no orders as zero revenue.</p>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-WITH bounds AS (
-  SELECT MIN(order_date)::date AS min_day,
-         MAX(order_date)::date AS max_day
-  FROM orders
-), calendar AS (
-  SELECT day::date
-  FROM bounds
-  CROSS JOIN LATERAL generate_series(min_day, max_day, interval &#x27;1 day&#x27;) AS day
-), daily AS (
-  SELECT order_date::date AS day, SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY order_date::date
-), complete AS (
-  SELECT c.day, COALESCE(d.revenue, 0) AS revenue
-  FROM calendar c
-  LEFT JOIN daily d USING (day)
-), forecasts AS (
-  SELECT day,
-         revenue,
-         AVG(revenue) OVER (
-           ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING
-         ) AS ma7_forecast,
-         LAG(revenue, 7) OVER (ORDER BY day) AS seasonal_naive
-  FROM complete
-)
-SELECT &#x27;MA(7)&#x27; AS model,
-       ROUND(AVG(ABS(revenue - ma7_forecast) / NULLIF(revenue, 0)), 4) AS mape
-FROM forecasts
-WHERE day &gt;= CURRENT_DATE - 180
-  AND ma7_forecast IS NOT NULL
-UNION ALL
-SELECT &#x27;seasonal naive (lag 7)&#x27;,
-       ROUND(AVG(ABS(revenue - seasonal_naive) / NULLIF(revenue, 0)), 4)
-FROM forecasts
-WHERE day &gt;= CURRENT_DATE - 180
-  AND seasonal_naive IS NOT NULL
-ORDER BY model;</code></pre>
+<span class="syntax-keyword">WITH</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> min_day<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> max_day
+  <span class="syntax-keyword">FROM</span> orders
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> calendar <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+  <span class="syntax-keyword">FROM</span> bounds
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> generate_series<span class="syntax-punctuation">(</span>min_day<span class="syntax-punctuation">,</span> max_day<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> complete <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> calendar <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> daily d <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> forecasts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span>
+         revenue<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">7</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
+         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma7_forecast<span class="syntax-punctuation">,</span>
+         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive
+  <span class="syntax-keyword">FROM</span> complete
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;MA(7)&#x27;</span> <span class="syntax-keyword">AS</span> model<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> ma7_forecast<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mape
+<span class="syntax-keyword">FROM</span> forecasts
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">day</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">180</span>
+  <span class="syntax-keyword">AND</span> ma7_forecast <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;seasonal naive (lag 7)&#x27;</span><span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> seasonal_naive<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> forecasts
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">day</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">180</span>
+  <span class="syntax-keyword">AND</span> seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> model<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: two model rows. Zero-revenue days are excluded from MAPE by <code>NULLIF</code>; disclose that choice.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -854,60 +902,60 @@ ORDER BY model;</code></pre>
 <li><strong>Edge case:</strong> If every eligible actual is zero, MAPE is NULL because its denominator is empty after <code>NULLIF</code>; report that state rather than replacing it with zero.</li>
 </ul>
 <h4 id="solution-1--exercise-2-top-ten-positive-and-negative-anomalies">Exercise 2 — Top ten positive and negative anomalies<a class="heading-anchor" href="#solution-1--exercise-2-top-ten-positive-and-negative-anomalies" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-WITH daily AS (
-  SELECT order_date::date AS day, SUM(total_amount) AS revenue
-  FROM orders
-  WHERE order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;6 months&#x27;
-  GROUP BY order_date::date
-), moments AS (
-  SELECT AVG(revenue) AS mean_revenue,
-         STDDEV_SAMP(revenue) AS sd_revenue
-  FROM daily
-), median AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_revenue
-  FROM daily
-), deviations AS (
-  SELECT d.*,
-         m.median_revenue,
-         ABS(d.revenue - m.median_revenue) AS absolute_deviation
-  FROM daily d
-  CROSS JOIN median m
-), mad AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY absolute_deviation) AS mad
-  FROM deviations
-), scored AS (
-  SELECT d.day,
-         d.revenue,
-         (d.revenue - mo.mean_revenue) / NULLIF(mo.sd_revenue, 0) AS sd_z,
-         0.6745 * (d.revenue - d.median_revenue) / NULLIF(mad.mad, 0)
-           AS modified_z
-  FROM deviations d
-  CROSS JOIN moments mo
-  CROSS JOIN mad
-), ranked AS (
-  SELECT *,
-         CASE WHEN revenue &gt;= (SELECT mean_revenue FROM moments)
-              THEN &#x27;positive&#x27; ELSE &#x27;negative&#x27; END AS direction,
-         ROW_NUMBER() OVER (
-           PARTITION BY (
-             CASE WHEN revenue &gt;= (SELECT mean_revenue FROM moments)
-                  THEN &#x27;positive&#x27; ELSE &#x27;negative&#x27; END
-           )
-           ORDER BY ABS(sd_z) + ABS(modified_z) DESC, day
-         ) AS anomaly_rank
-  FROM scored
-)
-SELECT direction,
-       anomaly_rank,
-       day,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(sd_z::numeric, 3) AS sd_z,
-       ROUND(modified_z::numeric, 3) AS modified_z
-FROM ranked
-WHERE anomaly_rank &lt;= 10
-ORDER BY direction DESC, anomaly_rank;</code></pre>
+<span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;6 months&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> moments <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mean_revenue<span class="syntax-punctuation">,</span>
+         STDDEV_SAMP<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_revenue
+  <span class="syntax-keyword">FROM</span> daily
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> median <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_revenue
+  <span class="syntax-keyword">FROM</span> daily
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> deviations <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         m<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> m<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> absolute_deviation
+  <span class="syntax-keyword">FROM</span> daily d
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> median m
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> mad <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> absolute_deviation<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mad
+  <span class="syntax-keyword">FROM</span> deviations
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> scored <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span>
+         d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> mo<span class="syntax-punctuation">.</span>mean_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>mo<span class="syntax-punctuation">.</span>sd_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_z<span class="syntax-punctuation">,</span>
+         <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> d<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+           <span class="syntax-keyword">AS</span> modified_z
+  <span class="syntax-keyword">FROM</span> deviations d
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> moments mo
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> mad
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> revenue <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> mean_revenue <span class="syntax-keyword">FROM</span> moments<span class="syntax-punctuation">)</span>
+              <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;positive&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;negative&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span>
+         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+           PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span>
+             <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> revenue <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> mean_revenue <span class="syntax-keyword">FROM</span> moments<span class="syntax-punctuation">)</span>
+                  <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;positive&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;negative&#x27;</span> <span class="syntax-keyword">END</span>
+           <span class="syntax-punctuation">)</span>
+           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>sd_z<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>modified_z<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">day</span>
+         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> anomaly_rank
+  <span class="syntax-keyword">FROM</span> scored
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> direction<span class="syntax-punctuation">,</span>
+       anomaly_rank<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>sd_z<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_z<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>modified_z<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> modified_z
+<span class="syntax-keyword">FROM</span> ranked
+<span class="syntax-keyword">WHERE</span> anomaly_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">10</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> direction <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> anomaly_rank<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1036,257 +1084,257 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 57 solutions: forecast accuracy and robust anomaly detection</span>
-<span>-- SOLUTION READING MAP — sql-57: Project4 BI Part3</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day57_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day57_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: compare prior-seven-day average with seven-day seasonal naive.</span>
-<span>WITH bounds AS (</span>
-<span>  SELECT MIN(order_date)::date AS min_day,</span>
-<span>         MAX(order_date)::date AS max_day</span>
-<span>  FROM orders</span>
-<span>), calendar AS (</span>
-<span>  SELECT day::date</span>
-<span>  FROM bounds</span>
-<span>  CROSS JOIN LATERAL generate_series(min_day, max_day, interval &#x27;1 day&#x27;) AS day</span>
-<span>), daily AS (</span>
-<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY order_date::date</span>
-<span>), complete AS (</span>
-<span>  SELECT c.day, COALESCE(d.revenue, 0) AS revenue</span>
-<span>  FROM calendar c</span>
-<span>  LEFT JOIN daily d USING (day)</span>
-<span>), forecasts AS (</span>
-<span>  SELECT day,</span>
-<span>         revenue,</span>
-<span>         AVG(revenue) OVER (</span>
-<span>           ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING</span>
-<span>         ) AS ma7_forecast,</span>
-<span>         LAG(revenue, 7) OVER (ORDER BY day) AS seasonal_naive</span>
-<span>  FROM complete</span>
-<span>)</span>
-<span>SELECT &#x27;MA(7)&#x27; AS model,</span>
-<span>       ROUND(AVG(ABS(revenue - ma7_forecast) / NULLIF(revenue, 0)), 4) AS mape</span>
-<span>FROM forecasts</span>
-<span>WHERE day &gt;= CURRENT_DATE - 180</span>
-<span>  AND ma7_forecast IS NOT NULL</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;seasonal naive (lag 7)&#x27;,</span>
-<span>       ROUND(AVG(ABS(revenue - seasonal_naive) / NULLIF(revenue, 0)), 4)</span>
-<span>FROM forecasts</span>
-<span>WHERE day &gt;= CURRENT_DATE - 180</span>
-<span>  AND seasonal_naive IS NOT NULL</span>
-<span>ORDER BY model;</span>
-<span> </span>
-<span>-- Exercise 2: rank positive and negative anomalies using both standard and</span>
-<span>-- median-absolute-deviation scores.</span>
-<span>WITH daily AS (</span>
-<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  WHERE order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;6 months&#x27;</span>
-<span>  GROUP BY order_date::date</span>
-<span>), moments AS (</span>
-<span>  SELECT AVG(revenue) AS mean_revenue,</span>
-<span>         STDDEV_SAMP(revenue) AS sd_revenue</span>
-<span>  FROM daily</span>
-<span>), median AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_revenue</span>
-<span>  FROM daily</span>
-<span>), deviations AS (</span>
-<span>  SELECT d.*,</span>
-<span>         m.median_revenue,</span>
-<span>         ABS(d.revenue - m.median_revenue) AS absolute_deviation</span>
-<span>  FROM daily d</span>
-<span>  CROSS JOIN median m</span>
-<span>), mad AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY absolute_deviation) AS mad</span>
-<span>  FROM deviations</span>
-<span>), scored AS (</span>
-<span>  SELECT d.day,</span>
-<span>         d.revenue,</span>
-<span>         (d.revenue - mo.mean_revenue) / NULLIF(mo.sd_revenue, 0) AS sd_z,</span>
-<span>         0.6745 * (d.revenue - d.median_revenue) / NULLIF(mad.mad, 0)</span>
-<span>           AS modified_z</span>
-<span>  FROM deviations d</span>
-<span>  CROSS JOIN moments mo</span>
-<span>  CROSS JOIN mad</span>
-<span>), ranked AS (</span>
-<span>  SELECT *,</span>
-<span>         CASE WHEN revenue &gt;= (SELECT mean_revenue FROM moments)</span>
-<span>              THEN &#x27;positive&#x27; ELSE &#x27;negative&#x27; END AS direction,</span>
-<span>         ROW_NUMBER() OVER (</span>
-<span>           PARTITION BY (</span>
-<span>             CASE WHEN revenue &gt;= (SELECT mean_revenue FROM moments)</span>
-<span>                  THEN &#x27;positive&#x27; ELSE &#x27;negative&#x27; END</span>
-<span>           )</span>
-<span>           ORDER BY ABS(sd_z) + ABS(modified_z) DESC, day</span>
-<span>         ) AS anomaly_rank</span>
-<span>  FROM scored</span>
-<span>)</span>
-<span>SELECT direction,</span>
-<span>       anomaly_rank,</span>
-<span>       day,</span>
-<span>       ROUND(revenue, 2) AS revenue,</span>
-<span>       ROUND(sd_z::numeric, 3) AS sd_z,</span>
-<span>       ROUND(modified_z::numeric, 3) AS modified_z</span>
-<span>FROM ranked</span>
-<span>WHERE anomaly_rank &lt;= 10</span>
-<span>ORDER BY direction DESC, anomaly_rank;</span>
-<span> </span>
-<span>-- Exercise 3: show exactly why the calendar spine matters.</span>
-<span>-- `observed_daily` has one row only when orders exist, so LAG(..., 7) means</span>
-<span>-- “seven prior observations.” `calendar_daily` has one row per calendar date,</span>
-<span>-- so the same offset means “seven calendar days.”</span>
-<span>WITH bounds AS (</span>
-<span>  SELECT MIN(order_date)::date AS min_day,</span>
-<span>         MAX(order_date)::date AS max_day</span>
-<span>  FROM orders</span>
-<span>), observed_daily AS (</span>
-<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY order_date::date</span>
-<span>), observed_lag AS (</span>
-<span>  SELECT day, revenue, LAG(revenue, 7) OVER (ORDER BY day) AS observed_row_lag7</span>
-<span>  FROM observed_daily</span>
-<span>), calendar_daily AS (</span>
-<span>  SELECT calendar.day::date AS day,</span>
-<span>         COALESCE(observed.revenue, 0) AS revenue</span>
-<span>  FROM bounds</span>
-<span>  CROSS JOIN LATERAL generate_series(</span>
-<span>    bounds.min_day, bounds.max_day, interval &#x27;1 day&#x27;</span>
-<span>  ) AS calendar(day)</span>
-<span>  LEFT JOIN observed_daily observed ON observed.day = calendar.day::date</span>
-<span>), calendar_lag AS (</span>
-<span>  SELECT day, revenue, LAG(revenue, 7) OVER (ORDER BY day) AS calendar_day_lag7</span>
-<span>  FROM calendar_daily</span>
-<span>)</span>
-<span>SELECT c.day,</span>
-<span>       c.revenue,</span>
-<span>       o.observed_row_lag7,</span>
-<span>       c.calendar_day_lag7</span>
-<span>FROM calendar_lag c</span>
-<span>LEFT JOIN observed_lag o USING (day)</span>
-<span>ORDER BY c.day DESC</span>
-<span>LIMIT 30;</span>
-<span> </span>
-<span>-- Exercise 4: score both forecast models on one identical evaluation set.</span>
-<span>-- 1. `calendar_daily` establishes one row per date and a documented zero policy.</span>
-<span>-- 2. `forecasts` uses only prior rows: MA(7) ends at 1 PRECEDING, while the</span>
-<span>--    seasonal model reads exactly seven calendar rows back.</span>
-<span>-- 3. LATERAL VALUES reshapes the two model columns to a common tidy model grain.</span>
-<span>-- 4. The WHERE clause requires both forecasts, so model comparisons use the</span>
-<span>--    same dates. MAPE additionally excludes zero actuals through NULLIF.</span>
-<span>WITH bounds AS (</span>
-<span>  SELECT MIN(order_date)::date AS min_day,</span>
-<span>         MAX(order_date)::date AS max_day</span>
-<span>  FROM orders</span>
-<span>), daily AS (</span>
-<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY order_date::date</span>
-<span>), calendar_daily AS (</span>
-<span>  SELECT calendar.day::date AS day, COALESCE(d.revenue, 0) AS revenue</span>
-<span>  FROM bounds</span>
-<span>  CROSS JOIN LATERAL generate_series(</span>
-<span>    bounds.min_day, bounds.max_day, interval &#x27;1 day&#x27;</span>
-<span>  ) AS calendar(day)</span>
-<span>  LEFT JOIN daily d ON d.day = calendar.day::date</span>
-<span>), forecasts AS (</span>
-<span>  SELECT day,</span>
-<span>         revenue,</span>
-<span>         AVG(revenue) OVER (</span>
-<span>           ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING</span>
-<span>         ) AS ma7,</span>
-<span>         LAG(revenue, 7) OVER (ORDER BY day) AS seasonal_naive</span>
-<span>  FROM calendar_daily</span>
-<span>), common_scoring_rows AS (</span>
-<span>  SELECT f.day,</span>
-<span>         f.revenue AS actual,</span>
-<span>         model.model_name,</span>
-<span>         model.forecast,</span>
-<span>         f.revenue - model.forecast AS error</span>
-<span>  FROM forecasts f</span>
-<span>  CROSS JOIN LATERAL (</span>
-<span>    VALUES (&#x27;MA(7)&#x27;, f.ma7), (&#x27;seasonal naive&#x27;, f.seasonal_naive)</span>
-<span>  ) AS model(model_name, forecast)</span>
-<span>  WHERE f.ma7 IS NOT NULL</span>
-<span>    AND f.seasonal_naive IS NOT NULL</span>
-<span>    AND f.day &gt;= (SELECT max_day FROM bounds) - 180</span>
-<span>)</span>
-<span>SELECT model_name,</span>
-<span>       COUNT(*) AS scored_rows,</span>
-<span>       ROUND(AVG(ABS(error)), 2) AS mae,</span>
-<span>       ROUND(SQRT(AVG(POWER(error, 2))), 2) AS rmse,</span>
-<span>       ROUND(AVG(ABS(error) / NULLIF(actual, 0)), 4) AS mape,</span>
-<span>       COUNT(*) FILTER (WHERE actual = 0) AS zero_actual_rows</span>
-<span>FROM common_scoring_rows</span>
-<span>GROUP BY model_name</span>
-<span>ORDER BY model_name;</span>
-<span> </span>
-<span>-- Exercise 5: place the leaky and honest frames side by side. The leaky result</span>
-<span>-- includes the current actual, so it is not a forecast of that day. The honest</span>
-<span>-- frame ends at 1 PRECEDING and can be computed before the target is known.</span>
-<span>WITH daily AS (</span>
-<span>  SELECT order_date::date AS day, SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY order_date::date</span>
-<span>)</span>
-<span>SELECT day,</span>
-<span>       revenue,</span>
-<span>       AVG(revenue) OVER (</span>
-<span>         ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</span>
-<span>       ) AS leaky_window,</span>
-<span>       AVG(revenue) OVER (</span>
-<span>         ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING</span>
-<span>       ) AS forecast_window</span>
-<span>FROM daily</span>
-<span>ORDER BY day DESC</span>
-<span>LIMIT 20;</span>
-<span> </span>
-<span>-- Exercise 6: constant data has zero SD and zero MAD. Both denominators use</span>
-<span>-- NULLIF, preserving an undefined score as NULL instead of declaring the points</span>
-<span>-- “normal” with a fabricated zero score.</span>
-<span>WITH constant(day, revenue) AS (</span>
-<span>  VALUES (date &#x27;2026-01-01&#x27;, 100::numeric),</span>
-<span>         (date &#x27;2026-01-02&#x27;, 100::numeric),</span>
-<span>         (date &#x27;2026-01-03&#x27;, 100::numeric)</span>
-<span>), center AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_revenue,</span>
-<span>         AVG(revenue) AS mean_revenue,</span>
-<span>         STDDEV_SAMP(revenue) AS sd_revenue</span>
-<span>  FROM constant</span>
-<span>), deviations AS (</span>
-<span>  SELECT c.*, ctr.*,</span>
-<span>         ABS(c.revenue - ctr.median_revenue) AS absolute_deviation</span>
-<span>  FROM constant c CROSS JOIN center ctr</span>
-<span>), dispersion AS (</span>
-<span>  SELECT percentile_cont(0.5) WITHIN GROUP (</span>
-<span>           ORDER BY absolute_deviation</span>
-<span>         ) AS mad</span>
-<span>  FROM deviations</span>
-<span>)</span>
-<span>SELECT d.day,</span>
-<span>       d.revenue,</span>
-<span>       (d.revenue - d.mean_revenue) / NULLIF(d.sd_revenue, 0) AS sd_z,</span>
-<span>       0.6745 * (d.revenue - d.median_revenue) / NULLIF(p.mad, 0)</span>
-<span>         AS modified_mad_z</span>
-<span>FROM deviations d</span>
-<span>CROSS JOIN dispersion p</span>
-<span>ORDER BY d.day;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 57 solutions: forecast accuracy and robust anomaly detection</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-57: Project4 BI Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day57_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day57_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: compare prior-seven-day average with seven-day seasonal naive.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> min_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> max_day</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> calendar <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> bounds</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> generate_series<span class="syntax-punctuation">(</span>min_day<span class="syntax-punctuation">,</span> max_day<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> complete <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> calendar <span class="syntax-keyword">c</span></span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> daily d <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> forecasts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">7</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING</span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma7_forecast<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> complete</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;MA(7)&#x27;</span> <span class="syntax-keyword">AS</span> model<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> ma7_forecast<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mape</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> forecasts</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">day</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">180</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> ma7_forecast <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;seasonal naive (lag 7)&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> seasonal_naive<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> forecasts</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">day</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">180</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> model<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: rank positive and negative anomalies using both standard and</span></span>
+<span class="source-line"><span class="syntax-comment">-- median-absolute-deviation scores.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;6 months&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> moments <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mean_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         STDDEV_SAMP<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> median <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> deviations <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         m<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> m<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> absolute_deviation</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> daily d</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> median m</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> mad <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> absolute_deviation<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mad</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> deviations</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> scored <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> mo<span class="syntax-punctuation">.</span>mean_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>mo<span class="syntax-punctuation">.</span>sd_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_z<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> d<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>mad<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">           <span class="syntax-keyword">AS</span> modified_z</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> deviations d</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> moments mo</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> mad</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> revenue <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> mean_revenue <span class="syntax-keyword">FROM</span> moments<span class="syntax-punctuation">)</span></span>
+<span class="source-line">              <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;positive&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;negative&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">             <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> revenue <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> mean_revenue <span class="syntax-keyword">FROM</span> moments<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                  <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;positive&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;negative&#x27;</span> <span class="syntax-keyword">END</span></span>
+<span class="source-line">           <span class="syntax-punctuation">)</span></span>
+<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>sd_z<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>modified_z<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">day</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> anomaly_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> scored</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> direction<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       anomaly_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>sd_z<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_z<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>modified_z<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> modified_z</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> anomaly_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">10</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> direction <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> anomaly_rank<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: show exactly why the calendar spine matters.</span></span>
+<span class="source-line"><span class="syntax-comment">-- `observed_daily` has one row only when orders exist, so LAG(..., 7) means</span></span>
+<span class="source-line"><span class="syntax-comment">-- “seven prior observations.” `calendar_daily` has one row per calendar date,</span></span>
+<span class="source-line"><span class="syntax-comment">-- so the same offset means “seven calendar days.”</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> min_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> max_day</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> observed_daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> observed_lag <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> observed_row_lag7</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> observed_daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> calendar_daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> calendar<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> bounds</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> generate_series<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    bounds<span class="syntax-punctuation">.</span>min_day<span class="syntax-punctuation">,</span> bounds<span class="syntax-punctuation">.</span>max_day<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> calendar<span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> observed_daily observed <span class="syntax-keyword">ON</span> observed<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span> <span class="syntax-operator">=</span> calendar<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> calendar_lag <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> calendar_day_lag7</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> calendar_daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       o<span class="syntax-punctuation">.</span>observed_row_lag7<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>calendar_day_lag7</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> calendar_lag <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> observed_lag o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: score both forecast models on one identical evaluation set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. `calendar_daily` establishes one row per date and a documented zero policy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. `forecasts` uses only prior rows: MA(7) ends at 1 PRECEDING, while the</span></span>
+<span class="source-line"><span class="syntax-comment">--    seasonal model reads exactly seven calendar rows back.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. LATERAL VALUES reshapes the two model columns to a common tidy model grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. The WHERE clause requires both forecasts, so model comparisons use the</span></span>
+<span class="source-line"><span class="syntax-comment">--    same dates. MAPE additionally excludes zero actuals through NULLIF.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> min_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> max_day</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> calendar_daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> calendar<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> bounds</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> generate_series<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    bounds<span class="syntax-punctuation">.</span>min_day<span class="syntax-punctuation">,</span> bounds<span class="syntax-punctuation">.</span>max_day<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> calendar<span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> daily d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span> <span class="syntax-operator">=</span> calendar<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> forecasts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">7</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING</span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma7<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> calendar_daily</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> common_scoring_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> f<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         model<span class="syntax-punctuation">.</span>model_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         model<span class="syntax-punctuation">.</span>forecast<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         f<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> model<span class="syntax-punctuation">.</span>forecast <span class="syntax-keyword">AS</span> error</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> forecasts f</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;MA(7)&#x27;</span><span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">.</span>ma7<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;seasonal naive&#x27;</span><span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">.</span>seasonal_naive<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> model<span class="syntax-punctuation">(</span>model_name<span class="syntax-punctuation">,</span> forecast<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> f<span class="syntax-punctuation">.</span>ma7 <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> f<span class="syntax-punctuation">.</span>seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> f<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> max_day <span class="syntax-keyword">FROM</span> bounds<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">180</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> model_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> scored_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mae<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>SQRT<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>POWER<span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rmse<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mape<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> actual <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> zero_actual_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> common_scoring_rows</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> model_name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> model_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: place the leaky and honest frames side by side. The leaky result</span></span>
+<span class="source-line"><span class="syntax-comment">-- includes the current actual, so it is not a forecast of that day. The honest</span></span>
+<span class="source-line"><span class="syntax-comment">-- frame ends at 1 PRECEDING and can be computed before the target is known.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> leaky_window<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">7</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING</span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> forecast_window</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> daily</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">day</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: constant data has zero SD and zero MAD. Both denominators use</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULLIF, preserving an undefined score as NULL instead of declaring the points</span></span>
+<span class="source-line"><span class="syntax-comment">-- “normal” with a fabricated zero score.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> constant<span class="syntax-punctuation">(</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">date</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span><span class="syntax-builtin">date</span> <span class="syntax-string">&#x27;2026-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span><span class="syntax-builtin">date</span> <span class="syntax-string">&#x27;2026-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> center <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mean_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         STDDEV_SAMP<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> constant</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> deviations <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> ctr<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> ctr<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> absolute_deviation</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> constant <span class="syntax-keyword">c</span> <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> center ctr</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dispersion <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> absolute_deviation</span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mad</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> deviations</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       d<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> d<span class="syntax-punctuation">.</span>mean_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>sd_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sd_z<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6745</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> d<span class="syntax-punctuation">.</span>median_revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>mad<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-keyword">AS</span> modified_mad_z</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deviations d</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> dispersion p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span><span class="syntax-keyword">day</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

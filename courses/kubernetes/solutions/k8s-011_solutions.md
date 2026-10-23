@@ -20,7 +20,7 @@ A single completion is the desired successful work count, parallelism bounds con
 
 The fixed task is deterministic and has no external side effects. Its receipt connects controller state to the actual task container and a small independent ledger. It does not certify arbitrary learner code or every written exercise.
 
-**Expected:** Owned Complete Job, controlled successful task Pod, exit0 and exact accepted3/rejected2/total35 output.
+**Expected:** Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted3/rejected2/total35 output.
 
 ## Exercise 3: Observe intentional failure
 

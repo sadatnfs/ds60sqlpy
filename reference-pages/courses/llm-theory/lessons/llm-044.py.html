@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,40 +161,40 @@
       <h1>Llm 044</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/lessons/llm-044.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-044: RoPE, relative positions, ALiBi and long-context limits.</span>
-<span> </span>
-<span>Answer-free learner worksheet. See the companion guide for worked examples.</span>
-<span>Copy to .learning before editing. Six independent attempts belong below.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Exercise 1: Rotate a two-dimensional vector</span>
-<span># Rotate[1, 0] bypi/2 andcheck length preservation.</span>
-<span># Expected: approximately[0, 1]; norm1.</span>
-<span> </span>
-<span># Exercise 2: Verify the relative dot-product identity</span>
-<span># Useq[1, 2], k[3, -1], anglesm=.3, n=1.1.</span>
-<span># Expected: dot(Rm q, Rn k)=dot(q, R(n-m)k) within1e-12.</span>
-<span> </span>
-<span># Exercise 3: Inspect an ALiBi causal row</span>
-<span># Use zero content scores forqueryposition2, keys0, 1, 2 andslope log2.</span>
-<span># Expected: normalized weights[1/7, 2/7, 4/7].</span>
-<span> </span>
-<span># Exercise 4: Apply multi-frequency RoPE</span>
-<span># Usewidth4, base10000 andpositions0, 1 on two fixed vectors; inspect pair norms.</span>
-<span># Expected: frequencies1, .01; each pair norm preserved.</span>
-<span> </span>
-<span># Exercise 5: Catch a cache offset reset</span>
-<span># Encode the third key atposition2 andcompare with mistakenly encoding it atposition0.</span>
-<span># Expected: correct incremental encoding matches full encoding; reset differs.</span>
-<span> </span>
-<span># Exercise 6: Separate computability from extrapolation evidence</span>
-<span># Compute a finite encoding atposition1000000, then record that no trained-model quality</span>
-<span># was measured.</span>
-<span># Expected: finite vector; long_context_quality_verifiedFalse; odd width rejected.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-044: RoPE, relative positions, ALiBi and long-context limits.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Answer-free learner worksheet. See the companion guide for worked examples.</span></span>
+<span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Rotate a two-dimensional vector</span></span>
+<span class="source-line"><span class="syntax-comment"># Rotate[1, 0] bypi/2 andcheck length preservation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: approximately[0, 1]; norm1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Verify the relative dot-product identity</span></span>
+<span class="source-line"><span class="syntax-comment"># Useq[1, 2], k[3, -1], anglesm=.3, n=1.1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: dot(Rm q, Rn k)=dot(q, R(n-m)k) within1e-12.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect an ALiBi causal row</span></span>
+<span class="source-line"><span class="syntax-comment"># Use zero content scores forqueryposition2, keys0, 1, 2 andslope log2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: normalized weights[1/7, 2/7, 4/7].</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Apply multi-frequency RoPE</span></span>
+<span class="source-line"><span class="syntax-comment"># Usewidth4, base10000 andpositions0, 1 on two fixed vectors; inspect pair norms.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: frequencies1, .01; each pair norm preserved.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Catch a cache offset reset</span></span>
+<span class="source-line"><span class="syntax-comment"># Encode the third key atposition2 andcompare with mistakenly encoding it atposition0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: correct incremental encoding matches full encoding; reset differs.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Separate computability from extrapolation evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute a finite encoding atposition1000000, then record that no trained-model quality</span></span>
+<span class="source-line"><span class="syntax-comment"># was measured.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: finite vector; long_context_quality_verifiedFalse; odd width rejected.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

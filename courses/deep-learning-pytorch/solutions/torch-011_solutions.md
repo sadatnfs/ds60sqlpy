@@ -75,7 +75,7 @@ assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0
 
 ## Exercise 3: Run one explicit loop step
 
-The question is: Use SGD.1 and mean squared error, clearing gradients before backward.
+The question is: Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
 
 The optimizer consumes only the registered Parameter. The buffer influences forward but remains fixed under this update.
 

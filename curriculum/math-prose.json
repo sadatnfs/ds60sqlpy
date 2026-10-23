@@ -4431,15 +4431,6 @@
       ]
     },
     {
-      "source": "R^d",
-      "latex": "{R}^{d}",
-      "paths": [
-        "courses/llm-theory/authoring/textbook_advanced/llm-026.md",
-        "courses/llm-theory/guides/llm-026.md",
-        "courses/llm-theory/guides/llm-045.md"
-      ]
-    },
-    {
       "source": "S=6",
       "latex": "S=6",
       "paths": [
@@ -10259,6 +10250,66 @@
     {
       "source": "about0.707107",
       "text": "about 0.707107"
+    },
+    {
+      "source": "H=SiLU(G) elementwise_mul U",
+      "latex": "H=\\operatorname{SiLU}(G)\\odot U"
+    },
+    {
+      "source": "H=A elementwise_mul U",
+      "latex": "H=A\\odot U"
+    },
+    {
+      "source": "(dL/dH) elementwise_mul A",
+      "latex": "\\frac{\\partial L}{\\partial H}\\odot A"
+    },
+    {
+      "source": "(dL/dH) elementwise_mul U",
+      "latex": "\\frac{\\partial L}{\\partial H}\\odot U"
+    },
+    {
+      "source": "h_gated=(2/3)h_plain",
+      "latex": "h_{\\mathrm{gated}}=\\frac23h_{\\mathrm{plain}}"
+    },
+    {
+      "source": "phi(xW1)W2",
+      "latex": "\\phi(xW_1)W_2"
+    },
+    {
+      "source": "SiLU(0)=0",
+      "latex": "\\operatorname{SiLU}(0)=0"
+    },
+    {
+      "source": "R^d",
+      "latex": "\\mathbb{R}^d"
+    },
+    {
+      "source": "dL/dH=R W_d^T",
+      "latex": "\\frac{\\partial L}{\\partial H}=RW_d^{\\mathsf T}"
+    },
+    {
+      "source": "alpha/r",
+      "latex": "\\frac{\\alpha}{r}"
+    },
+    {
+      "source": "XA=[1,1]",
+      "latex": "XA=[1,1]"
+    },
+    {
+      "source": "XA=[1, 1]",
+      "latex": "XA=[1,1]"
+    },
+    {
+      "source": "x^T u=0",
+      "latex": "x^{\\mathsf T}u=0"
+    },
+    {
+      "source": "[SiLU(xWg) elementwise_mul(xWu)]Wd",
+      "latex": "[\\operatorname{SiLU}(xW_g)\\odot(xW_u)]W_d"
+    },
+    {
+      "source": "R W_d^T",
+      "latex": "RW_d^{\\mathsf T}"
     }
   ]
 }

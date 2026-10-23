@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,73 +176,73 @@
 <h3 id="exercise-1-compile-and-run-a-two-module-project">Exercise 1: Compile and run a two-module project<a class="heading-anchor" href="#exercise-1-compile-and-run-a-two-module-project" aria-label="Link to this section">#</a></h3>
 <p>Task: Compile a main module importing twice from ./math.mjs and run it.</p>
 <p>The runtime specifier is .mjs even though the source file is .mts. Naming a source-only extension without a corresponding emit policy can produce a runtime failure.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;math.mts&#x27;: &#x27;export const twice = (value: number): number =&gt; value * 2;&#x27;, &#x27;main.mts&#x27;: &#x27;import { twice } from \&#x27;./math.mjs\&#x27;; console.log(twice(4));&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
-  const executed = runModule(directory);
-  assert.equal(executed.status, 0, executed.stderr);
-  assert.equal(executed.stdout.trim(), &#x27;8&#x27;);
-  assert.equal(await exists(join(directory, &#x27;compiled&#x27;, &#x27;math.mjs&#x27;)), true);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;math.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const twice = (value: number): number =&gt; value * 2;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;import { twice } from \&#x27;./math.mjs\&#x27;; console.log(twice(4));&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> executed <span class="syntax-operator">=</span> runModule<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>executed<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> executed<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>executed<span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> exists<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;math.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both processes succeed; output 8; math.mjs is emitted.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-inspect-type-only-erasure">Exercise 2: Inspect type-only erasure<a class="heading-anchor" href="#exercise-2-inspect-type-only-erasure" aria-label="Link to this section">#</a></h3>
 <p>Task: Compile a type import and inspect the emitted entry before running it.</p>
 <p>The type relation constrains source checking without becoming a value dependency. Inspecting the emitted program demonstrates this directly.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;model.mts&#x27;: &#x27;export type Item = { id: string };&#x27;, &#x27;main.mts&#x27;: &#x27;import type { Item } from \&#x27;./model.mjs\&#x27;; const item: Item = { id: \&#x27;A\&#x27; }; console.log(item.id);&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
-  const emitted = await readFile(join(directory, &#x27;compiled&#x27;, &#x27;main.mjs&#x27;), &#x27;utf8&#x27;);
-  assert.equal(emitted.includes(&#x27;./model.mjs&#x27;), false);
-  assert.equal(runModule(directory).stdout.trim(), &#x27;A&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;model.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export type Item = { id: string };&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;import type { Item } from \&#x27;./model.mjs\&#x27;; const item: Item = { id: \&#x27;A\&#x27; }; console.log(item.id);&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> emitted <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>emitted<span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;./model.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>runModule<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> no model import in emitted entry; output A.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-reject-a-type-mismatch-without-output">Exercise 3: Reject a type mismatch without output<a class="heading-anchor" href="#exercise-3-reject-a-type-mismatch-without-output" aria-label="Link to this section">#</a></h3>
 <p>Task: Assign text to a number in a fresh project.</p>
 <p>The test checks both diagnosis and output policy. A diagnostic alone does not establish whether stale or partially emitted artifacts could still be executed.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;main.mts&#x27;: &#x27;const count: number = \&#x27;wrong\&#x27;; console.log(count);&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.notEqual(compiled.status, 0);
-  assert.match(compiled.stdout + compiled.stderr, /TS2322/u);
-  assert.equal(await exists(join(directory, &#x27;compiled&#x27;, &#x27;main.mjs&#x27;)), false);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;const count: number = \&#x27;wrong\&#x27;; console.log(count);&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">,</span> <span class="syntax-string">/TS2322/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> exists<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TS2322; nonzero compiler status; no compiled main.mjs.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-require-runtime-valid-relative-extensions">Exercise 4: Require runtime-valid relative extensions<a class="heading-anchor" href="#exercise-4-require-runtime-valid-relative-extensions" aria-label="Link to this section">#</a></h3>
 <p>Task: Import ./math without an extension under NodeNext ESM.</p>
 <p>The chosen resolver is part of the program contract. A convenience supplied by another toolchain is not automatically available in direct Node execution.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;math.mts&#x27;: &#x27;export const value = 2;&#x27;, &#x27;main.mts&#x27;: &#x27;import { value } from \&#x27;./math\&#x27;; console.log(value);&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.notEqual(compiled.status, 0);
-  assert.match(compiled.stdout + compiled.stderr, /TS2835/u);
-  assert.equal(await exists(join(directory, &#x27;compiled&#x27;, &#x27;main.mjs&#x27;)), false);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;math.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const value = 2;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;import { value } from \&#x27;./math\&#x27;; console.log(value);&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">,</span> <span class="syntax-string">/TS2835/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> exists<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TS2835 and no emitted entry.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-observe-a-missing-runtime-artifact">Exercise 5: Observe a missing runtime artifact<a class="heading-anchor" href="#exercise-5-observe-a-missing-runtime-artifact" aria-label="Link to this section">#</a></h3>
 <p>Task: Compile successfully, remove only the owned emitted dependency, then run the entry.</p>
 <p>The deletion is restricted to a newly allocated temporary output. It models a missing packaged dependency without editing learner or repository files.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;value.mts&#x27;: &#x27;export const value = 3;&#x27;, &#x27;main.mts&#x27;: &#x27;import { value } from \&#x27;./value.mjs\&#x27;; console.log(value);&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
-  await rm(join(directory, &#x27;compiled&#x27;, &#x27;value.mjs&#x27;));
-  const executed = runModule(directory);
-  assert.notEqual(executed.status, 0);
-  assert.match(executed.stderr, /ERR_MODULE_NOT_FOUND/u);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;value.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const value = 3;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;import { value } from \&#x27;./value.mjs\&#x27;; console.log(value);&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;value.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> executed <span class="syntax-operator">=</span> runModule<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>executed<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>executed<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">,</span> <span class="syntax-string">/ERR_MODULE_NOT_FOUND/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> Node fails with ERR_MODULE_NOT_FOUND.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-retain-value-imports-beside-erased-type-imports">Exercise 6: Retain value imports beside erased type imports<a class="heading-anchor" href="#exercise-6-retain-value-imports-beside-erased-type-imports" aria-label="Link to this section">#</a></h3>
 <p>Task: Import both a type and a value from one module.</p>
 <p>The type and value namespaces have different runtime roles even when declarations share a source module. The value must remain packaged and resolvable.</p>
-<pre><code class="language-typescript">await withProject({ &#x27;model.mts&#x27;: &#x27;export type Item = { id: string }; export const prefix = \&#x27;ready\&#x27;;&#x27;, &#x27;main.mts&#x27;: &#x27;import { prefix, type Item } from \&#x27;./model.mjs\&#x27;; const item: Item = { id: \&#x27;A\&#x27; }; console.log(prefix + \&#x27;:\&#x27; + item.id);&#x27; }, async directory =&gt; {
-  const compiled = compile(directory);
-  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
-  const emitted = await readFile(join(directory, &#x27;compiled&#x27;, &#x27;main.mjs&#x27;), &#x27;utf8&#x27;);
-  assert.ok(emitted.includes(&#x27;./model.mjs&#x27;));
-  assert.equal(runModule(directory).stdout.trim(), &#x27;ready:A&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> withProject<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;model.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export type Item = { id: string }; export const prefix = \&#x27;ready\&#x27;;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mts&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;import { prefix, type Item } from \&#x27;./model.mjs\&#x27;; const item: Item = { id: \&#x27;A\&#x27; }; console.log(prefix + \&#x27;:\&#x27; + item.id);&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> compiled <span class="syntax-operator">=</span> compile<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> compiled<span class="syntax-punctuation">.</span>stdout <span class="syntax-operator">+</span> compiled<span class="syntax-punctuation">.</span>stderr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> emitted <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;compiled&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>emitted<span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;./model.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>runModule<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>stdout<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready:A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> value dependency remains; runtime prints ready:A.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

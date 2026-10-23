@@ -82,7 +82,7 @@ assert generated==[2,3,9]
 
 ## Exercise 5: Enforce a cap without EOS
 
-The question is: Consume an endless repeated token2 under cap3.
+The question is: Consume an endless repeated token 2 under cap3.
 
 A model is not guaranteed to emit EOS. A separate token cap provides a deterministic work bound even when the distribution keeps preferring continuation.
 

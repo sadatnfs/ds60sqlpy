@@ -34,7 +34,7 @@ assert [len(ids) for ids,values in batches]==[2,2,1]
 
 ## Exercise 2: Apply training statistics
 
-The question is: Use values1,2,3 to fit mean2, then transform all five values without refitting.
+The question is: Use values1,2,3 to fit mean 2, then transform all five values without refitting.
 
 The held-out values4 and5 are transformed with the same mean. Their transformed average is not zero, which is expected when a frozen training transformation meets a different subset.
 

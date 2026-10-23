@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-028`
 
 ## Learning objectives
 
-Explain connection, prepared statement, transaction, isolation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open the fixture,inspect product metadata andcount the two account rows. The final exercise transfers the mechanism to observe committed visibility under the declared isolation.
+Explain connection, prepared statement, transaction, isolation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open the fixture,inspect product metadata and count the two account rows. The final exercise transfers the mechanism to observe committed visibility under the declared isolation.
 
 ## Purpose and mental model
 
-JDBC is Java's database-access API. AConnection represents a database session,PreparedStatement separates SQL structure from bound values,andResultSet exposes rows returned by a query. A connection normally starts in auto-commit mode,where each completed statement is committed independently. A multi-statement business operation needs an explicit transaction when its changes must succeed orfail together. Commit makes the transaction durable under the database contract;rollback discards its uncommitted changes.
+JDBC is Java's database-access API. A Connection represents a database session,PreparedStatement separates SQL structure from bound values,and ResultSet exposes rows returned by a query. A connection normally starts in auto-commit mode,where each completed statement is committed independently. A multi-statement business operation needs an explicit transaction when its changes must succeed or fail together. Commit makes the transaction durable under the database contract;rollback discards its uncommitted changes.
 
-This lesson uses a real embedded H2 database in memory through the preparedH2JDBCdriver. Every exercise creates its own named in-memory database andcloses all connections. It doesnot connect toPostgreSQL,Oracle,a shared service ora file-backed database. The tiny account table has a nonnegative-balance constraint. Actual prepared queries,commit,rollback,constraint failure andREAD_COMMITTED visibility are tested. H2 behavior onthisfixture isnot presented as universal behavior ofevery database engine.
+This lesson uses a real embedded H2 database in memory through the preparedH2JDBCdriver. Every exercise creates its own named in-memory database and closes all connections. It does not connect to PostgreSQL,Oracle,a shared service ora file-backed database. The tiny account table has a nonnegative-balance constraint. Actual prepared queries,commit,rollback,constraint failure andREAD_COMMITTED visibility are tested. H2 behavior on this fixture is not presented as universal behavior of every database engine.
 
 ## Vocabulary and concepts
 
-**Connection:** A database session carrying transaction andstatement state.
+**Connection:** A database session carrying transaction and statement state.
 
 **Prepared statement:** SQL structure with separately bound parameter values.
 
-**Transaction:** A group of changes committed orrolled back as one declared unit.
+**Transaction:** A group of changes committed or rolled back as one declared unit.
 
 **Isolation:** Rules governing which concurrent transaction changes are visible.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-029/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -39,20 +39,20 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Required prepared JDBC dependency
 
-The classroom Java21 image includes the pinned H2 driver at `/opt/course-libs/h2-2.5.252.jar` and adds it to the fixed runtime classpath. This lesson needs that real driver;it doesnot simulateJDBC when the driver is missing. The database URL is always an owned `jdbc:h2:mem:` fixture. No external database setup orreset is performed.
+The classroom Java 21 image includes the pinned H2 driver at `/opt/course-libs/h2-2.5.252.jar` and adds it to the fixed runtime classpath. This lesson needs that real driver;it does not simulateJDBC when the driver is missing. The database URL is always an owned `jdbc:h2:mem:` fixture. No external database setup or reset is performed.
 
-For an already prepared nativeJDK andH2JAR,compile with `javac --release 21 Main.java`. Run onPOSIX with `java -ea -cp ".:/path/to/h2-2.5.252.jar" Main`;onWindows use the classpath separatorsemicolon: `java -ea -cp ".;C:\course-libs\h2-2.5.252.jar" Main`. Substitute the actual prepared JAR path. Do not download orinstall a driver from inside the lesson.
+For an already prepared nativeJDK and H2 JAR,compile with `javac --release 21 Main.java`. Run on POSIX with `java -ea -cp ".:/path/to/h2-2.5.252.jar" Main`;on Windows use the classpath separatorsemicolon: `java -ea -cp ".;C:\course-libs\h2-2.5.252.jar" Main`. Substitute the actual prepared JAR path. Do not download or install a driver from inside the lesson.
 
 
 ## Syntax anatomy and execution trace
 
-DriverManager.getConnection selects a loaded driver for thejdbc:h2:mem URL. Bind values withsetInt orsetString rather than concatenating them into SQL. Use setAutoCommit(false),commit androllback for transaction control. Close ResultSet,PreparedStatement andConnection withtry-with-resources. Check executeUpdate row counts so an unknown account isnot silently treated as a successful transfer. SetupDDL occurs before the tested transactions becauseDDL transaction behavior is engine-specific.
+DriverManager.getConnection selects a loaded driver for thejdbc:h2:mem URL. Bind values withsetInt orsetString rather than concatenating them into SQL. Use setAutoCommit(false),commit and rollback for transaction control. Close ResultSet,PreparedStatement and Connection withtry-with-resources. Check executeUpdate row counts so an unknown account is not silently treated as a successful transfer. SetupDDL occurs before the tested transactions becauseDDL transaction behavior is engine-specific.
 
 ## Worked example / walkthrough
 
 ### Example A: Verify a real local database
 
-Metadata andquery execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing ortransaction state.
+Metadata and query execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing or transaction state.
 
 ```java
 import java.util.*;
@@ -85,11 +85,11 @@ public class Main {
 
 ```
 
-**Expected:** database productH2;2 rows;auto-commit initiallytrue.
+**Expected:** database product H2; 2 rows; auto-commit initially true.
 
 ### Example B: Bind an injection-shaped value as data
 
-The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection isnot mistaken forcorrect binding.
+The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection is not mistaken for correct binding.
 
 ```java
 import java.util.*;
@@ -127,7 +127,7 @@ public class Main {
 
 ```
 
-**Expected:** Alice matches1row;the injection-shaped value matches0.
+**Expected:** Alice matches 1 row;the injection-shaped value matches0.
 
 ## Prediction before your attempt
 
@@ -135,29 +135,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Verify a real local database.** Open the fixture,inspect product metadata andcount the two account rows.
-   **Expected:** database productH2;2 rows;auto-commit initiallytrue.
-   **Verify:** Compare your assertion values or captured diagnostic with database productH2;2 rows;auto-commit initiallytrue.
+1. **Verify a real local database.** Open the fixture,inspect product metadata and count the two account rows.
+   **Expected:** database product H2; 2 rows; auto-commit initially true.
+   **Verify:** Compare your assertion values or captured diagnostic with database product H2; 2 rows; auto-commit initially true.
 
 2. **Bind an injection-shaped value as data.** Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the same prepared statement.
-   **Expected:** Alice matches1row;the injection-shaped value matches0.
-   **Verify:** Compare your assertion values or captured diagnostic with Alice matches1row;the injection-shaped value matches0.
+   **Expected:** Alice matches 1 row;the injection-shaped value matches0.
+   **Verify:** Compare your assertion values or captured diagnostic with Alice matches 1 row;the injection-shaped value matches0.
 
-3. **Roll back a transfer.** Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,androllback.
+3. **Roll back a transfer.** Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,and rollback.
    **Expected:** inside80,70;afterrollback100,50.
    **Verify:** Compare your assertion values or captured diagnostic with inside80,70;afterrollback100,50.
 
-4. **Commit andread from a second session.** Transfer10cents,commit,andopen another connection to the same owned memory database.
+4. **Commit and read from a second session.** Transfer10cents,commit,and open another connection to the same owned memory database.
    **Expected:** second connection sees90,60 andtotal150.
    **Verify:** Compare your assertion values or captured diagnostic with second connection sees90,60 andtotal150.
 
-5. **Handle a constraint failure androllback.** Attempt tosubtract200frombalance100,catch theSQL integrity error,androllback.
-   **Expected:** SQLState class23;balance remains100 afterrollback.
-   **Verify:** Compare your assertion values or captured diagnostic with SQLState class23;balance remains100 afterrollback.
+5. **Handle a constraint failure and rollback.** Attempt tosubtract200frombalance100,catch the SQL integrity error,and rollback.
+   **Expected:** SQLState class23;balance remains100 after rollback.
+   **Verify:** Compare your assertion values or captured diagnostic with SQLState class23;balance remains100 after rollback.
 
-6. **Observe committed visibility under the declared isolation.** Use twoH2connections atREAD_COMMITTED;updateaccount1 withoutcommit,read fromtheother,thencommit andreadagain.
-   **Expected:** second session sees100beforecommit and95aftercommit.
-   **Verify:** Compare your assertion values or captured diagnostic with second session sees100beforecommit and95aftercommit.
+6. **Observe committed visibility under the declared isolation.** Use twoH2connections atREAD_COMMITTED;updateaccount1 without commit,read from the other,then commit and read again.
+   **Expected:** second session sees 100 before commit and 95 after commit.
+   **Verify:** Compare your assertion values or captured diagnostic with second session sees 100 before commit and 95 after commit.
 
 ## Common pitfalls and diagnosis
 

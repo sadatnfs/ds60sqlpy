@@ -169,7 +169,7 @@ assert answer['status']=='answered' and answer['citation']['document_id']=='metr
 assert 'eligible visits' in answer['text']
 ```
 
-**Expected:** answered withmetric-v1 citation and source text.
+**Expected:** answered with metric-v1 citation and source text.
 
 ### Example B: Abstain on missing evidence
 
@@ -180,7 +180,7 @@ missing=assistant.answer('comet_period')
 assert missing['status']=='unknown' and missing['reason']=='missing evidence'
 ```
 
-**Expected:** unknown withmissing evidence reason.
+**Expected:** unknown with missing evidence reason.
 
 ### Example C: Enforce access before answering
 
@@ -191,37 +191,37 @@ public=assistant.answer('restricted_threshold'); privileged=Assistant(DOCUMENTS,
 assert public['status']=='unknown' and privileged['citation']['document_id']=='private-v1'
 ```
 
-**Expected:** publicunknown; authorizedanswercitesprivate-v1.
+**Expected:** public unknown; authorizedanswercitesprivate-v1.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: answered withmetric-v1 citation and source text. local_fixture_passTrue; production_gono-go. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Answer a supported domain definition.** Ask the public assistant forconversion_definition.
-   **Expected:** answered withmetric-v1 citation and source text.
-   **Verify:** Save the assertion results for exercise 1, including answered withmetric-v1 citation and source text.
+   **Expected:** answered with metric-v1 citation and source text.
+   **Verify:** Save the assertion results for exercise 1, including answered with metric-v1 citation and source text.
 
 2. **Abstain on missing evidence.** Ask forcomet_period, which has no supporting corpus entry.
-   **Expected:** unknown withmissing evidence reason.
-   **Verify:** Save the assertion results for exercise 2, including unknown withmissing evidence reason.
+   **Expected:** unknown with missing evidence reason.
+   **Verify:** Save the assertion results for exercise 2, including unknown with missing evidence reason.
 
 3. **Enforce access before answering.** Ask a public-only assistant forrestricted_threshold, then ask a separately authorized assistant.
-   **Expected:** publicunknown; authorizedanswercitesprivate-v1.
-   **Verify:** Save the assertion results for exercise 3, including publicunknown; authorizedanswercitesprivate-v1.
+   **Expected:** public unknown; authorizedanswercitesprivate-v1.
+   **Verify:** Save the assertion results for exercise 3, including public unknown; authorizedanswercitesprivate-v1.
 
 4. **Compute a data-science result deterministically.** Calculate 3 purchases over 10 eligible visits and reject 11 purchases over 10 visits.
-   **Expected:** rate.3; invalid counts raiseValueError.
-   **Verify:** Save the assertion results for exercise 4, including rate.3; invalid counts raiseValueError.
+   **Expected:** rate.3; invalid counts raise ValueError.
+   **Verify:** Save the assertion results for exercise 4, including rate.3; invalid counts raise ValueError.
 
 5. **Evaluate fixed task and boundary cases.** Score supported, missing andrestricted-public questions against their expected statuses.
    **Expected:** 3 of 3 status contracts pass; citation integrity checked separately.
    **Verify:** Save the assertion results for exercise 5, including 3 of 3 status contracts pass; citation integrity checked separately.
 
-6. **Issue a bounded capstone decision.** Record local fixture acceptance while leaving pretrained generation, realidentity integration andproduction readiness unverified.
-   **Expected:** local_fixture_passTrue; production_gono-go.
-   **Verify:** Save the assertion results for exercise 6, including local_fixture_passTrue; production_gono-go.
+6. **Issue a bounded capstone decision.** Record local fixture acceptance while leaving pretrained generation, real identity integration and production readiness unverified.
+   **Expected:** local_fixture_pass True; production_go no-go.
+   **Verify:** Save the assertion results for exercise 6, including local_fixture_pass True; production_go no-go.
 
 ## Common pitfalls and diagnosis
 

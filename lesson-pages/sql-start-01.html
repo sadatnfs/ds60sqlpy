@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -385,12 +431,14 @@
 
         <div class="artifact-content"><h3 id="guide--sql-start-01-reading-tables-and-result-grain">SQL-START-01: Reading Tables and Result Grain<a class="heading-anchor" href="#guide--sql-start-01-reading-tables-and-result-grain" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use only the local disposable <code>advanced_sql_training</code> database on PostgreSQL 16 or newer. The lesson page is a readable preview. In the private course portal, choose <strong>Create/open guided SQL notebook</strong>, run readiness, acknowledge only the explicitly offered course reset if needed, and edit the notebook&#x27;s ignored <code>.learning/sql/sql-start-01/</code> SQL copy. Its exact path is <code>.learning/sql/sql-start-01/lesson/workspace/sql/professional/lessons/sql_start_01_tables_and_grain.sql</code>. Save the copy and run its complete-script cell. Output appears below that cell as a full <code>psql</code> transcript. A successful run ends in <code>ROLLBACK</code>, exits 0, and has the example identities stated below. The setup uses temporary tables and no external data or extension.</p>
 <p>If using VS Code directly, run from the repository root. These fallbacks work in terminals after PostgreSQL setup:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql/professional/lessons/sql_start_01_tables_and_grain.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_start_01_tables_and_grain.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></pre>
 <p>Keep <code>-X</code> to ignore personal client startup changes and <code>ON_ERROR_STOP</code> to stop at the first unexpected error. If <code>psql</code> is missing, return to the operating-system setup and <code>scripts/course.py doctor</code>. An authentication failure needs the local setup workflow, never a password pasted into a lesson. If the database-name guard rejects the run, inspect your target instead of removing the guard. After an unexpected transaction error, fix that first error and rerun the whole file in a fresh connection. To try an exercise, put its SQL before the final <code>ROLLBACK</code> in your private copy; temporary tables exist only in that connection and transaction. Running this official learner file demonstrates the examples; exercises remain answer-free until you add an attempt. Do not edit the separate official solutions while studying.</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -436,16 +484,16 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-a-full-observation-retains-its-identity">Example 1: A full observation retains its identity<a class="heading-anchor" href="#guide--example-1-a-full-observation-retains-its-identity" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT reading_id, station, reading_day, temperature
-FROM start_readings
-ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature
+<span class="syntax-keyword">FROM</span> start_readings
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The input and output grain are both one observation, identified by reading_id. Selecting four columns changes the width of the result, not the number of observations. The missing South measurement is printed as an empty-looking field by default in psql; it is the SQL NULL marker, not a zero. Use the explicit ID to locate that observation.</p>
 <p><strong>Expected:</strong> Six rows with columns reading_id, station, reading_day, temperature; IDs 1 through 6 in order. ID 4 has NULL temperature.</p>
 <h5 id="guide--example-2-two-visually-identical-rows-are-still-two-observations">Example 2: Two visually identical rows are still two observations<a class="heading-anchor" href="#guide--example-2-two-visually-identical-rows-are-still-two-observations" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT station, temperature
-FROM start_readings
-WHERE reading_id &lt;= 2
-ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> station<span class="syntax-punctuation">,</span> temperature
+<span class="syntax-keyword">FROM</span> start_readings
+<span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>FROM starts with six observations; WHERE keeps IDs 1 and 2; SELECT hides their IDs and dates. Both output rows now display North and 18. SQL preserves both rows. The input identities explain why the repeated visible values are valid. Rerun with reading_id in the SELECT list to make the distinction visible. Sorting by an unprojected input column is allowed here because this is an ordinary SELECT without DISTINCT.</p>
 <p><strong>Expected:</strong> Two rows, each (North, 18), with columns station and temperature. No table row is removed or updated.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -514,7 +562,7 @@ ORDER BY reading_id;</code></pre>
 <p>Concrete next target: <a href="sql-start-02.html#guide">Values, NULL, and deterministic order</a>.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>
-<pre><code class="language-text">Tutor me through sql-start-01: Reading Tables and Result Grain using the checked-in $guide-ds60sqlpy-learning skill.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-start-01: Reading Tables and Result Grain using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_start_01_tables_and_grain.md
 Answer-free learner: sql/professional/lessons/sql_start_01_tables_and_grain.sql
 Direct prerequisite boundary: none; assume no SQL knowledge.
@@ -562,97 +610,97 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-START-01: Reading Tables and Result Grain</span>
-<span> </span>
-<span>-- Guide: sql/professional/companion-guides/sql_start_01_tables_and_grain.md</span>
-<span> </span>
-<span>-- Use Create/open guided SQL notebook and the ignored learner copy.</span>
-<span> </span>
-<span>-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span>
-<span> </span>
-<span>-- Only the local disposable advanced_sql_training database is permitted.</span>
-<span> </span>
-<span>-- Setup is supplied. Write attempts before the final ROLLBACK.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE start_readings (</span>
-<span>    reading_id integer PRIMARY KEY,</span>
-<span>    station text NOT NULL,</span>
-<span>    reading_day date NOT NULL,</span>
-<span>    temperature numeric</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO start_readings (reading_id, station, reading_day, temperature) VALUES</span>
-<span>(1, &#x27;North&#x27;, DATE &#x27;2024-01-01&#x27;, 18),</span>
-<span>(2, &#x27;North&#x27;, DATE &#x27;2024-01-02&#x27;, 18),</span>
-<span>(3, &#x27;South&#x27;, DATE &#x27;2024-01-01&#x27;, 0),</span>
-<span>(4, &#x27;South&#x27;, DATE &#x27;2024-01-02&#x27;, NULL),</span>
-<span>(5, &#x27;West&#x27;, DATE &#x27;2024-01-01&#x27;, -4),</span>
-<span>(6, &#x27;North&#x27;, DATE &#x27;2024-01-03&#x27;, 20);</span>
-<span> </span>
-<span>-- Example 1: A full observation retains its identity</span>
-<span>-- Expected: Six rows with columns reading_id, station, reading_day, temperature; IDs 1 through 6 in order. ID 4 has NULL temperature.</span>
-<span>SELECT reading_id, station, reading_day, temperature</span>
-<span>FROM start_readings</span>
-<span>ORDER BY reading_id;</span>
-<span> </span>
-<span>-- Example 2: Two visually identical rows are still two observations</span>
-<span>-- Expected: Two rows, each (North, 18), with columns station and temperature. No table row is removed or updated.</span>
-<span>SELECT station, temperature</span>
-<span>FROM start_readings</span>
-<span>WHERE reading_id &lt;= 2</span>
-<span>ORDER BY reading_id;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Keep predictions and attempts in your own working copy.</span>
-<span> </span>
-<span>-- 1. Trace identities.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 1, Return all observations with reading_id, station, and temperature. Write a sentence naming the table grain and output grain before running the query. Use the identity as the final display order.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 1, Six rows, one per reading_id, with columns reading_id, station, temperature; final ORDER BY reading_id. IDs are 1,2,3,4,5,6 and ID 4 keeps its NULL measurement.</span>
-<span>-- Verify: For sql-start-01 Exercise 1, Compare the six returned reading_id values with the fixture IDs 1 through 6 and inspect the NULL temperature at ID 4; no identity is repeated or absent.</span>
-<span>-- Hint: Start with FROM, then choose the three requested columns.</span>
-<span> </span>
-<span>-- 2. Reveal repeated visible values.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 2, Show reading_id, station, reading_day, temperature for IDs 1 and 2. Explain why projecting only station and temperature produces two identical-looking rows rather than one row.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 2, Two observation rows with columns reading_id, station, reading_day, temperature; final ORDER BY reading_id. Both temperatures are 18, with dates January 1 and January 2 respectively.</span>
-<span>-- Verify: For sql-start-01 Exercise 2, Inspect two different reading_id and reading_day values while confirming both station/temperature pairs are North/18. Removing the visible identity must not collapse the two observations.</span>
-<span>-- Hint: A column can repeat even when the primary key cannot.</span>
-<span> </span>
-<span>-- 3. Filter observations without losing missing values.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 3, Return the South observations with reading_id, station, temperature, ordered by reading_id. Do not add a measurement condition.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 3, Two rows keyed by reading_id, columns reading_id, station, temperature, final ORDER BY reading_id: (3, South, 0), (4, South, NULL).</span>
-<span>-- Verify: For sql-start-01 Exercise 3, Inspect the two returned rows: reading_id 3 and 4, exactly one present zero temperature, and exactly one NULL measurement. Neither a missing field nor zero makes the South observation disappear.</span>
-<span>-- Hint: The question restricts station, not temperature.</span>
-<span> </span>
-<span>-- 4. Calculate without editing storage.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 4, For IDs 1 and 3, return reading_id, temperature, and temperature + 2 named adjusted_temperature. Then rerun the original projection to show that the stored values did not change.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 4, Two rows keyed by reading_id, columns reading_id, temperature, adjusted_temperature, final ORDER BY reading_id: (1,18,20) and (3,0,2). Original temperatures remain 18 and 0.</span>
-<span>-- Verify: For sql-start-01 Exercise 4, Inspect calculated values 20 and 2, then rerun the original reading_id/temperature projection and confirm the stored temperatures remain 18 and 0.</span>
-<span>-- Hint: An expression in SELECT calculates a result; UPDATE would change storage.</span>
-<span> </span>
-<span>-- 5. Distinguish no rows from a missing field.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 5, Search for station East and project reading_id, station, temperature. Compare its output with the South result from Exercise 3.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 5, Zero observation rows with columns reading_id, station, temperature and final ORDER BY reading_id. South has two rows, including a row with a NULL field; East has no stored observation.</span>
-<span>-- Verify: For sql-start-01 Exercise 5, Inspect the zero-row message and compare it with the South row at ID 4, which has an identity and a NULL field. Do not manufacture an East row.</span>
-<span>-- Hint: A WHERE condition can produce an empty result without causing an error.</span>
-<span> </span>
-<span>-- 6. Transfer grain to a new collection.</span>
-<span>-- Inputs/evidence: For sql-start-01 Exercise 6, Use a VALUES input containing (11, &#x27;North&#x27;, &#x27;battery&#x27;) and (12, &#x27;North&#x27;, &#x27;screen&#x27;) with columns ticket_id, station, issue. Return ticket_id, station, issue ordered by ticket_id. Explain why station is not a ticket key.</span>
-<span>-- Expected result/shape: For sql-start-01 Exercise 6, Two ticket rows, columns ticket_id, station, issue, final ORDER BY ticket_id: IDs 11 and 12 both belong to North. The output grain is one ticket, not one station or observation.</span>
-<span>-- Verify: For sql-start-01 Exercise 6, Count two distinct ticket_id values and one distinct station; inspect battery at ID 11 and screen at ID 12 to retain their source associations.</span>
-<span>-- Hint: Name the three VALUES columns in the table alias.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-START-01: Reading Tables and Result Grain</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_start_01_tables_and_grain.md</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_readings <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    reading_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    station <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    reading_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    temperature <span class="syntax-builtin">numeric</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_readings <span class="syntax-punctuation">(</span>reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">)</span> <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;West&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 1: A full observation retains its identity</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Six rows with columns reading_id, station, reading_day, temperature; IDs 1 through 6 in order. ID 4 has NULL temperature.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> start_readings</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 2: Two visually identical rows are still two observations</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two rows, each (North, 18), with columns station and temperature. No table row is removed or updated.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> station<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> start_readings</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Trace identities.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 1, Return all observations with reading_id, station, and temperature. Write a sentence naming the table grain and output grain before running the query. Use the identity as the final display order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 1, Six rows, one per reading_id, with columns reading_id, station, temperature; final ORDER BY reading_id. IDs are 1,2,3,4,5,6 and ID 4 keeps its NULL measurement.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 1, Compare the six returned reading_id values with the fixture IDs 1 through 6 and inspect the NULL temperature at ID 4; no identity is repeated or absent.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Start with FROM, then choose the three requested columns.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Reveal repeated visible values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 2, Show reading_id, station, reading_day, temperature for IDs 1 and 2. Explain why projecting only station and temperature produces two identical-looking rows rather than one row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 2, Two observation rows with columns reading_id, station, reading_day, temperature; final ORDER BY reading_id. Both temperatures are 18, with dates January 1 and January 2 respectively.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 2, Inspect two different reading_id and reading_day values while confirming both station/temperature pairs are North/18. Removing the visible identity must not collapse the two observations.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: A column can repeat even when the primary key cannot.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Filter observations without losing missing values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 3, Return the South observations with reading_id, station, temperature, ordered by reading_id. Do not add a measurement condition.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 3, Two rows keyed by reading_id, columns reading_id, station, temperature, final ORDER BY reading_id: (3, South, 0), (4, South, NULL).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 3, Inspect the two returned rows: reading_id 3 and 4, exactly one present zero temperature, and exactly one NULL measurement. Neither a missing field nor zero makes the South observation disappear.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: The question restricts station, not temperature.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Calculate without editing storage.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 4, For IDs 1 and 3, return reading_id, temperature, and temperature + 2 named adjusted_temperature. Then rerun the original projection to show that the stored values did not change.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 4, Two rows keyed by reading_id, columns reading_id, temperature, adjusted_temperature, final ORDER BY reading_id: (1,18,20) and (3,0,2). Original temperatures remain 18 and 0.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 4, Inspect calculated values 20 and 2, then rerun the original reading_id/temperature projection and confirm the stored temperatures remain 18 and 0.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: An expression in SELECT calculates a result; UPDATE would change storage.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Distinguish no rows from a missing field.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 5, Search for station East and project reading_id, station, temperature. Compare its output with the South result from Exercise 3.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 5, Zero observation rows with columns reading_id, station, temperature and final ORDER BY reading_id. South has two rows, including a row with a NULL field; East has no stored observation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 5, Inspect the zero-row message and compare it with the South row at ID 4, which has an identity and a NULL field. Do not manufacture an East row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: A WHERE condition can produce an empty result without causing an error.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Transfer grain to a new collection.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-start-01 Exercise 6, Use a VALUES input containing (11, &#x27;North&#x27;, &#x27;battery&#x27;) and (12, &#x27;North&#x27;, &#x27;screen&#x27;) with columns ticket_id, station, issue. Return ticket_id, station, issue ordered by ticket_id. Explain why station is not a ticket key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-start-01 Exercise 6, Two ticket rows, columns ticket_id, station, issue, final ORDER BY ticket_id: IDs 11 and 12 both belong to North. The output grain is one ticket, not one station or observation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-start-01 Exercise 6, Count two distinct ticket_id values and one distinct station; inspect battery at ID 11 and screen at ID 12 to retain their source associations.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Name the three VALUES columns in the table alias.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -690,37 +738,37 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-trace-identities">Exercise 1: Trace identities<a class="heading-anchor" href="#solution-1--exercise-1-trace-identities" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT reading_id, station, temperature FROM start_readings ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The source contains six independent observations. SELECT chooses three attributes from each one, and ORDER BY uses the unique identity rather than physical insertion order. The two North rows at 18 remain separate observations. Do not add DISTINCT to make the display look shorter: that would answer a different question. A result that omits ID 4 silently loses a real observation just because its measurement is unknown. Compare each returned ID with the fixture before inspecting temperatures. The assertion checks the complete ID list, which detects both a missing observation and a repeated one.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 1, Return all observations with reading_id, station, and temperature. Write a sentence naming the table grain and output grain before running the query. Use the identity as the final display order.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 1, Six rows, one per reading_id, with columns reading_id, station, temperature; final ORDER BY reading_id. IDs are 1,2,3,4,5,6 and ID 4 keeps its NULL measurement.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 1, Compare the six returned reading_id values with the fixture IDs 1 through 6 and inspect the NULL temperature at ID 4; no identity is repeated or absent.</p>
 <h4 id="solution-1--exercise-2-reveal-repeated-visible-values">Exercise 2: Reveal repeated visible values<a class="heading-anchor" href="#solution-1--exercise-2-reveal-repeated-visible-values" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT reading_id, station, reading_day, temperature FROM start_readings WHERE reading_id &lt;= 2 ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>WHERE restricts the candidate observations before projection. The output remains one row per reading_id, so the dates and identities expose two different facts even though station and temperature repeat. Deduplicating the visible measurement pair would merge two observations and destroy information. Keep identity columns visible while debugging, then hide them only when the presentation actually requires it. The check verifies both identities and their repeated measurement. It is possible for a table to have a sound primary key and for a particular projection to show duplicates; those statements describe different things.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 2, Show reading_id, station, reading_day, temperature for IDs 1 and 2. Explain why projecting only station and temperature produces two identical-looking rows rather than one row.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 2, Two observation rows with columns reading_id, station, reading_day, temperature; final ORDER BY reading_id. Both temperatures are 18, with dates January 1 and January 2 respectively.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 2, Inspect two different reading_id and reading_day values while confirming both station/temperature pairs are North/18. Removing the visible identity must not collapse the two observations.</p>
 <h4 id="solution-1--exercise-3-filter-observations-without-losing-missing-values">Exercise 3: Filter observations without losing missing values<a class="heading-anchor" href="#solution-1--exercise-3-filter-observations-without-losing-missing-values" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;South&#x27; ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The predicate asks whether the station value equals South. It does not ask whether a measurement is present, positive, or usable. Consequently, both South observations survive: one records a known zero, and one records an unknown measurement. Adding temperature &gt; 0 would introduce a new business requirement and remove both rows. Check returned identities before deciding that a short result is sensible. The verification counts two rows and separately checks that exactly one measurement is missing. This keeps a missing field distinct from an absent row, a difference that later outer joins also depend on.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 3, Return the South observations with reading_id, station, temperature, ordered by reading_id. Do not add a measurement condition.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 3, Two rows keyed by reading_id, columns reading_id, station, temperature, final ORDER BY reading_id: (3, South, 0), (4, South, NULL).</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 3, Inspect the two returned rows: reading_id 3 and 4, exactly one present zero temperature, and exactly one NULL measurement. Neither a missing field nor zero makes the South observation disappear.</p>
 <h4 id="solution-1--exercise-4-calculate-without-editing-storage">Exercise 4: Calculate without editing storage<a class="heading-anchor" href="#solution-1--exercise-4-calculate-without-editing-storage" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT reading_id, temperature, temperature + 2 AS adjusted_temperature FROM start_readings WHERE reading_id IN (1,3) ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">,</span> temperature <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> adjusted_temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>SELECT evaluates the addition for each chosen observation and assigns a label to the resulting column. AS changes the displayed heading, not the table definition. IN is a short membership test for the two explicit IDs. The table values remain 18 and 0 because no UPDATE statement is present. The assertion checks the calculated sequence as well as the original fixture values. This distinguishes a successful calculation from a destructive workaround in which the learner edits the source to make the display match. Retain numeric types so addition is arithmetic, rather than building strings that merely look like numbers.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 4, For IDs 1 and 3, return reading_id, temperature, and temperature + 2 named adjusted_temperature. Then rerun the original projection to show that the stored values did not change.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 4, Two rows keyed by reading_id, columns reading_id, temperature, adjusted_temperature, final ORDER BY reading_id: (1,18,20) and (3,0,2). Original temperatures remain 18 and 0.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 4, Inspect calculated values 20 and 2, then rerun the original reading_id/temperature projection and confirm the stored temperatures remain 18 and 0.</p>
 <h4 id="solution-1--exercise-5-distinguish-no-rows-from-a-missing-field">Exercise 5: Distinguish no rows from a missing field<a class="heading-anchor" href="#solution-1--exercise-5-distinguish-no-rows-from-a-missing-field" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;East&#x27; ORDER BY reading_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></code></pre>
 <p>An empty result is a successful query with no matching observations. It is different from the South observation whose temperature is missing: that observation has an identity and other fields. The database cannot infer an East observation merely because someone asks for it. Do not manufacture a row containing zero or NULL unless the reporting contract explicitly requires a complete station list. The check tests cardinality directly instead of testing a temperature value that does not exist. In psql the column headings still appear above the zero-row message, showing that the output schema exists even when the result has no rows.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 5, Search for station East and project reading_id, station, temperature. Compare its output with the South result from Exercise 3.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 5, Zero observation rows with columns reading_id, station, temperature and final ORDER BY reading_id. South has two rows, including a row with a NULL field; East has no stored observation.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 5, Inspect the zero-row message and compare it with the South row at ID 4, which has an identity and a NULL field. Do not manufacture an East row.</p>
 <h4 id="solution-1--exercise-6-transfer-grain-to-a-new-collection">Exercise 6: Transfer grain to a new collection<a class="heading-anchor" href="#solution-1--exercise-6-transfer-grain-to-a-new-collection" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT ticket_id, station, issue FROM (VALUES (11, &#x27;North&#x27;, &#x27;battery&#x27;), (12, &#x27;North&#x27;, &#x27;screen&#x27;)) AS tickets(ticket_id, station, issue) ORDER BY ticket_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;battery&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets<span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">;</span></code></pre>
 <p>VALUES supplies a tiny input collection directly inside the query. The alias tickets names that collection, and its parentheses assign column names in the same order as the supplied fields. The technique makes a new example runnable without changing permanent tables. Both tickets happen at North, so station repeats while ticket_id distinguishes the facts. Reusing the earlier observation grain would be a conceptual error even though the SQL might run. The assertion verifies that the transfer retained both tickets and their common station. State the new grain aloud before checking the syntax: the identity follows the fact being modeled, not a familiar column name.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 6, Use a VALUES input containing (11, &#x27;North&#x27;, &#x27;battery&#x27;) and (12, &#x27;North&#x27;, &#x27;screen&#x27;) with columns ticket_id, station, issue. Return ticket_id, station, issue ordered by ticket_id. Explain why station is not a ticket key.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 6, Two ticket rows, columns ticket_id, station, issue, final ORDER BY ticket_id: IDs 11 and 12 both belong to North. The output grain is one ticket, not one station or observation.</p>
@@ -759,106 +807,106 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-START-01: executable solutions and fail-fast checks</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE start_readings (</span>
-<span>    reading_id integer PRIMARY KEY,</span>
-<span>    station text NOT NULL,</span>
-<span>    reading_day date NOT NULL,</span>
-<span>    temperature numeric</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO start_readings (reading_id, station, reading_day, temperature) VALUES</span>
-<span>(1, &#x27;North&#x27;, DATE &#x27;2024-01-01&#x27;, 18),</span>
-<span>(2, &#x27;North&#x27;, DATE &#x27;2024-01-02&#x27;, 18),</span>
-<span>(3, &#x27;South&#x27;, DATE &#x27;2024-01-01&#x27;, 0),</span>
-<span>(4, &#x27;South&#x27;, DATE &#x27;2024-01-02&#x27;, NULL),</span>
-<span>(5, &#x27;West&#x27;, DATE &#x27;2024-01-01&#x27;, -4),</span>
-<span>(6, &#x27;North&#x27;, DATE &#x27;2024-01-03&#x27;, 20);</span>
-<span> </span>
-<span>CREATE FUNCTION pg_temp.assert_true(ok boolean, message text)</span>
-<span>RETURNS void LANGUAGE plpgsql AS $assert$</span>
-<span>BEGIN</span>
-<span>  IF ok IS DISTINCT FROM true THEN</span>
-<span>    RAISE EXCEPTION &#x27;Contract failed: %&#x27;, message;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$assert$;</span>
-<span> </span>
-<span>-- Exercises: one isolated answer and verification per prompt.</span>
-<span> </span>
-<span>-- 1. Trace identities</span>
-<span>SAVEPOINT exercise_1;</span>
-<span>SELECT reading_id, station, temperature FROM start_readings ORDER BY reading_id;</span>
-<span>CREATE TEMP TABLE solution_answer_1 ON COMMIT DROP AS</span>
-<span>SELECT reading_id, station, temperature FROM start_readings ORDER BY reading_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(reading_id ORDER BY reading_id) FROM solution_answer_1) = ARRAY[1,2,3,4,5,6], &#x27;sql-start-01 exercise 1&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
-<span>RELEASE SAVEPOINT exercise_1;</span>
-<span> </span>
-<span>-- 2. Reveal repeated visible values</span>
-<span>SAVEPOINT exercise_2;</span>
-<span>SELECT reading_id, station, reading_day, temperature FROM start_readings WHERE reading_id &lt;= 2 ORDER BY reading_id;</span>
-<span>CREATE TEMP TABLE solution_answer_2 ON COMMIT DROP AS</span>
-<span>SELECT reading_id, station, reading_day, temperature FROM start_readings WHERE reading_id &lt;= 2 ORDER BY reading_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*) = 2 AND min(temperature) = 18 AND max(temperature) = 18 AND count(DISTINCT reading_day) = 2 FROM solution_answer_2), &#x27;sql-start-01 exercise 2&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
-<span>RELEASE SAVEPOINT exercise_2;</span>
-<span> </span>
-<span>-- 3. Filter observations without losing missing values</span>
-<span>SAVEPOINT exercise_3;</span>
-<span>SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;South&#x27; ORDER BY reading_id;</span>
-<span>CREATE TEMP TABLE solution_answer_3 ON COMMIT DROP AS</span>
-<span>SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;South&#x27; ORDER BY reading_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(reading_id ORDER BY reading_id) = ARRAY[3,4] AND count(temperature) = 1 FROM solution_answer_3), &#x27;sql-start-01 exercise 3&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
-<span>RELEASE SAVEPOINT exercise_3;</span>
-<span> </span>
-<span>-- 4. Calculate without editing storage</span>
-<span>SAVEPOINT exercise_4;</span>
-<span>SELECT reading_id, temperature, temperature + 2 AS adjusted_temperature FROM start_readings WHERE reading_id IN (1,3) ORDER BY reading_id;</span>
-<span>CREATE TEMP TABLE solution_answer_4 ON COMMIT DROP AS</span>
-<span>SELECT reading_id, temperature, temperature + 2 AS adjusted_temperature FROM start_readings WHERE reading_id IN (1,3) ORDER BY reading_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(adjusted_temperature ORDER BY reading_id) FROM solution_answer_4) = ARRAY[20,2]::numeric[] AND (SELECT temperature FROM start_readings WHERE reading_id=1) = 18, &#x27;sql-start-01 exercise 4&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
-<span>RELEASE SAVEPOINT exercise_4;</span>
-<span> </span>
-<span>-- 5. Distinguish no rows from a missing field</span>
-<span>SAVEPOINT exercise_5;</span>
-<span>SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;East&#x27; ORDER BY reading_id;</span>
-<span>CREATE TEMP TABLE solution_answer_5 ON COMMIT DROP AS</span>
-<span>SELECT reading_id, station, temperature FROM start_readings WHERE station = &#x27;East&#x27; ORDER BY reading_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*) FROM solution_answer_5) = 0, &#x27;sql-start-01 exercise 5&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
-<span>RELEASE SAVEPOINT exercise_5;</span>
-<span> </span>
-<span>-- 6. Transfer grain to a new collection</span>
-<span>SAVEPOINT exercise_6;</span>
-<span>SELECT ticket_id, station, issue FROM (VALUES (11, &#x27;North&#x27;, &#x27;battery&#x27;), (12, &#x27;North&#x27;, &#x27;screen&#x27;)) AS tickets(ticket_id, station, issue) ORDER BY ticket_id;</span>
-<span>CREATE TEMP TABLE solution_answer_6 ON COMMIT DROP AS</span>
-<span>SELECT ticket_id, station, issue FROM (VALUES (11, &#x27;North&#x27;, &#x27;battery&#x27;), (12, &#x27;North&#x27;, &#x27;screen&#x27;)) AS tickets(ticket_id, station, issue) ORDER BY ticket_id;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(ticket_id ORDER BY ticket_id) = ARRAY[11,12] AND count(DISTINCT station) = 1 FROM solution_answer_6), &#x27;sql-start-01 exercise 6&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
-<span>RELEASE SAVEPOINT exercise_6;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-START-01: executable solutions and fail-fast checks</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_readings <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    reading_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    station <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    reading_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    temperature <span class="syntax-builtin">numeric</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_readings <span class="syntax-punctuation">(</span>reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">)</span> <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;West&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Trace identities</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Reveal repeated visible values</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> reading_day<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Filter observations without losing missing values</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Calculate without editing storage</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">,</span> temperature <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> adjusted_temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">,</span> temperature <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> adjusted_temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>adjusted_temperature <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> reading_id<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Distinguish no rows from a missing field</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature <span class="syntax-keyword">FROM</span> start_readings <span class="syntax-keyword">WHERE</span> station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Transfer grain to a new collection</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;battery&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets<span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;battery&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets<span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>ticket_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> station<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

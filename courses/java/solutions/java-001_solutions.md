@@ -18,7 +18,7 @@ The class braces enclose methods, and the main-method braces enclose statements.
 
 ## Exercise 1: Print a first result
 
-Task: Create a message variable containing Hello,Java and print it once.
+Task: Create a message variable containing Hello, Java and print it once.
 
 The variable holds a reference to a String value. println adds a line separator, while the assertion checks the content independently of terminal formatting.
 
@@ -79,9 +79,9 @@ if (!enabled) throw new IllegalStateException("Run with -ea");
 assert enabled;
 ```
 
-**Expected:** assertion-enabled flagtrue.
+**Expected:** assertion-enabled flag true.
 
-**Verify:** Compare the program values or named exception with assertion-enabled flagtrue. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with assertion-enabled flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Separate runtime failure
 
@@ -120,9 +120,9 @@ try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {
 }
 ```
 
-**Expected:** compiler resultfalse and at least one ERROR diagnostic.
+**Expected:** compiler result false and at least one ERROR diagnostic.
 
-**Verify:** Compare the program values or named exception with compiler resultfalse and at least one ERROR diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with compiler result false and at least one ERROR diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

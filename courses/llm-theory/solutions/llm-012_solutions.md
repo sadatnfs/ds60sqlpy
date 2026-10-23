@@ -47,7 +47,7 @@ assert cool[0]>p[0] and p.argmax()==cool.argmax()==0
 
 ## Exercise 3: Use fixed draws
 
-The question is: Sample from probabilities[.5,.3,.2] with draws.1,.6,.9.
+The question is: Sample from probabilities[.5,.3,.2] with draws .1,.6,.9.
 
 The intervals are[0,.5),[.5,.8),[.8,1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.
 
@@ -71,9 +71,9 @@ allowed=np.argsort(-scores,kind='stable')[:2]; filtered=np.zeros(3); filtered[al
 assert filtered[2]==0; np.testing.assert_allclose(filtered.sum(),1,atol=1e-12,rtol=0)
 ```
 
-**Expected:** token2 probability0; first two sum1.
+**Expected:** token 2 probability0; first two sum1.
 
-**Verify:** Compare the computed values or written argument with token2 probability0; first two sum1.
+**Verify:** Compare the computed values or written argument with token 2 probability0; first two sum1.
 
 ## Exercise 5: Declare ties
 

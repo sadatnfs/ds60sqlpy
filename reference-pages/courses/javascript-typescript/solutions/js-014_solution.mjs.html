@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,116 +161,116 @@
       <h1>Js 014 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-014_solution.mjs</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span>function lowerBound(values, target, trace = []) {</span>
-<span>  let low = 0;</span>
-<span>  let high = values.length;</span>
-<span>  while (low &lt; high) {</span>
-<span>    const middle = low + Math.floor((high - low) / 2);</span>
-<span>    trace.push([low, high, middle]);</span>
-<span>    if (values[middle] &lt; target) low = middle + 1;</span>
-<span>    else high = middle;</span>
-<span>  }</span>
-<span>  return low;</span>
-<span>}</span>
-<span>function uniqueIndex(rows) {</span>
-<span>  const index = new Map();</span>
-<span>  for (const row of rows) {</span>
-<span>    if (index.has(row.id)) throw new Error(`duplicate id ${row.id}`);</span>
-<span>    index.set(row.id, row);</span>
-<span>  }</span>
-<span>  return index;</span>
-<span>}</span>
-<span>class MinHeap {</span>
-<span>  values = [];</span>
-<span>  push(value) {</span>
-<span>    if (!Number.isFinite(value)) throw new TypeError(&#x27;finite value required&#x27;);</span>
-<span>    const values = this.values;</span>
-<span>    values.push(value);</span>
-<span>    let index = values.length - 1;</span>
-<span>    while (index &gt; 0) {</span>
-<span>      const parent = Math.floor((index - 1) / 2);</span>
-<span>      if (values[parent] &lt;= values[index]) break;</span>
-<span>      [values[parent], values[index]] = [values[index], values[parent]];</span>
-<span>      index = parent;</span>
-<span>    }</span>
-<span>  }</span>
-<span>  pop() {</span>
-<span>    const values = this.values;</span>
-<span>    if (values.length === 0) return undefined;</span>
-<span>    const minimum = values[0];</span>
-<span>    const last = values.pop();</span>
-<span>    if (values.length === 0) return minimum;</span>
-<span>    values[0] = last;</span>
-<span>    let index = 0;</span>
-<span>    while (2 * index + 1 &lt; values.length) {</span>
-<span>      let child = 2 * index + 1;</span>
-<span>      if (child + 1 &lt; values.length &amp;&amp; values[child + 1] &lt; values[child]) child += 1;</span>
-<span>      if (values[index] &lt;= values[child]) break;</span>
-<span>      [values[index], values[child]] = [values[child], values[index]];</span>
-<span>      index = child;</span>
-<span>    }</span>
-<span>    return minimum;</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>export async function verify() {</span>
-<span>  // Exercise 1: Trace lower bound with duplicates</span>
-<span>  {</span>
-<span>    const trace = [];</span>
-<span>    assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);</span>
-<span>    assert.deepEqual(trace, [[0, 4, 2], [0, 2, 1], [0, 1, 0]]);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Use a heap for repeated minimum extraction</span>
-<span>  {</span>
-<span>    const heap = new MinHeap();</span>
-<span>    for (const value of [5, 1, 3, 1]) heap.push(value);</span>
-<span>    assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5]);</span>
-<span>    assert.equal(heap.pop(), undefined);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Cover empty and outside search boundaries</span>
-<span>  {</span>
-<span>    assert.equal(lowerBound([], 4), 0);</span>
-<span>    assert.equal(lowerBound([2, 4, 6], 1), 0);</span>
-<span>    assert.equal(lowerBound([2, 4, 6], 9), 3);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Measure comparisons without a timing claim</span>
-<span>  {</span>
-<span>    const values = Array.from({ length: 1024 }, (_, index) =&gt; index * 2);</span>
-<span>    const trace = [];</span>
-<span>    assert.equal(lowerBound(values, 1001, trace), 501);</span>
-<span>    assert.ok(trace.length &lt;= 11);</span>
-<span>    assert.equal(values.includes(1001), false);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Reject duplicate index keys</span>
-<span>  {</span>
-<span>    const index = uniqueIndex([{ id: &#x27;A&#x27;, value: 7 }, { id: &#x27;B&#x27;, value: 9 }]);</span>
-<span>    assert.equal(index.get(&#x27;A&#x27;).value, 7);</span>
-<span>    assert.throws(() =&gt; uniqueIndex([{ id: &#x27;A&#x27; }, { id: &#x27;A&#x27; }]), /duplicate/u);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Check the heap invariant after every update</span>
-<span>  {</span>
-<span>    const heap = new MinHeap();</span>
-<span>    for (const value of [6, 5, 4, 3, 2, 1]) {</span>
-<span>      heap.push(value);</span>
-<span>      for (let index = 1; index &lt; heap.values.length; index += 1) {</span>
-<span>        assert.ok(heap.values[Math.floor((index - 1) / 2)] &lt;= heap.values[index]);</span>
-<span>      }</span>
-<span>    }</span>
-<span>    assert.throws(() =&gt; heap.push(NaN), TypeError);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">function</span> lowerBound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">,</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">let</span> low <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">let</span> high <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span>low <span class="syntax-operator">&lt;</span> high<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> middle <span class="syntax-operator">=</span> low <span class="syntax-operator">+</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>floor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>high <span class="syntax-operator">-</span> low<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    trace<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>low<span class="syntax-punctuation">,</span> high<span class="syntax-punctuation">,</span> middle<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>middle<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> target<span class="syntax-punctuation">)</span> low <span class="syntax-operator">=</span> middle <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span> high <span class="syntax-operator">=</span> middle<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> low<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> uniqueIndex<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">const</span> index <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Map</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> row <span class="syntax-keyword">of</span> rows<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">.</span>has<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">duplicate id </span><span class="syntax-string">${</span>row<span class="syntax-punctuation">.</span>id<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    index<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>id<span class="syntax-punctuation">,</span> row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> index<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> MinHeap <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite value required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>length <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span>index <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">const</span> parent <span class="syntax-operator">=</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>floor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>index <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>parent<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;=</span> values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">[</span>values<span class="syntax-punctuation">[</span>parent<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">[</span>parent<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      index <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>length <span class="syntax-operator">===</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> minimum <span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> last <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>length <span class="syntax-operator">===</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> minimum<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> last<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">let</span> child <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>child <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">.</span>length <span class="syntax-operator">&amp;&amp;</span> values<span class="syntax-punctuation">[</span>child <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">[</span>child<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> child <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;=</span> values<span class="syntax-punctuation">[</span>child<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">[</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">[</span>child<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>values<span class="syntax-punctuation">[</span>child<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      index <span class="syntax-operator">=</span> child<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> minimum<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Trace lower bound with duplicates</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lowerBound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Use a heap for repeated minimum extraction</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> heap <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> MinHeap<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> value <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> heap<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>heap<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> heap<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> heap<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> heap<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>heap<span class="syntax-punctuation">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Cover empty and outside search boundaries</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lowerBound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lowerBound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lowerBound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Measure comparisons without a timing claim</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> values <span class="syntax-operator">=</span> <span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-number">1024</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> index <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lowerBound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">1001</span><span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">501</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">.</span>length <span class="syntax-operator">&lt;=</span> <span class="syntax-number">11</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span><span class="syntax-number">1001</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Reject duplicate index keys</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> index <span class="syntax-operator">=</span> uniqueIndex<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">9</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> uniqueIndex<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/duplicate/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Check the heap invariant after every update</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> heap <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> MinHeap<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> value <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      heap<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> heap<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>heap<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">[</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>floor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>index <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;=</span> heap<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> heap<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

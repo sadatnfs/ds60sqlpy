@@ -49,7 +49,7 @@ For an interview, explain why a training loss can rise after regularization whil
 
 ## Exercise 1: Calculate two penalties
 
-The question is: Use weights 1, -2 and compute L1and squared L2sums.
+The question is: Use weights 1, -2 and compute L1 and squared L2 sums.
 
 The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
 

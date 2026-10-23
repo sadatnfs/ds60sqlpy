@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,43 +161,43 @@
       <h1>Tf 018</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/lessons/tf-018.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-018: Normalization state and batch dependence.</span>
-<span> </span>
-<span>Answer-free learner worksheet. See the companion guide for worked examples.</span>
-<span>Copy to .learning before editing. Six independent attempts belong below.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Exercise 1: Update and inspect moving state</span>
-<span># Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-</span>
-<span># four probe.</span>
-<span># Expected: moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</span>
-<span> </span>
-<span># Exercise 2: Freeze evaluation state</span>
-<span># After one training call, evaluate the same batch and compare with the stored-statistic</span>
-<span># formula.</span>
-<span># Expected: moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</span>
-<span> </span>
-<span># Exercise 3: Test LayerNorm row independence</span>
-<span># Normalize [1,3] alone and as the first row beside [100,200].</span>
-<span># Expected: the first output is unchanged; LayerNorm has no running-statistic variables.</span>
-<span> </span>
-<span># Exercise 4: Expose actual BatchNorm batch dependence</span>
-<span># Compare the first row of training normalization with and without the added row [98,199].</span>
-<span># Expected: the output changes and matches independent per-channel NumPy mean/variance calculations.</span>
-<span> </span>
-<span># Exercise 5: Repeat updates and translate asymmetric momentum</span>
-<span># Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare</span>
-<span># old/new-weight arithmetic.</span>
-<span># Expected: 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</span>
-<span> </span>
-<span># Exercise 6: Handle constant rows and frozen BatchNorm</span>
-<span># Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with</span>
-<span># training=True.</span>
-<span># Expected: LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-018: Normalization state and batch dependence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Answer-free learner worksheet. See the companion guide for worked examples.</span></span>
+<span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Update and inspect moving state</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-</span></span>
+<span class="source-line"><span class="syntax-comment"># four probe.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Freeze evaluation state</span></span>
+<span class="source-line"><span class="syntax-comment"># After one training call, evaluate the same batch and compare with the stored-statistic</span></span>
+<span class="source-line"><span class="syntax-comment"># formula.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Test LayerNorm row independence</span></span>
+<span class="source-line"><span class="syntax-comment"># Normalize [1,3] alone and as the first row beside [100,200].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the first output is unchanged; LayerNorm has no running-statistic variables.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Expose actual BatchNorm batch dependence</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare the first row of training normalization with and without the added row [98,199].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the output changes and matches independent per-channel NumPy mean/variance calculations.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Repeat updates and translate asymmetric momentum</span></span>
+<span class="source-line"><span class="syntax-comment"># Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare</span></span>
+<span class="source-line"><span class="syntax-comment"># old/new-weight arithmetic.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Handle constant rows and frozen BatchNorm</span></span>
+<span class="source-line"><span class="syntax-comment"># Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with</span></span>
+<span class="source-line"><span class="syntax-comment"># training=True.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

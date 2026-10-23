@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such ascompute ormerge makes it atomic for a key.
+Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
 
 Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock;using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention,not a universal concurrency performance claim.
 
@@ -20,7 +20,7 @@ Use synchronized around the entire read-modify-write. AtomicInteger.incrementAnd
 
 ## Exercise 1: Protect a compound counter
 
-Task: Run two workers making1000 synchronized increments each.
+Task: Run two workers making 1000 synchronized increments each.
 
 The lock covers the complete increment. Synchronizing only a read or only a write would still permit lost updates.
 
@@ -29,9 +29,9 @@ Counter counter=new Counter();runTwo(() -> {for(int i=0;i<1000;i++)counter.incre
 assert counter.value()==2000;
 ```
 
-**Expected:** counter2000.
+**Expected:** counter 2000.
 
-**Verify:** Compare the program values or named exception with counter2000. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with counter 2000. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Use an atomic increment
 
@@ -50,7 +50,7 @@ assert atomic.get()==2000;
 
 ## Exercise 3: Inspect compare-and-set
 
-Task: Change0to1 withCAS,then retry expecting0.
+Task: Change0to1 with CAS,then retry expecting0.
 
 CAS reports whether its expected-state condition held. A failed attempt must be handled according to the algorithm rather than assumed to have updated.
 
@@ -58,9 +58,9 @@ CAS reports whether its expected-state condition held. A failed attempt must be 
 var state=new java.util.concurrent.atomic.AtomicInteger();assert state.compareAndSet(0,1);assert !state.compareAndSet(0,2);assert state.get()==1;
 ```
 
-**Expected:** firsttrue;secondfalse;value1.
+**Expected:** first true;second false;value1.
 
-**Verify:** Compare the program values or named exception with firsttrue;secondfalse;value1. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with first true;second false;value1. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Combine map updates atomically
 
@@ -79,7 +79,7 @@ assert counts.get("x")==2000;
 
 ## Exercise 5: Bound lock contention
 
-Task: Hold aReentrantLock in the caller while a worker tries to acquire it with a short timeout.
+Task: Hold a ReentrantLock in the caller while a worker tries to acquire it with a short timeout.
 
 The owner deliberately retains the lock until the timed attempt ends. The result is a controlled contention outcome,not a race-dependent timing guess.
 
@@ -90,13 +90,13 @@ finally{lock.unlock();}
 assert !lock.isLocked();
 ```
 
-**Expected:** worker returnsfalse;lock released in finally.
+**Expected:** worker returns false;lock released in finally.
 
-**Verify:** Compare the program values or named exception with worker returnsfalse;lock released in finally. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with worker returns false;lock released in finally. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 6: Use one global order for two locks
 
-Task: Have both workers acquirefirst then second before incrementing shared state.
+Task: Have both workers acquire first then second before incrementing shared state.
 
 The same acquisition order removes the opposite-order cycle for these two locks. It does not prove that a larger program has no other lock or resource cycles.
 

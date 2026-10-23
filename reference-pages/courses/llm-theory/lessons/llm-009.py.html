@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,87 +161,87 @@
       <h1>Llm 009</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/lessons/llm-009.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-009: read the companion guide, predict, then edit your own copy.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def attention(q, k, v, allowed):</span>
-<span>    q, k, v = (np.asarray(value, dtype=np.float64) for value in (q, k, v))</span>
-<span>    allowed = np.asarray(allowed)</span>
-<span>    if any(value.ndim != 2 for value in (q, k, v)):</span>
-<span>        raise ValueError(&quot;q, k and v must be matrices&quot;)</span>
-<span>    count, width = q.shape</span>
-<span>    if count == 0 or width == 0 or v.shape[1] == 0:</span>
-<span>        raise ValueError(&quot;nonempty token and feature axes required&quot;)</span>
-<span>    if k.shape != (count, width) or v.shape[0] != count:</span>
-<span>        raise ValueError(&quot;self-attention shapes do not agree&quot;)</span>
-<span>    if allowed.dtype != np.bool_:</span>
-<span>        raise TypeError(&quot;allowed must be boolean&quot;)</span>
-<span>    if allowed.shape != (count, count):</span>
-<span>        raise ValueError(&quot;allowed must have shape (tokens, tokens)&quot;)</span>
-<span>    if not allowed.any(axis=1).all():</span>
-<span>        raise ValueError(&quot;each query needs at least one key&quot;)</span>
-<span>    if not all(np.isfinite(value).all() for value in (q, k, v)):</span>
-<span>        raise ValueError(&quot;finite inputs required&quot;)</span>
-<span>    scores = (q @ k.T) / np.sqrt(width)</span>
-<span>    if not np.isfinite(scores[allowed]).all():</span>
-<span>        raise ValueError(&quot;finite allowed scores required&quot;)</span>
-<span>    masked = np.where(allowed, scores, -np.inf)</span>
-<span>    shifted = masked - masked.max(axis=1, keepdims=True)</span>
-<span>    weights = np.exp(shifted)</span>
-<span>    weights /= weights.sum(axis=1, keepdims=True)</span>
-<span>    return weights @ v, weights</span>
-<span> </span>
-<span> </span>
-<span># Exercise 1: Trace three mixtures</span>
-<span># Draw the three allowed rows and calculate the output of Example A by hand before</span>
-<span># executing it. Label query and key axes.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span># Exercise 2: Change only the future</span>
-<span># Repeat Example B with the third value `[100,200]`. Keep Q, K and the first two value</span>
-<span># rows fixed. Explain which output rows may change under the causal contract.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span># Exercise 3: Construct a nonuniform prefix oracle</span>
-<span># Use `Q=K=[[1,0],[0,1],[1,1],[-1,1]]` and `V=[[1,2],[3,4],[5,6],[7,8]]`. For cuts 1</span>
-<span># through 4, compare the full result&#x27;s early rows with an independently recomputed prefix.</span>
-<span># Then perturb only Q, K and V rows at positions 2 and later and compare the first two</span>
-<span># outputs.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span># Exercise 4: Diagnose a plausible-looking triangle</span>
-<span># For the zero-score three-token example, a broken implementation computes an unmasked</span>
-<span># softmax first and then multiplies it by the lower triangle without renormalizing.</span>
-<span># Calculate the resulting row sums and outputs, then repair the score/mask order.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span># Exercise 5: Make invalid inputs fail clearly</span>
-<span># Add tests for an empty token axis, an integer rather than boolean mask, a wrong mask</span>
-<span># shape, and an all-false second query row. Also try a NaN in V.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span># Exercise 6: Transfer to next-token labels</span>
-<span># Given IDs `[2,5,7,3]`, construct the decoder inputs and next-token labels. Explain</span>
-<span># whether query zero may see its current input, whether it may see its target in the next</span>
-<span># input position, and one data-leakage failure that a correct mask does not address.</span>
-<span># Keep your prediction, code change and observed check in your own copy.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    q = np.zeros((3, 2), dtype=np.float64)</span>
-<span>    k = q.copy()</span>
-<span>    v = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])</span>
-<span>    allowed = np.tri(3, dtype=bool)</span>
-<span>    output, weights = attention(q, k, v, allowed)</span>
-<span>    expected = np.array([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]])</span>
-<span>    np.testing.assert_allclose(output, expected, rtol=0, atol=1e-12)</span>
-<span>    np.testing.assert_allclose(weights.sum(axis=1), 1.0, rtol=0, atol=1e-12)</span>
-<span>    for cut in range(1, 4):</span>
-<span>        prefix, _ = attention(q[:cut], k[:cut], v[:cut], np.tri(cut, dtype=bool))</span>
-<span>        np.testing.assert_allclose(output[:cut], prefix, rtol=0, atol=1e-12)</span>
-<span>    print(output)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-009: read the companion guide, predict, then edit your own copy.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">attention</span><span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">,</span> allowed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    allowed <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">q, k and v must be matrices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    count<span class="syntax-punctuation">,</span> width <span class="syntax-operator">=</span> q<span class="syntax-operator">.</span>shape</span>
+<span class="source-line">    <span class="syntax-keyword">if</span> count <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> width <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> v<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty token and feature axes required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> k<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> <span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">,</span> width<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> v<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> count<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">self-attention shapes do not agree</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> allowed<span class="syntax-operator">.</span>dtype <span class="syntax-operator">!=</span> np<span class="syntax-operator">.</span>bool_<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">allowed must be boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> allowed<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> <span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">,</span> count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">allowed must have shape (tokens, tokens)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> allowed<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">each query needs at least one key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite inputs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>q <span class="syntax-operator">@</span> k<span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span>allowed<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite allowed scores required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    masked <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">,</span> scores<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    shifted <span class="syntax-operator">=</span> masked <span class="syntax-operator">-</span> masked<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    weights <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    weights <span class="syntax-operator">/</span><span class="syntax-operator">=</span> weights<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> weights <span class="syntax-operator">@</span> v<span class="syntax-punctuation">,</span> weights</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Trace three mixtures</span></span>
+<span class="source-line"><span class="syntax-comment"># Draw the three allowed rows and calculate the output of Example A by hand before</span></span>
+<span class="source-line"><span class="syntax-comment"># executing it. Label query and key axes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Change only the future</span></span>
+<span class="source-line"><span class="syntax-comment"># Repeat Example B with the third value `[100,200]`. Keep Q, K and the first two value</span></span>
+<span class="source-line"><span class="syntax-comment"># rows fixed. Explain which output rows may change under the causal contract.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Construct a nonuniform prefix oracle</span></span>
+<span class="source-line"><span class="syntax-comment"># Use `Q=K=[[1,0],[0,1],[1,1],[-1,1]]` and `V=[[1,2],[3,4],[5,6],[7,8]]`. For cuts 1</span></span>
+<span class="source-line"><span class="syntax-comment"># through 4, compare the full result&#x27;s early rows with an independently recomputed prefix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Then perturb only Q, K and V rows at positions 2 and later and compare the first two</span></span>
+<span class="source-line"><span class="syntax-comment"># outputs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Diagnose a plausible-looking triangle</span></span>
+<span class="source-line"><span class="syntax-comment"># For the zero-score three-token example, a broken implementation computes an unmasked</span></span>
+<span class="source-line"><span class="syntax-comment"># softmax first and then multiplies it by the lower triangle without renormalizing.</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate the resulting row sums and outputs, then repair the score/mask order.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Make invalid inputs fail clearly</span></span>
+<span class="source-line"><span class="syntax-comment"># Add tests for an empty token axis, an integer rather than boolean mask, a wrong mask</span></span>
+<span class="source-line"><span class="syntax-comment"># shape, and an all-false second query row. Also try a NaN in V.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer to next-token labels</span></span>
+<span class="source-line"><span class="syntax-comment"># Given IDs `[2,5,7,3]`, construct the decoder inputs and next-token labels. Explain</span></span>
+<span class="source-line"><span class="syntax-comment"># whether query zero may see its current input, whether it may see its target in the next</span></span>
+<span class="source-line"><span class="syntax-comment"># input position, and one data-leakage failure that a correct mask does not address.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep your prediction, code change and observed check in your own copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    q <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    k <span class="syntax-operator">=</span> q<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    v <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    allowed <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>tri<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    output<span class="syntax-punctuation">,</span> weights <span class="syntax-operator">=</span> attention<span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">,</span> allowed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expected <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">8</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> cut <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        prefix<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> attention<span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>cut<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>cut<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>cut<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>tri<span class="syntax-punctuation">(</span>cut<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>cut<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> prefix<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

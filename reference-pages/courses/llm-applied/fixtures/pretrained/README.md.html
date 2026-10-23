@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -152,24 +198,24 @@
 <h3 id="1-build-the-optional-environment">1. Build the optional environment<a class="heading-anchor" href="#1-build-the-optional-environment" aria-label="Link to this section">#</a></h3>
 <p>Use Docker with Linux containers and Compose, as described in the <a href="../../../../docs/docker-classroom.md.html">classroom guide</a>. Open a terminal in the repository root. On Windows, the engine uses its WSL 2 backend. Run each command separately and stop if it fails. These commands work in Command Prompt, PowerShell and macOS/Linux terminals without host Python.</p>
 <p>First build the CPU PyTorch worker that supplies the optional image&#x27;s base:</p>
-<pre><code class="language-text">docker compose --progress plain -f compose.classroom.yaml --profile llm-torch-cpu --parallel 1 build llm-worker</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker compose --progress plain -f compose.classroom.yaml --profile llm-torch-cpu --parallel 1 build llm-worker</code></pre>
 <p>Then build the separate recipe image:</p>
-<pre><code class="language-text">docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
 <p>The image reuses local <code>ds60sqlpy-worker-llm-torch-cpu:0.3.0</code>, then installs the complete <code>requirements.arm64.lock</code> or <code>requirements.amd64.lock</code> with required hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1, TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is installed by this recipe. <code>pip check</code> must pass during the build.</p>
 <p>The <a href="pyproject.toml.html">direct declaration</a>, <a href="requirements.arm64.lock.html">full arm64 lock</a> and <a href="requirements.amd64.lock.html">full amd64 lock</a> are distinct: the declaration expresses intended top-level dependencies, while a lock records every resolved package and accepted artifact hashes. Maintainers regenerate locks with <code>python courses/llm-applied/fixtures/pretrained/lock_dependencies.py</code> using uv. Changing a lock requires a fresh image build and runtime qualification.</p>
 <h3 id="2-acquire-the-pinned-model-deliberately">2. Acquire the pinned model deliberately<a class="heading-anchor" href="#2-acquire-the-pinned-model-deliberately" aria-label="Link to this section">#</a></h3>
 <p>Create a named Docker volume for downloaded assets and saved training outputs:</p>
-<pre><code class="language-text">docker volume create ds60-pretrained-learning</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker volume create ds60-pretrained-learning</code></pre>
 <p>This data is local to the Docker engine and persists when a run container is removed. Reusing this volume name selects the same artifacts. It is separate from the ordinary classroom&#x27;s progress volume. Do not remove it to diagnose a training error.</p>
 <p>The next command is the connected model acquisition step. It explicitly enables the Hub download client and acknowledges network access:</p>
-<pre><code class="language-text">docker run --rm --cpus 2 --memory 2g --mount type=volume,source=ds60-pretrained-learning,target=/models --env HF_HUB_OFFLINE=0 ds60-pretrained-recipe:local /recipe/prepare_assets.py --destination /models/smollm2-pinned --acknowledge-network</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker run --rm --cpus 2 --memory 2g --mount type=volume,source=ds60-pretrained-learning,target=/models --env HF_HUB_OFFLINE=0 ds60-pretrained-recipe:local /recipe/prepare_assets.py --destination /models/smollm2-pinned --acknowledge-network</code></pre>
 <p>The destination must not exist. The script downloads only the fixed revision and writes <code>course-assets.json</code> with file hashes. A partial acquisition is retained for inspection. It does not overwrite or delete an earlier model. Use a new destination name for a deliberate retry, then use that same name in later commands. A network failure must be fixed before attempting training.</p>
 <p>The scripts do not use paid services or automatically download a replacement model. Verification checks the exact local artifact inventory, rejects unsafe paths and unlisted files, and detects modified bytes before loading weights.</p>
 <h3 id="3-train-offline-and-preserve-a-receipt">3. Train offline and preserve a receipt<a class="heading-anchor" href="#3-train-offline-and-preserve-a-receipt" aria-label="Link to this section">#</a></h3>
 <p>Run the LoRA path with a bounded CPU and memory budget:</p>
-<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
 <p>For the full fine-tuning comparison, use another new output directory:</p>
-<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-full-001 --mode full</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-full-001 --mode full</code></pre>
 <p>Each run uses float 32, batch 1, seed 7 and exactly 10 updates. LoRA uses rank 4, alpha 8, zero adapter dropout and <code>q_proj</code>/<code>v_proj</code> targets. The output directory must be absent or empty. A repeated run needs a new name so previous models, logs and receipts remain intact.</p>
 <p>The 6 GiB limit is a chosen resource boundary for this short fixture, not a promise that any model or dataset will fit. Full fine-tuning stores parameter gradients and optimizer state. LoRA reduces trainable state but still retains the base model and intermediate activations. Longer sequences, larger batches and other models require new measurements. This recipe makes no GPU speed claim.</p>
 <h3 id="4-understand-the-training-mask">4. Understand the training mask<a class="heading-anchor" href="#4-understand-the-training-mask" aria-label="Link to this section">#</a></h3>
@@ -178,12 +224,12 @@
 <p>An attention mask controls which context positions are available; a loss mask controls which targets contribute to optimization. Prompt tokens can provide context without receiving a direct completion-loss term. Missing masks or an all-active target mask fail visibly. Do not substitute all-ones labels merely to make a run succeed.</p>
 <p>Every completed run saves a model or adapter, a tokenizer directory and a <code>receipt.json</code>. The receipt records update count, template lengths, trainable parameter count, before/after evaluation losses, installed versions, source data hashes and the pinned base revision. It is written after actual training. An authored script or failed run does not produce a success receipt.</p>
 <h3 id="5-reload-an-adapter-and-inspect-the-proposal">5. Reload an adapter and inspect the proposal<a class="heading-anchor" href="#5-reload-an-adapter-and-inspect-the-proposal" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 3g --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local /recipe/infer_local.py --model-dir /models/smollm2-pinned --adapter-dir /models/run-lora-001/model --question &quot;How is conversion rate defined?&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-text">docker run --rm --network none --cpus 2 --memory 3g --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local /recipe/infer_local.py --model-dir /models/smollm2-pinned --adapter-dir /models/run-lora-001/model --question &quot;How is conversion rate defined?&quot;</code></pre>
 <p>The probe uses the pinned base, the saved adapter, a public evidence sentence, greedy decoding and at most 64 new tokens. The tokenizer&#x27;s explicit attention mask is passed into generation. The output is a proposed answer, not a validated metric definition. Check the formula, eligibility rule and citation against the provided source. A truncated or unsupported answer should fail evaluation.</p>
 <p>The tiny training task is assignment-unit extraction; it does not train a conversion-rate assistant. The generation question deliberately tests a different use of the model. Build a real evaluation corpus before treating an adapted model as a subject expert. Lessons 011, 012, 022 and 024 of the applied LLM journey explain evidence support, separated evaluation, reviewed tools and the full assistant decision.</p>
 <h3 id="6-export-your-artifacts">6. Export your artifacts<a class="heading-anchor" href="#6-export-your-artifacts" aria-label="Link to this section">#</a></h3>
 <p>Use a temporary helper to access the persistent volume. Choose a helper name that is not already used. These copy commands create ordinary local files:</p>
-<pre><code class="language-text">docker create --name ds60-pretrained-export --network none --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local -c &quot;print(&#x27;export helper&#x27;)&quot;
+<pre class="highlighted-code"><code class="language-text">docker create --name ds60-pretrained-export --network none --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local -c &quot;print(&#x27;export helper&#x27;)&quot;
 docker cp ds60-pretrained-export:/models/run-lora-001 ./run-lora-001-export
 docker cp ds60-pretrained-export:/models/run-full-001 ./run-full-001-export
 docker rm ds60-pretrained-export</code></pre>

@@ -6,13 +6,13 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-023`
 
 ## Learning objectives
 
-Explain virtual thread, carrier, backpressure, pinning in java21 using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a virtual thread that recordsisVirtual andjoin it. The final exercise transfers the mechanism to keep a blocking wait outside a monitor.
+Explain virtual thread, carrier, backpressure, pinning in java21 using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a virtual thread that records isVirtual and join it. The final exercise transfers the mechanism to keep a blocking wait outside a monitor.
 
 ## Purpose and mental model
 
-Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas andmemory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.
+Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas and memory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.
 
-Java21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.
+Java 21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.
 
 ## Vocabulary and concepts
 
@@ -22,11 +22,11 @@ Java21 has pinning cases where a virtual thread blocks while holding a synchroni
 
 **Backpressure:** A limit on admitted resource-consuming operations.
 
-**Pinning in Java21:** A condition preventing a blocked virtual thread from releasing its carrier.
+**Pinning in Java 21:** A condition preventing a blocked virtual thread from releasing its carrier.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-024/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -95,7 +95,7 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Observe virtual identity.** Start a virtual thread that recordsisVirtual andjoin it.
+1. **Observe virtual identity.** Start a virtual thread that records isVirtual and join it.
    **Expected:** true and terminated.
    **Verify:** Compare your assertion values or captured diagnostic with true and terminated.
 

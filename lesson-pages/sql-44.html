@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-44.html#learner">learner SQL</a> · <a href="sql-44.html#solution-1">solution reasoning</a> · <a href="sql-44.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-44 — Monitoring Diagnostics</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day44_monitoring_diagnostics.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day44_monitoring_diagnostics.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day44_monitoring_diagnostics.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,22 +466,22 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day44_monitoring_diagnostics.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT pid, usename, datname, state, query_start, NOW() - query_start AS running_for, left(query, 120) AS query
-FROM pg_stat_activity
-WHERE state &lt;&gt; &#x27;idle&#x27;
-ORDER BY running_for DESC
-LIMIT 20;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> query_start<span class="syntax-punctuation">,</span> NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span> <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
+<span class="syntax-keyword">FROM</span> pg_stat_activity
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> running_for <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>pg_stat_activity</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, <code>running_for</code>, and <code>query</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 20</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>pid</code>, <code>usename</code>, and <code>datname</code>, capped at 20 rows with columns <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, and <code>running_for</code> from <code>pg_stat_activity</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">EXPLAIN ANALYZE
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;
-GROUP BY p.category
-ORDER BY qty DESC;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty
+<span class="syntax-keyword">FROM</span> order_items oi
+<span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>category</code> key set and row count over <code>order_items</code>, <code>products</code>, and <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -507,7 +555,7 @@ ORDER BY qty DESC;</code></pre>
 <p>Aggregate connection counts instead of exposing full SQL text in a shared report. For historical workload, examine both <code>mean_exec_time</code> and <code>total_exec_time</code>: one reveals expensive calls, the other cumulative load. Never cancel a session as part of this practice.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-44 — Monitoring Diagnostics.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-44 — Monitoring Diagnostics.
 
 I have completed the direct catalog prerequisite: `sql-43`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md
@@ -565,94 +613,94 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 44: Monitoring &amp; Diagnostics</span>
-<span>-- BEGINNER WORKFLOW — sql-44: Monitoring Diagnostics</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-44/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: order_items, products, orders.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Active sessions</span>
-<span>SELECT pid, usename, datname, state, query_start, NOW() - query_start AS running_for, left(query, 120) AS query</span>
-<span>FROM pg_stat_activity</span>
-<span>WHERE state &lt;&gt; &#x27;idle&#x27;</span>
-<span>ORDER BY running_for DESC</span>
-<span>LIMIT 20;</span>
-<span> </span>
-<span>-- pg_stat_statements has three relevant states:</span>
-<span>--   1. absent: its view does not exist;</span>
-<span>--   2. installed but unusable: the view exists, but the server was not started</span>
-<span>--      with pg_stat_statements in shared_preload_libraries;</span>
-<span>--   3. installed and loaded: the view is readable.</span>
-<span>-- Treat the first two as an explained empty optional result. Do not install the</span>
-<span>-- extension or change server startup settings from this monitoring lesson.</span>
-<span>-- SELECT queryid, calls, total_exec_time, mean_exec_time, rows, left(query, 120) AS q</span>
-<span>-- FROM pg_stat_statements</span>
-<span>-- ORDER BY total_exec_time DESC</span>
-<span>-- LIMIT 20;</span>
-<span> </span>
-<span>-- Slow queries from logs are an ops topic; here we simulate using EXPLAIN ANALYZE</span>
-<span>EXPLAIN ANALYZE</span>
-<span>SELECT p.category, SUM(oi.quantity) AS qty</span>
-<span>FROM order_items oi</span>
-<span>JOIN products p ON p.product_id = oi.product_id</span>
-<span>JOIN orders o ON o.order_id = oi.order_id</span>
-<span>WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;</span>
-<span>GROUP BY p.category</span>
-<span>ORDER BY qty DESC;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Identify the longest-running active queries on your system.</span>
-<span>--    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening. The final columns are `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`. The final order is `runtime DESC NULLS LAST`.</span>
-<span>--    Verify: For sql-44 Exercise 1, run an anti-check that counts rows where NOT (`state = &#x27;active&#x27; AND pid &lt;&gt; pg_backend_pid()`); require unique `pid` and compare the projected `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query` with a second read-only snapshot of `pg_stat_activity`. When practical, open a controlled second `psql` session that runs `SELECT pg_sleep(...)`, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 1, inspect the source keys that survive `WHERE`; then check `runtime DESC NULLS LAST` before applying the row cap.</span>
-<span>-- 2. If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.</span>
-<span>--    Inputs: For sql-44 Exercise 2, inspect `to_regclass(&#x27;public.pg_stat_statements&#x27;)`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span>
-<span>--    Verify: For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 2, first prove whether the optional view exists. Then rank the same snapshot twice with deterministic tie-breakers and keep the monitored statistics unchanged.</span>
-<span>-- 3. Prediction: explain why query_start is not the same as transaction start,</span>
-<span>--    then display both ages for non-idle sessions.</span>
-<span>--    Inputs: For sql-44 Exercise 3, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `state`, `transaction_age`, and `statement_age`; keep `pid` visible because the output grain is one backend session.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 3, expected output: one row per `pid`. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.</span>
-<span>--    Verify: For sql-44 Exercise 3, run an anti-check that counts rows where NOT (`pid &lt;&gt; pg_backend_pid() AND state &lt;&gt; &#x27;idle&#x27;`); require unique `pid` and compare `pid`, `usename`, `state`, `transaction_age`, and `statement_age` with `pg_stat_activity`. Require nonnegative ages for non-NULL timestamps and `transaction_age &gt;= statement_age` when both exist. When practical, use a controlled second `psql` session with `BEGIN`, wait, and then a long-running query to observe both clocks; finish that session with `ROLLBACK`.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 3, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span>
-<span>-- 4. Construction: summarize current connections by database, user, and state</span>
-<span>--    without exposing complete SQL text.</span>
-<span>--    Inputs: For sql-44 Exercise 4, take a read-only snapshot of `pg_stat_activity`. Group by `datname`, `usename`, and `state`, and calculate `connections`; keep the complete three-column group key visible.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 4, expected output: one row per `datname`, `usename`, and `state`. The final columns are `datname`, `usename`, `state`, and `connections`. The final order is `datname, usename, state`.</span>
-<span>--    Verify: For sql-44 Exercise 4, independently aggregate `pg_stat_activity` by `datname`, `usename`, and `state`; require one output row for every distinct tuple and compare `connections` tuple by tuple, using `IS NOT DISTINCT FROM` when matching nullable catalog values. Also require `SUM(connections)` to equal `COUNT(*)` from the same source snapshot and require the output tuples to be unique.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 4, confirm the groups are `datname`, `usename`, and `state`; then check `datname, usename, state` before applying the row cap.</span>
-<span>-- 5. Debugging: repair a “slow query” report that sorts only by mean time even</span>
-<span>--    though one rarely executed outlier should not outrank total workload cost.</span>
-<span>--    Inputs: For sql-44 Exercise 5, read the course-owned temporary `top_statement_stats` table without changing the monitored server statistics. Build the answer toward `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; keep the complete statement-within-ranking key visible.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 5, expected output: one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), so each ranking label can contain multiple statements. The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span>
-<span>--    Verify: For sql-44 Exercise 5, require one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`) and compare `rank_position`, `query`, `calls`, `mean_exec_time`, and `total_exec_time` with `top_statement_stats`. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive `rank_position` values, `total_exec_time` order for that ranking, and `mean_exec_time` order for that ranking; `ranking` alone is deliberately non-unique.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 5, compare statements only within the ranking that produced them, and use `rank_position` rather than re-sorting both lists by one metric.</span>
-<span>-- 6. Edge case: identify sessions that are idle in transaction and explain why</span>
-<span>--    they can retain locks or old snapshots even while no statement is running.</span>
-<span>--    Inputs: For sql-44 Exercise 6, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`; keep `pid` visible because the output grain is one backend session.</span>
-<span>--    Expected result/shape: For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.</span>
-<span>--    Verify: For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.</span>
-<span>--    Hint ladder, rung 1: For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 44: Monitoring &amp; Diagnostics</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-44: Monitoring Diagnostics</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-44/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: order_items, products, orders.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Active sessions</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> query_start<span class="syntax-punctuation">,</span> NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span> <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> running_for <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- pg_stat_statements has three relevant states:</span></span>
+<span class="source-line"><span class="syntax-comment">--   1. absent: its view does not exist;</span></span>
+<span class="source-line"><span class="syntax-comment">--   2. installed but unusable: the view exists, but the server was not started</span></span>
+<span class="source-line"><span class="syntax-comment">--      with pg_stat_statements in shared_preload_libraries;</span></span>
+<span class="source-line"><span class="syntax-comment">--   3. installed and loaded: the view is readable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Treat the first two as an explained empty optional result. Do not install the</span></span>
+<span class="source-line"><span class="syntax-comment">-- extension or change server startup settings from this monitoring lesson.</span></span>
+<span class="source-line"><span class="syntax-comment">-- SELECT queryid, calls, total_exec_time, mean_exec_time, rows, left(query, 120) AS q</span></span>
+<span class="source-line"><span class="syntax-comment">-- FROM pg_stat_statements</span></span>
+<span class="source-line"><span class="syntax-comment">-- ORDER BY total_exec_time DESC</span></span>
+<span class="source-line"><span class="syntax-comment">-- LIMIT 20;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Slow queries from logs are an ops topic; here we simulate using EXPLAIN ANALYZE</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Identify the longest-running active queries on your system.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening. The final columns are `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`. The final order is `runtime DESC NULLS LAST`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 1, run an anti-check that counts rows where NOT (`state = &#x27;active&#x27; AND pid &lt;&gt; pg_backend_pid()`); require unique `pid` and compare the projected `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query` with a second read-only snapshot of `pg_stat_activity`. When practical, open a controlled second `psql` session that runs `SELECT pg_sleep(...)`, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 1, inspect the source keys that survive `WHERE`; then check `runtime DESC NULLS LAST` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 2, inspect `to_regclass(&#x27;public.pg_stat_statements&#x27;)`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 2, first prove whether the optional view exists. Then rank the same snapshot twice with deterministic tie-breakers and keep the monitored statistics unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: explain why query_start is not the same as transaction start,</span></span>
+<span class="source-line"><span class="syntax-comment">--    then display both ages for non-idle sessions.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 3, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `state`, `transaction_age`, and `statement_age`; keep `pid` visible because the output grain is one backend session.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 3, expected output: one row per `pid`. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 3, run an anti-check that counts rows where NOT (`pid &lt;&gt; pg_backend_pid() AND state &lt;&gt; &#x27;idle&#x27;`); require unique `pid` and compare `pid`, `usename`, `state`, `transaction_age`, and `statement_age` with `pg_stat_activity`. Require nonnegative ages for non-NULL timestamps and `transaction_age &gt;= statement_age` when both exist. When practical, use a controlled second `psql` session with `BEGIN`, wait, and then a long-running query to observe both clocks; finish that session with `ROLLBACK`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 3, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: summarize current connections by database, user, and state</span></span>
+<span class="source-line"><span class="syntax-comment">--    without exposing complete SQL text.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 4, take a read-only snapshot of `pg_stat_activity`. Group by `datname`, `usename`, and `state`, and calculate `connections`; keep the complete three-column group key visible.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 4, expected output: one row per `datname`, `usename`, and `state`. The final columns are `datname`, `usename`, `state`, and `connections`. The final order is `datname, usename, state`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 4, independently aggregate `pg_stat_activity` by `datname`, `usename`, and `state`; require one output row for every distinct tuple and compare `connections` tuple by tuple, using `IS NOT DISTINCT FROM` when matching nullable catalog values. Also require `SUM(connections)` to equal `COUNT(*)` from the same source snapshot and require the output tuples to be unique.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 4, confirm the groups are `datname`, `usename`, and `state`; then check `datname, usename, state` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: repair a “slow query” report that sorts only by mean time even</span></span>
+<span class="source-line"><span class="syntax-comment">--    though one rarely executed outlier should not outrank total workload cost.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 5, read the course-owned temporary `top_statement_stats` table without changing the monitored server statistics. Build the answer toward `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; keep the complete statement-within-ranking key visible.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 5, expected output: one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), so each ranking label can contain multiple statements. The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 5, require one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`) and compare `rank_position`, `query`, `calls`, `mean_exec_time`, and `total_exec_time` with `top_statement_stats`. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive `rank_position` values, `total_exec_time` order for that ranking, and `mean_exec_time` order for that ranking; `ranking` alone is deliberately non-unique.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 5, compare statements only within the ranking that produced them, and use `rank_position` rather than re-sorting both lists by one metric.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: identify sessions that are idle in transaction and explain why</span></span>
+<span class="source-line"><span class="syntax-comment">--    they can retain locks or old snapshots even while no statement is running.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 6, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`; keep `pid` visible because the output grain is one backend session.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -688,10 +736,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-44-solutions-monitoring-and-diagnostics">Day 44 Solutions — Monitoring and Diagnostics<a class="heading-anchor" href="#solution-1--day-44-solutions-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day44_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day44_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day44_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -707,20 +755,20 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The two deliverables inspect active work and, when available, <code>pg_stat_statements</code>. The solution remains runnable on a fresh PostgreSQL installation where that optional extension is absent or installed without its shared-memory module being loaded at server startup. See <a href="sql-44.html#solution-2"><code>day44_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-longest-running-active-statements">Exercise 1 — Longest-running active statements<a class="heading-anchor" href="#solution-1--exercise-1-longest-running-active-statements" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-SELECT pid,
-       usename,
-       datname,
-       state,
-       clock_timestamp() - query_start AS runtime,
-       wait_event_type,
-       wait_event,
-       left(query, 160) AS query
-FROM pg_stat_activity
-WHERE state = &#x27;active&#x27;
-  AND pid &lt;&gt; pg_backend_pid()
-ORDER BY runtime DESC NULLS LAST;</code></pre>
+<span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span>
+       usename<span class="syntax-punctuation">,</span>
+       datname<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
+       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span>
+       wait_event_type<span class="syntax-punctuation">,</span>
+       wait_event<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
+<span class="syntax-keyword">FROM</span> pg_stat_activity
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span>
+  <span class="syntax-keyword">AND</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -733,81 +781,81 @@ ORDER BY runtime DESC NULLS LAST;</code></pre>
 <li><strong>Edge case:</strong> A quiet local database can correctly return zero rows. Use a controlled <code>pg_sleep</code> session when you need a positive observation, and never manufacture a row in a system view.</li>
 </ul>
 <h4 id="solution-1--exercise-2-optional-top-statement-statistics">Exercise 2 — Optional top statement statistics<a class="heading-anchor" href="#solution-1--exercise-2-optional-top-statement-statistics" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE top_statement_stats (
-  ranking text,
-  rank_position integer,
-  userid oid,
-  dbid oid,
-  toplevel boolean,
-  queryid bigint,
-  query text,
-  calls bigint,
-  mean_exec_time double precision,
-  total_exec_time double precision
-);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> top_statement_stats <span class="syntax-punctuation">(</span>
+  ranking <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>
+  rank_position <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>
+  userid oid<span class="syntax-punctuation">,</span>
+  dbid oid<span class="syntax-punctuation">,</span>
+  toplevel <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span>
+  queryid <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span>
+  query <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>
+  calls <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span>
+  mean_exec_time double <span class="syntax-keyword">precision</span><span class="syntax-punctuation">,</span>
+  total_exec_time double <span class="syntax-keyword">precision</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-DO $optional_pg_stat_statements$
-BEGIN
-  IF to_regclass(&#x27;public.pg_stat_statements&#x27;) IS NOT NULL THEN
-    BEGIN
-      EXECUTE $by_total$
-        INSERT INTO top_statement_stats
-        SELECT &#x27;total_exec_time&#x27;,
-               row_number() OVER (
-                 ORDER BY total_exec_time DESC,
-                          userid, dbid, toplevel, queryid
-               )::integer,
-               userid,
-               dbid,
-               toplevel,
-               queryid,
-               left(query, 200),
-               calls,
-               mean_exec_time,
+<span class="syntax-keyword">DO</span> $optional_pg_stat_statements$
+<span class="syntax-keyword">BEGIN</span>
+  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;public.pg_stat_statements&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-keyword">BEGIN</span>
+      <span class="syntax-keyword">EXECUTE</span> $by_total$
+        <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> top_statement_stats
+        <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;total_exec_time&#x27;</span><span class="syntax-punctuation">,</span>
+               row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+                 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+                          userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid
+               <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>
+               userid<span class="syntax-punctuation">,</span>
+               dbid<span class="syntax-punctuation">,</span>
+               toplevel<span class="syntax-punctuation">,</span>
+               queryid<span class="syntax-punctuation">,</span>
+               <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+               calls<span class="syntax-punctuation">,</span>
+               mean_exec_time<span class="syntax-punctuation">,</span>
                total_exec_time
-        FROM public.pg_stat_statements
-        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
-        LIMIT 10
-      $by_total$;
-      EXECUTE $by_mean$
-        INSERT INTO top_statement_stats
-        SELECT &#x27;mean_exec_time&#x27;,
-               row_number() OVER (
-                 ORDER BY mean_exec_time DESC,
-                          userid, dbid, toplevel, queryid
-               )::integer,
-               userid,
-               dbid,
-               toplevel,
-               queryid,
-               left(query, 200),
-               calls,
-               mean_exec_time,
+        <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">.</span>pg_stat_statements
+        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid
+        <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span>
+      $by_total$<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">EXECUTE</span> $by_mean$
+        <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> top_statement_stats
+        <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;mean_exec_time&#x27;</span><span class="syntax-punctuation">,</span>
+               row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+                 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> mean_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+                          userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid
+               <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>
+               userid<span class="syntax-punctuation">,</span>
+               dbid<span class="syntax-punctuation">,</span>
+               toplevel<span class="syntax-punctuation">,</span>
+               queryid<span class="syntax-punctuation">,</span>
+               <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+               calls<span class="syntax-punctuation">,</span>
+               mean_exec_time<span class="syntax-punctuation">,</span>
                total_exec_time
-        FROM public.pg_stat_statements
-        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
-        LIMIT 10
-      $by_mean$;
-    EXCEPTION
-      WHEN object_not_in_prerequisite_state THEN
-        TRUNCATE top_statement_stats;
+        <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">.</span>pg_stat_statements
+        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> mean_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid
+        <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span>
+      $by_mean$<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">EXCEPTION</span>
+      <span class="syntax-keyword">WHEN</span> object_not_in_prerequisite_state <span class="syntax-keyword">THEN</span>
+        <span class="syntax-keyword">TRUNCATE</span> top_statement_stats<span class="syntax-punctuation">;</span>
         RAISE NOTICE
-          &#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;;
-    END;
-  ELSE
-    RAISE NOTICE &#x27;pg_stat_statements is not installed; optional result is empty&#x27;;
-  END IF;
-END
-$optional_pg_stat_statements$;
+          <span class="syntax-string">&#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">ELSE</span>
+    RAISE NOTICE <span class="syntax-string">&#x27;pg_stat_statements is not installed; optional result is empty&#x27;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">END</span>
+$optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 
-SELECT *
-FROM top_statement_stats
-ORDER BY ranking, rank_position;
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span> top_statement_stats
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: up to twenty rows when <code>pg_stat_statements</code> is installed and loaded—at most ten for each ranking label. Otherwise the block emits an explanatory notice and the final query returns an empty result.</p>
 <p>An existence check is necessary but not sufficient. PostgreSQL can install the extension&#x27;s view without loading its shared-memory module at server startup. The nested block catches only that documented <code>object_not_in_prerequisite_state</code> condition. PL/pgSQL rolls back either partial ranking inside the nested block, and <code>TRUNCATE</code> makes the empty-result contract explicit. Any unrelated error still propagates.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -907,154 +955,154 @@ ROLLBACK;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 44 solutions: monitoring and diagnostics</span>
-<span>-- SOLUTION READING MAP — sql-44: Monitoring Diagnostics</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day44_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day44_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: longest-running active statements, excluding this session.</span>
-<span>SELECT pid,</span>
-<span>       usename,</span>
-<span>       datname,</span>
-<span>       state,</span>
-<span>       clock_timestamp() - query_start AS runtime,</span>
-<span>       wait_event_type,</span>
-<span>       wait_event,</span>
-<span>       left(query, 160) AS query</span>
-<span>FROM pg_stat_activity</span>
-<span>WHERE state = &#x27;active&#x27;</span>
-<span>  AND pid &lt;&gt; pg_backend_pid()</span>
-<span>ORDER BY runtime DESC NULLS LAST;</span>
-<span> </span>
-<span>-- Exercise 2: pg_stat_statements is optional. Dynamic SQL keeps this file</span>
-<span>-- runnable when the extension is not installed.</span>
-<span>CREATE TEMP TABLE top_statement_stats (</span>
-<span>  ranking text,</span>
-<span>  rank_position integer,</span>
-<span>  userid oid,</span>
-<span>  dbid oid,</span>
-<span>  toplevel boolean,</span>
-<span>  queryid bigint,</span>
-<span>  query text,</span>
-<span>  calls bigint,</span>
-<span>  mean_exec_time double precision,</span>
-<span>  total_exec_time double precision</span>
-<span>);</span>
-<span> </span>
-<span>DO $optional_pg_stat_statements$</span>
-<span>BEGIN</span>
-<span>  IF to_regclass(&#x27;public.pg_stat_statements&#x27;) IS NOT NULL THEN</span>
-<span>    BEGIN</span>
-<span>      EXECUTE $by_total$</span>
-<span>        INSERT INTO top_statement_stats</span>
-<span>        SELECT &#x27;total_exec_time&#x27;,</span>
-<span>               row_number() OVER (</span>
-<span>                 ORDER BY total_exec_time DESC,</span>
-<span>                          userid, dbid, toplevel, queryid</span>
-<span>               )::integer,</span>
-<span>               userid,</span>
-<span>               dbid,</span>
-<span>               toplevel,</span>
-<span>               queryid,</span>
-<span>               left(query, 200),</span>
-<span>               calls,</span>
-<span>               mean_exec_time,</span>
-<span>               total_exec_time</span>
-<span>        FROM public.pg_stat_statements</span>
-<span>        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid</span>
-<span>        LIMIT 10</span>
-<span>      $by_total$;</span>
-<span>      EXECUTE $by_mean$</span>
-<span>        INSERT INTO top_statement_stats</span>
-<span>        SELECT &#x27;mean_exec_time&#x27;,</span>
-<span>               row_number() OVER (</span>
-<span>                 ORDER BY mean_exec_time DESC,</span>
-<span>                          userid, dbid, toplevel, queryid</span>
-<span>               )::integer,</span>
-<span>               userid,</span>
-<span>               dbid,</span>
-<span>               toplevel,</span>
-<span>               queryid,</span>
-<span>               left(query, 200),</span>
-<span>               calls,</span>
-<span>               mean_exec_time,</span>
-<span>               total_exec_time</span>
-<span>        FROM public.pg_stat_statements</span>
-<span>        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid</span>
-<span>        LIMIT 10</span>
-<span>      $by_mean$;</span>
-<span>    EXCEPTION</span>
-<span>      WHEN object_not_in_prerequisite_state THEN</span>
-<span>        -- The extension can be installed (so its view exists) without being</span>
-<span>        -- loaded at server startup. Roll back either partial ranking and</span>
-<span>        -- preserve the same empty optional-result contract as absence.</span>
-<span>        TRUNCATE top_statement_stats;</span>
-<span>        RAISE NOTICE</span>
-<span>          &#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;;</span>
-<span>    END;</span>
-<span>  ELSE</span>
-<span>    RAISE NOTICE &#x27;pg_stat_statements is not installed; optional result is empty&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$optional_pg_stat_statements$;</span>
-<span> </span>
-<span>SELECT *</span>
-<span>FROM top_statement_stats</span>
-<span>ORDER BY ranking, rank_position;</span>
-<span> </span>
-<span>-- Exercise 3: transaction age can exceed statement age, especially for</span>
-<span>-- idle-in-transaction sessions.</span>
-<span>SELECT pid, usename, state,</span>
-<span>       clock_timestamp() - xact_start AS transaction_age,</span>
-<span>       clock_timestamp() - query_start AS statement_age</span>
-<span>FROM pg_stat_activity</span>
-<span>WHERE pid &lt;&gt; pg_backend_pid()</span>
-<span>  AND state &lt;&gt; &#x27;idle&#x27;</span>
-<span>ORDER BY transaction_age DESC NULLS LAST;</span>
-<span> </span>
-<span>-- Exercise 4: aggregate rather than exposing full statement text.</span>
-<span>SELECT datname, usename, state, COUNT(*) AS connections</span>
-<span>FROM pg_stat_activity</span>
-<span>GROUP BY datname, usename, state</span>
-<span>ORDER BY datname, usename, state;</span>
-<span> </span>
-<span>-- Exercise 5: retain both rankings. Mean identifies costly calls; total time</span>
-<span>-- captures cumulative workload impact.</span>
-<span>SELECT ranking,</span>
-<span>       rank_position,</span>
-<span>       userid,</span>
-<span>       dbid,</span>
-<span>       toplevel,</span>
-<span>       queryid,</span>
-<span>       query,</span>
-<span>       calls,</span>
-<span>       mean_exec_time,</span>
-<span>       total_exec_time</span>
-<span>FROM top_statement_stats</span>
-<span>ORDER BY ranking, rank_position;</span>
-<span> </span>
-<span>-- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.</span>
-<span>SELECT pid, usename, datname,</span>
-<span>       clock_timestamp() - xact_start AS transaction_age,</span>
-<span>       wait_event_type, wait_event</span>
-<span>FROM pg_stat_activity</span>
-<span>WHERE state = &#x27;idle in transaction&#x27;</span>
-<span>ORDER BY transaction_age DESC NULLS LAST;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 44 solutions: monitoring and diagnostics</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-44: Monitoring Diagnostics</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day44_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day44_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: longest-running active statements, excluding this session.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       wait_event_type<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       wait_event<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: pg_stat_statements is optional. Dynamic SQL keeps this file</span></span>
+<span class="source-line"><span class="syntax-comment">-- runnable when the extension is not installed.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> top_statement_stats <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  ranking <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  rank_position <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  userid oid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dbid oid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  toplevel <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  queryid <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  query <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  calls <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  mean_exec_time double <span class="syntax-keyword">precision</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_exec_time double <span class="syntax-keyword">precision</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $optional_pg_stat_statements$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;public.pg_stat_statements&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">      <span class="syntax-keyword">EXECUTE</span> $by_total$</span>
+<span class="source-line">        <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> top_statement_stats</span>
+<span class="source-line">        <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;total_exec_time&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">                 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                          userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid</span>
+<span class="source-line">               <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               userid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               dbid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               toplevel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               queryid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               calls<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               mean_exec_time<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               total_exec_time</span>
+<span class="source-line">        <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">.</span>pg_stat_statements</span>
+<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid</span>
+<span class="source-line">        <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></span>
+<span class="source-line">      $by_total$<span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">EXECUTE</span> $by_mean$</span>
+<span class="source-line">        <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> top_statement_stats</span>
+<span class="source-line">        <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;mean_exec_time&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">                 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> mean_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                          userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid</span>
+<span class="source-line">               <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               userid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               dbid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               toplevel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               queryid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">               calls<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               mean_exec_time<span class="syntax-punctuation">,</span></span>
+<span class="source-line">               total_exec_time</span>
+<span class="source-line">        <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">.</span>pg_stat_statements</span>
+<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> mean_exec_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> userid<span class="syntax-punctuation">,</span> dbid<span class="syntax-punctuation">,</span> toplevel<span class="syntax-punctuation">,</span> queryid</span>
+<span class="source-line">        <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></span>
+<span class="source-line">      $by_mean$<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">EXCEPTION</span></span>
+<span class="source-line">      <span class="syntax-keyword">WHEN</span> object_not_in_prerequisite_state <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">        <span class="syntax-comment">-- The extension can be installed (so its view exists) without being</span></span>
+<span class="source-line">        <span class="syntax-comment">-- loaded at server startup. Roll back either partial ranking and</span></span>
+<span class="source-line">        <span class="syntax-comment">-- preserve the same empty optional-result contract as absence.</span></span>
+<span class="source-line">        <span class="syntax-keyword">TRUNCATE</span> top_statement_stats<span class="syntax-punctuation">;</span></span>
+<span class="source-line">        RAISE NOTICE</span>
+<span class="source-line">          <span class="syntax-string">&#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    RAISE NOTICE <span class="syntax-string">&#x27;pg_stat_statements is not installed; optional result is empty&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$optional_pg_stat_statements$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> top_statement_stats</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: transaction age can exceed statement age, especially for</span></span>
+<span class="source-line"><span class="syntax-comment">-- idle-in-transaction sessions.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> statement_age</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: aggregate rather than exposing full statement text.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> connections</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: retain both rankings. Mean identifies costly calls; total time</span></span>
+<span class="source-line"><span class="syntax-comment">-- captures cumulative workload impact.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> ranking<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       rank_position<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       userid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dbid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       toplevel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       queryid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       query<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       calls<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       mean_exec_time<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       total_exec_time</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> top_statement_stats</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       wait_event_type<span class="syntax-punctuation">,</span> wait_event</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;idle in transaction&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

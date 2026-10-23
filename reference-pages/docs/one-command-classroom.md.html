@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,8 +162,9 @@
       <p class="source-path">Generated from <code>docs/one-command-classroom.md</code></p>
     </header>
     <article class="document"><h2 id="one-command-from-source-to-a-ready-classroom">One command from source to a ready classroom<a class="heading-anchor" href="#one-command-from-source-to-a-ready-classroom" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
 <p>After Docker is installed and running, open a terminal in the extracted course folder or repository and run:</p>
-<pre><code class="language-sh">./classroom</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
 <p>That is the complete ordinary startup command on <strong>macOS, Linux and Windows through WSL 2</strong>. It checks the engine and Compose version, prepares the database image, builds the classroom and all ten ordinary workers with visible logs, starts them in a controlled order, waits for health checks, verifies the web page, and opens its actual local address. Repeat the same command to rebuild changed sources and resume your saved work.</p>
 <p>The command uses Bash, already available on macOS and in Ubuntu/WSL. Confirm that <code>docker info</code> succeeds as your normal user before starting; engine access permissions and WSL integration belong to the engine installation. The course runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Java, Node, TensorFlow, PyTorch or Spark on the host. First preparation needs internet and several gigabytes of downloads. Allow room for images and build cache; roughly 20 GB of free storage and 8 GB of engine memory is a practical starting point for the full set. Actual requirements depend on the selected lessons. For a smaller start, use <code>./classroom --starter</code>.</p>
 <h3 id="windows-the-same-command-in-wsl-2">Windows: the same command in WSL 2<a class="heading-anchor" href="#windows-the-same-command-in-wsl-2" aria-label="Link to this section">#</a></h3>
@@ -176,7 +223,7 @@
 </tbody></table></div>
 <p>Kubernetes cluster preparation and optional pretrained-model downloads remain explicit lesson workflows. Opening the classroom does not create a cluster, download model weights or call a paid API. The ordinary lessons are usable offline after their images and local fixtures are prepared.</p>
 <p>The launcher uses the repository&#x27;s pinned/public registry alternatives by default, with TLS verification enabled. This handles the Docker Hub CDN issue observed during local validation. Existing <code>.env</code> and shell overrides remain in effect. To use ordinary upstream image defaults instead, run:</p>
-<pre><code class="language-sh">./classroom --registry upstream</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --registry upstream</code></pre>
 <p>A build log line marked <code>CACHED</code> means Docker reused an unchanged step. <code>RUN</code> steps install the image&#x27;s dependencies; <code>COPY</code> steps place the course sources inside it. The image is saved to your local engine. No command pushes an image, prunes caches or deletes a learning volume.</p>
 <h3 id="ports-and-saved-work">Ports and saved work<a class="heading-anchor" href="#ports-and-saved-work" aria-label="Link to this section">#</a></h3>
 <p>For a new project without explicit port settings, Docker selects available <strong>loopback-only</strong> host ports. The application keeps its fixed internal port; the launcher reads the actual published address after startup. It prints the URL even if browser opening is unavailable, and saves it in <code>.classroom/&lt;project&gt;/classroom.url</code>. You do not need to guess port 8765 or stop another application that already uses it.</p>
@@ -184,34 +231,35 @@
 <p>The launcher supplies the mapped browser port to the container while retaining one exact allowed Host and Origin. Do not configure arbitrary public hosts or relax that check to fix a port error. Direct manual Compose operation should use fixed ports; use <code>./classroom</code> for automatic port discovery.</p>
 <p>The ignored <code>.classroom/</code> directory contains only launcher settings and a transient lock. It is not the learning database and is excluded from images and archives. The older host-folder <code>.learning</code> workflow remains a separate storage route; follow the backup/transfer guidance before moving between them.</p>
 <p>To request fixed host ports explicitly:</p>
-<pre><code class="language-sh">./classroom --port 8766 --database-port 55433</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --port <span class="syntax-number">8766</span> --database-port <span class="syntax-number">55433</span></code></pre>
 <p>Command-line options take precedence for that run. Explicit shell/<code>.env</code> port settings take precedence over saved launcher settings on later runs. The launcher never rewrites <code>.env</code>. <code>DS60_CLASSROOM_PORT</code> controls the browser&#x27;s host port; <code>DS60_LAB_PORT</code> remains the app&#x27;s internal port. Existing <code>DS60_LAB_PORT</code> settings also remain a supported fixed-host-port fallback. Use <code>--port 0 --database-port 0</code> for automatic selection when an explicit port is busy. The launcher reports a failure and retains volumes instead of stopping an unrelated service to obtain that port.</p>
 <h3 id="useful-variations">Useful variations<a class="heading-anchor" href="#useful-variations" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-sh"># A lightweight first study session.
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># A lightweight first study session.</span>
 ./classroom --starter
 
-# Prepare Core plus selected language workers in one command.
+<span class="syntax-comment"># Prepare Core plus selected language workers in one command.</span>
 ./classroom --profile cpp20 --profile java21
 
-# Resume prepared images without pulling or rebuilding.
+<span class="syntax-comment"># Resume prepared images without pulling or rebuilding.</span>
 ./classroom --no-build
 
-# Build without starting services.
+<span class="syntax-comment"># Build without starting services.</span>
 ./classroom build
 
-# Check prerequisites without creating state or starting services.
+<span class="syntax-comment"># Check prerequisites without creating state or starting services.</span>
 ./classroom doctor
 
-# Inspect status or the recent app/database logs.
+<span class="syntax-comment"># Inspect status or the recent app/database logs.</span>
 ./classroom status
 ./classroom logs
 
-# Stop this classroom while retaining every named volume.
+<span class="syntax-comment"># Stop this classroom while retaining every named volume.</span>
 ./classroom stop</code></pre>
 <p>Starting a subset does not stop other workers that are already running. To switch to a smaller running set, stop the classroom first and then start with <code>--starter</code> or explicit <code>--profile</code> options. <code>--project NAME</code> intentionally creates a separate project and learning volumes; use the same name on later commands to resume that project.</p>
 <h3 id="when-something-fails">When something fails<a class="heading-anchor" href="#when-something-fails" aria-label="Link to this section">#</a></h3>
 <p>Read the first failed step. An unavailable engine calls for starting the engine; a missing Docker command inside WSL calls for enabling distribution integration; an old Compose version calls for updating Compose. The shared launcher requires <strong>Compose 2.28.0 or newer</strong>, including its resolved-environment query. Manual Compose files alone require 2.24.4 for reset/override tags.</p>
 <p>Build and startup failures stop the workflow before it opens a browser. No failed command silently deletes data. Fix the indicated problem and rerun the same command. Ctrl+C cancels the launcher and releases its own lock. A second launcher for the same project refuses a concurrent start; rerun it after the first finishes. It does not race two database initializers. A stale lock from a terminated process is reclaimed only when its recorded process is absent and its lock directory contains no unexpected files. Recovery has its own atomic lock, so two simultaneous restarts cannot remove each other&#x27;s ownership. If a process is terminated during recovery and leaves a recovery lock, inspect it before retrying; the launcher preserves ambiguous state.</p>
+<p>A full backup of the learning volume preserves saved code, notes, progress, source versions and recorded run output. Python and SQL receipts live under <code>classroom-runs</code> in that volume and appear in the shared <strong>Saved runs</strong> view. Opening a prior receipt displays its recorded source and output without re-executing it or replacing your pad. Source version history remains separate from execution history. The older completion-JSON export contains completion markers only; use the complete learning-volume backup when transferring your whole workspace, and back up PostgreSQL separately when you need its state.</p>
 <p>For backup, manual Compose operation and optional host labs, continue to the <a href="docker-classroom.md.html">full classroom reference</a>. Direct Compose remains an advanced alternative; use the single entrypoint when you want it to handle the image, readiness and URL steps together.</p></article>
   </main>
 </body>

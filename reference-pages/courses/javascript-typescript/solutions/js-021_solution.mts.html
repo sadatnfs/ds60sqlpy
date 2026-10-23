@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,82 +161,82 @@
       <h1>Js 021 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-021_solution.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {</span>
-<span>  // Exercise 1: Use structural compatibility</span>
-<span>  {</span>
-<span>    function label(value: { id: string }): string { return value.id; }</span>
-<span>    const wider = { id: &#x27;A&#x27;, count: 2 };</span>
-<span>    assert.equal(label(wider), &#x27;A&#x27;);</span>
-<span>    assert.equal(wider.count, 2);</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error A fresh literal is checked for excess properties.</span>
-<span>      label({ id: &#x27;A&#x27;, count: 2 });</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Observe mutation through an alias</span>
-<span>  {</span>
-<span>    const mutable = { count: 1 };</span>
-<span>    const view: Readonly&lt;{ count: number }&gt; = mutable;</span>
-<span>    mutable.count = 4;</span>
-<span>    assert.equal(view.count, 4);</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error Writes through the readonly view are forbidden.</span>
-<span>      view.count = 9;</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Handle absent and zero-valued optional counts</span>
-<span>  {</span>
-<span>    type Options = { count?: number };</span>
-<span>    function count(options: Options): number { return options.count ?? 10; }</span>
-<span>    assert.equal(count({}), 10);</span>
-<span>    assert.equal(count({ count: 0 }), 0);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Distinguish runtime presence from undefined</span>
-<span>  {</span>
-<span>    const absent: { count?: number } = {};</span>
-<span>    const present: { count?: number } = { count: undefined };</span>
-<span>    assert.equal(Object.hasOwn(absent, &#x27;count&#x27;), false);</span>
-<span>    assert.equal(Object.hasOwn(present, &#x27;count&#x27;), true);</span>
-<span>    assert.equal(JSON.stringify(absent), &#x27;{}&#x27;);</span>
-<span>    assert.equal(JSON.stringify(present), &#x27;{}&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Show shallow readonly and shallow freeze boundaries</span>
-<span>  {</span>
-<span>    const record = Object.freeze({ nested: { count: 1 } });</span>
-<span>    record.nested.count = 3;</span>
-<span>    assert.equal(record.nested.count, 3);</span>
-<span>    assert.equal(Object.isFrozen(record), true);</span>
-<span>    assert.equal(Object.isFrozen(record.nested), false);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Transform a readonly array without mutation</span>
-<span>  {</span>
-<span>    const values: readonly number[] = [1, 2];</span>
-<span>    const doubled = values.map(value =&gt; value * 2);</span>
-<span>    assert.deepEqual(doubled, [2, 4]);</span>
-<span>    assert.deepEqual(values, [1, 2]);</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error A readonly array has no mutable push operation.</span>
-<span>      values.push(3);</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Use structural compatibility</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> label<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">.</span>id<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wider <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span>wider<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wider<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error A fresh literal is checked for excess properties.</span></span>
+<span class="source-line">      label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Observe mutation through an alias</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> mutable <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> view<span class="syntax-operator">:</span> <span class="syntax-keyword">Readonly</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> mutable<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    mutable<span class="syntax-punctuation">.</span>count <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>view<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error Writes through the readonly view are forbidden.</span></span>
+<span class="source-line">      view<span class="syntax-punctuation">.</span>count <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Handle absent and zero-valued optional counts</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">type</span> Options <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> count?<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> count<span class="syntax-punctuation">(</span>options<span class="syntax-operator">:</span> <span class="syntax-keyword">Options</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> options<span class="syntax-punctuation">.</span>count <span class="syntax-operator">??</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Distinguish runtime presence from undefined</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> absent<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> count?<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> present<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> count?<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">undefined</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>absent<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;count&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>present<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;count&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>absent<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>present<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Show shallow readonly and shallow freeze boundaries</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> record <span class="syntax-operator">=</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>freeze<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> nested<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    record<span class="syntax-punctuation">.</span>nested<span class="syntax-punctuation">.</span>count <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">.</span>nested<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>isFrozen<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>isFrozen<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">.</span>nested<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Transform a readonly array without mutation</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> values<span class="syntax-operator">:</span> <span class="syntax-keyword">readonly</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> doubled <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=&gt;</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error A readonly array has no mutable push operation.</span></span>
+<span class="source-line">      values<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

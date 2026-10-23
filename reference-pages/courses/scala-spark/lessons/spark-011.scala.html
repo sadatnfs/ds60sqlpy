@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,75 +161,75 @@
       <h1>Spark 011</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-011.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
-<span>import org.apache.spark.sql.functions._</span>
-<span>import org.apache.spark.sql.types._</span>
-<span> </span>
-<span> </span>
-<span>object Main {</span>
-<span>  def ids(frame: DataFrame): Seq[Long] =</span>
-<span>    frame.select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq</span>
-<span> </span>
-<span>  def aboveTen(): Column =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete aboveTen&quot;)</span>
-<span> </span>
-<span>  def selectedIds(frame: DataFrame): Seq[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete selectedIds&quot;)</span>
-<span> </span>
-<span>  def missingIds(frame: DataFrame): Seq[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete missingIds&quot;)</span>
-<span> </span>
-<span>  def combinedIds(frame: DataFrame): Seq[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete combinedIds&quot;)</span>
-<span> </span>
-<span>  def projected(frame: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete projected&quot;)</span>
-<span> </span>
-<span>  def sqlIds(spark: SparkSession, frame: DataFrame): Seq[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete sqlIds&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-011&quot;).master(&quot;local[2]&quot;)</span>
-<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
-<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
-<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
-<span>    try {</span>
-<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
-<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>      val schema = StructType(Seq(</span>
-<span>        StructField(&quot;event_id&quot;,LongType,false),</span>
-<span>        StructField(&quot;amount_cents&quot;,LongType,true)))</span>
-<span>      val rows = Seq(Row(1L,0L),Row(2L,20L),Row(3L,null),Row(4L,20L))</span>
-<span>      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)</span>
-<span>      locally {</span>
-<span>        val driverValue: Boolean = 3 &gt; 1</span>
-<span>        val predicate: Column = col(&quot;amount_cents&quot;) &gt; lit(10L)</span>
-<span>        assert(driverValue)</span>
-<span>        assert(raw.filter(predicate).select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq == Seq(2L,4L))</span>
-<span>        println(&quot;A Column describes row-wise engine work&quot;)</span>
-<span>      }</span>
-<span>      locally {</span>
-<span>        val missing = raw.filter(col(&quot;amount_cents&quot;).isNull).select(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq</span>
-<span>        val zero = raw.filter(col(&quot;amount_cents&quot;) === lit(0L)).select(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq</span>
-<span>        assert(missing == Seq(3L) &amp;&amp; zero == Seq(1L))</span>
-<span>        println(&quot;Missing amount and observed zero are different rows&quot;)</span>
-<span>      }</span>
-<span>      println(&quot;spark-011: worked examples passed; six task implementations remain&quot;)</span>
-<span>    } finally { spark.stop() }</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Construct a predicate without collapsing it to a driver Boolean. Inputs/task: Implement aboveTen/above_ten returning a Spark Column for amount_cents&gt;10. Do not collect values or return a Python/Scala scalar Boolean. Expected: Passing the predicate to raw.filter retains IDs 2 and 4. In Python, bool(predicate) raises ValueError rather than choosing one row&#x27;s truth value. Verify: Assert the exact filtered IDs and, in the PySpark reference, catch the scalar-Boolean conversion failure.</span>
-<span>// Exercise 2: Apply the predicate and preserve event identity. Inputs/task: Return the ordered event IDs selected by aboveTen from this tiny fixture. Preserve both equal-valued 20-cent events and leave raw unchanged. Expected: The result is[2,4], and raw still contains IDs[1,2,3,4]. Projecting amount and calling distinct is not an acceptable implementation. Verify: Compare the selected IDs with literals and independently check all four raw IDs.</span>
-<span>// Exercise 3: Select missingness explicitly. Inputs/task: Return ordered IDs whose amount_cents is SQL NULL. Do not compare the Column to JVM null/Python None using driver identity logic, and do not treat zero as missing. Expected: Only ID 3 is returned. The observed-zero ID 1 is absent from the missingness result. Verify: Assert[3] and separately assert that the zero-amount filter returns [1].</span>
-<span>// Exercise 4: Combine conditions with engine operators. Inputs/task: Return ordered IDs with a known amount at least 10 and event_id less than 4. Combine parenthesized Column comparisons with engine Boolean operators in each language. Expected: Only ID 2 qualifies. ID 4 fails the ID bound, ID 3 is missing, and ID 1 is below the amount threshold. Verify: Assert the exact singleton and explain one exclusion reason for each other ID.</span>
-<span>// Exercise 5: Preserve NULL through a derived column. Inputs/task: Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result. Expected: Ordered rows are(1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown. Verify: Compare every ordered row with literal expected values, including the NULL position.</span>
-<span>// Exercise 6: Compare SQL and Columns with an independent expectation. Inputs/task: Register a session-local temporary view and return ordered IDs from SQL SELECT/WHERE amount_cents&gt;10. Compare SQL and DataFrame paths to the literal expected IDs rather than only to one another. Expected: Both paths return [2,4]. The temporary view exists only in this owned session and no external database connection is opened. Verify: Assert SQL IDs and selectedIds against [2,4] independently, then let the complete program stop its session in finally.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">ids</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    frame<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq</span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">aboveTen</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Column</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete aboveTen&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">selectedIds</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete selectedIds&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">missingIds</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete missingIds&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">combinedIds</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete combinedIds&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">projected</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete projected&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">sqlIds</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span> frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete sqlIds&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> spark <span class="syntax-operator">=</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">.</span>builder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ds60-spark-011&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.ui.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.host&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.bindAddress&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.shuffle.partitions&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;2&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.adaptive.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.session.timeZone&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;UTC&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;local-only course session&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ERROR&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> schema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> rows <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>schema<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> driverValue<span class="syntax-punctuation">:</span> <span class="syntax-class">Boolean</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> predicate<span class="syntax-punctuation">:</span> <span class="syntax-class">Column</span> <span class="syntax-operator">=</span> col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> lit<span class="syntax-punctuation">(</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>driverValue<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>predicate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">4L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A Column describes row-wise engine work&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> missing <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isNull<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq</span>
+<span class="source-line">        <span class="syntax-keyword">val</span> zero <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">===</span> lit<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq</span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>missing <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> zero <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Missing amount and observed zero are different rows&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-011: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> spark<span class="syntax-punctuation">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Construct a predicate without collapsing it to a driver Boolean. Inputs/task: Implement aboveTen/above_ten returning a Spark Column for amount_cents&gt;10. Do not collect values or return a Python/Scala scalar Boolean. Expected: Passing the predicate to raw.filter retains IDs 2 and 4. In Python, bool(predicate) raises ValueError rather than choosing one row&#x27;s truth value. Verify: Assert the exact filtered IDs and, in the PySpark reference, catch the scalar-Boolean conversion failure.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Apply the predicate and preserve event identity. Inputs/task: Return the ordered event IDs selected by aboveTen from this tiny fixture. Preserve both equal-valued 20-cent events and leave raw unchanged. Expected: The result is[2,4], and raw still contains IDs[1,2,3,4]. Projecting amount and calling distinct is not an acceptable implementation. Verify: Compare the selected IDs with literals and independently check all four raw IDs.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Select missingness explicitly. Inputs/task: Return ordered IDs whose amount_cents is SQL NULL. Do not compare the Column to JVM null/Python None using driver identity logic, and do not treat zero as missing. Expected: Only ID 3 is returned. The observed-zero ID 1 is absent from the missingness result. Verify: Assert[3] and separately assert that the zero-amount filter returns [1].</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Combine conditions with engine operators. Inputs/task: Return ordered IDs with a known amount at least 10 and event_id less than 4. Combine parenthesized Column comparisons with engine Boolean operators in each language. Expected: Only ID 2 qualifies. ID 4 fails the ID bound, ID 3 is missing, and ID 1 is below the amount threshold. Verify: Assert the exact singleton and explain one exclusion reason for each other ID.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Preserve NULL through a derived column. Inputs/task: Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result. Expected: Ordered rows are(1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown. Verify: Compare every ordered row with literal expected values, including the NULL position.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Compare SQL and Columns with an independent expectation. Inputs/task: Register a session-local temporary view and return ordered IDs from SQL SELECT/WHERE amount_cents&gt;10. Compare SQL and DataFrame paths to the literal expected IDs rather than only to one another. Expected: Both paths return [2,4]. The temporary view exists only in this owned session and no external database connection is opened. Verify: Assert SQL IDs and selectedIds against [2,4] independently, then let the complete program stop its session in finally.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

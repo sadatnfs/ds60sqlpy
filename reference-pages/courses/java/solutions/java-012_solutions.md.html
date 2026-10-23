@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,55 +164,55 @@
     <article class="document"><h2 id="java-012-explanatory-solutions">java-012: explanatory solutions<a class="heading-anchor" href="#java-012-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Generics express type relationships so many errors can be detected before execution. List&lt;Integer&gt; is not a subtype ofList&lt;Number&gt;, because a caller holdingList&lt;Number&gt; could insert aDouble and violate the original integer list. A producer wildcard?extendsNumber permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguishArrayList&lt;String&gt; fromArrayList&lt;Integer&gt;. Avoid raw types that bypass these checks.</p>
+<p>Generics express type relationships so many errors can be detected before execution. List&lt;Integer&gt; is not a subtype of List&lt;Number&gt;, because a caller holdingList&lt;Number&gt; could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList&lt;String&gt; from ArrayList&lt;Integer&gt;. Avoid raw types that bypass these checks.</p>
 <p><strong>Type parameter:</strong> A named placeholder relating types in a declaration.</p>
 <p><strong>Invariance:</strong> Different generic arguments do not imply a subtype relationship.</p>
 <p><strong>Wildcard bound:</strong> A restriction describing safe reads or writes through a generic reference.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>The&lt;T&gt; before a method return type declares a method type parameter. List&lt;?extendsNumber&gt; can be iterated asNumber for summation. List&lt;?superInteger&gt; can acceptInteger values. Use&lt;T&gt;voidcopy(List&lt;?extendsT&gt;source,List&lt;?superT&gt;target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.</p>
+<p>The&lt;T&gt; before a method return type declares a method type parameter. List&lt;?extends Number&gt; can be iterated asNumber for summation. List&lt;?superInteger&gt; can acceptInteger values. Use&lt;T&gt;void copy(List&lt;?extendsT&gt;source,List&lt;?superT&gt;target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.</p>
 <h3 id="exercise-1-read-from-a-producer">Exercise 1: Read from a producer<a class="heading-anchor" href="#exercise-1-read-from-a-producer" aria-label="Link to this section">#</a></h3>
-<p>Task: SumList.of(1,2,3) andList.of(1.5,2.5) throughList&lt;?extendsNumber&gt;.</p>
-<p>The method needs only to readNumber values, so anextends bound accepts both integer and double lists without permitting unsafe insertion.</p>
-<pre><code class="language-java">assert sum(List.of(1,2,3))==6.0;
-assert sum(List.of(1.5,2.5))==4.0;</code></pre>
-<p><strong>Expected:</strong> sums6.0 and4.0.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with sums6.0 and4.0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Sum <code>List.of(1, 2, 3)</code> and <code>List.of(1.5, 2.5)</code> through List&lt;?extends Number&gt;.</p>
+<p>The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> sums 6.0 and 4.0.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with sums 6.0 and 4.0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-write-to-a-consumer">Exercise 2: Write to a consumer<a class="heading-anchor" href="#exercise-2-write-to-a-consumer" aria-label="Link to this section">#</a></h3>
-<p>Task: Append integers1,2 to aList&lt;Number&gt; throughList&lt;?superInteger&gt;.</p>
-<p>ANumber list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.</p>
-<pre><code class="language-java">List&lt;Number&gt; numbers=new ArrayList&lt;&gt;(); addTwo(numbers);
-assert numbers.equals(List.of(1,2));</code></pre>
+<p>Task: Append integers1,2 to a List&lt;Number&gt; through List&lt;?superInteger&gt;.</p>
+<p>A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.</p>
+<pre class="highlighted-code"><code class="language-java">List<span class="syntax-operator">&lt;</span>Number<span class="syntax-operator">&gt;</span> numbers<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> addTwo<span class="syntax-punctuation">(</span>numbers<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> numbers<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> listcontains1,2.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with listcontains1,2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-connect-source-and-destination-types">Exercise 3: Connect source and destination types<a class="heading-anchor" href="#exercise-3-connect-source-and-destination-types" aria-label="Link to this section">#</a></h3>
 <p>Task: CopyList&lt;Integer&gt; intoList&lt;Number&gt; with a bounded generic method.</p>
 <p>The same type parameter links the producer and consumer. It permits safe widening without an unchecked cast.</p>
-<pre><code class="language-java">List&lt;Number&gt; destination=new ArrayList&lt;&gt;(); copy(List.of(3,4),destination);
-assert destination.equals(List.of(3,4));</code></pre>
+<pre class="highlighted-code"><code class="language-java">List<span class="syntax-operator">&lt;</span>Number<span class="syntax-operator">&gt;</span> destination<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> copy<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>destination<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> destination<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> destinationcontains3,4.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with destinationcontains3,4. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-preserve-generic-return-type">Exercise 4: Preserve generic return type<a class="heading-anchor" href="#exercise-4-preserve-generic-return-type" aria-label="Link to this section">#</a></h3>
-<p>Task: Callfirst on aString list and assign directly toString.</p>
+<p>Task: Callfirst on a String list and assign directly toString.</p>
 <p>The generic signature carries the element type to the return value. A rawObject return would force callers to cast and shift failures to runtime.</p>
-<pre><code class="language-java">String value=first(List.of(&quot;alpha&quot;,&quot;beta&quot;)); assert value.equals(&quot;alpha&quot;);</code></pre>
-<p><strong>Expected:</strong> resultalpha.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with resultalpha. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java">String value<span class="syntax-operator">=</span>first<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">beta</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> value<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> result alpha.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with result alpha. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-handle-an-empty-input-contract">Exercise 5: Handle an empty input contract<a class="heading-anchor" href="#exercise-5-handle-an-empty-input-contract" aria-label="Link to this section">#</a></h3>
 <p>Task: Callfirst on an empty list and require a named failure.</p>
 <p>Type safety does not establish nonemptiness. A separate value-level precondition is still needed for an operation that requires an element.</p>
-<pre><code class="language-java">boolean empty=false;
-try { first(List.of()); } catch(NoSuchElementException expected){empty=true;}
-assert empty;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> empty<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> first<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>NoSuchElementException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>empty<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> empty<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> NoSuchElementException.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with NoSuchElementException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-observe-erasure-carefully">Exercise 6: Observe erasure carefully<a class="heading-anchor" href="#exercise-6-observe-erasure-carefully" aria-label="Link to this section">#</a></h3>
-<p>Task: Compare runtime classes ofArrayList&lt;String&gt; andArrayList&lt;Integer&gt;;explain why this does not permit unsafe assignments.</p>
+<p>Task: Compare runtime classes of ArrayList&lt;String&gt; and ArrayList&lt;Integer&gt;;explain why this does not permit unsafe assignments.</p>
 <p>Erasure describes runtime representation. It does not repeal the compiler rule thatList&lt;Integer&gt; cannot be assigned toList&lt;Number&gt;. Do not use raw casts to bypass that rule.</p>
-<pre><code class="language-java">var strings=new ArrayList&lt;String&gt;(); var integers=new ArrayList&lt;Integer&gt;();
-assert strings.getClass().equals(integers.getClass());
-assert strings.isEmpty() &amp;&amp; integers.isEmpty();</code></pre>
-<p><strong>Expected:</strong> runtime classes equal;compile-time contracts remain distinct.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with runtime classes equal;compile-time contracts remain distinct. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> strings<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">var</span> integers<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> strings<span class="syntax-punctuation">.</span><span class="syntax-attribute">getClass</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>integers<span class="syntax-punctuation">.</span><span class="syntax-attribute">getClass</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> strings<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> integers<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> runtime classes equal; compile-time contracts remain distinct.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with runtime classes equal; compile-time contracts remain distinct. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

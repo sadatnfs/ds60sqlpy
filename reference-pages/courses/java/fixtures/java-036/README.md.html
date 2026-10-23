@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,18 +164,18 @@
     <article class="document"><h2 id="java036-release-artifact-andoptional-custom-runtime">Java036: release artifact andoptional custom runtime<a class="heading-anchor" href="#java036-release-artifact-andoptional-custom-runtime" aria-label="Link to this section">#</a></h2>
 <p>The default Java036 reference compiles a tiny Java21 application,packages a JAR,checks class-file version65,executes a fresh-process self-test andproves that an altered artifact fails its hash gate. It creates only owned temporary files andcleans them up. It doesnot build a custom runtime image ordeploy a service.</p>
 <p>Use a fresh learner-owned directory for this manual version. The following JDK commands have the same argument form in PowerShell andPOSIX:</p>
-<pre><code class="language-text">javac --release 21 -d .learning/java036-run1/classes courses/java/fixtures/java-036/src/App.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 -d .learning/java036-run1/classes courses/java/fixtures/java-036/src/App.java
 jar --create --file .learning/java036-run1/app.jar --main-class App --date=2020-01-01T00:00:02Z -C .learning/java036-run1/classes .
 java -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
 <p>Expected output is <code>release-ok</code> with exit0. An unsupported argument should produce <code>unknown argument</code> andexit2. Check the exit status through your shell&#x27;s normal mechanism rather than deciding success from whether any text appeared.</p>
 <h3 id="optional-jlink-step">Optional jlink step<a class="heading-anchor" href="#optional-jlink-step" aria-label="Link to this section">#</a></h3>
 <p>A custom runtime is a platform-specific artifact assembled from modules in the prepared JDK. It can be useful when distributing a controlled application, but the output is not one universal runtime for Windows,macOS,Linux andallCPUarchitectures. It also has a nontrivial disk footprint,so do not create it inside an ephemeral browser pad orunder the course source tree.</p>
 <p>This tiny fixture uses only <code>java.base</code>. After deliberately choosing an empty output directory andconfirming the prepared JDK includes <code>jlink</code> andits module files,you can build an optional runtime:</p>
-<pre><code class="language-text">jlink --add-modules java.base --strip-debug --no-header-files --no-man-pages --output .learning/java036-run1/runtime</code></pre>
+<pre class="highlighted-code"><code class="language-text">jlink --add-modules java.base --strip-debug --no-header-files --no-man-pages --output .learning/java036-run1/runtime</code></pre>
 <p>On POSIX,run the produced runtime with:</p>
-<pre><code class="language-bash">.learning/java036-run1/runtime/bin/java -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.learning/java036-run1/runtime/bin/java -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
 <p>On Windows PowerShell,use:</p>
-<pre><code class="language-powershell">&amp; .\.learning\java036-run1\runtime\bin\java.exe -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>java036-run1<span class="syntax-punctuation">\</span>runtime<span class="syntax-punctuation">\</span>bin<span class="syntax-punctuation">\</span>java<span class="syntax-punctuation">.</span>exe -ea -jar <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">/</span>java036-run1<span class="syntax-punctuation">/</span>app<span class="syntax-punctuation">.</span>jar <span class="syntax-punctuation">-</span>-self-test</code></pre>
 <p>This optional image build was not executed by the default lesson reference. Record the actual OS,architecture,JDKbuild,module list,output size andlaunch result if you perform it. A larger service usingHTTP,JDBC,JFR orothermodules needs its real dependency closure;copying this <code>java.base</code> command would omit required capabilities.</p>
 <h3 id="reviewable-release-evidence">Reviewable release evidence<a class="heading-anchor" href="#reviewable-release-evidence" aria-label="Link to this section">#</a></h3>
 <p>Retain source identity,compiler target,artifact hash,entrypoint,schema/configuration assumptions,normal andnegative launch checks,andthe previous artifact identity needed forrollback. A checksum match doesnot establish behavior,and a self-test doesnot establish production reliability. The application still needs representative contract tests,operational bounds andan owned deployment process. The course intentionally records those as separate gates.</p></article>

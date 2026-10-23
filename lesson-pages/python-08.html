@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 7 (<code>python-07</code>): string normalization, exceptions, and <code>Path</code>.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day08_files_json_csv_context.md</code>, then open <code>python/ds-60day/notebooks/day08_files_json_csv_context.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,28 +423,28 @@
 <p><code>with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;) as handle:</code> creates a context, binds the open handle, and guarantees <code>close</code> at block exit. <code>json.load(handle)</code> reads JSON from a file object; <code>json.loads(text)</code> parses an already-loaded string. For CSV output, <code>newline=&quot;&quot;</code> lets the <code>csv</code> module manage platform newline rules correctly.</p>
 <h5 id="guide--worked-example-1-round-trip-json-through-an-in-memory-stream">Worked example 1 — Round-trip JSON through an in-memory stream<a class="heading-anchor" href="#guide--worked-example-1-round-trip-json-through-an-in-memory-stream" aria-label="Link to this section">#</a></h5>
 <p>Observe serialization without creating learner files. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import io
-import json
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> io
+<span class="syntax-keyword">import</span> json
 
-record = {&quot;name&quot;: &quot;Ada&quot;, &quot;skills&quot;: [&quot;Python&quot;, &quot;SQL&quot;], &quot;active&quot;: True}
-stream = io.StringIO()
-json.dump(record, stream, ensure_ascii=False)
-encoded = stream.getvalue()
-decoded = json.loads(encoded)
-(encoded, decoded == record)</code></pre>
+record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">skills</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">Python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">SQL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">active</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span>
+stream <span class="syntax-operator">=</span> io<span class="syntax-operator">.</span>StringIO<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">,</span> stream<span class="syntax-punctuation">,</span> ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+encoded <span class="syntax-operator">=</span> stream<span class="syntax-operator">.</span>getvalue<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+decoded <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span> decoded <span class="syntax-operator">==</span> record<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.</code></pre>
+<pre class="highlighted-code"><code class="language-text">The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-read-csv-rows-as-dictionaries">Worked example 2 — Read CSV rows as dictionaries<a class="heading-anchor" href="#guide--worked-example-2-read-csv-rows-as-dictionaries" aria-label="Link to this section">#</a></h5>
 <p>Column headers become keys while every field initially remains text. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import csv
-import io
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
+<span class="syntax-keyword">import</span> io
 
-csv_text = &quot;name,score\nAda,9\nLin,10\n&quot;
-rows = list(csv.DictReader(io.StringIO(csv_text)))
-(rows, type(rows[0][&quot;score&quot;]).__name__)</code></pre>
+csv_text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name,score</span><span class="syntax-string">\n</span><span class="syntax-string">Ada,9</span><span class="syntax-string">\n</span><span class="syntax-string">Lin,10</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>io<span class="syntax-operator">.</span>StringIO<span class="syntax-punctuation">(</span>csv_text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`([{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;score&#x27;: &#x27;9&#x27;}, {&#x27;name&#x27;: &#x27;Lin&#x27;, &#x27;score&#x27;: &#x27;10&#x27;}], &#x27;str&#x27;)`. Numeric-looking CSV fields still require conversion.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`([{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;score&#x27;: &#x27;9&#x27;}, {&#x27;name&#x27;: &#x27;Lin&#x27;, &#x27;score&#x27;: &#x27;10&#x27;}], &#x27;str&#x27;)`. Numeric-looking CSV fields still require conversion.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -428,20 +476,20 @@ rows = list(csv.DictReader(io.StringIO(csv_text)))
 </ul>
 <p>Opening a file supplies a resource; <code>with</code> defines exactly how long that resource is owned.</p>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import json
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-path = Path(&quot;artifacts&quot;) / &quot;day08-settings.json&quot;
-settings = {&quot;theme&quot;: &quot;light&quot;, &quot;page_size&quot;: 25}
-path.parent.mkdir(parents=True, exist_ok=True)
+path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">day08-settings.json</span><span class="syntax-string">&quot;</span>
+settings <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">theme</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">light</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">page_size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">25</span><span class="syntax-punctuation">}</span>
+path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
-with path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;) as stream:
-    json.dump(settings, stream, indent=2)
+<span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> stream<span class="syntax-punctuation">:</span>
+    json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>settings<span class="syntax-punctuation">,</span> stream<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
-with path.open(encoding=&quot;utf-8&quot;) as stream:
-    loaded = json.load(stream)
+<span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> stream<span class="syntax-punctuation">:</span>
+    loaded <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>stream<span class="syntax-punctuation">)</span>
 
-assert loaded == settings</code></pre>
+<span class="syntax-keyword">assert</span> loaded <span class="syntax-operator">==</span> settings</code></pre>
 <p>This deterministic round trip requires no network access. <code>artifacts/</code> is the repository&#x27;s ignored location for disposable generated data.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -486,7 +534,7 @@ assert loaded == settings</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-08`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-08`
 (Day 8 — Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
 I have completed the direct prerequisites: `python-07`. Emphasize resource ownership, text encodings, and structured file boundaries.
 Read `python/ds-60day/companion-guides/day08_files_json_csv_context.md` and use the learner notebook
@@ -560,26 +608,26 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;) as handle:</code> creates a context, binds the open handle, and guarantees <code>close</code> at block exit. <code>json.load(handle)</code> reads JSON from a file object; <code>json.loads(text)</code> parses an already-loaded string. For CSV output, <code>newline=&quot;&quot;</code> lets the <code>csv</code> module manage platform newline rules correctly.</p>
 <h5 id="learner--cell-4--worked-example-1-round-trip-json-through-an-in-memory-stream">Worked example 1 — Round-trip JSON through an in-memory stream<a class="heading-anchor" href="#learner--cell-4--worked-example-1-round-trip-json-through-an-in-memory-stream" aria-label="Link to this section">#</a></h5>
 <p>Observe serialization without creating learner files. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import io</span>
-<span>import json</span>
-<span> </span>
-<span>record = {&quot;name&quot;: &quot;Ada&quot;, &quot;skills&quot;: [&quot;Python&quot;, &quot;SQL&quot;], &quot;active&quot;: True}</span>
-<span>stream = io.StringIO()</span>
-<span>json.dump(record, stream, ensure_ascii=False)</span>
-<span>encoded = stream.getvalue()</span>
-<span>decoded = json.loads(encoded)</span>
-<span>(encoded, decoded == record)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> io</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"></span>
+<span class="source-line">record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">skills</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">Python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">SQL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">active</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">stream <span class="syntax-operator">=</span> io<span class="syntax-operator">.</span>StringIO<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">,</span> stream<span class="syntax-punctuation">,</span> ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">encoded <span class="syntax-operator">=</span> stream<span class="syntax-operator">.</span>getvalue<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">decoded <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span> decoded <span class="syntax-operator">==</span> record<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The JSON text and <code>True</code> are displayed. Serialization creates text; parsing reconstructs equivalent Python data.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-read-csv-rows-as-dictionaries">Worked example 2 — Read CSV rows as dictionaries<a class="heading-anchor" href="#learner--cell-6--worked-example-2-read-csv-rows-as-dictionaries" aria-label="Link to this section">#</a></h5>
 <p>Column headers become keys while every field initially remains text. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import csv</span>
-<span>import io</span>
-<span> </span>
-<span>csv_text = &quot;name,score\nAda,9\nLin,10\n&quot;</span>
-<span>rows = list(csv.DictReader(io.StringIO(csv_text)))</span>
-<span>(rows, type(rows[0][&quot;score&quot;]).__name__)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> io</span>
+<span class="source-line"></span>
+<span class="source-line">csv_text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name,score</span><span class="syntax-string">\n</span><span class="syntax-string">Ada,9</span><span class="syntax-string">\n</span><span class="syntax-string">Lin,10</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>io<span class="syntax-operator">.</span>StringIO<span class="syntax-punctuation">(</span>csv_text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>([{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;score&#x27;: &#x27;9&#x27;}, {&#x27;name&#x27;: &#x27;Lin&#x27;, &#x27;score&#x27;: &#x27;10&#x27;}], &#x27;str&#x27;)</code>. Numeric-looking CSV fields still require conversion.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -593,29 +641,29 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> Use <code>json.loads</code>/<code>dumps</code> for in-memory text and <code>load</code>/<code>dump</code> for open file objects; use a database or columnar format when CSV cannot express the needed contract.</p>
 <p><strong>Boundary to test:</strong> Missing files, malformed records, absent or extra CSV columns, non-ASCII names, partial writes, and empty files need deliberate behavior.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import csv</span>
-<span>import json</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>artifact_dir = Path(&#x27;artifacts/day08&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>p = artifact_dir / &#x27;people.json&#x27;</span>
-<span>people = [{&quot;name&quot;: &quot;Ada&quot;, &quot;age&quot;: 36}, {&quot;name&quot;: &quot;Alan&quot;, &quot;age&quot;: 41}]</span>
-<span>with p.open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:</span>
-<span>    json.dump(people, f, indent=2)</span>
-<span> </span>
-<span>with p.open(encoding=&#x27;utf-8&#x27;) as f:</span>
-<span>    loaded = json.load(f)</span>
-<span>loaded</span>
-<span> </span>
-<span># CSV</span>
-<span>p2 = artifact_dir / &#x27;people.csv&#x27;</span>
-<span>with p2.open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;, newline=&#x27;&#x27;) as f:</span>
-<span>    writer = csv.DictWriter(f, fieldnames=[&#x27;name&#x27;, &#x27;age&#x27;])</span>
-<span>    writer.writeheader()</span>
-<span>    writer.writerows(people)</span>
-<span>p2.read_text(encoding=&#x27;utf-8&#x27;).splitlines()[:3]</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day08</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">p <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">people.json</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">people <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">36</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Alan</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">41</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> p<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">w</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>people<span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">with</span> p<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    loaded <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span></span>
+<span class="source-line">loaded</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># CSV</span></span>
+<span class="source-line">p2 <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">people.csv</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> p2<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">w</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    writer <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">name</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">age</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    writer<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    writer<span class="syntax-operator">.</span>writerows<span class="syntax-punctuation">(</span>people<span class="syntax-punctuation">)</span></span>
+<span class="source-line">p2<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -639,86 +687,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Implement <code>safe_load_json(path)</code> that returns parsed data on success and <code>None</code> only for a missing file or malformed JSON, logging which expected failure occurred. <strong>Constraints:</strong> open with UTF-8, catch <code>FileNotFoundError</code> and <code>json.JSONDecodeError</code> explicitly, and let unrelated errors surface. <strong>Verify:</strong> test a valid file, a missing path, and an invalid JSON file inside a temporary directory.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Implement `safe_load_json(path)` that returns parsed data on success and `None` only for a missing file or malformed JSON, logging which expected failure occurred. open with UTF...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement `safe_load_json(path)` that returns parsed data on success and `None` only for a missing file or malformed JSON, logging which expected failure occurred. open with UTF...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Implement <code>csv_to_records(path)</code> and <code>records_to_csv(records, path)</code> using <code>csv.DictReader</code> and <code>csv.DictWriter</code>. <strong>Contract:</strong> headers define keys, output field order is explicit, and numeric conversion policy is documented. <strong>Constraints:</strong> use UTF-8 and <code>newline=&#x27;&#x27;</code>; do not hand-split comma-delimited text. <strong>Verify:</strong> round-trip two records including a non-ASCII name and compare the normalized records.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Implement `csv_to_records(path)` and `records_to_csv(records, path)` using `csv.DictReader` and `csv.DictWriter`. headers define keys, output field order is explicit, and numeri...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement `csv_to_records(path)` and `records_to_csv(records, path)` using `csv.DictReader` and `csv.DictWriter`. headers define keys, output field order is explicit, and numeri...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> After <code>handle.read(2)</code> on a text file containing <code>abcd</code>, predict what a second <code>handle.read()</code> returns and explain the cursor. <strong>Progressive hint:</strong> Reads advance the file object&#x27;s current position. <strong>Verify:</strong> Assert the first read is <code>&#x27;ab&#x27;</code>, the second is <code>&#x27;cd&#x27;</code>, and a third is empty; record cursor positions <code>2</code> and <code>4</code>.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. Reads advance the file object&#x27;s current position....</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. Reads advance the file object&#x27;s current position....</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace when a file is open and closed through a <code>with</code> block, including when JSON decoding raises inside the block. <strong>Progressive hint:</strong> Context-manager cleanup runs on both normal and exceptional exit. <strong>Verify:</strong> Record <code>handle.closed</code> inside and after both successful and failing <code>with</code> blocks; assert it is true after either exit.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. Context-manager cleanup runs on both normal and exceptional ex...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. Context-manager cleanup runs on both normal and exceptional ex...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. <strong>Progressive hint:</strong> Use explicit UTF-8, <code>json.dump</code>, and <code>Path.replace</code>. <strong>Verify:</strong> Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. Use explicit UTF-8, `json.dump`, and `Path.replace`. Read the replaced destin...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. Use explicit UTF-8, `json.dump`, and `Path.replace`. Read the replaced destin...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. <strong>Progressive hint:</strong> Open with <code>newline=&#x27;&#x27;</code> and <code>encoding=&#x27;utf-8&#x27;</code>. <strong>Verify:</strong> Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. Open with `newline=&#x27;&#x27;` and `encoding=&#x27;utf-8&#x27;`. Round-trip two CSV rows including a non-ASCII...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. Open with `newline=&#x27;&#x27;` and `encoding=&#x27;utf-8&#x27;`. Round-trip two CSV rows including a non-ASCII...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. <strong>Progressive hint:</strong> Validate each row at the boundary rather than failing much later. <strong>Verify:</strong> Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. Validate each row at the boundary rather than failing muc...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. Validate each row at the boundary rather than failing muc...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -772,73 +820,73 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>safe_load_json(path)</code> that returns parsed data on success and <code>None</code> only for a missing file or malformed JSON, logging which expected failure occurred. <strong>Constraints:</strong> open with UTF-8, catch <code>FileNotFoundError</code> and <code>json.JSONDecodeError</code> explicitly, and let unrelated errors surface. <strong>Verify:</strong> test a valid file, a missing path, and an invalid JSON file inside a temporary directory.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>safe_load_json(path)</code> that returns parsed data on success and <code>None</code> only for a missing file or malformed JSON, logging which expected failure occurred. Constraints: open with UTF-8, catch <code>FileNotFoundError</code> and <code>json.JSONDecodeError</code> explicitly, and let unrelated errors surface. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test a valid file, a missing path, and an invalid JSON file inside a temporary directory. That connects the answer to resource ownership, text encodings, and structured file boundaries.</p>
-<pre><code class="language-python">import json
-import logging
-from pathlib import Path
-import tempfile
-from typing import Any
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">import</span> logging
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any
 
-logger = logging.getLogger(__name__)
-
-
-def safe_load_json(path: Path) -&gt; Any | None:
-    try:
-        with path.open(encoding=&quot;utf-8&quot;) as handle:
-            return json.load(handle)
-    except FileNotFoundError:
-        logger.warning(&quot;JSON file is missing: %s&quot;, path)
-    except json.JSONDecodeError as error:
-        logger.warning(&quot;Invalid JSON in %s at line %d&quot;, path, error.lineno)
-    return None
+logger <span class="syntax-operator">=</span> logging<span class="syntax-operator">.</span>getLogger<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span>
 
 
-with tempfile.TemporaryDirectory() as temporary:
-    folder = Path(temporary)
-    valid_path = folder / &quot;valid.json&quot;
-    invalid_path = folder / &quot;invalid.json&quot;
-    missing_path = folder / &quot;missing.json&quot;
-    valid_path.write_text(&#x27;{&quot;course&quot;: &quot;ds60&quot;}&#x27;, encoding=&quot;utf-8&quot;)
-    invalid_path.write_text(&#x27;{&quot;course&quot;:&#x27;, encoding=&quot;utf-8&quot;)
+<span class="syntax-keyword">def</span> <span class="syntax-function">safe_load_json</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">return</span> json<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> FileNotFoundError<span class="syntax-punctuation">:</span>
+        logger<span class="syntax-operator">.</span>warning<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">JSON file is missing: </span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> json<span class="syntax-operator">.</span>JSONDecodeError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        logger<span class="syntax-operator">.</span>warning<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Invalid JSON in </span><span class="syntax-string">%s</span><span class="syntax-string"> at line </span><span class="syntax-string">%d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">,</span> error<span class="syntax-operator">.</span>lineno<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>
 
-    assert safe_load_json(valid_path) == {&quot;course&quot;: &quot;ds60&quot;}
-    assert safe_load_json(invalid_path) is None
-    assert safe_load_json(missing_path) is None</code></pre>
+
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> temporary<span class="syntax-punctuation">:</span>
+    folder <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-punctuation">)</span>
+    valid_path <span class="syntax-operator">=</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">valid.json</span><span class="syntax-string">&quot;</span>
+    invalid_path <span class="syntax-operator">=</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">invalid.json</span><span class="syntax-string">&quot;</span>
+    missing_path <span class="syntax-operator">=</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing.json</span><span class="syntax-string">&quot;</span>
+    valid_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">course</span><span class="syntax-string">&quot;</span><span class="syntax-string">: </span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    invalid_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">course</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+    <span class="syntax-keyword">assert</span> safe_load_json<span class="syntax-punctuation">(</span>valid_path<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">course</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">assert</span> safe_load_json<span class="syntax-punctuation">(</span>invalid_path<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span>
+    <span class="syntax-keyword">assert</span> safe_load_json<span class="syntax-punctuation">(</span>missing_path<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
 <p>The two expected boundary failures are distinguished; unrelated permission or programming failures remain visible.</p>
 <p><strong>Verification evidence:</strong> test a valid file, a missing path, and an invalid JSON file inside a temporary directory.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>csv_to_records(path)</code> and <code>records_to_csv(records, path)</code> using <code>csv.DictReader</code> and <code>csv.DictWriter</code>. <strong>Contract:</strong> headers define keys, output field order is explicit, and numeric conversion policy is documented. <strong>Constraints:</strong> use UTF-8 and <code>newline=&#x27;&#x27;</code>; do not hand-split comma-delimited text. <strong>Verify:</strong> round-trip two records including a non-ASCII name and compare the normalized records.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>csv_to_records(path)</code> and <code>records_to_csv(records, path)</code> using <code>csv.DictReader</code> and <code>csv.DictWriter</code>. Contract: headers define keys, output field order is explicit, and numeric conversion policy is documented. Constraints: use UTF-8 and <code>newline=&#x27;&#x27;</code>; do not hand-split comma-delimited text. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: round-trip two records including a non-ASCII name and compare the normalized records. That connects the answer to resource ownership, text encodings, and structured file boundaries.</p>
-<pre><code class="language-python">import csv
-from pathlib import Path
-import tempfile
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
 
-CSV_FIELDS = (&quot;name&quot;, &quot;score&quot;)
-
-
-def csv_to_records(path: Path) -&gt; list[dict[str, str]]:
-    with path.open(encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
-        return list(csv.DictReader(handle))
+CSV_FIELDS <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-def records_to_csv(
-    records: list[dict[str, str]], path: Path
-) -&gt; None:
-    with path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
-        writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS)
-        writer.writeheader()
-        writer.writerows(records)
+<span class="syntax-keyword">def</span> <span class="syntax-function">csv_to_records</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-records = [
-    {&quot;name&quot;: &quot;Ada&quot;, &quot;score&quot;: &quot;10&quot;},
-    {&quot;name&quot;: &quot;José&quot;, &quot;score&quot;: &quot;8&quot;},
-]
-with tempfile.TemporaryDirectory() as temporary:
-    path = Path(temporary) / &quot;scores.csv&quot;
-    records_to_csv(records, path)
-    reloaded = csv_to_records(path)
-    assert reloaded == records
-    assert list(reloaded[0]) == list(CSV_FIELDS)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">records_to_csv</span><span class="syntax-punctuation">(</span>
+    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">:</span> Path
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+        writer <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span>CSV_FIELDS<span class="syntax-punctuation">)</span>
+        writer<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        writer<span class="syntax-operator">.</span>writerows<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span>
+
+
+records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">José</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> temporary<span class="syntax-punctuation">:</span>
+    path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">scores.csv</span><span class="syntax-string">&quot;</span>
+    records_to_csv<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">)</span>
+    reloaded <span class="syntax-operator">=</span> csv_to_records<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> reloaded <span class="syntax-operator">==</span> records
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>reloaded<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>CSV_FIELDS<span class="syntax-punctuation">)</span></code></pre>
 <p><code>DictReader</code> returns text, so this contract deliberately preserves <code>&quot;10&quot;</code> and <code>&quot;8&quot;</code> as strings. A later domain-specific parsing stage may convert them; the CSV transport layer does not guess numeric meaning.</p>
 <p><strong>Verification evidence:</strong> round-trip two records including a non-ASCII name and compare the normalized records.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -867,58 +915,58 @@ with tempfile.TemporaryDirectory() as temporary:
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior">Shared implementation for Exercises 3–4 — Cursor and context-manager behavior<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior" aria-label="Link to this section">#</a></h5>
 <p>The second read returns <code>&quot;cd&quot;</code> because the cursor is already after <code>&quot;ab&quot;</code>. Leaving a <code>with</code> block closes the handle even when decoding raises.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation">Shared implementation for Exercises 5–7 — Recoverable writes and explicit row validation<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-import csv
-import json
-from collections.abc import Iterable, Mapping
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Any
-
-
-def write_json_atomic(path: Path, value: Any) -&gt; None:
-    &quot;&quot;&quot;Replace ``path`` only after a complete sibling file is written.&quot;&quot;&quot;
-
-    temporary = path.with_suffix(path.suffix + &quot;.tmp&quot;)
-    with temporary.open(&quot;w&quot;, encoding=&quot;utf-8&quot;) as handle:
-        json.dump(value, handle, ensure_ascii=False, indent=2)
-        handle.write(&quot;\n&quot;)
-    temporary.replace(path)
+<span class="syntax-keyword">import</span> csv
+<span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Mapping
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory
+<span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any
 
 
-def partition_rows(
-    rows: Iterable[Mapping[str, str]], required: set[str]
-) -&gt; tuple[list[dict[str, str]], list[tuple[dict[str, str], str]]]:
-    &quot;&quot;&quot;Separate valid rows from rows that violate the required-column contract.&quot;&quot;&quot;
+<span class="syntax-keyword">def</span> <span class="syntax-function">write_json_atomic</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Replace ``path`` only after a complete sibling file is written.&quot;&quot;&quot;</span>
 
-    accepted: list[dict[str, str]] = []
-    rejected: list[tuple[dict[str, str], str]] = []
-    for source_row in rows:
-        row = dict(source_row)
-        missing = sorted(name for name in required if not row.get(name, &quot;&quot;).strip())
-        if missing:
-            rejected.append((row, f&quot;missing values: {&#x27;, &#x27;.join(missing)}&quot;))
-        else:
-            accepted.append(row)
-    return accepted, rejected
+    temporary <span class="syntax-operator">=</span> path<span class="syntax-operator">.</span>with_suffix<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>suffix <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.tmp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> temporary<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+        json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> handle<span class="syntax-punctuation">,</span> ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+        handle<span class="syntax-operator">.</span>write<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    temporary<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span>
 
 
-with TemporaryDirectory() as directory:
-    destination = Path(directory) / &quot;people.json&quot;
-    write_json_atomic(destination, [{&quot;name&quot;: &quot;Zoë&quot;}])
-    assert json.loads(destination.read_text(encoding=&quot;utf-8&quot;))[0][&quot;name&quot;] == &quot;Zoë&quot;
+<span class="syntax-keyword">def</span> <span class="syntax-function">partition_rows</span><span class="syntax-punctuation">(</span>
+    rows<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span>Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> required<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Separate valid rows from rows that violate the required-column contract.&quot;&quot;&quot;</span>
 
-    csv_path = Path(directory) / &quot;people.csv&quot;
-    with csv_path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
-        writer = csv.DictWriter(handle, fieldnames=[&quot;name&quot;])
-        writer.writeheader()
-        writer.writerow({&quot;name&quot;: &quot;Zoë&quot;})
+    accepted<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    rejected<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> source_row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span>
+        row <span class="syntax-operator">=</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>source_row<span class="syntax-punctuation">)</span>
+        missing <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>name <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> required <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> row<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span>
+            rejected<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing values: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            accepted<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> accepted<span class="syntax-punctuation">,</span> rejected
 
-accepted, rejected = partition_rows(
-    [{&quot;id&quot;: &quot;1&quot;, &quot;name&quot;: &quot;Ada&quot;}, {&quot;id&quot;: &quot;2&quot;, &quot;name&quot;: &quot;&quot;}], {&quot;id&quot;, &quot;name&quot;}
-)
-assert len(accepted) == 1 and rejected[0][1] == &quot;missing values: name&quot;</code></pre></div>
+
+<span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span>
+    destination <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">people.json</span><span class="syntax-string">&quot;</span>
+    write_json_atomic<span class="syntax-punctuation">(</span>destination<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>destination<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span>
+
+    csv_path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">people.csv</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">with</span> csv_path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+        writer <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+        writer<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        writer<span class="syntax-operator">.</span>writerow<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+
+accepted<span class="syntax-punctuation">,</span> rejected <span class="syntax-operator">=</span> partition_rows<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> rejected<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing values: name</span><span class="syntax-string">&quot;</span></code></pre></div>
       </section>
 
 
@@ -954,49 +1002,49 @@ assert len(accepted) == 1 and rejected[0][1] == &quot;missing values: name&quot;
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-08-solutions-files-json-csv-context-managers">Day 08 — Solutions: Files, JSON/CSV, Context Managers<a class="heading-anchor" href="#solution-2--cell-1--day-08-solutions-files-json-csv-context-managers" aria-label="Link to this section">#</a></h3>
 <p>Runnable implementations for safe JSON loader and CSV↔JSON converters.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Exercise 1 — Safe JSON loader</span>
-<span>from pathlib import Path</span>
-<span>from typing import Any</span>
-<span>import json</span>
-<span> </span>
-<span>def safe_load_json(path: str | Path, *, verbose: bool = True) -&gt; Any | None:</span>
-<span>    p = Path(path)</span>
-<span>    try:</span>
-<span>        with p.open(encoding=&#x27;utf-8&#x27;) as f:</span>
-<span>            return json.load(f)</span>
-<span>    except FileNotFoundError:</span>
-<span>        if verbose: print(f&#x27;safe_load_json: not found: {p}&#x27;)</span>
-<span>    except PermissionError:</span>
-<span>        if verbose: print(f&#x27;safe_load_json: permission denied: {p}&#x27;)</span>
-<span>    except json.JSONDecodeError as e:</span>
-<span>        if verbose: print(f&#x27;safe_load_json: invalid JSON in {p}: line {e.lineno}, col {e.colno}: {e.msg}&#x27;)</span>
-<span>    return None</span>
-<span> </span>
-<span># Example (will print if path missing)</span>
-<span>safe_load_json(&#x27;missing.json&#x27;)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 1 — Safe JSON loader</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">safe_load_json</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> Path<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> verbose<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> p<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> json<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> FileNotFoundError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> verbose<span class="syntax-punctuation">:</span> <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">safe_load_json: not found: </span><span class="syntax-string">{</span>p<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> PermissionError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> verbose<span class="syntax-punctuation">:</span> <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">safe_load_json: permission denied: </span><span class="syntax-string">{</span>p<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> json<span class="syntax-operator">.</span>JSONDecodeError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> verbose<span class="syntax-punctuation">:</span> <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">safe_load_json: invalid JSON in </span><span class="syntax-string">{</span>p<span class="syntax-string">}</span><span class="syntax-string">: line </span><span class="syntax-string">{</span>e<span class="syntax-operator">.</span>lineno<span class="syntax-string">}</span><span class="syntax-string">, col </span><span class="syntax-string">{</span>e<span class="syntax-operator">.</span>colno<span class="syntax-string">}</span><span class="syntax-string">: </span><span class="syntax-string">{</span>e<span class="syntax-operator">.</span>msg<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Example (will print if path missing)</span></span>
+<span class="source-line">safe_load_json<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">missing.json</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Exercise 2 — CSV ↔ JSON converters</span>
-<span>import csv</span>
-<span> </span>
-<span>def csv_to_json(csv_path: Path, json_path: Path) -&gt; None:</span>
-<span>    with csv_path.open(encoding=&#x27;utf-8&#x27;, newline=&#x27;&#x27;) as f:</span>
-<span>        reader = csv.DictReader(f)</span>
-<span>        rows = list(reader)</span>
-<span>    with json_path.open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as out:</span>
-<span>        json.dump(rows, out, indent=2, ensure_ascii=False)</span>
-<span> </span>
-<span>from typing import Any</span>
-<span>def json_to_csv(json_path: Path, csv_path: Path) -&gt; None:</span>
-<span>    data: list[dict[str, Any]] = safe_load_json(json_path) or []</span>
-<span>    if not data:</span>
-<span>        csv_path.write_text(&#x27;&#x27;, encoding=&#x27;utf-8&#x27;)</span>
-<span>        return</span>
-<span>    fieldnames: list[str] = sorted({k for rec in data for k in rec.keys()})</span>
-<span>    with csv_path.open(&#x27;w&#x27;, encoding=&#x27;utf-8&#x27;, newline=&#x27;&#x27;) as f:</span>
-<span>        w = csv.DictWriter(f, fieldnames=fieldnames)</span>
-<span>        w.writeheader()</span>
-<span>        for rec in data:</span>
-<span>            w.writerow({k: rec.get(k, &#x27;&#x27;) for k in fieldnames})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 2 — CSV ↔ JSON converters</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">csv_to_json</span><span class="syntax-punctuation">(</span>csv_path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> json_path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> csv_path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reader <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>reader<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> json_path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">w</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> out<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">json_to_csv</span><span class="syntax-punctuation">(</span>json_path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> csv_path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    data<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> safe_load_json<span class="syntax-punctuation">(</span>json_path<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> data<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        csv_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    fieldnames<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>k <span class="syntax-keyword">for</span> rec <span class="syntax-operator">in</span> data <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> rec<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> csv_path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">w</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> f<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        w <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span>fieldnames<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        w<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> rec <span class="syntax-operator">in</span> data<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            w<span class="syntax-operator">.</span>writerow<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>k<span class="syntax-punctuation">:</span> rec<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> fieldnames<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1028,59 +1076,59 @@ assert len(accepted) == 1 and rejected[0][1] == &quot;missing values: name&quot;
 <h5 id="solution-2--cell-4--practices-1-2-cursor-and-context-manager-behavior">Practices 1–2 — Cursor and context-manager behavior<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-cursor-and-context-manager-behavior" aria-label="Link to this section">#</a></h5>
 <p>The second read returns <code>&quot;cd&quot;</code> because the cursor is already after <code>&quot;ab&quot;</code>. Leaving a <code>with</code> block closes the handle even when decoding raises.</p>
 <h5 id="solution-2--cell-4--practices-3-5-recoverable-writes-and-explicit-row-validation">Practices 3–5 — Recoverable writes and explicit row validation<a class="heading-anchor" href="#solution-2--cell-4--practices-3-5-recoverable-writes-and-explicit-row-validation" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>import json</span>
-<span>from collections.abc import Iterable, Mapping</span>
-<span>from pathlib import Path</span>
-<span>from tempfile import TemporaryDirectory</span>
-<span>from typing import Any</span>
-<span> </span>
-<span> </span>
-<span>def write_json_atomic(path: Path, value: Any) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Replace ``path`` only after a complete sibling file is written.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    temporary = path.with_suffix(path.suffix + &quot;.tmp&quot;)</span>
-<span>    with temporary.open(&quot;w&quot;, encoding=&quot;utf-8&quot;) as handle:</span>
-<span>        json.dump(value, handle, ensure_ascii=False, indent=2)</span>
-<span>        handle.write(&quot;\n&quot;)</span>
-<span>    temporary.replace(path)</span>
-<span> </span>
-<span> </span>
-<span>def partition_rows(</span>
-<span>    rows: Iterable[Mapping[str, str]], required: set[str]</span>
-<span>) -&gt; tuple[list[dict[str, str]], list[tuple[dict[str, str], str]]]:</span>
-<span>    &quot;&quot;&quot;Separate valid rows from rows that violate the required-column contract.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    accepted: list[dict[str, str]] = []</span>
-<span>    rejected: list[tuple[dict[str, str], str]] = []</span>
-<span>    for source_row in rows:</span>
-<span>        row = dict(source_row)</span>
-<span>        missing = sorted(name for name in required if not row.get(name, &quot;&quot;).strip())</span>
-<span>        if missing:</span>
-<span>            rejected.append((row, f&quot;missing values: {&#x27;, &#x27;.join(missing)}&quot;))</span>
-<span>        else:</span>
-<span>            accepted.append(row)</span>
-<span>    return accepted, rejected</span>
-<span> </span>
-<span> </span>
-<span>with TemporaryDirectory() as directory:</span>
-<span>    destination = Path(directory) / &quot;people.json&quot;</span>
-<span>    write_json_atomic(destination, [{&quot;name&quot;: &quot;Zoë&quot;}])</span>
-<span>    assert json.loads(destination.read_text(encoding=&quot;utf-8&quot;))[0][&quot;name&quot;] == &quot;Zoë&quot;</span>
-<span> </span>
-<span>    csv_path = Path(directory) / &quot;people.csv&quot;</span>
-<span>    with csv_path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        writer = csv.DictWriter(handle, fieldnames=[&quot;name&quot;])</span>
-<span>        writer.writeheader()</span>
-<span>        writer.writerow({&quot;name&quot;: &quot;Zoë&quot;})</span>
-<span> </span>
-<span>accepted, rejected = partition_rows(</span>
-<span>    [{&quot;id&quot;: &quot;1&quot;, &quot;name&quot;: &quot;Ada&quot;}, {&quot;id&quot;: &quot;2&quot;, &quot;name&quot;: &quot;&quot;}], {&quot;id&quot;, &quot;name&quot;}</span>
-<span>)</span>
-<span>assert len(accepted) == 1 and rejected[0][1] == &quot;missing values: name&quot;</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Mapping</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_json_atomic</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Replace ``path`` only after a complete sibling file is written.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    temporary <span class="syntax-operator">=</span> path<span class="syntax-operator">.</span>with_suffix<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>suffix <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.tmp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> temporary<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        json<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> handle<span class="syntax-punctuation">,</span> ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        handle<span class="syntax-operator">.</span>write<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    temporary<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">partition_rows</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span>Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> required<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Separate valid rows from rows that violate the required-column contract.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    accepted<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    rejected<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> source_row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        row <span class="syntax-operator">=</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>source_row<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        missing <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>name <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> required <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> row<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            rejected<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing values: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            accepted<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> accepted<span class="syntax-punctuation">,</span> rejected</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    destination <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">people.json</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    write_json_atomic<span class="syntax-punctuation">(</span>destination<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>destination<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    csv_path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">people.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> csv_path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        writer <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        writer<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        writer<span class="syntax-operator">.</span>writerow<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Zoë</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">accepted<span class="syntax-punctuation">,</span> rejected <span class="syntax-operator">=</span> partition_rows<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> rejected<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing values: name</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -137,91 +183,91 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-read-a-small-utf-8-file">Example A: Read a small UTF-8 file<a class="heading-anchor" href="#example-a-read-a-small-utf-8-file" aria-label="Link to this section">#</a></h4>
 <p>The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, writeFile, readFile, rm } from &#x27;node:fs/promises&#x27;;
-import { createReadStream } from &#x27;node:fs&#x27;;
-import { createInterface } from &#x27;node:readline&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> readFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createReadStream <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createInterface <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:readline&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withDirectory(use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-files-&#x27;));
-  try { return await use(directory); }
-  finally { await rm(directory, { recursive: true, force: true }); }
-}
-async function readLines(path) {
-  const input = createReadStream(path, { encoding: &#x27;utf8&#x27;, highWaterMark: 2 });
-  const lines = createInterface({ input, crlfDelay: Infinity });
-  const result = [];
-  try { for await (const line of lines) result.push(line); }
-  finally { lines.close(); input.destroy(); }
-  return result;
-}
-function fixtureName(name) {
-  if (typeof name !== &#x27;string&#x27; || !/^[A-Za-z0-9_-]+\.txt$/u.test(name)) throw new TypeError(&#x27;simple .txt filename required&#x27;);
-  return name;
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withDirectory<span class="syntax-punctuation">(</span>use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-files-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> readLines<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> input <span class="syntax-operator">=</span> createReadStream<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> highWaterMark<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> lines <span class="syntax-operator">=</span> createInterface<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> input<span class="syntax-punctuation">,</span> crlfDelay<span class="syntax-operator">:</span> <span class="syntax-keyword">Infinity</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> line <span class="syntax-keyword">of</span> lines<span class="syntax-punctuation">)</span> result<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>line<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> lines<span class="syntax-punctuation">.</span>close<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> input<span class="syntax-punctuation">.</span>destroy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> fixtureName<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> name <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;string&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-string">/^[A-Za-z0-9_-]+\.txt$/u</span><span class="syntax-punctuation">.</span>test<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;simple .txt filename required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> name<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withDirectory(async directory =&gt; {
-      const path = join(directory, &#x27;message.txt&#x27;);
-      const text = &#x27;A😀B\n&#x27;;
-      await writeFile(path, text, { encoding: &#x27;utf8&#x27;, flag: &#x27;wx&#x27; });
-      assert.equal(await readFile(path, &#x27;utf8&#x27;), text);
-      assert.equal((await readFile(path)).length, 7);
-      assert.equal(text.length, 5);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;message.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">const</span> text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A😀B\n&#x27;</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> flag<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;wx&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> text round-trips; UTF-8 byte length exceeds code-unit length.</p>
 <h4 id="example-b-preserve-characters-and-lines-across-chunks">Example B: Preserve characters and lines across chunks<a class="heading-anchor" href="#example-b-preserve-characters-and-lines-across-chunks" aria-label="Link to this section">#</a></h4>
 <p>The stream decoder retains incomplete UTF-8 sequences, while readline retains incomplete lines. Chunk size is not a record size or a guarantee about the bytes held by every layer.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, writeFile, readFile, rm } from &#x27;node:fs/promises&#x27;;
-import { createReadStream } from &#x27;node:fs&#x27;;
-import { createInterface } from &#x27;node:readline&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> readFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createReadStream <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> createInterface <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:readline&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withDirectory(use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-files-&#x27;));
-  try { return await use(directory); }
-  finally { await rm(directory, { recursive: true, force: true }); }
-}
-async function readLines(path) {
-  const input = createReadStream(path, { encoding: &#x27;utf8&#x27;, highWaterMark: 2 });
-  const lines = createInterface({ input, crlfDelay: Infinity });
-  const result = [];
-  try { for await (const line of lines) result.push(line); }
-  finally { lines.close(); input.destroy(); }
-  return result;
-}
-function fixtureName(name) {
-  if (typeof name !== &#x27;string&#x27; || !/^[A-Za-z0-9_-]+\.txt$/u.test(name)) throw new TypeError(&#x27;simple .txt filename required&#x27;);
-  return name;
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withDirectory<span class="syntax-punctuation">(</span>use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-files-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> readLines<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> input <span class="syntax-operator">=</span> createReadStream<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> encoding<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">,</span> highWaterMark<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> lines <span class="syntax-operator">=</span> createInterface<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> input<span class="syntax-punctuation">,</span> crlfDelay<span class="syntax-operator">:</span> <span class="syntax-keyword">Infinity</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> line <span class="syntax-keyword">of</span> lines<span class="syntax-punctuation">)</span> result<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>line<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> lines<span class="syntax-punctuation">.</span>close<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> input<span class="syntax-punctuation">.</span>destroy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">function</span> fixtureName<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> name <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;string&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-string">/^[A-Za-z0-9_-]+\.txt$/u</span><span class="syntax-punctuation">.</span>test<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;simple .txt filename required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> name<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withDirectory(async directory =&gt; {
-      const path = join(directory, &#x27;lines.txt&#x27;);
-      await writeFile(path, &#x27;A😀B\r\nsecond\n&#x27;, &#x27;utf8&#x27;);
-      assert.deepEqual(await readLines(path), [&#x27;A😀B&#x27;, &#x27;second&#x27;]);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withDirectory<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> path <span class="syntax-operator">=</span> join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;lines.txt&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;A😀B\r\nsecond\n&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> readLines<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A😀B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> lines are A😀B and second, without a corrupt replacement character.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
@@ -256,7 +302,7 @@ console.log(JSON.stringify(await verify()));
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://nodejs.org/docs/latest-v24.x/api/fs.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-016: Files, paths and streaming text.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-016: Files, paths and streaming text.
 Read courses/javascript-typescript/guides/js-016.md and courses/javascript-typescript/lessons/js-016.mjs. Direct prerequisites: `js-015`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

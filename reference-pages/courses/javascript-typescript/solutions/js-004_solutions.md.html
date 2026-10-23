@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -129,56 +175,56 @@
 <h3 id="exercise-1-call-a-pure-function">Exercise 1: Call a pure function<a class="heading-anchor" href="#exercise-1-call-a-pure-function" aria-label="Link to this section">#</a></h3>
 <p>Task: Use add with 2, 3 and with negative 1, 1.</p>
 <p>The function depends only on its arguments and changes no external state. Boundary examples can be tested independently.</p>
-<pre><code class="language-javascript">function add(left, right) { return left + right; }
-assert.equal(add(2, 3), 5);
-assert.equal(add(-1, 1), 0);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">function</span> add<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> left <span class="syntax-operator">+</span> right<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>add<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 5 and 0.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-build-independent-closures">Exercise 2: Build independent closures<a class="heading-anchor" href="#exercise-2-build-independent-closures" aria-label="Link to this section">#</a></h3>
 <p>Task: Create two counters; increment the first twice and the second once.</p>
 <p>Each factory call creates a separate captured binding. Equal initial values do not imply shared counter state.</p>
-<pre><code class="language-javascript">const first = counter();
-const second = counter();
-assert.equal(first(), 1);
-assert.equal(first(), 2);
-assert.equal(second(), 1);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> second <span class="syntax-operator">=</span> counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> first 1, 2; second 1.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-compare-let-and-var-loop-capture">Exercise 3: Compare let and var loop capture<a class="heading-anchor" href="#exercise-3-compare-let-and-var-loop-capture" aria-label="Link to this section">#</a></h3>
 <p>Task: Create three closures in a let loop and three in a var loop.</p>
 <p>The difference is binding lifetime, not the time the function body was parsed. All var closures share one function-scoped index.</p>
-<pre><code class="language-javascript">const block = [];
-for (let index = 0; index &lt; 3; index += 1) block.push(() =&gt; index);
-const shared = [];
-for (var index = 0; index &lt; 3; index += 1) shared.push(() =&gt; index);
-assert.deepEqual(block.map(fn =&gt; fn()), [0, 1, 2]);
-assert.deepEqual(shared.map(fn =&gt; fn()), [3, 3, 3]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> block <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> block<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> shared <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> shared<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>block<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>fn <span class="syntax-punctuation">=&gt;</span> fn<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>shared<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>fn <span class="syntax-punctuation">=&gt;</span> fn<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> let returns 0, 1, 2; var returns 3, 3, 3.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-distinguish-undefined-from-null-defaults">Exercise 4: Distinguish undefined from null defaults<a class="heading-anchor" href="#exercise-4-distinguish-undefined-from-null-defaults" aria-label="Link to this section">#</a></h3>
 <p>Task: Call a greeting function with no argument, undefined and null.</p>
 <p>A default parameter does not define a general missing-value policy. If null is invalid, the function must validate it explicitly.</p>
-<pre><code class="language-javascript">function label(value = &#x27;guest&#x27;) { return value; }
-assert.equal(label(), &#x27;guest&#x27;);
-assert.equal(label(undefined), &#x27;guest&#x27;);
-assert.equal(label(null), null);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">function</span> label<span class="syntax-punctuation">(</span>value <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;guest&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;guest&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span><span class="syntax-keyword">undefined</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;guest&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> default used for the first two; null preserved.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-observe-an-ordinary-receiver">Exercise 5: Observe an ordinary receiver<a class="heading-anchor" href="#exercise-5-observe-an-ordinary-receiver" aria-label="Link to this section">#</a></h3>
 <p>Task: Call a method through its object and then with an explicit alternate receiver.</p>
 <p>The same function can operate on different receivers. Detaching it and calling without a receiver may produce an error rather than retain the original object.</p>
-<pre><code class="language-javascript">const item = { value: 4, read() { return this.value; } };
-assert.equal(item.read(), 4);
-assert.equal(item.read.call({ value: 9 }), 9);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> item <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">.</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">.</span>read<span class="syntax-punctuation">.</span>call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-number">9</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 4 and 9.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-reject-an-invalid-factory-configuration">Exercise 6: Reject an invalid factory configuration<a class="heading-anchor" href="#exercise-6-reject-an-invalid-factory-configuration" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a step counter with nonpositive or noninteger step.</p>
 <p>Validate the configuration when the closure is created so every later call can rely on its invariant. Hidden invalid state is harder to diagnose after many calls.</p>
-<pre><code class="language-javascript">assert.throws(() =&gt; counter(0), TypeError);
-assert.throws(() =&gt; counter(1.5), TypeError);
-const next = counter(2);
-assert.deepEqual([next(), next()], [2, 4]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> counter<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> counter<span class="syntax-punctuation">(</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> next <span class="syntax-operator">=</span> counter<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TypeError for 0 and 1.5; step 2 yields 2, 4.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

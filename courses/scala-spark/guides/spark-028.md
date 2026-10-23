@@ -129,7 +129,7 @@ Add reason using missing fact identity, negative known amount, then accepted pre
 
 **Verify:** Assert every rejection identity/reason, source reconciliation and accepted uniqueness/completeness counts.
 
-**Progressive hint:** ANULL amount does not satisfy a negative comparison and is explicitly allowed by this contract.
+**Progressive hint:** A NULL amount does not satisfy a negative comparison and is explicitly allowed by this contract.
 
 ### Exercise 2: Select an approved unique dimension before tuning
 
@@ -175,7 +175,7 @@ Return version, master, AQE and automatic broadcast threshold as named fields. A
 
 Choose baseline or broadcast using an explicit Boolean switch over the same accepted facts and reviewed dimension. Switch back to baseline and revalidate the complete product.
 
-**Expected result/shape:** Both switch positions satisfy the same metric map and bag contract. The disabled position has noBroadcastHashJoin under the controlled configuration.
+**Expected result/shape:** Both switch positions satisfy the same metric map and bag contract. The disabled position has no BroadcastHashJoin under the controlled configuration.
 
 **Verify:** Assert golden metrics and bag equality after rollback, and inspect the restored baseline plan.
 

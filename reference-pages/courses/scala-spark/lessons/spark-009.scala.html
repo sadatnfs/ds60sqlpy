@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,58 +161,58 @@
       <h1>Spark 009</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-009.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream, NotSerializableException}</span>
-<span> </span>
-<span>object Main {</span>
-<span>  final class Owner(val factor: Long) {</span>
-<span>    val resource: Object = new Object()</span>
-<span>    def bad: Long =&gt; Long = value =&gt; factor * value</span>
-<span>  }</span>
-<span> </span>
-<span>  def artifactCoordinate(base: String, scalaBinary: String, sparkVersion: String): String =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete artifactCoordinate&quot;)</span>
-<span> </span>
-<span>  def localMaster(value: String): String =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete localMaster&quot;)</span>
-<span> </span>
-<span>  def captureValue(owner: Owner): Long =&gt; Long =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete captureValue&quot;)</span>
-<span> </span>
-<span>  def serializedSize(value: AnyRef): Int =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete serializedSize&quot;)</span>
-<span> </span>
-<span>  def roundTrip(function: Long =&gt; Long): Long =&gt; Long =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete roundTrip&quot;)</span>
-<span> </span>
-<span>  def versionReport(): Map[String, String] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete versionReport&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    locally {</span>
-<span>      val binary = &quot;2.13&quot;</span>
-<span>      val artifact = s&quot;org.apache.spark:spark-sql_$binary:4.0.1&quot;</span>
-<span>      assert(artifact == &quot;org.apache.spark:spark-sql_2.13:4.0.1&quot;)</span>
-<span>      assert(!artifact.contains(&quot;_3:&quot;))</span>
-<span>      println(artifact)</span>
-<span>    }</span>
-<span>    locally {</span>
-<span>      val offset = 7L</span>
-<span>      val addOffset: Long =&gt; Long = value =&gt; value + offset</span>
-<span>      assert(addOffset(3L) == 10L)</span>
-<span>      assert(addOffset(3L) == addOffset(3L))</span>
-<span>      println(&quot;The closure needs the immutable numeric offset&quot;)</span>
-<span>    }</span>
-<span>    println(&quot;spark-009: worked examples passed; six task implementations remain&quot;)</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Validate the prepared dependency family. Inputs/task: Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything. Expected: spark-sql,2.13,4.0.1 yields org.apache.spark:spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract. Verify: Assert the exact coordinate and catch each unsupported tuple or malformed artifact base.</span>
-<span>// Exercise 2: Keep execution local and bounded. Inputs/task: Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session. Expected: local[2] passes;local[*], spark://example:7077 and null raise IllegalArgumentException. Verify: Assert the accepted literal and all three rejected values with no network action.</span>
-<span>// Exercise 3: Capture data instead of a resource owner. Inputs/task: Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource. Expected: Owner factor 3 produces 7-&gt;21 and-2-&gt;-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check. Verify: Assert both signed results and the domain rejection, then compare serializability with owner.bad in Exercise 4.</span>
-<span>// Exercise 4: Observe the captured object graph. Inputs/task: Serialize a locally constructed object into an in-memory byte array and return its byte size, closing the stream. Demonstrate that the safe closure serializes and owner.bad fails with NotSerializableException. Expected: The safe closure produces a positive byte count; the bad closure retaining Owner raises NotSerializableException. No file or external service is used. Verify: Assert positive size for safe and catch the exact serialization exception for owner.bad.</span>
-<span>// Exercise 5: Verify behavior after a local serialization round trip. Inputs/task: Serialize the supplied local function to memory, deserialize only those self-produced bytes and return the recovered function. Close both streams. Compare original and recovered outputs on a bounded fixture. Expected: The safe factor 3 closure returns identical results after round trip for-2,0,7. The check proves more than a nonempty byte array. Verify: Assert exact output equality for all three inputs and an expected 21 result for 7.</span>
-<span>// Exercise 6: Separate runtime readback from a target declaration. Inputs/task: Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17. Expected: Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run. Verify: Assert the keys and version families, then retain the printed runtime line as platform-specific evidence.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">ByteArrayInputStream</span><span class="syntax-punctuation">,</span> <span class="syntax-class">ByteArrayOutputStream</span><span class="syntax-punctuation">,</span> <span class="syntax-class">ObjectInputStream</span><span class="syntax-punctuation">,</span> <span class="syntax-class">ObjectOutputStream</span><span class="syntax-punctuation">,</span> <span class="syntax-class">NotSerializableException</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Owner</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">val</span> factor<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> resource<span class="syntax-punctuation">:</span> <span class="syntax-class">Object</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> <span class="syntax-class">Object</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">bad</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> value <span class="syntax-operator">=&gt;</span> factor <span class="syntax-operator">*</span> value</span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">artifactCoordinate</span><span class="syntax-punctuation">(</span>base<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span> scalaBinary<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span> sparkVersion<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete artifactCoordinate&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">localMaster</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete localMaster&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">captureValue</span><span class="syntax-punctuation">(</span>owner<span class="syntax-punctuation">:</span> <span class="syntax-class">Owner</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete captureValue&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">serializedSize</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-class">AnyRef</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete serializedSize&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">roundTrip</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete roundTrip&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">versionReport</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">String</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete versionReport&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> binary <span class="syntax-operator">=</span> <span class="syntax-string">&quot;2.13&quot;</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> artifact <span class="syntax-operator">=</span> <span class="syntax-string">s&quot;</span><span class="syntax-string">org.apache.spark:spark-sql_</span><span class="syntax-string">$</span>binary<span class="syntax-string">:4.0.1</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>artifact <span class="syntax-operator">==</span> <span class="syntax-string">&quot;org.apache.spark:spark-sql_2.13:4.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>artifact<span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;_3:&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span>artifact<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> offset <span class="syntax-operator">=</span> <span class="syntax-number">7L</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> addOffset<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> value <span class="syntax-operator">=&gt;</span> value <span class="syntax-operator">+</span> offset</span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>addOffset<span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">10L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>addOffset<span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> addOffset<span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;The closure needs the immutable numeric offset&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-009: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Validate the prepared dependency family. Inputs/task: Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything. Expected: spark-sql,2.13,4.0.1 yields org.apache.spark:spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract. Verify: Assert the exact coordinate and catch each unsupported tuple or malformed artifact base.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Keep execution local and bounded. Inputs/task: Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session. Expected: local[2] passes;local[*], spark://example:7077 and null raise IllegalArgumentException. Verify: Assert the accepted literal and all three rejected values with no network action.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Capture data instead of a resource owner. Inputs/task: Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource. Expected: Owner factor 3 produces 7-&gt;21 and-2-&gt;-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check. Verify: Assert both signed results and the domain rejection, then compare serializability with owner.bad in Exercise 4.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Observe the captured object graph. Inputs/task: Serialize a locally constructed object into an in-memory byte array and return its byte size, closing the stream. Demonstrate that the safe closure serializes and owner.bad fails with NotSerializableException. Expected: The safe closure produces a positive byte count; the bad closure retaining Owner raises NotSerializableException. No file or external service is used. Verify: Assert positive size for safe and catch the exact serialization exception for owner.bad.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Verify behavior after a local serialization round trip. Inputs/task: Serialize the supplied local function to memory, deserialize only those self-produced bytes and return the recovered function. Close both streams. Compare original and recovered outputs on a bounded fixture. Expected: The safe factor 3 closure returns identical results after round trip for-2,0,7. The check proves more than a nonempty byte array. Verify: Assert exact output equality for all three inputs and an expected 21 result for 7.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Separate runtime readback from a target declaration. Inputs/task: Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17. Expected: Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run. Verify: Assert the keys and version families, then retain the printed runtime line as platform-specific evidence.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

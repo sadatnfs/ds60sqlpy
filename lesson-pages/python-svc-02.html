@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -368,11 +414,11 @@
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>The learner file asks three policy questions: role authorization, readiness, and redaction.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_svc_02_hardening_observability.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_svc_02_hardening_observability<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_02_hardening_observability.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_02_hardening_observability.py</code></pre>
 <p>The reference service has injected boundaries:</p>
-<pre><code class="language-text">request -&gt; readiness probes
+<pre class="highlighted-code"><code class="language-text">request -&gt; readiness probes
         -&gt; Authenticator -&gt; Principal -&gt; role authorization
         -&gt; TokenBucket(Clock)
         -&gt; ConcurrencyGate
@@ -382,11 +428,13 @@
 startup -&gt; SHA-256 verification -&gt; constrained JSON artifact</code></pre>
 <p>Its main function serves one local request, flips a dependency probe, and shows readiness fail while health stays available.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_svc_02_hardening_observability.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_svc_02_hardening_observability<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_02_hardening_observability.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_02_hardening_observability.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -398,35 +446,35 @@ startup -&gt; SHA-256 verification -&gt; constrained JSON artifact</code></pre>
 <li><strong>structured log + metrics:</strong> records bounded diagnostic context and aggregate outcomes without secrets or unbounded labels.</li>
 </ul>
 <h5 id="guide--micro-example-a-keep-liveness-and-readiness-independent">Micro-example A — keep liveness and readiness independent<a class="heading-anchor" href="#guide--micro-example-a-keep-liveness-and-readiness-independent" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">def status(*, running, dependencies, artifact_verified, draining):
-    return {
-        &quot;healthy&quot;: running,
-        &quot;ready&quot;: (
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">status</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> running<span class="syntax-punctuation">,</span> dependencies<span class="syntax-punctuation">,</span> artifact_verified<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> running<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
             running
-            and bool(dependencies)
-            and all(dependencies)
-            and artifact_verified
-            and not draining
-        ),
-    }
+            <span class="syntax-operator">and</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">)</span>
+            <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">)</span>
+            <span class="syntax-operator">and</span> artifact_verified
+            <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining
+        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
 
-outage = status(running=True, dependencies=[True, False], artifact_verified=True, draining=False)
-print(outage)
-assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></pre>
+outage <span class="syntax-operator">=</span> status<span class="syntax-punctuation">(</span>running<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> dependencies<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> artifact_verified<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> draining<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>outage<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> outage <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> A dependency outage removes traffic readiness while avoiding a harmful restart loop.</p>
 <p><strong>Why it matters:</strong> Liveness performs only a fast local process check and does not call slow external systems.</p>
 <h5 id="guide--micro-example-b-reject-high-cardinality-metric-labels">Micro-example B — reject high-cardinality metric labels<a class="heading-anchor" href="#guide--micro-example-b-reject-high-cardinality-metric-labels" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">allowed_metric_labels = {&quot;route&quot;, &quot;method&quot;, &quot;outcome&quot;, &quot;error_class&quot;}
-proposed = {
-    &quot;route&quot;: &quot;/predict&quot;,
-    &quot;outcome&quot;: &quot;success&quot;,
-    &quot;request_id&quot;: &quot;r-123&quot;,
-    &quot;user_id&quot;: &quot;u-9&quot;,
-}
-forbidden = set(proposed) - allowed_metric_labels
-print({&quot;forbidden_metric_labels&quot;: sorted(forbidden)})
-assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</code></pre>
+<pre class="highlighted-code"><code class="language-python">allowed_metric_labels <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">route</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">method</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">outcome</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">error_class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+proposed <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">route</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">outcome</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">success</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">request_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">r-123</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">user_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">u-9</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+forbidden <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>proposed<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> allowed_metric_labels
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">forbidden_metric_labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>forbidden<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> forbidden <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">request_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">user_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Per-request and per-user identities are rejected from metrics, preventing unbounded series growth and privacy leakage.</p>
 <p><strong>Why it matters:</strong> Route values are templated/bounded rather than raw URLs with arbitrary IDs.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -448,7 +496,7 @@ assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</code></pre>
 <p>Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.</p>
 <p><strong>Verify:</strong> Design metrics — count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes; observe duration values; do not put user, token, request ID, or arbitrary URL into metric labels.</p>
 <h5 id="guide--5-bound-concurrency">5. Bound concurrency<a class="heading-anchor" href="#guide--5-bound-concurrency" aria-label="Link to this section">#</a></h5>
-<p>Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code><strong>exit</strong></code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
+<p>Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code>__exit__</code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
 <p><strong>Verify:</strong> Bound concurrency — acquire a BoundedSemaphore without blocking; return a lease that always releases in exit , including exceptions; with capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
 <h5 id="guide--6-rate-limit-with-injected-time">6. Rate limit with injected time<a class="heading-anchor" href="#guide--6-rate-limit-with-injected-time" aria-label="Link to this section">#</a></h5>
 <p>Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.</p>
@@ -538,10 +586,10 @@ assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</code></pre>
 <li>The lab is described as local policy, not Internet-ready security.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_svc_02_hardening_observability -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_svc_02_hardening_observability -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_svc_02_hardening_observability -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_svc_02_hardening_observability -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Liveness depends on every external service:</strong> an outage causes restart loops.</li>
@@ -559,7 +607,7 @@ assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</code></pre>
 <p>Wrap these policies in a thin FastAPI adapter from Day 44, preserving injected tests. Combine with <code>python-svc-01</code> for outbound reliability and Bridge Day 8 for database readiness, transaction, and deployment behavior.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-svc-02` — Service hardening and observability.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-svc-02` — Service hardening and observability.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize readiness, bounded resources, auth policy, artifact trust, and low-cardinality telemetry. Use exactly these maintained learner materials:
@@ -618,261 +666,261 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-svc-02 learner lab: service hardening and observability.</span>
-<span> </span>
-<span>Professional learner deep dive (python-svc-02)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Service hardening turns assumptions into admission and evidence policy. Liveness says the</span>
-<span>process can run; readiness says it should receive traffic given dependencies, verified</span>
-<span>artifacts, and draining state. A bulkhead bounds concurrent work and a rate limiter bounds</span>
-<span>arrival over time.  Authentication establishes identity; authorization checks allowed actions.</span>
-<span>Structured logs may carry one bounded correlation ID but never credentials or full request</span>
-<span>bodies. Metrics use low-cardinality labels; request/user IDs belong in logs/traces, not metric</span>
-<span>dimensions.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* startup validation + artifact verification: fails before traffic when capacity, policy, or</span>
-<span>  trusted model bytes are invalid.</span>
-<span>* admission chain: checks readiness, identity/role, rate, and concurrency before expensive work.</span>
-<span>* structured log + metrics: records bounded diagnostic context and aggregate outcomes without</span>
-<span>  secrets or unbounded labels.</span>
-<span> </span>
-<span>Micro-example A — keep liveness and readiness independent::</span>
-<span> </span>
-<span>    def status(*, running, dependencies, artifact_verified, draining):</span>
-<span>        return {</span>
-<span>            &quot;healthy&quot;: running,</span>
-<span>            &quot;ready&quot;: (</span>
-<span>                running and bool(dependencies) and all(dependencies)</span>
-<span>                and artifact_verified and not draining</span>
-<span>            ),</span>
-<span>        }</span>
-<span> </span>
-<span>    outage = status(</span>
-<span>        running=True, dependencies=[True, False],</span>
-<span>        artifact_verified=True, draining=False</span>
-<span>    )</span>
-<span>    print(outage)</span>
-<span>    assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</span>
-<span> </span>
-<span>Expected: A dependency outage removes traffic readiness while avoiding a harmful restart loop.</span>
-<span> </span>
-<span>Micro-example B — reject high-cardinality metric labels::</span>
-<span> </span>
-<span>    allowed_metric_labels = {&quot;route&quot;, &quot;method&quot;, &quot;outcome&quot;, &quot;error_class&quot;}</span>
-<span>    proposed = {</span>
-<span>        &quot;route&quot;: &quot;/predict&quot;,</span>
-<span>        &quot;outcome&quot;: &quot;success&quot;,</span>
-<span>        &quot;request_id&quot;: &quot;r-123&quot;,</span>
-<span>        &quot;user_id&quot;: &quot;u-9&quot;,</span>
-<span>    }</span>
-<span>    forbidden = set(proposed) - allowed_metric_labels</span>
-<span>    print({&quot;forbidden_metric_labels&quot;: sorted(forbidden)})</span>
-<span>    assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</span>
-<span> </span>
-<span>Expected: Per-request and per-user identities are rejected from metrics, preventing unbounded</span>
-<span>          series growth and privacy leakage.</span>
-<span> </span>
-<span>Debugging rule: Inject dependency, auth, limiter, saturation, artifact, handler, and telemetry</span>
-<span>                failures; assert status, cleanup, bounded log event, and metric outcome.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable, Mapping, Sequence</span>
-<span>from typing import Literal</span>
-<span> </span>
-<span>Role = Literal[&quot;reader&quot;, &quot;operator&quot;]</span>
-<span> </span>
-<span> </span>
-<span>def is_authorized(role: Role, action: str) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;TODO: readers may predict; operators may predict and reload.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete is_authorized&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def readiness(</span>
-<span>    dependency_checks: Sequence[bool],</span>
-<span>    *,</span>
-<span>    artifact_verified: bool,</span>
-<span>    draining: bool,</span>
-<span>) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;TODO: ready only when all dependencies and the artifact are safe.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete readiness&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def redact_fields(fields: Mapping[str, str]) -&gt; dict[str, str]:</span>
-<span>    &quot;&quot;&quot;TODO: redact token, authorization, password, and secret keys.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete redact_fields&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    print(&quot;Worked health rule: a running process may be healthy but not ready.&quot;)</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;authorization&quot;, lambda: is_authorized(&quot;reader&quot;, &quot;predict&quot;)),</span>
-<span>        (</span>
-<span>            &quot;readiness&quot;,</span>
-<span>            lambda: readiness([True, True], artifact_verified=True, draining=False),</span>
-<span>        ),</span>
-<span>        (</span>
-<span>            &quot;redaction&quot;,</span>
-<span>            lambda: redact_fields({&quot;request_id&quot;: &quot;r1&quot;, &quot;token&quot;: &quot;local-value&quot;}),</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_svc_02_hardening_observability.md</span>
-<span>#</span>
-<span># Exercise 1 — Validate startup configuration</span>
-<span># Prompt: Parse maximum concurrency, rate capacity, and refill rate. Reject zero,</span>
-<span># negative, blank, or nonnumeric values before constructing the service. Keep credential</span>
-<span># retrieval outside dataclass representations and logs.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Complete health/readiness policy</span>
-<span># Prompt: Health remains true for a running process. Readiness requires at least one</span>
-<span># configured dependency, all probes ready, verified artifact, and no draining state.</span>
-<span># Return named reasons so an operator can diagnose 503 without exposing secrets. Do not</span>
-<span># make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an</span>
-<span># external outage.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Design structured events</span>
-<span># Prompt: Emit request started/completed/failed/rejected with request ID, action, bounded</span>
-<span># reason, and error type. Redact token, authorization, password, secret, and API key</span>
-<span># fields case-insensitively. Do not log request bodies by default.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Design metrics</span>
-<span># Prompt: Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and</span>
-<span># not-ready outcomes. Observe duration values. Do not put user, token, request ID, or</span>
-<span># arbitrary URL into metric labels.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Bound concurrency</span>
-<span># Prompt: Acquire a `BoundedSemaphore` without blocking. Return a lease that always</span>
-<span># releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify</span>
-<span># a second attempt returns busy immediately.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Rate limit with injected time</span>
-<span># Prompt: Consume two tokens, reject the third request, advance a fake clock one second,</span>
-<span># and accept one refill. State that this in-process bucket is not sufficient across</span>
-<span># multiple service instances.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — Separate authentication and authorization</span>
-<span># Prompt: The local static authenticator maps placeholder test tokens to principals.</span>
-<span># Readers may predict; operators may predict and reload. Prove unknown identity returns</span>
-<span># 401 while an authenticated but unauthorized action returns 403. Production identity</span>
-<span># requires a reviewed provider, token verification/expiry, key rotation, transport</span>
-<span># security, and audit policy.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — Trust an artifact narrowly</span>
-<span># Prompt: Compute expected SHA-256 before startup, verify exact bytes, then parse a flat</span>
-<span># JSON object. Tamper with the file and confirm verification fails. Do not use pickle for</span>
-<span># untrusted service artifacts.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — Run the incident drill</span>
-<span># Prompt: Set a dependency probe false: 1. readiness reports its name, 2. health remains</span>
-<span># true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-</span>
-<span># rejected log carries the request ID and bounded reason. Then restore the dependency and</span>
-<span># confirm readiness recovers.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — Draw the Internet-facing boundary</span>
-<span># Prompt: List what this local example does not supply: TLS termination, real identity,</span>
-<span># secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse</span>
-<span># controls, autoscaling, durable telemetry, retention/privacy policy, artifact</span>
-<span># distribution, deployment rollback, and on-call response. Classify which boundary owns</span>
-<span># each omitted control and which local test evidence cannot validate it.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — drain and shut down gracefully</span>
-<span># Prompt: Add a draining transition that makes readiness false, rejects new work, allows</span>
-<span># active leases a bounded grace period, and records unfinished requests before shutdown.</span>
-<span># Make repeated drain calls idempotent.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — add a dependency circuit breaker</span>
-<span># Prompt: Wrap one dependency probe/call in a closed/open/half-open breaker with injected</span>
-<span># time. Define which failures count, one bounded probe, readiness interaction, and</span>
-<span># recovery metrics.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — define distributed limiting semantics</span>
-<span># Prompt: Explain how the local token bucket behaves with four service processes, then</span>
-<span># design a shared limiter contract covering atomicity, key, window/token semantics,</span>
-<span># timeout, fail-open/closed choice, and privacy.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — bound telemetry backpressure</span>
-<span># Prompt: Make the log/metric exporter slow or unavailable. Define a bounded queue,</span>
-<span># drop/coalesce policy, priority for security events, and counters that reveal lost</span>
-<span># telemetry without blocking request handling indefinitely.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 15 — propagate trace context safely</span>
-<span># Prompt: Accept or create a request/trace ID, validate its bounded format, carry it</span>
-<span># through local logs and an outbound fake client, and prove malformed or attacker-sized</span>
-<span># IDs are replaced rather than reflected.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 16 — rehearse credential rotation</span>
-<span># Prompt: Model a credential provider accepting active and previous key versions during a</span>
-<span># bounded overlap. Rotate, verify new requests use the active key, expire the old key, and</span>
-<span># ensure neither value reaches repr/log/metrics.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 17 — compose dependency timeout budgets</span>
-<span># Prompt: For a 750 ms request budget calling two dependencies, allocate local queue,</span>
-<span># dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and</span>
-<span># stop work when useful completion is impossible.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 18 — run a fault-injection matrix</span>
-<span># Prompt: Inject dependency false/exception/latency, artifact tampering, auth outage,</span>
-<span># limiter saturation, log-export failure, handler exception, and drain. For each, predict</span>
-<span># status, readiness/health, cleanup, log, and metric evidence.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 19 — define an SLO and error budget</span>
-<span># Prompt: Define one availability and one latency SLI over eligible requests,</span>
-<span># target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action.</span>
-<span># Use generated local events to compute a small example.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 20 — audit privacy, retention, and cardinality</span>
-<span># Prompt: Inventory every log field, metric label, trace attribute, and local artifact.</span>
-<span># Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and</span>
-<span># owner; then test representative forbidden values.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-svc-02 learner lab: service hardening and observability.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-svc-02)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Service hardening turns assumptions into admission and evidence policy. Liveness says the</span></span>
+<span class="source-line"><span class="syntax-string">process can run; readiness says it should receive traffic given dependencies, verified</span></span>
+<span class="source-line"><span class="syntax-string">artifacts, and draining state. A bulkhead bounds concurrent work and a rate limiter bounds</span></span>
+<span class="source-line"><span class="syntax-string">arrival over time.  Authentication establishes identity; authorization checks allowed actions.</span></span>
+<span class="source-line"><span class="syntax-string">Structured logs may carry one bounded correlation ID but never credentials or full request</span></span>
+<span class="source-line"><span class="syntax-string">bodies. Metrics use low-cardinality labels; request/user IDs belong in logs/traces, not metric</span></span>
+<span class="source-line"><span class="syntax-string">dimensions.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* startup validation + artifact verification: fails before traffic when capacity, policy, or</span></span>
+<span class="source-line"><span class="syntax-string">  trusted model bytes are invalid.</span></span>
+<span class="source-line"><span class="syntax-string">* admission chain: checks readiness, identity/role, rate, and concurrency before expensive work.</span></span>
+<span class="source-line"><span class="syntax-string">* structured log + metrics: records bounded diagnostic context and aggregate outcomes without</span></span>
+<span class="source-line"><span class="syntax-string">  secrets or unbounded labels.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — keep liveness and readiness independent::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def status(*, running, dependencies, artifact_verified, draining):</span></span>
+<span class="source-line"><span class="syntax-string">        return {</span></span>
+<span class="source-line"><span class="syntax-string">            &quot;healthy&quot;: running,</span></span>
+<span class="source-line"><span class="syntax-string">            &quot;ready&quot;: (</span></span>
+<span class="source-line"><span class="syntax-string">                running and bool(dependencies) and all(dependencies)</span></span>
+<span class="source-line"><span class="syntax-string">                and artifact_verified and not draining</span></span>
+<span class="source-line"><span class="syntax-string">            ),</span></span>
+<span class="source-line"><span class="syntax-string">        }</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    outage = status(</span></span>
+<span class="source-line"><span class="syntax-string">        running=True, dependencies=[True, False],</span></span>
+<span class="source-line"><span class="syntax-string">        artifact_verified=True, draining=False</span></span>
+<span class="source-line"><span class="syntax-string">    )</span></span>
+<span class="source-line"><span class="syntax-string">    print(outage)</span></span>
+<span class="source-line"><span class="syntax-string">    assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: A dependency outage removes traffic readiness while avoiding a harmful restart loop.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — reject high-cardinality metric labels::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    allowed_metric_labels = {&quot;route&quot;, &quot;method&quot;, &quot;outcome&quot;, &quot;error_class&quot;}</span></span>
+<span class="source-line"><span class="syntax-string">    proposed = {</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;route&quot;: &quot;/predict&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;outcome&quot;: &quot;success&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;request_id&quot;: &quot;r-123&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;user_id&quot;: &quot;u-9&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">    }</span></span>
+<span class="source-line"><span class="syntax-string">    forbidden = set(proposed) - allowed_metric_labels</span></span>
+<span class="source-line"><span class="syntax-string">    print({&quot;forbidden_metric_labels&quot;: sorted(forbidden)})</span></span>
+<span class="source-line"><span class="syntax-string">    assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Per-request and per-user identities are rejected from metrics, preventing unbounded</span></span>
+<span class="source-line"><span class="syntax-string">          series growth and privacy leakage.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Inject dependency, auth, limiter, saturation, artifact, handler, and telemetry</span></span>
+<span class="source-line"><span class="syntax-string">                failures; assert status, cleanup, bounded log event, and metric outcome.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Mapping<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal</span>
+<span class="source-line"></span>
+<span class="source-line">Role <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">is_authorized</span><span class="syntax-punctuation">(</span>role<span class="syntax-punctuation">:</span> Role<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: readers may predict; operators may predict and reload.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete is_authorized</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">readiness</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    dependency_checks<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    artifact_verified<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    draining<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: ready only when all dependencies and the artifact are safe.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete readiness</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">redact_fields</span><span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: redact token, authorization, password, and secret keys.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete redact_fields</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked health rule: a running process may be healthy but not ready.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">authorization</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> is_authorized<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">readiness</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> readiness<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> artifact_verified<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> draining<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">redaction</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> redact_fields<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">request_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">r1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">token</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local-value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_svc_02_hardening_observability.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Validate startup configuration</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Parse maximum concurrency, rate capacity, and refill rate. Reject zero,</span></span>
+<span class="source-line"><span class="syntax-comment"># negative, blank, or nonnumeric values before constructing the service. Keep credential</span></span>
+<span class="source-line"><span class="syntax-comment"># retrieval outside dataclass representations and logs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete health/readiness policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Health remains true for a running process. Readiness requires at least one</span></span>
+<span class="source-line"><span class="syntax-comment"># configured dependency, all probes ready, verified artifact, and no draining state.</span></span>
+<span class="source-line"><span class="syntax-comment"># Return named reasons so an operator can diagnose 503 without exposing secrets. Do not</span></span>
+<span class="source-line"><span class="syntax-comment"># make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an</span></span>
+<span class="source-line"><span class="syntax-comment"># external outage.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Design structured events</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Emit request started/completed/failed/rejected with request ID, action, bounded</span></span>
+<span class="source-line"><span class="syntax-comment"># reason, and error type. Redact token, authorization, password, secret, and API key</span></span>
+<span class="source-line"><span class="syntax-comment"># fields case-insensitively. Do not log request bodies by default.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Design metrics</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and</span></span>
+<span class="source-line"><span class="syntax-comment"># not-ready outcomes. Observe duration values. Do not put user, token, request ID, or</span></span>
+<span class="source-line"><span class="syntax-comment"># arbitrary URL into metric labels.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Bound concurrency</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Acquire a `BoundedSemaphore` without blocking. Return a lease that always</span></span>
+<span class="source-line"><span class="syntax-comment"># releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify</span></span>
+<span class="source-line"><span class="syntax-comment"># a second attempt returns busy immediately.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Rate limit with injected time</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Consume two tokens, reject the third request, advance a fake clock one second,</span></span>
+<span class="source-line"><span class="syntax-comment"># and accept one refill. State that this in-process bucket is not sufficient across</span></span>
+<span class="source-line"><span class="syntax-comment"># multiple service instances.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — Separate authentication and authorization</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: The local static authenticator maps placeholder test tokens to principals.</span></span>
+<span class="source-line"><span class="syntax-comment"># Readers may predict; operators may predict and reload. Prove unknown identity returns</span></span>
+<span class="source-line"><span class="syntax-comment"># 401 while an authenticated but unauthorized action returns 403. Production identity</span></span>
+<span class="source-line"><span class="syntax-comment"># requires a reviewed provider, token verification/expiry, key rotation, transport</span></span>
+<span class="source-line"><span class="syntax-comment"># security, and audit policy.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — Trust an artifact narrowly</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compute expected SHA-256 before startup, verify exact bytes, then parse a flat</span></span>
+<span class="source-line"><span class="syntax-comment"># JSON object. Tamper with the file and confirm verification fails. Do not use pickle for</span></span>
+<span class="source-line"><span class="syntax-comment"># untrusted service artifacts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — Run the incident drill</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Set a dependency probe false: 1. readiness reports its name, 2. health remains</span></span>
+<span class="source-line"><span class="syntax-comment"># true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-</span></span>
+<span class="source-line"><span class="syntax-comment"># rejected log carries the request ID and bounded reason. Then restore the dependency and</span></span>
+<span class="source-line"><span class="syntax-comment"># confirm readiness recovers.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — Draw the Internet-facing boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: List what this local example does not supply: TLS termination, real identity,</span></span>
+<span class="source-line"><span class="syntax-comment"># secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse</span></span>
+<span class="source-line"><span class="syntax-comment"># controls, autoscaling, durable telemetry, retention/privacy policy, artifact</span></span>
+<span class="source-line"><span class="syntax-comment"># distribution, deployment rollback, and on-call response. Classify which boundary owns</span></span>
+<span class="source-line"><span class="syntax-comment"># each omitted control and which local test evidence cannot validate it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — drain and shut down gracefully</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add a draining transition that makes readiness false, rejects new work, allows</span></span>
+<span class="source-line"><span class="syntax-comment"># active leases a bounded grace period, and records unfinished requests before shutdown.</span></span>
+<span class="source-line"><span class="syntax-comment"># Make repeated drain calls idempotent.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — add a dependency circuit breaker</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Wrap one dependency probe/call in a closed/open/half-open breaker with injected</span></span>
+<span class="source-line"><span class="syntax-comment"># time. Define which failures count, one bounded probe, readiness interaction, and</span></span>
+<span class="source-line"><span class="syntax-comment"># recovery metrics.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — define distributed limiting semantics</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Explain how the local token bucket behaves with four service processes, then</span></span>
+<span class="source-line"><span class="syntax-comment"># design a shared limiter contract covering atomicity, key, window/token semantics,</span></span>
+<span class="source-line"><span class="syntax-comment"># timeout, fail-open/closed choice, and privacy.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — bound telemetry backpressure</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Make the log/metric exporter slow or unavailable. Define a bounded queue,</span></span>
+<span class="source-line"><span class="syntax-comment"># drop/coalesce policy, priority for security events, and counters that reveal lost</span></span>
+<span class="source-line"><span class="syntax-comment"># telemetry without blocking request handling indefinitely.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15 — propagate trace context safely</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Accept or create a request/trace ID, validate its bounded format, carry it</span></span>
+<span class="source-line"><span class="syntax-comment"># through local logs and an outbound fake client, and prove malformed or attacker-sized</span></span>
+<span class="source-line"><span class="syntax-comment"># IDs are replaced rather than reflected.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16 — rehearse credential rotation</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Model a credential provider accepting active and previous key versions during a</span></span>
+<span class="source-line"><span class="syntax-comment"># bounded overlap. Rotate, verify new requests use the active key, expire the old key, and</span></span>
+<span class="source-line"><span class="syntax-comment"># ensure neither value reaches repr/log/metrics.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 17 — compose dependency timeout budgets</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For a 750 ms request budget calling two dependencies, allocate local queue,</span></span>
+<span class="source-line"><span class="syntax-comment"># dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and</span></span>
+<span class="source-line"><span class="syntax-comment"># stop work when useful completion is impossible.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 18 — run a fault-injection matrix</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Inject dependency false/exception/latency, artifact tampering, auth outage,</span></span>
+<span class="source-line"><span class="syntax-comment"># limiter saturation, log-export failure, handler exception, and drain. For each, predict</span></span>
+<span class="source-line"><span class="syntax-comment"># status, readiness/health, cleanup, log, and metric evidence.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 19 — define an SLO and error budget</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Define one availability and one latency SLI over eligible requests,</span></span>
+<span class="source-line"><span class="syntax-comment"># target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use generated local events to compute a small example.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 20 — audit privacy, retention, and cardinality</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Inventory every log field, metric label, trace attribute, and local artifact.</span></span>
+<span class="source-line"><span class="syntax-comment"># Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and</span></span>
+<span class="source-line"><span class="syntax-comment"># owner; then test representative forbidden values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -927,22 +975,22 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Run the fault matrix, prove permits/tokens release, distinguish 401/403/429/503, tamper artifacts, audit log redaction/metric labels, and rehearse drain/recovery.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">def status(*, running, dependencies, artifact_verified, draining):
-    return {
-        &quot;healthy&quot;: running,
-        &quot;ready&quot;: (
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">status</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> running<span class="syntax-punctuation">,</span> dependencies<span class="syntax-punctuation">,</span> artifact_verified<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> running<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
             running
-            and bool(dependencies)
-            and all(dependencies)
-            and artifact_verified
-            and not draining
-        ),
-    }
+            <span class="syntax-operator">and</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">)</span>
+            <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">)</span>
+            <span class="syntax-operator">and</span> artifact_verified
+            <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining
+        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
 
-outage = status(running=True, dependencies=[True, False], artifact_verified=True, draining=False)
-print(outage)
-assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></pre>
+outage <span class="syntax-operator">=</span> status<span class="syntax-punctuation">(</span>running<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> dependencies<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> artifact_verified<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> draining<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>outage<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> outage <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> A dependency outage removes traffic readiness while avoiding a harmful restart loop.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -972,7 +1020,7 @@ assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></p
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> Design metrics — count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes; observe duration values; do not put user, token, request ID, or arbitrary URL into metric labels.</p>
 <h5 id="solution-1--exercise-5-bound-concurrency">Exercise 5 — Bound concurrency<a class="heading-anchor" href="#solution-1--exercise-5-bound-concurrency" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code><strong>exit</strong></code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
+<p><strong>Prompt recap:</strong> Acquire a <code>BoundedSemaphore</code> without blocking. Return a lease that always releases in <code>__exit__</code>, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.</p>
 <p><strong>Reference reasoning:</strong> A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
@@ -1119,393 +1167,393 @@ assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></p
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-svc-02.</span>
-<span> </span>
-<span>This is a local policy model, not an Internet-facing server. All dependencies,</span>
-<span>identity, time, work, and artifact files are injected or temporary.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import hashlib</span>
-<span>import json</span>
-<span>import tempfile</span>
-<span>import threading</span>
-<span>from collections.abc import Callable, Mapping, Sequence</span>
-<span>from dataclasses import dataclass, field</span>
-<span>from pathlib import Path</span>
-<span>from types import TracebackType</span>
-<span>from typing import Literal, Protocol, TypeAlias</span>
-<span> </span>
-<span>Role = Literal[&quot;reader&quot;, &quot;operator&quot;]</span>
-<span>JsonScalar: TypeAlias = str | int | float | bool | None</span>
-<span> </span>
-<span> </span>
-<span>class Clock(Protocol):</span>
-<span>    def now(self) -&gt; float:</span>
-<span>        &quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class DependencyProbe(Protocol):</span>
-<span>    def ready(self) -&gt; bool:</span>
-<span>        &quot;&quot;&quot;Return whether the dependency can serve new work.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class Authenticator(Protocol):</span>
-<span>    def authenticate(self, token: str) -&gt; Principal | None:</span>
-<span>        &quot;&quot;&quot;Resolve a credential without logging it.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class ServiceConfig:</span>
-<span>    max_concurrency: int</span>
-<span>    rate_capacity: int</span>
-<span>    refill_per_second: float</span>
-<span> </span>
-<span>    @classmethod</span>
-<span>    def from_mapping(cls, values: Mapping[str, str]) -&gt; ServiceConfig:</span>
-<span>        try:</span>
-<span>            max_concurrency = int(values.get(&quot;MAX_CONCURRENCY&quot;, &quot;4&quot;))</span>
-<span>            rate_capacity = int(values.get(&quot;RATE_CAPACITY&quot;, &quot;10&quot;))</span>
-<span>            refill_per_second = float(values.get(&quot;REFILL_PER_SECOND&quot;, &quot;2&quot;))</span>
-<span>        except ValueError as exc:</span>
-<span>            raise ValueError(&quot;service limits must be numeric&quot;) from exc</span>
-<span>        if max_concurrency &lt; 1 or rate_capacity &lt; 1 or refill_per_second &lt;= 0:</span>
-<span>            raise ValueError(&quot;service limits must be positive&quot;)</span>
-<span>        return cls(max_concurrency, rate_capacity, refill_per_second)</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Principal:</span>
-<span>    subject: str</span>
-<span>    role: Role</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class StaticAuthenticator:</span>
-<span>    identities: Mapping[str, Principal] = field(repr=False)</span>
-<span> </span>
-<span>    def authenticate(self, token: str) -&gt; Principal | None:</span>
-<span>        return self.identities.get(token)</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class FixedProbe:</span>
-<span>    value: bool</span>
-<span> </span>
-<span>    def ready(self) -&gt; bool:</span>
-<span>        return self.value</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Status:</span>
-<span>    ok: bool</span>
-<span>    reasons: tuple[str, ...] = ()</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class LogEvent:</span>
-<span>    event: str</span>
-<span>    request_id: str</span>
-<span>    fields: tuple[tuple[str, str], ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class StructuredLog:</span>
-<span>    events: list[LogEvent] = field(default_factory=list)</span>
-<span> </span>
-<span>    def emit(</span>
-<span>        self,</span>
-<span>        event: str,</span>
-<span>        request_id: str,</span>
-<span>        fields: Mapping[str, str],</span>
-<span>    ) -&gt; None:</span>
-<span>        self.events.append(</span>
-<span>            LogEvent(</span>
-<span>                event,</span>
-<span>                request_id,</span>
-<span>                tuple(sorted(redact_fields(fields).items())),</span>
-<span>            )</span>
-<span>        )</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class Metrics:</span>
-<span>    counters: dict[str, int] = field(default_factory=dict)</span>
-<span>    durations: dict[str, list[float]] = field(default_factory=dict)</span>
-<span> </span>
-<span>    def increment(self, name: str) -&gt; None:</span>
-<span>        self.counters[name] = self.counters.get(name, 0) + 1</span>
-<span> </span>
-<span>    def observe(self, name: str, value: float) -&gt; None:</span>
-<span>        if value &lt; 0:</span>
-<span>            raise ValueError(&quot;duration must be non-negative&quot;)</span>
-<span>        self.durations.setdefault(name, []).append(value)</span>
-<span> </span>
-<span>    def snapshot(self) -&gt; dict[str, int | tuple[float, ...]]:</span>
-<span>        result: dict[str, int | tuple[float, ...]] = dict(self.counters)</span>
-<span>        result.update({name: tuple(values) for name, values in self.durations.items()})</span>
-<span>        return result</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class FixedClock:</span>
-<span>    value: float</span>
-<span> </span>
-<span>    def now(self) -&gt; float:</span>
-<span>        return self.value</span>
-<span> </span>
-<span>    def advance(self, seconds: float) -&gt; None:</span>
-<span>        if seconds &lt; 0:</span>
-<span>            raise ValueError(&quot;clock cannot move backward&quot;)</span>
-<span>        self.value += seconds</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class TokenBucket:</span>
-<span>    capacity: int</span>
-<span>    refill_per_second: float</span>
-<span>    clock: Clock</span>
-<span>    _state: dict[str, tuple[float, float]] = field(default_factory=dict)</span>
-<span> </span>
-<span>    def allow(self, subject: str) -&gt; bool:</span>
-<span>        if not subject:</span>
-<span>            raise ValueError(&quot;rate-limit subject must not be blank&quot;)</span>
-<span>        now = self.clock.now()</span>
-<span>        tokens, previous = self._state.get(subject, (float(self.capacity), now))</span>
-<span>        tokens = min(</span>
-<span>            float(self.capacity),</span>
-<span>            tokens + max(0.0, now - previous) * self.refill_per_second,</span>
-<span>        )</span>
-<span>        if tokens &lt; 1.0:</span>
-<span>            self._state[subject] = (tokens, now)</span>
-<span>            return False</span>
-<span>        self._state[subject] = (tokens - 1.0, now)</span>
-<span>        return True</span>
-<span> </span>
-<span> </span>
-<span>class ConcurrencyLease:</span>
-<span>    def __init__(self, gate: ConcurrencyGate) -&gt; None:</span>
-<span>        self._gate = gate</span>
-<span>        self._released = False</span>
-<span> </span>
-<span>    def __enter__(self) -&gt; ConcurrencyLease:</span>
-<span>        return self</span>
-<span> </span>
-<span>    def __exit__(</span>
-<span>        self,</span>
-<span>        exception_type: type[BaseException] | None,</span>
-<span>        exception: BaseException | None,</span>
-<span>        traceback: TracebackType | None,</span>
-<span>    ) -&gt; Literal[False]:</span>
-<span>        if not self._released:</span>
-<span>            self._released = True</span>
-<span>            self._gate.release()</span>
-<span>        return False</span>
-<span> </span>
-<span> </span>
-<span>class ConcurrencyGate:</span>
-<span>    def __init__(self, capacity: int) -&gt; None:</span>
-<span>        if capacity &lt; 1:</span>
-<span>            raise ValueError(&quot;capacity must be positive&quot;)</span>
-<span>        self._semaphore = threading.BoundedSemaphore(capacity)</span>
-<span>        self._lock = threading.Lock()</span>
-<span>        self._active = 0</span>
-<span>        self._peak = 0</span>
-<span> </span>
-<span>    @property</span>
-<span>    def active(self) -&gt; int:</span>
-<span>        with self._lock:</span>
-<span>            return self._active</span>
-<span> </span>
-<span>    @property</span>
-<span>    def peak(self) -&gt; int:</span>
-<span>        with self._lock:</span>
-<span>            return self._peak</span>
-<span> </span>
-<span>    def try_acquire(self) -&gt; ConcurrencyLease | None:</span>
-<span>        if not self._semaphore.acquire(blocking=False):</span>
-<span>            return None</span>
-<span>        with self._lock:</span>
-<span>            self._active += 1</span>
-<span>            self._peak = max(self._peak, self._active)</span>
-<span>        return ConcurrencyLease(self)</span>
-<span> </span>
-<span>    def release(self) -&gt; None:</span>
-<span>        with self._lock:</span>
-<span>            if self._active &lt; 1:</span>
-<span>                raise RuntimeError(&quot;concurrency lease released twice&quot;)</span>
-<span>            self._active -= 1</span>
-<span>        self._semaphore.release()</span>
-<span> </span>
-<span> </span>
-<span>def is_authorized(role: Role, action: str) -&gt; bool:</span>
-<span>    permissions: dict[Role, frozenset[str]] = {</span>
-<span>        &quot;reader&quot;: frozenset({&quot;predict&quot;}),</span>
-<span>        &quot;operator&quot;: frozenset({&quot;predict&quot;, &quot;reload&quot;}),</span>
-<span>    }</span>
-<span>    return action in permissions[role]</span>
-<span> </span>
-<span> </span>
-<span>def readiness(</span>
-<span>    dependency_checks: Sequence[bool],</span>
-<span>    *,</span>
-<span>    artifact_verified: bool,</span>
-<span>    draining: bool,</span>
-<span>) -&gt; bool:</span>
-<span>    return bool(dependency_checks) and all(dependency_checks) and artifact_verified and not draining</span>
-<span> </span>
-<span> </span>
-<span>def redact_fields(fields: Mapping[str, str]) -&gt; dict[str, str]:</span>
-<span>    sensitive = {&quot;token&quot;, &quot;authorization&quot;, &quot;password&quot;, &quot;secret&quot;, &quot;api_key&quot;}</span>
-<span>    return {</span>
-<span>        key: &quot;&lt;redacted&gt;&quot; if key.lower() in sensitive else value for key, value in fields.items()</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def sha256_file(path: Path) -&gt; str:</span>
-<span>    return hashlib.sha256(path.read_bytes()).hexdigest()</span>
-<span> </span>
-<span> </span>
-<span>def load_trusted_json(path: Path, expected_sha256: str) -&gt; dict[str, JsonScalar]:</span>
-<span>    if len(expected_sha256) != 64 or sha256_file(path) != expected_sha256:</span>
-<span>        raise ValueError(&quot;artifact hash verification failed&quot;)</span>
-<span>    raw = json.loads(path.read_text(encoding=&quot;utf-8&quot;))</span>
-<span>    if not isinstance(raw, dict) or not all(</span>
-<span>        isinstance(key, str) and (value is None or isinstance(value, str | int | float | bool))</span>
-<span>        for key, value in raw.items()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;trusted artifact must be a flat JSON object&quot;)</span>
-<span>    return raw</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class ServiceResponse:</span>
-<span>    status: int</span>
-<span>    message: str</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class HardenedService:</span>
-<span>    dependencies: Mapping[str, DependencyProbe]</span>
-<span>    artifact_verified: bool</span>
-<span>    authenticator: Authenticator</span>
-<span>    rate_limiter: TokenBucket</span>
-<span>    gate: ConcurrencyGate</span>
-<span>    log: StructuredLog</span>
-<span>    metrics: Metrics</span>
-<span>    clock: Clock</span>
-<span>    draining: bool = False</span>
-<span> </span>
-<span>    def health(self) -&gt; Status:</span>
-<span>        return Status(True)</span>
-<span> </span>
-<span>    def ready(self) -&gt; Status:</span>
-<span>        reasons = [] if self.dependencies else [&quot;dependency:none_configured&quot;]</span>
-<span>        reasons.extend(</span>
-<span>            f&quot;dependency:{name}&quot; for name, probe in self.dependencies.items() if not probe.ready()</span>
-<span>        )</span>
-<span>        if not self.artifact_verified:</span>
-<span>            reasons.append(&quot;artifact:not_verified&quot;)</span>
-<span>        if self.draining:</span>
-<span>            reasons.append(&quot;service:draining&quot;)</span>
-<span>        return Status(not reasons, tuple(sorted(reasons)))</span>
-<span> </span>
-<span>    def handle(</span>
-<span>        self,</span>
-<span>        *,</span>
-<span>        request_id: str,</span>
-<span>        token: str,</span>
-<span>        action: str,</span>
-<span>        work: Callable[[], str],</span>
-<span>    ) -&gt; ServiceResponse:</span>
-<span>        if not request_id.strip():</span>
-<span>            return ServiceResponse(400, &quot;request ID required&quot;)</span>
-<span>        ready = self.ready()</span>
-<span>        if not ready.ok:</span>
-<span>            self.metrics.increment(&quot;requests_not_ready&quot;)</span>
-<span>            self.log.emit(</span>
-<span>                &quot;request_rejected&quot;,</span>
-<span>                request_id,</span>
-<span>                {&quot;reason&quot;: &quot;,&quot;.join(ready.reasons)},</span>
-<span>            )</span>
-<span>            return ServiceResponse(503, &quot;not ready&quot;)</span>
-<span>        principal = self.authenticator.authenticate(token)</span>
-<span>        if principal is None:</span>
-<span>            self.metrics.increment(&quot;requests_unauthenticated&quot;)</span>
-<span>            return ServiceResponse(401, &quot;authentication required&quot;)</span>
-<span>        if not is_authorized(principal.role, action):</span>
-<span>            self.metrics.increment(&quot;requests_forbidden&quot;)</span>
-<span>            return ServiceResponse(403, &quot;forbidden&quot;)</span>
-<span>        if not self.rate_limiter.allow(principal.subject):</span>
-<span>            self.metrics.increment(&quot;requests_rate_limited&quot;)</span>
-<span>            return ServiceResponse(429, &quot;rate limited&quot;)</span>
-<span>        lease = self.gate.try_acquire()</span>
-<span>        if lease is None:</span>
-<span>            self.metrics.increment(&quot;requests_saturated&quot;)</span>
-<span>            return ServiceResponse(503, &quot;busy&quot;)</span>
-<span> </span>
-<span>        started = self.clock.now()</span>
-<span>        with lease:</span>
-<span>            self.log.emit(</span>
-<span>                &quot;request_started&quot;,</span>
-<span>                request_id,</span>
-<span>                {&quot;action&quot;: action, &quot;subject&quot;: principal.subject},</span>
-<span>            )</span>
-<span>            try:</span>
-<span>                message = work()</span>
-<span>            except Exception as exc:</span>
-<span>                self.metrics.increment(&quot;requests_failed&quot;)</span>
-<span>                self.log.emit(</span>
-<span>                    &quot;request_failed&quot;,</span>
-<span>                    request_id,</span>
-<span>                    {&quot;error_type&quot;: type(exc).__name__},</span>
-<span>                )</span>
-<span>                return ServiceResponse(500, &quot;internal error&quot;)</span>
-<span>            finally:</span>
-<span>                self.metrics.observe(&quot;request_duration_seconds&quot;, self.clock.now() - started)</span>
-<span>        self.metrics.increment(&quot;requests_succeeded&quot;)</span>
-<span>        self.log.emit(&quot;request_completed&quot;, request_id, {&quot;action&quot;: action})</span>
-<span>        return ServiceResponse(200, message)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-service-drill-&quot;) as directory:</span>
-<span>        artifact = Path(directory) / &quot;model.json&quot;</span>
-<span>        artifact.write_text(&#x27;{&quot;format&quot;:&quot;local-json-v1&quot;,&quot;version&quot;:1}&#x27;, encoding=&quot;utf-8&quot;)</span>
-<span>        load_trusted_json(artifact, sha256_file(artifact))</span>
-<span> </span>
-<span>        clock = FixedClock(10.0)</span>
-<span>        dependency = FixedProbe(True)</span>
-<span>        service = HardenedService(</span>
-<span>            dependencies={&quot;model-store&quot;: dependency},</span>
-<span>            artifact_verified=True,</span>
-<span>            authenticator=StaticAuthenticator({&quot;local-reader&quot;: Principal(&quot;learner&quot;, &quot;reader&quot;)}),</span>
-<span>            rate_limiter=TokenBucket(2, 1.0, clock),</span>
-<span>            gate=ConcurrencyGate(1),</span>
-<span>            log=StructuredLog(),</span>
-<span>            metrics=Metrics(),</span>
-<span>            clock=clock,</span>
-<span>        )</span>
-<span>        print(</span>
-<span>            &quot;normal request:&quot;,</span>
-<span>            service.handle(</span>
-<span>                request_id=&quot;request-1&quot;,</span>
-<span>                token=&quot;local-reader&quot;,</span>
-<span>                action=&quot;predict&quot;,</span>
-<span>                work=lambda: &quot;prediction-local&quot;,</span>
-<span>            ),</span>
-<span>        )</span>
-<span>        dependency.value = False</span>
-<span>        print(&quot;incident readiness:&quot;, service.ready())</span>
-<span>        print(&quot;health stays process-level:&quot;, service.health())</span>
-<span>        print(&quot;metrics:&quot;, service.metrics.snapshot())</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-svc-02.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">This is a local policy model, not an Internet-facing server. All dependencies,</span></span>
+<span class="source-line"><span class="syntax-string">identity, time, work, and artifact files are injected or temporary.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> hashlib</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
+<span class="source-line"><span class="syntax-keyword">import</span> threading</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Mapping<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass<span class="syntax-punctuation">,</span> field</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> types <span class="syntax-keyword">import</span> TracebackType</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal<span class="syntax-punctuation">,</span> Protocol<span class="syntax-punctuation">,</span> TypeAlias</span>
+<span class="source-line"></span>
+<span class="source-line">Role <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">JsonScalar<span class="syntax-punctuation">:</span> TypeAlias <span class="syntax-operator">=</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Clock</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return monotonic-style seconds.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">DependencyProbe</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">ready</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return whether the dependency can serve new work.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Authenticator</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">authenticate</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> token<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Principal <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Resolve a credential without logging it.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ServiceConfig</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    max_concurrency<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    rate_capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    refill_per_second<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@classmethod</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">from_mapping</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">cls</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ServiceConfig<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            max_concurrency <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">MAX_CONCURRENCY</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">4</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            rate_capacity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">RATE_CAPACITY</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            refill_per_second <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">REFILL_PER_SECOND</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">service limits must be numeric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> max_concurrency <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> rate_capacity <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> refill_per_second <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">service limits must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">cls</span><span class="syntax-punctuation">(</span>max_concurrency<span class="syntax-punctuation">,</span> rate_capacity<span class="syntax-punctuation">,</span> refill_per_second<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Principal</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    subject<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    role<span class="syntax-punctuation">:</span> Role</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">StaticAuthenticator</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    identities<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Principal<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> field<span class="syntax-punctuation">(</span><span class="syntax-builtin">repr</span><span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">authenticate</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> token<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Principal <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>identities<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>token<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedProbe</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">ready</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Status</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    ok<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    reasons<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">LogEvent</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    event<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    request_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    fields<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">StructuredLog</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    events<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>LogEvent<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> field<span class="syntax-punctuation">(</span>default_factory<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">emit</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        event<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        request_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        fields<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            LogEvent<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                event<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                request_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>redact_fields<span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Metrics</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    counters<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> field<span class="syntax-punctuation">(</span>default_factory<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    durations<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> field<span class="syntax-punctuation">(</span>default_factory<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">increment</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>counters<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>counters<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">observe</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duration must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>durations<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">snapshot</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        result<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>counters<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        result<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> values <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>durations<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FixedClock</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">now</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">advance</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> seconds <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">clock cannot move backward</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>value <span class="syntax-operator">+</span><span class="syntax-operator">=</span> seconds</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">TokenBucket</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    refill_per_second<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    clock<span class="syntax-punctuation">:</span> Clock</span>
+<span class="source-line">    _state<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> field<span class="syntax-punctuation">(</span>default_factory<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">allow</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> subject<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> subject<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rate-limit subject must not be blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        now <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        tokens<span class="syntax-punctuation">,</span> previous <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_state<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>subject<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>capacity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        tokens <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>capacity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            tokens <span class="syntax-operator">+</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> now <span class="syntax-operator">-</span> previous<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>refill_per_second<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> tokens <span class="syntax-operator">&lt;</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_state<span class="syntax-punctuation">[</span>subject<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_state<span class="syntax-punctuation">[</span>subject<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>tokens <span class="syntax-operator">-</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ConcurrencyLease</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> gate<span class="syntax-punctuation">:</span> ConcurrencyGate<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_gate <span class="syntax-operator">=</span> gate</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_released <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__enter__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ConcurrencyLease<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__exit__</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        exception_type<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span>BaseException<span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        exception<span class="syntax-punctuation">:</span> BaseException <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        traceback<span class="syntax-punctuation">:</span> TracebackType <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_released<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_released <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_gate<span class="syntax-operator">.</span>release<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ConcurrencyGate</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> capacity <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">capacity must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_semaphore <span class="syntax-operator">=</span> threading<span class="syntax-operator">.</span>BoundedSemaphore<span class="syntax-punctuation">(</span>capacity<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_lock <span class="syntax-operator">=</span> threading<span class="syntax-operator">.</span>Lock<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_peak <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">active</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_lock<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">peak</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_lock<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_peak</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">try_acquire</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ConcurrencyLease <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_semaphore<span class="syntax-operator">.</span>acquire<span class="syntax-punctuation">(</span>blocking<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_lock<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_peak <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_peak<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> ConcurrencyLease<span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">release</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_lock<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">concurrency lease released twice</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_active <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_semaphore<span class="syntax-operator">.</span>release<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">is_authorized</span><span class="syntax-punctuation">(</span>role<span class="syntax-punctuation">:</span> Role<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    permissions<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span>Role<span class="syntax-punctuation">,</span> <span class="syntax-builtin">frozenset</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">frozenset</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">frozenset</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> action <span class="syntax-operator">in</span> permissions<span class="syntax-punctuation">[</span>role<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">readiness</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    dependency_checks<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    artifact_verified<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    draining<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>dependency_checks<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>dependency_checks<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> artifact_verified <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">redact_fields</span><span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    sensitive <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">token</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">authorization</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">password</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">secret</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">api_key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        key<span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;redacted&gt;</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">if</span> key<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">in</span> sensitive <span class="syntax-keyword">else</span> value <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> fields<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sha256_file</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>read_bytes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_trusted_json</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> expected_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> JsonScalar<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>expected_sha256<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">64</span> <span class="syntax-operator">or</span> sha256_file<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> expected_sha256<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifact hash verification failed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    raw <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> raw<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">trusted artifact must be a flat JSON object</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> raw</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ServiceResponse</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    status<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    message<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">HardenedService</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    dependencies<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> DependencyProbe<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    artifact_verified<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    authenticator<span class="syntax-punctuation">:</span> Authenticator</span>
+<span class="source-line">    rate_limiter<span class="syntax-punctuation">:</span> TokenBucket</span>
+<span class="source-line">    gate<span class="syntax-punctuation">:</span> ConcurrencyGate</span>
+<span class="source-line">    log<span class="syntax-punctuation">:</span> StructuredLog</span>
+<span class="source-line">    metrics<span class="syntax-punctuation">:</span> Metrics</span>
+<span class="source-line">    clock<span class="syntax-punctuation">:</span> Clock</span>
+<span class="source-line">    draining<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">health</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Status<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> Status<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">ready</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Status<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reasons <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>dependencies <span class="syntax-keyword">else</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">dependency:none_configured</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        reasons<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">dependency:</span><span class="syntax-string">{</span>name<span class="syntax-string">}</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> probe <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>dependencies<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> probe<span class="syntax-operator">.</span>ready<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>artifact_verified<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifact:not_verified</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>draining<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">service:draining</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> Status<span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> reasons<span class="syntax-punctuation">,</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>reasons<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">handle</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        request_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        token<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        action<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        work<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ServiceResponse<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> request_id<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">request ID required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        ready <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>ready<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> ready<span class="syntax-operator">.</span>ok<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_not_ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>log<span class="syntax-operator">.</span>emit<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">request_rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                request_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">reason</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>ready<span class="syntax-operator">.</span>reasons<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">503</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">not ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        principal <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>authenticator<span class="syntax-operator">.</span>authenticate<span class="syntax-punctuation">(</span>token<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> principal <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_unauthenticated</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">401</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">authentication required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> is_authorized<span class="syntax-punctuation">(</span>principal<span class="syntax-operator">.</span>role<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_forbidden</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">403</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">forbidden</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>rate_limiter<span class="syntax-operator">.</span>allow<span class="syntax-punctuation">(</span>principal<span class="syntax-operator">.</span>subject<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_rate_limited</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">429</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">rate limited</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        lease <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>gate<span class="syntax-operator">.</span>try_acquire<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> lease <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_saturated</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">503</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">busy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        started <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> lease<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>log<span class="syntax-operator">.</span>emit<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">request_started</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                request_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> action<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">subject</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> principal<span class="syntax-operator">.</span>subject<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                message <span class="syntax-operator">=</span> work<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_failed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">                <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>log<span class="syntax-operator">.</span>emit<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                    <span class="syntax-string">&quot;</span><span class="syntax-string">request_failed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    request_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">error_type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>exc<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-punctuation">)</span></span>
+<span class="source-line">                <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">500</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">internal error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>observe<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">request_duration_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>clock<span class="syntax-operator">.</span>now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">requests_succeeded</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>log<span class="syntax-operator">.</span>emit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">request_completed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> request_id<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">action</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> action<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> ServiceResponse<span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-service-drill-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        artifact <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        artifact<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">format</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">local-json-v1</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-string">:1}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        load_trusted_json<span class="syntax-punctuation">(</span>artifact<span class="syntax-punctuation">,</span> sha256_file<span class="syntax-punctuation">(</span>artifact<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        clock <span class="syntax-operator">=</span> FixedClock<span class="syntax-punctuation">(</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        dependency <span class="syntax-operator">=</span> FixedProbe<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        service <span class="syntax-operator">=</span> HardenedService<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            dependencies<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">model-store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> dependency<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            artifact_verified<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            authenticator<span class="syntax-operator">=</span>StaticAuthenticator<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">local-reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> Principal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">learner</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            rate_limiter<span class="syntax-operator">=</span>TokenBucket<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> clock<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            gate<span class="syntax-operator">=</span>ConcurrencyGate<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            log<span class="syntax-operator">=</span>StructuredLog<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            metrics<span class="syntax-operator">=</span>Metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            clock<span class="syntax-operator">=</span>clock<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">normal request:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            service<span class="syntax-operator">.</span>handle<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                request_id<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">request-1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                token<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">local-reader</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                work<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction-local</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        dependency<span class="syntax-operator">.</span>value <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">incident readiness:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> service<span class="syntax-operator">.</span>ready<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">health stays process-level:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> service<span class="syntax-operator">.</span>health<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">metrics:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> service<span class="syntax-operator">.</span>metrics<span class="syntax-operator">.</span>snapshot<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

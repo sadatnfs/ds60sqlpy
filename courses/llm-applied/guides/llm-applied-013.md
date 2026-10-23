@@ -166,15 +166,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Align paired errors.** Use systemA errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) andB \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
+1. **Align paired errors.** Use system A errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) and B \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
    **Expected:** differences[-1, -1, 1] by sortedID.
    **Verify:** Save the assertion results for exercise 1, including differences[-1, -1, 1] by sortedID.
 
-2. **Aggregate by family.** Assignq 1, q2 tofamilyF andq 3 toG; compare row mean with family mean.
+2. **Aggregate by family.** Assignq 1, q2 tofamilyF and q 3 toG; compare row mean with family mean.
    **Expected:** row mean-1/3; family mean 0.
    **Verify:** Save the assertion results for exercise 2, including row mean-1/3; family mean 0.
 
-3. **Resample paired families.** Draw 2000 bootstrap samples of the two family differences withseed 17.
+3. **Resample paired families.** Draw 2000 bootstrap samples of the two family differences with seed 17.
    **Expected:** all estimates are-1, 0 or 1; repeatable with same seed.
    **Verify:** Save the assertion results for exercise 3, including all estimates are-1, 0 or 1; repeatable with same seed.
 
@@ -182,11 +182,11 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
    **Verify:** Save the assertion results for exercise 4, including coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
 
-5. **Block a severe boundary failure.** Combine a favorable mean comparison withone access leak and apply a zero-access-leak gate.
+5. **Block a severe boundary failure.** Combine a favorable mean comparison with one access leak and apply a zero-access-leak gate.
    **Expected:** release decision False.
    **Verify:** Save the assertion results for exercise 5, including release decision False.
 
-6. **Keep final tests out of selection.** Record retriever selection onvalidation and final scoring ontest; flag a test-based parameter change.
+6. **Keep final tests out of selection.** Record retriever selection on validation and final scoring on test; flag a test-based parameter change.
    **Expected:** test-based selection rejected.
    **Verify:** Save the assertion results for exercise 6, including test-based selection rejected.
 

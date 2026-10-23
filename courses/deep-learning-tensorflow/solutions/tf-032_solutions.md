@@ -18,7 +18,7 @@ Save the built model to a path ending.keras. Load it with tf.keras.models.load_m
 
 ## Exercise 1: Create a fixed inference model
 
-The question is: Set a bias-free Dense weight to2 and predict on1,3.
+The question is: Set a bias-free Dense weight to2 and predict on 1,3.
 
 A known fixed weight avoids making serialization success depend on a stochastic training result. The input shape and dtype are part of the inference contract.
 

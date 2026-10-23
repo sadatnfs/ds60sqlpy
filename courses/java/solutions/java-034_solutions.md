@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Application design separates domain decisions from the mechanisms that supply data,time orside effects. A pure pricing calculation can be tested without a database,network orsystemclock. A service composes that calculation with repository andclock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on thebehavior it needs rather than on a concrete infrastructure class.
+Application design separates domain decisions from the mechanisms that supply data,time or side effects. A pure pricing calculation can be tested without a database,network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
 
-This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies thetimestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result orrecording anevent. A failing repository propagates its failure ratherthan returning a fabricatedzero price. Thefake-backed tests establish service logic andcall boundaries,not live database ornetwork acceptance.
+This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies the timestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries,not live database or network acceptance.
 
 **Port:** A behavior interface required by application logic.
 
@@ -18,27 +18,27 @@ This lesson builds a small quote service. A catalog port supplies integer-cent p
 
 ## Reading the reference
 
-Define aCatalog interface returningOptionalLong anddeclaringIOException for anoperational read failure. Inject aSupplier<Instant> andConsumer<String> through theconstructor. Keep thepure total calculation separate anduseMath.multiplyExact foroverflow. TheQuote record carries item,quantity,total andtime. Audit only afterall requiredvalidation andcalculation succeed.
+Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate anduseMath.multiplyExact for overflow. TheQuote record carries item,quantity,total and time. Audit only after all required validation and calculation succeed.
 
 ## Exercise 1: Test the pure calculation
 
-Task: Compute3items at125cents andcheckzero/negativequantity policy.
+Task: Compute 3 items at 125 cents and check the zero/negative quantity policy.
 
-The core arithmetic needsno repository orclock. Isolating it makes domain boundaries andoverflow behavior easy tocheck.
+The core arithmetic needsno repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
 
 ```java
 assert total(3,125)==375;boolean invalid=false;try{total(0,125);}catch(IllegalArgumentException expected){invalid=true;}assert invalid;
 ```
 
-**Expected:** 375cents;nonpositivequantityrejected.
+**Expected:** 375 cents; nonpositive quantity rejected.
 
-**Verify:** Compare the program values or named exception with 375cents;nonpositivequantityrejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 375 cents; nonpositive quantity rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Compose a deterministic service
 
-Task: Inject a fixedcatalog,clock andauditlist,andrequest twoitems.
+Task: Inject a fixedcatalog,clock and audit list,and request twoitems.
 
-A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person orservice.
+A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person or service.
 
 ```java
 List<String> audit=new ArrayList<>();var instant=java.time.Instant.parse("2026-01-01T00:00:00Z");
@@ -55,22 +55,22 @@ assert quote.totalCents()==250 && quote.created().equals(instant) && audit.equal
 
 Task: Requestmissing andinspecttheauditlist.
 
-A missing item is a domain outcome. It shouldnot silently become a zero-priced quote orproduce a misleading success event.
+A missing item is a domain outcome. It should not silently become a zero-priced quote or produce a misleading success event.
 
 ```java
 boolean missing=false;try{service.quote("missing",2);}catch(NoSuchElementException expected){missing=true;}
 assert missing && audit.size()==1;
 ```
 
-**Expected:** NoSuchElementException;noadditionalaudit.
+**Expected:** NoSuchElementException;no additional audit.
 
-**Verify:** Compare the program values or named exception with NoSuchElementException;noadditionalaudit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with NoSuchElementException;no additional audit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Propagate an infrastructure failure
 
-Task: Inject aCatalog thatthrowsIOException.
+Task: Inject a Catalog thatthrowsIOException.
 
-An operational failure differs from a valid missing lookup. The service preserves that distinction so a caller can choose retry orerror behavior appropriately.
+An operational failure differs from a valid missing lookup. The service preserves that distinction so a caller can choose retry or error behavior appropriately.
 
 ```java
 List<String> failures=new ArrayList<>();Service unavailable=new Service(id -> {throw new java.io.IOException("catalog unavailable");},() -> instant,failures::add);boolean propagated=false;
@@ -78,15 +78,15 @@ try{unavailable.quote("item-a",1);}catch(java.io.IOException expected){propagate
 assert propagated && failures.isEmpty();
 ```
 
-**Expected:** samefailuretype;nosuccessaudit.
+**Expected:** same failure type;no success audit.
 
-**Verify:** Compare the program values or named exception with samefailuretype;nosuccessaudit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with same failure type;no success audit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Prove invalid quantity fails before a repository call
 
-Task: Use a countingcatalog andrequestnegativequantity.
+Task: Use a countingcatalog and request negative quantity.
 
-Validation ordering is part of theboundary contract. It avoids unnecessary externalwork andprevents a malformedrequest from being mistaken for an infrastructure failure.
+Validation ordering is part of the boundary contract. It avoids unnecessary external work and prevents a malformed request from being mistaken for an infrastructure failure.
 
 ```java
 var calls=new java.util.concurrent.atomic.AtomicInteger();Service checked=new Service(id -> {calls.incrementAndGet();return java.util.OptionalLong.of(1);},() -> instant,value -> {});boolean rejected=false;
@@ -102,7 +102,7 @@ assert rejected && calls.get()==0;
 
 Task: UseLong.MAX_VALUEunitprice andquantity2.
 
-A validly typed integer canstill exceed thedomain representation. Calculating before emitting a success event keeps side effects aligned with theactual outcome.
+A validly typed integer can still exceed the domain representation. Calculating before emitting a success event keeps side effects aligned with the actual outcome.
 
 ```java
 List<String> overflowAudit=new ArrayList<>();Service expensive=new Service(id -> java.util.OptionalLong.of(Long.MAX_VALUE),() -> instant,overflowAudit::add);boolean overflow=false;
@@ -110,9 +110,9 @@ try{expensive.quote("x",2);}catch(ArithmeticException expected){overflow=true;}
 assert overflow && overflowAudit.isEmpty();
 ```
 
-**Expected:** ArithmeticException;auditsinkunused.
+**Expected:** ArithmeticException;audit sink unused.
 
-**Verify:** Compare the program values or named exception with ArithmeticException;auditsinkunused. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with ArithmeticException;audit sink unused. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection asX@W. PyTorch Linear stores weights in output-by-input orientation and appliesX@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses1 orTrue for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.
+Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection asX@W. PyTorch Linear stores weights in output-by-input orientation and appliesX@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses1 or True for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.
 
 **Weight layout:** The semantic orientation of stored parameter axes.
 
@@ -90,7 +90,7 @@ Do not assume the functional call reads module.training automatically.
 
 ## Exercise 5: Design a cross-framework oracle
 
-The question is: Use zeroQ/K andV[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs.
+The question is: Use zeroQ/K and V[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs.
 
 The expected values come from arithmetic, not from treating one framework as infallible. A nonuniform-score case should follow to test scaling and score orientation.
 
@@ -107,7 +107,7 @@ Compare float32 atatol1e-6 and float64 atatol1e-12.
 
 ## Exercise 6: Preserve optionality
 
-The question is: Write a verification record when onlyNumPy andPyTorch are prepared,withTensorFlow unavailable.
+The question is: Write a verification record when onlyNumPy and PyTorch are prepared,with TensorFlow unavailable.
 
 A comparison worksheet does not justify installing a second framework or inventing runtime evidence. Optional execution remains optional and explicitly reported.
 
@@ -118,9 +118,9 @@ TensorFlow: unavailable/unexecuted, not passed.
 llm-042 does not require llm-041.
 ```
 
-**Expected:** TensorFlowunexecuted;LLMfinalcapstoneremainsavailable.
+**Expected:** TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.
 
-**Verify:** Compare the computed values or written argument with TensorFlowunexecuted;LLMfinalcapstoneremainsavailable.
+**Verify:** Compare the computed values or written argument with TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.
 
 ## Review after comparison
 

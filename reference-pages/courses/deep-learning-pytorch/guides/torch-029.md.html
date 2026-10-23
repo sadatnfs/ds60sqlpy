@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; approximately 120 minutes. Direct prerequisites: <code>torch-028</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. The central investigation is concrete: Exponentiate float32 logits1000, 999 directly. The finish condition is both exponentials infinite. ValueError before loss evaluation. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. The central investigation is concrete: Exponentiate float32 logits 1000, 999 directly. The finish condition is both exponentials infinite. ValueError before loss evaluation. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and log sum exp implement stable combined operations that avoid unnecessary probability round trips.</p>
 <p>Precision and range differ across float16, bfloat 16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.</p>
@@ -140,8 +186,8 @@
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Use F.cross_entropy on raw logits and torch.logsumexp for a stable log normalizer. Inspect torch.isfinite on forward values and gradients. torch.finfo reports representable ranges and epsilon, but is not a performance benchmark. Keep dtype explicit in independent arithmetic comparisons. Do not cast arbitrary nonfinite inputs into a lower-precision type and expect a stable objective to repair them.</p>
 <h3 id="separate-the-mathematical-distribution-from-its-representation">Separate the mathematical distribution from its representation<a class="heading-anchor" href="#separate-the-mathematical-distribution-from-its-representation" aria-label="Link to this section">#</a></h3>
-<p>For logits z=[1000, 999], the first-class probability is exp(1000)/(exp(1000)+exp(999)). Dividing numerator and denominator by exp(1000) gives 1/(1+exp(-1)), approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing exp(1000) overflows the types used in the counterexample.</p>
-<p>More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing m=max(z) makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is log(1+exp(-1)), approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.</p>
+<p>For logits z=[1000, 999], the first-class probability is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1000</mn><mo stretchy="false">)</mo></mrow><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1000</mn><mo stretchy="false">)</mo><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mn>999</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\exp(1000)}{\exp(1000)+\exp(999)}</annotation></semantics></math>. Dividing numerator and denominator by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1000</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(1000)</annotation></semantics></math> gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{1+\exp(-1)}</annotation></semantics></math>, approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1000</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(1000)</annotation></semantics></math> overflows the types used in the counterexample.</p>
+<p>More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>m</mi><mo>=</mo><mo>max</mo><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">m=\max(z)</annotation></semantics></math> makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-1))</annotation></semantics></math>, approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.</p>
 <p>Stability is more specific than a function name. logsumexp avoids raw exponential overflow, but computing a large logsumexp value and then subtracting a nearly equal large target logit can still lose precision. A fused logits loss or log_softmax formulation can preserve the small relative difference more directly. Similarly, computing a tiny probability and then taking its log can underflow where a direct log-probability calculation remains finite. Inspect intermediate representation rather than assuming algebraic equivalence implies equal floating-point error.</p>
 <p>Range and precision are different properties:</p>
 <div class="table-wrap"><table><thead><tr>
@@ -152,22 +198,22 @@
 <tr>
 <td>float16</td>
 <td>65, 504</td>
-<td>2^-10</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mo>−</mo><mn>10</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{-10}</annotation></semantics></math></td>
 </tr>
 <tr>
 <td>bfloat 16</td>
-<td>3.39×10^38</td>
-<td>2^-7</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3.39</mn><mo>·</mo><msup><mrow><mn>10</mn></mrow><mrow><mn>38</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3.39\cdot {10}^{38}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mo>−</mo><mn>7</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{-7}</annotation></semantics></math></td>
 </tr>
 <tr>
 <td>float32</td>
-<td>3.40×10^38</td>
-<td>2^-23</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3.4</mn><mo>·</mo><msup><mrow><mn>10</mn></mrow><mrow><mn>38</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3.4\cdot {10}^{38}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mo>−</mo><mn>23</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{-23}</annotation></semantics></math></td>
 </tr>
 <tr>
 <td>float64</td>
-<td>1.80×10^308</td>
-<td>2^-52</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.8</mn><mo>·</mo><msup><mrow><mn>10</mn></mrow><mrow><mn>308</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1.8\cdot {10}^{308}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mo>−</mo><mn>52</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{-52}</annotation></semantics></math></td>
 </tr>
 </tbody></table></div>
 <p>bfloat 16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. <a href="https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html">PyTorch 2.9 numerical accuracy</a>.</p>
@@ -179,31 +225,31 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-expose-naive-overflow">Example A: Expose naive overflow<a class="heading-anchor" href="#example-a-expose-naive-overflow" aria-label="Link to this section">#</a></h4>
 <p>The underlying probabilities are well defined. The failure comes from an unstable intermediate representation, not an impossible classification task.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-logits=torch.tensor([1000.,999.],dtype=torch.float32); naive=torch.exp(logits)
-assert torch.isinf(naive).all()</code></pre>
+logits<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.</span><span class="syntax-punctuation">,</span><span class="syntax-number">999.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> naive<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>isinf<span class="syntax-punctuation">(</span>naive<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both exponentials infinite.</p>
 <h4 id="example-b-compute-a-stable-class-loss">Example B: Compute a stable class loss<a class="heading-anchor" href="#example-b-compute-a-stable-class-loss" aria-label="Link to this section">#</a></h4>
 <p>The meaningful score difference is one. The stable combined objective avoids constructing enormous raw exponential values.</p>
-<pre><code class="language-python">stable=F.cross_entropy(logits[None,:],torch.tensor([0]))
-np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> loss log(1+exp(-1)) within 1e-6.</p>
+<pre class="highlighted-code"><code class="language-python">stable<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>stable<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log1p<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-1))</annotation></semantics></math> within 1e-6.</p>
 <h4 id="example-c-check-shift-invariance">Example C: Check shift invariance<a class="heading-anchor" href="#example-c-check-shift-invariance" aria-label="Link to this section">#</a></h4>
 <p>A common logit shift cancels from the normalizer. This property is useful for detecting wrong-axis or inconsistent-clipping implementations.</p>
-<pre><code class="language-python">torch.testing.assert_close(torch.softmax(logits,0),torch.softmax(torch.tensor([0.,-1.]),0),atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>softmax<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>softmax<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> probabilities match within 1e-6.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: both exponentials infinite. ValueError before loss evaluation. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Expose naive overflow.</strong> Exponentiate float32 logits1000, 999 directly. <strong>Expected:</strong> both exponentials infinite. <strong>Verify:</strong> Save the assertion results for exercise 1, including both exponentials infinite.</li>
+<li><strong>Expose naive overflow.</strong> Exponentiate float32 logits 1000, 999 directly. <strong>Expected:</strong> both exponentials infinite. <strong>Verify:</strong> Save the assertion results for exercise 1, including both exponentials infinite.</li>
 </ol>
 <ol>
-<li><strong>Compute a stable class loss.</strong> Use target 0 with the same logits. <strong>Expected:</strong> loss log(1+exp(-1)) within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss log(1+exp(-1)) within 1e-6.</li>
+<li><strong>Compute a stable class loss.</strong> Use target 0 with the same logits. <strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-1))</annotation></semantics></math> within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-1))</annotation></semantics></math> within 1e-6.</li>
 </ol>
 <ol>
 <li><strong>Check shift invariance.</strong> Compare softmax 1000, 999 with softmax 0, -1. <strong>Expected:</strong> probabilities match within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including probabilities match within 1e-6.</li>
@@ -234,7 +280,7 @@ np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)<
 <p><strong>Why separate arithmetic stability from task correctness?</strong></p>
 <p>A perfectly finite loss can still use leaked data, wrong targets or an unintended reduction. Both contracts need independent checks.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-029, Stable objectives, precision and mixed-precision boundaries.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-029, Stable objectives, precision and mixed-precision boundaries.
 Read courses/deep-learning-pytorch/guides/torch-029.md and courses/deep-learning-pytorch/lessons/torch-029.py. Direct prerequisites: `torch-028`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

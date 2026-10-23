@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,8 +167,10 @@
 <p>Each topic contains mechanism and shape/state reasoning, three worked examples, six distinct exercise checks, a framework comparison, answered interviews, method-selection decisions and topic-specific diagnosis. The review additions include analytic extensions that are identified separately from executed checks. The machine-readable <code>review_matrix.json</code> records concrete findings, paired-guide review and whether executable or worked code changed. Its completion is a source-review claim, not a runtime receipt.</p>
 <p>Worked Examples A-C execute sequentially in one scratch file. Imports, helpers and initial fixture state appear in A, while later blocks may reuse or mutate earlier state. Reproduce all three as one fresh program. The separate reference contains all six exercises. The focused tests compare their Python syntax trees so displayed calculations cannot silently drift from reference setup or the first three exercises.</p>
 <p>Run the focused host checks with the repository&#x27;s prepared development interpreter:</p>
-<pre><code class="language-text">python -m pytest tests/test_pytorch_lessons.py -q</code></pre>
-<p>The host suite checks all 36 bundles, paired links, practice contracts, exact regeneration, worked/reference parity and bounded child programs. Actual numerical reference tests are opt-in through <code>DS60_TEST_TORCH=1</code> inside the separately prepared PyTorch runtime. A host skip does not establish execution. Changes to reference behavior or worked programs require new parent-owned prepared-worker receipts. These authoring tools do not download data or models, install packages, change shared runtime definitions or modify learner state.</p></article>
+<pre class="highlighted-code"><code class="language-text">python -m pytest tests/test_pytorch_lessons.py -q</code></pre>
+<p>The host suite checks all 36 bundles, paired links, practice contracts, exact regeneration, worked/reference parity and bounded child programs. Actual numerical reference tests are opt-in through <code>DS60_TEST_TORCH=1</code> inside the separately prepared PyTorch runtime. A host skip does not establish execution. Changes to reference behavior or worked programs require new parent-owned prepared-worker receipts. These authoring tools do not download data or models, install packages, change shared runtime definitions or modify learner state.</p>
+<h3 id="unified-classroom-presentation">Unified classroom presentation<a class="heading-anchor" href="#unified-classroom-presentation" aria-label="Link to this section">#</a></h3>
+<p>Author mathematical expressions with explicit LaTeX <code>\( ... \)</code> and standalone <code>\[ ... \]</code> delimiters. Tag every fenced code example with its actual language. After regenerating older prose sources, run <code>python scripts/normalize_lesson_prose.py --write</code> from the repository root before rebuilding HTML readers. The reviewed <code>curriculum/math-prose.json</code> registry preserves this migration across regeneration; it does not change executable fences, notebook code or the supplied statistics outline. The public learner entrypoint is <code>/classroom</code>, shared by every subject. See <a href="../../../docs/content-authoring.md.html">the content contract</a> for the rendering and subject-theme requirements.</p></article>
   </main>
 </body>
 </html>

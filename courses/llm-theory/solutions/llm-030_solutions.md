@@ -82,7 +82,7 @@ Training decision for this experiment: exclude
 
 ## Exercise 5: Audit preprocessing inputs
 
-The question is: A tokenizer is fitted ontrain+test although model gradients use onlytrain. Identify the boundary failure.
+The question is: A tokenizer is fitted on train+test although model gradients use only train. Identify the boundary failure.
 
 The representation is fitted state. Keeping test labels out of the optimizer does not undo an earlier information leak through vocabulary selection.
 
@@ -108,9 +108,9 @@ d5 | unresolved origin | unresolved permission | unassigned | unknown family | a
 Action: obtain evidence before admitting to the experiment.
 ```
 
-**Expected:** origin unresolved; permission unresolved; admissionblocked.
+**Expected:** origin unresolved; permission unresolved; admission blocked.
 
-**Verify:** Compare the computed values or written argument with origin unresolved; permission unresolved; admissionblocked.
+**Verify:** Compare the computed values or written argument with origin unresolved; permission unresolved; admission blocked.
 
 ## Review after comparison
 

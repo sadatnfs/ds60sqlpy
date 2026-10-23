@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,85 +161,85 @@
       <h1>Js 019 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-019_solution.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {</span>
-<span>  // Exercise 1: Annotate a numeric function</span>
-<span>  {</span>
-<span>    function add(left: number, right: number): number { return left + right; }</span>
-<span>    const result = add(2, 3);</span>
-<span>    assert.equal(result, 5);</span>
-<span>    assert.equal(typeof result, &#x27;number&#x27;);</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error A string is not a numeric argument.</span>
-<span>      add(&#x27;2&#x27;, 3);</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Show that an assertion does not convert data</span>
-<span>  {</span>
-<span>    const external: unknown = &#x27;wrong&#x27;;</span>
-<span>    const claimed = external as number;</span>
-<span>    assert.equal(typeof claimed, &#x27;string&#x27;);</span>
-<span>    assert.equal(String(claimed), &#x27;wrong&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Compare literal preservation and widening</span>
-<span>  {</span>
-<span>    const fixed = &#x27;ready&#x27;;</span>
-<span>    let mutable = &#x27;ready&#x27;;</span>
-<span>    mutable = &#x27;done&#x27;;</span>
-<span>    function acceptReady(value: &#x27;ready&#x27;): string { return value; }</span>
-<span>    assert.equal(acceptReady(fixed), &#x27;ready&#x27;);</span>
-<span>    assert.equal(mutable, &#x27;done&#x27;);</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error mutable is string, not the literal type ready.</span>
-<span>      acceptReady(mutable);</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Handle null explicitly under strict checking</span>
-<span>  {</span>
-<span>    function lengthOrZero(value: string | null): number {</span>
-<span>      return value === null ? 0 : value.length;</span>
-<span>    }</span>
-<span>    assert.equal(lengthOrZero(&#x27;abc&#x27;), 3);</span>
-<span>    assert.equal(lengthOrZero(null), 0);</span>
-<span>    function negativeTypeCheck(value: string | null): void {</span>
-<span>      // @ts-expect-error value may be null before a guard.</span>
-<span>      void value.length;</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Observe type erasure through object keys</span>
-<span>  {</span>
-<span>    type Item = { id: string; count: number };</span>
-<span>    const item: Item = { id: &#x27;A&#x27;, count: 2 };</span>
-<span>    assert.deepEqual(Object.keys(item), [&#x27;id&#x27;, &#x27;count&#x27;]);</span>
-<span>    assert.equal(&#x27;Item&#x27; in item, false);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Narrow unknown before numeric use</span>
-<span>  {</span>
-<span>    function doubleFinite(value: unknown): number {</span>
-<span>      if (typeof value !== &#x27;number&#x27; || !Number.isFinite(value)) throw new TypeError(&#x27;finite number required&#x27;);</span>
-<span>      return value * 2;</span>
-<span>    }</span>
-<span>    assert.equal(doubleFinite(12), 24);</span>
-<span>    assert.throws(() =&gt; doubleFinite(&#x27;12&#x27;), TypeError);</span>
-<span>    assert.throws(() =&gt; doubleFinite(Infinity), TypeError);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Annotate a numeric function</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> add<span class="syntax-punctuation">(</span>left<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">,</span> right<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> left <span class="syntax-operator">+</span> right<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> result<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error A string is not a numeric argument.</span></span>
+<span class="source-line">      add<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Show that an assertion does not convert data</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> external<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;wrong&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> claimed <span class="syntax-operator">=</span> external <span class="syntax-keyword">as</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> claimed<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;string&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">String</span><span class="syntax-punctuation">(</span>claimed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;wrong&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Compare literal preservation and widening</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> fixed <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">let</span> mutable <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    mutable <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> acceptReady<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>acceptReady<span class="syntax-punctuation">(</span>fixed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>mutable<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error mutable is string, not the literal type ready.</span></span>
+<span class="source-line">      acceptReady<span class="syntax-punctuation">(</span>mutable<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Handle null explicitly under strict checking</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> lengthOrZero<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> value <span class="syntax-operator">===</span> <span class="syntax-keyword">null</span> <span class="syntax-operator">?</span> 0 <span class="syntax-operator">:</span> <span class="syntax-keyword">value.length</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lengthOrZero<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;abc&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>lengthOrZero<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error value may be null before a guard.</span></span>
+<span class="source-line">      <span class="syntax-operator">void</span> value<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Observe type erasure through object keys</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">type</span> Item <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> item<span class="syntax-operator">:</span> <span class="syntax-keyword">Item</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;count&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Item&#x27;</span> <span class="syntax-operator">in</span> item<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Narrow unknown before numeric use</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> doubleFinite<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> value <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;number&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite number required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;12&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> doubleFinite<span class="syntax-punctuation">(</span><span class="syntax-keyword">Infinity</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

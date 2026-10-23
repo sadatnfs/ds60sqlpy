@@ -50,7 +50,7 @@ Kubernetes uses its separate owned-cluster preparation and lease checks.
 | `scala-jvm` | `Main.scala`, compile then `Main` | Spark distribution's matched Scala 2.13 compiler/library and JDK 17 |
 | `spark-local-scala` | `Main.scala`, compile then local Spark submit | Spark 4.0.1, matched Scala 2.13, JDK 17, `local[2]` |
 | `spark-local-python` | `main.py`, local Spark submit | Same Spark/JDK, Python 3.12, `local[2]` |
-| `java21` | `Main.java`, compile then run `Main` | Java21, assertions enabled, prepared H2 JDBC teaching library |
+| `java21` | `Main.java`, compile then run `Main` | Java 21, assertions enabled, prepared H2 JDBC teaching library |
 | `javascript-node` | `main.mjs`, Node ES module | Node24 with strict unhandled rejections |
 | `typescript-node` | `main.mts`, strict check/compile then execute | TypeScript5.9.3 and Node24 with NodeNext module rules |
 

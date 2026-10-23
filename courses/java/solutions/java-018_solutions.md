@@ -14,22 +14,22 @@ A useful test distinguishes correct behavior from a plausible mistake. Repeating
 
 ## Reading the reference
 
-A table-driven test stores inputs and expected outputs together,then runs the same checker over all cases. A property test checks a relation over several inputs,such asreversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
+A table-driven test stores inputs and expected outputs together,then runs the same checker over all cases. A property test checks a relation over several inputs,such as reversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
 
 ## Exercise 1: Use independent table cases
 
-Task: Testclamp for values-2,0,3,9 underbounds0..5.
+Task: Test clamp for values -2,0,3,9 under bounds 0..5.
 
-The expected outputs are literal contract examples. They do not callclamp or duplicate its full branching logic to generate answers.
+The expected outputs are literal contract examples. They do not call clamp or duplicate its full branching logic to generate answers.
 
 ```java
 int[][] cases={{-2,0},{0,0},{3,3},{9,5}};
 for(int[] row:cases) assert clamp(row[0],0,5)==row[1];
 ```
 
-**Expected:** outputs0,0,3,5.
+**Expected:** outputs 0,0,3,5.
 
-**Verify:** Compare the program values or named exception with outputs0,0,3,5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with outputs 0,0,3,5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Check a boundary failure
 
@@ -63,7 +63,7 @@ for(int value=-10;value<=10;value++) {
 
 ## Exercise 4: Detect a broken implementation
 
-Task: Use a mutant that returnsupper for values belowlower and show the table rejects it.
+Task: Use a mutant that returns upper for values below lower and show the table rejects it.
 
 A test suite should fail on a meaningful defect. This control demonstrates that the lower-bound example is not merely decorative.
 
@@ -108,9 +108,9 @@ for(int[] original:List.of(new int[0],new int[]{4},new int[]{1,2,3})) {
 }
 ```
 
-**Expected:** all originals restored;input arrays unchanged.
+**Expected:** all originals restored; input arrays unchanged.
 
-**Verify:** Compare the program values or named exception with all originals restored;input arrays unchanged. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with all originals restored; input arrays unchanged. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

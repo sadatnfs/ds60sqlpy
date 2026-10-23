@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,7 +177,7 @@
 <p>Probabilistic label models attempt to estimate source accuracies and sometimes dependencies under specific assumptions. They can improve over majority voting, but identifiability and model misspecification matter. An LLM-generated label is another noisy source, and repeated prompts to the same model may share errors. Do not assume that more synthetic labels or more agreeing model calls create independent evidence.</p>
 <p>If weak labels train a downstream classifier, evaluate the classifier on independently reviewed examples. Agreement with its own labeling functions only measures imitation. Preserve the rule versions and source provenance because a changed heuristic changes the effective training target.</p>
 <h3 id="active-learning-and-the-sampling-bias-it-creates">Active learning and the sampling bias it creates<a class="heading-anchor" href="#active-learning-and-the-sampling-bias-it-creates" aria-label="Link to this section">#</a></h3>
-<p>Uncertainty sampling selects examples near a current decision boundary, using entropy, margin or another score. For binary probability p, entropy is -p<em>log(p)-(1-p)</em>log(1-p), largest at one-half. Uncertainty is model-dependent: a confidently wrong out-of-domain example may never be selected, while noise near the boundary can consume the budget repeatedly.</p>
+<p>Uncertainty sampling selects examples near a current decision boundary, using entropy, margin or another score. For binary probability p, entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>p</mi><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-p\cdot \log(p)-(1-p)\cdot \log(1-p)</annotation></semantics></math>, largest at one-half. Uncertainty is model-dependent: a confidently wrong out-of-domain example may never be selected, while noise near the boundary can consume the budget repeatedly.</p>
 <p>Diversity constraints can prevent a batch from containing many near-duplicate documents from one family. The reference ranks by entropy and accepts at most one example per family until the budget is filled. This is a simple deterministic selection policy, not an optimal information-gain algorithm. A different task may need representative sampling, rare-class coverage or cost-aware review.</p>
 <p>Actively selected labels are not a representative test sample. Evaluating only on queried hard cases can make performance appear worse, while evaluating on chosen easy cases can make it appear better. Keep a separate representative gold set or use an appropriate sampling-aware analysis. Record which examples were selected by which policy at each iteration.</p>
 <h3 id="a-measured-weak-to-strong-workflow">A measured weak-to-strong workflow<a class="heading-anchor" href="#a-measured-weak-to-strong-workflow" aria-label="Link to this section">#</a></h3>
@@ -146,17 +192,17 @@
 <p>Probabilities [0.5,0.6,0.95,0.1] make the first two examples most uncertain. Both belong to family a, so a one-per-family budget selects indices zero and three instead. The choice trades raw uncertainty for diversity and must be evaluated as a labeling policy, not a final classifier metric.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">import numpy as np
-labels=np.array([[1,1,-1],[0,-1,0],[1,0,-1],[-1,-1,-1]])
-coverage=np.any(labels!=-1,axis=1).mean()
-conflict=(np.any(labels==0,axis=1)&amp;np.any(labels==1,axis=1)).mean()
-print(coverage,conflict)
-assert coverage==.75 and conflict==.25</code></pre>
-<pre><code class="language-python">p=np.array([.5,.6,.95,.1])
-entropy=-p*np.log(p)-(1-p)*np.log(1-p)
-order=np.argsort(-entropy,kind=&#x27;stable&#x27;)
-print(order[:2])
-assert order[:2].tolist()==[0,1]</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+labels<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+conflict<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>coverage<span class="syntax-punctuation">,</span>conflict<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> coverage<span class="syntax-operator">==</span><span class="syntax-number">.75</span> <span class="syntax-operator">and</span> conflict<span class="syntax-operator">==</span><span class="syntax-number">.25</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.95</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+entropy<span class="syntax-operator">=</span><span class="syntax-operator">-</span>p<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>p<span class="syntax-punctuation">)</span>
+order<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>entropy<span class="syntax-punctuation">,</span>kind<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-020.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-020-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-020.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-020_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -177,9 +223,9 @@ assert order[:2].tolist()==[0,1]</code></pre>
 <p><strong>Hints:</strong> Ask which rules use independent information.</p>
 <h4 id="exercise-4-rank-uncertainty">Exercise 4: Rank uncertainty<a class="heading-anchor" href="#exercise-4-rank-uncertainty" aria-label="Link to this section">#</a></h4>
 <p>Compute binary entropy for probabilities[.5,.6,.95,.1].</p>
-<p><strong>Expected:</strong> Top two uncertainty indices[0,1]; p=.5 has maximum entropy.</p>
-<p><strong>Verify:</strong> Top two uncertainty indices[0,1]; p=.5 has maximum entropy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
-<p><strong>Hints:</strong> Handle p=0 and1 without log-zero warnings.</p>
+<p><strong>Expected:</strong> Top two uncertainty indices[0,1]; <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math> has maximum entropy.</p>
+<p><strong>Verify:</strong> Top two uncertainty indices[0,1]; <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math> has maximum entropy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Handle <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p=0</annotation></semantics></math> and 1 without log-zero warnings.</p>
 <h4 id="exercise-5-enforce-diversity-and-budget">Exercise 5: Enforce diversity and budget<a class="heading-anchor" href="#exercise-5-enforce-diversity-and-budget" aria-label="Link to this section">#</a></h4>
 <p>Select two examples with families[a,a,b,c], at most one per family.</p>
 <p><strong>Expected:</strong> Selected indices[0,3]; budget0 returns an empty batch.</p>
@@ -204,7 +250,7 @@ assert order[:2].tolist()==[0,1]</code></pre>
 <li><a href="https://burrsettles.com/pub/settles.activelearning.pdf">Settles, Active Learning Literature Survey</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-020.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-020.
 Read courses/nlp/guides/nlp-020.md and courses/nlp/learners/nlp-020.py.
 Direct prerequisites: `nlp-019`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

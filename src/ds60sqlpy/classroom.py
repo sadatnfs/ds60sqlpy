@@ -8,8 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.classroom_runs import ClassroomRunStore
 from ds60sqlpy.execution import MAX_CODE_BYTES
-from ds60sqlpy.lesson_reader import ReaderTarget, render_artifact
+from ds60sqlpy.lesson_reader import (
+    ReaderTarget,
+    reader_relative_path,
+    reference_relative_path,
+    render_artifact,
+)
 from ds60sqlpy.reader_content import highlight_source
 
 SUBJECT_DESCRIPTIONS = {
@@ -27,11 +33,16 @@ class ClassroomService:
         catalog: Catalog,
         dispatch: Callable[[dict[str, Any]], dict[str, Any]],
         targets: dict[Path, ReaderTarget],
+        *,
+        runs_directory: Path | None = None,
     ) -> None:
         self.catalog = catalog
         self.dispatch = dispatch
         self.targets = targets
         self.legacy_ids = frozenset(lesson.id for lesson in catalog)
+        self.runs = ClassroomRunStore(
+            catalog, runs_directory or catalog.repo_root / ".learning" / "classroom-runs"
+        )
 
     def action(self, payload: dict[str, Any]) -> dict[str, Any]:
         action = payload.get("action")
@@ -39,6 +50,24 @@ class ClassroomService:
             return self.index()
         if action == "classroom-solutions":
             return self.solutions(payload)
+        if action == "classroom-history":
+            return {
+                "history": self.runs.history(
+                    payload.get("lesson_id"),
+                    payload.get("language"),
+                    payload.get("mode", "snippet"),
+                    limit=payload.get("limit", 10),
+                )
+            }
+        if action == "classroom-run-result":
+            return {
+                "receipt": self.runs.get(
+                    payload.get("lesson_id"),
+                    payload.get("language"),
+                    payload.get("mode", "snippet"),
+                    payload.get("receipt_id"),
+                )
+            }
         if action == "classroom-highlight":
             source, language = payload.get("source"), payload.get("language", "text")
             if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_CODE_BYTES:
@@ -62,7 +91,8 @@ class ClassroomService:
                 {
                     "id": lesson.id,
                     "title": lesson.title,
-                    "level": lesson.level,
+                    "level": "beginner" if lesson.level == "foundation" else lesson.level,
+                    "source_level": lesson.level,
                     "status": "authored",
                     "engine": "legacy",
                     "outcome": lesson.phase,
@@ -130,6 +160,12 @@ class ClassroomService:
                 if lesson["status"] == "authored"
             )
         authored = sum(track["authored_count"] for track in tracks)
+        lesson_links = dict(module_index.get("lesson_links", {}))
+        for lesson in self.catalog:
+            lesson_links["/" + reader_relative_path(lesson.id)] = lesson.id
+            for path in (lesson.guide_path, lesson.lesson_path):
+                lesson_links["/" + reference_relative_path(path)] = lesson.id
+                lesson_links["/" + path] = lesson.id
         return {
             "schema_version": 1,
             "tracks": tracks,
@@ -138,6 +174,7 @@ class ClassroomService:
             "authored_count": authored,
             "planned_count": len(seen_lessons) - authored,
             "variant_count": variants,
+            "lesson_links": lesson_links,
             "active_job": module_index["active_job"],
             "completed": progress["completed"],
             "learning_paths": progress["paths"],

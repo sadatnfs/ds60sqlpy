@@ -38,7 +38,7 @@ Consider three equal-length documents: “exclude test accounts,” “include t
 
 The tie is correct for the stated lexical evidence. The two documents make opposite claims, but the query terms alone do not distinguish their policy meaning. A deterministic ID tie-break makes the output reproducible; it does not resolve which source is applicable. Version, authority and scope must be considered before an answer adopts either statement.
 
-Adding more query words can help without solving entailment generally. A passage saying “Do not exclude test accounts” still contains exclude,test andaccounts. A bag of terms does not represent the full effect of negation or the scope of an exception. Lexical retrieval is choosing candidates for inspection, not proving that their propositions answer the question correctly.
+Adding more query words can help without solving entailment generally. A passage saying “Do not exclude test accounts” still contains exclude,test and accounts. A bag of terms does not represent the full effect of negation or the scope of an exception. Lexical retrieval is choosing candidates for inspection, not proving that their propositions answer the question correctly.
 
 Technical quantities create another mismatch. “100 milliseconds” and “0.1 seconds” may describe the same duration while sharing little lexical form. A domain-aware normalization step could make the equivalence available, but it must preserve units and context. Blind text substitution can create false matches. The same caution applies to abbreviations, SQL identifiers and method names whose common-language meanings differ from their technical use.
 

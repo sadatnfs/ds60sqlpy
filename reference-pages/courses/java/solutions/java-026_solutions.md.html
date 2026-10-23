@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,64 +164,64 @@
     <article class="document"><h2 id="java-026-explanatory-solutions">java-026: explanatory solutions<a class="heading-anchor" href="#java-026-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Packages organize class names andaccess boundaries. Aclasspath tells the runtime where unnamed-module classes canbe found;it doesnot change the package declared in source. Java&#x27;s module system adds explicitrequires andexports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.</p>
-<p>This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors andruns the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.</p>
-<p><strong>Package:</strong> A namespace andaccess grouping declared by aJava source file.</p>
-<p><strong>Classpath:</strong> Locations used tofind classes in the unnamed-module model.</p>
-<p><strong>Named module:</strong> A unit declaring dependencies andexported packages.</p>
-<p><strong>Export:</strong> Permission for other modules toaccess a package&#x27;s publicAPI.</p>
+<p>Packages organize class names and access boundaries. Aclasspath tells the runtime where unnamed-module classes can be found;it does not change the package declared in source. Java&#x27;s module system adds explicit requires and exports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.</p>
+<p>This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors and runs the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.</p>
+<p><strong>Package:</strong> A namespace and access grouping declared by a Java source file.</p>
+<p><strong>Classpath:</strong> Locations used to find classes in the unnamed-module model.</p>
+<p><strong>Named module:</strong> A unit declaring dependencies and exported packages.</p>
+<p><strong>Export:</strong> Permission for other modules to access a package&#x27;s publicAPI.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules tocompile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable andbounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.</p>
+<p>The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules to compile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable and bounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.</p>
 <h3 id="exercise-1-inspect-a-platform-module">Exercise 1: Inspect a platform module<a class="heading-anchor" href="#exercise-1-inspect-a-platform-module" aria-label="Link to this section">#</a></h3>
-<p>Task: ReadString.class module andpackage names.</p>
-<p>The fully qualified class name,package andmodule are distinct identities. Apackage name alone doesnot establish module membership.</p>
-<pre><code class="language-java">assert String.class.getModule().getName().equals(&quot;java.base&quot;);assert String.class.getPackageName().equals(&quot;java.lang&quot;);</code></pre>
-<p><strong>Expected:</strong> modulejava.base;packagejava.lang.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with modulejava.base;packagejava.lang. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Read <code>String.class</code> module and package names.</p>
+<p>The fully qualified class name,package and module are distinct identities. Apackage name alone does not establish module membership.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">assert</span> String<span class="syntax-punctuation">.</span><span class="syntax-attribute">class</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">getModule</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">getName</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">java.base</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">assert</span> String<span class="syntax-punctuation">.</span><span class="syntax-attribute">class</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">getPackageName</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">java.lang</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> module <code>java.base</code>;package <code>java.lang</code>.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with module <code>java.base</code>;package <code>java.lang</code>. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-inspect-the-classroom-classpath-context">Exercise 2: Inspect the classroom classpath context<a class="heading-anchor" href="#exercise-2-inspect-the-classroom-classpath-context" aria-label="Link to this section">#</a></h3>
 <p>Task: ReadMain.class module metadata.</p>
-<p>The classroom compiles a singleMain.java andlaunches it byclasspath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.</p>
-<pre><code class="language-java">assert !Main.class.getModule().isNamed();</code></pre>
-<p><strong>Expected:</strong> Main belongs to the unnamed module in the standardclasspath launch.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with Main belongs to the unnamed module in the standardclasspath launch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>The classroom compiles a singleMain.java andlaunches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>Main<span class="syntax-punctuation">.</span><span class="syntax-attribute">class</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">getModule</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isNamed</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> Main belongs to the unnamed module in the standard classpath launch.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with Main belongs to the unnamed module in the standard classpath launch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-compile-two-real-modules">Exercise 3: Compile two real modules<a class="heading-anchor" href="#exercise-3-compile-two-real-modules" aria-label="Link to this section">#</a></h3>
-<p>Task: Create the owned greeting/application fixture andcompile both with--module-source-path.</p>
-<p>The compiler verifies actualrequires/exports syntax andpackage layout. Merely reading a module-info string would not establish a valid build.</p>
-<pre><code class="language-java">try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;
-    assert java.nio.file.Files.isRegularFile(fixture.output.resolve(&quot;course.greeting/module-info.class&quot;));
-    assert java.nio.file.Files.isRegularFile(fixture.output.resolve(&quot;course.app/module-info.class&quot;));
-}</code></pre>
-<p><strong>Expected:</strong> compiler exit0 andmodule-info.class files present.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with compiler exit0 andmodule-info.class files present. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
-<h3 id="exercise-4-inspect-declared-dependencies-andexports">Exercise 4: Inspect declared dependencies andexports<a class="heading-anchor" href="#exercise-4-inspect-declared-dependencies-andexports" aria-label="Link to this section">#</a></h3>
-<p>Task: Read the compiled descriptors withModuleFinder.</p>
+<p>Task: Create the owned greeting/application fixture and compile both with--module-source-path.</p>
+<p>The compiler verifies actualrequires/exports syntax and package layout. Merely reading a module-info string would not establish a valid build.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span>ModuleFixture fixture<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ModuleFixture<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">assert</span> fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">compile</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isRegularFile</span><span class="syntax-punctuation">(</span>fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">output</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.greeting/module-info.class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isRegularFile</span><span class="syntax-punctuation">(</span>fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">output</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.app/module-info.class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> compiler exit 0 andmodule-info.class files present.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with compiler exit 0 andmodule-info.class files present. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-4-inspect-declared-dependencies-and-exports">Exercise 4: Inspect declared dependencies and exports<a class="heading-anchor" href="#exercise-4-inspect-declared-dependencies-and-exports" aria-label="Link to this section">#</a></h3>
+<p>Task: Read the compiled descriptors with ModuleFinder.</p>
 <p>Descriptors provide structured evidence of the boundary. Apublic class without an export would not supply the same named-moduleAPI.</p>
-<pre><code class="language-java">try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;var finder=java.lang.module.ModuleFinder.of(fixture.output);
-    var app=finder.find(&quot;course.app&quot;).orElseThrow().descriptor();var library=finder.find(&quot;course.greeting&quot;).orElseThrow().descriptor();
-    assert app.requires().stream().anyMatch(item -&gt; item.name().equals(&quot;course.greeting&quot;));
-    assert library.exports().stream().anyMatch(item -&gt; item.source().equals(&quot;edu.example.greeting&quot;));
-}</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span>ModuleFixture fixture<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ModuleFixture<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">assert</span> fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">compile</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">var</span> finder<span class="syntax-operator">=</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">lang</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">module</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ModuleFinder</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span>fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">output</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">var</span> app<span class="syntax-operator">=</span>finder<span class="syntax-punctuation">.</span><span class="syntax-attribute">find</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.app</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseThrow</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">descriptor</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">var</span> library<span class="syntax-operator">=</span>finder<span class="syntax-punctuation">.</span><span class="syntax-attribute">find</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.greeting</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">orElseThrow</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">descriptor</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> app<span class="syntax-punctuation">.</span><span class="syntax-attribute">requires</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">stream</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">anyMatch</span><span class="syntax-punctuation">(</span>item <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> item<span class="syntax-punctuation">.</span><span class="syntax-attribute">name</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.greeting</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> library<span class="syntax-punctuation">.</span><span class="syntax-attribute">exports</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">stream</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">anyMatch</span><span class="syntax-punctuation">(</span>item <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> item<span class="syntax-punctuation">.</span><span class="syntax-attribute">source</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">edu.example.greeting</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> app requirescourse.greeting;library exportsedu.example.greeting.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with app requirescourse.greeting;library exportsedu.example.greeting. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-run-the-modular-application">Exercise 5: Run the modular application<a class="heading-anchor" href="#exercise-5-run-the-modular-application" aria-label="Link to this section">#</a></h3>
 <p>Task: Launch the compiled app in a fresh childJVM with the fixed module path.</p>
 <p>The fresh process tests runtime module resolution in addition to compilation. It cannot rely on classes accidentally loaded in the parent process.</p>
-<pre><code class="language-java">try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;assert fixture.run().strip().equals(&quot;Hello, modules!&quot;);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span>ModuleFixture fixture<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ModuleFixture<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">assert</span> fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">compile</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">assert</span> fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">run</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">strip</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, modules!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> stdoutHello, modules! andexit0.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with stdoutHello, modules! andexit0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-reject-a-missing-module-dependency">Exercise 6: Reject a missing module dependency<a class="heading-anchor" href="#exercise-6-reject-a-missing-module-dependency" aria-label="Link to this section">#</a></h3>
 <p>Task: Compile an app requiringcourse.missing instead ofcourse.greeting.</p>
-<p>The negative control proves dependency resolution is being checked. The failure is expected anddoesnot get converted into a passing runtime result.</p>
-<pre><code class="language-java">try(ModuleFixture fixture=new ModuleFixture()) {
-    java.nio.file.Files.writeString(fixture.source.resolve(&quot;course.app/module-info.java&quot;),&quot;module course.app { requires course.missing; }&quot;);
-    assert fixture.compile()!=0 &amp;&amp; !fixture.diagnostics.isBlank();
-}</code></pre>
-<p><strong>Expected:</strong> nonzero compiler exit andcaptured diagnostic.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with nonzero compiler exit andcaptured diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>The negative control proves dependency resolution is being checked. The failure is expected and does not get converted into a passing runtime result.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span>ModuleFixture fixture<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ModuleFixture<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">source</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">course.app/module-info.java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">module course.app { requires course.missing; }</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">compile</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">!</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> <span class="syntax-operator">!</span>fixture<span class="syntax-punctuation">.</span><span class="syntax-attribute">diagnostics</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isBlank</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> nonzero compiler exit and captured diagnostic.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with nonzero compiler exit and captured diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

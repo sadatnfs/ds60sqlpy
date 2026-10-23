@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-020`. The 
 
 ## Learning objectives
 
-A padded sequence contains real positions and artificial storage positions. The central investigation is concrete: Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row. The finish condition is embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A padded sequence contains real positions and artificial storage positions. The central investigation is concrete: Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row. The finish condition is embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -30,7 +30,7 @@ Keras can propagate mask metadata from Embedding(mask_zero=True)through compatib
 
 **Padding index:** A vocabulary entry reserved for artificial storage positions.
 
-**Packed sequence:** A representationallowing recurrent layers to skip invalid tail positions.
+**Packed sequence:** A representation allowing recurrent layers to skip invalid tail positions.
 
 **Final valid state:** The hidden state after the last real observation.
 
@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known 4 x2table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
+Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known 4 x 2 table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
 
 ## Follow lookup, recurrent state and loss participation separately
 
@@ -99,7 +99,7 @@ assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
 
 ### Example C: Compare packed and valid-prefix GRU state
 
-The packedsequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
+The packed sequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
 
 ```python
 gru=nn.GRU(2,2,batch_first=True)
@@ -118,7 +118,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Lookup and mark padding.** Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row.
+1. **Lookup and mark padding.** Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.
    **Expected:** embedding shape 1, 3, 2; mask True, True, False.
    **Verify:** Save the assertion results for exercise 1, including embedding shape 1, 3, 2; mask True, True, False.
 

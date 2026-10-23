@@ -46,7 +46,7 @@ The physical plan shows where the Python evaluation is inserted. The Python refe
 
 A UDF must be pure for this example: it does not write files, call a service, mutate shared counters or depend on invocation order. Spark can reevaluate expressions or retry tasks, so an application should not encode exactly-once external effects in a scalar UDF. Marking a function nondeterministic changes optimizer assumptions but does not turn it into a transactional side-effect mechanism. The result contract concerns returned values rather than the number of Python or JVM calls.
 
-The final counterexample deliberately uses a broader lowercase-and-trim implementation. It changesnon-ASCII capitals and fails to collapse interior whitespace correctly. Python's defaultstrip also removes the nonbreaking spaces that this contract preserves, while the JVMtrim behavior differs. The validators must reject the wrong implementation even if its output looks reasonable to a human. This teaches why a business rule needs examples at semantic boundaries rather than only a happy-path word.
+The final counterexample deliberately uses a broader lowercase-and-trim implementation. It changesnon-ASCII capitals and fails to collapse interior whitespace correctly. Python's default strip also removes the nonbreaking spaces that this contract preserves, while the JVMtrim behavior differs. The validators must reject the wrong implementation even if its output looks reasonable to a human. This teaches why a business rule needs examples at semantic boundaries rather than only a happy-path word.
 
 Arrow and pandas UDFs are an optional extension, not imported or executed by the default sources. Spark 4.0.1 documents pandas 2.0.0 and PyArrow 11.0.0 as minimum supported versions for this SQL integration. A dedicated profile must still record exact compatible package pins, then rerun the golden fixture and inspect the resulting plan; minimum versions alone do not qualify an environment. Arrow changes the transfer representation and batching boundary; it does not eliminate data conversion or guarantee speed. No optional dependency is assumed installed, and no lesson code downloads one.
 
@@ -144,7 +144,7 @@ Create a Scala String UDF or a Python StringType scalar UDF with useArrow=False,
 
 Return the physical plan strings for the built-in and language-specific UDF relations. Identify Python evaluation only where it is actually present.
 
-**Expected result/shape:** Python UDF plan contains BatchEvalPython; built-in contains no Python evaluator. Scala UDF expression is present without BatchEvalPython orArrowEvalPython.
+**Expected result/shape:** Python UDF plan contains BatchEvalPython; built-in contains no Python evaluator. Scala UDF expression is present without BatchEvalPython or ArrowEvalPython.
 
 **Verify:** Assert the language-appropriate markers and print both plans; do not infer a speed ratio from them.
 
@@ -154,7 +154,7 @@ Return the physical plan strings for the built-in and language-specific UDF rela
 
 Classify normalized values as missing, empty or text and count each category. Separately select the identity whose normalized text equals the literal null.
 
-**Expected result/shape:** Missing 1, empty 2, text 9. Literal null text belongs only toID 12; unknown value belongs only toID 1.
+**Expected result/shape:** Missing 1, empty 2, text 9. Literal null text belongs only to ID 12; unknown value belongs only to ID 1.
 
 **Verify:** Assert all category counts and both exact identity selections for built-in and UDF results.
 
@@ -164,7 +164,7 @@ Classify normalized values as missing, empty or text and count each category. Se
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected result/shape:** The wrong implementation disagrees at least onIDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
+**Expected result/shape:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
 
 **Verify:** Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization.
 

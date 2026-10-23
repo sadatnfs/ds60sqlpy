@@ -1,7 +1,7 @@
 # PyTorch authoring contract
 
 The user wants PyTorch and TensorFlow in equally large amounts, with very
-detailed explanations. This is a complete36lesson deep-learning route, not
+detailed explanations. This is a complete 36-lesson deep-learning route, not
 only the PyTorch snippets inside LLM theory. Read root guidance and the paired
 TensorFlow guide before authoring each topic. No em dashes. Use original prose.
 

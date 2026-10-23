@@ -129,7 +129,7 @@ np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 
 ### Example B: Inspect the preference gradient
 
-The negative gradient means gradient descent increases the chosen-response advantage. The scale includesbeta and the sigmoid derivative at zero.
+The negative gradient means gradient descent increases the chosen-response advantage. The scale includes beta and the sigmoid derivative at zero.
 
 ```python
 loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-12,rtol=0)

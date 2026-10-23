@@ -74,7 +74,7 @@ assert [len(batch) for batch in short]==[2,2,1]
 
 ## Exercise 3: Run three independent updates
 
-The question is: Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.
+The question is: Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each batch.
 
 Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.
 

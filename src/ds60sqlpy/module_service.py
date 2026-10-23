@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ds60sqlpy.catalog import Catalog
-from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
+from ds60sqlpy.lesson_reader import reference_relative_path, render_artifact, rendered_targets
 from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
 from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
@@ -88,8 +88,18 @@ class ModuleService:
         if action == "module-index":
             with self.jobs.lock:
                 active = self.jobs.active
+            # Shared guide paths prefer the canonical lesson; unique variant source
+            # paths still return directly to their own saved workspace.
+            lesson_links: dict[str, str] = {}
+            for lesson in sorted(
+                self.catalog.lessons.values(), key=lambda item: ("@" in item.id, item.id)
+            ):
+                for path in (lesson.guide_path, lesson.source_path):
+                    lesson_links.setdefault("/" + reference_relative_path(path), lesson.id)
+                    lesson_links.setdefault("/" + path, lesson.id)
             return {
                 **self.catalog.index(),
+                "lesson_links": lesson_links,
                 "active_job": self.jobs.get(active) if active is not None else None,
             }
         if action == "module-readiness":

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -147,34 +193,34 @@
 <p>text.encode(&quot;utf-8&quot;) turns a string into bytes. payload.decode(&quot;utf-8&quot;) performs strict decoding by default and raises when byte sequences are invalid. len(text) counts Python code points; len(payload) counts bytes. Neither expression universally counts displayed characters or language-model tokens.</p>
 <p>unicodedata.normalize(&quot;NFC&quot;, text) creates a normalized string rather than changing the original object. A hash of raw bytes identifies raw content; a hash of normalized bytes identifies the chosen canonicalized representation. Keep the policies labeled. The optional hash is not encryption, permission or a privacy guarantee. An empty string has a valid empty encoding, even though a later token-loss mean would still need a nonempty target denominator.</p>
 <h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
-<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, choose <strong>Journeys</strong> and select <code>llm-006</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
+<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, return to the classroom home and choose the LLM theory path and select <code>llm-006</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
 <p>Open <a href="../lessons/llm-006.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-006/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
-<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
-&amp; $CoursePython .learning\expansion\llm-006\practice.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
-&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/llm-006/practice.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell: selected interpreter from the course setup.</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>expansion<span class="syntax-punctuation">\</span>llm<span class="syntax-punctuation">-</span>006<span class="syntax-punctuation">\</span>practice<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux: selected course interpreter path from setup.</span>
+<span class="syntax-string">&quot;</span>$DS60_COURSE_PYTHON<span class="syntax-string">&quot;</span> .learning/expansion/llm-006/practice.py</code></pre>
 <p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-inspect-bytes-and-code-points">Example A: Inspect bytes and code points<a class="heading-anchor" href="#example-a-inspect-bytes-and-code-points" aria-label="Link to this section">#</a></h4>
 <p>Compare three fixed strings and round-trip their exact UTF-8 payloads.</p>
-<pre><code class="language-python">texts = [&quot;cat&quot;, &quot;café&quot;, &quot;🙂&quot;]
-counts = [(len(text), len(text.encode(&quot;utf-8&quot;))) for text in texts]
-assert counts == [(3, 3), (4, 5), (1, 4)]
-assert all(text.encode(&quot;utf-8&quot;).decode(&quot;utf-8&quot;) == text for text in texts)
-print(counts)</code></pre>
+<pre class="highlighted-code"><code class="language-python">texts <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cat</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">🙂</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+counts <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> texts<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> counts <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> text <span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> texts<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The accented word and smile require more bytes than code points. These are exact counts for the literal examples, not a general grapheme-counting algorithm.</p>
 <h4 id="example-b-a-deliberate-identity-change">Example B: A deliberate identity change<a class="heading-anchor" href="#example-b-a-deliberate-identity-change" aria-label="Link to this section">#</a></h4>
 <p>Compare composed and decomposed spellings before and after NFC.</p>
-<pre><code class="language-python">import unicodedata
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> unicodedata
 
-composed = &quot;é&quot;
-# Construct directly to avoid a platform-dependent source-file normalization step.
-decomposed = &quot;e&quot; + chr(0x0301)
-assert composed != decomposed
-assert composed.encode(&quot;utf-8&quot;) != decomposed.encode(&quot;utf-8&quot;)
-assert unicodedata.normalize(&quot;NFC&quot;, decomposed) == composed
-print(len(composed), len(decomposed))</code></pre>
+composed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">é</span><span class="syntax-string">&quot;</span>
+<span class="syntax-comment"># Construct directly to avoid a platform-dependent source-file normalization step.</span>
+decomposed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">e</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">chr</span><span class="syntax-punctuation">(</span><span class="syntax-number">0x0301</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> composed <span class="syntax-operator">!=</span> decomposed
+<span class="syntax-keyword">assert</span> composed<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> decomposed<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> unicodedata<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> composed
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>composed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Raw identity differs, while the explicit normalization makes these two fixtures agree. Retaining the normalized string cannot reconstruct which original spelling was supplied.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
@@ -209,11 +255,11 @@ print(len(composed), len(decomposed))</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Without the examples, explain why len(text), len(text.encode(&quot;utf-8&quot;)) and token count can all differ. Then choose a fresh combining-character fixture and state which identity policy your duplicate check uses.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>In <a href="llm-007.md.html">llm-007</a>, the raw bytes become the starting units for a small learned subword system. We will preserve their order and round-trip identity while changing how many token units represent a word. Retain this chapter&#x27;s distinction between reversible representation and deliberate normalization: a tokenizer&#x27;s advertised round trip is only as strong as the preprocessing contract it includes.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-006,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-006,
 Unicode, bytes and tokenizer round trips. Read courses/llm-theory/guides/llm-006.md
 and courses/llm-theory/lessons/llm-006.py. Respect direct prerequisites
 llm-005 and beginner depth. Explain the actual fixture&#x27;s

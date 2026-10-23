@@ -37,7 +37,7 @@ The source never turns the negative value into an unsigned size. The fixture is 
 int main(){ const long long count=-1; if(count<0){std::cout<<"rejected\n"; return 0;} return 1; }
 ```
 
-**Expected:** rejected followed by newline; exit0 means the intended rejection branch was observed.
+**Expected:** rejected followed by newline; exit 0 means the intended rejection branch was observed.
 
 ## Exercises and explanatory solutions
 
@@ -97,7 +97,7 @@ An integer has an exact representation for these cents values. A later lesson ca
 
 **Expected result/shape:** For cpp-003 Exercise 6, count 3; zero would also be valid, while-1 is not.
 
-**Verify:** For cpp-003 Exercise 6, test3 and 0 after validation and explain that arbitrary huge values still need a range check.
+**Verify:** For cpp-003 Exercise 6, test 3 and 0 after validation and explain that arbitrary huge values still need a range check.
 
 This bounded control demonstrates an intentional conversion. It does not justify casting arbitrary external long long values on every platform without representability validation.
 

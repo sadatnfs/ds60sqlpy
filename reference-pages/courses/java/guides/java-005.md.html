@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner, approximately 90 minutes. Direct prerequisites: <code>java-004</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain array index, utf-16 code unit, code point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Copy array1,2,3,mutate the copy and compare the original. The final exercise transfers the mechanism to reject an invalid array index.</p>
+<p>Explain array index, utf-16 code unit, code point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Copy array 1,2,3,mutate the copy and compare the original. The final exercise transfers the mechanism to reject an invalid array index.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An array is a fixed-length indexed container. A String is immutable text represented in UTF-16 code units. Those code units are not always complete Unicode characters: an emoji outside the basic multilingual plane uses a surrogate pair. String.length counts code units, while codePointCount counts Unicode code points. Even code points do not always equal user-perceived characters, because combining marks can join a base letter. Indexing and slicing therefore need a declared unit. Immutability means a transformation returns a new String rather than editing the original; it does not mean every object containing a String is immutable.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -127,49 +173,49 @@
 <p><strong>UTF-16 code unit:</strong> A16-bit storage unit used by Java String indexing.</p>
 <p><strong>Code point:</strong> A Unicode scalar identity represented by one or two UTF-16 units.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-005/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
-<p>Array indices start at0 and stop beforelength. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.</p>
+<p>Array indices start at0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-copy-array-storage">Example A: Copy array storage<a class="heading-anchor" href="#example-a-copy-array-storage" aria-label="Link to this section">#</a></h4>
-<p>The new array owns its storage. A simple assignmentcopy=original would alias the same array and make the mutation visible through both variables.</p>
-<pre><code class="language-java">import java.util.*;
+<p>The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
-        assert original[0] == 1 &amp;&amp; copy[0] == 9;
-    }
-}
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> copy <span class="syntax-operator">=</span> Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">copyOf</span><span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> original<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
-<p><strong>Expected:</strong> original starts1;copy starts9.</p>
+<p><strong>Expected:</strong> original starts 1; copy starts 9.</p>
 <h4 id="example-b-count-text-units">Example B: Count text units<a class="heading-anchor" href="#example-b-count-text-units" aria-label="Link to this section">#</a></h4>
 <p>The emoji occupies a surrogate pair. Treatinglength as a visible-character count would overcount this simple example.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
-        assert original[0] == 1 &amp;&amp; copy[0] == 9;
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> copy <span class="syntax-operator">=</span> Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">copyOf</span><span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> original<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
 
-        String text = &quot;A\ud83d\ude42&quot;;
-        assert text.length() == 3;
-        assert text.codePointCount(0, text.length()) == 2;
-    }
-}
+        String text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">\</span><span class="syntax-string">ud83d</span><span class="syntax-string">\</span><span class="syntax-string">ude42</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">codePointCount</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> length3 code units;2 code points.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Copy array storage.</strong> Copy array1,2,3,mutate the copy and compare the original. <strong>Expected:</strong> original starts1;copy starts9. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with original starts1;copy starts9.</li>
+<li><strong>Copy array storage.</strong> Copy array 1,2,3,mutate the copy and compare the original. <strong>Expected:</strong> original starts 1; copy starts 9. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with original starts 1; copy starts 9.</li>
 </ol>
 <ol>
 <li><strong>Count text units.</strong> Inspect stringA followed by an emoji. <strong>Expected:</strong> length3 code units;2 code points. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with length3 code units;2 code points.</li>
@@ -198,7 +244,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-005: Arrays, strings and Unicode.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-005: Arrays, strings and Unicode.
 Read courses/java/guides/java-005.md and courses/java/lessons/java-005.java. Direct prerequisites: `java-004`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

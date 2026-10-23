@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-027`
 
 ## Learning objectives
 
-Explain http status, loopback binding, request timeout, exchange lifetime using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start the fixture andGET/health. The final exercise transfers the mechanism to verify local-only target and closure.
+Explain http status, loopback binding, request timeout, exchange lifetime using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start the fixture and request `GET /health`. The final exercise transfers the mechanism to verify local-only target and closure.
 
 ## Purpose and mental model
 
-HTTP is a request/response protocol with method,path,status,headers andbody. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting thebody. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies andserver exchanges own resources that need closure.
+HTTP is a request/response protocol with method,path,status,headers and body. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting the body. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies and server exchanges own resources that need closure.
 
-This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses theJDKHttpClient tocall it. It doesnot contact anexternal service orstart a persistent deployment. Thehandler accepts anexactpath andGETmethod,returns explicitUTF-8content,andcloses everyexchange. try-with-resources owns both client andserver wrapper inJava21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.
+This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses the JDK HttpClient to call it. It does not contact an external service or start a persistent deployment. Thehandler accepts an exact path and GET method,returns explicitUTF-8content,and closes every exchange. try-with-resources owns both client and server wrapper in Java 21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.
 
 ## Vocabulary and concepts
 
 **HTTP status:** The response code describing protocol/application outcome.
 
-**Loopback binding:** A listener restricted to thelocal host network interface.
+**Loopback binding:** A listener restricted to the local host network interface.
 
 **Request timeout:** A bound on client waiting for a request.
 
-**Exchange lifetime:** Ownership of request/response streams andconnection state.
+**Exchange lifetime:** Ownership of request/response streams and connection state.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-028/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-HttpServer.create binds anInetSocketAddress withport0,thengetAddress reveals the actualport. createContext uses prefixmatching,so thehandler should validate anexactpath when that is thecontract. HttpRequest specifies a timeout andmethod. HttpResponse exposes statusCode,headers andbody separately. stop(0) releases the ownedlistener when thefixture closes.
+HttpServer.create binds an InetSocketAddress withport0,thengetAddress reveals the actual port. createContext uses prefix matching,so the handler should validate an exact path when that is the contract. HttpRequest specifies a timeout and method. HttpResponse exposes statusCode,headers and body separately. stop(0) releases the owned listener when the fixture closes.
 
 ## Worked example / walkthrough
 
 ### Example A: Call an owned loopback endpoint
 
-The request reaches a real localHTTPserver. A returnedStringalonewouldnotverify routing,status orresourceclosure.
+The request reaches a real localHTTPserver. A a returned String alone would not verify routing,status or resource closure.
 
 ```java
 import java.util.*;
@@ -72,11 +72,11 @@ public class Main {
 
 ```
 
-**Expected:** status200 andbodyok.
+**Expected:** status 200 and body ok.
 
 ### Example B: Inspect content metadata
 
-Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess aplatform default.
+Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess a platform default.
 
 ```java
 import java.util.*;
@@ -106,7 +106,7 @@ public class Main {
 
 ```
 
-**Expected:** text/plain withUTF-8 charset.
+**Expected:** text/plain with UTF-8 charset.
 
 ## Prediction before your attempt
 
@@ -114,29 +114,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Call an owned loopback endpoint.** Start the fixture andGET/health.
-   **Expected:** status200 andbodyok.
-   **Verify:** Compare your assertion values or captured diagnostic with status200 andbodyok.
+1. **Call an owned loopback endpoint.** Start the fixture and request `GET /health`.
+   **Expected:** status 200 and body ok.
+   **Verify:** Compare your assertion values or captured diagnostic with status 200 and body ok.
 
-2. **Inspect content metadata.** ReadContent-Type on the successfulresponse.
-   **Expected:** text/plain withUTF-8 charset.
-   **Verify:** Compare your assertion values or captured diagnostic with text/plain withUTF-8 charset.
+2. **Inspect content metadata.** ReadContent-Type on the successful response.
+   **Expected:** text/plain with UTF-8 charset.
+   **Verify:** Compare your assertion values or captured diagnostic with text/plain with UTF-8 charset.
 
 3. **Reject an unsupported method.** POSTto/health underaGET-onlycontract.
-   **Expected:** status405 andmethod not allowed body.
-   **Verify:** Compare your assertion values or captured diagnostic with status405 andmethod not allowed body.
+   **Expected:** status405 and method not allowed body.
+   **Verify:** Compare your assertion values or captured diagnostic with status405 and method not allowed body.
 
-4. **Reject a prefix lookalike.** GET/health-extra,whichmatchesthecontextprefixbutnot thedeclaredexactpath.
+4. **Reject a prefix lookalike.** GET/health-extra,which matches the context prefix but not the declared exact path.
    **Expected:** status404.
    **Verify:** Compare your assertion values or captured diagnostic with status404.
 
 5. **Keep error status separate from transport success.** GETanunknownpathandinspectthecompletedresponse.
-   **Expected:** HTTPexchangecompletes with404 ratherthan a fabricated200.
-   **Verify:** Compare your assertion values or captured diagnostic with HTTPexchangecompletes with404 ratherthan a fabricated200.
+   **Expected:** HTTP exchange completes with404 rather than a fabricated200.
+   **Verify:** Compare your assertion values or captured diagnostic with HTTP exchange completes with404 rather than a fabricated200.
 
-6. **Verify local-only target and closure.** Inspecttheboundhostandpositiveephemeralport,thenclose thewrapper.
-   **Expected:** host127.0.0.1;portpositive;closedflagtrue.
-   **Verify:** Compare your assertion values or captured diagnostic with host127.0.0.1;portpositive;closedflagtrue.
+6. **Verify local-only target and closure.** Inspect the bound host and positive ephemeral port,then close the wrapper.
+   **Expected:** host 127.0.0.1;port positive; closed flag true.
+   **Verify:** Compare your assertion values or captured diagnostic with host 127.0.0.1;port positive; closed flag true.
 
 ## Common pitfalls and diagnosis
 

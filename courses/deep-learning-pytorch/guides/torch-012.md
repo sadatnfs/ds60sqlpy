@@ -42,7 +42,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Create X shaped(6, 3), targets shaped(6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.
+Create X shaped(6, 3), targets shaped(6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD with rate 0.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.
 
 ## Derive a capstone oracle from the training design
 
@@ -60,7 +60,7 @@ After 100 updates, the missing fraction is \(r={0.95}^{100}\), about 0.00592. Th
 
 The curve records each loss before that iteration's update. Its first value is 1.5 and its last value corresponds to 99 completed updates, namely \(1.5\cdot {0.95}^{198}\). The separately recomputed final training error follows 100 updates and is \(1.5\cdot {0.95}^{200}\). Calling curve[-1] the final model's loss would create a one-step interpretation error even though every loop operation ran successfully.
 
-The fixture is identifiable within this hypothesis class because the three nonzero training rows span all three feature directions. That mathematical fact helps explain successful recovery on linear combinations of those directions. It does not show that an arbitrary real dataset is linear, noise-free, representative orwell-conditioned. Adding a trainable bias, changing feature scaling oraltering the loss denominator changes the derivation and requires a new oracle.
+The fixture is identifiable within this hypothesis class because the three nonzero training rows span all three feature directions. That mathematical fact helps explain successful recovery on linear combinations of those directions. It does not show that an arbitrary real dataset is linear, noise-free, representative orwell-conditioned. Adding a trainable bias, changing feature scaling or altering the loss denominator changes the derivation and requires a new oracle.
 
 The final report should retain training and assessment IDs, their counts, parameter dtype and layout, initial state, actual update count, baseline score, final fixed-state errors and the visible synthetic limitation. model.eval() and no_grad make evaluation behavior and derivative recording explicit; no optimizer step occurs during assessment. The two assessment rows demonstrate the intended procedure, but are far too few and too deliberately constructed to support a broad reliability claim.
 
@@ -128,7 +128,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** mean.5; holdout MSE 7.25.
    **Verify:** Save the assertion results for exercise 2, including mean.5; holdout MSE 7.25.
 
-3. **Train a bounded linear model.** Initialize a bias-free 3-to-1Linear layer at zero and run 100 SGD.1 updates.
+3. **Train a bounded linear model.** Initialize a bias-free 3-to-1Linear layer at zero and run 100 SGD with rate 0.1 updates.
    **Expected:** 100 finite updates; training loss decreases.
    **Verify:** Save the assertion results for exercise 3, including 100 finite updates; training loss decreases.
 

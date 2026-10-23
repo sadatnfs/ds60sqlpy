@@ -20,7 +20,7 @@ The same measured CPU use can lead to different utilization ratios when requests
 
 The proportional model scales count according to the demand ratio. It is useful for understanding the direction and approximate magnitude, while controller safeguards and incomplete measurements can alter the actual action.
 
-**Expected:** Unclipped recommendations2 and1.
+**Expected:** Unclipped recommendations2 and 1.
 
 ## Exercise 3: Recognize saturation at the maximum
 

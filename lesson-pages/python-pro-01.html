@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -374,9 +420,9 @@
 </ul>
 <p>Now run the answer-free learner artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_01_package_engineering.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_pro_01_package_engineering<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py</code></pre>
 <p>Predict whether the name printed from <code>[project]</code> contains a hyphen or an underscore. Then compare it with the import directory under <code>src/</code>.</p>
 <h5 id="guide--wheel-versus-source-distribution">Wheel versus source distribution<a class="heading-anchor" href="#guide--wheel-versus-source-distribution" aria-label="Link to this section">#</a></h5>
 <p>A wheel name ends in <code>.whl</code> and contains compatibility tags. Installation mostly unpacks its files. An sdist usually ends in <code>.tar.gz</code>; installing it requires a build backend and therefore has more opportunities for platform, tool-version, or offline failures.</p>
@@ -387,11 +433,13 @@
 <li>Do not assume that successfully importing from the checkout proves either artifact works.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_01_package_engineering.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_pro_01_package_engineering<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -403,34 +451,34 @@
 <li><strong><code>python -m build</code> then clean install:</strong> proves the built wheel, not repository-path import behavior.</li>
 </ul>
 <h5 id="guide--micro-example-a-distinguish-distribution-and-import-identities">Micro-example A — distinguish distribution and import identities<a class="heading-anchor" href="#guide--micro-example-a-distinguish-distribution-and-import-identities" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import importlib.util
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> importlib.util
 
-distribution_name = &quot;beautiful-soup4&quot;
-import_name = &quot;bs4&quot;
-print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})
-# The names are contracts for different tools and need not match.
-assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name
-print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</code></pre>
+distribution_name <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beautiful-soup4</span><span class="syntax-string">&quot;</span>
+import_name <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bs4</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">installer_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> distribution_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">import_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> import_name<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-comment"># The names are contracts for different tools and need not match.</span>
+<span class="syntax-keyword">assert</span> distribution_name<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">_</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> import_name
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">installed import available:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span>import_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Installer and import identifiers can differ; availability must be checked through the intended interface.</p>
 <p><strong>Why it matters:</strong> This mechanics example does not install anything and does not require <code>bs4</code> to be present.</p>
 <h5 id="guide--micro-example-b-create-a-deterministic-source-manifest-digest">Micro-example B — create a deterministic source manifest digest<a class="heading-anchor" href="#guide--micro-example-b-create-a-deterministic-source-manifest-digest" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import hashlib
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 
-files = {
-    &quot;src/tiny/__init__.py&quot;: b&#x27;__version__ = &quot;1.0.0&quot;\n&#x27;,
-    &quot;src/tiny/core.py&quot;: b&quot;def add(a, b): return a + b\n&quot;,
-}
-manifest = &quot;\n&quot;.join(
-    f&quot;{path}:{hashlib.sha256(content).hexdigest()}&quot; for path, content in sorted(files.items())
-)
-digest = hashlib.sha256(manifest.encode(&quot;utf-8&quot;)).hexdigest()
-print(manifest, digest, sep=&quot;\n&quot;)
-assert len(digest) == 64</code></pre>
+files <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">src/tiny/__init__.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">__version__ = </span><span class="syntax-string">&quot;</span><span class="syntax-string">1.0.0</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">src/tiny/core.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">def add(a, b): return a + b</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+manifest <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">:</span><span class="syntax-string">{</span>hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>content<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> path<span class="syntax-punctuation">,</span> content <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>files<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+digest <span class="syntax-operator">=</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>manifest<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">,</span> digest<span class="syntax-punctuation">,</span> sep<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>digest<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">64</span></code></pre>
 <p><strong>Expected observation:</strong> Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim about package quality.</p>
 <p><strong>Why it matters:</strong> The manifest includes every release-relevant file and normalizes no bytes silently.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
 <p><strong>Common mistake:</strong> Running an import from the repo root and concluding that the wheel contains the right packages and data.</p>
-<p><strong>Diagnostic:</strong> Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print <code>module.<strong>file</strong></code> plus distribution version.</p>
+<p><strong>Diagnostic:</strong> Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print <code>module.__file__</code> plus distribution version.</p>
 <p><strong>Transfer question:</strong> What extra checks would a package with a console script, typed marker, and package data need before publication?</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Work in <a href="python-pro-01.html#learner"><code>lessons/py_pro_01_package_engineering.py</code></a> or a copy under <code>.learning/</code>.</p>
@@ -461,20 +509,20 @@ assert len(digest) == 64</code></pre>
 <h5 id="guide--exercise-4-build-in-a-disposable-directory">Exercise 4 — build in a disposable directory<a class="heading-anchor" href="#guide--exercise-4-build-in-a-disposable-directory" aria-label="Link to this section">#</a></h5>
 <p>Use a temporary or ignored directory. A production-quality helper should first copy the source tree to a disposable staging directory because some backends write metadata beside the source even when <code>--outdir</code> is elsewhere. These commands intentionally prevent online build isolation.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$work = Join-Path $env:TEMP &quot;ds60-package-lab&quot;
-New-Item -ItemType Directory -Force -Path $work | Out-Null
-.\.venv\Scripts\python.exe -m build --no-isolation --sdist --wheel --outdir $work python\professional\fixtures\tiny_package
-Get-ChildItem $work</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$work <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Join-Path</span> $env:TEMP <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-package-lab</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">New-Item</span> -ItemType Directory -Force -Path $work <span class="syntax-punctuation">|</span> <span class="syntax-builtin">Out-Null</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m build <span class="syntax-punctuation">-</span>-no-isolation <span class="syntax-punctuation">-</span>-sdist <span class="syntax-punctuation">-</span>-wheel <span class="syntax-punctuation">-</span>-outdir $work python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>fixtures<span class="syntax-punctuation">\</span>tiny_package
+<span class="syntax-builtin">Get-ChildItem</span> $work</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">work_dir=&quot;$(mktemp -d)&quot;
-.venv/bin/python -m build --no-isolation --sdist --wheel --outdir &quot;$work_dir&quot; python/professional/fixtures/tiny_package
-find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
+<pre class="highlighted-code"><code class="language-bash">work_dir<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>mktemp -d<span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
+.venv/bin/python -m build --no-isolation --sdist --wheel --outdir <span class="syntax-string">&quot;</span>$work_dir<span class="syntax-string">&quot;</span> python/professional/fixtures/tiny_package
+find <span class="syntax-string">&quot;</span>$work_dir<span class="syntax-string">&quot;</span> -maxdepth <span class="syntax-number">1</span> -type f</code></pre>
 <p>If the frontend reports a missing build requirement, return to connected setup and install the build tools. Do not remove <code>--no-isolation</code> merely to make an offline test pass.</p>
 <p><strong>Verify:</strong> build in a disposable directory — run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.</p>
 <h5 id="guide--exercise-5-prove-the-installed-origin">Exercise 5 — prove the installed origin<a class="heading-anchor" href="#guide--exercise-5-prove-the-installed-origin" aria-label="Link to this section">#</a></h5>
 <p>Install the wheel into a fresh target using <code>pip install --no-index --no-deps --target &lt;directory&gt; &lt;wheel&gt;</code>. Start Python from outside the fixture source tree, put only that target on <code>PYTHONPATH</code>, and print:</p>
 <ul>
-<li><code>ds60_tiny_greeter.<strong>file</strong></code>,</li>
+<li><code>ds60_tiny_greeter.__file__</code>,</li>
 <li>the installed distribution version,</li>
 <li>its <code>console_scripts</code> entry points, and</li>
 <li><code>greeting(&quot;wheel&quot;)</code>.</li>
@@ -515,15 +563,15 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 </ul>
 <p>Run the reference tests after attempting the exercises.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_pro_01_package_engineering -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_pro_01_package_engineering -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_pro_01_package_engineering -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_pro_01_package_engineering -v</code></pre>
 <p>The end-to-end build test skips with an explicit reason if the optional local build tools were not bootstrapped.</p>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>The build tries to access the internet:</strong> build isolation was left on, or the backend is absent locally. Re-run with <code>--no-isolation</code> after connected bootstrap.</li>
-<li><strong>An import works before installation:</strong> the current directory or <code>PYTHONPATH</code> points at <code>src</code>. Change to a disposable directory and inspect <code>module.<strong>file</strong></code>.</li>
+<li><strong>An import works before installation:</strong> the current directory or <code>PYTHONPATH</code> points at <code>src</code>. Change to a disposable directory and inspect <code>module.__file__</code>.</li>
 <li><strong>The distribution cannot be found:</strong> distribution names use metadata lookup; import names use Python identifiers. Use <code>distribution(&quot;ds60-tiny-greeter&quot;)</code> but <code>import ds60_tiny_greeter</code>.</li>
 <li><strong>PowerShell treats a path as a command:</strong> invoke the interpreter explicitly with <code>.\.venv\Scripts\python.exe</code>.</li>
 <li><strong>A dependency group appears at runtime:</strong> it was incorrectly copied into <code>[project.dependencies]</code>. Development tools should not burden users.</li>
@@ -537,7 +585,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-01` — Package engineering and a local release workflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
@@ -596,238 +644,238 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-01 learner lab: package engineering and local releases.</span>
-<span> </span>
-<span>Run this file from the repository root. The worked example reads the fixture</span>
-<span>metadata without building anything. Complete the TODO functions in your own</span>
-<span>copy, then use the companion guide&#x27;s temporary-directory build procedure.</span>
-<span> </span>
-<span>Professional learner deep dive (python-pro-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>A source tree is not the deliverable. The build backend reads `pyproject.toml` and creates a</span>
-<span>wheel containing import packages plus distribution metadata. The **distribution name** used by</span>
-<span>installers may differ from the Python **import name**. A src layout prevents an accidental</span>
-<span>import from the repository root from masquerading as a successful installation.  A release check</span>
-<span>therefore builds a wheel, inspects its contents and metadata, installs it into a clean</span>
-<span>environment, imports it from outside the source tree, runs tests, and records hashes. Editable</span>
-<span>installs are useful for development but do not prove the wheel.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* `[build-system]`: declares the backend and bootstrap requirements that turn source into a</span>
-<span>  distribution artifact.</span>
-<span>* `[project]` metadata: defines distribution identity, version, Python range, dependencies, and</span>
-<span>  entry points.</span>
-<span>* `python -m build` then clean install: proves the built wheel, not repository-path import</span>
-<span>  behavior.</span>
-<span> </span>
-<span>Micro-example A — distinguish distribution and import identities::</span>
-<span> </span>
-<span>    import importlib.util</span>
-<span> </span>
-<span>    distribution_name = &quot;beautiful-soup4&quot;</span>
-<span>    import_name = &quot;bs4&quot;</span>
-<span>    print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})</span>
-<span>    # The names are contracts for different tools and need not match.</span>
-<span>    assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name</span>
-<span>    print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</span>
-<span> </span>
-<span>Expected: Installer and import identifiers can differ; availability must be checked through the</span>
-<span>          intended interface.</span>
-<span> </span>
-<span>Micro-example B — create a deterministic source manifest digest::</span>
-<span> </span>
-<span>    import hashlib</span>
-<span> </span>
-<span>    files = {</span>
-<span>        &quot;src/tiny/__init__.py&quot;: b&#x27;__version__ = &quot;1.0.0&quot;\n&#x27;,</span>
-<span>        &quot;src/tiny/core.py&quot;: b&quot;def add(a, b): return a + b\n&quot;,</span>
-<span>    }</span>
-<span>    manifest = &quot;\n&quot;.join(</span>
-<span>        f&quot;{path}:{hashlib.sha256(content).hexdigest()}&quot;</span>
-<span>        for path, content in sorted(files.items())</span>
-<span>    )</span>
-<span>    digest = hashlib.sha256(manifest.encode(&quot;utf-8&quot;)).hexdigest()</span>
-<span>    print(manifest, digest, sep=&quot;\n&quot;)</span>
-<span>    assert len(digest) == 64</span>
-<span> </span>
-<span>Expected: Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim</span>
-<span>          about package quality.</span>
-<span> </span>
-<span>Debugging rule: Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change</span>
-<span>                the working directory, and print `module.__file__` plus distribution version.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import tomllib</span>
-<span>from collections.abc import Callable</span>
-<span>from pathlib import Path</span>
-<span>from typing import Any</span>
-<span> </span>
-<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;tiny_package&quot;</span>
-<span> </span>
-<span> </span>
-<span>def read_project_table(project_root: Path = FIXTURE) -&gt; dict[str, Any]:</span>
-<span>    &quot;&quot;&quot;Worked example: return the PEP 621 ``[project]`` metadata table.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    with (project_root / &quot;pyproject.toml&quot;).open(&quot;rb&quot;) as handle:</span>
-<span>        document = tomllib.load(handle)</span>
-<span>    project = document.get(&quot;project&quot;)</span>
-<span>    if not isinstance(project, dict):</span>
-<span>        raise ValueError(&quot;pyproject.toml is missing a [project] table&quot;)</span>
-<span>    return project</span>
-<span> </span>
-<span> </span>
-<span>def classify_artifact(filename: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Return ``wheel`` or ``source distribution`` for a distribution file.</span>
-<span> </span>
-<span>    TODO:</span>
-<span>    1. Inspect the final suffixes rather than searching the whole path.</span>
-<span>    2. Accept ``.whl`` and ``.tar.gz``.</span>
-<span>    3. Raise ``ValueError`` for an unknown artifact.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete classify_artifact&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def offline_build_command(project_root: Path, output_dir: Path) -&gt; list[str]:</span>
-<span>    &quot;&quot;&quot;Return a cross-platform argument list for an isolated-free local build.</span>
-<span> </span>
-<span>    TODO: use the current interpreter, ``-m build``, both distribution formats,</span>
-<span>    ``--no-isolation``, and an explicit output directory. Returning an argument</span>
-<span>    list avoids shell quoting differences between PowerShell and POSIX shells.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete offline_build_command&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def installed_origin_is_safe(origin: Path, target: Path) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;Decide whether an imported module came from the fresh install target.</span>
-<span> </span>
-<span>    TODO: resolve both paths before comparing them. Do not accept the fixture&#x27;s</span>
-<span>    working-tree ``src`` directory as proof of an installation.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete installed_origin_is_safe&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    &quot;&quot;&quot;Run checks that become active as each exercise is completed.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    project = read_project_table()</span>
-<span>    assert project[&quot;name&quot;] == &quot;ds60-tiny-greeter&quot;</span>
-<span>    assert project[&quot;requires-python&quot;] == &quot;&gt;=3.11&quot;</span>
-<span>    print(&quot;Worked example: project metadata loaded.&quot;)</span>
-<span>    print(f&quot;  name={project[&#x27;name&#x27;]!r}, version={project[&#x27;version&#x27;]!r}&quot;)</span>
-<span> </span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;artifact classification&quot;, lambda: classify_artifact(&quot;demo-1.0-py3-none-any.whl&quot;)),</span>
-<span>        (</span>
-<span>            &quot;build command&quot;,</span>
-<span>            lambda: offline_build_command(FIXTURE, Path(&quot;.learning&quot;) / &quot;dist&quot;),</span>
-<span>        ),</span>
-<span>        (</span>
-<span>            &quot;installed origin&quot;,</span>
-<span>            lambda: installed_origin_is_safe(</span>
-<span>                Path(&quot;.learning/site/demo/__init__.py&quot;),</span>
-<span>                Path(&quot;.learning/site&quot;),</span>
-<span>            ),</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    for label, check in checks:</span>
-<span>        try:</span>
-<span>            result = check()</span>
-<span>        except NotImplementedError:</span>
-<span>            print(f&quot;TODO: {label}&quot;)</span>
-<span>        else:</span>
-<span>            print(f&quot;Completed: {label} -&gt; {result!r}&quot;)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_pro_01_package_engineering.md</span>
-<span>#</span>
-<span># Exercise 1 — classify artifacts</span>
-<span># Prompt: Implement `classify_artifact`. Use complete final suffixes and reject</span>
-<span># `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — create an offline build command</span>
-<span># Prompt: Implement `offline_build_command` as an argument list. Use the running</span>
-<span># interpreter, invoke the `build` module, request both formats, disable isolation, and</span>
-<span># choose an explicit output directory. Why an argument list? It avoids a second round of</span>
-<span># shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — inspect dependency intent</span>
-<span># Prompt: For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an</span>
-<span># optional installed feature, 3. a development-only dependency group, or 4. a build</span>
-<span># bootstrap requirement. Explain when `colorama`&#x27;s environment marker is true. Confirm</span>
-<span># that building metadata does not install the `test` or `quality` groups.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — build in a disposable directory</span>
-<span># Prompt: Use a temporary or ignored directory. A production-quality helper should first</span>
-<span># copy the source tree to a disposable staging directory because some backends write</span>
-<span># metadata beside the source even when `--outdir` is elsewhere. These commands</span>
-<span># intentionally prevent online build isolation. Invoke the running interpreter with</span>
-<span># `-m build --no-isolation --sdist --wheel --outdir &lt;temporary-dir&gt; &lt;fixture&gt;`. If a</span>
-<span># backend requirement is missing, return to connected setup instead of relaxing policy.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — prove the installed origin</span>
-<span># Prompt: Install the wheel into a fresh target using `pip install --no-index --no-deps</span>
-<span># --target &lt;directory&gt; &lt;wheel&gt;`. Start Python from outside the fixture source tree, put</span>
-<span># only that target on `PYTHONPATH`, and print: - `ds60_tiny_greeter.__file__`, - the</span>
-<span># installed distribution version, - its `console_scripts` entry points, and -</span>
-<span># `greeting(&quot;wheel&quot;)`. Implement `installed_origin_is_safe` so it accepts only a resolved</span>
-<span># import path under the fresh installation target, never the fixture source tree.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — build a wheel from the source distribution</span>
-<span># Prompt: Build the fixture sdist in disposable storage, unpack it, build a wheel from</span>
-<span># that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel</span>
-<span># build. Record every required local tool.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — inspect installed metadata without importing</span>
-<span># Prompt: Use `importlib.metadata` against the fresh target to inspect name, version,</span>
-<span># requirements, extras, and console scripts before importing the package. Reject</span>
-<span># unexpected or missing metadata.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — separate reproducibility from equivalence</span>
-<span># Prompt: Build twice from the same clean staged source. Compare file hashes, archive</span>
-<span># member lists, metadata contents, and installed behavior. Explain which differences are</span>
-<span># harmless and which invalidate the release.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — test dependency markers across targets</span>
-<span># Prompt: Create a review matrix for the fixture&#x27;s build, runtime, optional, development,</span>
-<span># and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and</span>
-<span># Python 3.12.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — design a local release gate</span>
-<span># Prompt: Write an offline release checklist that verifies clean source, tests, type/lint</span>
-<span># checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and</span>
-<span># secret scan without publishing anything.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-pro-01 learner lab: package engineering and local releases.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run this file from the repository root. The worked example reads the fixture</span></span>
+<span class="source-line"><span class="syntax-string">metadata without building anything. Complete the TODO functions in your own</span></span>
+<span class="source-line"><span class="syntax-string">copy, then use the companion guide&#x27;s temporary-directory build procedure.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-pro-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">A source tree is not the deliverable. The build backend reads `pyproject.toml` and creates a</span></span>
+<span class="source-line"><span class="syntax-string">wheel containing import packages plus distribution metadata. The **distribution name** used by</span></span>
+<span class="source-line"><span class="syntax-string">installers may differ from the Python **import name**. A src layout prevents an accidental</span></span>
+<span class="source-line"><span class="syntax-string">import from the repository root from masquerading as a successful installation.  A release check</span></span>
+<span class="source-line"><span class="syntax-string">therefore builds a wheel, inspects its contents and metadata, installs it into a clean</span></span>
+<span class="source-line"><span class="syntax-string">environment, imports it from outside the source tree, runs tests, and records hashes. Editable</span></span>
+<span class="source-line"><span class="syntax-string">installs are useful for development but do not prove the wheel.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* `[build-system]`: declares the backend and bootstrap requirements that turn source into a</span></span>
+<span class="source-line"><span class="syntax-string">  distribution artifact.</span></span>
+<span class="source-line"><span class="syntax-string">* `[project]` metadata: defines distribution identity, version, Python range, dependencies, and</span></span>
+<span class="source-line"><span class="syntax-string">  entry points.</span></span>
+<span class="source-line"><span class="syntax-string">* `python -m build` then clean install: proves the built wheel, not repository-path import</span></span>
+<span class="source-line"><span class="syntax-string">  behavior.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — distinguish distribution and import identities::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import importlib.util</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    distribution_name = &quot;beautiful-soup4&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    import_name = &quot;bs4&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})</span></span>
+<span class="source-line"><span class="syntax-string">    # The names are contracts for different tools and need not match.</span></span>
+<span class="source-line"><span class="syntax-string">    assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name</span></span>
+<span class="source-line"><span class="syntax-string">    print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Installer and import identifiers can differ; availability must be checked through the</span></span>
+<span class="source-line"><span class="syntax-string">          intended interface.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — create a deterministic source manifest digest::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import hashlib</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    files = {</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;src/tiny/__init__.py&quot;: b&#x27;__version__ = &quot;1.0.0&quot;\n&#x27;,</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;src/tiny/core.py&quot;: b&quot;def add(a, b): return a + b\n&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">    }</span></span>
+<span class="source-line"><span class="syntax-string">    manifest = &quot;\n&quot;.join(</span></span>
+<span class="source-line"><span class="syntax-string">        f&quot;{path}:{hashlib.sha256(content).hexdigest()}&quot;</span></span>
+<span class="source-line"><span class="syntax-string">        for path, content in sorted(files.items())</span></span>
+<span class="source-line"><span class="syntax-string">    )</span></span>
+<span class="source-line"><span class="syntax-string">    digest = hashlib.sha256(manifest.encode(&quot;utf-8&quot;)).hexdigest()</span></span>
+<span class="source-line"><span class="syntax-string">    print(manifest, digest, sep=&quot;\n&quot;)</span></span>
+<span class="source-line"><span class="syntax-string">    assert len(digest) == 64</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim</span></span>
+<span class="source-line"><span class="syntax-string">          about package quality.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change</span></span>
+<span class="source-line"><span class="syntax-string">                the working directory, and print `module.__file__` plus distribution version.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> tomllib</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tiny_package</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_project_table</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked example: return the PEP 621 ``[project]`` metadata table.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> <span class="syntax-punctuation">(</span>project_root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pyproject.toml</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        document <span class="syntax-operator">=</span> tomllib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    project <span class="syntax-operator">=</span> document<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">project</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>project<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pyproject.toml is missing a [project] table</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> project</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_artifact</span><span class="syntax-punctuation">(</span>filename<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return ``wheel`` or ``source distribution`` for a distribution file.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO:</span></span>
+<span class="source-line"><span class="syntax-string">    1. Inspect the final suffixes rather than searching the whole path.</span></span>
+<span class="source-line"><span class="syntax-string">    2. Accept ``.whl`` and ``.tar.gz``.</span></span>
+<span class="source-line"><span class="syntax-string">    3. Raise ``ValueError`` for an unknown artifact.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete classify_artifact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">offline_build_command</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> output_dir<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a cross-platform argument list for an isolated-free local build.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: use the current interpreter, ``-m build``, both distribution formats,</span></span>
+<span class="source-line"><span class="syntax-string">    ``--no-isolation``, and an explicit output directory. Returning an argument</span></span>
+<span class="source-line"><span class="syntax-string">    list avoids shell quoting differences between PowerShell and POSIX shells.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete offline_build_command</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">installed_origin_is_safe</span><span class="syntax-punctuation">(</span>origin<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Decide whether an imported module came from the fresh install target.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: resolve both paths before comparing them. Do not accept the fixture&#x27;s</span></span>
+<span class="source-line"><span class="syntax-string">    working-tree ``src`` directory as proof of an installation.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete installed_origin_is_safe</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run checks that become active as each exercise is completed.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    project <span class="syntax-operator">=</span> read_project_table<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> project<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-tiny-greeter</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> project<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">requires-python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=3.11</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example: project metadata loaded.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">  name=</span><span class="syntax-string">{</span>project<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">name</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">!r}</span><span class="syntax-string">, version=</span><span class="syntax-string">{</span>project<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">version</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifact classification</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> classify_artifact<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">demo-1.0-py3-none-any.whl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">build command</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> offline_build_command<span class="syntax-punctuation">(</span>FIXTURE<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.learning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">dist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">installed origin</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> installed_origin_is_safe<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.learning/site/demo/__init__.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.learning/site</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> check <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            result <span class="syntax-operator">=</span> check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Completed: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string"> -&gt; </span><span class="syntax-string">{</span>result<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_pro_01_package_engineering.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — classify artifacts</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `classify_artifact`. Use complete final suffixes and reject</span></span>
+<span class="source-line"><span class="syntax-comment"># `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — create an offline build command</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `offline_build_command` as an argument list. Use the running</span></span>
+<span class="source-line"><span class="syntax-comment"># interpreter, invoke the `build` module, request both formats, disable isolation, and</span></span>
+<span class="source-line"><span class="syntax-comment"># choose an explicit output directory. Why an argument list? It avoids a second round of</span></span>
+<span class="source-line"><span class="syntax-comment"># shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — inspect dependency intent</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an</span></span>
+<span class="source-line"><span class="syntax-comment"># optional installed feature, 3. a development-only dependency group, or 4. a build</span></span>
+<span class="source-line"><span class="syntax-comment"># bootstrap requirement. Explain when `colorama`&#x27;s environment marker is true. Confirm</span></span>
+<span class="source-line"><span class="syntax-comment"># that building metadata does not install the `test` or `quality` groups.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — build in a disposable directory</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use a temporary or ignored directory. A production-quality helper should first</span></span>
+<span class="source-line"><span class="syntax-comment"># copy the source tree to a disposable staging directory because some backends write</span></span>
+<span class="source-line"><span class="syntax-comment"># metadata beside the source even when `--outdir` is elsewhere. These commands</span></span>
+<span class="source-line"><span class="syntax-comment"># intentionally prevent online build isolation. Invoke the running interpreter with</span></span>
+<span class="source-line"><span class="syntax-comment"># `-m build --no-isolation --sdist --wheel --outdir &lt;temporary-dir&gt; &lt;fixture&gt;`. If a</span></span>
+<span class="source-line"><span class="syntax-comment"># backend requirement is missing, return to connected setup instead of relaxing policy.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — prove the installed origin</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Install the wheel into a fresh target using `pip install --no-index --no-deps</span></span>
+<span class="source-line"><span class="syntax-comment"># --target &lt;directory&gt; &lt;wheel&gt;`. Start Python from outside the fixture source tree, put</span></span>
+<span class="source-line"><span class="syntax-comment"># only that target on `PYTHONPATH`, and print: - `ds60_tiny_greeter.__file__`, - the</span></span>
+<span class="source-line"><span class="syntax-comment"># installed distribution version, - its `console_scripts` entry points, and -</span></span>
+<span class="source-line"><span class="syntax-comment"># `greeting(&quot;wheel&quot;)`. Implement `installed_origin_is_safe` so it accepts only a resolved</span></span>
+<span class="source-line"><span class="syntax-comment"># import path under the fresh installation target, never the fixture source tree.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — build a wheel from the source distribution</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build the fixture sdist in disposable storage, unpack it, build a wheel from</span></span>
+<span class="source-line"><span class="syntax-comment"># that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel</span></span>
+<span class="source-line"><span class="syntax-comment"># build. Record every required local tool.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — inspect installed metadata without importing</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use `importlib.metadata` against the fresh target to inspect name, version,</span></span>
+<span class="source-line"><span class="syntax-comment"># requirements, extras, and console scripts before importing the package. Reject</span></span>
+<span class="source-line"><span class="syntax-comment"># unexpected or missing metadata.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — separate reproducibility from equivalence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build twice from the same clean staged source. Compare file hashes, archive</span></span>
+<span class="source-line"><span class="syntax-comment"># member lists, metadata contents, and installed behavior. Explain which differences are</span></span>
+<span class="source-line"><span class="syntax-comment"># harmless and which invalidate the release.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — test dependency markers across targets</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a review matrix for the fixture&#x27;s build, runtime, optional, development,</span></span>
+<span class="source-line"><span class="syntax-comment"># and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and</span></span>
+<span class="source-line"><span class="syntax-comment"># Python 3.12.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — design a local release gate</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write an offline release checklist that verifies clean source, tests, type/lint</span></span>
+<span class="source-line"><span class="syntax-comment"># checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and</span></span>
+<span class="source-line"><span class="syntax-comment"># secret scan without publishing anything.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -872,7 +920,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><code>--target</code> keeps installation out of the course environment.</li>
 <li><code>--no-compile</code> plus <code>PYTHONDONTWRITEBYTECODE=1</code> avoids cache files.</li>
 </ul>
-<p>The proof runs in a child interpreter whose working directory is outside the source fixture and whose <code>PYTHONPATH</code> contains only the fresh target. Checking <code>package.<strong>file</strong></code> beneath that target turns “the import worked” into evidence that the wheel supplied it.</p>
+<p>The proof runs in a child interpreter whose working directory is outside the source fixture and whose <code>PYTHONPATH</code> contains only the fresh target. Checking <code>package.__file__</code> beneath that target turns “the import worked” into evidence that the wheel supplied it.</p>
 <h4 id="solution-1--exercise-decisions">Exercise decisions<a class="heading-anchor" href="#solution-1--exercise-decisions" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--artifact-classification">Artifact classification<a class="heading-anchor" href="#solution-1--artifact-classification" aria-label="Link to this section">#</a></h5>
 <p>The solution checks <code>.whl</code> and the complete <code>.tar.gz</code> ending. A substring check would incorrectly accept <code>backup.whl.txt</code>; a single <code>Path.suffix</code> check sees only <code>.gz</code> for an sdist.</p>
@@ -910,14 +958,14 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Build twice, inspect wheel metadata/content, install in a clean environment from outside the repo, run entry points/tests, and compare artifact hashes.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">import importlib.util
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> importlib.util
 
-distribution_name = &quot;beautiful-soup4&quot;
-import_name = &quot;bs4&quot;
-print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})
-# The names are contracts for different tools and need not match.
-assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name
-print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</code></pre>
+distribution_name <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beautiful-soup4</span><span class="syntax-string">&quot;</span>
+import_name <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bs4</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">installer_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> distribution_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">import_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> import_name<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-comment"># The names are contracts for different tools and need not match.</span>
+<span class="syntax-keyword">assert</span> distribution_name<span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">_</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> import_name
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">installed import available:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span>import_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Installer and import identifiers can differ; availability must be checked through the intended interface.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -964,7 +1012,7 @@ print(&quot;installed import available:&quot;, importlib.util.find_spec(import_n
 <p><strong>Prompt recap:</strong> Use <code>importlib.metadata</code> against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.</p>
 <p><strong>Reasoning path:</strong> Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.</p>
 <p>Query the installed distribution by its normalized project name and assert the declared version and console-script target. Evaluate marker text as metadata; do not import optional dependencies merely to inspect it. Then perform the separate module-origin and behavior proof.</p>
-<p>This catches a wheel that contains importable code but incorrect release metadata. It also avoids using <code>package.<strong>version</strong></code> as the only authority when the project intentionally derives version from distribution metadata.</p>
+<p>This catches a wheel that contains importable code but incorrect release metadata. It also avoids using <code>package.__version__</code> as the only authority when the project intentionally derives version from distribution metadata.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> inspect installed metadata without importing — use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.</p>
@@ -1024,291 +1072,291 @@ print(&quot;installed import available:&quot;, importlib.util.find_spec(import_n
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-pro-01.</span>
-<span> </span>
-<span>All build and installation output is confined to a caller-provided directory.</span>
-<span>The default demonstration uses ``TemporaryDirectory`` and disables dependency</span>
-<span>resolution, build isolation, bytecode generation, and network index access.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import importlib.util</span>
-<span>import json</span>
-<span>import os</span>
-<span>import shutil</span>
-<span>import subprocess</span>
-<span>import sys</span>
-<span>import tempfile</span>
-<span>import tomllib</span>
-<span>from dataclasses import dataclass</span>
-<span>from pathlib import Path</span>
-<span>from typing import Any, Literal</span>
-<span> </span>
-<span>ArtifactKind = Literal[&quot;wheel&quot;, &quot;source distribution&quot;]</span>
-<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;tiny_package&quot;</span>
-<span> </span>
-<span> </span>
-<span>class BuildToolUnavailable(RuntimeError):</span>
-<span>    &quot;&quot;&quot;Raised when the local bootstrap lacks a required build tool.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class ProjectSummary:</span>
-<span>    &quot;&quot;&quot;Selected metadata from a ``pyproject.toml`` document.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    name: str</span>
-<span>    version: str</span>
-<span>    build_backend: str</span>
-<span>    console_scripts: dict[str, str]</span>
-<span>    dependency_groups: tuple[str, ...]</span>
-<span>    optional_dependencies: tuple[str, ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class InstallProof:</span>
-<span>    &quot;&quot;&quot;Evidence that a wheel—not the source tree—supplied the import.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    wheel: Path</span>
-<span>    import_origin: Path</span>
-<span>    install_target: Path</span>
-<span>    distribution_version: str</span>
-<span>    console_scripts: tuple[str, ...]</span>
-<span>    command_output: str</span>
-<span> </span>
-<span> </span>
-<span>def load_pyproject(project_root: Path) -&gt; dict[str, Any]:</span>
-<span>    &quot;&quot;&quot;Load a project&#x27;s TOML document with the Python 3.11 standard library.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    pyproject = project_root / &quot;pyproject.toml&quot;</span>
-<span>    with pyproject.open(&quot;rb&quot;) as handle:</span>
-<span>        return tomllib.load(handle)</span>
-<span> </span>
-<span> </span>
-<span>def summarize_project(project_root: Path = FIXTURE) -&gt; ProjectSummary:</span>
-<span>    &quot;&quot;&quot;Validate and summarize the fixture&#x27;s important packaging tables.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    document = load_pyproject(project_root)</span>
-<span>    project = document.get(&quot;project&quot;)</span>
-<span>    build_system = document.get(&quot;build-system&quot;)</span>
-<span>    if not isinstance(project, dict):</span>
-<span>        raise ValueError(&quot;pyproject.toml is missing [project]&quot;)</span>
-<span>    if not isinstance(build_system, dict):</span>
-<span>        raise ValueError(&quot;pyproject.toml is missing [build-system]&quot;)</span>
-<span> </span>
-<span>    scripts = project.get(&quot;scripts&quot;, {})</span>
-<span>    groups = document.get(&quot;dependency-groups&quot;, {})</span>
-<span>    optional = project.get(&quot;optional-dependencies&quot;, {})</span>
-<span>    if not isinstance(scripts, dict):</span>
-<span>        raise ValueError(&quot;[project.scripts] must be a table&quot;)</span>
-<span>    if not isinstance(groups, dict):</span>
-<span>        raise ValueError(&quot;[dependency-groups] must be a table&quot;)</span>
-<span>    if not isinstance(optional, dict):</span>
-<span>        raise ValueError(&quot;[project.optional-dependencies] must be a table&quot;)</span>
-<span> </span>
-<span>    return ProjectSummary(</span>
-<span>        name=str(project[&quot;name&quot;]),</span>
-<span>        version=str(project[&quot;version&quot;]),</span>
-<span>        build_backend=str(build_system[&quot;build-backend&quot;]),</span>
-<span>        console_scripts={str(key): str(value) for key, value in scripts.items()},</span>
-<span>        dependency_groups=tuple(sorted(str(key) for key in groups)),</span>
-<span>        optional_dependencies=tuple(sorted(str(key) for key in optional)),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def classify_artifact(path: Path) -&gt; ArtifactKind:</span>
-<span>    &quot;&quot;&quot;Classify a Python distribution by its complete filename suffix.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if path.suffix == &quot;.whl&quot;:</span>
-<span>        return &quot;wheel&quot;</span>
-<span>    if path.name.endswith(&quot;.tar.gz&quot;):</span>
-<span>        return &quot;source distribution&quot;</span>
-<span>    raise ValueError(f&quot;unsupported distribution artifact: {path.name}&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def require_local_build_tools() -&gt; None:</span>
-<span>    &quot;&quot;&quot;Fail before a build if the connected bootstrap was not completed.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    missing = [</span>
-<span>        module</span>
-<span>        for module in (&quot;build&quot;, &quot;setuptools&quot;, &quot;wheel&quot;)</span>
-<span>        if importlib.util.find_spec(module) is None</span>
-<span>    ]</span>
-<span>    if missing:</span>
-<span>        names = &quot;, &quot;.join(missing)</span>
-<span>        raise BuildToolUnavailable(</span>
-<span>            f&quot;missing local build tools: {names}; install them during bootstrap&quot;</span>
-<span>        )</span>
-<span> </span>
-<span> </span>
-<span>def build_distributions(project_root: Path, output_dir: Path) -&gt; tuple[Path, Path]:</span>
-<span>    &quot;&quot;&quot;Build an sdist and wheel without an isolated environment or downloads.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    require_local_build_tools()</span>
-<span>    project_root = project_root.resolve()</span>
-<span>    output_dir = output_dir.resolve()</span>
-<span>    if output_dir.is_relative_to(project_root):</span>
-<span>        raise ValueError(&quot;build output must be outside the source project&quot;)</span>
-<span>    output_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>    staged_project = output_dir.parent / &quot;staged-project&quot;</span>
-<span>    if staged_project.exists():</span>
-<span>        raise FileExistsError(f&quot;staging path already exists: {staged_project}&quot;)</span>
-<span>    shutil.copytree(project_root, staged_project)</span>
-<span>    command = [</span>
-<span>        sys.executable,</span>
-<span>        &quot;-m&quot;,</span>
-<span>        &quot;build&quot;,</span>
-<span>        &quot;--no-isolation&quot;,</span>
-<span>        &quot;--sdist&quot;,</span>
-<span>        &quot;--wheel&quot;,</span>
-<span>        &quot;--outdir&quot;,</span>
-<span>        str(output_dir),</span>
-<span>        str(staged_project),</span>
-<span>    ]</span>
-<span>    environment = os.environ.copy()</span>
-<span>    environment[&quot;PYTHONDONTWRITEBYTECODE&quot;] = &quot;1&quot;</span>
-<span>    completed = subprocess.run(</span>
-<span>        command,</span>
-<span>        check=False,</span>
-<span>        capture_output=True,</span>
-<span>        text=True,</span>
-<span>        env=environment,</span>
-<span>    )</span>
-<span>    if completed.returncode != 0:</span>
-<span>        detail = completed.stderr.strip() or completed.stdout.strip()</span>
-<span>        raise RuntimeError(f&quot;local build failed: {detail}&quot;)</span>
-<span> </span>
-<span>    wheels = sorted(output_dir.glob(&quot;*.whl&quot;))</span>
-<span>    sdists = sorted(output_dir.glob(&quot;*.tar.gz&quot;))</span>
-<span>    if len(wheels) != 1 or len(sdists) != 1:</span>
-<span>        raise RuntimeError(</span>
-<span>            f&quot;expected one wheel and one sdist, found {len(wheels)} and {len(sdists)}&quot;</span>
-<span>        )</span>
-<span>    return wheels[0], sdists[0]</span>
-<span> </span>
-<span> </span>
-<span>def _proof_program(distribution_name: str, package_name: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Return a small subprocess program that prints install evidence as JSON.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    return &quot;\n&quot;.join(</span>
-<span>        (</span>
-<span>            &quot;import importlib.metadata as metadata&quot;,</span>
-<span>            &quot;import json&quot;,</span>
-<span>            f&quot;import {package_name} as package&quot;,</span>
-<span>            f&quot;distribution = metadata.distribution({distribution_name!r})&quot;,</span>
-<span>            &quot;scripts = sorted(&quot;,</span>
-<span>            &quot;    entry.name for entry in distribution.entry_points&quot;,</span>
-<span>            &quot;    if entry.group == &#x27;console_scripts&#x27;&quot;,</span>
-<span>            &quot;)&quot;,</span>
-<span>            &quot;print(json.dumps({&quot;,</span>
-<span>            &quot;    &#x27;origin&#x27;: package.__file__,&quot;,</span>
-<span>            &quot;    &#x27;version&#x27;: distribution.version,&quot;,</span>
-<span>            &quot;    &#x27;scripts&#x27;: scripts,&quot;,</span>
-<span>            &quot;    &#x27;output&#x27;: package.greeting(&#x27;wheel&#x27;),&quot;,</span>
-<span>            &quot;}))&quot;,</span>
-<span>        )</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def install_wheel_and_prove(</span>
-<span>    wheel: Path,</span>
-<span>    workspace: Path,</span>
-<span>    *,</span>
-<span>    distribution_name: str = &quot;ds60-tiny-greeter&quot;,</span>
-<span>    package_name: str = &quot;ds60_tiny_greeter&quot;,</span>
-<span>) -&gt; InstallProof:</span>
-<span>    &quot;&quot;&quot;Install a wheel locally and prove import and entry-point metadata.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    install_target = workspace / &quot;site&quot;</span>
-<span>    install_target.mkdir(parents=True, exist_ok=True)</span>
-<span>    environment = os.environ.copy()</span>
-<span>    environment[&quot;PYTHONDONTWRITEBYTECODE&quot;] = &quot;1&quot;</span>
-<span>    install_command = [</span>
-<span>        sys.executable,</span>
-<span>        &quot;-m&quot;,</span>
-<span>        &quot;pip&quot;,</span>
-<span>        &quot;--disable-pip-version-check&quot;,</span>
-<span>        &quot;install&quot;,</span>
-<span>        &quot;--no-index&quot;,</span>
-<span>        &quot;--no-deps&quot;,</span>
-<span>        &quot;--no-compile&quot;,</span>
-<span>        &quot;--target&quot;,</span>
-<span>        str(install_target),</span>
-<span>        str(wheel),</span>
-<span>    ]</span>
-<span>    installed = subprocess.run(</span>
-<span>        install_command,</span>
-<span>        check=False,</span>
-<span>        capture_output=True,</span>
-<span>        text=True,</span>
-<span>        cwd=workspace,</span>
-<span>        env=environment,</span>
-<span>    )</span>
-<span>    if installed.returncode != 0:</span>
-<span>        detail = installed.stderr.strip() or installed.stdout.strip()</span>
-<span>        raise RuntimeError(f&quot;local wheel install failed: {detail}&quot;)</span>
-<span> </span>
-<span>    proof_environment = environment.copy()</span>
-<span>    proof_environment[&quot;PYTHONPATH&quot;] = str(install_target)</span>
-<span>    proof = subprocess.run(</span>
-<span>        [sys.executable, &quot;-c&quot;, _proof_program(distribution_name, package_name)],</span>
-<span>        check=False,</span>
-<span>        capture_output=True,</span>
-<span>        text=True,</span>
-<span>        cwd=workspace,</span>
-<span>        env=proof_environment,</span>
-<span>    )</span>
-<span>    if proof.returncode != 0:</span>
-<span>        raise RuntimeError(f&quot;installed import proof failed: {proof.stderr.strip()}&quot;)</span>
-<span>    payload = json.loads(proof.stdout)</span>
-<span>    origin = Path(payload[&quot;origin&quot;]).resolve()</span>
-<span>    target = install_target.resolve()</span>
-<span>    if not origin.is_relative_to(target):</span>
-<span>        raise RuntimeError(f&quot;import escaped install target: {origin}&quot;)</span>
-<span> </span>
-<span>    return InstallProof(</span>
-<span>        wheel=wheel.resolve(),</span>
-<span>        import_origin=origin,</span>
-<span>        install_target=target,</span>
-<span>        distribution_version=str(payload[&quot;version&quot;]),</span>
-<span>        console_scripts=tuple(str(name) for name in payload[&quot;scripts&quot;]),</span>
-<span>        command_output=str(payload[&quot;output&quot;]),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def build_and_prove(project_root: Path = FIXTURE) -&gt; InstallProof:</span>
-<span>    &quot;&quot;&quot;Complete the offline build/install proof in a temporary workspace.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-package-proof-&quot;) as directory:</span>
-<span>        workspace = Path(directory)</span>
-<span>        wheel, sdist = build_distributions(project_root, workspace / &quot;dist&quot;)</span>
-<span>        assert classify_artifact(wheel) == &quot;wheel&quot;</span>
-<span>        assert classify_artifact(sdist) == &quot;source distribution&quot;</span>
-<span>        return install_wheel_and_prove(wheel, workspace)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    &quot;&quot;&quot;Inspect the fixture and run the proof when build tools are available.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    summary = summarize_project()</span>
-<span>    print(f&quot;{summary.name} {summary.version}&quot;)</span>
-<span>    print(f&quot;backend: {summary.build_backend}&quot;)</span>
-<span>    print(f&quot;console scripts: {&#x27;, &#x27;.join(summary.console_scripts)}&quot;)</span>
-<span>    print(f&quot;dependency groups: {&#x27;, &#x27;.join(summary.dependency_groups)}&quot;)</span>
-<span>    try:</span>
-<span>        proof = build_and_prove()</span>
-<span>    except BuildToolUnavailable as exc:</span>
-<span>        print(f&quot;Build proof not run: {exc}&quot;)</span>
-<span>        return 0</span>
-<span>    print(f&quot;wheel import: {proof.import_origin}&quot;)</span>
-<span>    print(f&quot;installed command metadata: {&#x27;, &#x27;.join(proof.console_scripts)}&quot;)</span>
-<span>    print(f&quot;command behavior: {proof.command_output}&quot;)</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-pro-01.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">All build and installation output is confined to a caller-provided directory.</span></span>
+<span class="source-line"><span class="syntax-string">The default demonstration uses ``TemporaryDirectory`` and disables dependency</span></span>
+<span class="source-line"><span class="syntax-string">resolution, build isolation, bytecode generation, and network index access.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> importlib.util</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> os</span>
+<span class="source-line"><span class="syntax-keyword">import</span> shutil</span>
+<span class="source-line"><span class="syntax-keyword">import</span> subprocess</span>
+<span class="source-line"><span class="syntax-keyword">import</span> sys</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tomllib</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any<span class="syntax-punctuation">,</span> Literal</span>
+<span class="source-line"></span>
+<span class="source-line">ArtifactKind <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">wheel</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">source distribution</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tiny_package</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">BuildToolUnavailable</span><span class="syntax-punctuation">(</span>RuntimeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Raised when the local bootstrap lacks a required build tool.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ProjectSummary</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Selected metadata from a ``pyproject.toml`` document.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    build_backend<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    console_scripts<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    dependency_groups<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    optional_dependencies<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">InstallProof</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Evidence that a wheel—not the source tree—supplied the import.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    wheel<span class="syntax-punctuation">:</span> Path</span>
+<span class="source-line">    import_origin<span class="syntax-punctuation">:</span> Path</span>
+<span class="source-line">    install_target<span class="syntax-punctuation">:</span> Path</span>
+<span class="source-line">    distribution_version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    console_scripts<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    command_output<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_pyproject</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Load a project&#x27;s TOML document with the Python 3.11 standard library.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    pyproject <span class="syntax-operator">=</span> project_root <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pyproject.toml</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> pyproject<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> tomllib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">summarize_project</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ProjectSummary<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Validate and summarize the fixture&#x27;s important packaging tables.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    document <span class="syntax-operator">=</span> load_pyproject<span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    project <span class="syntax-operator">=</span> document<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">project</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    build_system <span class="syntax-operator">=</span> document<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">build-system</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>project<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pyproject.toml is missing [project]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>build_system<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pyproject.toml is missing [build-system]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    scripts <span class="syntax-operator">=</span> project<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">scripts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    groups <span class="syntax-operator">=</span> document<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">dependency-groups</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    optional <span class="syntax-operator">=</span> project<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">optional-dependencies</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>scripts<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">[project.scripts] must be a table</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">[dependency-groups] must be a table</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>optional<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">[project.optional-dependencies] must be a table</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> ProjectSummary<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        name<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>project<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        version<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>project<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        build_backend<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>build_system<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">build-backend</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        console_scripts<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> scripts<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        dependency_groups<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> groups<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        optional_dependencies<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> optional<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_artifact</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ArtifactKind<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Classify a Python distribution by its complete filename suffix.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>suffix <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.whl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wheel</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>endswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.tar.gz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">source distribution</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unsupported distribution artifact: </span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">require_local_build_tools</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Fail before a build if the connected bootstrap was not completed.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        module</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> module <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">setuptools</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wheel</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        names <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> BuildToolUnavailable<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing local build tools: </span><span class="syntax-string">{</span>names<span class="syntax-string">}</span><span class="syntax-string">; install them during bootstrap</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_distributions</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> output_dir<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Build an sdist and wheel without an isolated environment or downloads.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    require_local_build_tools<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    project_root <span class="syntax-operator">=</span> project_root<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    output_dir <span class="syntax-operator">=</span> output_dir<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> output_dir<span class="syntax-operator">.</span>is_relative_to<span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">build output must be outside the source project</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    output_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    staged_project <span class="syntax-operator">=</span> output_dir<span class="syntax-operator">.</span>parent <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">staged-project</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> staged_project<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> FileExistsError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">staging path already exists: </span><span class="syntax-string">{</span>staged_project<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    shutil<span class="syntax-operator">.</span>copytree<span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">,</span> staged_project<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    command <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">-m</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--no-isolation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--sdist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--wheel</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--outdir</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>output_dir<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>staged_project<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    environment <span class="syntax-operator">=</span> os<span class="syntax-operator">.</span>environ<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">PYTHONDONTWRITEBYTECODE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    completed <span class="syntax-operator">=</span> subprocess<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        command<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        check<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        capture_output<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        text<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        env<span class="syntax-operator">=</span>environment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> completed<span class="syntax-operator">.</span>returncode <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        detail <span class="syntax-operator">=</span> completed<span class="syntax-operator">.</span>stderr<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> completed<span class="syntax-operator">.</span>stdout<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">local build failed: </span><span class="syntax-string">{</span>detail<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    wheels <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>output_dir<span class="syntax-operator">.</span>glob<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">*.whl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    sdists <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>output_dir<span class="syntax-operator">.</span>glob<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">*.tar.gz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>wheels<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sdists<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected one wheel and one sdist, found </span><span class="syntax-string">{</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>wheels<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string"> and </span><span class="syntax-string">{</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sdists<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> wheels<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> sdists<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_proof_program</span><span class="syntax-punctuation">(</span>distribution_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> package_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a small subprocess program that prints install evidence as JSON.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">import importlib.metadata as metadata</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">import json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">import </span><span class="syntax-string">{</span>package_name<span class="syntax-string">}</span><span class="syntax-string"> as package</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">distribution = metadata.distribution(</span><span class="syntax-string">{</span>distribution_name<span class="syntax-string">!r}</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">scripts = sorted(</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    entry.name for entry in distribution.entry_points</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    if entry.group == </span><span class="syntax-string">&#x27;</span><span class="syntax-string">console_scripts</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">print(json.dumps(</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    </span><span class="syntax-string">&#x27;</span><span class="syntax-string">origin</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: package.__file__,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    </span><span class="syntax-string">&#x27;</span><span class="syntax-string">version</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: distribution.version,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    </span><span class="syntax-string">&#x27;</span><span class="syntax-string">scripts</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: scripts,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">    </span><span class="syntax-string">&#x27;</span><span class="syntax-string">output</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: package.greeting(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">wheel</span><span class="syntax-string">&#x27;</span><span class="syntax-string">),</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">}))</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">install_wheel_and_prove</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    wheel<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    workspace<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    distribution_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-tiny-greeter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    package_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60_tiny_greeter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> InstallProof<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Install a wheel locally and prove import and entry-point metadata.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    install_target <span class="syntax-operator">=</span> workspace <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">site</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    install_target<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment <span class="syntax-operator">=</span> os<span class="syntax-operator">.</span>environ<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">PYTHONDONTWRITEBYTECODE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    install_command <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">-m</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">pip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--disable-pip-version-check</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">install</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--no-index</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--no-deps</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--no-compile</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--target</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>install_target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>wheel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    installed <span class="syntax-operator">=</span> subprocess<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        install_command<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        check<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        capture_output<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        text<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        cwd<span class="syntax-operator">=</span>workspace<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        env<span class="syntax-operator">=</span>environment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> installed<span class="syntax-operator">.</span>returncode <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        detail <span class="syntax-operator">=</span> installed<span class="syntax-operator">.</span>stderr<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> installed<span class="syntax-operator">.</span>stdout<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">local wheel install failed: </span><span class="syntax-string">{</span>detail<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    proof_environment <span class="syntax-operator">=</span> environment<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    proof_environment<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">PYTHONPATH</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>install_target<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    proof <span class="syntax-operator">=</span> subprocess<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">[</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> _proof_program<span class="syntax-punctuation">(</span>distribution_name<span class="syntax-punctuation">,</span> package_name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        check<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        capture_output<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        text<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        cwd<span class="syntax-operator">=</span>workspace<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        env<span class="syntax-operator">=</span>proof_environment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> proof<span class="syntax-operator">.</span>returncode <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">installed import proof failed: </span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>stderr<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>proof<span class="syntax-operator">.</span>stdout<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    origin <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">origin</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    target <span class="syntax-operator">=</span> install_target<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> origin<span class="syntax-operator">.</span>is_relative_to<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">import escaped install target: </span><span class="syntax-string">{</span>origin<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> InstallProof<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        wheel<span class="syntax-operator">=</span>wheel<span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        import_origin<span class="syntax-operator">=</span>origin<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        install_target<span class="syntax-operator">=</span>target<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        distribution_version<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        console_scripts<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> payload<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">scripts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        command_output<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_and_prove</span><span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> InstallProof<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Complete the offline build/install proof in a temporary workspace.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-package-proof-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        workspace <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        wheel<span class="syntax-punctuation">,</span> sdist <span class="syntax-operator">=</span> build_distributions<span class="syntax-punctuation">(</span>project_root<span class="syntax-punctuation">,</span> workspace <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">dist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> classify_artifact<span class="syntax-punctuation">(</span>wheel<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wheel</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> classify_artifact<span class="syntax-punctuation">(</span>sdist<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">source distribution</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> install_wheel_and_prove<span class="syntax-punctuation">(</span>wheel<span class="syntax-punctuation">,</span> workspace<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Inspect the fixture and run the proof when build tools are available.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    summary <span class="syntax-operator">=</span> summarize_project<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string"> </span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>version<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">backend: </span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>build_backend<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">console scripts: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>summary<span class="syntax-operator">.</span>console_scripts<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">dependency groups: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>summary<span class="syntax-operator">.</span>dependency_groups<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        proof <span class="syntax-operator">=</span> build_and_prove<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> BuildToolUnavailable <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Build proof not run: </span><span class="syntax-string">{</span>exc<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">wheel import: </span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>import_origin<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">installed command metadata: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>proof<span class="syntax-operator">.</span>console_scripts<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">command behavior: </span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>command_output<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

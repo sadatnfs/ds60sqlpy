@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -134,65 +180,65 @@
 <p>Clock interpretation, time-zone support and controller availability affect recurrence. Report actual timestamps and missed-run evidence. Do not invent a universal execution second from the schedule expression.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-the-bounded-job">Worked example 1: Read the bounded Job<a class="heading-anchor" href="#worked-example-1-read-the-bounded-job" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-yaml">apiVersion: batch/v1
-kind: Job
-metadata:
-  name: hello-task
-spec:
-  backoffLimit: 0
-  activeDeadlineSeconds: 20
-  completions: 1
-  parallelism: 1
-  template:
-    metadata:
-      labels:
-        app: hello
-    spec:
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-      - name: task
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - task
-        - --outcome
-        - success
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-      restartPolicy: Never</code></pre>
-<p><strong>Expected:</strong> One finite task is requested, with one parallel Pod and a20-second active deadline.</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> batch/v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Job
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-task
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">backoffLimit</span><span class="syntax-punctuation">:</span> 0
+  <span class="syntax-tag">activeDeadlineSeconds</span><span class="syntax-punctuation">:</span> 20
+  <span class="syntax-tag">completions</span><span class="syntax-punctuation">:</span> 1
+  <span class="syntax-tag">parallelism</span><span class="syntax-punctuation">:</span> 1
+  <span class="syntax-tag">template</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">labels</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
+    <span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">automountServiceAccountToken</span><span class="syntax-punctuation">:</span> false
+      <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">runAsNonRoot</span><span class="syntax-punctuation">:</span> true
+        <span class="syntax-tag">runAsUser</span><span class="syntax-punctuation">:</span> 65532
+        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault
+      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> task
+        <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0
+        <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never
+        <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> python
+        <span class="syntax-punctuation">-</span> /fixture.py
+        <span class="syntax-punctuation">-</span> task
+        <span class="syntax-punctuation">-</span> --outcome
+        <span class="syntax-punctuation">-</span> success
+        <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m
+            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi
+          <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m
+            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi
+        <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false
+          <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true
+          <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-punctuation">-</span> ALL
+      <span class="syntax-tag">restartPolicy</span><span class="syntax-punctuation">:</span> Never</code></pre>
+<p><strong>Expected:</strong> One finite task is requested, with one parallel Pod and a 20-second active deadline.</p>
 <h4 id="worked-example-2-separate-suspended-scheduling-from-execution">Worked example 2: Separate suspended scheduling from execution<a class="heading-anchor" href="#worked-example-2-separate-suspended-scheduling-from-execution" aria-label="Link to this section">#</a></h4>
 <p>The supplied CronJob JSON has schedule <em>/5 </em> <em> </em> *, timeZone Etc/UTC, suspend true and Forbid concurrency. No scheduled execution is claimed by reading it.</p>
 <p><strong>Expected:</strong> The object describes intended recurrence, but a suspended configuration does not create new scheduled Jobs.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
 <p>POSIX:</p>
-<pre><code class="language-sh">: &quot;${LAB_KUBECONFIG:?Use the owned receipt path}&quot;
-: &quot;${LAB_CONTEXT:?Use the owned receipt context}&quot;
-: &quot;${LAB_NAMESPACE:?Use the owned receipt namespace}&quot;
-kubectl --kubeconfig &quot;$LAB_KUBECONFIG&quot; --context &quot;$LAB_CONTEXT&quot; --namespace &quot;$LAB_NAMESPACE&quot; get job hello-task -o json</code></pre>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get job hello-task -o json</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">if (-not $env:LAB_KUBECONFIG -or -not $env:LAB_CONTEXT -or -not $env:LAB_NAMESPACE) { throw &#x27;Owned receipt fields are required.&#x27; }
-&amp; kubectl --kubeconfig $env:LAB_KUBECONFIG --context $env:LAB_CONTEXT --namespace $env:LAB_NAMESPACE get job hello-task -o json
-if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get job hello-task -o json
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>This lesson supplies an allowlisted <code>k8s-kind</code> source. Use <code>courses/kubernetes/lessons/k8s-011.yaml</code> in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. <a href="../host-labs.md.html">The run/host-lab guide</a> explains the precise boundary and POSIX/PowerShell targeting.</p>
@@ -205,8 +251,8 @@ if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</c
 <p><strong>Progressive hints:</strong> Each field controls a different part of lifecycle or work budget.</p>
 <h4 id="exercise-2-verify-exact-task-output">Exercise 2: Verify exact task output<a class="heading-anchor" href="#exercise-2-verify-exact-task-output" aria-label="Link to this section">#</a></h4>
 <p>Run the successful fixed task under a qualified lease.</p>
-<p><strong>Expected result/shape:</strong> Owned Complete Job, controlled successful task Pod, exit0 and exact accepted3/rejected2/total35 output.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Owned Complete Job, controlled successful task Pod, exit0 and exact accepted3/rejected2/total35 output.</p>
+<p><strong>Expected result/shape:</strong> Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted3/rejected2/total35 output.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted3/rejected2/total35 output.</p>
 <p><strong>Progressive hints:</strong> Inspect the identity and output checks rather than a success word.</p>
 <h4 id="exercise-3-observe-intentional-failure">Exercise 3: Observe intentional failure<a class="heading-anchor" href="#exercise-3-observe-intentional-failure" aria-label="Link to this section">#</a></h4>
 <p>Change only the allowed outcome from success to failure.</p>
@@ -214,7 +260,7 @@ if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</c
 <p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Job reaches Failed; operation reports failure and cleans its owned UID.</p>
 <p><strong>Progressive hints:</strong> A deliberate nonzero exit is expected negative evidence.</p>
 <h4 id="exercise-4-explain-retry-semantics">Exercise 4: Explain retry semantics<a class="heading-anchor" href="#exercise-4-explain-retry-semantics" aria-label="Link to this section">#</a></h4>
-<p>Compare backoffLimit0 and1 with restartPolicy Never.</p>
+<p>Compare backoffLimit0 and 1 with restartPolicy Never.</p>
 <p><strong>Expected result/shape:</strong> At most the declared retry budget is requested; Never does not forbid a replacement Pod attempt.</p>
 <p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: At most the declared retry budget is requested; Never does not forbid a replacement Pod attempt.</p>
 <p><strong>Progressive hints:</strong> Separate container restart from Job retry.</p>
@@ -245,7 +291,7 @@ if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</c
 <li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetes CronJobs</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-011.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-011.
 Read courses/kubernetes/guides/k8s-011.md and courses/kubernetes/lessons/k8s-011.yaml. Direct prerequisites: `k8s-005`.
 Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
 Keep courses/kubernetes/solutions/ closed until I attempt or explicitly ask for comparison.

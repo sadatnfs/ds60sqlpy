@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-10.html#learner">learner SQL</a> · <a href="sql-10.html#solution-1">solution reasoning</a> · <a href="sql-10.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-10 — DML with Subqueries</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day10_dml_with_subqueries.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day10_dml_with_subqueries.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day10_dml_with_subqueries.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,17 +466,17 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day10_dml_with_subqueries.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TEMP TABLE tmp_category_revenue AS
-SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> tmp_category_revenue <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+<span class="syntax-keyword">FROM</span> order_items oi
+<span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, and <code>revenue</code> from <code>order_items</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT category, revenue
-FROM tmp_category_revenue
-ORDER BY revenue DESC, category;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> revenue
+<span class="syntax-keyword">FROM</span> tmp_category_revenue
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>tmp_category_revenue</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>category</code>, and <code>revenue</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>category</code> with columns <code>category</code>, and <code>revenue</code> from <code>tmp_category_revenue</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -515,7 +563,7 @@ ORDER BY revenue DESC, category;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-10 — DML with Subqueries.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-10 — DML with Subqueries.
 
 I have completed the direct catalog prerequisite: `sql-09`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md
@@ -573,119 +621,119 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10: INSERT/UPDATE/DELETE with Subqueries (safe via ROLLBACK)</span>
-<span>-- BEGINNER WORKFLOW — sql-10: DML with Subqueries</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-10/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: tmp_category_revenue, order_items, products, employees, departments.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span>
-<span>-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span>
-<span>-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- Example: Insert promotional budget rollups into a temp table</span>
-<span>CREATE TEMP TABLE tmp_category_revenue AS</span>
-<span>SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue</span>
-<span>FROM order_items oi</span>
-<span>JOIN products p ON p.product_id = oi.product_id</span>
-<span>GROUP BY p.category;</span>
-<span> </span>
-<span>SELECT category, revenue</span>
-<span>FROM tmp_category_revenue</span>
-<span>ORDER BY revenue DESC, category;</span>
-<span> </span>
-<span>-- Example: Update salaries by department performance (demo only).</span>
-<span>-- Capture RETURNING in a data-modifying CTE so the evidence can be sorted.</span>
-<span>WITH changed AS (</span>
-<span>  UPDATE employees AS e</span>
-<span>  SET salary = e.salary * 1.05</span>
-<span>  WHERE e.department_id IN (</span>
-<span>    SELECT d.department_id</span>
-<span>    FROM departments AS d</span>
-<span>    WHERE d.name IN (&#x27;Sales&#x27;,&#x27;Engineering&#x27;)</span>
-<span>  )</span>
-<span>  RETURNING e.employee_id, e.department_id, e.salary</span>
-<span>)</span>
-<span>SELECT employee_id, department_id, salary</span>
-<span>FROM changed</span>
-<span>ORDER BY employee_id;</span>
-<span> </span>
-<span>-- Example: Delete unpaid old orders (demo only)</span>
-<span>WITH deleted AS (</span>
-<span>  DELETE FROM orders AS o</span>
-<span>  WHERE o.order_date &lt; now() - interval &#x27;365 days&#x27;</span>
-<span>    AND NOT EXISTS (</span>
-<span>      SELECT 1</span>
-<span>      FROM payments AS p</span>
-<span>      WHERE p.order_id = o.order_id</span>
-<span>    )</span>
-<span>  RETURNING o.order_id</span>
-<span>)</span>
-<span>SELECT order_id</span>
-<span>FROM deleted</span>
-<span>ORDER BY order_id;</span>
-<span> </span>
-<span>-- All changes will be rolled back below</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span>
-<span>--    Hint: Declare the temporary schema and aggregate source rows before inserting.</span>
-<span>--    Inputs: For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.</span>
-<span>--    Verify: For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 1, start with the first relation in `exercise_category_revenue`, `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.</span>
-<span>-- 2. [Query writing] Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span>
-<span>--    Hint: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span>
-<span>--    Inputs: For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.</span>
-<span>--    Verify: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry.</span>
-<span>-- 3. [Query writing] Delete orders older than one year only when no payment exists, returning candidate keys.</span>
-<span>--    Hint: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span>
-<span>--    Inputs: For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.</span>
-<span>--    Verify: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry.</span>
-<span>-- 4. [Prediction] Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span>
-<span>--    Hint: A primary key supplies the conflict target; the second statement updates rather than inserts.</span>
-<span>--    Inputs: For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.</span>
-<span>--    Verify: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry.</span>
-<span>-- 5. [Debugging] Preview and update a bounded product set while reconciling selected and returned key counts.</span>
-<span>--    Hint: Store candidate keys in a temporary table and update only through that reviewed set.</span>
-<span>--    Inputs: For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.</span>
-<span>--    Verify: For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 5, run `updated` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span>
-<span>-- 6. [Extension] Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span>
-<span>--    Hint: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span>
-<span>--    Inputs: For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
-<span>--    Expected result/shape: For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.</span>
-<span>--    Verify: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span>
-<span>--    Hint ladder, rung 1: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 10: INSERT/UPDATE/DELETE with Subqueries (safe via ROLLBACK)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-10: DML with Subqueries</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-10/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: tmp_category_revenue, order_items, products, employees, departments.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example: Insert promotional budget rollups into a temp table</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> tmp_category_revenue <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> tmp_category_revenue</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example: Update salaries by department performance (demo only).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Capture RETURNING in a data-modifying CTE so the evidence can be sorted.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> salary <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span> d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Sales&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;Engineering&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  RETURNING e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>salary</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> employee_id<span class="syntax-punctuation">,</span> department_id<span class="syntax-punctuation">,</span> salary</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> changed</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example: Delete unpaid old orders (demo only)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> deleted <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;365 days&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">      <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span></span>
+<span class="source-line">      <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">      <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  RETURNING o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deleted</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- All changes will be rolled back below</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Declare the temporary schema and aggregate source rows before inserting.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 1, start with the first relation in `exercise_category_revenue`, `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Delete orders older than one year only when no payment exists, returning candidate keys.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: A primary key supplies the conflict target; the second statement updates rather than inserts.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Preview and update a bounded product set while reconciling selected and returned key counts.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Store candidate keys in a temporary table and update only through that reviewed set.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 5, run `updated` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -721,10 +769,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert">Day 10 solutions — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT<a class="heading-anchor" href="#solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day10_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day10_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day10_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -760,22 +808,22 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_1;
-CREATE TEMP TABLE exercise_category_revenue (
-  category text PRIMARY KEY,
-  revenue numeric NOT NULL
-) ON COMMIT DROP;
-INSERT INTO exercise_category_revenue (category, revenue)
-SELECT p.category,
-       SUM(oi.unit_price * oi.quantity * (1 - oi.discount))
-FROM order_items AS oi
-JOIN products AS p
-  ON p.product_id = oi.product_id
-GROUP BY p.category;
-SELECT category, ROUND(revenue, 2) AS revenue
-FROM exercise_category_revenue
-ORDER BY revenue DESC, category;
-ROLLBACK TO SAVEPOINT exercise_1;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_category_revenue <span class="syntax-punctuation">(</span>
+  category <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_category_revenue <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">AS</span> oi
+<span class="syntax-keyword">JOIN</span> products <span class="syntax-keyword">AS</span> p
+  <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+<span class="syntax-keyword">FROM</span> exercise_category_revenue
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One temporary row per product category.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -800,16 +848,16 @@ ROLLBACK TO SAVEPOINT exercise_1;</code></pre>
 <li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_2;
-UPDATE employees AS e
-SET salary = ROUND(e.salary * 1.05, 2)
-WHERE e.department_id IN (
-  SELECT d.department_id
-  FROM departments AS d
-  WHERE d.name IN (&#x27;Sales&#x27;, &#x27;Engineering&#x27;)
-)
-RETURNING e.employee_id, e.full_name, e.salary;
-ROLLBACK TO SAVEPOINT exercise_2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">UPDATE</span> employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">SET</span> salary <span class="syntax-operator">=</span> ROUND<span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id
+  <span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d
+  <span class="syntax-keyword">WHERE</span> d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Sales&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Engineering&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+RETURNING e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Affected employee rows only; no change persists.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -834,16 +882,16 @@ ROLLBACK TO SAVEPOINT exercise_2;</code></pre>
 <li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_3;
-DELETE FROM orders AS o
-WHERE o.order_date &lt; CURRENT_TIMESTAMP - INTERVAL &#x27;1 year&#x27;
-  AND NOT EXISTS (
-    SELECT 1
-    FROM payments AS p
-    WHERE p.order_id = o.order_id
-  )
-RETURNING o.order_id, o.customer_id, o.order_date;
-ROLLBACK TO SAVEPOINT exercise_3;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">AS</span> p
+    <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-punctuation">)</span>
+RETURNING o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Deleted-candidate order rows, then fully restored state.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -870,23 +918,23 @@ ROLLBACK TO SAVEPOINT exercise_3;</code></pre>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_4;
-CREATE TEMP TABLE exercise_feed (
-  source_key text PRIMARY KEY,
-  source_value numeric NOT NULL
-) ON COMMIT DROP;
-INSERT INTO exercise_feed (source_key, source_value)
-VALUES (&#x27;source_a&#x27;, 10)
-ON CONFLICT (source_key)
-DO UPDATE SET source_value = EXCLUDED.source_value;
-INSERT INTO exercise_feed (source_key, source_value)
-VALUES (&#x27;source_a&#x27;, 12)
-ON CONFLICT (source_key)
-DO UPDATE SET source_value = EXCLUDED.source_value;
-SELECT source_key, source_value
-FROM exercise_feed
-ORDER BY source_key;
-ROLLBACK TO SAVEPOINT exercise_4;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_feed <span class="syntax-punctuation">(</span>
+  source_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  source_value <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_feed <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">,</span> source_value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">SET</span> source_value <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>source_value<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_feed <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">,</span> source_value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">SET</span> source_value <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>source_value<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span> source_key<span class="syntax-punctuation">,</span> source_value
+<span class="syntax-keyword">FROM</span> exercise_feed
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> source_key<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row for <code>source_a</code> with the second value.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -915,26 +963,26 @@ ROLLBACK TO SAVEPOINT exercise_4;</code></pre>
 <li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_5;
-CREATE TEMP TABLE exercise_product_candidates ON COMMIT DROP AS
-SELECT p.product_id
-FROM products AS p
-WHERE p.category = &#x27;Books&#x27;
-ORDER BY p.product_id
-LIMIT 5;
-WITH updated AS (
-  UPDATE products AS p
-  SET price = ROUND(p.price * 0.99, 2)
-  WHERE p.product_id IN (
-    SELECT candidate.product_id
-    FROM exercise_product_candidates AS candidate
-  )
-  RETURNING p.product_id
-)
-SELECT (SELECT COUNT(*) FROM exercise_product_candidates) AS candidate_count,
-       COUNT(*) AS updated_count
-FROM updated;
-ROLLBACK TO SAVEPOINT exercise_5;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_product_candidates <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Books&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">WITH</span> updated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">UPDATE</span> products <span class="syntax-keyword">AS</span> p
+  <span class="syntax-keyword">SET</span> price <span class="syntax-operator">=</span> ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span> candidate<span class="syntax-punctuation">.</span>product_id
+    <span class="syntax-keyword">FROM</span> exercise_product_candidates <span class="syntax-keyword">AS</span> candidate
+  <span class="syntax-punctuation">)</span>
+  RETURNING p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> exercise_product_candidates<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate_count<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> updated_count
+<span class="syntax-keyword">FROM</span> updated<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One summary row with equal candidate and updated counts.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -963,25 +1011,25 @@ ROLLBACK TO SAVEPOINT exercise_5;</code></pre>
 <li><code>RETURNING</code>: shows the rows changed by DML, providing immediate evidence of the affected population.</li>
 <li>savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</li>
 </ul>
-<pre><code class="language-sql">SAVEPOINT exercise_6;
-CREATE TEMP TABLE exercise_price_stage (
-  product_id integer PRIMARY KEY,
-  new_price numeric
-) ON COMMIT DROP;
-INSERT INTO exercise_price_stage (product_id, new_price)
-SELECT p.product_id,
-       ROUND(p.price * 1.01, 2)
-FROM products AS p
-ORDER BY p.product_id
-LIMIT 3;
-UPDATE products AS p
-SET price = stage.new_price
-FROM exercise_price_stage AS stage
-WHERE stage.product_id = p.product_id
-  AND stage.new_price &gt;= 0
-  AND p.price IS DISTINCT FROM stage.new_price
-RETURNING p.product_id, p.price;
-ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_price_stage <span class="syntax-punctuation">(</span>
+  product_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  new_price <span class="syntax-builtin">numeric</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_price_stage <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">,</span> new_price<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">UPDATE</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">SET</span> price <span class="syntax-operator">=</span> stage<span class="syntax-punctuation">.</span>new_price
+<span class="syntax-keyword">FROM</span> exercise_price_stage <span class="syntax-keyword">AS</span> stage
+<span class="syntax-keyword">WHERE</span> stage<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">AND</span> stage<span class="syntax-punctuation">.</span>new_price <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> stage<span class="syntax-punctuation">.</span>new_price
+RETURNING p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Returned rows only for valid changed products.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1034,228 +1082,228 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-10: DML with Subqueries</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day10_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day10_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span>
-<span>-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span>
-<span>-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span>
-<span>-- Why: Declare the temporary schema and aggregate source rows before inserting.</span>
-<span>-- Expected: One temporary row per product category.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
-<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span>
-<span>-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_1;</span>
-<span>CREATE TEMP TABLE exercise_category_revenue (</span>
-<span>  category text PRIMARY KEY,</span>
-<span>  revenue numeric NOT NULL</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO exercise_category_revenue (category, revenue)</span>
-<span>SELECT p.category,</span>
-<span>       SUM(oi.unit_price * oi.quantity * (1 - oi.discount))</span>
-<span>FROM order_items AS oi</span>
-<span>JOIN products AS p</span>
-<span>  ON p.product_id = oi.product_id</span>
-<span>GROUP BY p.category;</span>
-<span>SELECT category, ROUND(revenue, 2) AS revenue</span>
-<span>FROM exercise_category_revenue</span>
-<span>ORDER BY revenue DESC, category;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span>
-<span>-- Why: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span>
-<span>-- Expected: Affected employee rows only; no change persists.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_2;</span>
-<span>UPDATE employees AS e</span>
-<span>SET salary = ROUND(e.salary * 1.05, 2)</span>
-<span>WHERE e.department_id IN (</span>
-<span>  SELECT d.department_id</span>
-<span>  FROM departments AS d</span>
-<span>  WHERE d.name IN (&#x27;Sales&#x27;, &#x27;Engineering&#x27;)</span>
-<span>)</span>
-<span>RETURNING e.employee_id, e.full_name, e.salary;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Delete orders older than one year only when no payment exists, returning candidate keys.</span>
-<span>-- Why: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span>
-<span>-- Expected: Deleted-candidate order rows, then fully restored state.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `DELETE FROM`: removes only the predicate-matched rows; the lesson&#x27;s transaction wrapper makes the example reversible.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_3;</span>
-<span>DELETE FROM orders AS o</span>
-<span>WHERE o.order_date &lt; CURRENT_TIMESTAMP - INTERVAL &#x27;1 year&#x27;</span>
-<span>  AND NOT EXISTS (</span>
-<span>    SELECT 1</span>
-<span>    FROM payments AS p</span>
-<span>    WHERE p.order_id = o.order_id</span>
-<span>  )</span>
-<span>RETURNING o.order_id, o.customer_id, o.order_date;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span>
-<span>-- Why: A primary key supplies the conflict target; the second statement updates rather than inserts.</span>
-<span>-- Expected: One row for `source_a` with the second value.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
-<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
-<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
-<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_4;</span>
-<span>CREATE TEMP TABLE exercise_feed (</span>
-<span>  source_key text PRIMARY KEY,</span>
-<span>  source_value numeric NOT NULL</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO exercise_feed (source_key, source_value)</span>
-<span>VALUES (&#x27;source_a&#x27;, 10)</span>
-<span>ON CONFLICT (source_key)</span>
-<span>DO UPDATE SET source_value = EXCLUDED.source_value;</span>
-<span>INSERT INTO exercise_feed (source_key, source_value)</span>
-<span>VALUES (&#x27;source_a&#x27;, 12)</span>
-<span>ON CONFLICT (source_key)</span>
-<span>DO UPDATE SET source_value = EXCLUDED.source_value;</span>
-<span>SELECT source_key, source_value</span>
-<span>FROM exercise_feed</span>
-<span>ORDER BY source_key;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Preview and update a bounded product set while reconciling selected and returned key counts.</span>
-<span>-- Why: Store candidate keys in a temporary table and update only through that reviewed set.</span>
-<span>-- Expected: One summary row with equal candidate and updated counts.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
-<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span>
-<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_5;</span>
-<span>CREATE TEMP TABLE exercise_product_candidates ON COMMIT DROP AS</span>
-<span>SELECT p.product_id</span>
-<span>FROM products AS p</span>
-<span>WHERE p.category = &#x27;Books&#x27;</span>
-<span>ORDER BY p.product_id</span>
-<span>LIMIT 5;</span>
-<span>WITH updated AS (</span>
-<span>  UPDATE products AS p</span>
-<span>  SET price = ROUND(p.price * 0.99, 2)</span>
-<span>  WHERE p.product_id IN (</span>
-<span>    SELECT candidate.product_id</span>
-<span>    FROM exercise_product_candidates AS candidate</span>
-<span>  )</span>
-<span>  RETURNING p.product_id</span>
-<span>)</span>
-<span>SELECT (SELECT COUNT(*) FROM exercise_product_candidates) AS candidate_count,</span>
-<span>       COUNT(*) AS updated_count</span>
-<span>FROM updated;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span>
-<span>-- Why: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span>
-<span>-- Expected: Returned rows only for valid changed products.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span>
-<span>-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span>
-<span>-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span>
-<span>-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span>
-<span>-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span>
-<span>SAVEPOINT exercise_6;</span>
-<span>CREATE TEMP TABLE exercise_price_stage (</span>
-<span>  product_id integer PRIMARY KEY,</span>
-<span>  new_price numeric</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO exercise_price_stage (product_id, new_price)</span>
-<span>SELECT p.product_id,</span>
-<span>       ROUND(p.price * 1.01, 2)</span>
-<span>FROM products AS p</span>
-<span>ORDER BY p.product_id</span>
-<span>LIMIT 3;</span>
-<span>UPDATE products AS p</span>
-<span>SET price = stage.new_price</span>
-<span>FROM exercise_price_stage AS stage</span>
-<span>WHERE stage.product_id = p.product_id</span>
-<span>  AND stage.new_price &gt;= 0</span>
-<span>  AND p.price IS DISTINCT FROM stage.new_price</span>
-<span>RETURNING p.product_id, p.price;</span>
-<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 10 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-10: DML with Subqueries</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day10_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day10_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Declare the temporary schema and aggregate source rows before inserting.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One temporary row per product category.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_category_revenue <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  category <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_category_revenue <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">AS</span> oi</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> exercise_category_revenue</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Affected employee rows only; no change persists.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-keyword">SET</span> salary <span class="syntax-operator">=</span> ROUND<span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Sales&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Engineering&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">RETURNING e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Delete orders older than one year only when no payment exists, returning candidate keys.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Deleted-candidate order rows, then fully restored state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `DELETE FROM`: removes only the predicate-matched rows; the lesson&#x27;s transaction wrapper makes the example reversible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line">RETURNING o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: A primary key supplies the conflict target; the second statement updates rather than inserts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row for `source_a` with the second value.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_feed <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  source_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_value <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_feed <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">,</span> source_value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">SET</span> source_value <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>source_value<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_feed <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">,</span> source_value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>source_key<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">SET</span> source_value <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>source_value<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> source_key<span class="syntax-punctuation">,</span> source_value</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> exercise_feed</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> source_key<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Preview and update a bounded product set while reconciling selected and returned key counts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Store candidate keys in a temporary table and update only through that reviewed set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One summary row with equal candidate and updated counts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_product_candidates <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Books&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> updated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> price <span class="syntax-operator">=</span> ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span> candidate<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> exercise_product_candidates <span class="syntax-keyword">AS</span> candidate</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span></span>
+<span class="source-line">  RETURNING p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> exercise_product_candidates<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> updated_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> updated<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Returned rows only for valid changed products.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CREATE TEMP`: creates session-local teaching state; the outer transaction and final rollback keep the lesson disposable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `INSERT INTO`: adds rows to the named target; an explicit column list prevents accidental position-based mistakes.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `UPDATE`: changes only the target rows selected by its predicate; preview that population before executing.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - savepoint control: creates or restores an inner transaction checkpoint while the lesson&#x27;s outer rollback remains the final guard.</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> exercise_price_stage <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  product_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  new_price <span class="syntax-builtin">numeric</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> exercise_price_stage <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">,</span> new_price<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">SET</span> price <span class="syntax-operator">=</span> stage<span class="syntax-punctuation">.</span>new_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> exercise_price_stage <span class="syntax-keyword">AS</span> stage</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> stage<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> stage<span class="syntax-punctuation">.</span>new_price <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> stage<span class="syntax-punctuation">.</span>new_price</span>
+<span class="source-line">RETURNING p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

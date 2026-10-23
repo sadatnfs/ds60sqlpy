@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled bybeta. Equal adjusted margins give losslog2. The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
+Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss log 2. The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
 
 RLHF is a broader family of workflows in which human feedback informs a reward or preference signal and a policy optimization procedure. A reward model and an online policy update introduce additional state, exploration and reward-hacking risks. This chapter performs a real scalar PyTorch update on a DPO-style preference margin and contrasts its evidence with an RLHF workflow. It does not claim to train a reward model, execute onlineRL, or establish factuality. A preferred answer can still be unsupported or wrong if the preference labels reward style over truth.
 
@@ -18,13 +18,13 @@ RLHF is a broader family of workflows in which human feedback informs a reward o
 
 ## Reading the implementation
 
-Represent the policy log-probability difference as a trainable scalar for the smallest diagnostic. The reference difference is fixed. Compute margin=beta*(policy_difference-reference_difference) andloss=softplus(-margin). Backpropagate and apply oneSGD update. Reversing chosen/rejected labels reverses the margin and gradient direction. Keep response identities attached to scores when forming pairs.
+Represent the policy log-probability difference as a trainable scalar for the smallest diagnostic. The reference difference is fixed. Compute margin=beta*(policy_difference-reference_difference) and loss=softplus(-margin). Backpropagate and apply oneSGD update. Reversing chosen/rejected labels reverses the margin and gradient direction. Keep response identities attached to scores when forming pairs.
 
 ## Derive the DPO-style scalar update
 
 Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At \(d=r=0\) and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
@@ -46,7 +46,7 @@ Feedback quality remains decisive. If annotators prefer a confident but unsuppor
 
 ## Exercise 1: Calculate the equal-margin loss
 
-The question is: Set policy difference0, reference difference0, beta.5.
+The question is: Set policy difference 0, reference difference 0, beta.5.
 
 The objective has no preference advantage at equal margins. This exact value is an independent arithmetic check of the loss convention.
 
@@ -56,15 +56,15 @@ loss=F.softplus(-beta*(difference-reference))
 np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 ```
 
-**Expected:** losslog2.
+**Expected:** loss log 2.
 
-**Verify:** Compare the computed values or written argument with losslog2.
+**Verify:** Compare the computed values or written argument with loss log 2.
 
 ## Exercise 2: Inspect the preference gradient
 
 The question is: Backpropagate the equal-margin loss.
 
-The negative gradient means gradient descent increases the chosen-response advantage. The scale includesbeta and the sigmoid derivative atzero.
+The negative gradient means gradient descent increases the chosen-response advantage. The scale includes beta and the sigmoid derivative at zero.
 
 ```python
 loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-12,rtol=0)
@@ -91,7 +91,7 @@ np.testing.assert_allclose(difference.item(),.05,atol=1e-12,rtol=0); assert afte
 
 ## Exercise 4: Reverse the preference
 
-The question is: Atzero policy difference, reverse the chosen/rejected orientation and inspect the gradient.
+The question is: At zero policy difference, reverse the chosen/rejected orientation and inspect the gradient.
 
 Both response identities and score differences must reverse consistently. Swapping only a label string without changing the associated scores would corrupt the objective.
 
@@ -130,9 +130,9 @@ receipt={'offline_preference_update':True,'reward_model_trained':False,'online_r
 assert receipt['offline_preference_update'] and not receipt['online_rl'] and not receipt['reward_model_trained']
 ```
 
-**Expected:** offline updateTrue; reward_model_trainedFalse; online_rlFalse.
+**Expected:** offline update True; reward_model_trained False; online_rl False.
 
-**Verify:** Compare the computed values or written argument with offline updateTrue; reward_model_trainedFalse; online_rlFalse.
+**Verify:** Compare the computed values or written argument with offline update True; reward_model_trained False; online_rl False.
 
 ## Review after comparison
 

@@ -119,7 +119,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** A1/2errors; B0/1.
    **Verify:** Save the assertion results for exercise 1, including A1/2errors; B0/1.
 
-2. **Expose repeated identities.** Repeatcorrectrecordc five times and compare row count with unique IDs.
+2. **Expose repeated identities.** Repeat correct record c five times and compare row count with unique IDs.
    **Expected:** 8rows but 3 unique IDs.
    **Verify:** Save the assertion results for exercise 2, including 8rows but 3 unique IDs.
 

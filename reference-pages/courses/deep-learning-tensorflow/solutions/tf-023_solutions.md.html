@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,56 +169,56 @@
 <p><strong>Zero gradient:</strong> A connected derivative whose current value is zero.</p>
 <p><strong>State trace:</strong> A record of values before and after each update.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Use a new tape for every step. w.assign_sub(rate<em>gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence w_next=w-.1</em>(28/3)*(w-2).</p>
+<p>Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>w</mi><mrow><mrow><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">t</mi></mrow></mrow></msub><mo>=</mo><mi>w</mi><mo>−</mo><mn>0.1</mn><mo>·</mo><mfrac><mrow><mn>28</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>·</mo><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">w_{\mathrm{next}}=w-0.1\cdot \frac{28}{3}\cdot (w-2)</annotation></semantics></math>.</p>
 <h3 id="exercise-1-expose-a-missing-path">Exercise 1: Expose a missing path<a class="heading-anchor" href="#exercise-1-expose-a-missing-path" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute(w-2)² before opening a tape and ask that tape for its gradient.</p>
 <p>The tape cannot reconstruct operations it never recorded. The numerical loss4 alone does not reveal this missing dependency.</p>
-<pre><code class="language-python">w=tf.Variable(0.,dtype=tf.float64); outside=(w-2)**2
-with tf.GradientTape() as tape: loss=outside
-assert tape.gradient(loss,w) is None</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> outside<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>outside
+<span class="syntax-keyword">assert</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
 <p><strong>Expected:</strong> gradient is None.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with gradient is None.</p>
 <h3 id="exercise-2-distinguish-an-actual-zero">Exercise 2: Distinguish an actual zero<a class="heading-anchor" href="#exercise-2-distinguish-an-actual-zero" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute the same objective inside the tape atw2.</p>
 <p>The path exists and its slope is zero at the optimum. Replacing every None with zero would make these semantically different observations indistinguishable.</p>
-<pre><code class="language-python">optimum=tf.Variable(2.,dtype=tf.float64)
-with tf.GradientTape() as tape: loss=(optimum-2)**2
-g=tape.gradient(loss,optimum); assert g is not None and float(g)==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">optimum<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>optimum<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+g<span class="syntax-operator">=</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>optimum<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> g <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>g<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> gradient is a tensor equal0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with gradient is a tensor equal0.</p>
 <h3 id="exercise-3-repair-two-updates">Exercise 3: Repair two updates<a class="heading-anchor" href="#exercise-3-repair-two-updates" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use x1,2,3,y2x,w0 and rate.1 for exactly2 steps.</p>
+<p>The question is: Use x = [1, 2, 3],y = 2x,w = 0 and rate 0.1 for exactly 2 steps.</p>
 <p>The first update is28/15 and the second moves closer to2. This exact recurrence tests the loop order independently of framework metrics.</p>
-<pre><code class="language-python">x=tf.constant([1.,2.,3.],tf.float64); y=2*x; w=tf.Variable(0.,dtype=tf.float64); history=[]
-for _ in range(2):
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x-y)**2)
-    g=tape.gradient(loss,w); assert g is not None
-    w.assign_sub(.1*g); history.append(float(w))
-np.testing.assert_allclose(float(w),448/225,atol=1e-12,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">;</span> w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    g<span class="syntax-operator">=</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> g <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+    w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.1</span><span class="syntax-operator">*</span>g<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">448</span><span class="syntax-operator">/</span><span class="syntax-number">225</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> weight448/225 within1e-12.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with weight448/225 within1e-12.</p>
 <h3 id="exercise-4-recompute-loss-after-assignment">Exercise 4: Recompute loss after assignment<a class="heading-anchor" href="#exercise-4-recompute-loss-after-assignment" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare the two-step loss with the one-step loss56/675.</p>
 <p>A loss tensor saved from before assignment does not retroactively change when the variable changes. The new loss requires a new forward calculation.</p>
-<pre><code class="language-python">after=float(tf.reduce_mean((w*x-y)**2))
-assert 0&lt;=after&lt;56/675</code></pre>
+<pre class="highlighted-code"><code class="language-python">after<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>after<span class="syntax-operator">&lt;</span><span class="syntax-number">56</span><span class="syntax-operator">/</span><span class="syntax-number">675</span></code></pre>
 <p><strong>Expected:</strong> two-step loss is smaller and nonnegative.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with two-step loss is smaller and nonnegative.</p>
 <h3 id="exercise-5-check-gradient-finiteness">Exercise 5: Check gradient finiteness<a class="heading-anchor" href="#exercise-5-check-gradient-finiteness" aria-label="Link to this section">#</a></h3>
 <p>The question is: Inject a nonfinite target and refuse to apply its gradient.</p>
 <p>A bounded loop should check nonfinite state before contaminating weights. A skipped invalid update must be reported as a failure, not counted as a successful learning step.</p>
-<pre><code class="language-python">bad=tf.constant([2.,4.,np.inf],tf.float64); saved=float(w)
-with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x-bad)**2)
-g=tape.gradient(loss,w)
-assert not bool(tf.reduce_all(tf.math.is_finite(g))) and float(w)==saved</code></pre>
+<pre class="highlighted-code"><code class="language-python">bad<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saved<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-operator">-</span>bad<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+g<span class="syntax-operator">=</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>reduce_all<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>is_finite<span class="syntax-punctuation">(</span>g<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>saved</code></pre>
 <p><strong>Expected:</strong> gradient is nonfinite and rejected before assignment.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with gradient is nonfinite and rejected before assignment.</p>
 <h3 id="exercise-6-compare-an-analytic-recurrence">Exercise 6: Compare an analytic recurrence<a class="heading-anchor" href="#exercise-6-compare-an-analytic-recurrence" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate both updates with plain Python and compare each state with the tape trace.</p>
 <p>Comparing every state identifies the first divergence. A final-value-only check can hide compensating errors or incorrect intermediate logging.</p>
-<pre><code class="language-python">oracle=0.; expected=[]
-for _ in range(2): oracle-=.1*(28/3)*(oracle-2); expected.append(oracle)
-np.testing.assert_allclose(history,expected,atol=1e-12,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">oracle<span class="syntax-operator">=</span><span class="syntax-number">0.</span><span class="syntax-punctuation">;</span> expected<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> oracle<span class="syntax-operator">-</span><span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">28</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>oracle<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> expected<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>oracle<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both recorded states match within1e-12.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both recorded states match within1e-12.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

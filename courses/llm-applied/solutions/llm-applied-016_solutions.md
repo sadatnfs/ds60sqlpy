@@ -14,7 +14,7 @@ Only A and B are optimized. The frozen base remains part of the forward computat
 
 **Adapter rank:** The inner dimension bounding, but not guaranteeing, the rank of the learned update.
 
-**LoRA scale:** The multiplier alpha/r used in this forward function and its gradients.
+**LoRA scale:** The multiplier \(\frac{\alpha}{r}\) used in this forward function and its gradients.
 
 **Frozen base:** Weights excluded from updates while still participating in the differentiable forward computation.
 
@@ -36,7 +36,7 @@ At initialization \(B=0\). Therefore the A gradient is a connected tensor of zer
 
 ### Calculate the exact first step
 
-The input X is a row of eight ones, so XA=[1, 1]. With \(B=0\) and \(W=I_{8}\), Y is a row of eight ones. The loss is the mean of eight squared outputs against zero: \(L=1\). The output derivative is \(G=\frac{2Y}{8}\), so every entry is \(\frac{1}{4}\). With \(s=2\), every B-gradient entry is \(2\cdot 1\cdot \frac{1}{4}=\frac{1}{2}\), and every A-gradient entry is zero.
+The input X is a row of eight ones, so \(XA=[1,1]\). With \(B=0\) and \(W=I_{8}\), Y is a row of eight ones. The loss is the mean of eight squared outputs against zero: \(L=1\). The output derivative is \(G=\frac{2Y}{8}\), so every entry is \(\frac{1}{4}\). With \(s=2\), every B-gradient entry is \(2\cdot 1\cdot \frac{1}{4}=\frac{1}{2}\), and every A-gradient entry is zero.
 
 SGD with learning rate 0.1 changes every B entry to -0.05 and leaves A at 0.125. Each entry of AB is \(2\cdot 0.125\cdot (-0.05)=-0.0125\). Multiplication by s gives an effective update of -0.025 in every base-matrix entry. Multiplying by the eight-one input sums eight such contributions, producing \(Y_{\mathrm{new}}=0.8\) in every output coordinate. The new mean squared loss is therefore \({0.8}^{2}=0.64\). The reference checks these values, not merely that something changed or that a loss happened to decrease.
 
@@ -86,7 +86,7 @@ assert torch.equal(a @ b, torch.zeros((8, 8)))
 
 The question is: Differentiate the mean squared output against a zero target and inspect both factor gradients.
 
-The derivative for A contains B transpose, so it is zero at \(B=0\) while remaining connected to the graph. The derivative for B is s(XA) transpose times G. Here XA=[1, 1], G is eight copies of \(\frac{1}{4}\) and \(s=2\), giving 0.5 in every entry. This independent arithmetic is more diagnostic than only checking whether a gradient is nonzero.
+The derivative for A contains B transpose, so it is zero at \(B=0\) while remaining connected to the graph. The derivative for B is s(XA) transpose times G. Here \(XA=[1,1]\), G is eight copies of \(\frac{1}{4}\) and \(s=2\), giving 0.5 in every entry. This independent arithmetic is more diagnostic than only checking whether a gradient is nonzero.
 
 ```python
 loss = initial.square().mean()

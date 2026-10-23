@@ -67,9 +67,9 @@ Multilabel prediction has a different denominator and probability meaning. For t
 
 Each zero-logit binary entry contributeslog 2. Summing all six gives 6 log2; the element mean giveslog 2; the mean across records of a sum across three labels gives 3 log2. All three are possible reductions, but they imply different objective and gradient scales. State whether the denominator counts records, labels, valid pixels or another participation unit.
 
-Weights and ignored entries require another check. For class-index targets with class weights, PyTorch's weighted mean uses the participating target-class weights in its denominator, and ignore_index excludes designated targets from that participation. Do not transfer that exact formula automatically to soft-target cross entropy orpositive-weighted binary loss. A padded spatial orsequence target can otherwise change training scale while the displayed output tensor shape remains plausible.
+Weights and ignored entries require another check. For class-index targets with class weights, PyTorch's weighted mean uses the participating target-class weights in its denominator, and ignore_index excludes designated targets from that participation. Do not transfer that exact formula automatically to soft-target cross entropy orpositive-weighted binary loss. A padded spatial or sequence target can otherwise change training scale while the displayed output tensor shape remains plausible.
 
-For Keras comparisons, the default class-axis convention is often the last axis, whereas the PyTorch spatial categorical interface expects classes at dimension 1. Reorder axes and align target indexing explicitly; merely matching total element count can normalize across the wrong population orcouple unrelated observations.
+For Keras comparisons, the default class-axis convention is often the last axis, whereas the PyTorch spatial categorical interface expects classes at dimension 1. Reorder axes and align target indexing explicitly; merely matching total element count can normalize across the wrong population or couple unrelated observations.
 
 ## Worked example / walkthrough
 
@@ -143,9 +143,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-If probabilities sum along the batch axis instead of the class axis, inspect the softmax dimension and give each axis a semantic name. If a class-index target was converted to a floating matrix just to avoid an error, verify whether the task actually changed to a soft-target ormultilabel objective. A class index 3 isinvalid for three classes 0..2, regardless of how confidently a model predicts.
+If probabilities sum along the batch axis instead of the class axis, inspect the softmax dimension and give each axis a semantic name. If a class-index target was converted to a floating matrix just to avoid an error, verify whether the task actually changed to a soft-target or multilabel objective. A class index 3 is invalid for three classes 0..2, regardless of how confidently a model predicts.
 
-If a double-softmax mistake passes the uniform-logit case, test a nonuniform row and compare the target probability and gradient. If padding orclass weighting changes the scalar unexpectedly, reconstruct the library's exact participation denominator for that target form. Never compare a per-label mean with a per-record summed objective as though their matching function names implied the same training problem.
+If a double-softmax mistake passes the uniform-logit case, test a nonuniform row and compare the target probability and gradient. If padding or class weighting changes the scalar unexpectedly, reconstruct the library's exact participation denominator for that target form. Never compare a per-label mean with a per-record summed objective as though their matching function names implied the same training problem.
 
 ## Progressive hints
 

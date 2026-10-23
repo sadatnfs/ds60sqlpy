@@ -88,7 +88,7 @@ Create one base model, copy its state_dict into two new instances, and snapshot 
 
 The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for \(64+32=96\) trainable entries. The trainable ratio is \(\frac{96}{10464}=\frac{1}{109}\), about 0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
 
-The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B, T, 32]. In this fixture \(\alpha=r=2\), so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
+The output-head function is base_output(H)+(HAB)*(\(\frac{\alpha}{r}\)), with hidden states H shaped[B, T, 32]. In this fixture \(\alpha=r=2\), so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
 
 Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.
 
@@ -204,7 +204,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** all initial base parameters equal.
    **Verify:** Save the assertion results for exercise 1, including all initial base parameters equal.
 
-2. **Install an output-head adapter.** Freeze the adapted model, replace its output layer withrank 2LoRA, and compare initial logits.
+2. **Install an output-head adapter.** Freeze the adapted model, replace its output layer with rank 2LoRA, and compare initial logits.
    **Expected:** 96 trainable adapter entries; initial logits match base.
    **Verify:** Save the assertion results for exercise 2, including 96 trainable adapter entries; initial logits match base.
 
@@ -216,7 +216,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** all frozen tensors exactly equal.
    **Verify:** Save the assertion results for exercise 4, including all frozen tensors exactly equal.
 
-5. **Compare a frozen held-out task.** Evaluate prompt[7, 2] withanswer[5, 3] for both candidates using the same mask.
+5. **Compare a frozen held-out task.** Evaluate prompt[7, 2] with answer[5, 3] for both candidates using the same mask.
    **Expected:** two finite held-out losses; no predetermined winner.
    **Verify:** Save the assertion results for exercise 5, including two finite held-out losses; no predetermined winner.
 

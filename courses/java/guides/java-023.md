@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-022`
 
 ## Learning objectives
 
-Explain critical section, compare-and-set, lock ordering using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Run two workers making1000 synchronized increments each. The final exercise transfers the mechanism to use one global order for two locks.
+Explain critical section, compare-and-set, lock ordering using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Run two workers making 1000 synchronized increments each. The final exercise transfers the mechanism to use one global order for two locks.
 
 ## Purpose and mental model
 
-Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such ascompute ormerge makes it atomic for a key.
+Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
 
 Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock;using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention,not a universal concurrency performance claim.
 
@@ -24,7 +24,7 @@ Locks also create lifetime and ordering obligations. Always release an explicit 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-023/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -62,7 +62,7 @@ public class Main {
 
 ```
 
-**Expected:** counter2000.
+**Expected:** counter 2000.
 
 ### Example B: Use an atomic increment
 
@@ -94,27 +94,27 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Protect a compound counter.** Run two workers making1000 synchronized increments each.
-   **Expected:** counter2000.
-   **Verify:** Compare your assertion values or captured diagnostic with counter2000.
+1. **Protect a compound counter.** Run two workers making 1000 synchronized increments each.
+   **Expected:** counter 2000.
+   **Verify:** Compare your assertion values or captured diagnostic with counter 2000.
 
 2. **Use an atomic increment.** Repeat the workload withAtomicInteger.incrementAndGet.
    **Expected:** value2000.
    **Verify:** Compare your assertion values or captured diagnostic with value2000.
 
-3. **Inspect compare-and-set.** Change0to1 withCAS,then retry expecting0.
-   **Expected:** firsttrue;secondfalse;value1.
-   **Verify:** Compare your assertion values or captured diagnostic with firsttrue;secondfalse;value1.
+3. **Inspect compare-and-set.** Change0to1 with CAS,then retry expecting0.
+   **Expected:** first true;second false;value1.
+   **Verify:** Compare your assertion values or captured diagnostic with first true;second false;value1.
 
 4. **Combine map updates atomically.** UseConcurrentHashMap.merge for2000 total increments ofkeyx.
    **Expected:** stored count2000.
    **Verify:** Compare your assertion values or captured diagnostic with stored count2000.
 
-5. **Bound lock contention.** Hold aReentrantLock in the caller while a worker tries to acquire it with a short timeout.
-   **Expected:** worker returnsfalse;lock released in finally.
-   **Verify:** Compare your assertion values or captured diagnostic with worker returnsfalse;lock released in finally.
+5. **Bound lock contention.** Hold a ReentrantLock in the caller while a worker tries to acquire it with a short timeout.
+   **Expected:** worker returns false;lock released in finally.
+   **Verify:** Compare your assertion values or captured diagnostic with worker returns false;lock released in finally.
 
-6. **Use one global order for two locks.** Have both workers acquirefirst then second before incrementing shared state.
+6. **Use one global order for two locks.** Have both workers acquire first then second before incrementing shared state.
    **Expected:** 2000 increments and no blocked worker after bounded joins.
    **Verify:** Compare your assertion values or captured diagnostic with 2000 increments and no blocked worker after bounded joins.
 

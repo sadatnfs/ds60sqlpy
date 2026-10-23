@@ -4,27 +4,27 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-JDBC is Java's database-access API. AConnection represents a database session,PreparedStatement separates SQL structure from bound values,andResultSet exposes rows returned by a query. A connection normally starts in auto-commit mode,where each completed statement is committed independently. A multi-statement business operation needs an explicit transaction when its changes must succeed orfail together. Commit makes the transaction durable under the database contract;rollback discards its uncommitted changes.
+JDBC is Java's database-access API. A Connection represents a database session,PreparedStatement separates SQL structure from bound values,and ResultSet exposes rows returned by a query. A connection normally starts in auto-commit mode,where each completed statement is committed independently. A multi-statement business operation needs an explicit transaction when its changes must succeed or fail together. Commit makes the transaction durable under the database contract;rollback discards its uncommitted changes.
 
-This lesson uses a real embedded H2 database in memory through the preparedH2JDBCdriver. Every exercise creates its own named in-memory database andcloses all connections. It doesnot connect toPostgreSQL,Oracle,a shared service ora file-backed database. The tiny account table has a nonnegative-balance constraint. Actual prepared queries,commit,rollback,constraint failure andREAD_COMMITTED visibility are tested. H2 behavior onthisfixture isnot presented as universal behavior ofevery database engine.
+This lesson uses a real embedded H2 database in memory through the preparedH2JDBCdriver. Every exercise creates its own named in-memory database and closes all connections. It does not connect to PostgreSQL,Oracle,a shared service ora file-backed database. The tiny account table has a nonnegative-balance constraint. Actual prepared queries,commit,rollback,constraint failure andREAD_COMMITTED visibility are tested. H2 behavior on this fixture is not presented as universal behavior of every database engine.
 
-**Connection:** A database session carrying transaction andstatement state.
+**Connection:** A database session carrying transaction and statement state.
 
 **Prepared statement:** SQL structure with separately bound parameter values.
 
-**Transaction:** A group of changes committed orrolled back as one declared unit.
+**Transaction:** A group of changes committed or rolled back as one declared unit.
 
 **Isolation:** Rules governing which concurrent transaction changes are visible.
 
 ## Reading the reference
 
-DriverManager.getConnection selects a loaded driver for thejdbc:h2:mem URL. Bind values withsetInt orsetString rather than concatenating them into SQL. Use setAutoCommit(false),commit androllback for transaction control. Close ResultSet,PreparedStatement andConnection withtry-with-resources. Check executeUpdate row counts so an unknown account isnot silently treated as a successful transfer. SetupDDL occurs before the tested transactions becauseDDL transaction behavior is engine-specific.
+DriverManager.getConnection selects a loaded driver for thejdbc:h2:mem URL. Bind values withsetInt orsetString rather than concatenating them into SQL. Use setAutoCommit(false),commit and rollback for transaction control. Close ResultSet,PreparedStatement and Connection withtry-with-resources. Check executeUpdate row counts so an unknown account is not silently treated as a successful transfer. SetupDDL occurs before the tested transactions becauseDDL transaction behavior is engine-specific.
 
 ## Exercise 1: Verify a real local database
 
-Task: Open the fixture,inspect product metadata andcount the two account rows.
+Task: Open the fixture,inspect product metadata and count the two account rows.
 
-Metadata andquery execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing ortransaction state.
+Metadata and query execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing or transaction state.
 
 ```java
 try(java.sql.Connection connection=database()) {
@@ -33,15 +33,15 @@ try(java.sql.Connection connection=database()) {
 }
 ```
 
-**Expected:** database productH2;2 rows;auto-commit initiallytrue.
+**Expected:** database product H2; 2 rows; auto-commit initially true.
 
-**Verify:** Compare the program values or named exception with database productH2;2 rows;auto-commit initiallytrue. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with database product H2; 2 rows; auto-commit initially true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Bind an injection-shaped value as data
 
 Task: Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the same prepared statement.
 
-The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection isnot mistaken forcorrect binding.
+The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection is not mistaken for correct binding.
 
 ```java
 try(java.sql.Connection connection=database();var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts WHERE name = ?")) {
@@ -50,13 +50,13 @@ try(java.sql.Connection connection=database();var statement=connection.prepareSt
 }
 ```
 
-**Expected:** Alice matches1row;the injection-shaped value matches0.
+**Expected:** Alice matches 1 row;the injection-shaped value matches0.
 
-**Verify:** Compare the program values or named exception with Alice matches1row;the injection-shaped value matches0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with Alice matches 1 row;the injection-shaped value matches0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Roll back a transfer
 
-Task: Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,androllback.
+Task: Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,and rollback.
 
 Both changes belong to the same transaction. The intermediate state is visible to its own connection,but rollback restores the original fixture.
 
@@ -72,11 +72,11 @@ try(java.sql.Connection connection=database()) {
 
 **Verify:** Compare the program values or named exception with inside80,70;afterrollback100,50. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 4: Commit andread from a second session
+## Exercise 4: Commit and read from a second session
 
-Task: Transfer10cents,commit,andopen another connection to the same owned memory database.
+Task: Transfer10cents,commit,and open another connection to the same owned memory database.
 
-The first connection remains open while the second reads,keeping this in-memory database alive. No global database name orambient connection profile is used.
+The first connection remains open while the second reads,keeping this in-memory database alive. No global database name or ambient connection profile is used.
 
 ```java
 try(java.sql.Connection connection=database()) {
@@ -89,9 +89,9 @@ try(java.sql.Connection connection=database()) {
 
 **Verify:** Compare the program values or named exception with second connection sees90,60 andtotal150. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 5: Handle a constraint failure androllback
+## Exercise 5: Handle a constraint failure and rollback
 
-Task: Attempt tosubtract200frombalance100,catch theSQL integrity error,androllback.
+Task: Attempt tosubtract200frombalance100,catch the SQL integrity error,and rollback.
 
 The database enforces its own invariant even if application validation is missing. The transaction must be resolved explicitly after the failure rather than reused in an unknown state.
 
@@ -103,15 +103,15 @@ try(java.sql.Connection connection=database()) {
 }
 ```
 
-**Expected:** SQLState class23;balance remains100 afterrollback.
+**Expected:** SQLState class23;balance remains100 after rollback.
 
-**Verify:** Compare the program values or named exception with SQLState class23;balance remains100 afterrollback. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with SQLState class23;balance remains100 after rollback. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 6: Observe committed visibility under the declared isolation
 
-Task: Use twoH2connections atREAD_COMMITTED;updateaccount1 withoutcommit,read fromtheother,thencommit andreadagain.
+Task: Use twoH2connections atREAD_COMMITTED;updateaccount1 without commit,read from the other,then commit and read again.
 
-This is an actual two-session observation for the preparedH2engine. Other engines orisolation levels canhave different snapshot andlocking behavior,so retain the database/version context.
+This is an actual two-session observation for the preparedH2engine. Other engines or isolation levels can have different snapshot and locking behavior,so retain the database/version context.
 
 ```java
 try(java.sql.Connection first=database();var second=java.sql.DriverManager.getConnection(first.getMetaData().getURL())) {
@@ -120,9 +120,9 @@ try(java.sql.Connection first=database();var second=java.sql.DriverManager.getCo
 }
 ```
 
-**Expected:** second session sees100beforecommit and95aftercommit.
+**Expected:** second session sees 100 before commit and 95 after commit.
 
-**Verify:** Compare the program values or named exception with second session sees100beforecommit and95aftercommit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with second session sees 100 before commit and 95 after commit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

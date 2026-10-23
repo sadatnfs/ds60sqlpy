@@ -78,7 +78,7 @@ assert abs(wrong-np.log(2))>.1
 
 ## Exercise 5: Stress large scores
 
-The question is: Calculate losses for logits1000,-1000 with labels1,0 using the logits-aware form.
+The question is: Calculate losses for logits 1000,-1000 with labels1,0 using the logits-aware form.
 
 A naive `log(sigmoid())` path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.
 
@@ -102,9 +102,9 @@ labels=np.array([0,1,1]); assert np.count_nonzero((p>=.5)!=labels)==0
 assert np.count_nonzero((p>=.8)!=labels)==1
 ```
 
-**Expected:** 0 errors at.5 and1 at.8 on this fixture.
+**Expected:** 0 errors at.5 and 1 at.8 on this fixture.
 
-**Verify:** Compare the computed values or written argument with 0 errors at.5 and1 at.8 on this fixture.
+**Verify:** Compare the computed values or written argument with 0 errors at.5 and 1 at.8 on this fixture.
 
 ## Review after comparison
 

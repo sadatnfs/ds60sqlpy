@@ -27,9 +27,9 @@ x=np.array([[1,2],[3,4]],dtype='float32'); result=predict(x)
 np.testing.assert_array_equal(result,[0,2]); assert result.shape==(2,)
 ```
 
-**Expected:** outputs0,2 with shape(2,).
+**Expected:** outputs 0,2 with shape(2,).
 
-**Verify:** Compare the computed values or written argument with outputs0,2 with shape(2,).
+**Verify:** Compare the computed values or written argument with outputs 0,2 with shape(2,).
 
 ## Exercise 2: Compare batch independence
 

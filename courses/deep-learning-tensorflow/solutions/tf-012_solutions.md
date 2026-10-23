@@ -18,7 +18,7 @@ The fixture is a float32 matrix with one row per observation. Slicing by saved I
 
 ## Exercise 1: Freeze six records
 
-The question is: Create the three-feature fixture below, assign IDs0..3 to train and4..5 to holdout, and calculate targets.
+The question is: Create the three-feature fixture below, assign IDs0..3 to train and 4..5 to holdout, and calculate targets.
 
 The target formula is specified before fitting. This makes the learning problem inspectable, while still requiring the optimizer to recover useful weights from only the training subset.
 
@@ -50,7 +50,7 @@ assert mean==.5 and baseline==7.25
 
 ## Exercise 3: Train a bounded model
 
-The question is: Initialize a three-by-one kernel at zero and make exactly100 full-training SGD updates at rate.1.
+The question is: Initialize a three-by-one kernel at zero and make exactly100 full-training SGD updates at rate 0.1.
 
 The explicit step cap bounds the teaching run. Improvement is checked against the same initial training batch. It does not imply a universal learning-rate rule or a production acceptance threshold.
 
@@ -86,7 +86,7 @@ assert report['test_count']==2
 
 ## Exercise 5: Preserve arithmetic evidence
 
-The question is: Derive a one-feature pilot update from x1,2,3 and target2x at w0,rate.1.
+The question is: Derive a one-feature pilot update from x = [1, 2, 3] and target2x at w = 0,rate 0.1.
 
 A scalar diagnostic is a separate implementation check, not an alternative score for the three-feature model. Keeping both prevents an impressive-looking fit from concealing a broken update.
 

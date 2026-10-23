@@ -16,11 +16,11 @@ A fixed thread pool normally has an unbounded queue,which can retain more work t
 
 ## Reading the reference
 
-submit returns a Future;get(timeout,unit) returns a value or throws a named completion/timeout exception. ExecutionException wraps the task failure in getCause. cancel(true) requests interruption. try-with-resources closes the executor in Java21,but tasks still need bounded cooperative behavior. A ThreadPoolExecutor with an ArrayBlockingQueue and AbortPolicy rejects excess submissions rather than silently growing memory.
+submit returns a Future;get(timeout,unit) returns a value or throws a named completion/timeout exception. ExecutionException wraps the task failure in getCause. cancel(true) requests interruption. try-with-resources closes the executor in Java 21,but tasks still need bounded cooperative behavior. A ThreadPoolExecutor with an ArrayBlockingQueue and AbortPolicy rejects excess submissions rather than silently growing memory.
 
 ## Exercise 1: Retrieve a bounded result
 
-Task: Submit a callable returning42 and get it within2seconds.
+Task: Submit a callable returning 42 and get it within 2 seconds.
 
 The executor owns worker lifetime. The timeout makes the caller waiting policy explicit even though this fixture should finish immediately.
 
@@ -31,13 +31,13 @@ try(var executor=java.util.concurrent.Executors.newFixedThreadPool(2)) {
 }
 ```
 
-**Expected:** result42.
+**Expected:** result 42.
 
-**Verify:** Compare the program values or named exception with result42. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with result 42. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Preserve task failure identity
 
-Task: Submit a callable throwingIllegalArgumentException and inspectFuture.get.
+Task: Submit a callable throwing IllegalArgumentException and inspectFuture.get.
 
 The asynchronous boundary wraps the failure but retains its cause. Replacing it with a generic successful default would hide the task outcome.
 
@@ -123,9 +123,9 @@ try(var bounded=new java.util.concurrent.ThreadPoolExecutor(1,1,0,java.util.conc
 }
 ```
 
-**Expected:** third submission rejected;admitted tasks finish after release.
+**Expected:** third submission rejected; admitted tasks finish after release.
 
-**Verify:** Compare the program values or named exception with third submission rejected;admitted tasks finish after release. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with third submission rejected; admitted tasks finish after release. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

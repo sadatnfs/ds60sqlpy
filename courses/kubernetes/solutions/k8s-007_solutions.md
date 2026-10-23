@@ -38,7 +38,7 @@ The negative case tests the connection between selection and routing. A later su
 
 The independent request establishes that the Service path reaches the expected fixture response. Job completion alone is tied to owned Pod identity and the fixed checker behavior; the result remains bounded to the observed request.
 
-**Expected:** Job/Pod ownership and exit0 accompany the expected ds60-fixture-v1 payload contract.
+**Expected:** Job/Pod ownership and exit 0 accompany the expected ds60-fixture-v1 payload contract.
 
 ## Exercise 6: Design a second-Service transfer
 

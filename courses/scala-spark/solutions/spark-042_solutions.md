@@ -41,7 +41,7 @@ def canonical_product_input(frame):
 
 The canonical input contains every occurrence, including rejected business data, so replay identity covers the complete batch rather than only successful rows. The structural delivery key makes accounting possible. A duplicated delivery ID or oversized batch is a fatal input-contract error;an ordinary NULL business ID is retained for the invalid ledger.
 
-**Verification evidence:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a12-row union.
+**Verification evidence:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a 12-row union.
 
 ### Exercise 2: Implement the explicit state and lateness policy
 

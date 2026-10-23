@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-006`
 
 ## Learning objectives
 
-Explain instance, encapsulation, invariant using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Construct accounts with100 and100 cents,deposit50 into the first. The final exercise transfers the mechanism to protect against overflow.
+Explain instance, encapsulation, invariant using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Construct accounts with 100 and 100 cents,deposit 50 into the first. The final exercise transfers the mechanism to protect against overflow.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ An object combines state with operations that preserve its rules. Encapsulation 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-007/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -64,7 +64,7 @@ public class Main {
 
 ```
 
-**Expected:** balances150 and100.
+**Expected:** balances 150 and 100.
 
 ### Example B: Withdraw within the contract
 
@@ -99,9 +99,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Create independent accounts.** Construct accounts with100 and100 cents,deposit50 into the first.
-   **Expected:** balances150 and100.
-   **Verify:** Compare your assertion values or captured diagnostic with balances150 and100.
+1. **Create independent accounts.** Construct accounts with 100 and 100 cents,deposit 50 into the first.
+   **Expected:** balances 150 and 100.
+   **Verify:** Compare your assertion values or captured diagnostic with balances 150 and 100.
 
 2. **Withdraw within the contract.** Withdraw40 cents from the first account.
    **Expected:** balance110.

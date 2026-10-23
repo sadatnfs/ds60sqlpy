@@ -14,11 +14,11 @@ A record is a concise carrier for a fixed set of components, with generated acce
 
 ## Reading the reference
 
-record Order(String id,List<String>items) declares component accessorsid() anditems(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
+record Order(String id,List<String>items) declares component accessorsid() and items(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
 
 ## Exercise 1: Normalize at construction
 
-Task: Create an Order with idspaceAspace and itemx.
+Task: Create an Order with ID " A " and item x.
 
 Normalization occurs once at the boundary. Every later accessor sees the canonical ID, rather than requiring callers to remember to trim it.
 
@@ -27,9 +27,9 @@ Order order = new Order(" A ", List.of("x"));
 assert order.id().equals("A") && order.items().equals(List.of("x"));
 ```
 
-**Expected:** idA and items[x].
+**Expected:** ID A and items[x].
 
-**Verify:** Compare the program values or named exception with idA and items[x]. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with ID A and items[x]. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Copy caller-owned collections
 
@@ -48,7 +48,7 @@ assert copied.items().equals(List.of("x"));
 
 ## Exercise 3: Use value equality
 
-Task: Construct another Order with normalizedA and itemx.
+Task: Construct another Order with normalizedA and item x.
 
 Record equality compares component values. This is useful for stable data carriers and differs from default object identity equality.
 
@@ -95,7 +95,7 @@ assert protectedItems;
 
 ## Exercise 6: Reject null collection members
 
-Task: Try creating an Order whose items containsnull.
+Task: Try creating an Order whose items contains null.
 
 The constructor usesList.copyOf, whose null policy is explicit. An alternative domain could allow missing items, but should encode that meaning instead of accidentally accepting null.
 
@@ -105,9 +105,9 @@ try { new Order("C", Arrays.asList("x", null)); } catch (NullPointerException ex
 assert nullItem;
 ```
 
-**Expected:** NullPointerException from the declaredcopy policy.
+**Expected:** NullPointerException from the declared copy policy.
 
-**Verify:** Compare the program values or named exception with NullPointerException from the declaredcopy policy. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with NullPointerException from the declared copy policy. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

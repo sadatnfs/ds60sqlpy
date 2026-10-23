@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,8 +169,8 @@
 <p><strong>Expected:</strong> Three training rows and four holdout rows; the row-ID and group-ID intersections are empty.</p>
 <p><strong>Verify:</strong> Inspect the row-count table and assert the two ID-set intersections are empty.</p>
 <h3 id="exercise-2-compare-a-fixed-baseline">Exercise 2: Compare a fixed baseline<a class="heading-anchor" href="#exercise-2-compare-a-fixed-baseline" aria-label="Link to this section">#</a></h3>
-<p>Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is 8/3. Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.</p>
-<p><strong>Expected:</strong> The constant is 4, training MSE is 8/3 and holdout MSE is 54.</p>
+<p>Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{3}</annotation></semantics></math>. Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.</p>
+<p><strong>Expected:</strong> The constant is 4, training MSE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{3}</annotation></semantics></math> and holdout MSE is 54.</p>
 <p><strong>Verify:</strong> Record all seven residuals and compare their two separately labeled sums and denominators.</p>
 <h3 id="exercise-3-separate-a-sum-from-a-mean">Exercise 3: Separate a sum from a mean<a class="heading-anchor" href="#exercise-3-separate-a-sum-from-a-mean" aria-label="Link to this section">#</a></h3>
 <p>Subtract target from prediction for each pair, giving -1 and +1. Squaring removes the sign and produces two ones. Their sum is 2 and their mean is 1. The exact difference between these reductions is the denominator, not rounding. If the target were measured in meters, this squared quantity would be square meters. Comparing a sum from two rows with a mean from four rows obscures both the unit and the sample-size dependence.</p>
@@ -139,42 +185,42 @@
 <p><strong>Expected:</strong> An empty evaluation set has no mean; the reference raises ValueError instead of reporting zero.</p>
 <p><strong>Verify:</strong> Capture the empty-input exception and confirm the original four-row evaluation still yields 54 afterward.</p>
 <h3 id="exercise-6-bound-the-conclusion">Exercise 6: Bound the conclusion<a class="heading-anchor" href="#exercise-6-bound-the-conclusion" aria-label="Link to this section">#</a></h3>
-<p>Zero error shows that y=2*x matches these seven published feature/target pairs. The rule and labels are already visible, so this is an arithmetic demonstration and cannot establish unseen-population performance. A statement such as every future input is correct is unsupported. Choose new source groups or a later time period under a frozen protocol and state the intended use first. Report any revision made after inspecting those results as selection work rather than untouched testing.</p>
+<p>Zero error shows that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>y</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">y=2\cdot x</annotation></semantics></math> matches these seven published feature/target pairs. The rule and labels are already visible, so this is an arithmetic demonstration and cannot establish unseen-population performance. A statement such as every future input is correct is unsupported. Choose new source groups or a later time period under a frozen protocol and state the intended use first. Report any revision made after inspecting those results as selection work rather than untouched testing.</p>
 <p><strong>Expected:</strong> The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported.</p>
 <p><strong>Verify:</strong> The evidence note names seven observations, the already visible rule, and a new source/time fixture that has not influenced selection.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import math
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
 
-TRAIN = [{&quot;id&quot;: f&quot;t{i}&quot;, &quot;group&quot;: f&quot;train-{i}&quot;, &quot;x&quot;: i, &quot;y&quot;: 2 * i} for i in range(1, 4)]
-HOLDOUT = [
-    {&quot;id&quot;: f&quot;h{i}&quot;, &quot;group&quot;: f&quot;holdout-{i}&quot;, &quot;x&quot;: i + 3, &quot;y&quot;: 2 * (i + 3)} for i in range(1, 5)
-]
-
-
-def mse(predictions, targets):
-    predictions, targets = list(predictions), list(targets)
-    if not predictions or len(predictions) != len(targets):
-        raise ValueError(&quot;nonempty equal-length evaluation pairs required&quot;)
-    pairs = [(float(a), float(b)) for a, b in zip(predictions, targets)]
-    if not all(math.isfinite(a) and math.isfinite(b) for a, b in pairs):
-        raise ValueError(&quot;finite evaluation pairs required&quot;)
-    return sum((a - b) ** 2 for a, b in pairs) / len(pairs)
+TRAIN <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">t</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">train-</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> i<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+HOLDOUT <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">h</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">holdout-</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>i <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">]</span>
 
 
-def validate_split(train, holdout):
-    if not train or not holdout:
-        raise ValueError(&quot;nonempty train and holdout required&quot;)
-    ids = [{row[&quot;id&quot;] for row in part} for part in (train, holdout)]
-    groups = [{row[&quot;group&quot;] for row in part} for part in (train, holdout)]
-    if any(len(keys) != len(part) for keys, part in zip(ids, (train, holdout))):
-        raise ValueError(&quot;duplicate row IDs&quot;)
-    if ids[0] &amp; ids[1]:
-        raise ValueError(&quot;row ID overlap&quot;)
-    if groups[0] &amp; groups[1]:
-        raise ValueError(&quot;source group overlap&quot;)
-    return True</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">mse</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    predictions<span class="syntax-punctuation">,</span> targets <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>targets<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> predictions <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty equal-length evaluation pairs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> pairs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite evaluation pairs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> pairs<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate_split</span><span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> train <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> holdout<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty train and holdout required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    ids <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> part<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> part <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    groups <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> part<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> part <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>keys<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>part<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> keys<span class="syntax-punctuation">,</span> part <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate row IDs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> ids<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;</span> ids<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">row ID overlap</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> groups<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;</span> groups<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source group overlap</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">True</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Close the table and explain why a holdout is a decision policy. Then change the training targets to [1,3] and the evaluation target to [5]. Derive the fixed training-mean prediction and its single squared error without looking at the reference.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

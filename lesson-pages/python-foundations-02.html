@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -337,16 +383,18 @@
 <li>Change one hypothesis at a time and preserve a regression case.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-foundations-02.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python\professional\lessons\py_foundations_02_debug_evidence.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_foundations_02_debug_evidence<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_02_debug_evidence.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_02_debug_evidence.py</code></pre>
 <p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-foundations-02.html#solution-1">explanatory solutions</a> and <a href="python-foundations-02.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <p>Debugging is an investigation into a disagreement between intended and observed behavior. Treat the program as evidence, not as a puzzle solved by random edits. A small program with one input and one clear failure is easier to reason about than a full application whose state you cannot reconstruct. First write what should happen and what actually happened. Then locate the earliest difference. Only then propose and test a change.</p>
@@ -361,20 +409,20 @@
 <p>Syntax errors prevent Python from interpreting a statement. Runtime errors happen while a syntactically valid program executes, such as division by zero. Logic errors can produce the wrong answer while the process still exits normally. An exit code of zero is useful process evidence, but it cannot prove that your intended calculation was implemented. A comment claiming success is even weaker: it does not inspect any actual behavior.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-a-preserve-the-exact-boundary">Example A: preserve the exact boundary<a class="heading-anchor" href="#guide--example-a-preserve-the-exact-boundary" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">quantity = 0
-if quantity &gt; 0:
-    status = &quot;ready&quot;
-else:
-    status = &quot;empty&quot;
-print(status)
-assert status == &quot;empty&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-python">quantity <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">if</span> quantity <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+    status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>status<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty</span><span class="syntax-string">&quot;</span></code></pre>
 <p>The contract says an order is ready only when quantity is strictly positive. <code>&gt;</code> excludes zero. The colon begins a branch, and indentation marks its body. <code>else</code> covers every case that did not satisfy the first condition. Expected output is <code>empty</code>; the assertion checks that value. Replacing <code>&gt;</code> with <code>&gt;=</code> is a one-character change with a real policy effect. Testing only quantity three would miss it. Try quantities zero and one before calling the rule fixed.</p>
 <h5 id="guide--example-b-inspect-before-converting">Example B: inspect before converting<a class="heading-anchor" href="#guide--example-b-inspect-before-converting" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">raw_quantity = &quot; 12 &quot;
-print(repr(raw_quantity), type(raw_quantity).__name__)
-quantity = int(raw_quantity)
-print(quantity + 1)
-assert quantity == 12</code></pre>
+<pre class="highlighted-code"><code class="language-python">raw_quantity <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> 12 </span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>raw_quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>raw_quantity<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span>
+quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw_quantity<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> quantity <span class="syntax-operator">==</span> <span class="syntax-number">12</span></code></pre>
 <p>Expected output first exposes surrounding spaces and type <code>str</code>, then 13. <code>repr</code> produces an inspectable representation; it can reveal whitespace that ordinary display hides. <code>int</code> accepts surrounding whitespace for this input. If the input becomes <code>&quot;twelve&quot;</code>, conversion raises <code>ValueError</code>. That symptom does not prove that integer conversion is broken. It shows that the supplied text does not match the accepted numeric representation. Decide whether to reject it, prompt again, or support another representation. Do not silently replace every invalid quantity with zero.</p>
 <h5 id="guide--read-a-traceback-deliberately">Read a traceback deliberately<a class="heading-anchor" href="#guide--read-a-traceback-deliberately" aria-label="Link to this section">#</a></h5>
 <p>Start with the final exception class and message. Find the named source line in your saved file. Inspect the values and types entering that line using a temporary, bounded print. In a longer traceback, move upward until you reach the call site that supplies those values. Do not copy a whole traceback into a bug report when it contains private paths or user data. Preserve the class, the smallest reproducing code, and harmless input that illustrates the failure.</p>
@@ -429,7 +477,7 @@ assert quantity == 12</code></pre>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Continue into loops and functions. Keep the investigation log for Day 10 tests and Day 11 debugging tools. Those tools make observations easier to collect; they do not replace a clear contract or a falsifiable hypothesis.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-02.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-02.
 Read python/professional/companion-guides/py_foundations_02_debug_evidence.md and python/professional/lessons/py_foundations_02_debug_evidence.py.
 Check my direct prerequisites: python-03.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -469,76 +517,76 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-foundations-02: Debug from Evidence Instead of Guessing.</span>
-<span> </span>
-<span>Read ../companion-guides/py_foundations_02_debug_evidence.md before attempting the exercises.</span>
-<span>The example runs. Complete the numbered experiments in your own working copy.</span>
-<span>Keep solutions separate until you have attempted and checked the contract.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Worked example: exact boundary and direct evidence.</span>
-<span>quantity = 0</span>
-<span>if quantity &gt; 0:  # noqa: SIM108 - explicit branches are the current learning objective.</span>
-<span>    status = &quot;ready&quot;</span>
-<span>else:</span>
-<span>    status = &quot;empty&quot;</span>
-<span>print(&quot;Worked status:&quot;, status)</span>
-<span>assert status == &quot;empty&quot;</span>
-<span>print(&quot;TODO: investigate the eight cases below in separate saved attempts&quot;)</span>
-<span> </span>
-<span># Place only one deliberate failing experiment in a script at a time.</span>
-<span># Preserve expected and observed values in comments or your investigation log.</span>
-<span> </span>
-<span># Exercise 1. Classify three failures</span>
-<span># Prompt: Create separate tiny scripts containing a missing closing parenthesis, `1 / 0`, and</span>
-<span># `total = 3 + 4` where the intended rule is multiplication. Classify each before running.</span>
-<span># Verify: Your log records `SyntaxError`, `ZeroDivisionError`, and a normal run with wrong</span>
-<span># value 7 instead of 12, respectively.</span>
-<span> </span>
-<span># Exercise 2. Inspect the raw input</span>
-<span># Prompt: Inspect `raw = &quot; 08 &quot;` with `repr` and `type`, convert it deliberately, and</span>
-<span># calculate its successor. Then try `&quot;eight&quot;` in a separate run.</span>
-<span># Verify: The valid parsed value is 8 and successor is 9; invalid text raises `ValueError` and</span>
-<span># is not converted to zero.</span>
-<span> </span>
-<span># Exercise 3. Repair the boundary</span>
-<span># Prompt: A free-shipping rule says orders costing at least 20 qualify. The implementation</span>
-<span># uses `amount &gt; 20`. Predict values 19, 20, and 21, then repair one comparison.</span>
-<span># Verify: A three-row observation table reports False, True, True after the change; the before</span>
-<span># table differs only at 20.</span>
-<span> </span>
-<span># Exercise 4. Read an exception precisely</span>
-<span># Prompt: Run `int(&quot;4.5&quot;)` in a fresh file. Capture the exception class and the failing line.</span>
-<span># State whether the input is invalid integer text or a missing package.</span>
-<span># Verify: The recorded class is `ValueError`; no installation command is used, and the report</span>
-<span># identifies the text `&quot;4.5&quot;` as the failing input.</span>
-<span> </span>
-<span># Exercise 5. Reduce a wrong result</span>
-<span># Prompt: A receipt with price 7, quantity 3, and a whole-order discount 2 uses `price *</span>
-<span># (quantity - discount)`. Strip unrelated output and repair only the arithmetic grouping.</span>
-<span># Verify: The failing result is 7 and repaired result is 19. With discount zero, both formulas</span>
-<span># yield 21, showing why that case alone missed the bug.</span>
-<span> </span>
-<span># Exercise 6. Keep the failure visible</span>
-<span># Prompt: Write a try/except around `int(&quot;unknown&quot;)` that records the conversion failure by</span>
-<span># setting a status string. Avoid an empty except block and do not return a fake successful</span>
-<span># amount.</span>
-<span># Verify: The terminal reports status `invalid quantity`; a valid `&quot;4&quot;` reports `accepted` and</span>
-<span># quantity 4.</span>
-<span> </span>
-<span># Exercise 7. Disprove a hypothesis</span>
-<span># Prompt: Investigate `&quot;2&quot; + &quot;3&quot;` yielding `&quot;23&quot;`. Test the hypothesis that Python added the</span>
-<span># numbers incorrectly by inspecting types and repeating the operation on integers.</span>
-<span># Verify: Your log records string operands and integer result 5 in the control experiment,</span>
-<span># rejecting the arithmetic-bug hypothesis.</span>
-<span> </span>
-<span># Exercise 8. Write a regression note</span>
-<span># Prompt: Choose the shipping or receipt defect. Save a four-part note containing contract,</span>
-<span># smallest failing input, repaired observation, and one nearby boundary case. Add executable</span>
-<span># checks.</span>
-<span># Verify: The note names concrete input 20 for shipping or (7, 3, 2) for the receipt, and</span>
-<span># assertions fail if you reintroduce the original operator.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-foundations-02: Debug from Evidence Instead of Guessing.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_foundations_02_debug_evidence.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs. Complete the numbered experiments in your own working copy.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Worked example: exact boundary and direct evidence.</span></span>
+<span class="source-line">quantity <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> quantity <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>  <span class="syntax-comment"># noqa: SIM108 - explicit branches are the current learning objective.</span></span>
+<span class="source-line">    status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked status:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: investigate the eight cases below in separate saved attempts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Place only one deliberate failing experiment in a script at a time.</span></span>
+<span class="source-line"><span class="syntax-comment"># Preserve expected and observed values in comments or your investigation log.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Classify three failures</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create separate tiny scripts containing a missing closing parenthesis, `1 / 0`, and</span></span>
+<span class="source-line"><span class="syntax-comment"># `total = 3 + 4` where the intended rule is multiplication. Classify each before running.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Your log records `SyntaxError`, `ZeroDivisionError`, and a normal run with wrong</span></span>
+<span class="source-line"><span class="syntax-comment"># value 7 instead of 12, respectively.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Inspect the raw input</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Inspect `raw = &quot; 08 &quot;` with `repr` and `type`, convert it deliberately, and</span></span>
+<span class="source-line"><span class="syntax-comment"># calculate its successor. Then try `&quot;eight&quot;` in a separate run.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The valid parsed value is 8 and successor is 9; invalid text raises `ValueError` and</span></span>
+<span class="source-line"><span class="syntax-comment"># is not converted to zero.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Repair the boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: A free-shipping rule says orders costing at least 20 qualify. The implementation</span></span>
+<span class="source-line"><span class="syntax-comment"># uses `amount &gt; 20`. Predict values 19, 20, and 21, then repair one comparison.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A three-row observation table reports False, True, True after the change; the before</span></span>
+<span class="source-line"><span class="syntax-comment"># table differs only at 20.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Read an exception precisely</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run `int(&quot;4.5&quot;)` in a fresh file. Capture the exception class and the failing line.</span></span>
+<span class="source-line"><span class="syntax-comment"># State whether the input is invalid integer text or a missing package.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The recorded class is `ValueError`; no installation command is used, and the report</span></span>
+<span class="source-line"><span class="syntax-comment"># identifies the text `&quot;4.5&quot;` as the failing input.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Reduce a wrong result</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: A receipt with price 7, quantity 3, and a whole-order discount 2 uses `price *</span></span>
+<span class="source-line"><span class="syntax-comment"># (quantity - discount)`. Strip unrelated output and repair only the arithmetic grouping.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The failing result is 7 and repaired result is 19. With discount zero, both formulas</span></span>
+<span class="source-line"><span class="syntax-comment"># yield 21, showing why that case alone missed the bug.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Keep the failure visible</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write a try/except around `int(&quot;unknown&quot;)` that records the conversion failure by</span></span>
+<span class="source-line"><span class="syntax-comment"># setting a status string. Avoid an empty except block and do not return a fake successful</span></span>
+<span class="source-line"><span class="syntax-comment"># amount.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The terminal reports status `invalid quantity`; a valid `&quot;4&quot;` reports `accepted` and</span></span>
+<span class="source-line"><span class="syntax-comment"># quantity 4.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Disprove a hypothesis</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Investigate `&quot;2&quot; + &quot;3&quot;` yielding `&quot;23&quot;`. Test the hypothesis that Python added the</span></span>
+<span class="source-line"><span class="syntax-comment"># numbers incorrectly by inspecting types and repeating the operation on integers.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Your log records string operands and integer result 5 in the control experiment,</span></span>
+<span class="source-line"><span class="syntax-comment"># rejecting the arithmetic-bug hypothesis.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Write a regression note</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Choose the shipping or receipt defect. Save a four-part note containing contract,</span></span>
+<span class="source-line"><span class="syntax-comment"># smallest failing input, repaired observation, and one nearby boundary case. Add executable</span></span>
+<span class="source-line"><span class="syntax-comment"># checks.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The note names concrete input 20 for shipping or (7, 3, 2) for the receipt, and</span></span>
+<span class="source-line"><span class="syntax-comment"># assertions fail if you reintroduce the original operator.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -575,9 +623,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <p>Stable ID: <code>python-foundations-02</code>.</p>
 <p>Read the <a href="python-foundations-02.html#guide">guide</a> and attempt the <a href="python-foundations-02.html#learner">learner artifact</a> first. The <a href="python-foundations-02.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
 <p>The reference keeps deliberate errors inside narrow demonstrations or describes them without crashing the entire module. Your original reproduction should still preserve the real failure. The central test is whether a check would detect the old defect. When a test passes both the broken and repaired program, it may document useful behavior but cannot prove that repair.</p>
-<pre><code class="language-python">amount = 20
-qualifies = amount &gt;= 20
-assert qualifies is True</code></pre>
+<pre class="highlighted-code"><code class="language-python">amount <span class="syntax-operator">=</span> <span class="syntax-number">20</span>
+qualifies <span class="syntax-operator">=</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span>
+<span class="syntax-keyword">assert</span> qualifies <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span></code></pre>
 <p>This assertion checks the exact change point. An amount of 21 would pass both the original and repaired comparison and therefore provides weaker evidence.</p>
 <h4 id="solution-1--exercise-1-classify-three-failures">Exercise 1. Classify three failures<a class="heading-anchor" href="#solution-1--exercise-1-classify-three-failures" aria-label="Link to this section">#</a></h4>
 <p>A missing closing parenthesis is a syntax failure: Python cannot finish parsing the statement. Dividing one by zero is a runtime failure, because the expression is grammatical but the operation has no defined numeric result here. Adding three and four is valid and returns seven; it becomes a logic failure only when the independent requirement says to multiply. Preserve the requirement alongside the input so another reader can judge the result. The interpreter cannot infer the business rule from a syntactically valid formula.</p>
@@ -629,52 +677,52 @@ assert qualifies is True</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Small reproducible checks for python-foundations-02.&quot;&quot;&quot;</span>
-<span> </span>
-<span>raw = &quot; 08 &quot;</span>
-<span>assert repr(raw) == &quot;&#x27; 08 &#x27;&quot;</span>
-<span>quantity = int(raw)</span>
-<span>assert quantity == 8 and quantity + 1 == 9</span>
-<span>try:</span>
-<span>    int(&quot;eight&quot;)</span>
-<span>except ValueError:</span>
-<span>    invalid_word_seen = True</span>
-<span>else:</span>
-<span>    invalid_word_seen = False</span>
-<span>assert invalid_word_seen</span>
-<span>assert (19 &gt;= 20, 20 &gt;= 20, 21 &gt;= 20) == (False, True, True)</span>
-<span>try:</span>
-<span>    int(&quot;4.5&quot;)</span>
-<span>except ValueError:</span>
-<span>    invalid_integer_seen = True</span>
-<span>else:</span>
-<span>    invalid_integer_seen = False</span>
-<span>assert invalid_integer_seen</span>
-<span>price = 7</span>
-<span>quantity = 3</span>
-<span>discount = 2</span>
-<span>assert price * (quantity - discount) == 7</span>
-<span>assert price * quantity - discount == 19</span>
-<span>assert price * (quantity - 0) == price * quantity - 0 == 21</span>
-<span>try:</span>
-<span>    parsed_quantity = int(&quot;unknown&quot;)</span>
-<span>    conversion_status = &quot;accepted&quot;</span>
-<span>except ValueError:</span>
-<span>    conversion_status = &quot;invalid quantity&quot;</span>
-<span>assert conversion_status == &quot;invalid quantity&quot;</span>
-<span>try:</span>
-<span>    parsed_quantity = int(&quot;4&quot;)</span>
-<span>    conversion_status = &quot;accepted&quot;</span>
-<span>except ValueError:</span>
-<span>    conversion_status = &quot;invalid quantity&quot;</span>
-<span>assert conversion_status == &quot;accepted&quot; and parsed_quantity == 4</span>
-<span>assert &quot;2&quot; + &quot;3&quot; == &quot;23&quot;</span>
-<span>assert 2 + 3 == 5</span>
-<span>assert 20 &gt;= 20</span>
-<span>assert 7 * 3 - 2 == 19</span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Boundary and regression checks passed; inspect your investigation log too.&quot;)</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Small reproducible checks for python-foundations-02.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">raw <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> 08 </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&#x27;</span><span class="syntax-string"> 08 </span><span class="syntax-string">&#x27;</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> quantity <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">and</span> quantity <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">eight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    invalid_word_seen <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    invalid_word_seen <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> invalid_word_seen</span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-number">19</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">21</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">4.5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    invalid_integer_seen <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    invalid_integer_seen <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> invalid_integer_seen</span>
+<span class="source-line">price <span class="syntax-operator">=</span> <span class="syntax-number">7</span></span>
+<span class="source-line">quantity <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">discount <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">-</span> discount<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> price <span class="syntax-operator">*</span> quantity <span class="syntax-operator">-</span> discount <span class="syntax-operator">==</span> <span class="syntax-number">19</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">-</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> price <span class="syntax-operator">*</span> quantity <span class="syntax-operator">-</span> <span class="syntax-number">0</span> <span class="syntax-operator">==</span> <span class="syntax-number">21</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    parsed_quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    conversion_status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    conversion_status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">invalid quantity</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> conversion_status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">invalid quantity</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    parsed_quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">4</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    conversion_status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    conversion_status <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">invalid quantity</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> conversion_status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> parsed_quantity <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">23</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">20</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">7</span> <span class="syntax-operator">*</span> <span class="syntax-number">3</span> <span class="syntax-operator">-</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">19</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Boundary and regression checks passed; inspect your investigation log too.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

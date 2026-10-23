@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-017`
 
 ## Learning objectives
 
-Explain test oracle, property, mutation test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Testclamp for values-2,0,3,9 underbounds0..5. The final exercise transfers the mechanism to test a fresh transfer property.
+Explain test oracle, property, mutation test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Test clamp for values -2,0,3,9 under bounds 0..5. The final exercise transfers the mechanism to test a fresh transfer property.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A useful test distinguishes correct behavior from a plausible mistake. Repeating
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-018/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A table-driven test stores inputs and expected outputs together,then runs the same checker over all cases. A property test checks a relation over several inputs,such asreversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
+A table-driven test stores inputs and expected outputs together,then runs the same checker over all cases. A property test checks a relation over several inputs,such as reversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
 
 ## Worked example / walkthrough
 
 ### Example A: Use independent table cases
 
-The expected outputs are literal contract examples. They do not callclamp or duplicate its full branching logic to generate answers.
+The expected outputs are literal contract examples. They do not call clamp or duplicate its full branching logic to generate answers.
 
 ```java
 import java.util.*;
@@ -65,7 +65,7 @@ public class Main {
 
 ```
 
-**Expected:** outputs0,0,3,5.
+**Expected:** outputs 0,0,3,5.
 
 ### Example B: Check a boundary failure
 
@@ -101,9 +101,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use independent table cases.** Testclamp for values-2,0,3,9 underbounds0..5.
-   **Expected:** outputs0,0,3,5.
-   **Verify:** Compare your assertion values or captured diagnostic with outputs0,0,3,5.
+1. **Use independent table cases.** Test clamp for values -2,0,3,9 under bounds 0..5.
+   **Expected:** outputs 0,0,3,5.
+   **Verify:** Compare your assertion values or captured diagnostic with outputs 0,0,3,5.
 
 2. **Check a boundary failure.** Callclamp withlower5,upper2 and requireIllegalArgumentException.
    **Expected:** exception observed.
@@ -113,7 +113,7 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** all21 cases satisfyidempotence.
    **Verify:** Compare your assertion values or captured diagnostic with all21 cases satisfyidempotence.
 
-4. **Detect a broken implementation.** Use a mutant that returnsupper for values belowlower and show the table rejects it.
+4. **Detect a broken implementation.** Use a mutant that returns upper for values below lower and show the table rejects it.
    **Expected:** at least one mismatch.
    **Verify:** Compare your assertion values or captured diagnostic with at least one mismatch.
 
@@ -122,8 +122,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with checker fails when no exception is thrown.
 
 6. **Test a fresh transfer property.** Reverse arrays oflength0,1,3 twice using a separate copy and compare with originals.
-   **Expected:** all originals restored;input arrays unchanged.
-   **Verify:** Compare your assertion values or captured diagnostic with all originals restored;input arrays unchanged.
+   **Expected:** all originals restored; input arrays unchanged.
+   **Verify:** Compare your assertion values or captured diagnostic with all originals restored; input arrays unchanged.
 
 ## Common pitfalls and diagnosis
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -137,47 +183,47 @@
 <p>Open the Docker classroom, select <strong>Journeys</strong>, and choose <code>tf-004</code>. Use the <code>python-core</code> worker from the <a href="../../../docs/docker-classroom.md.html">Docker classroom guide</a>. Its prepared packages run inside Docker, so the host needs no Python or TensorFlow install. Save your current attempt before putting a worked example in the coding pad. Run the complete example sequence in a fresh process, as specified below. The classroom console shows output and failures; all data here are local literals, with no downloads or service calls.</p>
 <p>The checked-in learner source remains a reusable worksheet. For optional native study, follow the <a href="../../../docs/setup/first-success.md.html">setup guide</a> and save your edited copy under <code>.learning/expansion/tf-004/</code>. The chosen interpreter must provide the lesson&#x27;s declared profile. A missing dependency is a runtime setup issue, not an invitation to install packages inside a lesson.</p>
 <h3 id="the-objective-chooses-what-receives-weight">The objective chooses what receives weight<a class="heading-anchor" href="#the-objective-chooses-what-receives-weight" aria-label="Link to this section">#</a></h3>
-<p>For model A residuals [0, 0, 4], the mean squared error is 16/3 and the mean absolute error is 4/3. For model B residuals [2, 2, 2], both means are 4 and 2, respectively. Squared loss favors B because it gives the one large error more influence; absolute error favors A. There is no contradiction. The two criteria encode different preferences about the distribution of mistakes.</p>
+<p>For model A residuals [0, 0, 4], the mean squared error is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>16</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{16}{3}</annotation></semantics></math> and the mean absolute error is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{4}{3}</annotation></semantics></math>. For model B residuals [2, 2, 2], both means are 4 and 2, respectively. Squared loss favors B because it gives the one large error more influence; absolute error favors A. There is no contradiction. The two criteria encode different preferences about the distribution of mistakes.</p>
 <p>The unit of aggregation matters just as much. If one customer contributes one squared error of 4 and another contributes three zero errors, the row mean is 1. Averaging the two customer means gives 2. The first assigns equal weight to rows; the second assigns equal weight to customers. Name the unit before deciding which result is relevant.</p>
 <p>Multiplying an optimization loss by a constant also multiplies its gradient. A sum and a mean can share the same minimizing parameter in a fixed unregularized problem while requiring different update sizes. Once regularization or changing batch counts enter, an unnoticed reduction change can alter more than the appearance of a reported number.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-two-reductions-of-one-fixture">Example A: Two reductions of one fixture<a class="heading-anchor" href="#example-a-two-reductions-of-one-fixture" aria-label="Link to this section">#</a></h4>
 <p>Calculate the squares first, then compare the scalar reductions.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-r = np.array([1.0, -1.0, 2.0])
-squared = np.square(r)
-assert squared.sum() == 6.0
-assert squared.mean() == 2.0
-print(squared, squared.sum(), squared.mean())</code></pre>
+r <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+squared <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> squared<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6.0</span>
+<span class="syntax-keyword">assert</span> squared<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.0</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>squared<span class="syntax-punctuation">,</span> squared<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> squared<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The signs disappear after squaring, but the observation count remains three. Sum and mean answer different scale questions.</p>
 <h4 id="example-b-zeroing-a-masked-entry-changes-the-wrong-denominator">Example B: Zeroing a masked entry changes the wrong denominator<a class="heading-anchor" href="#example-b-zeroing-a-masked-entry-changes-the-wrong-denominator" aria-label="Link to this section">#</a></h4>
 <p>Select the first two observations only, and contrast it with zeroing the last square before averaging.</p>
-<pre><code class="language-python">include = np.array([True, True, False])
-correct = np.square(r[include]).mean()
-wrong = np.where(include, np.square(r), 0.0).mean()
-assert correct == 1.0
-np.testing.assert_allclose(wrong, 2 / 3, rtol=0, atol=1e-12)
-print(correct, wrong)</code></pre>
+<pre class="highlighted-code"><code class="language-python">include <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+correct <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">[</span>include<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+wrong <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>include<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> correct <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> wrong<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Both numerators equal 2. The accepted set has two records, so its mean is 1, whereas the broken calculation divides by three.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Trace squared units.</strong> Calculate the residual squares, sum, mean and root mean square for [1,-1,2]. <strong>Expected:</strong> Squares [1,1,4], sum 6, mean 2 and root mean square sqrt(2). <strong>Verify:</strong> Assert both reductions and state squared target units versus original target units.</li>
+<li><strong>Trace squared units.</strong> Calculate the residual squares, sum, mean and root mean square for [1,-1,2]. <strong>Expected:</strong> Squares [1,1,4], sum 6, mean 2 and root mean square <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>2</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{2}</annotation></semantics></math>. <strong>Verify:</strong> Assert both reductions and state squared target units versus original target units.</li>
 </ol>
 <ol>
 <li><strong>Duplicate the batch.</strong> Append a second copy of all three residuals without changing their values. <strong>Expected:</strong> Sum 12 and mean 2 over six records. <strong>Verify:</strong> Compare both outputs with the three-record fixture and record the changed denominator.</li>
 </ol>
 <ol>
-<li><strong>Construct a masked reduction.</strong> Implement reduce_squared with mean/sum choices and an optional boolean mask; include only the first two fixture entries. <strong>Expected:</strong> Masked sum 2 and masked mean 1; the zero-then-mean bug gives 2/3. <strong>Verify:</strong> Assert the selected count is two and compare the three different scalar results.</li>
+<li><strong>Construct a masked reduction.</strong> Implement reduce_squared with mean/sum choices and an optional boolean mask; include only the first two fixture entries. <strong>Expected:</strong> Masked sum 2 and masked mean 1; the zero-then-mean bug gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>. <strong>Verify:</strong> Assert the selected count is two and compare the three different scalar results.</li>
 </ol>
 <ol>
 <li><strong>Reject an absent objective.</strong> Try an empty vector, an all-false mask, an integer mask and reduction name median. <strong>Expected:</strong> Empty/all-false/unknown-reduction cases raise ValueError; integer mask raises TypeError. <strong>Verify:</strong> Capture the four named exceptions separately and retain the valid mean 2 afterward.</li>
 </ol>
 <ol>
-<li><strong>Compare objective preferences.</strong> Model A has residuals [0,0,4] and B has [2,2,2]. Compare mean squared and mean absolute errors. <strong>Expected:</strong> MSE prefers B: 4 versus 16/3; MAE prefers A: 4/3 versus 2. <strong>Verify:</strong> Write a two-model/two-metric table with the explicit denominator three; do not choose the metric after seeing the ranking.</li>
+<li><strong>Compare objective preferences.</strong> Model A has residuals [0,0,4] and B has [2,2,2]. Compare mean squared and mean absolute errors. <strong>Expected:</strong> MSE prefers B: 4 versus <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>16</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{16}{3}</annotation></semantics></math>; MAE prefers A: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{4}{3}</annotation></semantics></math> versus 2. <strong>Verify:</strong> Write a two-model/two-metric table with the explicit denominator three; do not choose the metric after seeing the ranking.</li>
 </ol>
 <ol>
 <li><strong>Transfer to unequal groups.</strong> Group A has one residual [2]; group B has three residuals [0,0,0]. Compare the all-record MSE with an unweighted mean of group MSEs. <strong>Expected:</strong> All-record MSE 1; equal-group average 2. <strong>Verify:</strong> Inspect the one-versus-three group counts and assert the example-weighted mean matches 1.</li>
@@ -194,11 +240,11 @@ print(correct, wrong)</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Without the helper, derive the mean squared loss of residuals [3,0] and its value after duplicating both records. Then explain how an all-false mask differs from two accepted zero residuals.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>tf-005</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-004,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-004,
 Loss, reduction and what a number measures. Read courses/deep-learning-tensorflow/guides/tf-004.md
 and courses/deep-learning-tensorflow/lessons/tf-004.py. Respect direct prerequisites
 tf-003 and beginner depth. Explain the actual fixture&#x27;s

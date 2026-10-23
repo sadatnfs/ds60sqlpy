@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,64 +161,64 @@
       <h1>Spark 019</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-019.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
-<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
-<span>from pyspark.sql import Window</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def validate_candidates(events):</span>
-<span>    raise NotImplementedError(&quot;Complete validate_candidates&quot;)</span>
-<span> </span>
-<span>def rank_candidates(events):</span>
-<span>    raise NotImplementedError(&quot;Complete rank_candidates&quot;)</span>
-<span> </span>
-<span>def winners(events):</span>
-<span>    raise NotImplementedError(&quot;Complete winners&quot;)</span>
-<span> </span>
-<span>def top_time_candidates(events):</span>
-<span>    raise NotImplementedError(&quot;Complete top_time_candidates&quot;)</span>
-<span> </span>
-<span>def running_totals(events):</span>
-<span>    raise NotImplementedError(&quot;Complete running_totals&quot;)</span>
-<span> </span>
-<span>def previous_evidence(events):</span>
-<span>    raise NotImplementedError(&quot;Complete previous_evidence&quot;)</span>
-<span> </span>
-<span>def main():</span>
-<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-019&quot;).master(&quot;local[2]&quot;)</span>
-<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
-<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
-<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
-<span>    try:</span>
-<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
-<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>        schema = StructType([StructField(&quot;event_id&quot;,LongType(),False),StructField(&quot;entity&quot;,StringType(),False),StructField(&quot;time_text&quot;,StringType(),True),StructField(&quot;amount&quot;,LongType(),False)])</span>
-<span>        events = spark.createDataFrame([(1,&quot;A&quot;,&quot;2024-01-01 00:00:00&quot;,10),(2,&quot;A&quot;,&quot;2024-01-01 00:01:00&quot;,20),(3,&quot;A&quot;,&quot;2024-01-01 00:01:00&quot;,30),(4,&quot;B&quot;,&quot;2024-01-01 00:00:00&quot;,40),(5,&quot;B&quot;,&quot;2024-01-01 00:02:00&quot;,50),(6,&quot;B&quot;,&quot;2024-01-01 00:02:00&quot;,60),(7,&quot;C&quot;,None,70),(8,&quot;C&quot;,&quot;2024-01-01 00:01:00&quot;,80)],schema=schema).withColumn(&quot;event_time&quot;,F.to_timestamp(&quot;time_text&quot;))</span>
-<span>        group = events.filter(F.col(&quot;entity&quot;)==&quot;A&quot;)</span>
-<span>        assert group.count() == 3 and group.select(&quot;event_time&quot;).distinct().count() == 2</span>
-<span>        print(&quot;Three event identities share only two timestamp values&quot;)</span>
-<span>        counts = events.dropDuplicates([&quot;entity&quot;]).count()</span>
-<span>        assert counts == 3</span>
-<span>        print(&quot;dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy&quot;)</span>
-<span>        print(&quot;spark-019: worked examples passed; six task implementations remain&quot;)</span>
-<span>    finally:</span>
-<span>        spark.stop()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span>
-<span># Exercise 1: Validate identities before defining a winner. Inputs/task: Reject an input unless event_id is known, positive and unique and entity is known. Allow missing event_time under the declared last-priority policy. Return Unit/None on success. Expected: The eight-event fixture passes;adding another copy of event 1 fails. Missing-time event 7 is allowed. Verify: Assert normal acceptance and explicit rejection after unioning a duplicate identity.</span>
-<span># Exercise 2: Rank all candidates with an explicit NULL rule. Inputs/task: Add candidate_rank using row_number per entity, descending event_time with NULL last, then descending event_id. Keep all eight rows. Expected: Ranks byevent_id are 1:3,2:2,3:1,4:3,5:2,6:1,7:2,8:1. Verify: Assert the full ID/rank table and input count 8.</span>
-<span># Exercise 3: Select stable winners across physical layouts. Inputs/task: Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalentSQL row_number query. Expected: Every case yields event IDs[3,6,8], one per entity. SQL returns the same literal winners. Verify: Assert exact winners in every layout and SQL, not just equal row counts.</span>
-<span># Exercise 4: Prove why timestamp-only ordering is incomplete. Inputs/task: Use dense_rank ordered only by descending event_time with NULL last, returning all rank 1 candidates. Report the candidate IDs rather than choosing an arbitrary winner. Expected: Top-time candidates[2,3,5,6,8]. EntitiesA andB each have two admissible candidates under the incomplete rule. Verify: Assert the five candidate identities and the two ambiguous entity keys. Do not require unstable executions to change output.</span>
-<span># Exercise 5: Distinguish occurrence totals from time-peer totals. Inputs/task: Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then ID and an unbounded-preceding/current-row frame. RANGE uses only ascending time NULL last over the same cumulative boundary. Expected: By ID:1(10,10),2(30,60),3(60,60),4(40,40),5(90,150),6(150,150),7(150,150),8(80,80). Verify: Assert all eight tuples, especially tied IDs 2/3 and the missing-time event 7.</span>
-<span># Exercise 6: Interpret lag without claiming strict temporal availability. Inputs/task: Using ascending time NULL last then event_id, return event_id, previous_id, gap_seconds. Lag the event identity and time, then subtract epoch seconds. Expected: 1(NULL, NULL),2(1,60),3(2,0),4(NULL, NULL),5(4,120),6(5,0),7(8, NULL),8(NULL, NULL). Verify: Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> Window</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_candidates</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete validate_candidates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">rank_candidates</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete rank_candidates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">winners</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete winners</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">top_time_candidates</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete top_time_candidates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">running_totals</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete running_totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">previous_evidence</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete previous_evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    spark <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>SparkSession<span class="syntax-operator">.</span>builder<span class="syntax-operator">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-019</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.ui.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.host</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.bindAddress</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.adaptive.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.ansi.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.session.timeZone</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ERROR</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">time_text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        events <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>createDataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:01:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:01:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:02:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:02:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-number">70</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01 00:01:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>to_timestamp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">time_text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        group <span class="syntax-operator">=</span> events<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> group<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> group<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>distinct<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Three event identities share only two timestamp values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        counts <span class="syntax-operator">=</span> events<span class="syntax-operator">.</span>dropDuplicates<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> counts <span class="syntax-operator">==</span> <span class="syntax-number">3</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-019: worked examples passed; six task implementations remain</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Validate identities before defining a winner. Inputs/task: Reject an input unless event_id is known, positive and unique and entity is known. Allow missing event_time under the declared last-priority policy. Return Unit/None on success. Expected: The eight-event fixture passes;adding another copy of event 1 fails. Missing-time event 7 is allowed. Verify: Assert normal acceptance and explicit rejection after unioning a duplicate identity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Rank all candidates with an explicit NULL rule. Inputs/task: Add candidate_rank using row_number per entity, descending event_time with NULL last, then descending event_id. Keep all eight rows. Expected: Ranks byevent_id are 1:3,2:2,3:1,4:3,5:2,6:1,7:2,8:1. Verify: Assert the full ID/rank table and input count 8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Select stable winners across physical layouts. Inputs/task: Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalentSQL row_number query. Expected: Every case yields event IDs[3,6,8], one per entity. SQL returns the same literal winners. Verify: Assert exact winners in every layout and SQL, not just equal row counts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Prove why timestamp-only ordering is incomplete. Inputs/task: Use dense_rank ordered only by descending event_time with NULL last, returning all rank 1 candidates. Report the candidate IDs rather than choosing an arbitrary winner. Expected: Top-time candidates[2,3,5,6,8]. EntitiesA andB each have two admissible candidates under the incomplete rule. Verify: Assert the five candidate identities and the two ambiguous entity keys. Do not require unstable executions to change output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Distinguish occurrence totals from time-peer totals. Inputs/task: Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then ID and an unbounded-preceding/current-row frame. RANGE uses only ascending time NULL last over the same cumulative boundary. Expected: By ID:1(10,10),2(30,60),3(60,60),4(40,40),5(90,150),6(150,150),7(150,150),8(80,80). Verify: Assert all eight tuples, especially tied IDs 2/3 and the missing-time event 7.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Interpret lag without claiming strict temporal availability. Inputs/task: Using ascending time NULL last then event_id, return event_id, previous_id, gap_seconds. Lag the event identity and time, then subtract epoch seconds. Expected: 1(NULL, NULL),2(1,60),3(2,0),4(NULL, NULL),5(4,120),6(5,0),7(8, NULL),8(NULL, NULL). Verify: Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

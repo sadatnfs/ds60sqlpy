@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -177,12 +223,12 @@
 <p>Dropping incomplete records can be valid for some targets under specific mechanisms, but the phrase only 5% missing is not a justification. A small missing fraction concentrated in extreme values can materially change a mean or disparity. Conversely, a larger fraction missing independently can mainly reduce precision. Examine the pattern and its relationship to the estimand.</p>
 <p>A sensitivity model can shift imputed missing salaries by delta relative to the MAR prediction. Average the completed outcome under several defensible deltas and identify where the policy conclusion changes. The data usually do not estimate delta without external information. Present it as an assumption and use domain knowledge or validation sampling to narrow its plausible range.</p>
 <h4 id="case-study-multiple-imputation-combines-two-uncertainties">Case study: multiple imputation combines two uncertainties<a class="heading-anchor" href="#case-study-multiple-imputation-combines-two-uncertainties" aria-label="Link to this section">#</a></h4>
-<p>Each completed dataset contains a plausible version of missing values. Fitting the analysis model yields estimate Q_m and variance U_m. Pool estimates by their average Q_bar. The within-imputation variance W is the average U_m, and between-imputation variance B is the sample variance of Q_m. Rubin&#x27;s total variance is W+(1+1/M)*B under the relevant framework.</p>
+<p>Each completed dataset contains a plausible version of missing values. Fitting the analysis model yields estimate Q_m and variance U_m. Pool estimates by their average Q_bar. The within-imputation variance W is the average U_m, and between-imputation variance B is the sample variance of Q_m. Rubin&#x27;s total variance is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>M</mi></mrow></mfrac><mo stretchy="false">)</mo><mo>·</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">W+(1+\frac{1}{M})\cdot B</annotation></semantics></math> under the relevant framework.</p>
 <p>The multiplier accounts for using a finite number of imputations. More imputations reduce Monte Carlo variability in the pooling calculation; they do not create more observed information. If all completed datasets use the same deterministic mean replacement, B is zero because the imputation procedure failed to express missing-value uncertainty, not because the missing values are known.</p>
 <p>Include variables needed to preserve the analysis relationships, such as interactions, nonlinear terms, outcomes and design variables where appropriate. Imputing each variable independently can destroy covariance. Chained equations offer flexibility but need compatible conditional models and diagnostic checks. Inspect distributions, logical constraints, convergence and sensitivity rather than treating successful execution as validated missing-data assumptions.</p>
 <h4 id="case-study-derive-attenuation-from-classical-predictor-error">Case study: derive attenuation from classical predictor error<a class="heading-anchor" href="#case-study-derive-attenuation-from-classical-predictor-error" aria-label="Link to this section">#</a></h4>
-<p>Let the true model be Y=beta<em>X+epsilon, but observe W=X+U. Assume X, U and epsilon are appropriately independent with zero-mean errors. Cov(W,Y)=beta</em>Var(X), while Var(W)=Var(X)+Var(U). The population regression slope of Y on W is therefore beta*Var(X)/(Var(X)+Var(U)). Noise in the predictor shrinks the slope toward zero in this simple setting.</p>
-<p>If beta=2 and true-signal and measurement-error variances are both one, the observed slope is one. Increasing sample size estimates that attenuated slope more precisely; it does not restore beta. Repeated measurements or validation data can estimate the error variance and support regression calibration, errors-in-variables methods or SIMEX under additional assumptions.</p>
+<p>Let the true model be <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>β</mi><mi>X</mi><mo>+</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">Y=\beta X+\epsilon</annotation></semantics></math>, but observe <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mi>X</mi><mo>+</mo><mi>U</mi></mrow><annotation encoding="application/x-tex">W=X+U</annotation></semantics></math>. Assume X, U and epsilon are appropriately independent with zero-mean errors. <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Cov</mo><mo stretchy="false">(</mo><mi>W</mi><mo>,</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>β</mi><mo>Var</mo><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{Cov}(W,Y)=\beta\operatorname{Var}(X)</annotation></semantics></math>, while <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><mi>W</mi><mo stretchy="false">)</mo><mo>=</mo><mo>Var</mo><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>+</mo><mo>Var</mo><mo stretchy="false">(</mo><mi>U</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{Var}(W)=\operatorname{Var}(X)+\operatorname{Var}(U)</annotation></semantics></math>. The population regression slope of Y on W is therefore <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>β</mi><mo>Var</mo><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><mrow><mo>Var</mo><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>+</mo><mo>Var</mo><mo stretchy="false">(</mo><mi>U</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\beta\operatorname{Var}(X)}{\operatorname{Var}(X)+\operatorname{Var}(U)}</annotation></semantics></math>. Noise in the predictor shrinks the slope toward zero in this simple setting.</p>
+<p>If <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>β</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\beta=2</annotation></semantics></math> and true-signal and measurement-error variances are both one, the observed slope is one. Increasing sample size estimates that attenuated slope more precisely; it does not restore beta. Repeated measurements or validation data can estimate the error variance and support regression calibration, errors-in-variables methods or SIMEX under additional assumptions.</p>
 <p>The direction is not universal in multivariable, nonlinear or differential-error settings. Correlated error or error related to the outcome can bias estimates away from zero or reverse associations. State the error model explicitly before repeating the slogan that measurement error attenuates effects.</p>
 <h4 id="case-study-robustness-can-protect-or-hide-the-important-signal">Case study: robustness can protect or hide the important signal<a class="heading-anchor" href="#case-study-robustness-can-protect-or-hide-the-important-signal" aria-label="Link to this section">#</a></h4>
 <p>Suppose most recorded transaction amounts are near ten but one is 1,000. A median resists that value, while a mean reflects its contribution to total spending. If 1,000 is a decimal-placement error, a robust summary may protect a location estimate. If it is a legitimate high-value transaction, ignoring its contribution can distort a business total. Statistical outlier status does not resolve provenance.</p>
@@ -190,7 +236,7 @@
 <p>Choose the estimand and contamination model, verify suspicious records, and report how robust and ordinary analyses differ. Trimming or Winsorizing changes the target relative to the original mean. If the decision is about rare failure cost, the tail may be the object of study rather than nuisance to suppress.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_07.py.html">chapter_07.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_07.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_07.py</code></pre>
 <h4 id="an-extreme-value-and-a-bounded-score">An extreme value and a bounded score<a class="heading-anchor" href="#an-extreme-value-and-a-bounded-score" aria-label="Link to this section">#</a></h4>
 <p>One added value of 1,000 raises the mean above 100 while the median stays 10. Trimming one observation from each tail gives 10.25. These are different summaries, not interchangeable repairs. The clipped Huber score shows exactly how a residual of 100 contributes no more score than 1.5 beyond the chosen cutoff.</p>
 <h4 id="missing-values-add-uncertainty">Missing values add uncertainty<a class="heading-anchor" href="#missing-values-add-uncertainty" aria-label="Link to this section">#</a></h4>
@@ -198,50 +244,50 @@
 <h4 id="predictor-noise-can-attenuate-a-relationship">Predictor noise can attenuate a relationship<a class="heading-anchor" href="#predictor-noise-can-attenuate-a-relationship" aria-label="Link to this section">#</a></h4>
 <p>A balanced four-cell fixture makes true signal and measurement error independent with equal variances. The true slope is two, while regression on the noisy predictor gives one, exactly the reliability-ratio attenuation formula. More copies of the same generating distribution would estimate that biased slope more precisely, not remove the measurement error.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
 
-def robust_location():
-    clean = np.array([9.,10.,10.,11.,10.])
-    contaminated = np.append(clean, 1000.)
-    median = np.median(contaminated)
-    trimmed = stats.trim_mean(contaminated, proportiontocut=1/6)
-    assert median == 10 and trimmed == 10.25
-    assert contaminated.mean() &gt; 100
-    residual = np.array([0., 1., 100.])
-    huber_score = np.clip(residual, -1.5, 1.5)
-    assert huber_score[-1] == 1.5
-    print(&quot;Mean/median/trimmed:&quot;, contaminated.mean(), median, trimmed, &quot;Huber scores:&quot;, huber_score)
+<span class="syntax-keyword">def</span> <span class="syntax-function">robust_location</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    clean <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">11.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    contaminated <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>clean<span class="syntax-punctuation">,</span> <span class="syntax-number">1000.</span><span class="syntax-punctuation">)</span>
+    median <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>contaminated<span class="syntax-punctuation">)</span>
+    trimmed <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>trim_mean<span class="syntax-punctuation">(</span>contaminated<span class="syntax-punctuation">,</span> proportiontocut<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> median <span class="syntax-operator">==</span> <span class="syntax-number">10</span> <span class="syntax-operator">and</span> trimmed <span class="syntax-operator">==</span> <span class="syntax-number">10.25</span>
+    <span class="syntax-keyword">assert</span> contaminated<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">100</span>
+    residual <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    huber_score <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>residual<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> huber_score<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1.5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Mean/median/trimmed:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> contaminated<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> median<span class="syntax-punctuation">,</span> trimmed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Huber scores:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> huber_score<span class="syntax-punctuation">)</span>
 
-def imputation_uncertainty():
-    estimates = np.array([2., 2.5, 3.])
-    within_variance = np.array([.04, .04, .04])
-    m = len(estimates)
-    between = estimates.var(ddof=1)
-    total = within_variance.mean() + (1+1/m)*between
-    assert np.isclose(total, .04+1/3) and total &gt; within_variance.mean()
-    observed_mean, missing_fraction = 2., .3
-    deltas = np.array([-2., 0., 2.])
-    sensitivity = observed_mean + missing_fraction*deltas
-    assert np.allclose(sensitivity, [1.4,2.,2.6])
-    print(&quot;Pooled estimate/SE:&quot;, estimates.mean(), np.sqrt(total), &quot;MNAR scenarios:&quot;, sensitivity)
+<span class="syntax-keyword">def</span> <span class="syntax-function">imputation_uncertainty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    estimates <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    within_variance <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.04</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.04</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.04</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    m <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>estimates<span class="syntax-punctuation">)</span>
+    between <span class="syntax-operator">=</span> estimates<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    total <span class="syntax-operator">=</span> within_variance<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>m<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>between
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">,</span> <span class="syntax-number">.04</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> total <span class="syntax-operator">&gt;</span> within_variance<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    observed_mean<span class="syntax-punctuation">,</span> missing_fraction <span class="syntax-operator">=</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.3</span>
+    deltas <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    sensitivity <span class="syntax-operator">=</span> observed_mean <span class="syntax-operator">+</span> missing_fraction<span class="syntax-operator">*</span>deltas
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>sensitivity<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Pooled estimate/SE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> estimates<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">MNAR scenarios:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> sensitivity<span class="syntax-punctuation">)</span>
 
-def measurement_error_attenuation():
-    x=np.array([-1.,-1.,1.,1.])
-    error=np.array([-1.,1.,-1.,1.])
-    observed=x+error;y=2*x
-    slope=np.sum((observed-observed.mean())*(y-y.mean()))/np.sum((observed-observed.mean())**2)
-    reliability=np.var(x)/(np.var(x)+np.var(error))
-    assert np.isclose(slope,1.) and np.isclose(slope,2*reliability)
-    print(&quot;True slope 2; noisy-predictor slope:&quot;,slope,&quot;reliability ratio:&quot;,reliability)
+<span class="syntax-keyword">def</span> <span class="syntax-function">measurement_error_attenuation</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    error<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    observed<span class="syntax-operator">=</span>x<span class="syntax-operator">+</span>error<span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x
+    slope<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>observed<span class="syntax-operator">-</span>observed<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>y<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>observed<span class="syntax-operator">-</span>observed<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    reliability<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>np<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>slope<span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>slope<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>reliability<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">True slope 2; noisy-predictor slope:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>slope<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">reliability ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>reliability<span class="syntax-punctuation">)</span>
 
-def main():
-    measurement_error_attenuation()
-    robust_location()
-    imputation_uncertainty()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    measurement_error_attenuation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    robust_location<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    imputation_uncertainty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Can a missingness test prove MAR?</strong> No. MAR concerns dependence on values that are missing. Observed patterns can challenge simple models, but different MAR and MNAR mechanisms can generate the same observed-data distribution.</p>
 <p><strong>Interview: Why is mean imputation dangerous for inferential uncertainty?</strong> It adds repeated central values and ignores the uncertainty of their replacement. This usually compresses variance and distorts relationships. Multiple imputation propagates uncertainty if the imputation and analysis assumptions are adequate.</p>

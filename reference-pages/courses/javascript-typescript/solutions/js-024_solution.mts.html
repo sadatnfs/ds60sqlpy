@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,107 +161,107 @@
       <h1>Js 024 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-024_solution.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span>type LineItem = { sku: string; quantity: number };</span>
-<span>type Order = { id: string; items: LineItem[] };</span>
-<span>type Failure = { ok: false; code: &#x27;json&#x27; | &#x27;schema&#x27;; path: string; message: string };</span>
-<span>type Validation = { ok: true; value: Order } | Failure;</span>
-<span>function record(value: unknown): value is Record&lt;string, unknown&gt; {</span>
-<span>  return typeof value === &#x27;object&#x27; &amp;&amp; value !== null &amp;&amp; !Array.isArray(value);</span>
-<span>}</span>
-<span>function fail(path: string, message: string): Failure { return { ok: false, code: &#x27;schema&#x27;, path, message }; }</span>
-<span>function shortText(value: unknown): value is string {</span>
-<span>  return typeof value === &#x27;string&#x27; &amp;&amp; value.length &gt; 0 &amp;&amp; value.length &lt;= 40;</span>
-<span>}</span>
-<span>function validateOrder(value: unknown): Validation {</span>
-<span>  if (!record(value) || Object.keys(value).sort().join(&#x27;,&#x27;) !== &#x27;id,items&#x27;) return fail(&#x27;$&#x27;, &#x27;exact order object required&#x27;);</span>
-<span>  if (!shortText(value.id)) return fail(&#x27;id&#x27;, &#x27;nonempty id up to 40 code units required&#x27;);</span>
-<span>  if (!Array.isArray(value.items) || value.items.length &gt; 20) return fail(&#x27;items&#x27;, &#x27;at most 20 items required&#x27;);</span>
-<span>  const items: LineItem[] = [];</span>
-<span>  for (let index = 0; index &lt; value.items.length; index += 1) {</span>
-<span>    const item: unknown = value.items[index];</span>
-<span>    if (!record(item) || Object.keys(item).sort().join(&#x27;,&#x27;) !== &#x27;quantity,sku&#x27;) return fail(`items[${index}]`, &#x27;exact line item required&#x27;);</span>
-<span>    if (!shortText(item.sku)) return fail(`items[${index}].sku`, &#x27;bounded nonempty SKU required&#x27;);</span>
-<span>    if (typeof item.quantity !== &#x27;number&#x27; || !Number.isSafeInteger(item.quantity) || item.quantity &lt;= 0) return fail(`items[${index}].quantity`, &#x27;positive safe integer required&#x27;);</span>
-<span>    items.push({ sku: item.sku, quantity: item.quantity });</span>
-<span>  }</span>
-<span>  return { ok: true, value: { id: value.id, items } };</span>
-<span>}</span>
-<span>function parseOrder(text: string): Validation {</span>
-<span>  let value: unknown;</span>
-<span>  try { value = JSON.parse(text); }</span>
-<span>  catch { return { ok: false, code: &#x27;json&#x27;, path: &#x27;$&#x27;, message: &#x27;invalid JSON syntax&#x27; }; }</span>
-<span>  return validateOrder(value);</span>
-<span>}</span>
-<span> </span>
-<span>export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {</span>
-<span>  // Exercise 1: Validate and copy a complete order</span>
-<span>  {</span>
-<span>    const raw: unknown = { id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }, { sku: &#x27;Y&#x27;, quantity: 3 }] };</span>
-<span>    const result = validateOrder(raw);</span>
-<span>    if (!result.ok) throw new Error(result.message);</span>
-<span>    assert.equal(result.ok, true);</span>
-<span>    assert.equal(result.value.items.reduce((sum, item) =&gt; sum + item.quantity, 0), 5);</span>
-<span>    assert.notEqual(result.value, raw);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Report a nested domain failure precisely</span>
-<span>  {</span>
-<span>    const result = validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }, { sku: &#x27;Y&#x27;, quantity: 0 }] });</span>
-<span>    assert.equal(result.ok, false);</span>
-<span>    if (result.ok) throw new Error(&#x27;expected rejection&#x27;);</span>
-<span>    assert.equal(result.code, &#x27;schema&#x27;);</span>
-<span>    assert.equal(result.path, &#x27;items[1].quantity&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Separate JSON syntax failure from schema failure</span>
-<span>  {</span>
-<span>    const malformed = parseOrder(&#x27;{broken&#x27;);</span>
-<span>    const wrongShape = parseOrder(&#x27;null&#x27;);</span>
-<span>    assert.equal(malformed.ok, false);</span>
-<span>    assert.equal(wrongShape.ok, false);</span>
-<span>    if (malformed.ok || wrongShape.ok) throw new Error(&#x27;expected failures&#x27;);</span>
-<span>    assert.equal(malformed.code, &#x27;json&#x27;);</span>
-<span>    assert.equal(wrongShape.code, &#x27;schema&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Reject unknown fields and excessive item counts</span>
-<span>  {</span>
-<span>    const extra = validateOrder({ id: &#x27;A&#x27;, items: [], admin: true });</span>
-<span>    const tooMany = validateOrder({ id: &#x27;A&#x27;, items: Array.from({ length: 21 }, () =&gt; ({ sku: &#x27;X&#x27;, quantity: 1 })) });</span>
-<span>    assert.equal(extra.ok, false);</span>
-<span>    assert.equal(tooMany.ok, false);</span>
-<span>    if (extra.ok || tooMany.ok) throw new Error(&#x27;expected failures&#x27;);</span>
-<span>    assert.equal(extra.path, &#x27;$&#x27;);</span>
-<span>    assert.equal(tooMany.path, &#x27;items&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Preserve the validated value after input mutation</span>
-<span>  {</span>
-<span>    const raw = { id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity: 2 }] };</span>
-<span>    const result = validateOrder(raw);</span>
-<span>    if (!result.ok) throw new Error(result.message);</span>
-<span>    raw.items[0].quantity = 9;</span>
-<span>    assert.equal(result.value.items[0].quantity, 2);</span>
-<span>    assert.equal(raw.items[0].quantity, 9);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Exercise numeric and string boundaries</span>
-<span>  {</span>
-<span>    for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER + 1]) {</span>
-<span>      assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;X&#x27;, quantity }] }).ok, false);</span>
-<span>    }</span>
-<span>    assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [{ sku: &#x27;&#x27;, quantity: 1 }] }).ok, false);</span>
-<span>    assert.equal(validateOrder({ id: &#x27;A&#x27;.repeat(41), items: [] }).ok, false);</span>
-<span>    assert.equal(validateOrder({ id: &#x27;A&#x27;, items: [] }).ok, true);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">type</span> LineItem <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">type</span> Order <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> items<span class="syntax-operator">:</span> <span class="syntax-keyword">LineItem</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">type</span> Failure <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> ok<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span> code<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;json&#x27;</span> <span class="syntax-operator">|</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">;</span> path<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> message<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">type</span> Validation <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> ok<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">Order</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> Failure<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> record<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> value is Record<span class="syntax-operator">&lt;</span><span class="syntax-keyword">string</span><span class="syntax-punctuation">,</span> unknown<span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-operator">typeof</span> value <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;object&#x27;</span> <span class="syntax-operator">&amp;&amp;</span> value <span class="syntax-operator">!==</span> <span class="syntax-keyword">null</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span>isArray<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> fail<span class="syntax-punctuation">(</span>path<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">,</span> message<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> Failure <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> ok<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> code<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">,</span> message <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> shortText<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> value is <span class="syntax-keyword">string</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-operator">typeof</span> value <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;string&#x27;</span> <span class="syntax-operator">&amp;&amp;</span> value<span class="syntax-punctuation">.</span>length <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> value<span class="syntax-punctuation">.</span>length <span class="syntax-operator">&lt;=</span> <span class="syntax-number">40</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> validateOrder<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> Validation <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>record<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;,&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;id,items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;$&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;exact order object required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>shortText<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">.</span>id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;nonempty id up to 40 code units required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span>isArray<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">.</span>length <span class="syntax-operator">&gt;</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;at most 20 items required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">const</span> items<span class="syntax-operator">:</span> <span class="syntax-keyword">LineItem</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> item<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>record<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;,&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;quantity,sku&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">items[</span><span class="syntax-string">${</span>index<span class="syntax-string">}</span><span class="syntax-string">]</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;exact line item required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>shortText<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">items[</span><span class="syntax-string">${</span>index<span class="syntax-string">}</span><span class="syntax-string">].sku</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;bounded nonempty SKU required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> item<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;number&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isSafeInteger<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> item<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">&lt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> fail<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">items[</span><span class="syntax-string">${</span>index<span class="syntax-string">}</span><span class="syntax-string">].quantity</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;positive safe integer required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    items<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-keyword">item.sku</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">item.quantity</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> ok<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">value.id</span><span class="syntax-punctuation">,</span> items <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> parseOrder<span class="syntax-punctuation">(</span>text<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> Validation <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">let</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> value <span class="syntax-operator">=</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>parse<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> ok<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> code<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;json&#x27;</span><span class="syntax-punctuation">,</span> path<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;$&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;invalid JSON syntax&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> validateOrder<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Validate and copy a complete order</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> raw<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Y&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">.</span>reduce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">,</span> item<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> sum <span class="syntax-operator">+</span> item<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Report a nested domain failure precisely</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Y&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected rejection&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;items[1].quantity&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Separate JSON syntax failure from schema failure</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> malformed <span class="syntax-operator">=</span> parseOrder<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{broken&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wrongShape <span class="syntax-operator">=</span> parseOrder<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;null&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongShape<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>ok <span class="syntax-operator">||</span> wrongShape<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected failures&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>malformed<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;json&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongShape<span class="syntax-punctuation">.</span>code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;schema&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Reject unknown fields and excessive item counts</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> extra <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> admin<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> tooMany <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-keyword">Array.from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-keyword">21</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>tooMany<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>ok <span class="syntax-operator">||</span> tooMany<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;expected failures&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>extra<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>tooMany<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Preserve the validated value after input mutation</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> raw <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>result<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    raw<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">.</span>items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Exercise numeric and string boundaries</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> quantity <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;X&#x27;</span><span class="syntax-punctuation">,</span> quantity <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> sku<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">41</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

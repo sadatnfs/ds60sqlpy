@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Use one-based ranks and a positive fusion constant. Deduplicate each input ranking before assigning contributions so repeated IDs do not gain extra votes. Sum contributions by document ID and sort with an explicit ID tie-breaker. The reranker receives only admitted candidates and returns a new ordering; it must not expand access scope or silently fetch new documents.</p>
 <h3 id="calculate-the-fused-ordering-and-its-limits">Calculate the fused ordering and its limits<a class="heading-anchor" href="#calculate-the-fused-ordering-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>For constant c and one-based rank r, this fixture contributes1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant60, the scores are:</p>
+<p>For constant c and one-based rank r, this fixture contributes1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant 60, the scores are:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Document</th>
 <th>Contributions</th>
@@ -135,26 +181,26 @@
 </tr></thead><tbody>
 <tr>
 <td>b</td>
-<td>1/62+1/61</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>62</mn></mrow></mfrac><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>61</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{62}+\frac{1}{61}</annotation></semantics></math></td>
 <td>about0.032522</td>
 </tr>
 <tr>
 <td>a</td>
-<td>1/61+1/63</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>61</mn></mrow></mfrac><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>63</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{61}+\frac{1}{63}</annotation></semantics></math></td>
 <td>about0.032266</td>
 </tr>
 <tr>
 <td>d</td>
-<td>1/62</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>62</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{62}</annotation></semantics></math></td>
 <td>about0.016129</td>
 </tr>
 <tr>
 <td>c</td>
-<td>1/63</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>63</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{63}</annotation></semantics></math></td>
 <td>about0.015873</td>
 </tr>
 </tbody></table></div>
-<p>The b-minus-a gap is1/62-1/63=1/3906, about0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. <a href="https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">Reciprocal Rank Fusion</a>.</p>
+<p>The b-minus-a gap is1/62-<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>63</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{63}</annotation></semantics></math>=1/3906, about0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. <a href="https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">Reciprocal Rank Fusion</a>.</p>
 <p>The constant changes how strongly rank gaps matter. With a large constant relative to the list depth, each appearance contributes roughly1/c, so cross-list occurrence count becomes influential and nearby ranks differ little. With a small positive constant, top ranks have much stronger relative weight. Neither setting is universally optimal. The fixture&#x27;s60 is a declared choice, not a calibrated relevance probability or a domain-independent threshold.</p>
 <p>RRF discards raw score gaps. A system giving its first document a tiny lead and another giving an overwhelming lead produce the same rank contribution. This makes fusion insensitive to raw score units, but it also discards potentially useful confidence information. A calibrated score-combination approach is a different design that needs validation of both scales and their transfer across query families.</p>
 <p>Within one ranking, duplicate IDs are removed before ranks are assigned. Thus[a, b, b, c] becomes[a, b, c], preserving c&#x27;s third position instead of penalizing it for a duplicate emission. Across lists, the same ID deliberately receives another contribution. If two lists are exact copies of the same retrieval run, that extra vote is not independent evidence. The method does not estimate correlation between retrievers; duplication at the system level can overweight one behavior.</p>
@@ -165,47 +211,47 @@
 <p><strong>Does duplicate removal solve correlated evidence?</strong> It prevents repeated IDs within one list from earning extra ranks. It does not make two similar retrieval systems independent or turn overlapping chunks into independent support.</p>
 <p><strong>What should be measured before tuning a reranker?</strong> Candidate recall, authorization admission, candidate count/length and final context budget. Without sufficient candidates, reranker improvements cannot recover the missing evidence.</p>
 <h3 id="exercise-1-fuse-two-rankings">Exercise 1: Fuse two rankings<a class="heading-anchor" href="#exercise-1-fuse-two-rankings" aria-label="Link to this section">#</a></h3>
-<p>The question is: Fuse lexical[a, b, c] and dense[b, d, a] with constant60.</p>
-<p>Documentb receives ranks2 and1, whilea receives1 and3. The difference comes from rank evidence rather than incompatible raw score scales.</p>
-<pre><code class="language-python">ranked=rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;],[&#x27;b&#x27;,&#x27;d&#x27;,&#x27;a&#x27;]],60)
-assert [key for key,score in ranked][:2]==[&#x27;b&#x27;,&#x27;a&#x27;]</code></pre>
+<p>The question is: Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.</p>
+<p>Documentb receives ranks2 and 1, whilea receives1 and3. The difference comes from rank evidence rather than incompatible raw score scales.</p>
+<pre class="highlighted-code"><code class="language-python">ranked<span class="syntax-operator">=</span>rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>key <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span>score <span class="syntax-operator">in</span> ranked<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> b ranks first, a second.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with b ranks first, a second.</p>
 <h3 id="exercise-2-inspect-one-exact-contribution">Exercise 2: Inspect one exact contribution<a class="heading-anchor" href="#exercise-2-inspect-one-exact-contribution" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate the fused score ofb as1/62+1/61.</p>
 <p>Writing the formula independently makes off-by-one rank errors visible. Zero-based rank would change every denominator.</p>
-<pre><code class="language-python">scores=dict(ranked)
-assert abs(scores[&#x27;b&#x27;]-(1/62+1/61))&lt;1e-12</code></pre>
+<pre class="highlighted-code"><code class="language-python">scores<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>ranked<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">62</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">61</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span></code></pre>
 <p><strong>Expected:</strong> computed b score equals that sum within1e-12.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with computed b score equals that sum within1e-12.</p>
 <h3 id="exercise-3-prevent-duplicate-votes">Exercise 3: Prevent duplicate votes<a class="heading-anchor" href="#exercise-3-prevent-duplicate-votes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Repeatb inside one ranking and compare with its deduplicated form.</p>
 <p>One retrieval list should contribute one rank per document. Otherwise a buggy candidate generator can inflate a result by emitting duplicates.</p>
-<pre><code class="language-python">assert rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)==rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> fusion result unchanged.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with fusion result unchanged.</p>
 <h3 id="exercise-4-rerank-a-bounded-candidate-set">Exercise 4: Rerank a bounded candidate set<a class="heading-anchor" href="#exercise-4-rerank-a-bounded-candidate-set" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use candidatesa, b, c with authored relevance features0, 2, 1 and sort descending feature then ID.</p>
 <p>This deterministic feature is an inspectable stand-in for a learned reranker score. It is not described as a cross-encoder or a language model.</p>
-<pre><code class="language-python">features={&#x27;a&#x27;:0,&#x27;b&#x27;:2,&#x27;c&#x27;:1}; candidates=[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]
-reranked=sorted(candidates,key=lambda key:(-features[key],key))
-assert reranked==[&#x27;b&#x27;,&#x27;c&#x27;,&#x27;a&#x27;]</code></pre>
+<pre class="highlighted-code"><code class="language-python">features<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> candidates<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+reranked<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">,</span>key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> key<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>features<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> reranked<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> orderb, c, a.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with orderb, c, a.</p>
 <h3 id="exercise-5-expose-a-candidate-recall-ceiling">Exercise 5: Expose a candidate-recall ceiling<a class="heading-anchor" href="#exercise-5-expose-a-candidate-recall-ceiling" aria-label="Link to this section">#</a></h3>
 <p>The question is: Declare relevant documentd but supply only candidatesa, b, c.</p>
 <p>A reranker can rearrange available evidence but cannot repair an upstream omission without another retrieval step. This distinction guides where to invest debugging effort.</p>
-<pre><code class="language-python">relevant={&#x27;d&#x27;}; assert not set(candidates)&amp;relevant
-assert &#x27;d&#x27; not in reranked</code></pre>
+<pre class="highlighted-code"><code class="language-python">relevant<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span>relevant
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> reranked</code></pre>
 <p><strong>Expected:</strong> candidate recall0 and reranker cannot return d.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with candidate recall0 and reranker cannot return d.</p>
 <h3 id="exercise-6-reject-invalid-fusion-policy">Exercise 6: Reject invalid fusion policy<a class="heading-anchor" href="#exercise-6-reject-invalid-fusion-policy" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use constant0 or a repeated non-string identifier and apply the declared validation.</p>
 <p>Validation keeps the rank formula and identity space explicit. A production implementation also needs bounds on list length and candidate count.</p>
-<pre><code class="language-python">for rankings,k,kind in [([[&#x27;a&#x27;]],0,ValueError),([[1]],60,TypeError)]:
-    try: rrf(rankings,k)
-    except kind: pass
-    else: raise AssertionError(&#x27;invalid fusion input&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">for</span> rankings<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>kind <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">,</span>TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> rrf<span class="syntax-punctuation">(</span>rankings<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> kind<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid fusion input</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError for nonpositive constant; TypeError for non-string ID.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for nonpositive constant; TypeError for non-string ID.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

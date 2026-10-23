@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,41 +161,41 @@
       <h1>Chapter 32</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_32.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def exact_retrieval():</span>
-<span>    query=np.array([1.,0.]);items=np.array([[1.,0.],[.8,.6],[0.,1.]])</span>
-<span>    scores=items@query;order=np.argsort(-scores,kind=&quot;stable&quot;)</span>
-<span>    assert order.tolist()==[0,1,2] and np.allclose(scores,[1.,.8,0.])</span>
-<span>    approximate=np.array([1,2]);true_top2=set(order[:2])</span>
-<span>    recall=len(true_top2 &amp; set(approximate))/2</span>
-<span>    assert recall==.5</span>
-<span>    print(&quot;Exact order:&quot;,order,&quot;example approximate recall@2:&quot;,recall)</span>
-<span> </span>
-<span>def ranking_metrics():</span>
-<span>    relevance=np.array([3.,2.,0.]);order=np.array([2,0,1])</span>
-<span>    discount=np.log2(np.arange(2,5))</span>
-<span>    dcg=np.sum((2**relevance[order]-1)/discount)</span>
-<span>    ideal=np.sum((2**np.sort(relevance)[::-1]-1)/discount)</span>
-<span>    ndcg=dcg/ideal</span>
-<span>    binary=np.array([0,1,1]);hits=np.flatnonzero(binary)+1</span>
-<span>    reciprocal=1/hits[0];ap=np.mean(np.arange(1,len(hits)+1)/hits)</span>
-<span>    assert 0&lt;ndcg&lt;1 and reciprocal==.5 and np.isclose(ap,7/12)</span>
-<span>    print(&quot;Exponential-gain NDCG:&quot;,ndcg,&quot;reciprocal rank:&quot;,reciprocal,&quot;AP:&quot;,ap)</span>
-<span> </span>
-<span>def exposure_adjustment():</span>
-<span>    # Same underlying relevance .4, examination probabilities 1 and .25.</span>
-<span>    expected_click=np.array([.4,.1]);examination=np.array([1.,.25])</span>
-<span>    recovered=expected_click/examination</span>
-<span>    assert np.allclose(recovered,[.4,.4])</span>
-<span>    print(&quot;Expected clicks:&quot;,expected_click,&quot;propensity-adjusted relevance:&quot;,recovered)</span>
-<span> </span>
-<span>def main():</span>
-<span>    exact_retrieval();ranking_metrics();exposure_adjustment()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">exact_retrieval</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    query<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>items<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scores<span class="syntax-operator">=</span>items<span class="syntax-decorator">@query</span><span class="syntax-punctuation">;</span>order<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>scores<span class="syntax-punctuation">,</span>kind<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">stable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> order<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    approximate<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>true_top2<span class="syntax-operator">=</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    recall<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>true_top2 <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>approximate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> recall<span class="syntax-operator">==</span><span class="syntax-number">.5</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exact order:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>order<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">example approximate recall@2:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>recall<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">ranking_metrics</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    relevance<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>order<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    discount<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>log2<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    dcg<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>relevance<span class="syntax-punctuation">[</span>order<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>discount<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ideal<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>relevance<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>discount<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ndcg<span class="syntax-operator">=</span>dcg<span class="syntax-operator">/</span>ideal</span>
+<span class="source-line">    binary<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>hits<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>binary<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line">    reciprocal<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>hits<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>ap<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>hits<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>hits<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span>ndcg<span class="syntax-operator">&lt;</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> reciprocal<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ap<span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-operator">/</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exponential-gain NDCG:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ndcg<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">reciprocal rank:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>reciprocal<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">AP:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ap<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">exposure_adjustment</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Same underlying relevance .4, examination probabilities 1 and .25.</span></span>
+<span class="source-line">    expected_click<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>examination<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">.25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    recovered<span class="syntax-operator">=</span>expected_click<span class="syntax-operator">/</span>examination</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>recovered<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">.4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected clicks:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>expected_click<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">propensity-adjusted relevance:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>recovered<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    exact_retrieval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>ranking_metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>exposure_adjustment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

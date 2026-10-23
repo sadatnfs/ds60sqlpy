@@ -105,7 +105,7 @@ assert not np.allclose(y.numpy(),2*sx.numpy())
 
 ## Exercise 6: Aggregate unequal batches
 
-The question is: Combine batch mean losses2 and8 with counts2 and1; compare mean-of-means with the record mean.
+The question is: Combine batch mean losses2 and8 with counts2 and 1; compare mean-of-means with the record mean.
 
 The correct epoch statistic counts examples. Batch means hide their denominators. Reconstruct sums by multiplying each mean by its batch count, sum those numerators, then divide by total examples.
 

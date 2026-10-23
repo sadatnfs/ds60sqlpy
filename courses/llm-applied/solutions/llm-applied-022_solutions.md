@@ -18,7 +18,7 @@ Separate extraction, computation and explanation. An extraction proposal becomes
 
 ## Reading the implementation
 
-The tool request has exactlyoperation, group_by andvalue fields. Allowed values aregroup_mean, group andvalue. Input rows haveid, group, value with unique IDs and at most20 records. Rejectbool even though it is anint subclass. Group values with a dictionary, then emit sorted rows containinggroup, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.
+The tool request has exactly operation, group_by and value fields. Allowed values aregroup_mean, group and value. Input rows haveid, group, value with unique IDs and at most20 records. Rejectbool even though it is anint subclass. Group values with a dictionary, then emit sorted rows containing group, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.
 
 ## Trace a typed tool from proposal to descriptive result
 
@@ -48,9 +48,9 @@ Finally, group membership is not a treatment-assignment design. The difference e
 
 ## Exercise 1: Execute a bounded grouped mean
 
-The question is: Use rowsA1, A3, B10 and the admittedgroup_mean request.
+The question is: Use rows A1, A3, B10 and the admittedgroup_mean request.
 
-The output grain is one row pergroup. Counts remain beside means so a one-record group does not look as well supported as a larger group.
+The output grain is one row per group. Counts remain beside means so a one-record group does not look as well supported as a larger group.
 
 ```python
 rows=[{'id':'a1','group':'A','value':1.},{'id':'a2','group':'A','value':3.},{'id':'b1','group':'B','value':10.}]
@@ -59,13 +59,13 @@ result=dispatch(request,rows)
 assert result==[{'group':'A','count':2,'mean':2.},{'group':'B','count':1,'mean':10.}]
 ```
 
-**Expected:** A count 2 mean2; B count 1 mean10.
+**Expected:** A count 2 mean 2; B count 1 mean 10.
 
-**Verify:** Compare the computed values or written argument with A count 2 mean2; B count 1 mean10.
+**Verify:** Compare the computed values or written argument with A count 2 mean 2; B count 1 mean 10.
 
 ## Exercise 2: Reject an arbitrary operation
 
-The question is: Submitoperationrun_sql or an extraquery field.
+The question is: Submitoperationrun_sql or an extra query field.
 
 The dispatcher never interprets arbitrary text as code or SQL. A production SQL adapter would need a separate reviewed query template and target boundary.
 
@@ -146,9 +146,9 @@ report={'group_means':result,'random_assignment_verified':False,'causal_effect_e
 assert report['group_means'] and not report['causal_effect_established']
 ```
 
-**Expected:** descriptive statisticavailable; causal claimnot established.
+**Expected:** descriptive statistic available; causal claim not established.
 
-**Verify:** Compare the computed values or written argument with descriptive statisticavailable; causal claimnot established.
+**Verify:** Compare the computed values or written argument with descriptive statistic available; causal claim not established.
 
 ## Review after comparison
 

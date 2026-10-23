@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-17.html#learner">learner SQL</a> · <a href="sql-17.html#solution-1">solution reasoning</a> · <a href="sql-17.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-17 — Rank Functions</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day17_rank_functions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day17_rank_functions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day17_rank_functions.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,42 +466,42 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day17_rank_functions.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH cust_rev AS (
-  SELECT c.customer_id,
-         c.full_name,
-         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue
-  FROM customers c
-  LEFT JOIN orders o ON o.customer_id = c.customer_id
-  LEFT JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY c.customer_id, c.full_name
-)
-SELECT customer_id,
-       full_name,
-       revenue,
-       ROW_NUMBER() OVER (
-         ORDER BY revenue DESC, customer_id
-       ) AS row_num,
-       RANK()       OVER (ORDER BY revenue DESC) AS rank_pos,
-       DENSE_RANK() OVER (ORDER BY revenue DESC) AS dense_rank_pos
-FROM cust_rev
-ORDER BY revenue DESC, customer_id
-LIMIT 30;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> cust_rev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+       full_name<span class="syntax-punctuation">,</span>
+       revenue<span class="syntax-punctuation">,</span>
+       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_num<span class="syntax-punctuation">,</span>
+       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>       OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_pos<span class="syntax-punctuation">,</span>
+       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_pos
+<span class="syntax-keyword">FROM</span> cust_rev
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code>, <code>orders</code>, and <code>order_items</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>customer_id</code>, <code>full_name</code>, <code>revenue</code>, <code>row_num</code>, <code>rank_pos</code>, and <code>dense_rank_pos</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 30</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, capped at 30 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>revenue</code>, <code>row_num</code>, <code>rank_pos</code>, and <code>dense_rank_pos</code> from <code>customers</code>, <code>orders</code>, and <code>order_items</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT e.department_id,
-       d.name AS department,
-       e.employee_id,
-       e.full_name,
-       e.salary,
-       RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS dept_rank
-FROM employees e
-LEFT JOIN departments d ON d.department_id = e.department_id
-ORDER BY department NULLS LAST,
-         dept_rank,
-         e.salary DESC,
-         e.employee_id
-LIMIT 50;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dept_rank
+<span class="syntax-keyword">FROM</span> employees e
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> departments d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>department_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>
+         dept_rank<span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+         e<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>employees</code>, and <code>departments</code> in <code>FROM</code>/<code>JOIN</code>; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>department_id</code>, <code>department</code>, <code>employee_id</code>, <code>full_name</code>, <code>salary</code>, and <code>dept_rank</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>department_id</code>, and <code>employee_id</code>, capped at 50 rows with columns <code>department_id</code>, <code>department</code>, <code>employee_id</code>, <code>full_name</code>, <code>salary</code>, and <code>dept_rank</code> from <code>employees</code>, and <code>departments</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -538,7 +586,7 @@ LIMIT 50;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-17 — Rank Functions.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-17 — Rank Functions.
 
 I have completed the direct catalog prerequisite: `sql-16`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day17_rank_functions.md
@@ -596,112 +644,112 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 17: ROW_NUMBER, RANK, DENSE_RANK</span>
-<span>-- BEGINNER WORKFLOW — sql-17: Rank Functions</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day17_rank_functions.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-17/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: customers, orders, order_items, employees, departments.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Study contract</span>
-<span>-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span>
-<span>-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span>
-<span>-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span>
-<span>-- Predict row grain and NULL/order behavior before executing each example.</span>
-<span> </span>
-<span>-- Rank customers by lifetime revenue (ties vs gaps)</span>
-<span>WITH cust_rev AS (</span>
-<span>  SELECT c.customer_id,</span>
-<span>         c.full_name,</span>
-<span>         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue</span>
-<span>  FROM customers c</span>
-<span>  LEFT JOIN orders o ON o.customer_id = c.customer_id</span>
-<span>  LEFT JOIN order_items oi ON oi.order_id = o.order_id</span>
-<span>  GROUP BY c.customer_id, c.full_name</span>
-<span>)</span>
-<span>SELECT customer_id,</span>
-<span>       full_name,</span>
-<span>       revenue,</span>
-<span>       ROW_NUMBER() OVER (</span>
-<span>         ORDER BY revenue DESC, customer_id</span>
-<span>       ) AS row_num,</span>
-<span>       RANK()       OVER (ORDER BY revenue DESC) AS rank_pos,</span>
-<span>       DENSE_RANK() OVER (ORDER BY revenue DESC) AS dense_rank_pos</span>
-<span>FROM cust_rev</span>
-<span>ORDER BY revenue DESC, customer_id</span>
-<span>LIMIT 30;</span>
-<span> </span>
-<span>-- Rank employees by salary within department</span>
-<span>SELECT e.department_id,</span>
-<span>       d.name AS department,</span>
-<span>       e.employee_id,</span>
-<span>       e.full_name,</span>
-<span>       e.salary,</span>
-<span>       RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS dept_rank</span>
-<span>FROM employees e</span>
-<span>LEFT JOIN departments d ON d.department_id = e.department_id</span>
-<span>ORDER BY department NULLS LAST,</span>
-<span>         dept_rank,</span>
-<span>         e.salary DESC,</span>
-<span>         e.employee_id</span>
-<span>LIMIT 50;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span>
-<span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
-<span>-- 1. [Query writing] Number each customer&#x27;s orders from newest to oldest.</span>
-<span>--    Hint: Partition by customer and use order date plus order ID as a unique descending order.</span>
-<span>--    Inputs: For sql-17 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `recency_number`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 1, expected output: One row per order with sequence starting at one per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `recency_number`. The final order is `o.customer_id, recency_number`.</span>
-<span>--    Verify: For sql-17 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, then verify output keys remain `order_id`. Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 1, inspect one window partition before projecting; then check `o.customer_id, recency_number` before applying the row cap.</span>
-<span>-- 2. [Query writing] Rank products by price within category using both `RANK` and `DENSE_RANK`.</span>
-<span>--    Hint: Rank only on price so equal prices tie; order the final display by product ID.</span>
-<span>--    Inputs: For sql-17 Exercise 2, read from `products`. Build the answer toward `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`; keep `product_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 2, expected output: One row per product with two rank semantics. The final columns are `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`. The final order is `p.category, p.price DESC, p.product_id`.</span>
-<span>--    Verify: For sql-17 Exercise 2, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `price_rank`, and `dense_price_rank`, then verify output keys remain `product_id`. Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 2, inspect one window partition before projecting; then check `p.category, p.price DESC, p.product_id` before applying the row cap.</span>
-<span>-- 3. [Query writing] Return the three highest-priced products per category, including price ties.</span>
-<span>--    Hint: Compute `DENSE_RANK` in a CTE and filter outside.</span>
-<span>--    Inputs: For sql-17 Exercise 3, read from `products`. Build the answer toward `product_id`, `name`, `category`, `price`, and `price_rank`; keep `product_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 3, expected output: At least three price levels per category where available. The final columns are `product_id`, `name`, `category`, `price`, and `price_rank`. The final order is `category, price_rank, product_id`.</span>
-<span>--    Verify: For sql-17 Exercise 3, run an anti-check that counts rows where NOT ((price_rank &lt;= 3)); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, `category`, `price`, and `price_rank` against `products`. Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 3, run `ranked` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span>
-<span>-- 4. [Prediction] Compare row number, rank, and dense rank on values 100, 100, and 90.</span>
-<span>--    Hint: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie.</span>
-<span>--    Inputs: For sql-17 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`; keep `sample_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 4, expected output: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2. The final columns are `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`. The final order is `sample_id`.</span>
-<span>--    Verify: For sql-17 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `score`, `row_number_value`, `rank_value`, and `dense_rank_value`, then verify output keys remain `sample_id`. Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 4, inspect one window partition before projecting; then check `sample_id` before applying the row cap.</span>
-<span>-- 5. [Debugging] Return exactly one latest order per customer even when timestamps tie.</span>
-<span>--    Hint: Use row number with the unique order ID as final tie-breaker.</span>
-<span>--    Inputs: For sql-17 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 5, expected output: At most one row per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `total_amount`. The final order is `customer_id`.</span>
-<span>--    Verify: For sql-17 Exercise 5, run an anti-check that counts rows where NOT ((recency_number = 1)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `order_date`, and `total_amount` against `orders`. Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 5, run `numbered` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 6. [Extension] Rank employee salaries within department and show only the top two distinct salary levels.</span>
-<span>--    Hint: Dense rank includes all employees tied at either of the top two salary values.</span>
-<span>--    Inputs: For sql-17 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`; keep `employee_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-17 Exercise 6, expected output: Top two salary levels per department. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.</span>
-<span>--    Verify: For sql-17 Exercise 6, run an anti-check that counts rows where NOT ((salary_rank &lt;= 2)); require unique `employee_id` where the expected grain is one row per key and confirm the projected `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` against `employees`. Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.</span>
-<span>--    Hint ladder, rung 1: For sql-17 Exercise 6, run `ranked` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 17: ROW_NUMBER, RANK, DENSE_RANK</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-17: Rank Functions</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day17_rank_functions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-17/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: customers, orders, order_items, employees, departments.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Rank customers by lifetime revenue (ties vs gaps)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> cust_rev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_num<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>       OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_pos<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_pos</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> cust_rev</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Rank employees by salary within department</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dept_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> employees e</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> departments d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         dept_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Number each customer&#x27;s orders from newest to oldest.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Partition by customer and use order date plus order ID as a unique descending order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `recency_number`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 1, expected output: One row per order with sequence starting at one per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `recency_number`. The final order is `o.customer_id, recency_number`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, then verify output keys remain `order_id`. Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 1, inspect one window partition before projecting; then check `o.customer_id, recency_number` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Rank products by price within category using both `RANK` and `DENSE_RANK`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Rank only on price so equal prices tie; order the final display by product ID.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 2, read from `products`. Build the answer toward `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`; keep `product_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 2, expected output: One row per product with two rank semantics. The final columns are `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`. The final order is `p.category, p.price DESC, p.product_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 2, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `price_rank`, and `dense_price_rank`, then verify output keys remain `product_id`. Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 2, inspect one window partition before projecting; then check `p.category, p.price DESC, p.product_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Return the three highest-priced products per category, including price ties.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Compute `DENSE_RANK` in a CTE and filter outside.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 3, read from `products`. Build the answer toward `product_id`, `name`, `category`, `price`, and `price_rank`; keep `product_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 3, expected output: At least three price levels per category where available. The final columns are `product_id`, `name`, `category`, `price`, and `price_rank`. The final order is `category, price_rank, product_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 3, run an anti-check that counts rows where NOT ((price_rank &lt;= 3)); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, `category`, `price`, and `price_rank` against `products`. Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 3, run `ranked` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Compare row number, rank, and dense rank on values 100, 100, and 90.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`; keep `sample_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 4, expected output: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2. The final columns are `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`. The final order is `sample_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `score`, `row_number_value`, `rank_value`, and `dense_rank_value`, then verify output keys remain `sample_id`. Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 4, inspect one window partition before projecting; then check `sample_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Return exactly one latest order per customer even when timestamps tie.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use row number with the unique order ID as final tie-breaker.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 5, expected output: At most one row per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `total_amount`. The final order is `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 5, run an anti-check that counts rows where NOT ((recency_number = 1)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `order_date`, and `total_amount` against `orders`. Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 5, run `numbered` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Rank employee salaries within department and show only the top two distinct salary levels.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Dense rank includes all employees tied at either of the top two salary values.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-17 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`; keep `employee_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 6, expected output: Top two salary levels per department. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 6, run an anti-check that counts rows where NOT ((salary_rank &lt;= 2)); require unique `employee_id` where the expected grain is one row per key and confirm the projected `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` against `employees`. Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 6, run `ranked` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -737,10 +785,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-17-solutions-ranking-functions-rownumber-rank-denserank">Day 17 solutions — Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK<a class="heading-anchor" href="#solution-1--day-17-solutions-ranking-functions-rownumber-rank-denserank" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day17_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day17_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day17_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -773,15 +821,15 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       ROW_NUMBER() OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date DESC, o.order_id DESC
-       ) AS recency_number
-FROM orders AS o
-ORDER BY o.customer_id, recency_number;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+         PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id
+         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number
+<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> recency_number<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per order with sequence starting at one per customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -805,17 +853,17 @@ ORDER BY o.customer_id, recency_number;</code></pre>
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT p.product_id,
-       p.category,
-       p.price,
-       RANK() OVER (
-         PARTITION BY p.category ORDER BY p.price DESC
-       ) AS price_rank,
-       DENSE_RANK() OVER (
-         PARTITION BY p.category ORDER BY p.price DESC
-       ) AS dense_price_rank
-FROM products AS p
-ORDER BY p.category, p.price DESC, p.product_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+       p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span>
+       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank<span class="syntax-punctuation">,</span>
+       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_price_rank
+<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per product with two rank semantics.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -841,21 +889,21 @@ ORDER BY p.category, p.price DESC, p.product_id;</code></pre>
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH ranked AS (
-  SELECT p.*,
-         DENSE_RANK() OVER (
-           PARTITION BY p.category ORDER BY p.price DESC
-         ) AS price_rank
-  FROM products AS p
-)
-SELECT product_id,
-       name,
-       category,
-       price,
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+           PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span>
+         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank
+  <span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span>
+       name<span class="syntax-punctuation">,</span>
+       category<span class="syntax-punctuation">,</span>
+       price<span class="syntax-punctuation">,</span>
        price_rank
-FROM ranked
-WHERE price_rank &lt;= 3
-ORDER BY category, price_rank, product_id;</code></pre>
+<span class="syntax-keyword">FROM</span> ranked
+<span class="syntax-keyword">WHERE</span> price_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">,</span> price_rank<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> At least three price levels per category where available.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -879,13 +927,13 @@ ORDER BY category, price_rank, product_id;</code></pre>
 <li><code>OVER (...)</code>: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">SELECT sample_id,
-       score,
-       ROW_NUMBER() OVER (ORDER BY score DESC, sample_id) AS row_number_value,
-       RANK() OVER (ORDER BY score DESC) AS rank_value,
-       DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_value
-FROM (VALUES (1, 100), (2, 100), (3, 90)) AS sample(sample_id, score)
-ORDER BY sample_id;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> sample_id<span class="syntax-punctuation">,</span>
+       score<span class="syntax-punctuation">,</span>
+       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> sample_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_number_value<span class="syntax-punctuation">,</span>
+       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_value<span class="syntax-punctuation">,</span>
+       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_value
+<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>sample_id<span class="syntax-punctuation">,</span> score<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sample_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -911,21 +959,21 @@ ORDER BY sample_id;</code></pre>
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH numbered AS (
-  SELECT o.*,
-         ROW_NUMBER() OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date DESC, o.order_id DESC
-         ) AS recency_number
-  FROM orders AS o
-)
-SELECT order_id,
-       customer_id,
-       order_date,
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> numbered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+           PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id
+           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span>
+         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number
+  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span>
+       customer_id<span class="syntax-punctuation">,</span>
+       order_date<span class="syntax-punctuation">,</span>
        total_amount
-FROM numbered
-WHERE recency_number = 1
-ORDER BY customer_id;</code></pre>
+<span class="syntax-keyword">FROM</span> numbered
+<span class="syntax-keyword">WHERE</span> recency_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> At most one row per customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -951,21 +999,21 @@ ORDER BY customer_id;</code></pre>
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre><code class="language-sql">WITH ranked AS (
-  SELECT e.*,
-         DENSE_RANK() OVER (
-           PARTITION BY e.department_id ORDER BY e.salary DESC
-         ) AS salary_rank
-  FROM employees AS e
-)
-SELECT employee_id,
-       full_name,
-       department_id,
-       salary,
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
+           PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span>
+         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> salary_rank
+  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> employee_id<span class="syntax-punctuation">,</span>
+       full_name<span class="syntax-punctuation">,</span>
+       department_id<span class="syntax-punctuation">,</span>
+       salary<span class="syntax-punctuation">,</span>
        salary_rank
-FROM ranked
-WHERE salary_rank &lt;= 2
-ORDER BY department_id, salary_rank, employee_id;</code></pre>
+<span class="syntax-keyword">FROM</span> ranked
+<span class="syntax-keyword">WHERE</span> salary_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department_id<span class="syntax-punctuation">,</span> salary_rank<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Top two salary levels per department.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1018,196 +1066,196 @@ ORDER BY department_id, salary_rank, employee_id;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 17 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-17: Rank Functions</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day17_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day17_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
-<span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Shared teaching contract</span>
-<span>-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span>
-<span>-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span>
-<span>-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 1: Query writing</span>
-<span>-- Prompt: Number each customer&#x27;s orders from newest to oldest.</span>
-<span>-- Why: Partition by customer and use order date plus order ID as a unique descending order.</span>
-<span>-- Expected: One row per order with sequence starting at one per customer.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT o.order_id,</span>
-<span>       o.customer_id,</span>
-<span>       o.order_date,</span>
-<span>       ROW_NUMBER() OVER (</span>
-<span>         PARTITION BY o.customer_id</span>
-<span>         ORDER BY o.order_date DESC, o.order_id DESC</span>
-<span>       ) AS recency_number</span>
-<span>FROM orders AS o</span>
-<span>ORDER BY o.customer_id, recency_number;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 2: Query writing</span>
-<span>-- Prompt: Rank products by price within category using both `RANK` and `DENSE_RANK`.</span>
-<span>-- Why: Rank only on price so equal prices tie; order the final display by product ID.</span>
-<span>-- Expected: One row per product with two rank semantics.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT p.product_id,</span>
-<span>       p.category,</span>
-<span>       p.price,</span>
-<span>       RANK() OVER (</span>
-<span>         PARTITION BY p.category ORDER BY p.price DESC</span>
-<span>       ) AS price_rank,</span>
-<span>       DENSE_RANK() OVER (</span>
-<span>         PARTITION BY p.category ORDER BY p.price DESC</span>
-<span>       ) AS dense_price_rank</span>
-<span>FROM products AS p</span>
-<span>ORDER BY p.category, p.price DESC, p.product_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 3: Query writing</span>
-<span>-- Prompt: Return the three highest-priced products per category, including price ties.</span>
-<span>-- Why: Compute `DENSE_RANK` in a CTE and filter outside.</span>
-<span>-- Expected: At least three price levels per category where available.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH ranked AS (</span>
-<span>  SELECT p.*,</span>
-<span>         DENSE_RANK() OVER (</span>
-<span>           PARTITION BY p.category ORDER BY p.price DESC</span>
-<span>         ) AS price_rank</span>
-<span>  FROM products AS p</span>
-<span>)</span>
-<span>SELECT product_id,</span>
-<span>       name,</span>
-<span>       category,</span>
-<span>       price,</span>
-<span>       price_rank</span>
-<span>FROM ranked</span>
-<span>WHERE price_rank &lt;= 3</span>
-<span>ORDER BY category, price_rank, product_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 4: Prediction</span>
-<span>-- Prompt: Compare row number, rank, and dense rank on values 100, 100, and 90.</span>
-<span>-- Why: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie.</span>
-<span>-- Expected: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>SELECT sample_id,</span>
-<span>       score,</span>
-<span>       ROW_NUMBER() OVER (ORDER BY score DESC, sample_id) AS row_number_value,</span>
-<span>       RANK() OVER (ORDER BY score DESC) AS rank_value,</span>
-<span>       DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_value</span>
-<span>FROM (VALUES (1, 100), (2, 100), (3, 90)) AS sample(sample_id, score)</span>
-<span>ORDER BY sample_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 5: Debugging</span>
-<span>-- Prompt: Return exactly one latest order per customer even when timestamps tie.</span>
-<span>-- Why: Use row number with the unique order ID as final tie-breaker.</span>
-<span>-- Expected: At most one row per customer.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH numbered AS (</span>
-<span>  SELECT o.*,</span>
-<span>         ROW_NUMBER() OVER (</span>
-<span>           PARTITION BY o.customer_id</span>
-<span>           ORDER BY o.order_date DESC, o.order_id DESC</span>
-<span>         ) AS recency_number</span>
-<span>  FROM orders AS o</span>
-<span>)</span>
-<span>SELECT order_id,</span>
-<span>       customer_id,</span>
-<span>       order_date,</span>
-<span>       total_amount</span>
-<span>FROM numbered</span>
-<span>WHERE recency_number = 1</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- ---------------------------------------------------------------------------</span>
-<span>-- Exercise 6: Extension</span>
-<span>-- Prompt: Rank employee salaries within department and show only the top two distinct salary levels.</span>
-<span>-- Why: Dense rank includes all employees tied at either of the top two salary values.</span>
-<span>-- Expected: Top two salary levels per department.</span>
-<span>-- Review the selected keys, grain, NULL behavior, and ordering before</span>
-<span>-- treating the output as evidence.</span>
-<span>-- Clause-by-clause reading:</span>
-<span>-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span>
-<span>-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span>
-<span>-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span>
-<span>-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span>
-<span>-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span>
-<span>-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span>
-<span>-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span>
-<span>WITH ranked AS (</span>
-<span>  SELECT e.*,</span>
-<span>         DENSE_RANK() OVER (</span>
-<span>           PARTITION BY e.department_id ORDER BY e.salary DESC</span>
-<span>         ) AS salary_rank</span>
-<span>  FROM employees AS e</span>
-<span>)</span>
-<span>SELECT employee_id,</span>
-<span>       full_name,</span>
-<span>       department_id,</span>
-<span>       salary,</span>
-<span>       salary_rank</span>
-<span>FROM ranked</span>
-<span>WHERE salary_rank &lt;= 2</span>
-<span>ORDER BY department_id, salary_rank, employee_id;</span>
-<span> </span>
-<span>-- No course answer persists changes or temporary objects.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 17 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-17: Rank Functions</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day17_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day17_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Number each customer&#x27;s orders from newest to oldest.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Partition by customer and use order date plus order ID as a unique descending order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per order with sequence starting at one per customer.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> recency_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Rank products by price within category using both `RANK` and `DENSE_RANK`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Rank only on price so equal prices tie; order the final display by product ID.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per product with two rank semantics.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_price_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return the three highest-priced products per category, including price ties.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Compute `DENSE_RANK` in a CTE and filter outside.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: At least three price levels per category where available.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       price_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> price_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">,</span> price_rank<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Compare row number, rank, and dense rank on values 100, 100, and 90.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sample_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       score<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> sample_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_number_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_value</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>sample_id<span class="syntax-punctuation">,</span> score<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sample_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return exactly one latest order per customer even when timestamps tie.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use row number with the unique order ID as final tie-breaker.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: At most one row per customer.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> numbered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       total_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> numbered</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> recency_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Rank employee salaries within department and show only the top two distinct salary levels.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Dense rank includes all employees tied at either of the top two salary values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Top two salary levels per department.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> salary_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       salary_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> salary_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department_id<span class="syntax-punctuation">,</span> salary_rank<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

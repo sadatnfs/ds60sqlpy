@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-numpy-01.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_numpy_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_numpy_01<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_01.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-01.html#solution-1">explanatory solutions</a> and <a href="python-numpy-01.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -362,20 +410,20 @@
 <p>The exercises distinguish inspection, independent extraction, transformation, access restriction and snapshotting. Predict the source and result after each mutation before executing. Treat dtype and empty-shape behavior as part of the contract. The goal is to make mutation visible and deliberate, not to copy every intermediate indiscriminately. Extra copies cost memory and time; accidental aliases cost correctness.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">a = np.arange(6, dtype=np.int64)
-view = a[::2]
-view[1] = 99
-assert a.tolist() == [0, 1, 99, 3, 4, 5]
-assert np.shares_memory(a, view)
-print(&quot;Shared slice:&quot;, a.tolist(), view.strides)</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span>
+view <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+view<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> view<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Shared slice:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> view<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">)</span></code></pre>
 <p>The slice selects indices zero, two, four. Its one-dimensional stride is 16 bytes because each int64 occupies eight bytes and the slice advances two elements. Assigning the second slice element changes source index two. This is a storage relationship, not a new collection of values.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">a = np.arange(6, dtype=np.int64).reshape(2, 3)
-copy = a[:, 1:].copy()
-copy[0, 0] = -1
-assert a[0, 1] == 1 and not np.shares_memory(a, copy)
-assert a.T.strides == (8, 24)
-print(&quot;Original preserved:&quot;, a.tolist(), &quot;transpose strides:&quot;, a.T.strides)</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+copy <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> copy<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>T<span class="syntax-operator">.</span>strides <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Original preserved:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">transpose strides:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>T<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">)</span></code></pre>
 <p>A copy detaches the selected values before mutation. The transpose changes strides from row/column movement to column/row movement without requiring a new mathematical value at each position. The assertions distinguish independence from a merely different shape.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -397,7 +445,7 @@ print(&quot;Original preserved:&quot;, a.tolist(), &quot;transpose strides:&quot
 <ol>
 <li><strong>Select a strided view deliberately.</strong> Return every step-th value from a one-dimensional array as a view. Require a positive integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</li>
 </ol>
-<p><strong>Expected:</strong> For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).</p>
+<p><strong>Expected:</strong> For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 and True raise ValueError; an empty source returns shape(0,).</p>
 <ol>
 <li><strong>Transfer ownership across a cache boundary.</strong> Copy each array in a mapping so future numeric mutations of source arrays do not affect the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with ValueError because copying their buffer would not deep-copy nested Python objects.</li>
 </ol>
@@ -416,7 +464,7 @@ print(&quot;Original preserved:&quot;, a.tolist(), &quot;transpose strides:&quot
 <li><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.strides.html">NumPy ndarray.strides</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-01: NumPy Memory Ownership, Strides, and Safe Mutation.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-01: NumPy Memory Ownership, Strides, and Safe Mutation.
 Read python/professional/companion-guides/py_numpy_01.md and python/professional/lessons/py_numpy_01.py. Direct prerequisites: python-16.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -452,132 +500,132 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-numpy-01: NumPy Memory Ownership, Strides, and Safe Mutation.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def layout(values: np.ndarray) -&gt; dict:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a</span>
-<span>    dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an</span>
-<span>    empty float32 array. Do not mutate values.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement layout&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def copy_window(values: np.ndarray, start: int, stop: int) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement a one-dimensional half-open window [start, stop) that returns an independent</span>
-<span>    copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with</span>
-<span>    ValueError. An empty valid window is allowed.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement copy_window&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def row_center_owned(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a new floating-point matrix with each row mean subtracted. Require a finite</span>
-<span>    two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs</span>
-<span>    must not fail because of in-place float subtraction. Reject an unrepresentable centered</span>
-<span>    result with ValueError.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement row_center_owned&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def read_only_view(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a view that shares numeric storage but rejects assignment through that view. Do</span>
-<span>    not change the source writeable flag. Demonstrate that changing the source remains</span>
-<span>    visible in the view.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement read_only_view&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def stride_select(values: np.ndarray, step: int) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return every step-th value from a one-dimensional array as a view. Require a positive</span>
-<span>    integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement stride_select&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def snapshot_arrays(values: dict[str, np.ndarray]) -&gt; dict[str, np.ndarray]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Copy each array in a mapping so future numeric mutations of source arrays do not affect</span>
-<span>    the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with</span>
-<span>    ValueError because copying their buffer would not deep-copy nested Python objects.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement snapshot_arrays&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    a = np.arange(6, dtype=np.int64)</span>
-<span>    view = a[::2]</span>
-<span>    view[1] = 99</span>
-<span>    assert a.tolist() == [0, 1, 99, 3, 4, 5]</span>
-<span>    assert np.shares_memory(a, view)</span>
-<span>    print(&quot;Shared slice:&quot;, a.tolist(), view.strides)</span>
-<span> </span>
-<span>    a = np.arange(6, dtype=np.int64).reshape(2, 3)</span>
-<span>    copy = a[:, 1:].copy()</span>
-<span>    copy[0, 0] = -1</span>
-<span>    assert a[0, 1] == 1 and not np.shares_memory(a, copy)</span>
-<span>    assert a.T.strides == (8, 24)</span>
-<span>    print(&quot;Original preserved:&quot;, a.tolist(), &quot;transpose strides:&quot;, a.T.strides)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Inspect a concrete layout</span>
-<span># Prompt: Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a</span>
-<span># dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an empty</span>
-<span># float32 array. Do not mutate values.</span>
-<span># Expected: The original has shape(3,4), strides(32,8), itemsize 8 and nbytes 96; the transpose</span>
-<span># has strides(8,32); the empty array has nbytes 0.</span>
-<span> </span>
-<span># Exercise 2: Return an independent window</span>
-<span># Prompt: Implement a one-dimensional half-open window [start, stop) that returns an independent</span>
-<span># copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with ValueError. An</span>
-<span># empty valid window is allowed.</span>
-<span># Expected: For [10,20,30,40] and bounds 1,3 return [20,30]. Changing output[0] leaves</span>
-<span># source[1]=20. Bounds 2,2 return shape(0,); bounds 3,2 raise ValueError.</span>
-<span> </span>
-<span># Exercise 3: Transform without mutating callers</span>
-<span># Prompt: Return a new floating-point matrix with each row mean subtracted. Require a finite</span>
-<span># two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must</span>
-<span># not fail because of in-place float subtraction. Reject an unrepresentable centered result with</span>
-<span># ValueError.</span>
-<span># Expected: [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no</span>
-<span># memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.</span>
-<span> </span>
-<span># Exercise 4: Distinguish access restriction from a snapshot</span>
-<span># Prompt: Return a view that shares numeric storage but rejects assignment through that view. Do</span>
-<span># not change the source writeable flag. Demonstrate that changing the source remains visible in</span>
-<span># the view.</span>
-<span># Expected: Assigning view[0]=9 raises ValueError; source[0]=7 succeeds and then view[0] equals 7.</span>
-<span># Source flags.writeable remainsTrue.</span>
-<span> </span>
-<span># Exercise 5: Select a strided view deliberately</span>
-<span># Prompt: Return every step-th value from a one-dimensional array as a view. Require a positive</span>
-<span># integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</span>
-<span># Expected: For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes</span>
-<span># source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).</span>
-<span> </span>
-<span># Exercise 6: Transfer ownership across a cache boundary</span>
-<span># Prompt: Copy each array in a mapping so future numeric mutations of source arrays do not affect</span>
-<span># the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with</span>
-<span># ValueError because copying their buffer would not deep-copy nested Python objects.</span>
-<span># Expected: Two keys pointing to one source array produce two independent snapshot arrays.</span>
-<span># Mutating one snapshot leaves the other and source unchanged. Empty input returns{}; dtype=object</span>
-<span># is rejected.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-numpy-01: NumPy Memory Ownership, Strides, and Safe Mutation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">layout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a</span></span>
+<span class="source-line"><span class="syntax-string">    dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an</span></span>
+<span class="source-line"><span class="syntax-string">    empty float32 array. Do not mutate values.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement layout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">copy_window</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement a one-dimensional half-open window [start, stop) that returns an independent</span></span>
+<span class="source-line"><span class="syntax-string">    copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError. An empty valid window is allowed.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement copy_window</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">row_center_owned</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a new floating-point matrix with each row mean subtracted. Require a finite</span></span>
+<span class="source-line"><span class="syntax-string">    two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs</span></span>
+<span class="source-line"><span class="syntax-string">    must not fail because of in-place float subtraction. Reject an unrepresentable centered</span></span>
+<span class="source-line"><span class="syntax-string">    result with ValueError.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement row_center_owned</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_only_view</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a view that shares numeric storage but rejects assignment through that view. Do</span></span>
+<span class="source-line"><span class="syntax-string">    not change the source writeable flag. Demonstrate that changing the source remains</span></span>
+<span class="source-line"><span class="syntax-string">    visible in the view.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement read_only_view</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stride_select</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> step<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return every step-th value from a one-dimensional array as a view. Require a positive</span></span>
+<span class="source-line"><span class="syntax-string">    integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement stride_select</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">snapshot_arrays</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Copy each array in a mapping so future numeric mutations of source arrays do not affect</span></span>
+<span class="source-line"><span class="syntax-string">    the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError because copying their buffer would not deep-copy nested Python objects.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement snapshot_arrays</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    view <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    view<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> view<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Shared slice:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> view<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    copy <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> copy<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>T<span class="syntax-operator">.</span>strides <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Original preserved:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">transpose strides:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> a<span class="syntax-operator">.</span>T<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Inspect a concrete layout</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a</span></span>
+<span class="source-line"><span class="syntax-comment"># dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an empty</span></span>
+<span class="source-line"><span class="syntax-comment"># float32 array. Do not mutate values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: The original has shape(3,4), strides(32,8), itemsize 8 and nbytes 96; the transpose</span></span>
+<span class="source-line"><span class="syntax-comment"># has strides(8,32); the empty array has nbytes 0.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Return an independent window</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement a one-dimensional half-open window [start, stop) that returns an independent</span></span>
+<span class="source-line"><span class="syntax-comment"># copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with ValueError. An</span></span>
+<span class="source-line"><span class="syntax-comment"># empty valid window is allowed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: For [10,20,30,40] and bounds 1,3 return [20,30]. Changing output[0] leaves</span></span>
+<span class="source-line"><span class="syntax-comment"># source[1]=20. Bounds 2,2 return shape(0,); bounds 3,2 raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Transform without mutating callers</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a new floating-point matrix with each row mean subtracted. Require a finite</span></span>
+<span class="source-line"><span class="syntax-comment"># two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must</span></span>
+<span class="source-line"><span class="syntax-comment"># not fail because of in-place float subtraction. Reject an unrepresentable centered result with</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no</span></span>
+<span class="source-line"><span class="syntax-comment"># memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Distinguish access restriction from a snapshot</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a view that shares numeric storage but rejects assignment through that view. Do</span></span>
+<span class="source-line"><span class="syntax-comment"># not change the source writeable flag. Demonstrate that changing the source remains visible in</span></span>
+<span class="source-line"><span class="syntax-comment"># the view.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Assigning view[0]=9 raises ValueError; source[0]=7 succeeds and then view[0] equals 7.</span></span>
+<span class="source-line"><span class="syntax-comment"># Source flags.writeable remainsTrue.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Select a strided view deliberately</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return every step-th value from a one-dimensional array as a view. Require a positive</span></span>
+<span class="source-line"><span class="syntax-comment"># integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes</span></span>
+<span class="source-line"><span class="syntax-comment"># source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer ownership across a cache boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Copy each array in a mapping so future numeric mutations of source arrays do not affect</span></span>
+<span class="source-line"><span class="syntax-comment"># the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError because copying their buffer would not deep-copy nested Python objects.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Two keys pointing to one source array produce two independent snapshot arrays.</span></span>
+<span class="source-line"><span class="syntax-comment"># Mutating one snapshot leaves the other and source unchanged. Empty input returns{}; dtype=object</span></span>
+<span class="source-line"><span class="syntax-comment"># is rejected.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -616,103 +664,103 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-inspect-a-concrete-layout">Exercise 1: Inspect a concrete layout<a class="heading-anchor" href="#solution-1--exercise-1-inspect-a-concrete-layout" aria-label="Link to this section">#</a></h5>
 <p>Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an empty float32 array. Do not mutate values.</p>
 <p><strong>Expected:</strong> The original has shape(3,4), strides(32,8), itemsize 8 and nbytes 96; the transpose has strides(8,32); the empty array has nbytes 0.</p>
-<pre><code class="language-python">def layout(values: np.ndarray) -&gt; dict[str, object]:
-    return {
-        &quot;shape&quot;: values.shape,
-        &quot;strides&quot;: values.strides,
-        &quot;itemsize&quot;: values.itemsize,
-        &quot;nbytes&quot;: values.nbytes,
-    }</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">layout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">itemsize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>itemsize<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>nbytes<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span></code></pre>
 <p>The properties describe the array view, not necessarily a new allocation. nbytes counts represented element bytes and can differ from the size of a shared underlying buffer. Transposition exchanges axis strides while preserving the number of elements. The empty case verifies that a valid shape can represent no stored elements; inspecting it must not invent a minimum allocation or divide by its length.</p>
-<pre><code class="language-python">a: np.ndarray = np.arange(12, dtype=np.int64).reshape(3, 4)
-assert layout(a) == {&quot;shape&quot;: (3, 4), &quot;strides&quot;: (32, 8), &quot;itemsize&quot;: 8, &quot;nbytes&quot;: 96}
-assert layout(a.T)[&quot;strides&quot;] == (8, 32)
-assert layout(np.array([], dtype=np.float32))[&quot;nbytes&quot;] == 0</code></pre>
+<pre class="highlighted-code"><code class="language-python">a<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">itemsize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">96</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">32</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></code></pre>
 <h5 id="solution-1--exercise-2-return-an-independent-window">Exercise 2: Return an independent window<a class="heading-anchor" href="#solution-1--exercise-2-return-an-independent-window" aria-label="Link to this section">#</a></h5>
 <p>Implement a one-dimensional half-open window [start, stop) that returns an independent copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with ValueError. An empty valid window is allowed.</p>
 <p><strong>Expected:</strong> For [10,20,30,40] and bounds 1,3 return [20,30]. Changing output[0] leaves source[1]=20. Bounds 2,2 return shape(0,); bounds 3,2 raise ValueError.</p>
-<pre><code class="language-python">def copy_window(values: np.ndarray, start: int, stop: int) -&gt; np.ndarray:
-    if values.ndim != 1 or not 0 &lt;= start &lt;= stop &lt;= len(values):
-        raise ValueError(&quot;Expected a valid one-dimensional half-open window&quot;)
-    return np.asarray(values[start:stop].copy())</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">copy_window</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> stop <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a valid one-dimensional half-open window</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>stop<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Validation precedes slicing so Python&#x27;s forgiving slice normalization does not silently accept a contract violation. The stop boundary is excluded, making adjacent windows nonoverlapping by construction. Calling copy after selecting the window allocates only the selected values. The mutation test is essential: equal initial values do not prove independence, while changing the returned window and inspecting the source directly demonstrates the intended ownership boundary.</p>
-<pre><code class="language-python">a = np.array([10, 20, 30, 40])
-b = copy_window(a, 1, 3)
-assert b.tolist() == [20, 30] and not np.shares_memory(a, b)
-b[0] = -1
-assert a[1] == 20 and copy_window(a, 2, 2).shape == (0,)
-expect_value_error(lambda: copy_window(a, 3, 2))
-expect_value_error(lambda: copy_window(np.ones((2, 2)), 0, 1))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> b<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span>
+b<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">20</span> <span class="syntax-operator">and</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> copy_window<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-transform-without-mutating-callers">Exercise 3: Transform without mutating callers<a class="heading-anchor" href="#solution-1--exercise-3-transform-without-mutating-callers" aria-label="Link to this section">#</a></h5>
 <p>Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction. Reject an unrepresentable centered result with ValueError.</p>
 <p><strong>Expected:</strong> [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.</p>
-<pre><code class="language-python">def row_center_owned(values: np.ndarray) -&gt; np.ndarray:
-    array = np.asarray(values, dtype=float)
-    if array.ndim != 2 or array.shape[1] == 0 or not np.isfinite(array).all():
-        raise ValueError(&quot;Expected finite rows with at least one column&quot;)
-    mean = (array / array.shape[1]).sum(axis=1, keepdims=True)
-    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
-        result = array - mean
-    if not np.isfinite(result).all():
-        raise ValueError(&quot;Centered result exceeds finite floating range&quot;)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">row_center_owned</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    array <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> array<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> array<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>array<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite rows with at least one column</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    mean <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>array <span class="syntax-operator">/</span> array<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        result <span class="syntax-operator">=</span> array <span class="syntax-operator">-</span> mean
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Centered result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>Conversion to float permits fractional means without an integer casting error. Dividing before summing avoids overflow in a large finite row mean; retaining the reduced axis gives an n-by-one mean that broadcasts across each row. A centered result outside floating range is rejected explicitly. Subtraction creates the result rather than modifying the caller&#x27;s array, even when the input conversion reused a float buffer. A row with no columns has an undefined mean and is rejected; a matrix with no rows has no row means to compute and preserves its valid column count.</p>
-<pre><code class="language-python">a = np.array([[1, 3], [10, 14]])
-b = row_center_owned(a)
-assert np.allclose(b, [[-1, 1], [-2, 2]]) and a.tolist() == [[1, 3], [10, 14]]
-assert not np.shares_memory(a, b) and row_center_owned(np.empty((0, 2))).shape == (0, 2)
-assert np.allclose(row_center_owned(np.array([[1e308, 1e308]])), [[0, 0]])
-expect_value_error(lambda: row_center_owned(np.array([[1.7e308, -1.7e308, -1.7e308]])))
-expect_value_error(lambda: row_center_owned(np.empty((2, 0))))
-expect_value_error(lambda: row_center_owned(np.array([[np.nan]])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> row_center_owned<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-distinguish-access-restriction-from-a-snapshot">Exercise 4: Distinguish access restriction from a snapshot<a class="heading-anchor" href="#solution-1--exercise-4-distinguish-access-restriction-from-a-snapshot" aria-label="Link to this section">#</a></h5>
 <p>Return a view that shares numeric storage but rejects assignment through that view. Do not change the source writeable flag. Demonstrate that changing the source remains visible in the view.</p>
 <p><strong>Expected:</strong> Assigning view[0]=9 raises ValueError; source[0]=7 succeeds and then view[0] equals 7. Source flags.writeable remainsTrue.</p>
-<pre><code class="language-python">def read_only_view(values: np.ndarray) -&gt; np.ndarray:
-    result = values.view()
-    result.flags.writeable = False
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">read_only_view</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    result <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>view<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    result<span class="syntax-operator">.</span>flags<span class="syntax-operator">.</span>writeable <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>The writeable flag belongs to the array view. Setting it on a newly created view prevents mutation through that handle while leaving the source contract unchanged. Because both refer to the same buffer, a writable alias can still alter the observed values. This is an access convenience, not an immutable snapshot or a security boundary against code that holds other references.</p>
-<pre><code class="language-python">a = np.array([1, 2])
-b = read_only_view(a)
-assert np.shares_memory(a, b) and a.flags.writeable
-expect_value_error(lambda: b.__setitem__(0, 9))
-a[0] = 7
-assert b[0] == 7</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> read_only_view<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> a<span class="syntax-operator">.</span>flags<span class="syntax-operator">.</span>writeable
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> b<span class="syntax-operator">.</span><span class="syntax-function">__setitem__</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">7</span>
+<span class="syntax-keyword">assert</span> b<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></code></pre>
 <h5 id="solution-1--exercise-5-select-a-strided-view-deliberately">Exercise 5: Select a strided view deliberately<a class="heading-anchor" href="#solution-1--exercise-5-select-a-strided-view-deliberately" aria-label="Link to this section">#</a></h5>
 <p>Return every step-th value from a one-dimensional array as a view. Require a positive integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</p>
-<p><strong>Expected:</strong> For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).</p>
-<pre><code class="language-python">def stride_select(values: np.ndarray, step: int) -&gt; np.ndarray:
-    if (
-        values.ndim != 1
-        or isinstance(step, bool)
-        or not isinstance(step, (int, np.integer))
-        or step &lt;= 0
-    ):
-        raise ValueError(&quot;Expected one-dimensional data and a positive integer step&quot;)
-    return np.asarray(values[::step])</code></pre>
+<p><strong>Expected:</strong> For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 and True raise ValueError; an empty source returns shape(0,).</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">stride_select</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> step<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> step <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one-dimensional data and a positive integer step</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>step<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Basic slicing expresses the step through strides and can reuse storage. The function deliberately promises this aliasing behavior, unlike copy_window. Boolean values are excluded even though Python bool is a subclass of int, because True as a stride hides a likely caller error. The empty output has no elements to mutate, so a false shares_memory result on an empty slice does not contradict the selection semantics.</p>
-<pre><code class="language-python">a = np.arange(7)
-b = stride_select(a, 3)
-assert b.tolist() == [0, 3, 6]
-b[1] = 99
-assert a[3] == 99 and stride_select(np.array([]), 2).shape == (0,)
-expect_value_error(lambda: stride_select(a, 0))
-expect_value_error(lambda: stride_select(a, True))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> b<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span>
+b<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">99</span> <span class="syntax-operator">and</span> stride_select<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-transfer-ownership-across-a-cache-boundary">Exercise 6: Transfer ownership across a cache boundary<a class="heading-anchor" href="#solution-1--exercise-6-transfer-ownership-across-a-cache-boundary" aria-label="Link to this section">#</a></h5>
 <p>Copy each array in a mapping so future numeric mutations of source arrays do not affect the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with ValueError because copying their buffer would not deep-copy nested Python objects.</p>
 <p><strong>Expected:</strong> Two keys pointing to one source array produce two independent snapshot arrays. Mutating one snapshot leaves the other and source unchanged. Empty input returns{}; dtype=object is rejected.</p>
-<pre><code class="language-python">def snapshot_arrays(values: dict[str, np.ndarray]) -&gt; dict[str, np.ndarray]:
-    if any(array.dtype.hasobject for array in values.values()):
-        raise ValueError(&quot;Object arrays need an explicit deep-copy policy&quot;)
-    return {key: array.copy() for key, array in values.items()}</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">snapshot_arrays</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>array<span class="syntax-operator">.</span>dtype<span class="syntax-operator">.</span>hasobject <span class="syntax-keyword">for</span> array <span class="syntax-operator">in</span> values<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Object arrays need an explicit deep-copy policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> array<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> array <span class="syntax-operator">in</span> values<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p>The mapping itself and each numeric buffer receive new ownership. Copying entries independently intentionally does not preserve the source alias graph: two keys that shared an input buffer become independent outputs. That is a clear snapshot contract, but it costs additional memory. Object arrays are rejected because a shallow array copy would duplicate references to mutable Python objects and violate the intuitive promise that the snapshot is detached.</p>
-<pre><code class="language-python">a = np.array([1, 2])
-snap = snapshot_arrays({&quot;a&quot;: a, &quot;b&quot;: a})
-snap[&quot;a&quot;][0] = 9
-assert a[0] == 1 and snap[&quot;b&quot;][0] == 1
-assert not np.shares_memory(snap[&quot;a&quot;], snap[&quot;b&quot;]) and snapshot_arrays({}) == {}
-expect_value_error(lambda: snapshot_arrays({&quot;x&quot;: np.array([{}], dtype=object)}))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+snap <span class="syntax-operator">=</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_numpy_01_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -747,122 +795,122 @@ expect_value_error(lambda: snapshot_arrays({&quot;x&quot;: np.array([{}], dtype=
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-01.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def layout(values: np.ndarray) -&gt; dict[str, object]:</span>
-<span>    return {</span>
-<span>        &quot;shape&quot;: values.shape,</span>
-<span>        &quot;strides&quot;: values.strides,</span>
-<span>        &quot;itemsize&quot;: values.itemsize,</span>
-<span>        &quot;nbytes&quot;: values.nbytes,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def copy_window(values: np.ndarray, start: int, stop: int) -&gt; np.ndarray:</span>
-<span>    if values.ndim != 1 or not 0 &lt;= start &lt;= stop &lt;= len(values):</span>
-<span>        raise ValueError(&quot;Expected a valid one-dimensional half-open window&quot;)</span>
-<span>    return np.asarray(values[start:stop].copy())</span>
-<span> </span>
-<span> </span>
-<span>def row_center_owned(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    array = np.asarray(values, dtype=float)</span>
-<span>    if array.ndim != 2 or array.shape[1] == 0 or not np.isfinite(array).all():</span>
-<span>        raise ValueError(&quot;Expected finite rows with at least one column&quot;)</span>
-<span>    mean = (array / array.shape[1]).sum(axis=1, keepdims=True)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):</span>
-<span>        result = array - mean</span>
-<span>    if not np.isfinite(result).all():</span>
-<span>        raise ValueError(&quot;Centered result exceeds finite floating range&quot;)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def read_only_view(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    result = values.view()</span>
-<span>    result.flags.writeable = False</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def stride_select(values: np.ndarray, step: int) -&gt; np.ndarray:</span>
-<span>    if (</span>
-<span>        values.ndim != 1</span>
-<span>        or isinstance(step, bool)</span>
-<span>        or not isinstance(step, (int, np.integer))</span>
-<span>        or step &lt;= 0</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected one-dimensional data and a positive integer step&quot;)</span>
-<span>    return np.asarray(values[::step])</span>
-<span> </span>
-<span> </span>
-<span>def snapshot_arrays(values: dict[str, np.ndarray]) -&gt; dict[str, np.ndarray]:</span>
-<span>    if any(array.dtype.hasobject for array in values.values()):</span>
-<span>        raise ValueError(&quot;Object arrays need an explicit deep-copy policy&quot;)</span>
-<span>    return {key: array.copy() for key, array in values.items()}</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Inspect a concrete layout</span>
-<span>    a: np.ndarray = np.arange(12, dtype=np.int64).reshape(3, 4)</span>
-<span>    assert layout(a) == {&quot;shape&quot;: (3, 4), &quot;strides&quot;: (32, 8), &quot;itemsize&quot;: 8, &quot;nbytes&quot;: 96}</span>
-<span>    assert layout(a.T)[&quot;strides&quot;] == (8, 32)</span>
-<span>    assert layout(np.array([], dtype=np.float32))[&quot;nbytes&quot;] == 0</span>
-<span>    # Exercise 2: Return an independent window</span>
-<span>    a = np.array([10, 20, 30, 40])</span>
-<span>    b = copy_window(a, 1, 3)</span>
-<span>    assert b.tolist() == [20, 30] and not np.shares_memory(a, b)</span>
-<span>    b[0] = -1</span>
-<span>    assert a[1] == 20 and copy_window(a, 2, 2).shape == (0,)</span>
-<span>    expect_value_error(lambda: copy_window(a, 3, 2))</span>
-<span>    expect_value_error(lambda: copy_window(np.ones((2, 2)), 0, 1))</span>
-<span>    # Exercise 3: Transform without mutating callers</span>
-<span>    a = np.array([[1, 3], [10, 14]])</span>
-<span>    b = row_center_owned(a)</span>
-<span>    assert np.allclose(b, [[-1, 1], [-2, 2]]) and a.tolist() == [[1, 3], [10, 14]]</span>
-<span>    assert not np.shares_memory(a, b) and row_center_owned(np.empty((0, 2))).shape == (0, 2)</span>
-<span>    assert np.allclose(row_center_owned(np.array([[1e308, 1e308]])), [[0, 0]])</span>
-<span>    expect_value_error(lambda: row_center_owned(np.array([[1.7e308, -1.7e308, -1.7e308]])))</span>
-<span>    expect_value_error(lambda: row_center_owned(np.empty((2, 0))))</span>
-<span>    expect_value_error(lambda: row_center_owned(np.array([[np.nan]])))</span>
-<span>    # Exercise 4: Distinguish access restriction from a snapshot</span>
-<span>    a = np.array([1, 2])</span>
-<span>    b = read_only_view(a)</span>
-<span>    assert np.shares_memory(a, b) and a.flags.writeable</span>
-<span>    expect_value_error(lambda: b.__setitem__(0, 9))</span>
-<span>    a[0] = 7</span>
-<span>    assert b[0] == 7</span>
-<span>    # Exercise 5: Select a strided view deliberately</span>
-<span>    a = np.arange(7)</span>
-<span>    b = stride_select(a, 3)</span>
-<span>    assert b.tolist() == [0, 3, 6]</span>
-<span>    b[1] = 99</span>
-<span>    assert a[3] == 99 and stride_select(np.array([]), 2).shape == (0,)</span>
-<span>    expect_value_error(lambda: stride_select(a, 0))</span>
-<span>    expect_value_error(lambda: stride_select(a, True))</span>
-<span>    # Exercise 6: Transfer ownership across a cache boundary</span>
-<span>    a = np.array([1, 2])</span>
-<span>    snap = snapshot_arrays({&quot;a&quot;: a, &quot;b&quot;: a})</span>
-<span>    snap[&quot;a&quot;][0] = 9</span>
-<span>    assert a[0] == 1 and snap[&quot;b&quot;][0] == 1</span>
-<span>    assert not np.shares_memory(snap[&quot;a&quot;], snap[&quot;b&quot;]) and snapshot_arrays({}) == {}</span>
-<span>    expect_value_error(lambda: snapshot_arrays({&quot;x&quot;: np.array([{}], dtype=object)}))</span>
-<span>    print(&quot;python-numpy-01: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-01.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">layout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">itemsize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>itemsize<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>nbytes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">copy_window</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> stop <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a valid one-dimensional half-open window</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>stop<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">row_center_owned</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    array <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> array<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> array<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>array<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite rows with at least one column</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mean <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>array <span class="syntax-operator">/</span> array<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> array <span class="syntax-operator">-</span> mean</span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Centered result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_only_view</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>view<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result<span class="syntax-operator">.</span>flags<span class="syntax-operator">.</span>writeable <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stride_select</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> step<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> step <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one-dimensional data and a positive integer step</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>step<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">snapshot_arrays</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>array<span class="syntax-operator">.</span>dtype<span class="syntax-operator">.</span>hasobject <span class="syntax-keyword">for</span> array <span class="syntax-operator">in</span> values<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Object arrays need an explicit deep-copy policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> array<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> array <span class="syntax-operator">in</span> values<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Inspect a concrete layout</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">itemsize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">96</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">strides</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">32</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> layout<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nbytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Return an independent window</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> b<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">20</span> <span class="syntax-operator">and</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> copy_window<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> copy_window<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Transform without mutating callers</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> row_center_owned<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> a<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> row_center_owned<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Distinguish access restriction from a snapshot</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> read_only_view<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> a<span class="syntax-operator">.</span>flags<span class="syntax-operator">.</span>writeable</span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> b<span class="syntax-operator">.</span><span class="syntax-function">__setitem__</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">7</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> b<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Select a strided view deliberately</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> b<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    b<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">99</span> <span class="syntax-operator">and</span> stride_select<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stride_select<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Transfer ownership across a cache boundary</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    snap <span class="syntax-operator">=</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> snap<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> snapshot_arrays<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-numpy-01: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

@@ -18,7 +18,7 @@ Read each row as one experiment with parametersP,tokensD,stepsS,computeC and hel
 
 ## Exercise 1: Read a controlled comparison
 
-The question is: Inspect rowsA(P1000,D10000,S100,C1,L2.0) andB(P1000,D10000,S200,C2,L1.8). Identify what changed.
+The question is: Inspect rowsA(P1000,D10000,S100,C1,L2.0) and B(P1000,D10000,S200,C2,L1.8). Identify what changed.
 
 The comparison is evidence about additional optimization under this setup. It is not a direct experiment on model size because parameter count stayed fixed.
 
@@ -60,9 +60,9 @@ A ten-percent relative decrease is different from an absolute decrease of0.2 los
 (2.0 - 1.8) / 2.0 = 0.10
 ```
 
-**Expected:** ratio.9; decrease10percent.
+**Expected:** ratio.9; decrease 10 percent.
 
-**Verify:** Compare the computed values or written argument with ratio.9; decrease10percent.
+**Verify:** Compare the computed values or written argument with ratio.9; decrease 10 percent.
 
 ## Exercise 4: Reject an unsupported forecast
 

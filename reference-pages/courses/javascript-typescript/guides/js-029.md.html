@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -141,33 +187,33 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-use-a-native-button-and-live-result">Example A: Use a native button and live result<a class="heading-anchor" href="#example-a-use-a-native-button-and-live-result" aria-label="Link to this section">#</a></h4>
 <p>The browser supplies native button activation. The script handles click once rather than separately counting keydown and click, which could double-count keyboard use.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Counter&lt;/title&gt;
-&lt;button type=&#x27;button&#x27; id=&#x27;add&#x27;&gt;Add one&lt;/button&gt;
-&lt;p role=&#x27;status&#x27; id=&#x27;count&#x27;&gt;Count: 0&lt;/p&gt;
-&lt;script&gt;
-const button = document.querySelector(&#x27;#add&#x27;);
-const output = document.querySelector(&#x27;#count&#x27;);
-if (!(button instanceof HTMLButtonElement) || !(output instanceof HTMLElement)) throw new Error(&#x27;required controls missing&#x27;);
-let count = 0;
-button.addEventListener(&#x27;click&#x27;, () =&gt; { count += 1; output.textContent = `Count: ${count}`; });
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Counter<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">button</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;button&#x27;</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;add&#x27;</span><span class="syntax-punctuation">&gt;</span>Add one<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">role</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;count&#x27;</span><span class="syntax-punctuation">&gt;</span>Count: 0<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">const</span> button <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#add&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> output <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#count&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>button <span class="syntax-operator">instanceof</span> HTMLButtonElement<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>output <span class="syntax-operator">instanceof</span> HTMLElement<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;required controls missing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> count <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+button<span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;click&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> count <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> output<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Count: </span><span class="syntax-string">${</span>count<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> count 3; button remains keyboard reachable.</p>
 <h4 id="example-b-trace-target-and-currenttarget-through-delegation">Example B: Trace target and currentTarget through delegation<a class="heading-anchor" href="#example-b-trace-target-and-currenttarget-through-delegation" aria-label="Link to this section">#</a></h4>
 <p>The listener belongs to the list, but the original target can be a child inside the button. Delegation checks both the matching action and its containment in the component.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Delegation&lt;/title&gt;
-&lt;ul id=&#x27;list&#x27;&gt;&lt;li&gt;&lt;button type=&#x27;button&#x27; data-id=&#x27;A&#x27;&gt;&lt;span&gt;Choose A&lt;/span&gt;&lt;/button&gt;&lt;/li&gt;&lt;/ul&gt;
-&lt;p id=&#x27;result&#x27; role=&#x27;status&#x27;&gt;No selection&lt;/p&gt;
-&lt;script&gt;
-const list = document.querySelector(&#x27;#list&#x27;);
-const output = document.querySelector(&#x27;#result&#x27;);
-if (!(list instanceof HTMLUListElement) || !(output instanceof HTMLElement)) throw new Error(&#x27;required nodes missing&#x27;);
-list.addEventListener(&#x27;click&#x27;, event =&gt; {
-  if (!(event.target instanceof Element)) return;
-  const button = event.target.closest(&#x27;button[data-id]&#x27;);
-  if (!(button instanceof HTMLButtonElement) || !list.contains(button)) return;
-  output.textContent = `Selected ${button.dataset.id}; target ${event.target.tagName}; currentTarget ${event.currentTarget.tagName}`;
-});
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Delegation<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">ul</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;list&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">button</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;button&#x27;</span> <span class="syntax-attribute">data-id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">span</span><span class="syntax-punctuation">&gt;</span>Choose A<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">span</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">ul</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;result&#x27;</span> <span class="syntax-attribute">role</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span><span class="syntax-punctuation">&gt;</span>No selection<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">const</span> list <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#list&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> output <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#result&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>list <span class="syntax-operator">instanceof</span> HTMLUListElement<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>output <span class="syntax-operator">instanceof</span> HTMLElement<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;required nodes missing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+list<span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;click&#x27;</span><span class="syntax-punctuation">,</span> event <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>target <span class="syntax-operator">instanceof</span> Element<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> button <span class="syntax-operator">=</span> event<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">.</span>closest<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;button[data-id]&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>button <span class="syntax-operator">instanceof</span> HTMLButtonElement<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span>list<span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span>button<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span><span class="syntax-punctuation">;</span>
+  output<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Selected </span><span class="syntax-string">${</span>button<span class="syntax-punctuation">.</span>dataset<span class="syntax-punctuation">.</span>id<span class="syntax-string">}</span><span class="syntax-string">; target </span><span class="syntax-string">${</span>event<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">.</span>tagName<span class="syntax-string">}</span><span class="syntax-string">; currentTarget </span><span class="syntax-string">${</span>event<span class="syntax-punctuation">.</span>currentTarget<span class="syntax-punctuation">.</span>tagName<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> selected A; target SPAN and currentTarget UL.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
@@ -201,7 +247,7 @@ list.addEventListener(&#x27;click&#x27;, event =&gt; {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://dom.spec.whatwg.org/">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-029: The DOM, events and accessible interaction.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-029: The DOM, events and accessible interaction.
 Read courses/javascript-typescript/guides/js-029.md and courses/javascript-typescript/lessons/js-029.md. Direct prerequisites: `js-028`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

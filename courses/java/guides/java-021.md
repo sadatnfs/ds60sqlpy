@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-020`
 
 ## Learning objectives
 
-Explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result. The final exercise transfers the mechanism to respond to interruption.
+Explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result. The final exercise transfers the mechanism to respond to interruption.
 
 ## Purpose and mental model
 
-Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds andwrites,so two threads can lose an update even if each individual access is visible.
+Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds and writes,so two threads can lose an update even if each individual access is visible.
 
 This lesson uses bounded joins,latches and a barrier to make ordering deliberate. A controlled lost-update fixture forces both workers to read the same starting value before either writes. That demonstrates the mechanism without hoping a random stress run happens to fail. Interruption is a cooperative request,not forcible termination;blocking code should respond or preserve the interrupt status when it cannot complete its work.
 
@@ -24,7 +24,7 @@ This lesson uses bounded joins,latches and a barrier to make ordering deliberate
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-021/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -61,7 +61,7 @@ public class Main {
 
 ```
 
-**Expected:** worker terminated;result42.
+**Expected:** worker terminated; result 42.
 
 ### Example B: Publish initial state through start
 
@@ -93,9 +93,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Publish a result through join.** Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.
-   **Expected:** worker terminated;result42.
-   **Verify:** Compare your assertion values or captured diagnostic with worker terminated;result42.
+1. **Publish a result through join.** Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.
+   **Expected:** worker terminated; result 42.
+   **Verify:** Compare your assertion values or captured diagnostic with worker terminated; result 42.
 
 2. **Publish initial state through start.** Assign7 before starting a worker that reads the holder.
    **Expected:** worker observes7.

@@ -33,7 +33,7 @@ assert np.average(means,weights=counts)==5 and means.mean()==4
 
 ## Exercise 2: Recover a full-batch mean
 
-The question is: Partition gradients[2,4,6,8] into sizes1 and3 and reconstruct their mean.
+The question is: Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean.
 
 The explicit per-example values are an independent oracle for the shard calculation. A test that compares two formulas using the same wrong weights would miss the error.
 
@@ -49,7 +49,7 @@ assert recombined==g.mean()==5
 
 ## Exercise 3: Accumulate squared-loss gradients
 
-The question is: Atw0 use x1,2,3,4,y2x; compare full-batch gradient with sum-then-divide microbatches.
+The question is: At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches.
 
 The variable remains fixed while all microbatch gradients are calculated. This is the condition under which accumulation matches the full-batch gradient.
 
@@ -69,7 +69,7 @@ assert float(full_g)==total/4==-30
 
 ## Exercise 4: Apply exactly one update
 
-The question is: Use rate.01 with accumulated global gradient-30.
+The question is: Use rate 0.01 with accumulated global gradient-30.
 
 The update counter should increment once for this effective batch. Incrementing a learning-rate schedule once per microbatch changes the optimizer policy even if gradients are combined correctly.
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,99 +161,99 @@
       <h1>Nlp 001 Solution</h1>
       <p class="source-path">Generated from <code>courses/nlp/solutions/nlp-001_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Original corpus-contract examples. No network or external data is used.&quot;&quot;&quot;</span>
-<span>from collections import Counter</span>
-<span>from copy import deepcopy</span>
-<span>import math</span>
-<span> </span>
-<span>DOCUMENTS = [</span>
-<span>    {&quot;id&quot;: &quot;a&quot;, &quot;family&quot;: &quot;account-reset&quot;, &quot;text&quot;: &quot;Reset password&quot;, &quot;label&quot;: &quot;account&quot;},</span>
-<span>    {&quot;id&quot;: &quot;b&quot;, &quot;family&quot;: &quot;billing-charge&quot;, &quot;text&quot;: &quot;Double charge&quot;, &quot;label&quot;: &quot;billing&quot;},</span>
-<span>    {&quot;id&quot;: &quot;c&quot;, &quot;family&quot;: &quot;account-reset&quot;, &quot;text&quot;: &quot;Password reset please&quot;, &quot;label&quot;: &quot;account&quot;},</span>
-<span>    {&quot;id&quot;: &quot;d&quot;, &quot;family&quot;: &quot;billing-refund&quot;, &quot;text&quot;: &quot;Refund request&quot;, &quot;label&quot;: &quot;billing&quot;},</span>
-<span>]</span>
-<span> </span>
-<span> </span>
-<span>def validate_corpus(rows):</span>
-<span>    seen = set()</span>
-<span>    for row in rows:</span>
-<span>        if not isinstance(row, dict):</span>
-<span>            raise ValueError(&quot;Each example must be a record.&quot;)</span>
-<span>        for field in (&quot;id&quot;, &quot;family&quot;, &quot;text&quot;, &quot;label&quot;):</span>
-<span>            if not isinstance(row.get(field), str) or not row[field].strip():</span>
-<span>                raise ValueError(f&quot;Missing or blank {field}.&quot;)</span>
-<span>        if row[&quot;id&quot;] in seen:</span>
-<span>            raise ValueError(&quot;Duplicate document identity.&quot;)</span>
-<span>        seen.add(row[&quot;id&quot;])</span>
-<span>    return len(seen)</span>
-<span> </span>
-<span> </span>
-<span>def corpus_counts(rows):</span>
-<span>    validate_corpus(rows)</span>
-<span>    return {</span>
-<span>        &quot;documents&quot;: len(rows),</span>
-<span>        &quot;classes&quot;: dict(Counter(row[&quot;label&quot;] for row in rows)),</span>
-<span>        &quot;whitespace_pieces&quot;: sum(len(row[&quot;text&quot;].split()) for row in rows),</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def family_overlap(left, right):</span>
-<span>    return {row[&quot;family&quot;] for row in left} &amp; {row[&quot;family&quot;] for row in right}</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: unique identity and nonmutation.</span>
-<span>    before = deepcopy(DOCUMENTS)</span>
-<span>    assert validate_corpus(DOCUMENTS) == 4</span>
-<span>    try:</span>
-<span>        validate_corpus(DOCUMENTS + [dict(DOCUMENTS[0])])</span>
-<span>    except ValueError:</span>
-<span>        pass</span>
-<span>    else:</span>
-<span>        raise AssertionError(&quot;A repeated document ID was accepted.&quot;)</span>
-<span>    assert DOCUMENTS == before</span>
-<span> </span>
-<span>    # Exercise 2: invalid text and missing provenance are errors.</span>
-<span>    for broken in ({**DOCUMENTS[0], &quot;text&quot;: &quot;  &quot;},</span>
-<span>                   {key: value for key, value in DOCUMENTS[0].items() if key != &quot;family&quot;}):</span>
-<span>        try:</span>
-<span>            validate_corpus([broken])</span>
-<span>        except ValueError:</span>
-<span>            pass</span>
-<span>        else:</span>
-<span>            raise AssertionError(&quot;An invalid text record was accepted.&quot;)</span>
-<span> </span>
-<span>    # Exercise 3: text length and number of prediction units differ.</span>
-<span>    assert corpus_counts(DOCUMENTS) == {</span>
-<span>        &quot;documents&quot;: 4, &quot;classes&quot;: {&quot;account&quot;: 2, &quot;billing&quot;: 2}, &quot;whitespace_pieces&quot;: 9</span>
-<span>    }</span>
-<span>    changed = deepcopy(DOCUMENTS)</span>
-<span>    changed[0][&quot;text&quot;] += &quot; &quot; + changed[0][&quot;text&quot;]</span>
-<span>    assert corpus_counts(changed) == {</span>
-<span>        &quot;documents&quot;: 4, &quot;classes&quot;: {&quot;account&quot;: 2, &quot;billing&quot;: 2}, &quot;whitespace_pieces&quot;: 11</span>
-<span>    }</span>
-<span> </span>
-<span>    # Exercise 4: the weighted score answers a different question.</span>
-<span>    correct = [1, 0]</span>
-<span>    assert sum(correct) / len(correct) == 0.5</span>
-<span>    scores = [sum(c*w for c, w in zip(correct, weights)) / sum(weights)</span>
-<span>              for weights in ([1000, 10], [10, 1000])]</span>
-<span>    assert math.isclose(scores[0], 1000/1010, abs_tol=1e-12)</span>
-<span>    assert math.isclose(scores[1], 10/1010, abs_tol=1e-12)</span>
-<span> </span>
-<span>    # Exercise 5: related text stays together, and no row disappears.</span>
-<span>    assert family_overlap(DOCUMENTS[:2], DOCUMENTS[2:]) == {&quot;account-reset&quot;}</span>
-<span>    train, holdout = [DOCUMENTS[0], DOCUMENTS[2]], [DOCUMENTS[1], DOCUMENTS[3]]</span>
-<span>    assert family_overlap(train, holdout) == set()</span>
-<span>    assert sorted(row[&quot;id&quot;] for row in train + holdout) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]</span>
-<span> </span>
-<span>    # Exercise 6 requires an explained task contract, not a fake automatic grade.</span>
-<span>    return {&quot;status&quot;: &quot;passed&quot;, &quot;automated_exercises&quot;: 5, &quot;written_exercises&quot;: 1}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Original corpus-contract examples. No network or external data is used.&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter</span>
+<span class="source-line"><span class="syntax-keyword">from</span> copy <span class="syntax-keyword">import</span> deepcopy</span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"></span>
+<span class="source-line">DOCUMENTS <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account-reset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Reset password</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing-charge</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Double charge</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account-reset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Password reset please</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing-refund</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Refund request</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_corpus</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    seen <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Each example must be a record.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> field <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>row<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>field<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> row<span class="syntax-punctuation">[</span>field<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Missing or blank </span><span class="syntax-string">{</span>field<span class="syntax-string">}</span><span class="syntax-string">.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Duplicate document identity.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>seen<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">corpus_counts</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    validate_corpus<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">documents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">classes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>Counter<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">whitespace_pieces</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">family_overlap</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> left<span class="syntax-punctuation">}</span> <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> right<span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: unique identity and nonmutation.</span></span>
+<span class="source-line">    before <span class="syntax-operator">=</span> deepcopy<span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> validate_corpus<span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        validate_corpus<span class="syntax-punctuation">(</span>DOCUMENTS <span class="syntax-operator">+</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A repeated document ID was accepted.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> DOCUMENTS <span class="syntax-operator">==</span> before</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: invalid text and missing provenance are errors.</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> broken <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                   <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> value <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> key <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            validate_corpus<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>broken<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">An invalid text record was accepted.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: text length and number of prediction units differ.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> corpus_counts<span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">documents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">classes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">whitespace_pieces</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">9</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    changed <span class="syntax-operator">=</span> deepcopy<span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> corpus_counts<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">documents</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">classes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">whitespace_pieces</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">11</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: the weighted score answers a different question.</span></span>
+<span class="source-line">    correct <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span></span>
+<span class="source-line">    scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>c<span class="syntax-operator">*</span>w <span class="syntax-keyword">for</span> c<span class="syntax-punctuation">,</span> w <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">)</span></span>
+<span class="source-line">              <span class="syntax-keyword">for</span> weights <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span><span class="syntax-operator">/</span><span class="syntax-number">1010</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-operator">/</span><span class="syntax-number">1010</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: related text stays together, and no row disappears.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> family_overlap<span class="syntax-punctuation">(</span>DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">account-reset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    train<span class="syntax-punctuation">,</span> holdout <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> DOCUMENTS<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> family_overlap<span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> train <span class="syntax-operator">+</span> holdout<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6 requires an explained task contract, not a fake automatic grade.</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">automated_exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">written_exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

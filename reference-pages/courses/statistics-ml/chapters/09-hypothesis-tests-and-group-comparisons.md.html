@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,13 +165,26 @@
 <p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-009</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A hypothesis test evaluates a procedure under a specified null model. It does not assign a probability to the null hypothesis and does not establish that an effect matters. The design determines which observations can be compared, which permutations are legal, and which error rate has meaning.</p>
-<p>For an independent two-group mean comparison, estimate delta=mean(A)-mean(B). Welch&#x27;s standard error is sqrt(sA^2/nA+sB^2/nB), with an approximate degrees-of-freedom correction. For paired measurements, form each within-pair difference first and test its mean. Pairing removes stable person-level variability; pretending pairs are independent groups discards that information.</p>
+<p>For independent groups A and B, estimate the population mean difference using</p>
+<div class="math-display"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover><mrow><mi>δ</mi></mrow><mo>^</mo></mover><mo>=</mo><msub><mover><mrow><mi>x</mi></mrow><mo stretchy="true">¯</mo></mover><mi>A</mi></msub><mo>−</mo><msub><mover><mrow><mi>x</mi></mrow><mo stretchy="true">¯</mo></mover><mi>B</mi></msub><mo>,</mo><mspace width="2em"></mspace><mo>SE</mo><mo stretchy="false">(</mo><mover><mrow><mi>δ</mi></mrow><mo>^</mo></mover><mo stretchy="false">)</mo><mo>=</mo><msqrt><mrow><mfrac><mrow><msubsup><mi>s</mi><mi>A</mi><mn>2</mn></msubsup></mrow><mrow><msub><mi>n</mi><mi>A</mi></msub></mrow></mfrac><mo>+</mo><mfrac><mrow><msubsup><mi>s</mi><mi>B</mi><mn>2</mn></msubsup></mrow><mrow><msub><mi>n</mi><mi>B</mi></msub></mrow></mfrac></mrow></msqrt><mo>.</mo></mrow><annotation encoding="application/x-tex">\widehat{\delta}=\bar{x}_A-\bar{x}_B,
+\qquad
+\operatorname{SE}(\widehat{\delta})
+=\sqrt{\frac{s_A^2}{n_A}+\frac{s_B^2}{n_B}}.</annotation></semantics></math></div>
+<p>Here <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mover><mrow><mi>x</mi></mrow><mo stretchy="true">¯</mo></mover><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">\bar{x}_A</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mover><mrow><mi>x</mi></mrow><mo stretchy="true">¯</mo></mover><mi>B</mi></msub></mrow><annotation encoding="application/x-tex">\bar{x}_B</annotation></semantics></math> are sample means, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msubsup><mi>s</mi><mi>A</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">s_A^2</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msubsup><mi>s</mi><mi>B</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">s_B^2</annotation></semantics></math> are sample variances calculated with the sample-size-minus-one denominator, and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>n</mi><mi>A</mi></msub><mo>,</mo><msub><mi>n</mi><mi>B</mi></msub><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n_A,n_B&gt;1</annotation></semantics></math> are the group sizes. The two variance contributions add because the group estimates are independent. Test a specified null difference <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>δ</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">\delta_0</annotation></semantics></math> with the Welch statistic</p>
+<div class="math-display"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>t</mi><mo>=</mo><mfrac><mrow><mover><mrow><mi>δ</mi></mrow><mo>^</mo></mover><mo>−</mo><msub><mi>δ</mi><mn>0</mn></msub></mrow><mrow><mo>SE</mo><mo stretchy="false">(</mo><mover><mrow><mi>δ</mi></mrow><mo>^</mo></mover><mo stretchy="false">)</mo></mrow></mfrac><mo>,</mo><mspace width="2em"></mspace><mi>ν</mi><mo>≈</mo><mfrac><mrow><mo stretchy="false">(</mo><msubsup><mi>s</mi><mi>A</mi><mn>2</mn></msubsup><mo>/</mo><msub><mi>n</mi><mi>A</mi></msub><mo>+</mo><msubsup><mi>s</mi><mi>B</mi><mn>2</mn></msubsup><mo>/</mo><msub><mi>n</mi><mi>B</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mfrac><mrow><mo stretchy="false">(</mo><msubsup><mi>s</mi><mi>A</mi><mn>2</mn></msubsup><mo>/</mo><msub><mi>n</mi><mi>A</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><msub><mi>n</mi><mi>A</mi></msub><mo>−</mo><mn>1</mn></mrow></mfrac><mo>+</mo><mfrac><mrow><mo stretchy="false">(</mo><msubsup><mi>s</mi><mi>B</mi><mn>2</mn></msubsup><mo>/</mo><msub><mi>n</mi><mi>B</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><msub><mi>n</mi><mi>B</mi></msub><mo>−</mo><mn>1</mn></mrow></mfrac></mrow></mfrac><mo>.</mo></mrow><annotation encoding="application/x-tex">t=\frac{\widehat{\delta}-\delta_0}
+{\operatorname{SE}(\widehat{\delta})},
+\qquad
+\nu\approx
+\frac{(s_A^2/n_A+s_B^2/n_B)^2}
+{\frac{(s_A^2/n_A)^2}{n_A-1}+\frac{(s_B^2/n_B)^2}{n_B-1}}.</annotation></semantics></math></div>
+<p>The Welch-Satterthwaite degrees of freedom <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>ν</mi></mrow><annotation encoding="application/x-tex">\nu</annotation></semantics></math> are generally nonintegral; the reference distribution accounts approximately for estimating two unequal variances. A zero standard error needs an explicit degeneracy policy rather than division by zero. These formulas do not repair dependent samples or a misidentified observational unit. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm">NIST two-sample test definition</a>.</p>
+<p>For paired measurements, first calculate a within-pair difference <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">d_i</annotation></semantics></math>, then apply a one-sample test to those differences. Its standard error is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow><annotation encoding="application/x-tex">s_d/\sqrt{n}</annotation></semantics></math>, where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>s</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">s_d</annotation></semantics></math> is the sample standard deviation of the <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math> independent pairs. Pairing removes stable person-level variability; pretending paired measurements are independent groups discards that information. In SciPy, the independent unequal-variance example deliberately uses <code>ttest_ind(..., equal_var=False)</code>; paired data use <code>ttest_rel</code> instead. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html">SciPy independent t-test contract</a>.</p>
 <p>Choose the null to match the decision. Superiority asks whether an effect differs from or exceeds zero. Equivalence asks whether it lies entirely inside a meaningful interval, commonly through two one-sided tests. Failure to reject zero is not evidence that two options are sufficiently similar.</p>
 <h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
 <h4 id="stat-09-01">Null and alternative hypotheses<a class="heading-anchor" href="#stat-09-01" aria-label="Link to this section">#</a></h4>
 <p>Specify the parameter, null region, alternative direction and analysis population before looking at outcomes. A null can be composite, containing many parameter values; the reference procedure must control error across the relevant null.</p>
 <h4 id="stat-09-02">P-values<a class="heading-anchor" href="#stat-09-02" aria-label="Link to this section">#</a></h4>
-<p>A p-value is the null-model probability of a test statistic at least as extreme as observed. It is neither P(null given data) nor the probability that the result occurred by chance.</p>
+<p>A p-value is the null-model probability of a test statistic at least as extreme as observed. It is neither <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo>∣</mo><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pr(H_0\mid\mathrm{data})</annotation></semantics></math> nor the probability that the result occurred by chance.</p>
 <h4 id="stat-09-03">Type I error<a class="heading-anchor" href="#stat-09-03" aria-label="Link to this section">#</a></h4>
 <p>Type I error is rejecting a true null under the testing procedure. Alpha controls its repeated-use probability under assumptions. Repeated looks or selective reporting change the procedure and can invalidate nominal alpha.</p>
 <h4 id="stat-09-04">Type II error<a class="heading-anchor" href="#stat-09-04" aria-label="Link to this section">#</a></h4>
@@ -207,7 +266,7 @@
 <p>Margins must be justified before seeing results, and missing outcomes or nonadherence can bias similarity claims toward zero. A treatment comparison that loses the most harmed participants may look reassuringly similar. Review the analysis population and observation process as carefully as the test statistic.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_09.py.html">chapter_09.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_09.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_09.py</code></pre>
 <h4 id="respect-the-pair">Respect the pair<a class="heading-anchor" href="#respect-the-pair" aria-label="Link to this section">#</a></h4>
 <p>Each person improves by one or two units but baseline levels vary enormously. The paired test isolates those changes and rejects zero; the independent comparison is highly uncertain because it incorporates between-person spread. This is a design distinction, not a contest to find whichever test produces the preferred p-value.</p>
 <h4 id="enumerate-the-actual-experiment">Enumerate the actual experiment<a class="heading-anchor" href="#enumerate-the-actual-experiment" aria-label="Link to this section">#</a></h4>
@@ -215,44 +274,44 @@
 <h4 id="show-similarity-against-an-operational-margin">Show similarity against an operational margin<a class="heading-anchor" href="#show-similarity-against-an-operational-margin" aria-label="Link to this section">#</a></h4>
 <p>An estimate 0.1 with SE 0.1 has an approximate 90% interval entirely within minus 0.5 and plus 0.5. That supports the defined equivalence claim under normal approximation. A much wider interval containing zero would fail the equivalence criterion.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
-from itertools import combinations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
+<span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> combinations
 
-def paired_and_welch():
-    before = np.array([10.,30.,50.,70.,90.,110.])
-    changes = np.array([1.,2.,1.,2.,1.,2.])
-    after = before+changes
-    paired = stats.ttest_rel(after,before)
-    independent = stats.ttest_ind(after,before,equal_var=False)
-    assert paired.pvalue &lt; .01 and independent.pvalue &gt; .8
-    print(&quot;Paired p:&quot;, paired.pvalue, &quot;unpaired p:&quot;, independent.pvalue)
+<span class="syntax-keyword">def</span> <span class="syntax-function">paired_and_welch</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    before <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">30.</span><span class="syntax-punctuation">,</span><span class="syntax-number">50.</span><span class="syntax-punctuation">,</span><span class="syntax-number">70.</span><span class="syntax-punctuation">,</span><span class="syntax-number">90.</span><span class="syntax-punctuation">,</span><span class="syntax-number">110.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    changes <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    after <span class="syntax-operator">=</span> before<span class="syntax-operator">+</span>changes
+    paired <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>ttest_rel<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span>before<span class="syntax-punctuation">)</span>
+    independent <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>ttest_ind<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span>before<span class="syntax-punctuation">,</span>equal_var<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> paired<span class="syntax-operator">.</span>pvalue <span class="syntax-operator">&lt;</span> <span class="syntax-number">.01</span> <span class="syntax-operator">and</span> independent<span class="syntax-operator">.</span>pvalue <span class="syntax-operator">&gt;</span> <span class="syntax-number">.8</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Paired p:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> paired<span class="syntax-operator">.</span>pvalue<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unpaired p:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> independent<span class="syntax-operator">.</span>pvalue<span class="syntax-punctuation">)</span>
 
-def exact_randomization():
-    y = np.array([1.,2.,3.,4.])
-    observed = y[2:].mean()-y[:2].mean()
-    contrasts=[]
-    for treated in combinations(range(4),2):
-        mask=np.zeros(4,dtype=bool);mask[list(treated)]=True
-        contrasts.append(y[mask].mean()-y[~mask].mean())
-    p = np.mean(np.abs(contrasts)&gt;=abs(observed))
-    assert np.isclose(p,1/3)
-    print(&quot;Six valid assignments, exact two-sided p:&quot;, p)
+<span class="syntax-keyword">def</span> <span class="syntax-function">exact_randomization</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    observed <span class="syntax-operator">=</span> y<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    contrasts<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> treated <span class="syntax-operator">in</span> combinations<span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        mask<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>mask<span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>treated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-keyword">True</span>
+        contrasts<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">[</span>mask<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span><span class="syntax-operator">~</span>mask<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>contrasts<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Six valid assignments, exact two-sided p:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">)</span>
 
-def equivalence():
-    delta, se, margin = .1, .1, .5
-    lower, upper = delta+np.array([-1,1])*stats.norm.ppf(.95)*se
-    assert lower &gt; -margin and upper &lt; margin
-    print(&quot;90% equivalence interval:&quot;, lower, upper, &quot;inside +/-&quot;, margin)
+<span class="syntax-keyword">def</span> <span class="syntax-function">equivalence</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    delta<span class="syntax-punctuation">,</span> se<span class="syntax-punctuation">,</span> margin <span class="syntax-operator">=</span> <span class="syntax-number">.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.5</span>
+    lower<span class="syntax-punctuation">,</span> upper <span class="syntax-operator">=</span> delta<span class="syntax-operator">+</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.95</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>se
+    <span class="syntax-keyword">assert</span> lower <span class="syntax-operator">&gt;</span> <span class="syntax-operator">-</span>margin <span class="syntax-operator">and</span> upper <span class="syntax-operator">&lt;</span> margin
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">90</span><span class="syntax-string">% e</span><span class="syntax-string">quivalence interval:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">inside +/-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> margin<span class="syntax-punctuation">)</span>
 
-def main():
-    paired_and_welch(); exact_randomization(); equivalence()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    paired_and_welch<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> exact_randomization<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> equivalence<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Which test should compare before and after measurements?</strong> First determine whether the same units were measured. Pairing permits analysis of differences; time trends, attrition and lack of a concurrent control still limit causal interpretation. A paired test alone does not identify the intervention effect.</p>
-<p><strong>Interview: What does p=.03 prove?</strong> It reports a tail probability under the stated null and procedure. It does not quantify effect importance, probability of the null or protection against undisclosed selection. Inspect the estimate, interval, design and multiplicity.</p>
+<p><strong>Interview: What does <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">p=0.03</annotation></semantics></math> prove?</strong> It reports a tail probability under the stated null and procedure. It does not quantify effect importance, probability of the null or protection against undisclosed selection. Inspect the estimate, interval, design and multiplicity.</p>
 <p><strong>Interview: Why is a nonsignificant result insufficient for equivalence?</strong> An imprecise interval can include both zero and consequential harm. Equivalence requires enough precision to exclude all effects outside prespecified practical margins.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>

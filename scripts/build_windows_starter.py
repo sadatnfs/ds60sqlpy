@@ -21,7 +21,9 @@ README = """DS60 Learning Lab: Docker classroom starter
 2. Start a Docker-compatible Linux-container engine with integration enabled for Ubuntu in WSL 2.
 3. Double-click START_DOCKER_CLASSROOM.cmd. Keep its window open for build logs.
 4. The shared ./classroom entrypoint builds and starts all ordinary workers,
-   waits for readiness, and opens the actual URL.
+   waits for readiness, and opens one classroom for all subjects.
+5. Choose any learning path and pace. Code, notes and saved runs stay separate
+   for each lesson and language. Equations and code highlights render offline.
 
 Docker, Compose and the WSL 2 Ubuntu shell are the Windows launcher prerequisites.
 No host Python, PostgreSQL,
@@ -89,6 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     checks = (
+        ("normalize_lesson_prose.py",),
+        ("check_content_rendering.py",),
         ("build_course_guide.py", "--check"),
         ("build_lesson_readers.py", "--check"),
         ("check_modules.py",),

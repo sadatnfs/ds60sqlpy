@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -403,20 +449,22 @@
 <h5 id="guide--predict-before-running">Predict before running<a class="heading-anchor" href="#guide--predict-before-running" aria-label="Link to this section">#</a></h5>
 <p>Open <a href="python-pro-02.html#learner"><code>lessons/py_pro_02_concurrency_parallelism.py</code></a>. The baseline awaits three 10 ms waits sequentially. Predict the lower bound on elapsed time, then run it.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_pro_02_concurrency_parallelism<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
 <p>The exact measured time varies, so the check uses a broad behavioral boundary rather than asserting a fragile benchmark.</p>
 <h5 id="guide--two-different-bounds">Two different bounds<a class="heading-anchor" href="#guide--two-different-bounds" aria-label="Link to this section">#</a></h5>
 <p>A semaphore limits active operations, but a producer can still create a million waiting task objects. A bounded queue controls pending work as well:</p>
-<pre><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
+<pre class="highlighted-code"><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
 <p>When the queue is full, <code>await queue.put(...)</code> pauses the producer. This is backpressure. The consumer count bounds active worker calls.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_pro_02_concurrency_parallelism<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -428,45 +476,45 @@
 <li><strong>structured result:</strong> associates each input with success/failure/cancellation so no work disappears.</li>
 </ul>
 <h5 id="guide--micro-example-a-state-the-execution-choice-from-the-blocking-behavior">Micro-example A — state the execution choice from the blocking behavior<a class="heading-anchor" href="#guide--micro-example-a-state-the-execution-choice-from-the-blocking-behavior" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
-    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
-        raise ValueError(&quot;classify one dominant workload&quot;)
-    if waits_nonblocking:
-        return &quot;asyncio&quot;
-    if waits_blocking:
-        return &quot;threads&quot;
-    return &quot;processes-or-native-vectorization&quot;
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_execution</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> waits_nonblocking<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> waits_blocking<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> cpu_python<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>waits_nonblocking<span class="syntax-punctuation">,</span> waits_blocking<span class="syntax-punctuation">,</span> cpu_python<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">classify one dominant workload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> waits_nonblocking<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">if</span> waits_blocking<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes-or-native-vectorization</span><span class="syntax-string">&quot;</span>
 
 
-assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;
-assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</code></pre>
+<span class="syntax-keyword">assert</span> choose_execution<span class="syntax-punctuation">(</span>waits_nonblocking<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">assert</span> choose_execution<span class="syntax-punctuation">(</span>cpu_python<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes-or-native-vectorization</span><span class="syntax-string">&quot;</span></code></pre>
 <p><strong>Expected observation:</strong> The decision follows where time is spent, not a belief that one primitive is universally faster.</p>
 <p><strong>Why it matters:</strong> One dominant local bottleneck was measured; mixed pipelines may need multiple bounded stages.</p>
 <h5 id="guide--micro-example-b-prove-an-async-concurrency-ceiling">Micro-example B — prove an async concurrency ceiling<a class="heading-anchor" href="#guide--micro-example-b-prove-an-async-concurrency-ceiling" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import asyncio
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
 
 
-async def demo():
-    gate = asyncio.Semaphore(2)
-    active = 0
-    peak = 0
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">demo</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    gate <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>Semaphore<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    active <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    peak <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
 
-    async def work(value):
-        nonlocal active, peak
-        async with gate:
-            active += 1
-            peak = max(peak, active)
-            await asyncio.sleep(0)
-            active -= 1
-            return value * 2
+    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">work</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">nonlocal</span> active<span class="syntax-punctuation">,</span> peak
+        <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> gate<span class="syntax-punctuation">:</span>
+            active <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+            peak <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span> active<span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+            active <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+            <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span>
 
-    results = await asyncio.gather(*(work(i) for i in range(6)))
-    return results, peak
+    results <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>work<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> results<span class="syntax-punctuation">,</span> peak
 
 
-results, peak = asyncio.run(demo())
-print(results, peak)
-assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
+results<span class="syntax-punctuation">,</span> peak <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>demo<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">,</span> peak<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> results <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> peak <span class="syntax-operator">==</span> <span class="syntax-number">2</span></code></pre>
 <p><strong>Expected observation:</strong> All inputs are accounted for while no more than two operations enter the protected section.</p>
 <p><strong>Why it matters:</strong> The task count is tiny; a large stream also needs bounded task creation or a worker queue.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -516,14 +564,14 @@ assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
 <p><strong>Verify:</strong> adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.</p>
 <h5 id="guide--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#guide--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
 <p>Make the CPU function a top-level function with serializable arguments and results. Use:</p>
-<pre><code class="language-python">multiprocessing.get_context(&quot;spawn&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">multiprocessing<span class="syntax-operator">.</span>get_context<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spawn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>and <code>ProcessPoolExecutor</code>. Run process creation only beneath:</p>
-<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
-    ...</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></code></pre>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\solutions\py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>py_pro_02_concurrency_parallelism_solution<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-with-processes</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
 <p>The workload is intentionally small for safety; process startup may make it slower than sequential execution. That observation is part of the lesson.</p>
 <p><strong>Verify:</strong> isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.</p>
 <h5 id="guide--exercise-6-reason-about-shared-state">Exercise 6 — reason about shared state<a class="heading-anchor" href="#guide--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
@@ -574,10 +622,10 @@ assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
 </ul>
 <p>Run the focused suite.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_pro_02_concurrency_parallelism -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_pro_02_concurrency_parallelism -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_pro_02_concurrency_parallelism -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_pro_02_concurrency_parallelism -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Async work runs sequentially:</strong> each coroutine was awaited while it was created. Schedule child tasks within a structured scope.</li>
@@ -596,7 +644,7 @@ assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
@@ -655,265 +703,265 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-02 learner lab: concurrency and parallelism.</span>
-<span> </span>
-<span>The worked example measures a sequential local wait. Complete the TODO</span>
-<span>functions before comparing your design with the reference implementation.</span>
-<span> </span>
-<span>Professional learner deep dive (python-pro-02)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Concurrency overlaps work; parallelism executes work simultaneously. `asyncio` is effective when</span>
-<span>many operations spend time awaiting nonblocking I/O. Threads can overlap blocking I/O behind a</span>
-<span>synchronous API. Processes bypass the Global Interpreter Lock for CPU-bound Python work but</span>
-<span>require serialization, startup, and platform-safe entry points.  Unlimited fan-out converts</span>
-<span>latency into memory, connection, and rate pressure. A production design needs admission bounds,</span>
-<span>result/error accounting, cancellation cleanup, timeouts, ordering semantics, and measurement</span>
-<span>against a sequential baseline.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* workload classification: identifies CPU time, blocking/nonblocking I/O, data transfer, and</span>
-<span>  external capacity before selecting a primitive.</span>
-<span>* semaphore/worker queue: bounds active and queued work rather than creating one task per input.</span>
-<span>* structured result: associates each input with success/failure/cancellation so no work</span>
-<span>  disappears.</span>
-<span> </span>
-<span>Micro-example A — state the execution choice from the blocking behavior::</span>
-<span> </span>
-<span>    def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):</span>
-<span>        if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:</span>
-<span>            raise ValueError(&quot;classify one dominant workload&quot;)</span>
-<span>        if waits_nonblocking:</span>
-<span>            return &quot;asyncio&quot;</span>
-<span>        if waits_blocking:</span>
-<span>            return &quot;threads&quot;</span>
-<span>        return &quot;processes-or-native-vectorization&quot;</span>
-<span> </span>
-<span>    assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;</span>
-<span>    assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</span>
-<span> </span>
-<span>Expected: The decision follows where time is spent, not a belief that one primitive is</span>
-<span>          universally faster.</span>
-<span> </span>
-<span>Micro-example B — prove an async concurrency ceiling::</span>
-<span> </span>
-<span>    import asyncio</span>
-<span> </span>
-<span>    async def demo():</span>
-<span>        gate = asyncio.Semaphore(2)</span>
-<span>        active = 0</span>
-<span>        peak = 0</span>
-<span> </span>
-<span>        async def work(value):</span>
-<span>            nonlocal active, peak</span>
-<span>            async with gate:</span>
-<span>                active += 1</span>
-<span>                peak = max(peak, active)</span>
-<span>                await asyncio.sleep(0)</span>
-<span>                active -= 1</span>
-<span>                return value * 2</span>
-<span> </span>
-<span>        results = await asyncio.gather(*(work(i) for i in range(6)))</span>
-<span>        return results, peak</span>
-<span> </span>
-<span>    results, peak = asyncio.run(demo())</span>
-<span>    print(results, peak)</span>
-<span>    assert results == [0, 2, 4, 6, 8, 10] and peak == 2</span>
-<span> </span>
-<span>Expected: All inputs are accounted for while no more than two operations enter the protected</span>
-<span>          section.</span>
-<span> </span>
-<span>Debugging rule: Measure sequential and candidate paths, record active/queued counts, per-item</span>
-<span>                results, timeout/cancellation cleanup, serialization size, and platform start</span>
-<span>                method.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import asyncio</span>
-<span>import time</span>
-<span>from collections.abc import Awaitable, Callable, Sequence</span>
-<span>from typing import Literal, TypeVar</span>
-<span> </span>
-<span>T = TypeVar(&quot;T&quot;)</span>
-<span>R = TypeVar(&quot;R&quot;)</span>
-<span>Workload = Literal[&quot;async-io&quot;, &quot;blocking-io&quot;, &quot;cpu&quot;]</span>
-<span>Model = Literal[&quot;asyncio&quot;, &quot;threads&quot;, &quot;processes&quot;]</span>
-<span> </span>
-<span> </span>
-<span>def choose_execution_model(</span>
-<span>    workload: Workload,</span>
-<span>    *,</span>
-<span>    async_api_available: bool,</span>
-<span>) -&gt; Model:</span>
-<span>    &quot;&quot;&quot;Choose the first concurrency model to evaluate.</span>
-<span> </span>
-<span>    TODO:</span>
-<span>    - cooperative async I/O with an async API -&gt; asyncio</span>
-<span>    - blocking I/O without an async API -&gt; threads</span>
-<span>    - substantial pure-Python CPU work -&gt; processes</span>
-<span> </span>
-<span>    Reject contradictory input such as claiming an async API for CPU work.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete choose_execution_model&quot;)</span>
-<span> </span>
-<span> </span>
-<span>async def bounded_map(</span>
-<span>    items: Sequence[T],</span>
-<span>    worker: Callable[[T], Awaitable[R]],</span>
-<span>    *,</span>
-<span>    worker_count: int,</span>
-<span>    queue_capacity: int,</span>
-<span>) -&gt; list[R]:</span>
-<span>    &quot;&quot;&quot;Map an async worker while bounding active work and queued work.</span>
-<span> </span>
-<span>    TODO: use an ``asyncio.Queue(maxsize=queue_capacity)``, a fixed number of</span>
-<span>    consumers, and ``asyncio.TaskGroup``. Preserve input order. A worker</span>
-<span>    exception must cancel sibling work rather than being hidden.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete bounded_map&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def deterministic_lost_update(initial: int = 0) -&gt; tuple[int, int]:</span>
-<span>    &quot;&quot;&quot;Model two unsynchronized read/modify/write operations.</span>
-<span> </span>
-<span>    TODO: return ``(unsafe_result, serialized_result)``. Force both unsafe</span>
-<span>    workers to read the same initial snapshot before either writes. This</span>
-<span>    demonstrates the race without relying on a timing-sensitive thread test.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete deterministic_lost_update&quot;)</span>
-<span> </span>
-<span> </span>
-<span>async def _worked_wait(delay: float) -&gt; str:</span>
-<span>    await asyncio.sleep(delay)</span>
-<span>    return f&quot;waited {delay:.3f}s&quot;</span>
-<span> </span>
-<span> </span>
-<span>async def worked_example() -&gt; None:</span>
-<span>    &quot;&quot;&quot;Run a deterministic sequential baseline and show unfinished exercises.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    started = time.perf_counter()</span>
-<span>    messages = [await _worked_wait(delay) for delay in (0.01, 0.01, 0.01)]</span>
-<span>    elapsed = time.perf_counter() - started</span>
-<span>    print(f&quot;Sequential async baseline: {messages}; elapsed &gt;= 0.03? {elapsed &gt;= 0.03}&quot;)</span>
-<span> </span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (</span>
-<span>            &quot;execution-model choice&quot;,</span>
-<span>            lambda: choose_execution_model(&quot;blocking-io&quot;, async_api_available=False),</span>
-<span>        ),</span>
-<span>        (&quot;lost-update model&quot;, deterministic_lost_update),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            value = call()</span>
-<span>        except NotImplementedError:</span>
-<span>            print(f&quot;TODO: {label}&quot;)</span>
-<span>        else:</span>
-<span>            print(f&quot;Completed: {label} -&gt; {value!r}&quot;)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_pro_02_concurrency_parallelism.md</span>
-<span>#</span>
-<span># Exercise 1 — choose a model</span>
-<span># Prompt: Implement `choose_execution_model` in the learner artifact. For each case, write</span>
-<span># one sentence explaining the choice: - an async database driver, - a synchronous file</span>
-<span># metadata API, - image transforms written in pure Python, - three tiny computations.</span>
-<span># Reject labels that contradict each other. An async function that performs computation</span>
-<span># without `await` is still CPU work and blocks the event loop.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — build a bounded async map</span>
-<span># Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one</span>
-<span># producer, 3. a fixed number of consumers, 4. indexed items so results retain input</span>
-<span># order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place</span>
-<span># `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch</span>
-<span># `CancelledError` unless cleanup requires it; if caught, re-raise it.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — add per-item timeouts</span>
-<span># Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the</span>
-<span># limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block</span>
-<span># returns the active count to zero. Prediction: what happens to sibling consumers when one</span>
-<span># item times out?</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — adapt blocking I/O</span>
-<span># Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.</span>
-<span># Compare sequential and threaded elapsed time with generous bounds, then verify ordered</span>
-<span># results rather than treating speed as the correctness assertion. Explain why a thread</span>
-<span># pool requires a deliberate `max_workers`, even if the remote service could theoretically</span>
-<span># accept more requests.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — isolate CPU work</span>
-<span># Prompt: Make the CPU function a top-level function with serializable arguments and</span>
-<span># results. Use `multiprocessing.get_context(&quot;spawn&quot;)` with `ProcessPoolExecutor`, and</span>
-<span># create processes only beneath an `if __name__ == &quot;__main__&quot;:` guard. Run the solution</span>
-<span># with `--with-processes`; explain when startup makes a small workload slower.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — reason about shared state</span>
-<span># Prompt: Implement `deterministic_lost_update`. Force two workers to read the same</span>
-<span># snapshot, then apply both writes. Compare with two serialized increments. List three</span>
-<span># repairs: - one owner task/process receives update messages, - a lock protects the</span>
-<span># complete read/modify/write unit, or - an external system performs an atomic update.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — prove cancellation cleanup</span>
-<span># Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and</span>
-<span># prove active count, queued acknowledgements, and child tasks return to zero before the</span>
-<span># parent finishes.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — inspect structured failures</span>
-<span># Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to</span>
-<span># handle one expected category while preserving unexpected failures and their original</span>
-<span># tracebacks.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — stream a backpressured producer</span>
-<span># Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is</span>
-<span># unknown. Preserve output order without retaining every input or creating one task per</span>
-<span># item.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — trace context across boundaries</span>
-<span># Prompt: Set a request ID in `contextvars`, then observe propagation through an async</span>
-<span># task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any</span>
-<span># explicit propagation visible.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — design graceful executor shutdown</span>
-<span># Prompt: Own a thread or process pool through a context manager. Stop accepting new work,</span>
-<span># wait with a bounded policy, cancel pending futures when allowed, and report unfinished</span>
-<span># work without hanging interpreter exit.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — make an evidence-based model decision</span>
-<span># Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on</span>
-<span># representative I/O and CPU fixtures. Record correctness, startup, throughput, peak</span>
-<span># active work, transfer size, and cleanup—not just fastest elapsed time.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    asyncio.run(worked_example())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-pro-02 learner lab: concurrency and parallelism.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The worked example measures a sequential local wait. Complete the TODO</span></span>
+<span class="source-line"><span class="syntax-string">functions before comparing your design with the reference implementation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-pro-02)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Concurrency overlaps work; parallelism executes work simultaneously. `asyncio` is effective when</span></span>
+<span class="source-line"><span class="syntax-string">many operations spend time awaiting nonblocking I/O. Threads can overlap blocking I/O behind a</span></span>
+<span class="source-line"><span class="syntax-string">synchronous API. Processes bypass the Global Interpreter Lock for CPU-bound Python work but</span></span>
+<span class="source-line"><span class="syntax-string">require serialization, startup, and platform-safe entry points.  Unlimited fan-out converts</span></span>
+<span class="source-line"><span class="syntax-string">latency into memory, connection, and rate pressure. A production design needs admission bounds,</span></span>
+<span class="source-line"><span class="syntax-string">result/error accounting, cancellation cleanup, timeouts, ordering semantics, and measurement</span></span>
+<span class="source-line"><span class="syntax-string">against a sequential baseline.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* workload classification: identifies CPU time, blocking/nonblocking I/O, data transfer, and</span></span>
+<span class="source-line"><span class="syntax-string">  external capacity before selecting a primitive.</span></span>
+<span class="source-line"><span class="syntax-string">* semaphore/worker queue: bounds active and queued work rather than creating one task per input.</span></span>
+<span class="source-line"><span class="syntax-string">* structured result: associates each input with success/failure/cancellation so no work</span></span>
+<span class="source-line"><span class="syntax-string">  disappears.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — state the execution choice from the blocking behavior::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):</span></span>
+<span class="source-line"><span class="syntax-string">        if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:</span></span>
+<span class="source-line"><span class="syntax-string">            raise ValueError(&quot;classify one dominant workload&quot;)</span></span>
+<span class="source-line"><span class="syntax-string">        if waits_nonblocking:</span></span>
+<span class="source-line"><span class="syntax-string">            return &quot;asyncio&quot;</span></span>
+<span class="source-line"><span class="syntax-string">        if waits_blocking:</span></span>
+<span class="source-line"><span class="syntax-string">            return &quot;threads&quot;</span></span>
+<span class="source-line"><span class="syntax-string">        return &quot;processes-or-native-vectorization&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The decision follows where time is spent, not a belief that one primitive is</span></span>
+<span class="source-line"><span class="syntax-string">          universally faster.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — prove an async concurrency ceiling::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import asyncio</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    async def demo():</span></span>
+<span class="source-line"><span class="syntax-string">        gate = asyncio.Semaphore(2)</span></span>
+<span class="source-line"><span class="syntax-string">        active = 0</span></span>
+<span class="source-line"><span class="syntax-string">        peak = 0</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">        async def work(value):</span></span>
+<span class="source-line"><span class="syntax-string">            nonlocal active, peak</span></span>
+<span class="source-line"><span class="syntax-string">            async with gate:</span></span>
+<span class="source-line"><span class="syntax-string">                active += 1</span></span>
+<span class="source-line"><span class="syntax-string">                peak = max(peak, active)</span></span>
+<span class="source-line"><span class="syntax-string">                await asyncio.sleep(0)</span></span>
+<span class="source-line"><span class="syntax-string">                active -= 1</span></span>
+<span class="source-line"><span class="syntax-string">                return value * 2</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">        results = await asyncio.gather(*(work(i) for i in range(6)))</span></span>
+<span class="source-line"><span class="syntax-string">        return results, peak</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    results, peak = asyncio.run(demo())</span></span>
+<span class="source-line"><span class="syntax-string">    print(results, peak)</span></span>
+<span class="source-line"><span class="syntax-string">    assert results == [0, 2, 4, 6, 8, 10] and peak == 2</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: All inputs are accounted for while no more than two operations enter the protected</span></span>
+<span class="source-line"><span class="syntax-string">          section.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Measure sequential and candidate paths, record active/queued counts, per-item</span></span>
+<span class="source-line"><span class="syntax-string">                results, timeout/cancellation cleanup, serialization size, and platform start</span></span>
+<span class="source-line"><span class="syntax-string">                method.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> asyncio</span>
+<span class="source-line"><span class="syntax-keyword">import</span> time</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Awaitable<span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal<span class="syntax-punctuation">,</span> TypeVar</span>
+<span class="source-line"></span>
+<span class="source-line">T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">R <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">R</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Workload <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">async-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blocking-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">Model <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_execution_model</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    workload<span class="syntax-punctuation">:</span> Workload<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    async_api_available<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Model<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Choose the first concurrency model to evaluate.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO:</span></span>
+<span class="source-line"><span class="syntax-string">    - cooperative async I/O with an async API -&gt; asyncio</span></span>
+<span class="source-line"><span class="syntax-string">    - blocking I/O without an async API -&gt; threads</span></span>
+<span class="source-line"><span class="syntax-string">    - substantial pure-Python CPU work -&gt; processes</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    Reject contradictory input such as claiming an async API for CPU work.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete choose_execution_model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">bounded_map</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    items<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    worker<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Awaitable<span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    worker_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    queue_capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Map an async worker while bounding active work and queued work.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: use an ``asyncio.Queue(maxsize=queue_capacity)``, a fixed number of</span></span>
+<span class="source-line"><span class="syntax-string">    consumers, and ``asyncio.TaskGroup``. Preserve input order. A worker</span></span>
+<span class="source-line"><span class="syntax-string">    exception must cancel sibling work rather than being hidden.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete bounded_map</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">deterministic_lost_update</span><span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Model two unsynchronized read/modify/write operations.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: return ``(unsafe_result, serialized_result)``. Force both unsafe</span></span>
+<span class="source-line"><span class="syntax-string">    workers to read the same initial snapshot before either writes. This</span></span>
+<span class="source-line"><span class="syntax-string">    demonstrates the race without relying on a timing-sensitive thread test.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete deterministic_lost_update</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">_worked_wait</span><span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">waited </span><span class="syntax-string">{</span>delay<span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">s</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">worked_example</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run a deterministic sequential baseline and show unfinished exercises.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    started <span class="syntax-operator">=</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    messages <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">await</span> _worked_wait<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> delay <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    elapsed <span class="syntax-operator">=</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Sequential async baseline: </span><span class="syntax-string">{</span>messages<span class="syntax-string">}</span><span class="syntax-string">; elapsed &gt;= 0.03? </span><span class="syntax-string">{</span>elapsed <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.03</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">execution-model choice</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> choose_execution_model<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">blocking-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> async_api_available<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">lost-update model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> deterministic_lost_update<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            value <span class="syntax-operator">=</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Completed: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string"> -&gt; </span><span class="syntax-string">{</span>value<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_pro_02_concurrency_parallelism.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — choose a model</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `choose_execution_model` in the learner artifact. For each case, write</span></span>
+<span class="source-line"><span class="syntax-comment"># one sentence explaining the choice: - an async database driver, - a synchronous file</span></span>
+<span class="source-line"><span class="syntax-comment"># metadata API, - image transforms written in pure Python, - three tiny computations.</span></span>
+<span class="source-line"><span class="syntax-comment"># Reject labels that contradict each other. An async function that performs computation</span></span>
+<span class="source-line"><span class="syntax-comment"># without `await` is still CPU work and blocks the event loop.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — build a bounded async map</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one</span></span>
+<span class="source-line"><span class="syntax-comment"># producer, 3. a fixed number of consumers, 4. indexed items so results retain input</span></span>
+<span class="source-line"><span class="syntax-comment"># order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place</span></span>
+<span class="source-line"><span class="syntax-comment"># `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch</span></span>
+<span class="source-line"><span class="syntax-comment"># `CancelledError` unless cleanup requires it; if caught, re-raise it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — add per-item timeouts</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the</span></span>
+<span class="source-line"><span class="syntax-comment"># limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block</span></span>
+<span class="source-line"><span class="syntax-comment"># returns the active count to zero. Prediction: what happens to sibling consumers when one</span></span>
+<span class="source-line"><span class="syntax-comment"># item times out?</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — adapt blocking I/O</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare sequential and threaded elapsed time with generous bounds, then verify ordered</span></span>
+<span class="source-line"><span class="syntax-comment"># results rather than treating speed as the correctness assertion. Explain why a thread</span></span>
+<span class="source-line"><span class="syntax-comment"># pool requires a deliberate `max_workers`, even if the remote service could theoretically</span></span>
+<span class="source-line"><span class="syntax-comment"># accept more requests.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — isolate CPU work</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Make the CPU function a top-level function with serializable arguments and</span></span>
+<span class="source-line"><span class="syntax-comment"># results. Use `multiprocessing.get_context(&quot;spawn&quot;)` with `ProcessPoolExecutor`, and</span></span>
+<span class="source-line"><span class="syntax-comment"># create processes only beneath an `if __name__ == &quot;__main__&quot;:` guard. Run the solution</span></span>
+<span class="source-line"><span class="syntax-comment"># with `--with-processes`; explain when startup makes a small workload slower.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — reason about shared state</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `deterministic_lost_update`. Force two workers to read the same</span></span>
+<span class="source-line"><span class="syntax-comment"># snapshot, then apply both writes. Compare with two serialized increments. List three</span></span>
+<span class="source-line"><span class="syntax-comment"># repairs: - one owner task/process receives update messages, - a lock protects the</span></span>
+<span class="source-line"><span class="syntax-comment"># complete read/modify/write unit, or - an external system performs an atomic update.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — prove cancellation cleanup</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and</span></span>
+<span class="source-line"><span class="syntax-comment"># prove active count, queued acknowledgements, and child tasks return to zero before the</span></span>
+<span class="source-line"><span class="syntax-comment"># parent finishes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — inspect structured failures</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to</span></span>
+<span class="source-line"><span class="syntax-comment"># handle one expected category while preserving unexpected failures and their original</span></span>
+<span class="source-line"><span class="syntax-comment"># tracebacks.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — stream a backpressured producer</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is</span></span>
+<span class="source-line"><span class="syntax-comment"># unknown. Preserve output order without retaining every input or creating one task per</span></span>
+<span class="source-line"><span class="syntax-comment"># item.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — trace context across boundaries</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Set a request ID in `contextvars`, then observe propagation through an async</span></span>
+<span class="source-line"><span class="syntax-comment"># task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any</span></span>
+<span class="source-line"><span class="syntax-comment"># explicit propagation visible.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — design graceful executor shutdown</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Own a thread or process pool through a context manager. Stop accepting new work,</span></span>
+<span class="source-line"><span class="syntax-comment"># wait with a bounded policy, cancel pending futures when allowed, and report unfinished</span></span>
+<span class="source-line"><span class="syntax-comment"># work without hanging interpreter exit.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — make an evidence-based model decision</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on</span></span>
+<span class="source-line"><span class="syntax-comment"># representative I/O and CPU fixtures. Record correctness, startup, throughput, peak</span></span>
+<span class="source-line"><span class="syntax-comment"># active work, transfer size, and cleanup—not just fastest elapsed time.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>worked_example<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -997,18 +1045,18 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Benchmark against sequential, prove peak active/queued bounds, account for every input, inject failures/cancellation, and run process examples behind a main guard.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
-    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
-        raise ValueError(&quot;classify one dominant workload&quot;)
-    if waits_nonblocking:
-        return &quot;asyncio&quot;
-    if waits_blocking:
-        return &quot;threads&quot;
-    return &quot;processes-or-native-vectorization&quot;
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_execution</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> waits_nonblocking<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> waits_blocking<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> cpu_python<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>waits_nonblocking<span class="syntax-punctuation">,</span> waits_blocking<span class="syntax-punctuation">,</span> cpu_python<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">classify one dominant workload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> waits_nonblocking<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">if</span> waits_blocking<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes-or-native-vectorization</span><span class="syntax-string">&quot;</span>
 
 
-assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;
-assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</code></pre>
+<span class="syntax-keyword">assert</span> choose_execution<span class="syntax-punctuation">(</span>waits_nonblocking<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">assert</span> choose_execution<span class="syntax-punctuation">(</span>cpu_python<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes-or-native-vectorization</span><span class="syntax-string">&quot;</span></code></pre>
 <p><strong>Expected observation:</strong> The decision follows where time is spent, not a belief that one primitive is universally faster.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1038,7 +1086,7 @@ assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorizat
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.</p>
 <h5 id="solution-1--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#solution-1--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Make the CPU function top-level with serializable arguments and results. Use <code>multiprocessing.get_context(&quot;spawn&quot;)</code> with <code>ProcessPoolExecutor</code>, and create processes only beneath an <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;:</code> guard. Run the solution with <code>--with-processes</code>; explain why startup can make a small workload slower.</p>
+<p><strong>Prompt recap:</strong> Make the CPU function top-level with serializable arguments and results. Use <code>multiprocessing.get_context(&quot;spawn&quot;)</code> with <code>ProcessPoolExecutor</code>, and create processes only beneath an <code>if __name__ == &quot;__main__&quot;:</code> guard. Run the solution with <code>--with-processes</code>; explain why startup can make a small workload slower.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
@@ -1129,300 +1177,300 @@ assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorizat
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-pro-02.</span>
-<span> </span>
-<span>The module demonstrates bounded asyncio work, blocking I/O in threads, and</span>
-<span>pure-Python CPU work in spawned processes. Workloads are deterministic and</span>
-<span>small enough for a lesson and its tests.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import argparse</span>
-<span>import asyncio</span>
-<span>import multiprocessing</span>
-<span>import time</span>
-<span>from collections.abc import AsyncIterator, Awaitable, Callable, Sequence</span>
-<span>from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor</span>
-<span>from contextlib import asynccontextmanager</span>
-<span>from dataclasses import dataclass</span>
-<span>from typing import Generic, Literal, TypeVar, cast</span>
-<span> </span>
-<span>T = TypeVar(&quot;T&quot;)</span>
-<span>R = TypeVar(&quot;R&quot;)</span>
-<span>Workload = Literal[&quot;async-io&quot;, &quot;blocking-io&quot;, &quot;cpu&quot;]</span>
-<span>Model = Literal[&quot;asyncio&quot;, &quot;threads&quot;, &quot;processes&quot;]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass</span>
-<span>class ConcurrencyProbe:</span>
-<span>    &quot;&quot;&quot;Track active and peak work on one asyncio event loop.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    active: int = 0</span>
-<span>    peak: int = 0</span>
-<span> </span>
-<span>    @asynccontextmanager</span>
-<span>    async def activity(self) -&gt; AsyncIterator[None]:</span>
-<span>        self.active += 1</span>
-<span>        self.peak = max(self.peak, self.active)</span>
-<span>        try:</span>
-<span>            yield</span>
-<span>        finally:</span>
-<span>            self.active -= 1</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class BoundedRun(Generic[R]):</span>
-<span>    &quot;&quot;&quot;Ordered values and observable bounds from an async run.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    values: tuple[R, ...]</span>
-<span>    worker_count: int</span>
-<span>    queue_capacity: int</span>
-<span>    peak_active: int</span>
-<span> </span>
-<span> </span>
-<span>def choose_execution_model(</span>
-<span>    workload: Workload,</span>
-<span>    *,</span>
-<span>    async_api_available: bool,</span>
-<span>) -&gt; Model:</span>
-<span>    &quot;&quot;&quot;Choose a useful starting model from workload behavior.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if workload == &quot;cpu&quot;:</span>
-<span>        if async_api_available:</span>
-<span>            raise ValueError(&quot;a pure-Python CPU workload does not have an async API&quot;)</span>
-<span>        return &quot;processes&quot;</span>
-<span>    if workload == &quot;async-io&quot;:</span>
-<span>        if not async_api_available:</span>
-<span>            raise ValueError(&quot;async-io requires an awaitable API&quot;)</span>
-<span>        return &quot;asyncio&quot;</span>
-<span>    if async_api_available:</span>
-<span>        raise ValueError(&quot;blocking-io should not be labeled as an async API&quot;)</span>
-<span>    return &quot;threads&quot;</span>
-<span> </span>
-<span> </span>
-<span>async def bounded_map(</span>
-<span>    items: Sequence[T],</span>
-<span>    worker: Callable[[T], Awaitable[R]],</span>
-<span>    *,</span>
-<span>    worker_count: int,</span>
-<span>    queue_capacity: int,</span>
-<span>    item_timeout: float | None = None,</span>
-<span>    probe: ConcurrencyProbe | None = None,</span>
-<span>) -&gt; BoundedRun[R]:</span>
-<span>    &quot;&quot;&quot;Map async work through a bounded queue and structured task group.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if worker_count &lt; 1:</span>
-<span>        raise ValueError(&quot;worker_count must be at least 1&quot;)</span>
-<span>    if queue_capacity &lt; 1:</span>
-<span>        raise ValueError(&quot;queue_capacity must be at least 1&quot;)</span>
-<span>    if item_timeout is not None and item_timeout &lt;= 0:</span>
-<span>        raise ValueError(&quot;item_timeout must be positive&quot;)</span>
-<span> </span>
-<span>    sentinel = object()</span>
-<span>    queue: asyncio.Queue[tuple[int, T] | object] = asyncio.Queue(maxsize=queue_capacity)</span>
-<span>    results: dict[int, R] = {}</span>
-<span>    activity_probe = probe if probe is not None else ConcurrencyProbe()</span>
-<span> </span>
-<span>    async def produce() -&gt; None:</span>
-<span>        for index, item in enumerate(items):</span>
-<span>            await queue.put((index, item))</span>
-<span>        for _ in range(worker_count):</span>
-<span>            await queue.put(sentinel)</span>
-<span> </span>
-<span>    async def consume() -&gt; None:</span>
-<span>        while True:</span>
-<span>            entry = await queue.get()</span>
-<span>            try:</span>
-<span>                if entry is sentinel:</span>
-<span>                    return</span>
-<span>                index, item = cast(tuple[int, T], entry)</span>
-<span>                async with activity_probe.activity():</span>
-<span>                    if item_timeout is None:</span>
-<span>                        result = await worker(item)</span>
-<span>                    else:</span>
-<span>                        async with asyncio.timeout(item_timeout):</span>
-<span>                            result = await worker(item)</span>
-<span>                results[index] = result</span>
-<span>            finally:</span>
-<span>                queue.task_done()</span>
-<span> </span>
-<span>    async with asyncio.TaskGroup() as group:</span>
-<span>        group.create_task(produce(), name=&quot;bounded-producer&quot;)</span>
-<span>        for number in range(worker_count):</span>
-<span>            group.create_task(consume(), name=f&quot;bounded-consumer-{number}&quot;)</span>
-<span> </span>
-<span>    if len(results) != len(items):</span>
-<span>        raise RuntimeError(&quot;structured run finished without one result per input&quot;)</span>
-<span>    return BoundedRun(</span>
-<span>        values=tuple(results[index] for index in range(len(items))),</span>
-<span>        worker_count=worker_count,</span>
-<span>        queue_capacity=queue_capacity,</span>
-<span>        peak_active=activity_probe.peak,</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>async def delayed_square(value: int, *, delay: float = 0.01) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Represent cooperative local I/O with a deterministic result.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    await asyncio.sleep(delay)</span>
-<span>    return value * value</span>
-<span> </span>
-<span> </span>
-<span>def _blocking_wait(job: tuple[int, float]) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Represent a library call that blocks its thread.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    value, delay = job</span>
-<span>    time.sleep(delay)</span>
-<span>    return value * value</span>
-<span> </span>
-<span> </span>
-<span>def run_blocking_io_in_threads(</span>
-<span>    jobs: Sequence[tuple[int, float]],</span>
-<span>    *,</span>
-<span>    max_workers: int,</span>
-<span>) -&gt; tuple[int, ...]:</span>
-<span>    &quot;&quot;&quot;Run independent blocking waits in a bounded thread pool.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if max_workers &lt; 1:</span>
-<span>        raise ValueError(&quot;max_workers must be at least 1&quot;)</span>
-<span>    with ThreadPoolExecutor(</span>
-<span>        max_workers=max_workers,</span>
-<span>        thread_name_prefix=&quot;ds60-io&quot;,</span>
-<span>    ) as executor:</span>
-<span>        return tuple(executor.map(_blocking_wait, jobs))</span>
-<span> </span>
-<span> </span>
-<span>def cpu_checksum(limit: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Perform deterministic pure-Python CPU work in a picklable function.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if limit &lt; 0:</span>
-<span>        raise ValueError(&quot;limit must be non-negative&quot;)</span>
-<span>    return sum((number * number) % 97 for number in range(limit))</span>
-<span> </span>
-<span> </span>
-<span>def run_cpu_work_in_processes(</span>
-<span>    limits: Sequence[int],</span>
-<span>    *,</span>
-<span>    max_workers: int,</span>
-<span>) -&gt; tuple[int, ...]:</span>
-<span>    &quot;&quot;&quot;Use spawned processes so the example matches Windows behavior.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if max_workers &lt; 1:</span>
-<span>        raise ValueError(&quot;max_workers must be at least 1&quot;)</span>
-<span>    context = multiprocessing.get_context(&quot;spawn&quot;)</span>
-<span>    with ProcessPoolExecutor(</span>
-<span>        max_workers=max_workers,</span>
-<span>        mp_context=context,</span>
-<span>    ) as executor:</span>
-<span>        return tuple(executor.map(cpu_checksum, limits))</span>
-<span> </span>
-<span> </span>
-<span>def deterministic_lost_update(initial: int = 0) -&gt; tuple[int, int]:</span>
-<span>    &quot;&quot;&quot;Return unsafe and serialized results for two increments.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    first_snapshot = initial</span>
-<span>    second_snapshot = initial</span>
-<span>    unsafe_value = first_snapshot + 1</span>
-<span>    unsafe_value = second_snapshot + 1</span>
-<span> </span>
-<span>    serialized_value = initial</span>
-<span>    serialized_value += 1</span>
-<span>    serialized_value += 1</span>
-<span>    return unsafe_value, serialized_value</span>
-<span> </span>
-<span> </span>
-<span>def _flatten_exceptions(</span>
-<span>    group: BaseExceptionGroup[BaseException],</span>
-<span>) -&gt; tuple[BaseException, ...]:</span>
-<span>    &quot;&quot;&quot;Flatten a nested task-group exception for concise demonstration output.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    leaves: list[BaseException] = []</span>
-<span>    for exception in group.exceptions:</span>
-<span>        if isinstance(exception, BaseExceptionGroup):</span>
-<span>            leaves.extend(_flatten_exceptions(exception))</span>
-<span>        else:</span>
-<span>            leaves.append(exception)</span>
-<span>    return tuple(leaves)</span>
-<span> </span>
-<span> </span>
-<span>async def demonstrate_async_failure() -&gt; str:</span>
-<span>    &quot;&quot;&quot;Show that one failed item cancels sibling work and reaches the caller.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    async def worker(value: int) -&gt; int:</span>
-<span>        await asyncio.sleep(0)</span>
-<span>        if value == 2:</span>
-<span>            raise RuntimeError(&quot;item 2 failed&quot;)</span>
-<span>        await asyncio.sleep(0.02)</span>
-<span>        return value</span>
-<span> </span>
-<span>    try:</span>
-<span>        await bounded_map(</span>
-<span>            [1, 2, 3],</span>
-<span>            worker,</span>
-<span>            worker_count=2,</span>
-<span>            queue_capacity=1,</span>
-<span>        )</span>
-<span>    except ExceptionGroup as group:</span>
-<span>        leaves = _flatten_exceptions(group)</span>
-<span>        return &quot;, &quot;.join(f&quot;{type(exc).__name__}: {exc}&quot; for exc in leaves)</span>
-<span>    raise AssertionError(&quot;the failure demonstration unexpectedly succeeded&quot;)</span>
-<span> </span>
-<span> </span>
-<span>async def async_demo() -&gt; None:</span>
-<span>    &quot;&quot;&quot;Run bounded work, timeout behavior, and failure propagation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    result = await bounded_map(</span>
-<span>        [1, 2, 3, 4],</span>
-<span>        delayed_square,</span>
-<span>        worker_count=2,</span>
-<span>        queue_capacity=1,</span>
-<span>        item_timeout=0.1,</span>
-<span>    )</span>
-<span>    print(f&quot;async values: {result.values}; peak active: {result.peak_active}&quot;)</span>
-<span>    print(f&quot;propagated failure: {await demonstrate_async_failure()}&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
-<span>    &quot;&quot;&quot;Create a parser whose process demo is explicit for notebook safety.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    parser = argparse.ArgumentParser(description=&quot;Run deterministic concurrency demos.&quot;)</span>
-<span>    parser.add_argument(</span>
-<span>        &quot;--with-processes&quot;,</span>
-<span>        action=&quot;store_true&quot;,</span>
-<span>        help=&quot;also launch a small Windows-spawn-compatible process pool&quot;,</span>
-<span>    )</span>
-<span>    return parser</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    &quot;&quot;&quot;Run local demonstrations behind the required process main guard.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    args = build_parser().parse_args()</span>
-<span>    asyncio.run(async_demo())</span>
-<span>    print(</span>
-<span>        &quot;thread values:&quot;,</span>
-<span>        run_blocking_io_in_threads(</span>
-<span>            [(1, 0.01), (2, 0.01), (3, 0.01)],</span>
-<span>            max_workers=2,</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    print(&quot;lost update (unsafe, serialized):&quot;, deterministic_lost_update())</span>
-<span>    if args.with_processes:</span>
-<span>        print(</span>
-<span>            &quot;process checksums:&quot;,</span>
-<span>            run_cpu_work_in_processes([5_000, 5_500], max_workers=2),</span>
-<span>        )</span>
-<span>    else:</span>
-<span>        print(&quot;process demo skipped; pass --with-processes to run it&quot;)</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    # Windows and macOS spawn a fresh interpreter. The guard prevents every</span>
-<span>    # child from recursively creating another process pool.</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-pro-02.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The module demonstrates bounded asyncio work, blocking I/O in threads, and</span></span>
+<span class="source-line"><span class="syntax-string">pure-Python CPU work in spawned processes. Workloads are deterministic and</span></span>
+<span class="source-line"><span class="syntax-string">small enough for a lesson and its tests.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> argparse</span>
+<span class="source-line"><span class="syntax-keyword">import</span> asyncio</span>
+<span class="source-line"><span class="syntax-keyword">import</span> multiprocessing</span>
+<span class="source-line"><span class="syntax-keyword">import</span> time</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> AsyncIterator<span class="syntax-punctuation">,</span> Awaitable<span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> concurrent.futures <span class="syntax-keyword">import</span> ProcessPoolExecutor<span class="syntax-punctuation">,</span> ThreadPoolExecutor</span>
+<span class="source-line"><span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> asynccontextmanager</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Generic<span class="syntax-punctuation">,</span> Literal<span class="syntax-punctuation">,</span> TypeVar<span class="syntax-punctuation">,</span> cast</span>
+<span class="source-line"></span>
+<span class="source-line">T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">R <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">R</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Workload <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">async-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blocking-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">Model <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ConcurrencyProbe</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Track active and peak work on one asyncio event loop.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    active<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    peak<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@asynccontextmanager</span></span>
+<span class="source-line">    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">activity</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> AsyncIterator<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>active <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>peak <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>peak<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>active<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">yield</span></span>
+<span class="source-line">        <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>active <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">BoundedRun</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Ordered values and observable bounds from an async run.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    worker_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    queue_capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    peak_active<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_execution_model</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    workload<span class="syntax-punctuation">:</span> Workload<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    async_api_available<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Model<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Choose a useful starting model from workload behavior.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> workload <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> async_api_available<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a pure-Python CPU workload does not have an async API</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">processes</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> workload <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">async-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> async_api_available<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">async-io requires an awaitable API</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">asyncio</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> async_api_available<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">blocking-io should not be labeled as an async API</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">bounded_map</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    items<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    worker<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Awaitable<span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    worker_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    queue_capacity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    item_timeout<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    probe<span class="syntax-punctuation">:</span> ConcurrencyProbe <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> BoundedRun<span class="syntax-punctuation">[</span>R<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Map async work through a bounded queue and structured task group.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> worker_count <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">worker_count must be at least 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> queue_capacity <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">queue_capacity must be at least 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> item_timeout <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> item_timeout <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">item_timeout must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    sentinel <span class="syntax-operator">=</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    queue<span class="syntax-punctuation">:</span> asyncio<span class="syntax-operator">.</span>Queue<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> T<span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>Queue<span class="syntax-punctuation">(</span>maxsize<span class="syntax-operator">=</span>queue_capacity<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    results<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> R<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    activity_probe <span class="syntax-operator">=</span> probe <span class="syntax-keyword">if</span> probe <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">else</span> ConcurrencyProbe<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">produce</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> index<span class="syntax-punctuation">,</span> item <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">,</span> item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>worker_count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span>sentinel<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">consume</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">while</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            entry <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">if</span> entry <span class="syntax-operator">is</span> sentinel<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                    <span class="syntax-keyword">return</span></span>
+<span class="source-line">                index<span class="syntax-punctuation">,</span> item <span class="syntax-operator">=</span> cast<span class="syntax-punctuation">(</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> entry<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> activity_probe<span class="syntax-operator">.</span>activity<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                    <span class="syntax-keyword">if</span> item_timeout <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                        result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> worker<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                        <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> asyncio<span class="syntax-operator">.</span>timeout<span class="syntax-punctuation">(</span>item_timeout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                            result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> worker<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span></span>
+<span class="source-line">                results<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> result</span>
+<span class="source-line">            <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                queue<span class="syntax-operator">.</span>task_done<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> asyncio<span class="syntax-operator">.</span>TaskGroup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> group<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        group<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>produce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bounded-producer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> number <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>worker_count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            group<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>consume<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">bounded-consumer-</span><span class="syntax-string">{</span>number<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">structured run finished without one result per input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> BoundedRun<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        values<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        worker_count<span class="syntax-operator">=</span>worker_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        queue_capacity<span class="syntax-operator">=</span>queue_capacity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        peak_active<span class="syntax-operator">=</span>activity_probe<span class="syntax-operator">.</span>peak<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">delayed_square</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> delay<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Represent cooperative local I/O with a deterministic result.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_blocking_wait</span><span class="syntax-punctuation">(</span>job<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Represent a library call that blocks its thread.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    value<span class="syntax-punctuation">,</span> delay <span class="syntax-operator">=</span> job</span>
+<span class="source-line">    time<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_blocking_io_in_threads</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    jobs<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    max_workers<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run independent blocking waits in a bounded thread pool.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> max_workers <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_workers must be at least 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> ThreadPoolExecutor<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        max_workers<span class="syntax-operator">=</span>max_workers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        thread_name_prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-io</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> executor<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>executor<span class="syntax-operator">.</span>map<span class="syntax-punctuation">(</span>_blocking_wait<span class="syntax-punctuation">,</span> jobs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">cpu_checksum</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Perform deterministic pure-Python CPU work in a picklable function.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>number <span class="syntax-operator">*</span> number<span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">97</span> <span class="syntax-keyword">for</span> number <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_cpu_work_in_processes</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    limits<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    max_workers<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Use spawned processes so the example matches Windows behavior.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> max_workers <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_workers must be at least 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    context <span class="syntax-operator">=</span> multiprocessing<span class="syntax-operator">.</span>get_context<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spawn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> ProcessPoolExecutor<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        max_workers<span class="syntax-operator">=</span>max_workers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        mp_context<span class="syntax-operator">=</span>context<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> executor<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>executor<span class="syntax-operator">.</span>map<span class="syntax-punctuation">(</span>cpu_checksum<span class="syntax-punctuation">,</span> limits<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">deterministic_lost_update</span><span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return unsafe and serialized results for two increments.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    first_snapshot <span class="syntax-operator">=</span> initial</span>
+<span class="source-line">    second_snapshot <span class="syntax-operator">=</span> initial</span>
+<span class="source-line">    unsafe_value <span class="syntax-operator">=</span> first_snapshot <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    unsafe_value <span class="syntax-operator">=</span> second_snapshot <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line"></span>
+<span class="source-line">    serialized_value <span class="syntax-operator">=</span> initial</span>
+<span class="source-line">    serialized_value <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    serialized_value <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> unsafe_value<span class="syntax-punctuation">,</span> serialized_value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_flatten_exceptions</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    group<span class="syntax-punctuation">:</span> BaseExceptionGroup<span class="syntax-punctuation">[</span>BaseException<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>BaseException<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Flatten a nested task-group exception for concise demonstration output.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    leaves<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>BaseException<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> exception <span class="syntax-operator">in</span> group<span class="syntax-operator">.</span>exceptions<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>exception<span class="syntax-punctuation">,</span> BaseExceptionGroup<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            leaves<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span>_flatten_exceptions<span class="syntax-punctuation">(</span>exception<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            leaves<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>exception<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>leaves<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">demonstrate_async_failure</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Show that one failed item cancels sibling work and reaches the caller.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">worker</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">item 2 failed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">await</span> bounded_map<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            worker<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            worker_count<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            queue_capacity<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ExceptionGroup <span class="syntax-keyword">as</span> group<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        leaves <span class="syntax-operator">=</span> _flatten_exceptions<span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>exc<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">: </span><span class="syntax-string">{</span>exc<span class="syntax-string">}</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> exc <span class="syntax-operator">in</span> leaves<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">the failure demonstration unexpectedly succeeded</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">async_demo</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run bounded work, timeout behavior, and failure propagation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> bounded_map<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        delayed_square<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        worker_count<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        queue_capacity<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        item_timeout<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">async values: </span><span class="syntax-string">{</span>result<span class="syntax-operator">.</span>values<span class="syntax-string">}</span><span class="syntax-string">; peak active: </span><span class="syntax-string">{</span>result<span class="syntax-operator">.</span>peak_active<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">propagated failure: </span><span class="syntax-string">{</span><span class="syntax-keyword">await</span> demonstrate_async_failure<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_parser</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Create a parser whose process demo is explicit for notebook safety.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>description<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Run deterministic concurrency demos.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">--with-processes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">store_true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        help<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">also launch a small Windows-spawn-compatible process pool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> parser</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run local demonstrations behind the required process main guard.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    args <span class="syntax-operator">=</span> build_parser<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>async_demo<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">thread values:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        run_blocking_io_in_threads<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            max_workers<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">lost update (unsafe, serialized):</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> deterministic_lost_update<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> args<span class="syntax-operator">.</span>with_processes<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">process checksums:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            run_cpu_work_in_processes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5_500</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> max_workers<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">process demo skipped; pass --with-processes to run it</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Windows and macOS spawn a fresh interpreter. The guard prevents every</span></span>
+<span class="source-line">    <span class="syntax-comment"># child from recursively creating another process pool.</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

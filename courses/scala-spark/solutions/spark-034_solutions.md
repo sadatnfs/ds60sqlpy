@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-034.md) and attempt one language first. The [Sc
 
 Read the owned impression and click file directories with their explicit schemas, maxFilesPerTrigger 1 and five-minute watermarks on their respective event-time columns.
 
-**Expected:** Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely fromconstruction.
+**Expected:** Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely from construction.
 
 ```scala
 def inputs(spark: SparkSession, root: Path): (DataFrame,DataFrame) = {
@@ -33,7 +33,7 @@ The schemas and watermarks define the stateful interpretation before any query s
 
 Build either an inner orleft_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
 
-**Expected:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 butnot boundaryclickc 3.
+**Expected:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 but not boundaryclickc 3.
 
 ```scala
 def boundedJoin(impressions: DataFrame, clicks: DataFrame, kind: String): DataFrame = {
@@ -52,7 +52,7 @@ def bounded_join(impressions, clicks, kind):
     return i.join(c,condition,kind).select("i.impression_id","c.click_id","i.impression_time","c.click_time")
 ```
 
-The temporal bound limits future eligibility while key equality preserves entity attribution. The exclusive upper bound is a deliberate business rule, not a syntactic preference. The projected timestamps retain diagnostic context even though the later concise pair ledger shows only identities. A valid physical strategy cannot repair a missing orincorrect predicate.
+The temporal bound limits future eligibility while key equality preserves entity attribution. The exclusive upper bound is a deliberate business rule, not a syntactic preference. The projected timestamps retain diagnostic context even though the later concise pair ledger shows only identities. A valid physical strategy cannot repair a missing or incorrect predicate.
 
 **Verification evidence:** Assert output shape and reject an unsupported kind value; later exact pair checks validate both predicates.
 
@@ -81,11 +81,11 @@ def run_join(spark, root, kind):
     finally: query.stop()
 ```
 
-The independent recovery namespaces prevent one comparison query from consuming ormutating the other state. Their input counters describe two separate executions over the same seven source records. Bounded termination and cleanup are execution guarantees for this finite phase, not proof that an unmatched outer row is already final.
+The independent recovery namespaces prevent one comparison query from consuming or mutating the other state. Their input counters describe two separate executions over the same seven source records. Bounded termination and cleanup are execution guarantees for this finite phase, not proof that an unmatched outer row is already final.
 
 **Verification evidence:** Assert input 7 for each query and inactive state after both bounded runs; do not combine their processing counts into 14 unique source events.
 
-### Exercise 4: Distinguish immediate matches frompending unmatched impressions
+### Exercise 4: Distinguish immediate matches from pending unmatched impressions
 
 Read either owned output as ordered(impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
 
@@ -109,9 +109,9 @@ The exact identities expose both the key condition and the half-open temporal ed
 
 ### Exercise 5: Advance both sides and observe delayed outer finalization
 
-Publish distinct-key 00:30 advancers toboth sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
+Publish distinct-key 00:30 advancers to both sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
 
-**Expected:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal ispositive; the new advancer impression remains pending.
+**Expected:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
 
 ```scala
 def progressEvidence(progress: Seq[StreamingQueryProgress]): (Long,Seq[String],Long) = {
@@ -167,7 +167,7 @@ def reject_unbounded_outer(spark, root):
     if not rejected: raise AssertionError("Unbounded outer join unexpectedly accepted")
 ```
 
-The negative control distinguishes an event-time retention declaration from an actual bounded join relationship. Key equality alone leaves a left row eligible for an arbitrarily timed right match. The separate namespace protects the valid query state, and finally cleanup remains necessary even if a future engine behaves differently fromthe expected analysis rejection.
+The negative control distinguishes an event-time retention declaration from an actual bounded join relationship. Key equality alone leaves a left row eligible for an arbitrarily timed right match. The separate namespace protects the valid query state, and finally cleanup remains necessary even if a future engine behaves differently from the expected analysis rejection.
 
 **Verification evidence:** Assert the named rejection, inactive state and unchanged final valid outer pairs.
 

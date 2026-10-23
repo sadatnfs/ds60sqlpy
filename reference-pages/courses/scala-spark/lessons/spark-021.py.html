@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,78 +161,78 @@
       <h1>Spark 021</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-021.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
-<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
-<span>from pathlib import Path</span>
-<span>import tempfile</span>
-<span>import shutil</span>
-<span>import re</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def projection_result(spark, query):</span>
-<span>    raise NotImplementedError(&quot;Complete projection_result&quot;)</span>
-<span> </span>
-<span>def explain_text(spark, query, mode):</span>
-<span>    raise NotImplementedError(&quot;Complete explain_text&quot;)</span>
-<span> </span>
-<span>def read_schema_evidence(formatted):</span>
-<span>    raise NotImplementedError(&quot;Complete read_schema_evidence&quot;)</span>
-<span> </span>
-<span>def aggregate_result(spark, query):</span>
-<span>    raise NotImplementedError(&quot;Complete aggregate_result&quot;)</span>
-<span> </span>
-<span>def normalize_evidence(plan, root):</span>
-<span>    raise NotImplementedError(&quot;Complete normalize_evidence&quot;)</span>
-<span> </span>
-<span>def configuration_receipt(spark):</span>
-<span>    raise NotImplementedError(&quot;Complete configuration_receipt&quot;)</span>
-<span> </span>
-<span>def main():</span>
-<span>    owned_root = None</span>
-<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-021&quot;).master(&quot;local[2]&quot;)</span>
-<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
-<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
-<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
-<span>    try:</span>
-<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
-<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>        owned_root = Path(tempfile.mkdtemp(prefix=&quot;.ds60-spark-021-&quot;,dir=&quot;.&quot;)).resolve()</span>
-<span>        fixture = spark.range(0,12,1,2).withColumn(&quot;group_id&quot;,F.col(&quot;id&quot;)%3).withColumn(&quot;amount&quot;,F.col(&quot;id&quot;)*10).withColumn(&quot;unused_payload&quot;,F.lit(&quot;xxxxxxxxxxxxxxxx&quot;))</span>
-<span>        data_path = str(owned_root/&quot;data&quot;)</span>
-<span>        fixture.write.mode(&quot;errorifexists&quot;).parquet(data_path)</span>
-<span>        input_frame = spark.read.parquet(data_path)</span>
-<span>        input_frame.createOrReplaceTempView(&quot;ds60_spark_021_input&quot;)</span>
-<span>        projection_query = &quot;SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount&gt;=30&quot;</span>
-<span>        aggregate_query = &quot;SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount&gt;=30 GROUP BY group_id&quot;</span>
-<span>        assert input_frame.count() == 12</span>
-<span>        assert input_frame.columns == [&quot;id&quot;,&quot;group_id&quot;,&quot;amount&quot;,&quot;unused_payload&quot;]</span>
-<span>        print(&quot;Owned Parquet fixture has four stored columns and12 rows&quot;)</span>
-<span>        rows = spark.sql(projection_query).orderBy(&quot;id&quot;).collect()</span>
-<span>        assert len(rows) == 9 and rows[0][0] == 3 and rows[-1][0] == 11</span>
-<span>        spark.sql(&quot;EXPLAIN FORMATTED &quot; + projection_query).show(truncate=False)</span>
-<span>        print(&quot;spark-021: worked examples passed; six task implementations remain&quot;)</span>
-<span>    finally:</span>
-<span>        try:</span>
-<span>            if owned_root is not None:</span>
-<span>                shutil.rmtree(owned_root)</span>
-<span>        finally:</span>
-<span>            spark.stop()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span>
-<span># Exercise 1: Check the query meaning before its execution plan. Inputs/task: Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id. Expected: Nine tuples from(3,60) through(11,220), with no missing or extra identities. Verify: Assert the complete tuple list, not only the first/last rows or a printed plan.</span>
-<span># Exercise 2: Capture each extended planning stage. Inputs/task: Return EXPLAIN EXTENDED text for the supplied query. Permit only EXTENDED or FORMATTED as the mode and reject another mode. Expected: Text includes Parsed Logical Plan, Analyzed Logical Plan, Optimized Logical Plan and Physical Plan sections. An invalid mode is rejected. Verify: Assert all four section labels and an explicit invalid-mode exception.</span>
-<span># Exercise 3: Inspect the scan scope for column pruning. Inputs/task: Capture FORMATTED output and extract lines containing ReadSchema. Verify that the projection scan requests id and amount but not group_id or unused_payload. Also locate Filter and Project operators. Expected: ReadSchema includes id:bigint and amount:bigint only among the four stored fields. Filter and Project evidence are present. Verify: Assert needed/excluded fields in the extracted scan lines rather than in the entire extended plan.</span>
-<span># Exercise 4: Connect grouped output to a redistribution boundary. Inputs/task: Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration. Expected: Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange. Verify: Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting.</span>
-<span># Exercise 5: Normalize incidental identifiers without erasing semantics. Inputs/task: Replace expression-number suffixes such as#123 with#ID and the exact owned root path with&lt;owned-root&gt; in plan text. Preserve operators, field names, predicates and partitioning descriptions. Expected: A synthetic Project id#123L becomes Project id#IDL;the current temporary root is absent from normalized actual plan text. Verify: Assert the synthetic replacement and required semantic tokens after normalizing the actual plan.</span>
-<span># Exercise 6: Compare equivalent query forms with separate semantic and plan evidence. Inputs/task: Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings. Expected: The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage. Verify: Assert full output parity with the literal oracle and exact controlled settings;do not assert whole-plan byte equality or faster execution.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
+<span class="source-line"><span class="syntax-keyword">import</span> shutil</span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">projection_result</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span> query<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete projection_result</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">explain_text</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span> query<span class="syntax-punctuation">,</span> mode<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete explain_text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_schema_evidence</span><span class="syntax-punctuation">(</span>formatted<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete read_schema_evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">aggregate_result</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span> query<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete aggregate_result</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">normalize_evidence</span><span class="syntax-punctuation">(</span>plan<span class="syntax-punctuation">,</span> root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete normalize_evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">configuration_receipt</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Complete configuration_receipt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    owned_root <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    spark <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>SparkSession<span class="syntax-operator">.</span>builder<span class="syntax-operator">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-021</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.ui.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.host</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.bindAddress</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.adaptive.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.ansi.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.session.timeZone</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ERROR</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        owned_root <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">.ds60-spark-021-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        fixture <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">group_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unused_payload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">xxxxxxxxxxxxxxxx</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        data_path <span class="syntax-operator">=</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        fixture<span class="syntax-operator">.</span>write<span class="syntax-operator">.</span>mode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">errorifexists</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parquet<span class="syntax-punctuation">(</span>data_path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        input_frame <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>read<span class="syntax-operator">.</span>parquet<span class="syntax-punctuation">(</span>data_path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        input_frame<span class="syntax-operator">.</span>createOrReplaceTempView<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60_spark_021_input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        projection_query <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount&gt;=30</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        aggregate_query <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount&gt;=30 GROUP BY group_id</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> input_frame<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> input_frame<span class="syntax-operator">.</span>columns <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">group_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">unused_payload</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Owned Parquet fixture has four stored columns and12 rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        rows <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span>projection_query<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>orderBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span> <span class="syntax-operator">and</span> rows<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> rows<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">11</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">EXPLAIN FORMATTED </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> projection_query<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span>truncate<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-021: worked examples passed; six task implementations remain</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> owned_root <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                shutil<span class="syntax-operator">.</span>rmtree<span class="syntax-punctuation">(</span>owned_root<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Check the query meaning before its execution plan. Inputs/task: Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id. Expected: Nine tuples from(3,60) through(11,220), with no missing or extra identities. Verify: Assert the complete tuple list, not only the first/last rows or a printed plan.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Capture each extended planning stage. Inputs/task: Return EXPLAIN EXTENDED text for the supplied query. Permit only EXTENDED or FORMATTED as the mode and reject another mode. Expected: Text includes Parsed Logical Plan, Analyzed Logical Plan, Optimized Logical Plan and Physical Plan sections. An invalid mode is rejected. Verify: Assert all four section labels and an explicit invalid-mode exception.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect the scan scope for column pruning. Inputs/task: Capture FORMATTED output and extract lines containing ReadSchema. Verify that the projection scan requests id and amount but not group_id or unused_payload. Also locate Filter and Project operators. Expected: ReadSchema includes id:bigint and amount:bigint only among the four stored fields. Filter and Project evidence are present. Verify: Assert needed/excluded fields in the extracted scan lines rather than in the entire extended plan.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Connect grouped output to a redistribution boundary. Inputs/task: Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration. Expected: Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange. Verify: Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Normalize incidental identifiers without erasing semantics. Inputs/task: Replace expression-number suffixes such as#123 with#ID and the exact owned root path with&lt;owned-root&gt; in plan text. Preserve operators, field names, predicates and partitioning descriptions. Expected: A synthetic Project id#123L becomes Project id#IDL;the current temporary root is absent from normalized actual plan text. Verify: Assert the synthetic replacement and required semantic tokens after normalizing the actual plan.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Compare equivalent query forms with separate semantic and plan evidence. Inputs/task: Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings. Expected: The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage. Verify: Assert full output parity with the literal oracle and exact controlled settings;do not assert whole-plan byte equality or faster execution.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

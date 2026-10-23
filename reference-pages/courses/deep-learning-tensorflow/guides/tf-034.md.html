@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <p><strong>Subgroup:</strong> A declared subset whose performance is evaluated separately.</p>
 <p><strong>Model card:</strong> A structured account of intended use, evidence and limitations.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>tf-034</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-034/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-034</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-034/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Represent each result with a stable record ID, group, expected label and prediction. Aggregate integer errors and counts before calculating rates. Compare the set of unique IDs with row count to detect exact repetitions. Keep a model-card dictionary with intended use, evaluated units and untested conditions. A model card summarizes evidence; it is not itself a validation method.</p>
@@ -139,21 +185,21 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-count-errors-by-group">Example A: Count errors by group<a class="heading-anchor" href="#example-a-count-errors-by-group" aria-label="Link to this section">#</a></h4>
 <p>Both numerator and denominator are visible. Reporting only rates would conceal the fact that groupB has a single observation.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-rows=[(&#x27;a&#x27;,&#x27;A&#x27;,1,1),(&#x27;b&#x27;,&#x27;A&#x27;,1,0),(&#x27;c&#x27;,&#x27;B&#x27;,0,0)]
-report={g:(sum(t!=p for i,k,t,p in rows if k==g),sum(k==g for i,k,t,p in rows)) for g in [&#x27;A&#x27;,&#x27;B&#x27;]}
-assert report=={&#x27;A&#x27;:(1,2),&#x27;B&#x27;:(0,1)}</code></pre>
+rows<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>g<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">!=</span>p <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> rows <span class="syntax-keyword">if</span> k<span class="syntax-operator">==</span>g<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>k<span class="syntax-operator">==</span>g <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> g <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> A1/2 errors; B0/1.</p>
 <h4 id="example-b-expose-duplicate-confidence">Example B: Expose duplicate confidence<a class="heading-anchor" href="#example-b-expose-duplicate-confidence" aria-label="Link to this section">#</a></h4>
 <p>Duplicating a correct observation can improve a row-weighted score without testing a new case. Identity-aware evaluation prevents artificial increases in apparent evidence.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-rows=[(&#x27;a&#x27;,&#x27;A&#x27;,1,1),(&#x27;b&#x27;,&#x27;A&#x27;,1,0),(&#x27;c&#x27;,&#x27;B&#x27;,0,0)]
-report={g:(sum(t!=p for i,k,t,p in rows if k==g),sum(k==g for i,k,t,p in rows)) for g in [&#x27;A&#x27;,&#x27;B&#x27;]}
-assert report=={&#x27;A&#x27;:(1,2),&#x27;B&#x27;:(0,1)}
-repeated=rows+[rows[-1]]*5
-assert len(repeated)==8 and len({r[0] for r in repeated})==3</code></pre>
+rows<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>g<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">!=</span>p <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> rows <span class="syntax-keyword">if</span> k<span class="syntax-operator">==</span>g<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>k<span class="syntax-operator">==</span>g <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> g <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+repeated<span class="syntax-operator">=</span>rows<span class="syntax-operator">+</span><span class="syntax-punctuation">[</span>rows<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">*</span><span class="syntax-number">5</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>repeated<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">8</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>r<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> r <span class="syntax-operator">in</span> repeated<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> 8 rows but only3 unique IDs.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: The report names the evaluation unit, each tested group, sample count and untested conditions. It makes no differential-privacy or production-safety claim from a small red-team set. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -168,7 +214,7 @@ assert len(repeated)==8 and len({r[0] for r in repeated})==3</code></pre>
 <li><strong>Evaluate fixed perturbations.</strong> Use f(x)=x&gt;=0 with base1 and perturbations-.1,-.9,-1.1. <strong>Expected:</strong> first two retain class1; final perturbation changes to0. <strong>Verify:</strong> Save the assertion results for exercise 3, including first two retain class1; final perturbation changes to0.</li>
 </ol>
 <ol>
-<li><strong>Keep severities separate.</strong> Record one severe failure and nine minor passes; count severe failures independently of total pass rate. <strong>Expected:</strong> 90percent passes and1 severe failure. <strong>Verify:</strong> Save the assertion results for exercise 4, including 90percent passes and1 severe failure.</li>
+<li><strong>Keep severities separate.</strong> Record one severe failure and nine minor passes; count severe failures independently of total pass rate. <strong>Expected:</strong> 90percent passes and 1 severe failure. <strong>Verify:</strong> Save the assertion results for exercise 4, including 90percent passes and 1 severe failure.</li>
 </ol>
 <ol>
 <li><strong>Write bounded claims.</strong> Create a model card naming the three unique units and untested conditions. <strong>Expected:</strong> card includes count3 and an untested future-population condition. <strong>Verify:</strong> Save the assertion results for exercise 5, including card includes count3 and an untested future-population condition.</li>
@@ -187,7 +233,7 @@ assert len(repeated)==8 and len({r[0] for r in repeated})==3</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://arxiv.org/abs/1810.03993">Model Cards for Model Reporting</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-034, Robustness, privacy and model evidence.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-034, Robustness, privacy and model evidence.
 Read courses/deep-learning-tensorflow/guides/tf-034.md and courses/deep-learning-tensorflow/lessons/tf-034.py. Direct prerequisites: `tf-033`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

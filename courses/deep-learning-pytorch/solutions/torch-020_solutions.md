@@ -40,7 +40,7 @@ Random training augmentation, when introduced, belongs to the experiment's RNG s
 
 ## Exercise 1: Compare local reductions
 
-The question is: Pool patch 1, 3; 2, 4 with a2x2window.
+The question is: Pool patch 1, 3; 2, 4 with a 2-by-2 window.
 
 The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.
 

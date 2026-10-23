@@ -171,7 +171,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** private-v1 absent before ranking.
    **Verify:** Save the assertion results for exercise 1, including private-v1 absent before ranking.
 
-2. **Permit an explicitly privileged scope.** Use allowed scopespublic, restricted and compare the admitted set.
+2. **Permit an explicitly privileged scope.** Use allowed scopes public, restricted and compare the admitted set.
    **Expected:** all 6 documents admitted.
    **Verify:** Save the assertion results for exercise 2, including all 6 documents admitted.
 
@@ -184,8 +184,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 4, including cache key changes.
 
 5. **Keep hostile evidence inert.** Inspectattack-v1 while retaining a public-only policy.
-   **Expected:** scope set remains exactlypublic; private-v1 still excluded.
-   **Verify:** Save the assertion results for exercise 5, including scope set remains exactlypublic; private-v1 still excluded.
+   **Expected:** scope set remains exactly public; private-v1 still excluded.
+   **Verify:** Save the assertion results for exercise 5, including scope set remains exactly public; private-v1 still excluded.
 
 6. **Avoid restricted identifiers in public traces.** Create a trace from admitted result IDs only and check it contains no restricted ID.
    **Expected:** trace contains only public document IDs.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,94 +161,94 @@
       <h1>Spark 004 Solution</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-004_solution.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span> </span>
-<span> </span>
-<span>object Main {</span>
-<span> </span>
-<span> </span>
-<span>  def accepted(values: Seq[Long]): Seq[Long] = {</span>
-<span>    values.filter(_ &gt;= 0L)</span>
-<span>  }</span>
-<span> </span>
-<span>  def partitionAmounts(values: Seq[Long]): (Seq[Long], Seq[Long]) = {</span>
-<span>    values.partition(_ &gt;= 0L)</span>
-<span>  }</span>
-<span> </span>
-<span>  def fivePercent(values: Seq[Long]): Seq[Long] = {</span>
-<span>    require(values.forall(_ &gt;= 0L), &quot;fees require nonnegative amounts&quot;)</span>
-<span>    values.map(_ / 20L)</span>
-<span>  }</span>
-<span> </span>
-<span>  def summary(values: Seq[Long]): (Long, Long) = {</span>
-<span>    values.foldLeft((0L, 0L)) { case ((count, total), amount) =&gt;</span>
-<span>      (count + 1L, Math.addExact(total, amount))</span>
-<span>    }</span>
-<span>  }</span>
-<span> </span>
-<span>  def frequencies(values: Seq[Long]): Map[Long, Long] = {</span>
-<span>    values.foldLeft(Map.empty[Long, Long]) { (counts, amount) =&gt;</span>
-<span>      counts.updated(amount, counts.getOrElse(amount, 0L) + 1L)</span>
-<span>    }</span>
-<span>  }</span>
-<span> </span>
-<span>  def groupedSummary(records: Seq[(String, Long)]): Map[String, (Long, Long)] = {</span>
-<span>    require(records.forall { case (group, _) =&gt; group != null &amp;&amp; group.trim.nonEmpty }, &quot;group labels must be known&quot;)</span>
-<span>    records.filter(_._2 &gt;= 0L).groupBy(_._1).map { case (group, rows) =&gt;</span>
-<span>      group -&gt; summary(rows.map(_._2))</span>
-<span>    }</span>
-<span>  }</span>
-<span> </span>
-<span>  def expectIllegalArgument(body: =&gt; Any): Unit = {</span>
-<span>    var caught = false</span>
-<span>    try body catch { case _: IllegalArgumentException =&gt; caught = true }</span>
-<span>    assert(caught, &quot;Expected IllegalArgumentException&quot;)</span>
-<span>  }</span>
-<span>  def expectArithmetic(body: =&gt; Any): Unit = {</span>
-<span>    var caught = false</span>
-<span>    try body catch { case _: ArithmeticException =&gt; caught = true }</span>
-<span>    assert(caught, &quot;Expected ArithmeticException&quot;)</span>
-<span>  }</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    // Exercise 1: Retain observed zero and repeated values</span>
-<span>    val raw = Seq(100L, -5L, 0L, 100L, 25L)</span>
-<span>    assert(accepted(raw) == Seq(100L, 0L, 100L, 25L))</span>
-<span>    assert(raw == Seq(100L, -5L, 0L, 100L, 25L))</span>
-<span>    assert(accepted(Seq.empty[Long]).isEmpty)</span>
-<span>    // Exercise 2: Keep a rejected ledger</span>
-<span>    val split = partitionAmounts(raw)</span>
-<span>    assert(split._1 == Seq(100L, 0L, 100L, 25L) &amp;&amp; split._2 == Seq(-5L))</span>
-<span>    assert(split._1.size + split._2.size == raw.size)</span>
-<span>    assert(partitionAmounts(Seq(-2L, -1L)) == (Seq.empty[Long], Seq(-2L, -1L)))</span>
-<span>    // Exercise 3: Map a bounded numeric policy</span>
-<span>    assert(fivePercent(accepted(raw)) == Seq(5L, 0L, 5L, 1L))</span>
-<span>    assert(fivePercent(Seq(Long.MaxValue)) == Seq(Long.MaxValue / 20L))</span>
-<span>    expectIllegalArgument(fivePercent(Seq(-1L)))</span>
-<span>    // Exercise 4: Fold count and total together</span>
-<span>    assert(summary(accepted(raw)) == (4L, 225L))</span>
-<span>    assert(summary(Seq.empty[Long]) == (0L, 0L))</span>
-<span>    expectArithmetic(summary(Seq(Long.MaxValue, 1L)))</span>
-<span>    // Exercise 5: Represent multiplicity in a Map</span>
-<span>    val frequency = frequencies(accepted(raw))</span>
-<span>    assert(frequency == Map(100L -&gt; 2L, 0L -&gt; 1L, 25L -&gt; 1L))</span>
-<span>    assert(frequency.values.sum == 4L &amp;&amp; frequencies(Seq.empty[Long]).isEmpty)</span>
-<span>    // Exercise 6: Transfer the bag contract to grouped reporting</span>
-<span>    val grouped = groupedSummary(Seq((&quot;A&quot;,100L),(&quot;A&quot;,100L),(&quot;B&quot;,0L),(&quot;B&quot;,25L),(&quot;C&quot;,-5L)))</span>
-<span>    assert(grouped == Map(&quot;A&quot; -&gt; (2L,200L), &quot;B&quot; -&gt; (2L,25L)))</span>
-<span>    assert(grouped.values.map(_._1).sum == 4L &amp;&amp; grouped.values.map(_._2).sum == 225L)</span>
-<span>    expectIllegalArgument(groupedSummary(Seq((&quot;&quot;,-5L))))</span>
-<span>    println(&quot;spark-004: six reference contracts passed&quot;)</span>
-<span>    println(&quot;Scala=&quot; + scala.util.Properties.versionNumberString + &quot;; Java=&quot; + System.getProperty(&quot;java.version&quot;))</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Retain observed zero and repeated values. Inputs/task: Implement a nonnegative filter for Seq(100L,-5L,0L,100L,25L). Preserve input order and duplicate values. An empty input should remain empty. Expected: The result is Seq(100L,0L,100L,25L), with four occurrences. Both 100-cent entries and the zero remain. Verify: Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted(Seq.empty) is empty.</span>
-<span>// Exercise 2: Keep a rejected ledger. Inputs/task: Split every input amount into accepted nonnegative and rejected negative sequences, preserving order within each output. Return both sequences instead of dropping rejected data. Expected: The five-value fixture yields accepted four values and rejected Seq(-5L). Accepted size plus rejected size equals five, including an all-negative or empty fixture. Verify: Assert both exact outputs, their combined count and an all-negative case with empty accepted output.</span>
-<span>// Exercise 3: Map a bounded numeric policy. Inputs/task: For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long. Expected: Seq(100L,0L,100L,25L) maps to Seq(5L,0L,5L,1L). Long.MaxValue maps safely to Long.MaxValue/20L. Verify: Assert the exact four fees, the maximum-Long case and rejection of Seq(-1L).</span>
-<span>// Exercise 4: Fold count and total together. Inputs/task: Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L,0L); an overflowing total raises ArithmeticException. Expected: The accepted fixture returns (4L,225L), while Seq(Long.MaxValue,1L) is rejected by checked addition. Verify: Assert the two-component result, the empty identity and the overflow exception independently.</span>
-<span>// Exercise 5: Represent multiplicity in a Map. Inputs/task: Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map. Expected: The accepted fixture yields Map(100L-&gt;2L,0L-&gt;1L,25L-&gt;1L); the sum of counts is four. Verify: Assert exact map equality and reconcile all map counts to the accepted sequence size.</span>
-<span>// Exercise 6: Transfer the bag contract to grouped reporting. Inputs/task: Given group/amount pairs, reject blank group labels, retain nonnegative amount occurrences and return per-group(count, total) using checked summary. Groups with only rejected amounts are absent from the accepted report and remain explainable through the rejection policy. Expected: A100, A100, B0, B25, C-5 yields A:(2,200), B:(2,25). Report counts sum to four and totals to 225; a blank label is rejected even on a negative row. Verify: Assert the complete map, both global reconciliations and the blank-label failure before filtering can hide it.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">accepted</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">partitionAmounts</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>partition<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">fivePercent</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    require<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>forall<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;fees require nonnegative amounts&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">/</span> <span class="syntax-number">20L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">summary</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>foldLeft<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">,</span> total<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">(</span>count <span class="syntax-operator">+</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Math</span><span class="syntax-punctuation">.</span>addExact<span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">frequencies</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">.</span>foldLeft<span class="syntax-punctuation">(</span><span class="syntax-class">Map</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span></span>
+<span class="source-line">      counts<span class="syntax-punctuation">.</span>updated<span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">,</span> counts<span class="syntax-punctuation">.</span>getOrElse<span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">groupedSummary</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    require<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">.</span>forall <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> <span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">,</span> _<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> group <span class="syntax-operator">!=</span> <span class="syntax-keyword">null</span> <span class="syntax-operator">&amp;&amp;</span> group<span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">.</span>nonEmpty <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;group labels must be known&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    records<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2 <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>groupBy<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> <span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span></span>
+<span class="source-line">      group <span class="syntax-operator">-&gt;</span> summary<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">expectIllegalArgument</span><span class="syntax-punctuation">(</span>body<span class="syntax-punctuation">:</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Any</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">var</span> caught <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> body <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> _: <span class="syntax-class">IllegalArgumentException</span> <span class="syntax-operator">=&gt;</span> caught <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>caught<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;Expected IllegalArgumentException&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">expectArithmetic</span><span class="syntax-punctuation">(</span>body<span class="syntax-punctuation">:</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Any</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">var</span> caught <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> body <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> _: <span class="syntax-class">ArithmeticException</span> <span class="syntax-operator">=&gt;</span> caught <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>caught<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;Expected ArithmeticException&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Retain observed zero and repeated values</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>raw <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Keep a rejected ledger</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> split <span class="syntax-operator">=</span> partitionAmounts<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>split<span class="syntax-punctuation">.</span>_1 <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> split<span class="syntax-punctuation">.</span>_2 <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>split<span class="syntax-punctuation">.</span>_1<span class="syntax-punctuation">.</span>size <span class="syntax-operator">+</span> split<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">.</span>size <span class="syntax-operator">==</span> raw<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>partitionAmounts<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 3: Map a bounded numeric policy</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>fivePercent<span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>fivePercent<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">.</span><span class="syntax-class">MaxValue</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">.</span><span class="syntax-class">MaxValue</span> <span class="syntax-operator">/</span> <span class="syntax-number">20L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expectIllegalArgument<span class="syntax-punctuation">(</span>fivePercent<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 4: Fold count and total together</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>summary<span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">225L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>summary<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expectArithmetic<span class="syntax-punctuation">(</span>summary<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">.</span><span class="syntax-class">MaxValue</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 5: Represent multiplicity in a Map</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> frequency <span class="syntax-operator">=</span> frequencies<span class="syntax-punctuation">(</span>accepted<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>frequency <span class="syntax-operator">==</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">(</span><span class="syntax-number">100L</span> <span class="syntax-operator">-&gt;</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span> <span class="syntax-operator">-&gt;</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25L</span> <span class="syntax-operator">-&gt;</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>frequency<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">.</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">4L</span> <span class="syntax-operator">&amp;&amp;</span> frequencies<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 6: Transfer the bag contract to grouped reporting</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> grouped <span class="syntax-operator">=</span> groupedSummary<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;B&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;B&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;C&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>grouped <span class="syntax-operator">==</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A&quot;</span> <span class="syntax-operator">-&gt;</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">200L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;B&quot;</span> <span class="syntax-operator">-&gt;</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">(</span>grouped<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">4L</span> <span class="syntax-operator">&amp;&amp;</span> grouped<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">225L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expectIllegalArgument<span class="syntax-punctuation">(</span>groupedSummary<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-004: six reference contracts passed&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Scala=&quot;</span> <span class="syntax-operator">+</span> scala<span class="syntax-punctuation">.</span>util<span class="syntax-punctuation">.</span><span class="syntax-class">Properties</span><span class="syntax-punctuation">.</span>versionNumberString <span class="syntax-operator">+</span> <span class="syntax-string">&quot;; Java=&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-class">System</span><span class="syntax-punctuation">.</span>getProperty<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;java.version&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Retain observed zero and repeated values. Inputs/task: Implement a nonnegative filter for Seq(100L,-5L,0L,100L,25L). Preserve input order and duplicate values. An empty input should remain empty. Expected: The result is Seq(100L,0L,100L,25L), with four occurrences. Both 100-cent entries and the zero remain. Verify: Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted(Seq.empty) is empty.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Keep a rejected ledger. Inputs/task: Split every input amount into accepted nonnegative and rejected negative sequences, preserving order within each output. Return both sequences instead of dropping rejected data. Expected: The five-value fixture yields accepted four values and rejected Seq(-5L). Accepted size plus rejected size equals five, including an all-negative or empty fixture. Verify: Assert both exact outputs, their combined count and an all-negative case with empty accepted output.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Map a bounded numeric policy. Inputs/task: For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long. Expected: Seq(100L,0L,100L,25L) maps to Seq(5L,0L,5L,1L). Long.MaxValue maps safely to Long.MaxValue/20L. Verify: Assert the exact four fees, the maximum-Long case and rejection of Seq(-1L).</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Fold count and total together. Inputs/task: Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L,0L); an overflowing total raises ArithmeticException. Expected: The accepted fixture returns (4L,225L), while Seq(Long.MaxValue,1L) is rejected by checked addition. Verify: Assert the two-component result, the empty identity and the overflow exception independently.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Represent multiplicity in a Map. Inputs/task: Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map. Expected: The accepted fixture yields Map(100L-&gt;2L,0L-&gt;1L,25L-&gt;1L); the sum of counts is four. Verify: Assert exact map equality and reconcile all map counts to the accepted sequence size.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Transfer the bag contract to grouped reporting. Inputs/task: Given group/amount pairs, reject blank group labels, retain nonnegative amount occurrences and return per-group(count, total) using checked summary. Groups with only rejected amounts are absent from the accepted report and remain explainable through the rejection policy. Expected: A100, A100, B0, B25, C-5 yields A:(2,200), B:(2,25). Report counts sum to four and totals to 225; a blank label is rejected even on a negative row. Verify: Assert the complete map, both global reconciliations and the blank-label failure before filtering can hide it.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

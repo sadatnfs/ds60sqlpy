@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -133,33 +179,33 @@
 <p><strong>Temperature:</strong> Positive divisor controlling score concentration before softmax.</p>
 <p><strong>Top-k:</strong> A filter retaining the k highest-scoring candidates.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>llm-012</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-012/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-012</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-012/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative,draw,side=&#x27;right&#x27;) selects the interval containing a draw in[0,1). Filter candidates before the final normalization.</p>
 <h3 id="derive-the-actual-selection-probabilities">Derive the actual selection probabilities<a class="heading-anchor" href="#derive-the-actual-selection-probabilities" aria-label="Link to this section">#</a></h3>
-<p>For logits [2, 1, 0], stable softmax can subtract 2 and normalize [1, exp(-1), exp(-2)]. The probabilities are approximately [0.665241, 0.244728, 0.090031]. Temperature 0.5 first divides the logits by 0.5, giving probabilities [0.866813, 0.117310, 0.015876]. Temperature 2 gives approximately [0.506480, 0.307196, 0.186324]. The order remains unchanged for every positive temperature, so greedy selection still chooses token zero. Sampling frequencies change because the mass assigned to each interval changes.</p>
+<p>For logits [2, 1, 0], stable softmax can subtract 2 and normalize [1, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-1)</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">e^{-2}</annotation></semantics></math>]. The probabilities are approximately [0.665241, 0.244728, 0.090031]. Temperature 0.5 first divides the logits by 0.5, giving probabilities [0.866813, 0.117310, 0.015876]. Temperature 2 gives approximately [0.506480, 0.307196, 0.186324]. The order remains unchanged for every positive temperature, so greedy selection still chooses token zero. Sampling frequencies change because the mass assigned to each interval changes.</p>
 <p>Temperature modifies the selection distribution, not the learned weights or the factual evidence available to the model. A sharper distribution can confidently select an incorrect token. It should not be described as improving calibration merely because its highest probability increases. Zero temperature is implemented as a separate greedy policy here; dividing scores by zero is not a numerical implementation of that policy. When several logits tie for the maximum, a positive-temperature limit distributes mass among them, while this lesson&#x27;s greedy rule selects the smallest index.</p>
 <h3 id="filtering-and-drawing-are-separate-operations">Filtering and drawing are separate operations<a class="heading-anchor" href="#filtering-and-drawing-are-separate-operations" aria-label="Link to this section">#</a></h3>
-<p>Keeping only the first two logits produces probabilities [exp(2)/(exp(2)+exp(1)), exp(1)/(exp(2)+exp(1)), 0], approximately [0.731059, 0.268941, 0]. Removing the third probability after the original normalization would leave a total near 0.909969, which is not a complete categorical distribution. Filtering must be followed by normalization over the retained support.</p>
+<p>Keeping only the first two logits produces probabilities [<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msup><mi>e</mi><mn>2</mn></msup></mrow><mrow><msup><mi>e</mi><mn>2</mn></msup><mo>+</mo><mi>e</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{e^2}{e^2+e}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\exp(1)}{\exp(2)+\exp(1)}</annotation></semantics></math>, 0], approximately [0.731059, 0.268941, 0]. Removing the third probability after the original normalization would leave a total near 0.909969, which is not a complete categorical distribution. Filtering must be followed by normalization over the retained support.</p>
 <p>For probabilities [0.5, 0.3, 0.2], cumulative boundaries are [0.5, 0.8, 1]. Draws in [0, 0.5) select token zero, [0.5, 0.8) select token one, and [0.8, 1) select token two. The right-sided search puts a draw exactly equal to 0.5 in the second interval. A draw of one belongs to none of these half-open intervals and must be rejected. Zero-probability tokens have empty intervals and should not be selected.</p>
 <p>The fixture supplies explicit draws so the decision can be reconstructed without a hidden RNG state. Real generation must preserve both the random-source state and the decoding policy if it is to be replayed. Changing top-k, temperature, tie ordering or the number of earlier draws can change output despite reusing a seed. The later nucleus-sampling chapter adds a probability-mass cutoff, termination rules and output caps; these are policy choices with their own failure cases.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-calculate-greedy-choice">Example A: Calculate greedy choice<a class="heading-anchor" href="#example-a-calculate-greedy-choice" aria-label="Link to this section">#</a></h4>
 <p>Only ranking matters to greedy selection. A common shift or positive temperature preserves this particular decision.</p>
-<pre><code class="language-python">import numpy as np
-def softmax(x):
-    x=np.asarray(x,dtype=float); mass=np.exp(x-x.max()); return mass/mass.sum()
-scores=np.array([2.,1.,0.]); assert int(np.argmax(scores))==0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">def</span> <span class="syntax-function">softmax</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> mass<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>x<span class="syntax-operator">-</span>x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> mass<span class="syntax-operator">/</span>mass<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> token0.</p>
 <h4 id="example-b-change-temperature">Example B: Change temperature<a class="heading-anchor" href="#example-b-change-temperature" aria-label="Link to this section">#</a></h4>
 <p>Sharper probabilities make high-scoring tokens more likely without changing their order. They do not create new evidence that the selected token is correct.</p>
-<pre><code class="language-python">import numpy as np
-def softmax(x):
-    x=np.asarray(x,dtype=float); mass=np.exp(x-x.max()); return mass/mass.sum()
-scores=np.array([2.,1.,0.]); assert int(np.argmax(scores))==0
-p=softmax(scores); cool=softmax(scores/.5)
-assert cool[0]&gt;p[0] and p.argmax()==cool.argmax()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">def</span> <span class="syntax-function">softmax</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> mass<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>x<span class="syntax-operator">-</span>x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> mass<span class="syntax-operator">/</span>mass<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span>
+p<span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> cool<span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(</span>scores<span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> cool<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span>p<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> p<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>cool<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> token0 probability increases; argmax stays0.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Greedy chooses index 0; temperature changes probabilities but not this ranking. A fixed draw with a fixed cumulative table yields a reproducible choice. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -171,10 +217,10 @@ assert cool[0]&gt;p[0] and p.argmax()==cool.argmax()==0</code></pre>
 <li><strong>Change temperature.</strong> Compare probabilities at temperatures1 and.5 using stable softmax. <strong>Expected:</strong> token0 probability increases; argmax stays0. <strong>Verify:</strong> Save the assertion results for exercise 2, including token0 probability increases; argmax stays0.</li>
 </ol>
 <ol>
-<li><strong>Use fixed draws.</strong> Sample from probabilities[.5,.3,.2] with draws.1,.6,.9. <strong>Expected:</strong> tokens0,1,2. <strong>Verify:</strong> Save the assertion results for exercise 3, including tokens0,1,2.</li>
+<li><strong>Use fixed draws.</strong> Sample from probabilities[.5,.3,.2] with draws .1,.6,.9. <strong>Expected:</strong> tokens0,1,2. <strong>Verify:</strong> Save the assertion results for exercise 3, including tokens0,1,2.</li>
 </ol>
 <ol>
-<li><strong>Retain two candidates.</strong> Apply top-k2 to scores[2,1,0] and normalize only retained candidates. <strong>Expected:</strong> token2 probability0; first two sum1. <strong>Verify:</strong> Save the assertion results for exercise 4, including token2 probability0; first two sum1.</li>
+<li><strong>Retain two candidates.</strong> Apply top-k2 to scores[2,1,0] and normalize only retained candidates. <strong>Expected:</strong> token 2 probability0; first two sum1. <strong>Verify:</strong> Save the assertion results for exercise 4, including token 2 probability0; first two sum1.</li>
 </ol>
 <ol>
 <li><strong>Declare ties.</strong> Use equal scores[1,1,0] and choose the smallest-index maximum. <strong>Expected:</strong> token0 under the stated rule. <strong>Verify:</strong> Save the assertion results for exercise 5, including token0 under the stated rule.</li>
@@ -193,7 +239,7 @@ assert cool[0]&gt;p[0] and p.argmax()==cool.argmax()==0</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://numpy.org/doc/stable/reference/">NumPy reference</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-012, Greedy decoding, temperature and sampling.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-012, Greedy decoding, temperature and sampling.
 Read courses/llm-theory/guides/llm-012.md and courses/llm-theory/lessons/llm-012.py. Direct prerequisites: `llm-011`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

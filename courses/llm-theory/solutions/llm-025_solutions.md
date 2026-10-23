@@ -48,7 +48,7 @@ assert cache==[4096,8192]
 
 ## Exercise 3: Compare element precision
 
-The question is: Calculate cache bytes at context32 using2-byte versus4-byte elements.
+The question is: Calculate cache bytes at context32 using 2-byte versus 4-byte elements.
 
 A storage reduction does not establish an acceptable accuracy change. Precision policy requires separate numerical evaluation.
 
@@ -63,7 +63,7 @@ assert 2*1*1*2*32*16*4==8192
 
 ## Exercise 4: Scale batch size
 
-The question is: Increase batch from1 to3 with context32 and all other cache dimensions fixed.
+The question is: Increase batch from 1 to3 with context32 and all other cache dimensions fixed.
 
 Independent requests each need their own context state unless a documented sharing mechanism applies. Batching improves utilization in some systems but does not eliminate storage per request.
 

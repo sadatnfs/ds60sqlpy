@@ -120,7 +120,7 @@ The packet makes configuration, skew, logical results and measured operator coun
 
 Choose baseline or broadcast using an explicit Boolean switch over the same accepted facts and reviewed dimension. Switch back to baseline and revalidate the complete product.
 
-**Expected:** Both switch positions satisfy the same metric map and bag contract. The disabled position has noBroadcastHashJoin under the controlled configuration.
+**Expected:** Both switch positions satisfy the same metric map and bag contract. The disabled position has no BroadcastHashJoin under the controlled configuration.
 
 ```scala
 def chooseProduct(facts: DataFrame, dimension: DataFrame, useBroadcast: Boolean): DataFrame = {

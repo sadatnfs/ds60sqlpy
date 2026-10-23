@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,9 +171,9 @@
 <p>Two frameworks can implement the same mathematical operation while storing weights differently, arranging axes differently or assigning opposite meanings to a boolean mask. A successful import or matching tensor shape therefore does not establish parity. Begin with an equation, explicit dimensions and a small literal fixture whose expected values can be calculated independently. Then map that contract to each API.</p>
 <p>This chapter is a reading comparison. It does not require installing a second framework or running TensorFlow to continue the course. The executable lessons elsewhere provide actual runtime evidence for their own profiles. Here the goal is to understand what must be matched before a cross-framework result can be interpreted as the same computation.</p>
 <h5 id="use-a-rectangular-projection-to-expose-orientation">Use a rectangular projection to expose orientation<a class="heading-anchor" href="#use-a-rectangular-projection-to-expose-orientation" aria-label="Link to this section">#</a></h5>
-<p>In row-vector notation, let X have shape(N,d_in) and W have shape(d_in,d_out). The projection is Y=XW+b. NumPy multiplication and a Keras Dense kernel use this orientation directly. PyTorch Linear stores its weight with shape(d_out,d_in) and applies the corresponding transposed multiplication. The stored array must therefore be transposed when translating this particular equation.</p>
-<p>The fixture uses X=[1,2] and W=[[1,2,3],[4,5,6]], so the output is[9,12,15]. The PyTorch-style stored weight is[[1,4],[2,5],[3,6]], shaped(3,2). A square symmetric matrix would be a poor translation test because transposing it could leave its values unchanged. The rectangular dimensions and distinct entries make the error visible.</p>
-<p>The backward contract should match too. If the upstream derivative is G=[1,-1,2], then dL/dX=G W^T=[5,11]. The gradient for the NumPy/Keras-oriented W is X^T G=[[1,-1,2],[2,-2,4]]. The corresponding PyTorch stored-weight gradient is its transpose. Agreement only on one forward output would not detect every gradient-layout or parameter-update mistake.</p>
+<p>In row-vector notation, let X have shape(N,d_in) and W have shape(d_in,d_out). The projection is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mi>W</mi><mo>+</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">Y=XW+b</annotation></semantics></math>. NumPy multiplication and a Keras Dense kernel use this orientation directly. PyTorch Linear stores its weight with shape(d_out,d_in) and applies the corresponding transposed multiplication. The stored array must therefore be transposed when translating this particular equation.</p>
+<p>The fixture uses <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">X=[1,2]</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>4</mn><mo>,</mo><mn>5</mn><mo>,</mo><mn>6</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[1,2,3],[4,5,6]]</annotation></semantics></math>, so the output is[9,12,15]. The PyTorch-style stored weight is[[1,4],[2,5],[3,6]], shaped(3,2). A square symmetric matrix would be a poor translation test because transposing it could leave its values unchanged. The rectangular dimensions and distinct entries make the error visible.</p>
+<p>The backward contract should match too. If the upstream derivative is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">G=[1,-1,2]</annotation></semantics></math>, then <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>X</mi></mrow></mfrac><mo>=</mo><mi>G</mi></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial X}=G</annotation></semantics></math> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>W</mi></mrow><mrow><mi>T</mi></mrow></msup><mo>=</mo><mo stretchy="false">[</mo><mn>5</mn><mo>,</mo><mn>11</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">{W}^{T}=[5,11]</annotation></semantics></math>. The gradient for the NumPy/Keras-oriented W is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>X</mi></mrow><mrow><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">{X}^{T}</annotation></semantics></math> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mo>−</mo><mn>2</mn><mo>,</mo><mn>4</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">G=[[1,-1,2],[2,-2,4]]</annotation></semantics></math>. The corresponding PyTorch stored-weight gradient is its transpose. Agreement only on one forward output would not detect every gradient-layout or parameter-update mistake.</p>
 <p>Bias handling is another independent field. A bias may be enabled by default in one layer and deliberately absent in the mathematical fixture. If one implementation adds a bias and the other does not, transposing weights cannot repair the mismatch. Match bias presence, values and broadcasting before moving to a larger network.</p>
 <h5 id="write-mask-meaning-as-a-sentence">Write mask meaning as a sentence<a class="heading-anchor" href="#write-mask-meaning-as-a-sentence" aria-label="Link to this section">#</a></h5>
 <p>For causal self-attention with shifted next-token labels, query row i may use keys j&lt;=i. The three-token allowed matrix is rows 100,110,111. A forbidden matrix is its boolean complement, rows 011,001,000. The two matrices represent the same boundary only when the receiving API&#x27;s boolean convention is known.</p>
@@ -135,7 +181,7 @@
 <p>The shape identifies another part of the meaning. A key-padding mask typically names unavailable source keys per batch item. A query-dependent causal mask has both query and key axes. A padding mask cannot express &quot;query 0 cannot see key 1, but query 1 may see key 1&quot; without the query dimension. Combining padding and causality requires a deliberate rule, such as allowing a key only when both its source-validity condition and its causal-position condition hold.</p>
 <p>Boolean and floating masks are also different interfaces. A floating attention mask can be an additive score bias rather than a boolean inclusion array. Passing 0/1 values where a library expects additive biases can add preferences instead of blocking positions. State whether a mask is a boolean access rule or a numeric score adjustment and test a forbidden extreme-score case to distinguish the interpretations.</p>
 <h5 id="cached-and-cross-attention-shapes-need-separate-checks">Cached and cross-attention shapes need separate checks<a class="heading-anchor" href="#cached-and-cross-attention-shapes-need-separate-checks" aria-label="Link to this section">#</a></h5>
-<p>Self-attention over a complete sequence often uses a square score matrix. Cross-attention can have Tq target queries and Tk source keys, yielding shape(Tq,Tk). A single cached decode query can have Tq=1 while attending to many prior keys. Code that assumes a square triangle can accidentally allow only the first key because its local query-row index is 0 rather than the query&#x27;s absolute sequence position.</p>
+<p>Self-attention over a complete sequence often uses a square score matrix. Cross-attention can have Tq target queries and Tk source keys, yielding shape(Tq,Tk). A single cached decode query can have <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">T</mi><mi mathvariant="normal">q</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{Tq}=1</annotation></semantics></math> while attending to many prior keys. Code that assumes a square triangle can accidentally allow only the first key because its local query-row index is 0 rather than the query&#x27;s absolute sequence position.</p>
 <p>A correct translation must preserve position offsets and cache layout as well as masks. One library may store batch before head, another may expose a different packed representation. Reshaping is not a substitute for a semantically correct transpose. Use distinct values for each batch, head and position so an axis permutation cannot pass by coincidence.</p>
 <p>The same principle applies to returned attention weights. Some APIs average across heads by default or omit weights entirely when using an optimized path. Comparing an averaged tensor with an unaveraged head tensor can produce a misleading mismatch or an accidental broadcast. Specify exactly which intermediate is being compared.</p>
 <h5 id="match-numerical-and-mode-conventions">Match numerical and mode conventions<a class="heading-anchor" href="#match-numerical-and-mode-conventions" aria-label="Link to this section">#</a></h5>
@@ -166,14 +212,14 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-translate-linear-weights">Example A: Translate linear weights<a class="heading-anchor" href="#example-a-translate-linear-weights" aria-label="Link to this section">#</a></h4>
 <p>A square symmetric matrix would hide a transpose error. The rectangular fixture makes the orientation and output feature count explicit.</p>
-<pre><code class="language-text">X shape(1,2)
+<pre class="highlighted-code"><code class="language-text">X shape(1,2)
 NumPy/Keras W shape(2,3): [[1,2,3],[4,5,6]]
 PyTorch Linear.weight shape(3,2): [[1,4],[2,5],[3,6]]
 Output: [1*1+2*4,1*2+2*5,1*3+2*6] = [9,12,15]</code></pre>
 <p><strong>Expected:</strong> PyTorch weight[[1,4],[2,5],[3,6]];all outputs[9,12,15].</p>
 <h4 id="example-b-translate-a-causal-mask">Example B: Translate a causal mask<a class="heading-anchor" href="#example-b-translate-a-causal-mask" aria-label="Link to this section">#</a></h4>
 <p>The diagonal is allowed because inputs are paired with shifted next-token labels. Excluding it would remove the current token from its own prediction context.</p>
-<pre><code class="language-text">Allowed:
+<pre class="highlighted-code"><code class="language-text">Allowed:
 1 0 0
 1 1 0
 1 1 1
@@ -198,10 +244,10 @@ Forbidden:
 <li><strong>Specify evaluation dropout.</strong> Describe why model.eval alone is insufficient if functional SDPA is called withdropout_p=.1. <strong>Expected:</strong> functional call must receive dropout_p0 for deterministic evaluation. <strong>Verify:</strong> Save the reasoning table for exercise 4, including functional call must receive dropout_p0 for deterministic evaluation.</li>
 </ol>
 <ol>
-<li><strong>Design a cross-framework oracle.</strong> Use zeroQ/K andV[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs. <strong>Expected:</strong> [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance. <strong>Verify:</strong> Save the reasoning table for exercise 5, including [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.</li>
+<li><strong>Design a cross-framework oracle.</strong> Use zeroQ/K and V[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs. <strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]</annotation></semantics></math> within declared dtype tolerance. <strong>Verify:</strong> Save the reasoning table for exercise 5, including <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]</annotation></semantics></math> within declared dtype tolerance.</li>
 </ol>
 <ol>
-<li><strong>Preserve optionality.</strong> Write a verification record when onlyNumPy andPyTorch are prepared,withTensorFlow unavailable. <strong>Expected:</strong> TensorFlowunexecuted;LLMfinalcapstoneremainsavailable. <strong>Verify:</strong> Save the reasoning table for exercise 6, including TensorFlowunexecuted;LLMfinalcapstoneremainsavailable.</li>
+<li><strong>Preserve optionality.</strong> Write a verification record when onlyNumPy and PyTorch are prepared,with TensorFlow unavailable. <strong>Expected:</strong> TensorFlow unexecuted;LLMfinalcapstoneremainsavailable. <strong>Verify:</strong> Save the reasoning table for exercise 6, including TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Use rectangular literal weights to expose transposition errors. Check mask shape, meaning and polarity for the exact API, and do not use a padding mask as if it were a query-dependent causal mask. Match dtype, epsilon, modes and dropout arguments explicitly rather than assuming equal seeds or names imply parity.</p>
@@ -214,7 +260,7 @@ Forbidden:
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.14/generated/torch.nn.functional.scaled_dot_product_attention.html">PyTorch scaled dot product attention</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-041, Optional framework comparison without a second prerequisite.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-041, Optional framework comparison without a second prerequisite.
 Read courses/llm-theory/guides/llm-041.md and courses/llm-theory/lessons/llm-041.md. Direct prerequisites: `llm-040`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

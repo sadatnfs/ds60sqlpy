@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,10 +166,10 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An explanation describes a model&#x27;s behavior relative to a question and reference. It does not automatically describe the data-generating cause or a feasible intervention. A feature can have high predictive importance because it is a proxy, a downstream symptom or a leakage artifact. Explainability must therefore be paired with data provenance, validation and causal reasoning when actions are proposed.</p>
 <h4 id="attribution-requires-a-value-function">Attribution requires a value function<a class="heading-anchor" href="#attribution-requires-a-value-function" aria-label="Link to this section">#</a></h4>
-<p>For two features, let v(S) be the prediction value assigned when coalition S is known under a specified reference construction. Shapley attribution averages each feature&#x27;s marginal contribution over the possible orders. Thus phi1=[v({1})-v(empty)+v({1,2})-v({2})]/2, with a parallel expression for phi2. The attributions sum to v({1,2})-v(empty). Their values change when the reference background or dependence treatment changes. Conditional and interventional constructions answer different questions, especially for correlated features.</p>
+<p>For two features, let v(S) be the prediction value assigned when coalition S is known under a specified reference construction. Shapley attribution averages each feature&#x27;s marginal contribution over the possible orders. Thus <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>ϕ</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mi>v</mi><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mn>1</mn><mo stretchy="false">}</mo><mo stretchy="false">)</mo><mo>−</mo><mi>v</mi><mo stretchy="false">(</mo><mo>∅</mo><mo stretchy="false">)</mo><mo>+</mo><mi>v</mi><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">}</mo><mo stretchy="false">)</mo><mo>−</mo><mi>v</mi><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mn>2</mn><mo stretchy="false">}</mo><mo stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\phi_1=\frac{v(\{1\})-v(\varnothing)+v(\{1,2\})-v(\{2\})}{2}</annotation></semantics></math>, with a parallel expression for phi2. The attributions sum to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>v</mi><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">}</mo><mo stretchy="false">)</mo><mo>−</mo><mi>v</mi><mo stretchy="false">(</mo><mo>∅</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">v(\{1,2\})-v(\varnothing)</annotation></semantics></math>. Their values change when the reference background or dependence treatment changes. Conditional and interventional constructions answer different questions, especially for correlated features.</p>
 <p>Permutation importance asks how performance changes when a feature is disrupted. If another feature duplicates its information, marginal permutation importance can be small despite the signal being useful. PDP replaces one feature across all rows and averages predictions, potentially creating impossible combinations. ICE retains separate curves; ALE uses local changes within observed regions to reduce some extrapolation. None of these curves is automatically a causal response curve.</p>
 <h4 id="fairness-criteria-condition-on-different-quantities">Fairness criteria condition on different quantities<a class="heading-anchor" href="#fairness-criteria-condition-on-different-quantities" aria-label="Link to this section">#</a></h4>
-<p>Demographic parity compares P(predicted positive|group). Equalized odds compares prediction rates conditional on both group and true outcome; equal opportunity focuses on true positives. Group calibration compares actual outcome rates among people receiving the same predicted probability in different groups. When base rates differ and prediction is imperfect, desirable criteria can conflict. This is a consequence of conditioning, not simply an implementation bug.</p>
+<p>Demographic parity compares <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi><mtext> </mtext><mi mathvariant="normal">p</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">v</mi><mi mathvariant="normal">e</mi></mrow><mo>∣</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">p</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pr(\mathrm{predicted\ positive}\mid\mathrm{group})</annotation></semantics></math>. Equalized odds compares prediction rates conditional on both group and true outcome; equal opportunity focuses on true positives. Group calibration compares actual outcome rates among people receiving the same predicted probability in different groups. When base rates differ and prediction is imperfect, desirable criteria can conflict. This is a consequence of conditioning, not simply an implementation bug.</p>
 <p>Select criteria according to the decision, harms, affected people and quality of labels. Historical labels can encode unequal opportunity, so matching their error rates is not a complete ethical analysis. Quantify uncertainty and intersectional support before interpreting group differences. A feasible recourse plan must account for immutable attributes, costs, causal dependencies and whether the model will remain stable.</p>
 <h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
 <h4 id="stat-24-01">Global interpretability<a class="heading-anchor" href="#stat-24-01" aria-label="Link to this section">#</a></h4>
@@ -182,7 +228,7 @@
 <p>A counterfactual search may suggest changing age, reducing debt while holding available balance fixed, or altering a derived feature without changing its inputs. Those changes can cross the model boundary in feature space but are impossible or incoherent actions. Feasible recourse requires constraints on immutable attributes and a model of how actions propagate through dependent variables.</p>
 <p>Costs differ among people. A recommendation to obtain a credential or reduce debt may be technically possible but prohibitively costly for some groups. Recourse evaluation should include feasibility, burden, uncertainty and whether the promised outcome survives model updates. A model&#x27;s prediction can change without the underlying outcome improving, so the decision system should not incentivize merely gaming a proxy.</p>
 <h4 id="case-study-fairness-tradeoffs-are-visible-in-a-confusion-table">Case study: fairness tradeoffs are visible in a confusion table<a class="heading-anchor" href="#case-study-fairness-tradeoffs-are-visible-in-a-confusion-table" aria-label="Link to this section">#</a></h4>
-<p>Consider two groups with prevalences .2 and .8. If both have sensitivity .8 and false-positive rate .1, their positive decision rates are .8<em>.2+.1</em>.8=.24 and .8<em>.8+.1</em>.2=.66. Equalized odds holds, while demographic parity does not. Their precision values are .16/.24 and .64/.66, which differ markedly.</p>
+<p>Consider two groups with prevalences .2 and .8. If both have sensitivity .8 and false-positive rate .1, their positive decision rates are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0.8</mn><mo>·</mo><mn>0.2</mn><mo>+</mo><mn>0.1</mn><mo>·</mo><mn>0.8</mn><mo>=</mo><mn>0.24</mn></mrow><annotation encoding="application/x-tex">0.8\cdot 0.2+0.1\cdot 0.8=0.24</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0.8</mn><mo>·</mo><mn>0.8</mn><mo>+</mo><mn>0.1</mn><mo>·</mo><mn>0.2</mn><mo>=</mo><mn>0.66</mn></mrow><annotation encoding="application/x-tex">0.8\cdot 0.8+0.1\cdot 0.2=0.66</annotation></semantics></math>. Equalized odds holds, while demographic parity does not. Their precision values are .16/.24 and .64/.66, which differ markedly.</p>
 <p>Changing thresholds to equalize positive decision rates generally changes the class-conditional error rates. Calibrated probabilities with unequal base rates also create constraints on which predictive-value and error-rate equalities can simultaneously hold under imperfect prediction. The appropriate choice depends on the allocation, harms and legal or organizational context, not an automatic preference for one mathematical criterion.</p>
 <p>Labels themselves require scrutiny. A target such as historical approval, arrest or access to treatment may reflect prior unequal decisions rather than an independent ground truth about merit or need. Equal error rates against that label can reproduce existing inequities. Use measurement and causal reasoning to examine the construct before interpreting a fairness metric as a complete ethical result.</p>
 <h4 id="case-study-evaluate-an-assistant-across-groups-and-tasks">Case study: evaluate an assistant across groups and tasks<a class="heading-anchor" href="#case-study-evaluate-an-assistant-across-groups-and-tasks" aria-label="Link to this section">#</a></h4>
@@ -194,7 +240,7 @@
 <p>Separate descriptive disparities, predictive error disparities and causal claims about discriminatory mechanisms. Each requires different evidence. Document who chose the criterion and who owns the resulting action. Technical analysis can clarify tradeoffs and expose failure modes; it cannot erase the value judgments embedded in the decision.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_24.py.html">chapter_24.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_24.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_24.py</code></pre>
 <h4 id="attribute-an-interaction-transparently">Attribute an interaction transparently<a class="heading-anchor" href="#attribute-an-interaction-transparently" aria-label="Link to this section">#</a></h4>
 <p>A specified value function assigns zero to no features, one to A, two to B and seven to both. Each feature receives its standalone contribution plus half the interaction, giving three and four. The calculation is exact for this game; another background construction could define different coalition values.</p>
 <h4 id="equal-error-rates-do-not-imply-equal-decision-rates">Equal error rates do not imply equal decision rates<a class="heading-anchor" href="#equal-error-rates-do-not-imply-equal-decision-rates" aria-label="Link to this section">#</a></h4>
@@ -202,40 +248,40 @@
 <h4 id="state-the-perturbation-model">State the perturbation model<a class="heading-anchor" href="#state-the-perturbation-model" aria-label="Link to this section">#</a></h4>
 <p>For a linear score with weights (2,-1), an L-infinity perturbation of radius .4 can reduce the score by .4 times the L1 norm of the weights, or 1.2. The sign flips from one to minus .2. Whether changing both inputs this way is feasible is a separate threat-model question.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def exact_shapley_game():
-    empty,a,b,ab=0.,1.,2.,7.
-    phi_a=.5*((a-empty)+(ab-b))
-    phi_b=.5*((b-empty)+(ab-a))
-    assert phi_a==3 and phi_b==4 and phi_a+phi_b==ab-empty
-    print(&quot;Specified two-feature game attributions:&quot;,phi_a,phi_b)
+<span class="syntax-keyword">def</span> <span class="syntax-function">exact_shapley_game</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    empty<span class="syntax-punctuation">,</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</span>ab<span class="syntax-operator">=</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">7.</span>
+    phi_a<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">-</span>empty<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span>ab<span class="syntax-operator">-</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    phi_b<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">-</span>empty<span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span>ab<span class="syntax-operator">-</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> phi_a<span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> phi_b<span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> phi_a<span class="syntax-operator">+</span>phi_b<span class="syntax-operator">==</span>ab<span class="syntax-operator">-</span>empty
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Specified two-feature game attributions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>phi_a<span class="syntax-punctuation">,</span>phi_b<span class="syntax-punctuation">)</span>
 
-def fairness_conditioning():
-    # Rows are groups; columns are TP, FN, FP, TN.
-    counts=np.array([[16.,4.,8.,72.],[64.,16.,2.,18.]])
-    tp,fn,fp,tn=counts.T
-    tpr=tp/(tp+fn);fpr=fp/(fp+tn)
-    positive_rate=(tp+fp)/counts.sum(axis=1)
-    precision=tp/(tp+fp)
-    assert np.allclose(tpr,[.8,.8]) and np.allclose(fpr,[.1,.1])
-    assert not np.isclose(positive_rate[0],positive_rate[1])
-    assert not np.isclose(precision[0],precision[1])
-    print(&quot;Equalized odds rates:&quot;,tpr,fpr,&quot;positive rates:&quot;,positive_rate,&quot;precision:&quot;,precision)
+<span class="syntax-keyword">def</span> <span class="syntax-function">fairness_conditioning</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># Rows are groups; columns are TP, FN, FP, TN.</span>
+    counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">16.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">8.</span><span class="syntax-punctuation">,</span><span class="syntax-number">72.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">64.</span><span class="syntax-punctuation">,</span><span class="syntax-number">16.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">18.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    tp<span class="syntax-punctuation">,</span>fn<span class="syntax-punctuation">,</span>fp<span class="syntax-punctuation">,</span>tn<span class="syntax-operator">=</span>counts<span class="syntax-operator">.</span>T
+    tpr<span class="syntax-operator">=</span>tp<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>tp<span class="syntax-operator">+</span>fn<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>fpr<span class="syntax-operator">=</span>fp<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>fp<span class="syntax-operator">+</span>tn<span class="syntax-punctuation">)</span>
+    positive_rate<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>tp<span class="syntax-operator">+</span>fp<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    precision<span class="syntax-operator">=</span>tp<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>tp<span class="syntax-operator">+</span>fp<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>tpr<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>fpr<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>positive_rate<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>positive_rate<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>precision<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>precision<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Equalized odds rates:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>tpr<span class="syntax-punctuation">,</span>fpr<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">positive rates:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>positive_rate<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">precision:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>precision<span class="syntax-punctuation">)</span>
 
-def adversarial_linear_margin():
-    weights=np.array([2.,-1.]);x=np.array([1.,1.]);epsilon=.4
-    delta=-epsilon*np.sign(weights)
-    before=weights@x;after=weights@(x+delta)
-    assert before==1 and np.isclose(after,-.2)
-    assert np.isclose(before-after,epsilon*np.abs(weights).sum())
-    print(&quot;Linear margin before/after bounded perturbation:&quot;,before,after)
+<span class="syntax-keyword">def</span> <span class="syntax-function">adversarial_linear_margin</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    weights<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>epsilon<span class="syntax-operator">=</span><span class="syntax-number">.4</span>
+    delta<span class="syntax-operator">=</span><span class="syntax-operator">-</span>epsilon<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>sign<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">)</span>
+    before<span class="syntax-operator">=</span>weights<span class="syntax-decorator">@x</span><span class="syntax-punctuation">;</span>after<span class="syntax-operator">=</span>weights<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">+</span>delta<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> before<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>before<span class="syntax-operator">-</span>after<span class="syntax-punctuation">,</span>epsilon<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Linear margin before/after bounded perturbation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>before<span class="syntax-punctuation">,</span>after<span class="syntax-punctuation">)</span>
 
-def main():
-    exact_shapley_game();fairness_conditioning();adversarial_linear_margin()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    exact_shapley_game<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>fairness_conditioning<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>adversarial_linear_margin<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does SHAP tell you what to change to improve an outcome?</strong> It attributes a model prediction relative to a specified reference. It does not establish that changing a feature causes the desired outcome, that the change is feasible or that other features remain fixed. Recourse needs an action and causal model.</p>
 <p><strong>Interview: Why can equalized odds coexist with unequal precision?</strong> Error rates condition on actual class, while precision conditions on the prediction. Different base rates change the mixture of true and false positives even when class-conditional error rates match.</p>

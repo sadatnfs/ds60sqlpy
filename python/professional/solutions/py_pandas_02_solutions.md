@@ -102,7 +102,7 @@ assert missing_key_report(e[e.event_id == 1], d).columns.tolist() == ["event_id"
 
 For a single history, attach the latest available_at, value no later than each request at time, within a nonnegative tolerance. Require unique request_id and unique history available_at, with nonmissing timezone-aware UTC time columns. Return original request order and preserve unmatched values as missing.
 
-**Expected:** Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20, tolerance 2 hours, yield 10 andmissing. Unsorted requests are restored to their original order; naive times fail.
+**Expected:** Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20, tolerance 2 hours, yield 10 and missing. Unsorted requests are restored to their original order; naive times fail.
 
 ```python
 def latest_available(

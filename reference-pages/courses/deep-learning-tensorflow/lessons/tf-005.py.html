@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,55 +161,55 @@
       <h1>Tf 005</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/lessons/tf-005.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-005: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import math</span>
-<span> </span>
-<span> </span>
-<span>def f(w):</span>
-<span>    return (w - 2) ** 2</span>
-<span> </span>
-<span> </span>
-<span>w, h = 0.0, 0.01</span>
-<span>central = (f(w + h) - f(w - h)) / (2 * h)</span>
-<span>assert math.isclose(central, -4.0, rel_tol=0, abs_tol=1e-10)</span>
-<span>updated = w - 0.1 * central</span>
-<span>assert math.isclose(updated, 0.4, rel_tol=0, abs_tol=1e-12)</span>
-<span>print(central, updated, f(updated))</span>
-<span> </span>
-<span>h = 0.01</span>
-<span>left_slope = (abs(0.0) - abs(-h)) / h</span>
-<span>right_slope = (abs(h) - abs(0.0)) / h</span>
-<span>central = (abs(h) - abs(-h)) / (2 * h)</span>
-<span>assert (left_slope, right_slope, central) == (-1.0, 1.0, 0.0)</span>
-<span>print(left_slope, right_slope, central)</span>
-<span> </span>
-<span># Exercise 1: Label slope and state</span>
-<span># For f(w)=(w-2)^2 at zero, derive the loss, derivative and a rate-0.1 update.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 2: Construct central probes</span>
-<span># Implement central_difference(function,point,h) and evaluate h=0.1,0.01,0.001 on the</span>
-<span># quadratic at zero.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 3: Expose a one-sided bias</span>
-<span># Compute the forward difference (f(h)-f(0))/h for the same three h values.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 4: Move from the other side</span>
-<span># At w=3, derive the derivative and apply rate 0.1.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 5: Diagnose an invalid derivative claim</span>
-<span># Use abs(w) at zero and inspect left, right and central probes; also test h=0 and a NaN</span>
-<span># point.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 6: Transfer to a scaled objective</span>
-<span># For g(w)=3*(w-1)^2 at w=2, derive a gradient and one rate-0.1 step.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-005: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">f</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>w <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">w<span class="syntax-punctuation">,</span> h <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span></span>
+<span class="source-line">central <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">(</span>w <span class="syntax-operator">+</span> h<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> f<span class="syntax-punctuation">(</span>w <span class="syntax-operator">-</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> h<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>central<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">updated <span class="syntax-operator">=</span> w <span class="syntax-operator">-</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">*</span> central</span>
+<span class="source-line"><span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>updated<span class="syntax-punctuation">,</span> <span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>central<span class="syntax-punctuation">,</span> updated<span class="syntax-punctuation">,</span> f<span class="syntax-punctuation">(</span>updated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">h <span class="syntax-operator">=</span> <span class="syntax-number">0.01</span></span>
+<span class="source-line">left_slope <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> h</span>
+<span class="source-line">right_slope <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> h</span>
+<span class="source-line">central <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> h<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>left_slope<span class="syntax-punctuation">,</span> right_slope<span class="syntax-punctuation">,</span> central<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>left_slope<span class="syntax-punctuation">,</span> right_slope<span class="syntax-punctuation">,</span> central<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Label slope and state</span></span>
+<span class="source-line"><span class="syntax-comment"># For f(w)=(w-2)^2 at zero, derive the loss, derivative and a rate-0.1 update.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Construct central probes</span></span>
+<span class="source-line"><span class="syntax-comment"># Implement central_difference(function,point,h) and evaluate h=0.1,0.01,0.001 on the</span></span>
+<span class="source-line"><span class="syntax-comment"># quadratic at zero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Expose a one-sided bias</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute the forward difference (f(h)-f(0))/h for the same three h values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Move from the other side</span></span>
+<span class="source-line"><span class="syntax-comment"># At w=3, derive the derivative and apply rate 0.1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Diagnose an invalid derivative claim</span></span>
+<span class="source-line"><span class="syntax-comment"># Use abs(w) at zero and inspect left, right and central probes; also test h=0 and a NaN</span></span>
+<span class="source-line"><span class="syntax-comment"># point.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer to a scaled objective</span></span>
+<span class="source-line"><span class="syntax-comment"># For g(w)=3*(w-1)^2 at w=2, derive a gradient and one rate-0.1 step.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

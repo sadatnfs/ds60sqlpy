@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,652 +161,652 @@
       <h1>Review Matrix</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/authoring/review_matrix.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;review_date&quot;: &quot;2026-10-23&quot;,</span>
-<span>  &quot;chapters&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-001&quot;,</span>
-<span>      &quot;title&quot;: &quot;A bounded PyTorch investigation and framework comparison&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The published holdout needed a clearer distinction from a blind assessment.&quot;,</span>
-<span>        &quot;Experiment selection and extrapolation needed a concrete decision trace.&quot;,</span>
-<span>        &quot;Malformed words obscured the evidence boundary.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-001&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-002&quot;,</span>
-<span>      &quot;title&quot;: &quot;Tensors, devices, dtypes, strides and views&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Storage offsets, contiguity and ownership needed separate reasoning.&quot;,</span>
-<span>        &quot;Broadcast pairing needed a complete numerical counterexample.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-002&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-003&quot;,</span>
-<span>      &quot;title&quot;: &quot;Linear modules, parameters and matrix contracts&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Forward layout and parameter count needed a shape ledger.&quot;,</span>
-<span>        &quot;Registration, differentiation and optimizer membership needed clearer separation.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-003&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-004&quot;,</span>
-<span>      &quot;title&quot;: &quot;Loss functions, reductions and gradient scale&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Mean reduction needed a batch-by-output derivation and masked-gradient trace.&quot;,</span>
-<span>        &quot;Objective weighting and metric preference needed concrete comparisons.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-004&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-005&quot;,</span>
-<span>      &quot;title&quot;: &quot;Derivatives, requires_grad and finite-difference checks&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Finite differences needed a truncation/cancellation derivation and a distinction from learning-rate steps.&quot;,</span>
-<span>        &quot;The numerical helper did not reject a nonfinite point when a constant function hid it.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-005&quot;,</span>
-<span>      &quot;executable_change&quot;: true,</span>
-<span>      &quot;worked_code_change&quot;: true,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-005_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;bbc9ca56deaebe89dd9b10248a8c72b4ac83311912ff3979c1260ead0e5c4819&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 1.013,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-005&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        },</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;work/pytorch-depth-worked/torch-005-abc.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;fdbbe5e392a0aa5e96c726e71c04c6b56fb24c1c92545b817b82be8796164d81&quot;,</span>
-<span>          &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-005.md&quot;,</span>
-<span>          &quot;guide_sha256&quot;: &quot;77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.937,</span>
-<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-005&quot;,</span>
-<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-006&quot;,</span>
-<span>      &quot;title&quot;: &quot;Autograd graphs, the chain rule and in-place hazards&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;The chain factors needed an exact forward/backward table.&quot;,</span>
-<span>        &quot;In-place version checking and saved-graph lifetime needed a concrete failure sequence.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-006&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-007&quot;,</span>
-<span>      &quot;title&quot;: &quot;Leaf tensors, detach, no_grad and gradient accumulation&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Graph history, gradient buffers, storage ownership and module mode needed a separate-state comparison.&quot;,</span>
-<span>        &quot;None-versus-zero gradients needed an optimizer-aware interpretation.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-007&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-008&quot;,</span>
-<span>      &quot;title&quot;: &quot;One optimizer step you can audit&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;The one-step oracle needed a full objective and stability derivation.&quot;,</span>
-<span>        &quot;The broadcast counterexample needed to show a changed optimum,not only a different first gradient.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-008&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-009&quot;,</span>
-<span>      &quot;title&quot;: &quot;Batches, zero_grad and repeated updates&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Batch/update counts needed an exact parameter-state trace.&quot;,</span>
-<span>        &quot;Metric weighting needed separation from evaluation at the final model state.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-009&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-010&quot;,</span>
-<span>      &quot;title&quot;: &quot;Datasets, held-out families and leakage controls&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Subset delegation and split identity needed a concrete index/shape trace.&quot;,</span>
-<span>        &quot;The held-out perturbation needed exact fitted-statistic arithmetic and claim limits.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-010&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-011&quot;,</span>
-<span>      &quot;title&quot;: &quot;nn.Module, registered parameters and explicit training loops&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Module state categories needed a concrete ownership and persistence table.&quot;,</span>
-<span>        &quot;Optimizer object membership and dtype conversion needed an operational ordering explanation.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-011&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-012&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: an auditable tiny PyTorch regressor&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The capstone decision section was empty.&quot;,</span>
-<span>        &quot;The special basis-vector fixture allowed an independent closed-form100-step oracle that was missing.&quot;,</span>
-<span>        &quot;The final-model metric needed distinction from the last pre-update loss in the curve.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-012&quot;,</span>
-<span>      &quot;executable_change&quot;: true,</span>
-<span>      &quot;worked_code_change&quot;: true,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-012_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;7065ba3acadffa38430501fbfd147066d8cf46daa817ae0a8b68a0da786755af&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 1.498,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-012&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        },</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;work/pytorch-depth-worked/torch-012-abc.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;2d297a5a840c43f8c8351baddc4f69d2b519651212056713f63e08e7ef1b42c9&quot;,</span>
-<span>          &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-012.md&quot;,</span>
-<span>          &quot;guide_sha256&quot;: &quot;90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 1.501,</span>
-<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-012&quot;,</span>
-<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-013&quot;,</span>
-<span>      &quot;title&quot;: &quot;Binary logits, BCEWithLogitsLoss and thresholds&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Stable binary loss needed its algebra and gradient,not only API naming.&quot;,</span>
-<span>        &quot;Threshold cost assumptions,double-sigmoid gradients andcalibration limits needed concrete reasoning.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-013&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-014&quot;,</span>
-<span>      &quot;title&quot;: &quot;CrossEntropyLoss, multiclass and multilabel contracts&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Class-axis andtarget contracts needed a spatial/batched shape table.&quot;,</span>
-<span>        &quot;Cross-entropy gradients,soft targets andweighted denominators needed clearer boundaries.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-014&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-014_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;e399b32881779b12c4f2f24a25f90c5e89ff3be6b0a3c8dceb7acd028a5bcf70&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.97,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-014&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-015&quot;,</span>
-<span>      &quot;title&quot;: &quot;Dataset, DataLoader, collation and reproducible sampling&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Sampler state,collation masks andtail populations needed distinct contracts.&quot;,</span>
-<span>        &quot;The collator silently truncated floating token IDs into a Long tensor.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-015&quot;,</span>
-<span>      &quot;executable_change&quot;: true,</span>
-<span>      &quot;worked_code_change&quot;: true,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-015_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;3f02a8dc38300a37e69604626966f9cbfb5a43c8d50b0570ee5f7564afd9461d&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.854,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-015&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        },</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;work/pytorch-depth-worked/torch-015-abc.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;eac8fb051853d2f1a3cd051580fe78f6c96d4dbf5c62d2da8dbac97603eb6767&quot;,</span>
-<span>          &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-015.md&quot;,</span>
-<span>          &quot;guide_sha256&quot;: &quot;04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.849,</span>
-<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-015&quot;,</span>
-<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-016&quot;,</span>
-<span>      &quot;title&quot;: &quot;Initialization, nonlinearities and gradient diagnostics&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;XOR needed an affine impossibility proof and a full hidden-feature trace.&quot;,</span>
-<span>        &quot;The symmetric XOR matrix could not detect the claimed transpose mistake.&quot;,</span>
-<span>        &quot;Initialization symmetry needed conditions on downstream gradients and activation regions.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-016&quot;,</span>
-<span>      &quot;executable_change&quot;: true,</span>
-<span>      &quot;worked_code_change&quot;: true,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-016_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;93994c908a91da36691412c1c33e170d720dec5df333cf0bf15e3a19f23d29cb&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.845,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-016&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        },</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;work/pytorch-depth-worked/torch-016-abc.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;58f5d5c0385a08809a78a58e92835f6156b521c81f616d09126c08b83b8930b6&quot;,</span>
-<span>          &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-016.md&quot;,</span>
-<span>          &quot;guide_sha256&quot;: &quot;208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 0.96,</span>
-<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-016&quot;,</span>
-<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-017&quot;,</span>
-<span>      &quot;title&quot;: &quot;Dropout, regularization, train and eval modes&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Dropout expectation was stated without its variance or backward trace.&quot;,</span>
-<span>        &quot;Penalty coefficients, loss reduction and adaptive weight decay needed an explicit comparison.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-017&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-018&quot;,</span>
-<span>      &quot;title&quot;: &quot;BatchNorm, LayerNorm and stateful normalization&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The decision section was empty.&quot;,</span>
-<span>        &quot;Axis retention versus reduction needed a complete shape ledger.&quot;,</span>
-<span>        &quot;Momentum parity needed a non-half coefficient and distinct variance estimators.&quot;,</span>
-<span>        &quot;Freezing affine gradients was not distinguished from freezing running statistics.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-018&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-019&quot;,</span>
-<span>      &quot;title&quot;: &quot;Convolutions, channel layouts and shared computation&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Output-size, dilation and parameter-sharing rules lacked a symbolic shape derivation.&quot;,</span>
-<span>        &quot;The forward patch example did not explain how shared kernel and input gradients accumulate.&quot;,</span>
-<span>        &quot;Semantic layout conversion, memory format and translation equivariance needed separate contracts.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-019&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-020&quot;,</span>
-<span>      &quot;title&quot;: &quot;Pooling, local augmentation and label invariants&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Pooling information loss needed a backward-sensitivity trace and boundary counterexamples.&quot;,</span>
-<span>        &quot;A flip round trip was not distinguished fully from a valid target transformation.&quot;,</span>
-<span>        &quot;Pooling defaults and ownership of deterministic evaluation outputs needed explicit decisions.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-020&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-021&quot;,</span>
-<span>      &quot;title&quot;: &quot;Embeddings, padded sequences and recurrent models&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Embedding lookup gradients and padding semantics needed an exact row-by-row trace.&quot;,</span>
-<span>        &quot;Packed recurrent output, final-state axes and the detached worked-example boundary needed explanation.&quot;,</span>
-<span>        &quot;Zero padding, mask propagation and valid-token versus per-sequence objectives were conflated by insufficient detail.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-021&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-022&quot;,</span>
-<span>      &quot;title&quot;: &quot;Attention, transformer masks and information boundaries&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Query/key/value axes and the softmax Jacobian needed a concrete forward/backward trace.&quot;,</span>
-<span>        &quot;Mask polarity differences needed a parameter-level table and a float-mask counterexample.&quot;,</span>
-<span>        &quot;Prefix agreement was overinterpreted as a complete arithmetic or model-causality check.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-022&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-023&quot;,</span>
-<span>      &quot;title&quot;: &quot;Debugging custom loops, accumulation and clipping&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The scalar update sequence needed exact before/loss/gradient/after states.&quot;,</span>
-<span>        &quot;Accumulation weighting and clipping order were named without an unequal-microbatch counterexample.&quot;,</span>
-<span>        &quot;Missing gradients,nonfinite gradients and optimizer displacement needed different diagnostic meanings.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-023&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-024&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: a small classifier with honest evaluation&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The classifier capstone needed an independently derived first update and preprocessing denominator comparison.&quot;,</span>
-<span>        &quot;Visible synthetic labels and two test rows were insufficiently separated from population reliability.&quot;,</span>
-<span>        &quot;Confusion accounting,threshold ties and subgroup denominators needed a complete decision trace.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-024&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-025&quot;,</span>
-<span>      &quot;title&quot;: &quot;Contrastive embeddings and negative sampling&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Contrastive temperature needed an exact loss/gradient derivation rather than a sharpness label.&quot;,</span>
-<span>        &quot;The projection-gradient check needed its actual trainable branch and expected matrix explained.&quot;,</span>
-<span>        &quot;False negatives,zero norms and changing candidate populations needed distinct failure contracts.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-025&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-026&quot;,</span>
-<span>      &quot;title&quot;: &quot;Custom modules, residual paths, buffers and autograd checks&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Residual forward identity needed a nonzero branch-gradient derivation.&quot;,</span>
-<span>        &quot;Parameter objects,buffers,constructor metadata and optimizer identity needed distinct state roles.&quot;,</span>
-<span>        &quot;Custom backward needed a vector-Jacobian-product explanation and clearer gradcheck limits.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-026&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-027&quot;,</span>
-<span>      &quot;title&quot;: &quot;Transfer learning, frozen layers and optimizer membership&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Freeze semantics needed a four-part state/mode/gradient/optimizer contract.&quot;,</span>
-<span>        &quot;The head update and newly available base-gradient path lacked an exact local derivation.&quot;,</span>
-<span>        &quot;Unfreezing needed explicit optimizer-state choices rather than implying recreation is mandatory.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-027&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-028&quot;,</span>
-<span>      &quot;title&quot;: &quot;Restartable training, optimizer state and RNG evidence&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Restart parity needed a state-dependency ledger and a precise RNG draw timeline.&quot;,</span>
-<span>        &quot;The fixed data-position marker was not clearly separated from restoring a real loader or sampler.&quot;,</span>
-<span>        &quot;Snapshot aliasing,optimizer reconstruction and checkpoint publication limits needed explanation.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-028&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-029&quot;,</span>
-<span>      &quot;title&quot;: &quot;Stable objectives, precision and mixed-precision boundaries&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Stable softmax/cross-entropy needed an exact shifted-logit and gradient derivation.&quot;,</span>
-<span>        &quot;Range,precision and cancellation were not distinguished by concrete dtype comparisons.&quot;,</span>
-<span>        &quot;Autocast,gradient scaling and clipping order needed separate hardware-qualified boundaries.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-029&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-030&quot;,</span>
-<span>      &quot;title&quot;: &quot;Distributed gradients and accumulation semantics on CPU&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Unequal-shard weighting needed a direct connection to backend averaging conventions.&quot;,</span>
-<span>        &quot;The full-batch and sequential-microbatch trajectories needed exact distinct endpoints.&quot;,</span>
-<span>        &quot;Empty shards,regularization and batch-dependent forward behavior needed explicit assumptions.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-030&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: [</span>
-<span>        {</span>
-<span>          &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/solutions/torch-030_solution.py&quot;,</span>
-<span>          &quot;source_sha256&quot;: &quot;226f37bfe24d12cbeabdcf0bc0d88aab44d0072c07660370a9523b90a24ed623&quot;,</span>
-<span>          &quot;worker_sha256&quot;: &quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;,</span>
-<span>          &quot;image_id&quot;: &quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;,</span>
-<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>          &quot;elapsed&quot;: 1.299,</span>
-<span>          &quot;lesson_id&quot;: &quot;torch-030&quot;,</span>
-<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>          &quot;receipt_path&quot;: &quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span>
-<span>        }</span>
-<span>      ]</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-031&quot;,</span>
-<span>      &quot;title&quot;: &quot;Profiling, torch.compile and honest performance measurement&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Graph capture,backend execution and optimizing compilation needed a phase-by-phase distinction.&quot;,</span>
-<span>        &quot;The graph counter and timing interval needed precise observable meanings.&quot;,</span>
-<span>        &quot;Profiler totals,signature diversity and setup amortization needed concrete interpretation.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-031&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-032&quot;,</span>
-<span>      &quot;title&quot;: &quot;state_dict, torch.export and inference parity&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;State reconstruction and exported-program constraints needed a direct interface comparison.&quot;,</span>
-<span>        &quot;Static batch specialization and declared dynamic bounds needed precise tested-versus-declared scope.&quot;,</span>
-<span>        &quot;Feature semantics,artifact ownership and inference versus training continuation needed distinct acceptance gates.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-032&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-033&quot;,</span>
-<span>      &quot;title&quot;: &quot;Inference mode, model contracts and bounded batching&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Inference mode,eval and an owned normal output tensor needed a precise lifetime/gradient explanation.&quot;,</span>
-<span>        &quot;Per-record batching parity needed its stateless-model assumptions and singleton-axis trace.&quot;,</span>
-<span>        &quot;Input finiteness,batch bounds and output-value guarantees needed clearer scope.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-033&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-034&quot;,</span>
-<span>      &quot;title&quot;: &quot;Robustness, privacy and evidence beyond a score&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;Duplicate weighting and subgroup uncertainty needed exact denominator counterexamples.&quot;,</span>
-<span>        &quot;Perturbation outcomes needed a stated target policy rather than an unchanged-prediction slogan.&quot;,</span>
-<span>        &quot;Privacy mechanisms,severity gates and finite empirical evidence needed separate meanings.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-034&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-035&quot;,</span>
-<span>      &quot;title&quot;: &quot;Paired model comparisons and uncertainty&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The paired loss comparison needed its full per-ID table and covariance explanation.&quot;,</span>
-<span>        &quot;The three-point bootstrap needed an exact empirical distribution and a distinction from new evidence.&quot;,</span>
-<span>        &quot;Resampling units,training variability and selection history needed separate uncertainty contracts.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-035&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-036&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: release a small reproducible PyTorch model&quot;,</span>
-<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
-<span>      &quot;findings&quot;: [</span>
-<span>        &quot;The release capstone needed an analytic training/holdout oracle and explicit artifact boundaries.&quot;,</span>
-<span>        &quot;Hash integrity,metadata validation and publisher trust needed separate meanings.&quot;,</span>
-<span>        &quot;Local acceptance,negative-gate success,rollback identity and production readiness needed precise scope.&quot;</span>
-<span>      ],</span>
-<span>      &quot;paired_guide_reviewed&quot;: &quot;tf-036&quot;,</span>
-<span>      &quot;executable_change&quot;: false,</span>
-<span>      &quot;worked_code_change&quot;: false,</span>
-<span>      &quot;review_runtime_evidence&quot;: []</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;review_date&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-23&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;chapters&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A bounded PyTorch investigation and framework comparison&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The published holdout needed a clearer distinction from a blind assessment.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Experiment selection and extrapolation needed a concrete decision trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Malformed words obscured the evidence boundary.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Tensors, devices, dtypes, strides and views&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Storage offsets, contiguity and ownership needed separate reasoning.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Broadcast pairing needed a complete numerical counterexample.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Linear modules, parameters and matrix contracts&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Forward layout and parameter count needed a shape ledger.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Registration, differentiation and optimizer membership needed clearer separation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Loss functions, reductions and gradient scale&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Mean reduction needed a batch-by-output derivation and masked-gradient trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Objective weighting and metric preference needed concrete comparisons.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Derivatives, requires_grad and finite-difference checks&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Finite differences needed a truncation/cancellation derivation and a distinction from learning-rate steps.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The numerical helper did not reject a nonfinite point when a constant function hid it.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-005_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bbc9ca56deaebe89dd9b10248a8c72b4ac83311912ff3979c1260ead0e5c4819&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.013</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-worked/torch-005-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;fdbbe5e392a0aa5e96c726e71c04c6b56fb24c1c92545b817b82be8796164d81&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-005.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.937</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Autograd graphs, the chain rule and in-place hazards&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The chain factors needed an exact forward/backward table.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;In-place version checking and saved-graph lifetime needed a concrete failure sequence.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Leaf tensors, detach, no_grad and gradient accumulation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Graph history, gradient buffers, storage ownership and module mode needed a separate-state comparison.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;None-versus-zero gradients needed an optimizer-aware interpretation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One optimizer step you can audit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The one-step oracle needed a full objective and stability derivation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The broadcast counterexample needed to show a changed optimum,not only a different first gradient.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Batches, zero_grad and repeated updates&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Batch/update counts needed an exact parameter-state trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Metric weighting needed separation from evaluation at the final model state.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Datasets, held-out families and leakage controls&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Subset delegation and split identity needed a concrete index/shape trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The held-out perturbation needed exact fitted-statistic arithmetic and claim limits.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nn.Module, registered parameters and explicit training loops&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Module state categories needed a concrete ownership and persistence table.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Optimizer object membership and dtype conversion needed an operational ordering explanation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: an auditable tiny PyTorch regressor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The capstone decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The special basis-vector fixture allowed an independent closed-form100-step oracle that was missing.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The final-model metric needed distinction from the last pre-update loss in the curve.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-012_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;7065ba3acadffa38430501fbfd147066d8cf46daa817ae0a8b68a0da786755af&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.498</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-worked/torch-012-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2d297a5a840c43f8c8351baddc4f69d2b519651212056713f63e08e7ef1b42c9&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-012.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.501</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Binary logits, BCEWithLogitsLoss and thresholds&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Stable binary loss needed its algebra and gradient,not only API naming.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Threshold cost assumptions,double-sigmoid gradients andcalibration limits needed concrete reasoning.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;CrossEntropyLoss, multiclass and multilabel contracts&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Class-axis andtarget contracts needed a spatial/batched shape table.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Cross-entropy gradients,soft targets andweighted denominators needed clearer boundaries.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-014_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;e399b32881779b12c4f2f24a25f90c5e89ff3be6b0a3c8dceb7acd028a5bcf70&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.97</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dataset, DataLoader, collation and reproducible sampling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Sampler state,collation masks andtail populations needed distinct contracts.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The collator silently truncated floating token IDs into a Long tensor.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-015_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;3f02a8dc38300a37e69604626966f9cbfb5a43c8d50b0570ee5f7564afd9461d&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.854</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-worked/torch-015-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;eac8fb051853d2f1a3cd051580fe78f6c96d4dbf5c62d2da8dbac97603eb6767&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-015.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.849</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Initialization, nonlinearities and gradient diagnostics&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;XOR needed an affine impossibility proof and a full hidden-feature trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The symmetric XOR matrix could not detect the claimed transpose mistake.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Initialization symmetry needed conditions on downstream gradients and activation regions.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-016_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;93994c908a91da36691412c1c33e170d720dec5df333cf0bf15e3a19f23d29cb&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.845</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-worked/torch-016-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;58f5d5c0385a08809a78a58e92835f6156b521c81f616d09126c08b83b8930b6&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-016.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.96</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dropout, regularization, train and eval modes&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Dropout expectation was stated without its variance or backward trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Penalty coefficients, loss reduction and adaptive weight decay needed an explicit comparison.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BatchNorm, LayerNorm and stateful normalization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The decision section was empty.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Axis retention versus reduction needed a complete shape ledger.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Momentum parity needed a non-half coefficient and distinct variance estimators.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Freezing affine gradients was not distinguished from freezing running statistics.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Convolutions, channel layouts and shared computation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Output-size, dilation and parameter-sharing rules lacked a symbolic shape derivation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The forward patch example did not explain how shared kernel and input gradients accumulate.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Semantic layout conversion, memory format and translation equivariance needed separate contracts.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pooling, local augmentation and label invariants&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Pooling information loss needed a backward-sensitivity trace and boundary counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;A flip round trip was not distinguished fully from a valid target transformation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Pooling defaults and ownership of deterministic evaluation outputs needed explicit decisions.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Embeddings, padded sequences and recurrent models&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Embedding lookup gradients and padding semantics needed an exact row-by-row trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Packed recurrent output, final-state axes and the detached worked-example boundary needed explanation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Zero padding, mask propagation and valid-token versus per-sequence objectives were conflated by insufficient detail.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Attention, transformer masks and information boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Query/key/value axes and the softmax Jacobian needed a concrete forward/backward trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Mask polarity differences needed a parameter-level table and a float-mask counterexample.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Prefix agreement was overinterpreted as a complete arithmetic or model-causality check.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Debugging custom loops, accumulation and clipping&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The scalar update sequence needed exact before/loss/gradient/after states.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Accumulation weighting and clipping order were named without an unequal-microbatch counterexample.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Missing gradients,nonfinite gradients and optimizer displacement needed different diagnostic meanings.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: a small classifier with honest evaluation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The classifier capstone needed an independently derived first update and preprocessing denominator comparison.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Visible synthetic labels and two test rows were insufficiently separated from population reliability.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Confusion accounting,threshold ties and subgroup denominators needed a complete decision trace.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-025&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Contrastive embeddings and negative sampling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Contrastive temperature needed an exact loss/gradient derivation rather than a sharpness label.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The projection-gradient check needed its actual trainable branch and expected matrix explained.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;False negatives,zero norms and changing candidate populations needed distinct failure contracts.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-025&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-026&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Custom modules, residual paths, buffers and autograd checks&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Residual forward identity needed a nonzero branch-gradient derivation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Parameter objects,buffers,constructor metadata and optimizer identity needed distinct state roles.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Custom backward needed a vector-Jacobian-product explanation and clearer gradcheck limits.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-026&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-027&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Transfer learning, frozen layers and optimizer membership&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Freeze semantics needed a four-part state/mode/gradient/optimizer contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The head update and newly available base-gradient path lacked an exact local derivation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Unfreezing needed explicit optimizer-state choices rather than implying recreation is mandatory.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-027&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-028&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Restartable training, optimizer state and RNG evidence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Restart parity needed a state-dependency ledger and a precise RNG draw timeline.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The fixed data-position marker was not clearly separated from restoring a real loader or sampler.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Snapshot aliasing,optimizer reconstruction and checkpoint publication limits needed explanation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-028&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-029&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Stable objectives, precision and mixed-precision boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Stable softmax/cross-entropy needed an exact shifted-logit and gradient derivation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Range,precision and cancellation were not distinguished by concrete dtype comparisons.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Autocast,gradient scaling and clipping order needed separate hardware-qualified boundaries.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-029&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Distributed gradients and accumulation semantics on CPU&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Unequal-shard weighting needed a direct connection to backend averaging conventions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The full-batch and sequential-microbatch trajectories needed exact distinct endpoints.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Empty shards,regularization and batch-dependent forward behavior needed explicit assumptions.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-030_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;226f37bfe24d12cbeabdcf0bc0d88aab44d0072c07660370a9523b90a24ed623&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.299</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/pytorch-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-031&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Profiling, torch.compile and honest performance measurement&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Graph capture,backend execution and optimizing compilation needed a phase-by-phase distinction.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The graph counter and timing interval needed precise observable meanings.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Profiler totals,signature diversity and setup amortization needed concrete interpretation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-031&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-032&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;state_dict, torch.export and inference parity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;State reconstruction and exported-program constraints needed a direct interface comparison.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Static batch specialization and declared dynamic bounds needed precise tested-versus-declared scope.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Feature semantics,artifact ownership and inference versus training continuation needed distinct acceptance gates.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-032&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-033&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inference mode, model contracts and bounded batching&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Inference mode,eval and an owned normal output tensor needed a precise lifetime/gradient explanation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Per-record batching parity needed its stateless-model assumptions and singleton-axis trace.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Input finiteness,batch bounds and output-value guarantees needed clearer scope.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-033&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-034&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Robustness, privacy and evidence beyond a score&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Duplicate weighting and subgroup uncertainty needed exact denominator counterexamples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Perturbation outcomes needed a stated target policy rather than an unchanged-prediction slogan.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Privacy mechanisms,severity gates and finite empirical evidence needed separate meanings.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-034&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-035&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Paired model comparisons and uncertainty&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The paired loss comparison needed its full per-ID table and covariance explanation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The three-point bootstrap needed an exact empirical distribution and a distinction from new evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Resampling units,training variability and selection history needed separate uncertainty contracts.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-035&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-036&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: release a small reproducible PyTorch model&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reviewed_and_deepened&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;findings&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;The release capstone needed an analytic training/holdout oracle and explicit artifact boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Hash integrity,metadata validation and publisher trust needed separate meanings.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Local acceptance,negative-gate success,rollback identity and production readiness needed precise scope.&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_guide_reviewed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-036&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;executable_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worked_code_change&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;review_runtime_evidence&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

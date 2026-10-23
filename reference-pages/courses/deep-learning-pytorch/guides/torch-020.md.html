@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>torch-019</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Pooling reduces local spatial information. The central investigation is concrete: Pool patch 1, 3; 2, 4 with a2x2window. The finish condition is max 4; average 2.5. left-&gt;right-&gt;left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Pooling reduces local spatial information. The central investigation is concrete: Pool patch 1, 3; 2, 4 with a 2-by-2 window. The finish condition is max 4; average 2.5. left-&gt;right-&gt;left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Pooling reduces local spatial information. Max pooling retains the largest response; average pooling uses every entry. Both can make certain perturbations less visible while also discarding potentially useful details. Augmentation changes training inputs under a declared label policy. A horizontal flip may preserve a shape label but reverse a left/right direction label. A transform&#x27;s availability in a library does not establish its validity for the task.</p>
 <p>This lesson uses only torch operations on literal images, not torchvision or a data download. Training transforms and evaluation transforms are separate functions. Evaluation remains deterministic. Random augmentation, when introduced, should use the intended random state and be tested by invariants rather than a hard coded cross-platform mask.</p>
@@ -140,7 +186,7 @@
 <p>F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image: geometry alone cannot prove semantic invariance.</p>
 <h3 id="trace-discarded-information-gradients-and-target-semantics">Trace discarded information, gradients and target semantics<a class="heading-anchor" href="#trace-discarded-information-gradients-and-target-semantics" aria-label="Link to this section">#</a></h3>
 <p>For the patch[[1, 3], [2, 4]], max pooling returns 4 and average pooling returns(1+3+2+4)/4=2.5. Now change only the first entry from 1 to 0. The maximum stays 4, while the average becomes 9/4=2.25. The two maps are therefore not interchangeable summaries even though both return one number. Many different patches share the same maximum, so no later layer can reconstruct all discarded values from that output alone.</p>
-<p>Consider an upstream derivative g=1 for this one pooled output. With a unique maximum, the max-pool backward route sends one to the selected 4 and zero to the other positions. Average pooling sends 1/4 to every entry. This explains the perturbation result locally: a small change to the nonmaximum 1 has zero first-order effect on the max but a quarter-sized effect on the average. Raising 3 past 4 changes the selected maximum, so the derivative route changes at that boundary. At a tie there is no unique ordinary derivative of the max function; do not assume gradients are split equally or use a tied point as a smooth finite-difference oracle.</p>
+<p>Consider an upstream derivative <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">g=1</annotation></semantics></math> for this one pooled output. With a unique maximum, the max-pool backward route sends one to the selected 4 and zero to the other positions. Average pooling sends <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math> to every entry. This explains the perturbation result locally: a small change to the nonmaximum 1 has zero first-order effect on the max but a quarter-sized effect on the average. Raising 3 past 4 changes the selected maximum, so the derivative route changes at that boundary. At a tie there is no unique ordinary derivative of the max function; do not assume gradients are split equally or use a tied point as a smooth finite-difference oracle.</p>
 <p>The worked call uses kernel_size2 and the default stride equal to the kernel size. With overlapping windows, one input can receive contributions from several pooled outputs, so its final gradient sums those routes. Pooling itself has no learned kernel coefficients in these examples. Its effect on training is through the information and derivatives it passes to learned layers.</p>
 <p>Padding conventions matter on negative inputs. PyTorch max pooling uses implicit negative infinity for its padding, so a padded location cannot defeat a valid negative maximum. Replacing that with ordinary zero padding would make a patch of negative responses appear to contain a larger zero. For average pooling, count_include_pad and any divisor override affect the denominator near boundaries. The paired TensorFlow worked example uses VALID padding, so none of those boundary differences is exercised there. Match explicit conventions before claiming a padded cross-framework equivalence. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.MaxPool2d.html">PyTorch 2.9 MaxPool2d</a>.</p>
 <p>A local pool can be invariant to permutations inside one fixed window, but shifting an image can move values between windows. Max pooling is not a general guarantee that the complete model ignores translations. Stride and window boundaries can discard small features or alias a pattern. Whether that tradeoff helps depends on the task and the downstream representation, not only the smaller tensor shape.</p>
@@ -151,28 +197,28 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-compare-local-reductions">Example A: Compare local reductions<a class="heading-anchor" href="#example-a-compare-local-reductions" aria-label="Link to this section">#</a></h4>
 <p>The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-image=torch.tensor([[[[1.,3.],[2.,4.]]]])
-assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5</code></pre>
+image<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> F<span class="syntax-operator">.</span>max_pool2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> F<span class="syntax-operator">.</span>avg_pool2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.5</span></code></pre>
 <p><strong>Expected:</strong> max 4; average 2.5.</p>
 <h4 id="example-b-inspect-a-horizontal-flip">Example B: Inspect a horizontal flip<a class="heading-anchor" href="#example-b-inspect-a-horizontal-flip" aria-label="Link to this section">#</a></h4>
 <p>The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.</p>
-<pre><code class="language-python">flipped=torch.flip(image,dims=(-1,))
-assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]</code></pre>
+<pre class="highlighted-code"><code class="language-python">flipped<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>dims<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> flipped<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> rows 3, 1 and 4, 2.</p>
 <h4 id="example-c-check-the-round-trip">Example C: Check the round trip<a class="heading-anchor" href="#example-c-check-the-round-trip" aria-label="Link to this section">#</a></h4>
 <p>Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.</p>
-<pre><code class="language-python">assert torch.equal(torch.flip(flipped,dims=(-1,)),image)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>flipped<span class="syntax-punctuation">,</span>dims<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>image<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> exact original values.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: max 4; average 2.5. left-&gt;right-&gt;left. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Compare local reductions.</strong> Pool patch 1, 3; 2, 4 with a2x2window. <strong>Expected:</strong> max 4; average 2.5. <strong>Verify:</strong> Save the assertion results for exercise 1, including max 4; average 2.5.</li>
+<li><strong>Compare local reductions.</strong> Pool patch 1, 3; 2, 4 with a 2-by-2 window. <strong>Expected:</strong> max 4; average 2.5. <strong>Verify:</strong> Save the assertion results for exercise 1, including max 4; average 2.5.</li>
 </ol>
 <ol>
 <li><strong>Inspect a horizontal flip.</strong> Flip the width axis and read the pixel s. <strong>Expected:</strong> rows 3, 1 and 4, 2. <strong>Verify:</strong> Save the assertion results for exercise 2, including rows 3, 1 and 4, 2.</li>
@@ -206,7 +252,7 @@ assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]</code></pre>
 <p><strong>Why separate training and evaluation transforms?</strong></p>
 <p>Stochastic training changes are part of the fitting policy. Evaluation needs a declared repeatable policy so score changes are interpretable.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-020, Pooling, local augmentation and label invariants.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-020, Pooling, local augmentation and label invariants.
 Read courses/deep-learning-pytorch/guides/torch-020.md and courses/deep-learning-pytorch/lessons/torch-020.py. Direct prerequisites: `torch-019`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -339,22 +385,24 @@
 <p>Complete Day 26 (<code>python-26</code>). This optional lesson uses the <code>geo</code> dependency group (<code>geopandas</code>, <code>geodatasets</code>, <code>contextily</code>, and <code>networkx</code>).</p>
 <p>Install the advanced profile if those packages are not present.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1 -Advanced</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md</code>, then open <code>python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -380,28 +428,28 @@
 <p><code>GeoDataFrame(data, geometry=..., crs=&quot;EPSG:4326&quot;)</code> declares that the supplied longitude/latitude coordinates already use WGS 84. <code>.to_crs(&quot;EPSG:3857&quot;)</code> transforms them to Web Mercator meters. In contrast, <code>.set_crs(...)</code> labels coordinates without moving them and should be used only when the original CRS is known but missing.</p>
 <h5 id="guide--worked-example-1-create-known-geographic-points-and-inspect-bounds">Worked example 1 — Create known geographic points and inspect bounds<a class="heading-anchor" href="#guide--worked-example-1-create-known-geographic-points-and-inspect-bounds" aria-label="Link to this section">#</a></h5>
 <p>Constructed geometry avoids any network or external file. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import geopandas as gpd
-from shapely.geometry import Point
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> geopandas <span class="syntax-keyword">as</span> gpd
+<span class="syntax-keyword">from</span> shapely.geometry <span class="syntax-keyword">import</span> Point
 
-places = gpd.GeoDataFrame(
-    {&quot;name&quot;: [&quot;A&quot;, &quot;B&quot;]},
-    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
-    crs=&quot;EPSG:4326&quot;,
-)
-(str(places.crs), places.total_bounds.round(1).tolist())</code></pre>
+places <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.</span>GeoDataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    geometry<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">37.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">73.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40.7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    crs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:4326</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>places<span class="syntax-operator">.</span>crs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> places<span class="syntax-operator">.</span>total_bounds<span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.</code></pre>
+<pre class="highlighted-code"><code class="language-text">The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-reproject-rather-than-relabel">Worked example 2 — Reproject rather than relabel<a class="heading-anchor" href="#guide--worked-example-2-reproject-rather-than-relabel" aria-label="Link to this section">#</a></h5>
 <p>Projected coordinates use different units while representing the same places. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">projected = places.to_crs(&quot;EPSG:3857&quot;)
-{
-    &quot;same_rows&quot;: len(projected) == len(places),
-    &quot;projected_crs&quot;: str(projected.crs),
-    &quot;x_units_are_not_degrees&quot;: abs(projected.geometry.x.iloc[0]) &gt; 1_000,
-}</code></pre>
+<pre class="highlighted-code"><code class="language-python">projected <span class="syntax-operator">=</span> places<span class="syntax-operator">.</span>to_crs<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:3857</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">same_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>projected<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>places<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">projected_crs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>projected<span class="syntax-operator">.</span>crs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">x_units_are_not_degrees</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>projected<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>x<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">All checks are true; the coordinates are transformed to meter-like Web Mercator values.</code></pre>
+<pre class="highlighted-code"><code class="language-text">All checks are true; the coordinates are transformed to meter-like Web Mercator values.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -433,23 +481,23 @@ places = gpd.GeoDataFrame(
 </ul>
 <p>Coordinates without a known CRS are numbers, not trustworthy locations.</p>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import geopandas as gpd
-import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> geopandas <span class="syntax-keyword">as</span> gpd
+<span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
-cities = pd.DataFrame(
-    {
-        &quot;city&quot;: [&quot;San Francisco&quot;, &quot;New York&quot;],
-        &quot;longitude&quot;: [-122.4194, -74.0060],
-        &quot;latitude&quot;: [37.7749, 40.7128],
-    }
-)
-points = gpd.GeoDataFrame(
-    cities,
-    geometry=gpd.points_from_xy(cities[&quot;longitude&quot;], cities[&quot;latitude&quot;]),
-    crs=&quot;EPSG:4326&quot;,
-)
-ax = points.plot(figsize=(7, 4), column=&quot;city&quot;, legend=True)
-ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;, ylabel=&quot;Latitude&quot;)</code></pre>
+cities <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">city</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">San Francisco</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">New York</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">longitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">122.4194</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">74.0060</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">latitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">37.7749</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40.7128</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+points <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.</span>GeoDataFrame<span class="syntax-punctuation">(</span>
+    cities<span class="syntax-punctuation">,</span>
+    geometry<span class="syntax-operator">=</span>gpd<span class="syntax-operator">.</span>points_from_xy<span class="syntax-punctuation">(</span>cities<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">longitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> cities<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">latitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    crs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:4326</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+ax <span class="syntax-operator">=</span> points<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> column<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">city</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> legend<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+ax<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Example city coordinates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> xlabel<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Longitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ylabel<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Latitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>This example is deterministic and makes no network request. It shows points, not city boundaries.</p>
 <h4 id="guide--download-cache-note">Download/cache note<a class="heading-anchor" href="#guide--download-cache-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook&#x27;s <code>geodatasets.get_path(...)</code> example downloads and caches Natural Earth data on first use. <code>contextily</code> basemaps also require tile-network access unless separately cached. Prime approved caches while online, use a local GeoJSON file, or choose the NetworkX exercise for fully offline work.</p>
@@ -496,7 +544,7 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-27`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-27`
 (Day 27 — Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
 I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
@@ -569,26 +617,26 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>GeoDataFrame(data, geometry=..., crs=&quot;EPSG:4326&quot;)</code> declares that the supplied longitude/latitude coordinates already use WGS 84. <code>.to_crs(&quot;EPSG:3857&quot;)</code> transforms them to Web Mercator meters. In contrast, <code>.set_crs(...)</code> labels coordinates without moving them and should be used only when the original CRS is known but missing.</p>
 <h5 id="learner--cell-4--worked-example-1-create-known-geographic-points-and-inspect-bounds">Worked example 1 — Create known geographic points and inspect bounds<a class="heading-anchor" href="#learner--cell-4--worked-example-1-create-known-geographic-points-and-inspect-bounds" aria-label="Link to this section">#</a></h5>
 <p>Constructed geometry avoids any network or external file. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import geopandas as gpd</span>
-<span>from shapely.geometry import Point</span>
-<span> </span>
-<span>places = gpd.GeoDataFrame(</span>
-<span>    {&quot;name&quot;: [&quot;A&quot;, &quot;B&quot;]},</span>
-<span>    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],</span>
-<span>    crs=&quot;EPSG:4326&quot;,</span>
-<span>)</span>
-<span>(str(places.crs), places.total_bounds.round(1).tolist())</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> geopandas <span class="syntax-keyword">as</span> gpd</span>
+<span class="source-line"><span class="syntax-keyword">from</span> shapely.geometry <span class="syntax-keyword">import</span> Point</span>
+<span class="source-line"></span>
+<span class="source-line">places <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.</span>GeoDataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    geometry<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">37.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">73.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40.7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    crs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:4326</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>places<span class="syntax-operator">.</span>crs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> places<span class="syntax-operator">.</span>total_bounds<span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The CRS is WGS 84/EPSG:4326 and bounds are approximately <code>[-122.4, 37.8, -73.9, 40.7]</code> in longitude/latitude degrees.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-reproject-rather-than-relabel">Worked example 2 — Reproject rather than relabel<a class="heading-anchor" href="#learner--cell-6--worked-example-2-reproject-rather-than-relabel" aria-label="Link to this section">#</a></h5>
 <p>Projected coordinates use different units while representing the same places. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>projected = places.to_crs(&quot;EPSG:3857&quot;)</span>
-<span>{</span>
-<span>    &quot;same_rows&quot;: len(projected) == len(places),</span>
-<span>    &quot;projected_crs&quot;: str(projected.crs),</span>
-<span>    &quot;x_units_are_not_degrees&quot;: abs(projected.geometry.x.iloc[0]) &gt; 1_000,</span>
-<span>}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">projected <span class="syntax-operator">=</span> places<span class="syntax-operator">.</span>to_crs<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:3857</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">same_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>projected<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>places<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">projected_crs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>projected<span class="syntax-operator">.</span>crs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">x_units_are_not_degrees</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>projected<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>x<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> All checks are true; the coordinates are transformed to meter-like Web Mercator values.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -602,16 +650,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.</p>
 <p><strong>Boundary to test:</strong> Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># This optional example downloads and caches Natural Earth data on first use.</span>
-<span>try:</span>
-<span>    import geopandas as gpd</span>
-<span>    from geodatasets import get_path</span>
-<span> </span>
-<span>    world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;))</span>
-<span>    world.plot(figsize=(8, 6), edgecolor=&#x27;black&#x27;)</span>
-<span>except ImportError:</span>
-<span>    print(&#x27;Install the geo dependency group to run this optional example.&#x27;)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># This optional example downloads and caches Natural Earth data on first use.</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> geopandas <span class="syntax-keyword">as</span> gpd</span>
+<span class="source-line">    <span class="syntax-keyword">from</span> geodatasets <span class="syntax-keyword">import</span> get_path</span>
+<span class="source-line"></span>
+<span class="source-line">    world <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.</span>read_file<span class="syntax-punctuation">(</span>get_path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">naturalearth.land</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    world<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> edgecolor<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">black</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ImportError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Install the geo dependency group to run this optional example.</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -635,86 +683,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. transfo...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. transfo...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. use a fixed layout seed, encode at most a few meaningful attr...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. use a fixed layout seed, encode at most a few meaningful attr...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs). <strong>Verify:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Layers must use compatible coordinate reference systems (CRSs)...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Layers must use compatible coordinate reference systems (CRSs)...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters. <strong>Verify:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Both numbers may fall in legal ranges, so sem...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Both numbers may fall in legal ranges, so sem...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. <strong>Verify:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Require west ≤ east, south ≤ north, and geographic bounds. Assert a valid box passes...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Require west ≤ east, south ≤ north, and geographic bounds. Assert a valid box passes...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. <strong>Verify:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Inspect `.crs`; transform one layer to the other&#x27;s CRS. Show the pre-reprojection CRS mismatch...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Inspect `.crs`; transform one layer to the other&#x27;s CRS. Show the pre-reprojection CRS mismatch...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer. <strong>Verify:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. A missing basemap should not erase the analytical d...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. A missing basemap should not erase the analytical d...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -768,80 +816,80 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. Before plotting: record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. Constraints: transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. Values below, at, and above the named boundary must produce the evidence check a known location/bounds and confirm entity count survives reprojection. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.</p>
-<pre><code class="language-python">import geopandas as gpd
-from shapely.geometry import Point
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> geopandas <span class="syntax-keyword">as</span> gpd
+<span class="syntax-keyword">from</span> shapely.geometry <span class="syntax-keyword">import</span> Point
 
-places = gpd.GeoDataFrame(
-    {&quot;name&quot;: [&quot;San Francisco&quot;, &quot;New York&quot;]},
-    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
-    crs=&quot;EPSG:4326&quot;,
-)
-spatial_profile = {
-    &quot;provenance&quot;: &quot;constructed course points&quot;,
-    &quot;license&quot;: &quot;course-authored fixture; unrestricted educational reuse&quot;,
-    &quot;crs&quot;: places.crs.to_string(),
-    &quot;geometry_types&quot;: sorted(places.geom_type.unique().tolist()),
-    &quot;invalid_count&quot;: int((~places.geometry.is_valid).sum()),
-    &quot;empty_count&quot;: int(places.geometry.is_empty.sum()),
-    &quot;bounds&quot;: places.total_bounds.tolist(),
-}
-assert places.crs is not None
-assert places.geometry.is_valid.all()
-assert spatial_profile[&quot;geometry_types&quot;] == [&quot;Point&quot;]
-assert spatial_profile[&quot;bounds&quot;][0] &lt; -122
-assert places.loc[
-    places[&quot;name&quot;].eq(&quot;San Francisco&quot;), &quot;geometry&quot;
-].iloc[0].x == -122.4
-projected = places.to_crs(&quot;EPSG:3857&quot;)
-assert len(projected) == len(places)
-assert projected.crs == &quot;EPSG:3857&quot;
-assert not projected.geometry.equals(places.geometry)
-ax = projected.plot()
-assert len(ax.collections) &gt;= 1</code></pre>
+places <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.</span>GeoDataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">San Francisco</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">New York</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    geometry<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">37.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Point<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">73.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40.7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    crs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:4326</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+spatial_profile <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">provenance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">constructed course points</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">license</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course-authored fixture; unrestricted educational reuse</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">crs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> places<span class="syntax-operator">.</span>crs<span class="syntax-operator">.</span>to_string<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">geometry_types</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>places<span class="syntax-operator">.</span>geom_type<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">invalid_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-operator">~</span>places<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>is_valid<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">empty_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>places<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>is_empty<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">bounds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> places<span class="syntax-operator">.</span>total_bounds<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> places<span class="syntax-operator">.</span>crs <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+<span class="syntax-keyword">assert</span> places<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>is_valid<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> spatial_profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">geometry_types</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">Point</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> spatial_profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">bounds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> <span class="syntax-operator">-</span><span class="syntax-number">122</span>
+<span class="syntax-keyword">assert</span> places<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>
+    places<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>eq<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">San Francisco</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">geometry</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>x <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">122.4</span>
+projected <span class="syntax-operator">=</span> places<span class="syntax-operator">.</span>to_crs<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:3857</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>projected<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>places<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> projected<span class="syntax-operator">.</span>crs <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">EPSG:3857</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> projected<span class="syntax-operator">.</span>geometry<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>places<span class="syntax-operator">.</span>geometry<span class="syntax-punctuation">)</span>
+ax <span class="syntax-operator">=</span> projected<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ax<span class="syntax-operator">.</span>collections<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></code></pre>
 <p>This constructed local fixture needs no basemap or network source. <code>to_crs</code> transforms coordinates; <code>set_crs</code> would only relabel their meaning and would be incorrect here.</p>
 <p><strong>Verification evidence:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. Constraints: use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.</p>
-<pre><code class="language-python">import matplotlib.pyplot as plt
-import networkx as nx
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
+<span class="syntax-keyword">import</span> networkx <span class="syntax-keyword">as</span> nx
 
-graph = nx.Graph()
-graph.add_nodes_from([
-    (&quot;source&quot;, {&quot;role&quot;: &quot;input&quot;}),
-    (&quot;clean&quot;, {&quot;role&quot;: &quot;transform&quot;}),
-    (&quot;report&quot;, {&quot;role&quot;: &quot;output&quot;}),
-])
-graph.add_edges_from([
-    (&quot;source&quot;, &quot;clean&quot;, {&quot;meaning&quot;: &quot;feeds&quot;}),
-    (&quot;clean&quot;, &quot;report&quot;, {&quot;meaning&quot;: &quot;produces&quot;}),
-])
-positions = nx.spring_layout(graph, seed=42)
-fig, ax = plt.subplots(figsize=(5, 3))
-role_shapes = {&quot;input&quot;: &quot;s&quot;, &quot;transform&quot;: &quot;o&quot;, &quot;output&quot;: &quot;^&quot;}
-for role, shape in role_shapes.items():
-    nodes = [
-        node for node, attributes in graph.nodes(data=True)
-        if attributes[&quot;role&quot;] == role
-    ]
-    nx.draw_networkx_nodes(
-        graph,
-        positions,
-        nodelist=nodes,
-        node_shape=shape,
-        label=role,
-        ax=ax,
-    )
-nx.draw_networkx_edges(graph, positions, ax=ax)
-nx.draw_networkx_labels(graph, positions, ax=ax)
-ax.legend(title=&quot;Node role&quot;)
-ax.set_axis_off()
+graph <span class="syntax-operator">=</span> nx<span class="syntax-operator">.</span>Graph<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+graph<span class="syntax-operator">.</span>add_nodes_from<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">role</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">clean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">role</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">transform</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">report</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">role</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+graph<span class="syntax-operator">.</span>add_edges_from<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">clean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">meaning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">feeds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">clean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">report</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">meaning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">produces</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+positions <span class="syntax-operator">=</span> nx<span class="syntax-operator">.</span>spring_layout<span class="syntax-punctuation">(</span>graph<span class="syntax-punctuation">,</span> seed<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-punctuation">,</span> ax <span class="syntax-operator">=</span> plt<span class="syntax-operator">.</span>subplots<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+role_shapes <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">transform</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">o</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">^</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> role<span class="syntax-punctuation">,</span> shape <span class="syntax-operator">in</span> role_shapes<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    nodes <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+        node <span class="syntax-keyword">for</span> node<span class="syntax-punctuation">,</span> attributes <span class="syntax-operator">in</span> graph<span class="syntax-operator">.</span>nodes<span class="syntax-punctuation">(</span>data<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> attributes<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">role</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> role
+    <span class="syntax-punctuation">]</span>
+    nx<span class="syntax-operator">.</span>draw_networkx_nodes<span class="syntax-punctuation">(</span>
+        graph<span class="syntax-punctuation">,</span>
+        positions<span class="syntax-punctuation">,</span>
+        nodelist<span class="syntax-operator">=</span>nodes<span class="syntax-punctuation">,</span>
+        node_shape<span class="syntax-operator">=</span>shape<span class="syntax-punctuation">,</span>
+        label<span class="syntax-operator">=</span>role<span class="syntax-punctuation">,</span>
+        ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+nx<span class="syntax-operator">.</span>draw_networkx_edges<span class="syntax-punctuation">(</span>graph<span class="syntax-punctuation">,</span> positions<span class="syntax-punctuation">,</span> ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">)</span>
+nx<span class="syntax-operator">.</span>draw_networkx_labels<span class="syntax-punctuation">(</span>graph<span class="syntax-punctuation">,</span> positions<span class="syntax-punctuation">,</span> ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">)</span>
+ax<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Node role</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+ax<span class="syntax-operator">.</span>set_axis_off<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-assert graph.number_of_nodes() == 3
-assert graph.number_of_edges() == 2
-assert set(positions) == set(graph)
-assert sum(len(collection.get_offsets()) for collection in ax.collections[:3]) == 3
-plt.close(fig)</code></pre>
+<span class="syntax-keyword">assert</span> graph<span class="syntax-operator">.</span>number_of_nodes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> graph<span class="syntax-operator">.</span>number_of_edges<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>positions<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>graph<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>collection<span class="syntax-operator">.</span>get_offsets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> collection <span class="syntax-operator">in</span> ax<span class="syntax-operator">.</span>collections<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+plt<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span>fig<span class="syntax-punctuation">)</span></code></pre>
 <p>A deterministic graph can show dependency relationships offline, but it cannot answer geographic distance, containment, or coordinate questions because its layout encodes readability, not physical space.</p>
 <p><strong>Verification evidence:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -870,32 +918,32 @@ plt.close(fig)</code></pre>
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-crs-and-coordinate-order">Shared implementation for Exercises 3–4 — CRS and coordinate order<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
 <p>Longitude/latitude data are commonly stored as <code>(x, y) = (longitude, latitude)</code>. Swapping them may still produce numbers inside valid ranges but a wrong place. Degrees and projected meters cannot be overlaid without reprojection.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-spatial-boundaries-and-degrade-gracefully">Shared implementation for Exercises 5–7 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from dataclasses import dataclass
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
 
 
-@dataclass(frozen=True)
-class GeographicBounds:
-    west: float
-    south: float
-    east: float
-    north: float
+<span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">class</span> <span class="syntax-class">GeographicBounds</span><span class="syntax-punctuation">:</span>
+    west<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
+    south<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
+    east<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
+    north<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
 
-    def __post_init__(self) -&gt; None:
-        if not (-180 &lt;= self.west &lt;= self.east &lt;= 180):
-            raise ValueError(&quot;longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180&quot;)
-        if not (-90 &lt;= self.south &lt;= self.north &lt;= 90):
-            raise ValueError(&quot;latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90&quot;)
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__post_init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">180</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>west <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>east <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">180</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">90</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>south <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>north <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-    def contains(self, longitude: float, latitude: float) -&gt; bool:
-        return (
-            self.west &lt;= longitude &lt;= self.east
-            and self.south &lt;= latitude &lt;= self.north
-        )
+    <span class="syntax-keyword">def</span> <span class="syntax-function">contains</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> longitude<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>
+            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>west <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> longitude <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>east
+            <span class="syntax-operator">and</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>south <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> latitude <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>north
+        <span class="syntax-punctuation">)</span>
 
 
-bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)
-assert bounds.contains(longitude=-122.4, latitude=37.8)
-assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
+bounds <span class="syntax-operator">=</span> GeographicBounds<span class="syntax-punctuation">(</span>west<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">125</span><span class="syntax-punctuation">,</span> south<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> east<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">114</span><span class="syntax-punctuation">,</span> north<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> bounds<span class="syntax-operator">.</span>contains<span class="syntax-punctuation">(</span>longitude<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-operator">=</span><span class="syntax-number">37.8</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> bounds<span class="syntax-operator">.</span>contains<span class="syntax-punctuation">(</span>longitude<span class="syntax-operator">=</span><span class="syntax-number">37.8</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></div>
       </section>
 
@@ -932,24 +980,24 @@ assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-27-solutions-geospatial-or-domain-visualization">Day 27 — Solutions: Geospatial or Domain Visualization<a class="heading-anchor" href="#solution-2--cell-1--day-27-solutions-geospatial-or-domain-visualization" aria-label="Link to this section">#</a></h3>
 <p>GeoPandas world map or NetworkX pipeline graph.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># GeoPandas track (requires geopandas, contextily, geodatasets)</span>
-<span># import contextily as cx</span>
-<span># import geopandas as gpd</span>
-<span># from geodatasets import get_path</span>
-<span># world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;)).to_crs(3857)</span>
-<span># ax = world.plot(figsize=(8,6), alpha=0.6, edgecolor=&#x27;k&#x27;)</span>
-<span># cx.add_basemap(ax, source=cx.providers.Stamen.TonerLite)</span>
-<span># ax.set(title=&#x27;World basemap (Web Mercator)&#x27;)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># GeoPandas track (requires geopandas, contextily, geodatasets)</span></span>
+<span class="source-line"><span class="syntax-comment"># import contextily as cx</span></span>
+<span class="source-line"><span class="syntax-comment"># import geopandas as gpd</span></span>
+<span class="source-line"><span class="syntax-comment"># from geodatasets import get_path</span></span>
+<span class="source-line"><span class="syntax-comment"># world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;)).to_crs(3857)</span></span>
+<span class="source-line"><span class="syntax-comment"># ax = world.plot(figsize=(8,6), alpha=0.6, edgecolor=&#x27;k&#x27;)</span></span>
+<span class="source-line"><span class="syntax-comment"># cx.add_basemap(ax, source=cx.providers.Stamen.TonerLite)</span></span>
+<span class="source-line"><span class="syntax-comment"># ax.set(title=&#x27;World basemap (Web Mercator)&#x27;)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Domain viz track: network graph of pipeline stages</span>
-<span>import networkx as nx, matplotlib.pyplot as plt</span>
-<span>G = nx.Graph()</span>
-<span>G.add_edge(&#x27;ingest&#x27;,&#x27;clean&#x27;); G.add_edge(&#x27;clean&#x27;,&#x27;validate&#x27;); G.add_edge(&#x27;validate&#x27;,&#x27;model&#x27;)</span>
-<span>G.add_edge(&#x27;model&#x27;,&#x27;serve&#x27;); G.add_edge(&#x27;serve&#x27;,&#x27;monitor&#x27;)</span>
-<span>pos = nx.spring_layout(G, seed=42)</span>
-<span>plt.figure(figsize=(6,4))</span>
-<span>nx.draw(G, pos, with_labels=True, node_color=&#x27;lightblue&#x27;, node_size=1200)</span>
-<span>plt.title(&#x27;Pipeline Stages (Network Graph)&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Domain viz track: network graph of pipeline stages</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> networkx <span class="syntax-keyword">as</span> nx<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line">G <span class="syntax-operator">=</span> nx<span class="syntax-operator">.</span>Graph<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">G<span class="syntax-operator">.</span>add_edge<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ingest</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">clean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> G<span class="syntax-operator">.</span>add_edge<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">clean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> G<span class="syntax-operator">.</span>add_edge<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">G<span class="syntax-operator">.</span>add_edge<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">serve</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> G<span class="syntax-operator">.</span>add_edge<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">serve</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">monitor</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">pos <span class="syntax-operator">=</span> nx<span class="syntax-operator">.</span>spring_layout<span class="syntax-punctuation">(</span>G<span class="syntax-punctuation">,</span> seed<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>figure<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">nx<span class="syntax-operator">.</span>draw<span class="syntax-punctuation">(</span>G<span class="syntax-punctuation">,</span> pos<span class="syntax-punctuation">,</span> with_labels<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> node_color<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lightblue</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> node_size<span class="syntax-operator">=</span><span class="syntax-number">1200</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Pipeline Stages (Network Graph)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -981,33 +1029,33 @@ assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
 <h5 id="solution-2--cell-4--practices-1-2-crs-and-coordinate-order">Practices 1–2 — CRS and coordinate order<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
 <p>Longitude/latitude data are commonly stored as <code>(x, y) = (longitude, latitude)</code>. Swapping them may still produce numbers inside valid ranges but a wrong place. Degrees and projected meters cannot be overlaid without reprojection.</p>
 <h5 id="solution-2--cell-4--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully">Practices 3–5 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-2--cell-4--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from dataclasses import dataclass</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class GeographicBounds:</span>
-<span>    west: float</span>
-<span>    south: float</span>
-<span>    east: float</span>
-<span>    north: float</span>
-<span> </span>
-<span>    def __post_init__(self) -&gt; None:</span>
-<span>        if not (-180 &lt;= self.west &lt;= self.east &lt;= 180):</span>
-<span>            raise ValueError(&quot;longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180&quot;)</span>
-<span>        if not (-90 &lt;= self.south &lt;= self.north &lt;= 90):</span>
-<span>            raise ValueError(&quot;latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90&quot;)</span>
-<span> </span>
-<span>    def contains(self, longitude: float, latitude: float) -&gt; bool:</span>
-<span>        return (</span>
-<span>            self.west &lt;= longitude &lt;= self.east</span>
-<span>            and self.south &lt;= latitude &lt;= self.north</span>
-<span>        )</span>
-<span> </span>
-<span> </span>
-<span>bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)</span>
-<span>assert bounds.contains(longitude=-122.4, latitude=37.8)</span>
-<span>assert not bounds.contains(longitude=37.8, latitude=-122.4)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">GeographicBounds</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    west<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    south<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    east<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    north<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__post_init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">180</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>west <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>east <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">180</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">longitude bounds must satisfy -180 &lt;= west &lt;= east &lt;= 180</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">90</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>south <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>north <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">latitude bounds must satisfy -90 &lt;= south &lt;= north &lt;= 90</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">contains</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> longitude<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>west <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> longitude <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>east</span>
+<span class="source-line">            <span class="syntax-operator">and</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>south <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> latitude <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>north</span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">bounds <span class="syntax-operator">=</span> GeographicBounds<span class="syntax-punctuation">(</span>west<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">125</span><span class="syntax-punctuation">,</span> south<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> east<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">114</span><span class="syntax-punctuation">,</span> north<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> bounds<span class="syntax-operator">.</span>contains<span class="syntax-punctuation">(</span>longitude<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-operator">=</span><span class="syntax-number">37.8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> bounds<span class="syntax-operator">.</span>contains<span class="syntax-punctuation">(</span>longitude<span class="syntax-operator">=</span><span class="syntax-number">37.8</span><span class="syntax-punctuation">,</span> latitude<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">122.4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></article></div>
       </section>

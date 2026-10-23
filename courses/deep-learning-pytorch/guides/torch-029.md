@@ -6,7 +6,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-028`. The prer
 
 ## Learning objectives
 
-Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. The central investigation is concrete: Exponentiate float32 logits1000, 999 directly. The finish condition is both exponentials infinite. ValueError before loss evaluation. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. The central investigation is concrete: Exponentiate float32 logits 1000, 999 directly. The finish condition is both exponentials infinite. ValueError before loss evaluation. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -120,7 +120,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Expose naive overflow.** Exponentiate float32 logits1000, 999 directly.
+1. **Expose naive overflow.** Exponentiate float32 logits 1000, 999 directly.
    **Expected:** both exponentials infinite.
    **Verify:** Save the assertion results for exercise 1, including both exponentials infinite.
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -140,64 +186,64 @@
 <p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-014-example-1.cpp.html">Complete program 1</a></p>
-<pre><code class="language-cpp">#include &lt;cassert&gt;
-#include &lt;charconv&gt;
-#include &lt;iostream&gt;
-#include &lt;optional&gt;
-#include &lt;string&gt;
-#include &lt;string_view&gt;
-#include &lt;system_error&gt;
-#include &lt;vector&gt;
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;charconv&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;optional&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string_view&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;system_error&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
 
-std::optional&lt;int&gt; parse_reading(std::string_view s)  {
-     int n=0;
-    auto [p,e]=std::from_chars(s.data(),s.data()+s.size(),n);
-    if(e!=std::errc {
-    }||p!=s.data()+s.size()||n&lt;0)return  {
-    };
-    return n;
-}
-int main() {
-    const std::vector&lt;std::string&gt; rows{&quot;10&quot;,&quot;0&quot;,&quot;bad&quot;,&quot;-2&quot;,&quot;25&quot;};
-    int accepted=0,rejected=0;
-    long long total=0;
-    for (const auto&amp; raw:rows) {
-        if(auto value=parse_reading(raw)) { ++accepted; total+=*value; }
-        else { ++rejected; }
-    }
-    assert(accepted==3 &amp;&amp; rejected==2 &amp;&amp; total==35);
-    std::cout &lt;&lt; &quot;accepted=&quot; &lt;&lt; accepted &lt;&lt; &quot; rejected=&quot; &lt;&lt; rejected &lt;&lt; &quot; total=&quot; &lt;&lt; total &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;cpp-014 example 1 checks passed\n&quot;;
-    return 0;
-}</code></pre>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> parse_reading<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string_view s<span class="syntax-punctuation">)</span>  <span class="syntax-punctuation">{</span>
+     <span class="syntax-keyword">int</span> n<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">auto</span> <span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>from_chars<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>s<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>e<span class="syntax-operator">!</span><span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>errc <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span>p<span class="syntax-operator">!</span><span class="syntax-operator">=</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>s<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span>n<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">return</span>  <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> n<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string<span class="syntax-operator">&gt;</span> rows<span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">bad</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">25</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">int</span> accepted<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>rejected<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> total<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span><span class="syntax-operator">&amp;</span> raw<span class="syntax-operator">:</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">auto</span> value<span class="syntax-operator">=</span>parse_reading<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-operator">+</span><span class="syntax-operator">+</span>accepted<span class="syntax-punctuation">;</span> total<span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-operator">*</span>value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span> <span class="syntax-operator">+</span><span class="syntax-operator">+</span>rejected<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    assert<span class="syntax-punctuation">(</span>accepted<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> rejected<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> total<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">35</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> accepted <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> rejected=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> rejected <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> total=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> total <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-014 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
-<pre><code class="language-text">accepted=3 rejected=2 total=35
+<pre class="highlighted-code"><code class="language-text">accepted=3 rejected=2 total=35
 cpp-014 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-014-example-2.cpp.html">Complete program 2</a></p>
-<pre><code class="language-cpp">#include &lt;cassert&gt;
-#include &lt;charconv&gt;
-#include &lt;iostream&gt;
-#include &lt;optional&gt;
-#include &lt;string&gt;
-#include &lt;string_view&gt;
-#include &lt;system_error&gt;
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;charconv&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;optional&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string_view&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;system_error&gt;</span>
 
-std::optional&lt;int&gt; parse_reading(std::string_view s)  {
-     int n=0;
-    auto [p,e]=std::from_chars(s.data(),s.data()+s.size(),n);
-    if(e!=std::errc {
-    }||p!=s.data()+s.size()||n&lt;0)return  {
-    };
-    return n;
-}
-int main() {
-    assert(parse_reading(&quot;0&quot;)==0); assert(!parse_reading(&quot;10x&quot;));
-    std::cout &lt;&lt; &quot;cpp-014 example 2 checks passed\n&quot;;
-    return 0;
-}</code></pre>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> parse_reading<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string_view s<span class="syntax-punctuation">)</span>  <span class="syntax-punctuation">{</span>
+     <span class="syntax-keyword">int</span> n<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">auto</span> <span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>from_chars<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>s<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>e<span class="syntax-operator">!</span><span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>errc <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span>p<span class="syntax-operator">!</span><span class="syntax-operator">=</span>s<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>s<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span>n<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">return</span>  <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> n<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    assert<span class="syntax-punctuation">(</span>parse_reading<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>parse_reading<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">10x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-014 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
-<pre><code class="language-text">cpp-014 example 2 checks passed</code></pre>
+<pre class="highlighted-code"><code class="language-text">cpp-014 example 2 checks passed</code></pre>
 <h4 id="file-driven-reference-handoff">File-driven reference handoff<a class="heading-anchor" href="#file-driven-reference-handoff" aria-label="Link to this section">#</a></h4>
 <p>The separate reference also accepts <code>--input FILE</code>. It reads at most 100 lines of at most 32 characters each, reports accepted/rejected counts and exact total, and rejects fatal open/read/budget failures with status 2. Copy the <a href="../fixtures/cpp-014-input.txt.html">five-line input</a> to an owned local directory. After compiling the reference as analyzer, POSIX runs <code>./analyzer --input readings.txt</code>; PowerShell runs <code>&amp; .\analyzer.exe --input .\readings.txt</code>. Expected output: <code>accepted=3 rejected=2 total=35</code>. The browser executes the embedded fixture without command-line arguments. Supplying a missing file must produce nonzero status, not an empty successful report.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -242,7 +288,7 @@ int main() {
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-014.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-014.
 Read courses/cpp/guides/cpp-014.md and courses/cpp/lessons/cpp-014.cpp.
 Direct prerequisites: `cpp-010`, `cpp-011`, `cpp-013`.
 Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

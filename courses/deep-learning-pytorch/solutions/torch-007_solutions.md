@@ -48,7 +48,7 @@ Finally, model.eval() does not stop derivatives through a Linear layer. It chang
 
 ## Exercise 1: Inspect leaf and nonleaf state
 
-The question is: Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.
+The question is: Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.
 
 Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.
 

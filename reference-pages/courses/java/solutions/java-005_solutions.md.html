@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,50 +169,50 @@
 <p><strong>UTF-16 code unit:</strong> A16-bit storage unit used by Java String indexing.</p>
 <p><strong>Code point:</strong> A Unicode scalar identity represented by one or two UTF-16 units.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>Array indices start at0 and stop beforelength. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.</p>
+<p>Array indices start at0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.</p>
 <h3 id="exercise-1-copy-array-storage">Exercise 1: Copy array storage<a class="heading-anchor" href="#exercise-1-copy-array-storage" aria-label="Link to this section">#</a></h3>
-<p>Task: Copy array1,2,3,mutate the copy and compare the original.</p>
-<p>The new array owns its storage. A simple assignmentcopy=original would alias the same array and make the mutation visible through both variables.</p>
-<pre><code class="language-java">int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
-assert original[0] == 1 &amp;&amp; copy[0] == 9;</code></pre>
-<p><strong>Expected:</strong> original starts1;copy starts9.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with original starts1;copy starts9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: Copy array 1,2,3,mutate the copy and compare the original.</p>
+<p>The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> copy <span class="syntax-operator">=</span> Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">copyOf</span><span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> original<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> copy<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> original starts 1; copy starts 9.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with original starts 1; copy starts 9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-count-text-units">Exercise 2: Count text units<a class="heading-anchor" href="#exercise-2-count-text-units" aria-label="Link to this section">#</a></h3>
 <p>Task: Inspect stringA followed by an emoji.</p>
 <p>The emoji occupies a surrogate pair. Treatinglength as a visible-character count would overcount this simple example.</p>
-<pre><code class="language-java">String text = &quot;A\ud83d\ude42&quot;;
-assert text.length() == 3;
-assert text.codePointCount(0, text.length()) == 2;</code></pre>
+<pre class="highlighted-code"><code class="language-java">String text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">\</span><span class="syntax-string">ud83d</span><span class="syntax-string">\</span><span class="syntax-string">ude42</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">codePointCount</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> length3 code units;2 code points.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with length3 code units;2 code points. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-observe-string-immutability">Exercise 3: Observe String immutability<a class="heading-anchor" href="#exercise-3-observe-string-immutability" aria-label="Link to this section">#</a></h3>
 <p>Task: Convert lowercasered to uppercase and retain both references.</p>
-<p>The method returns a new value rather than changinglower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.</p>
-<pre><code class="language-java">String lower = &quot;red&quot;; String upper = lower.toUpperCase(Locale.ROOT);
-assert lower.equals(&quot;red&quot;) &amp;&amp; upper.equals(&quot;RED&quot;);</code></pre>
+<p>The method returns a new value rather than changing lower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.</p>
+<pre class="highlighted-code"><code class="language-java">String lower <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> String upper <span class="syntax-operator">=</span> lower<span class="syntax-punctuation">.</span><span class="syntax-attribute">toUpperCase</span><span class="syntax-punctuation">(</span>Locale<span class="syntax-punctuation">.</span><span class="syntax-attribute">ROOT</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> lower<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> upper<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">RED</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> originalred;newRED.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with originalred;newRED. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-select-by-code-point-offset">Exercise 4: Select by code-point offset<a class="heading-anchor" href="#exercise-4-select-by-code-point-offset" aria-label="Link to this section">#</a></h3>
 <p>Task: Find the UTF-16 offset of the second code point and take the remaining substring.</p>
 <p>Converting a code-point position to a UTF-16 offset respects surrogate boundaries. Arbitrarily slicing at the second surrogate would create malformed text.</p>
-<pre><code class="language-java">int offset = text.offsetByCodePoints(0, 1); String emoji = text.substring(offset);
-assert emoji.length() == 2 &amp;&amp; emoji.codePointCount(0, emoji.length()) == 1;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">int</span> offset <span class="syntax-operator">=</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">offsetByCodePoints</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> String emoji <span class="syntax-operator">=</span> text<span class="syntax-punctuation">.</span><span class="syntax-attribute">substring</span><span class="syntax-punctuation">(</span>offset<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> emoji<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> emoji<span class="syntax-punctuation">.</span><span class="syntax-attribute">codePointCount</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> emoji<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> substring is the intact emoji withlength2.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with substring is the intact emoji withlength2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-normalize-deliberately">Exercise 5: Normalize deliberately<a class="heading-anchor" href="#exercise-5-normalize-deliberately" aria-label="Link to this section">#</a></h3>
 <p>Task: Compare composedé ande plus combining acute before and afterNFC.</p>
 <p>Normalization can merge representations that look equivalent. Whether that is appropriate for an identifier, password or display field is a domain decision.</p>
-<pre><code class="language-java">String composed = &quot;é&quot;; String decomposed = &quot;é&quot;;
-assert !composed.equals(decomposed);
-assert java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed);</code></pre>
+<pre class="highlighted-code"><code class="language-java">String composed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">é</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> String decomposed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">é</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>composed<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">text</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Normalizer</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">normalize</span><span class="syntax-punctuation">(</span>decomposed<span class="syntax-punctuation">,</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">text</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Normalizer</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Form</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">NFC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>composed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> raw strings differ;normalized strings equal.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with raw strings differ;normalized strings equal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-reject-an-invalid-array-index">Exercise 6: Reject an invalid array index<a class="heading-anchor" href="#exercise-6-reject-an-invalid-array-index" aria-label="Link to this section">#</a></h3>
 <p>Task: Readindex3 from a length3 array and catch the boundary failure.</p>
 <p>The highest valid index islength-1. A container having three elements does not makeindex3 valid.</p>
-<pre><code class="language-java">boolean invalid = false;
-try { int ignored = original[3]; } catch (ArrayIndexOutOfBoundsException expected) { invalid = true; }
-assert invalid;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> invalid <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">int</span> ignored <span class="syntax-operator">=</span> original<span class="syntax-operator">[</span><span class="syntax-number">3</span><span class="syntax-operator">]</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>ArrayIndexOutOfBoundsException expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> invalid <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> invalid<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ArrayIndexOutOfBoundsException.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with ArrayIndexOutOfBoundsException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>

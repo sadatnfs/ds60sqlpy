@@ -164,7 +164,7 @@ np.testing.assert_array_equal(word_vectors['buy'],word_vectors['purchase'])
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: purchase ranks first, mixed second, geometry last. top-ranked IDwrong is outside the authored relevant set. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -189,8 +189,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 5, including metadata identity mismatch is detected; the caller must enforce the retrieval gate.
 
 6. **Measure a domain failure.** Give an irrelevant document a high-scoring vector and record that geometric rank does not establish relevance.
-   **Expected:** top-ranked IDwrong is outside the authored relevant set.
-   **Verify:** Save the assertion results for exercise 6, including top-ranked IDwrong is outside the authored relevant set.
+   **Expected:** top-ranked ID wrong is outside the authored relevant set.
+   **Verify:** Save the assertion results for exercise 6, including top-ranked ID wrong is outside the authored relevant set.
 
 ## Common pitfalls and diagnosis
 

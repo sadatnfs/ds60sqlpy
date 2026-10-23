@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-pandas-01.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_pandas_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_pandas_01<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pandas_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_pandas_01.py</code></pre>
 <p>Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-pandas-01.html#solution-1">explanatory solutions</a> and <a href="python-pandas-01.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -363,20 +411,20 @@
 <p>Finally, concatenation appends rows but does not guarantee that keys remain unique or schemas match. Require explicit columns and dtype compatibility when combining typed batches. A result that prints nicely may still have silently widened a nullable integer to object or duplicated an entity. The exercises build narrow reusable boundaries that reject ambiguity while preserving input tables.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">left = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])
-right = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])
-result = left - right
-assert result.to_dict() == {&quot;a&quot;: 9, &quot;b&quot;: 18}
-assert (left.to_numpy() - right.to_numpy()).tolist() == [19, 8]
-print(&quot;Label subtraction:&quot;, result.to_dict())</code></pre>
+<pre class="highlighted-code"><code class="language-python">left <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+right <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+result <span class="syntax-operator">=</span> left <span class="syntax-operator">-</span> right
+<span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">18</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> right<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">19</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Label subtraction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The two arithmetic expressions answer different questions. Series subtraction matches a with a and b with b, while array subtraction pairs the first elements regardless of identity. The resulting numbers differ even though every input has length two. Labels are part of the data contract.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">values = pd.Series([1, pd.NA, -2], dtype=&quot;Int64&quot;, index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])
-mask = values.gt(0)
-assert str(mask.dtype) == &quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])
-selected = values.loc[mask.fillna(False)]
-assert selected.index.tolist() == [&quot;a&quot;]
-print(&quot;Known positive rows:&quot;, selected.to_dict())</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+mask <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>gt<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+selected <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>mask<span class="syntax-operator">.</span>fillna<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> selected<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Known positive rows:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> selected<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The comparison preserves uncertainty for b rather than inventing a negative measurement. The filter then explicitly chooses to retain only known True rows. Filling the mask is a decision policy at the selection boundary, not an instruction to replace missing source values with zero.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -417,7 +465,7 @@ print(&quot;Known positive rows:&quot;, selected.to_dict())</code></pre>
 <li><a href="https://pandas.pydata.org/docs/user_guide/boolean.html">pandas nullable Boolean data type</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-pandas-01: pandas Label Alignment, Nullable Logic, and Safe Assignment.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-pandas-01: pandas Label Alignment, Nullable Logic, and Safe Assignment.
 Read python/professional/companion-guides/py_pandas_01.md and python/professional/lessons/py_pandas_01.py. Direct prerequisites: python-20.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -453,131 +501,131 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pandas-01: pandas Label Alignment, Nullable Logic, and Safe Assignment.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>import pandas as pd  # type: ignore[import-untyped]</span>
-<span> </span>
-<span> </span>
-<span>def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Subtract right from left after requiring unique indices and exactly the same label set.</span>
-<span>    Preserve left index order. Reject missing or duplicate labels with ValueError; do not</span>
-<span>    silently form a union and invent missing results.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement aligned_difference&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a copied frame with a column assigned from a uniquely indexed Series covering</span>
-<span>    exactly the frame index. Preserve frame order and existing source data. Reject duplicate</span>
-<span>    or mismatched indices rather than assigning by position.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement assign_by_label&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def nullable_positive(values: pd.Series) -&gt; pd.Series:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span>
-<span>    than zero. Preserve its index and unknown entries. Reject another dtype with ValueError</span>
-<span>    so the missing-value representation is explicit.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement nullable_positive&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span>
-<span>    same unique labels. Align by label, retain only known True entries, preserve frame order</span>
-<span>    and return a copy. Reject integer flags or mismatched labels.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement select_known_true&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    For unique source labels and unique target labels, return a DataFrame indexed in target</span>
-<span>    order with value and present columns. Reindex values without filling them; present</span>
-<span>    indicates whether the label existed in the source even if its value was missing.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement reindex_with_presence&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span>
-<span>    globally unique row indices. Reject schema differences or duplicate identities with</span>
-<span>    ValueError. Permit an empty typed frame within the list.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement strict_concat&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    left = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])</span>
-<span>    right = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])</span>
-<span>    result = left - right</span>
-<span>    assert result.to_dict() == {&quot;a&quot;: 9, &quot;b&quot;: 18}</span>
-<span>    assert (left.to_numpy() - right.to_numpy()).tolist() == [19, 8]</span>
-<span>    print(&quot;Label subtraction:&quot;, result.to_dict())</span>
-<span> </span>
-<span>    values = pd.Series([1, pd.NA, -2], dtype=&quot;Int64&quot;, index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</span>
-<span>    mask = values.gt(0)</span>
-<span>    assert str(mask.dtype) == &quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])</span>
-<span>    selected = values.loc[mask.fillna(False)]</span>
-<span>    assert selected.index.tolist() == [&quot;a&quot;]</span>
-<span>    print(&quot;Known positive rows:&quot;, selected.to_dict())</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Subtract by validated identities</span>
-<span># Prompt: Subtract right from left after requiring unique indices and exactly the same label set.</span>
-<span># Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently</span>
-<span># form a union and invent missing results.</span>
-<span># Expected: left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series</span>
-<span># missing b or with duplicate a raises ValueError.</span>
-<span> </span>
-<span># Exercise 2: Assign without swapping entities</span>
-<span># Prompt: Return a copied frame with a column assigned from a uniquely indexed Series covering</span>
-<span># exactly the frame index. Preserve frame order and existing source data. Reject duplicate or</span>
-<span># mismatched indices rather than assigning by position.</span>
-<span># Expected: Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame</span>
-<span># has no new column; an extra Series label c raises ValueError.</span>
-<span> </span>
-<span># Exercise 3: Keep unknown comparison results</span>
-<span># Prompt: Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span>
-<span># than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the</span>
-<span># missing-value representation is explicit.</span>
-<span># Expected: Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float</span>
-<span># Series is rejected; an empty Int64 Series returns empty boolean.</span>
-<span> </span>
-<span># Exercise 4: Apply an explicit unknown-filter policy</span>
-<span># Prompt: Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span>
-<span># same unique labels. Align by label, retain only known True entries, preserve frame order and</span>
-<span># return a copy. Reject integer flags or mismatched labels.</span>
-<span># Expected: Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be</span>
-<span># mutated without changing frame; Int64[1,0,1] is rejected.</span>
-<span> </span>
-<span># Exercise 5: Distinguish absent labels from unknown values</span>
-<span># Prompt: For unique source labels and unique target labels, return a DataFrame indexed in target</span>
-<span># order with value and present columns. Reindex values without filling them; present indicates</span>
-<span># whether the label existed in the source even if its value was missing.</span>
-<span># Expected: Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5</span>
-<span># and missing a, c. Duplicate target labels raise ValueError.</span>
-<span> </span>
-<span># Exercise 6: Append typed batches without hiding identity conflicts</span>
-<span># Prompt: Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span>
-<span># globally unique row indices. Reject schema differences or duplicate identities with ValueError.</span>
-<span># Permit an empty typed frame within the list.</span>
-<span># Expected: Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated</span>
-<span># a, reversed columns, changed dtype or an empty list is rejected.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-pandas-01: pandas Label Alignment, Nullable Logic, and Safe Assignment.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd  <span class="syntax-comment"># type: ignore[import-untyped]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">aligned_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Subtract right from left after requiring unique indices and exactly the same label set.</span></span>
+<span class="source-line"><span class="syntax-string">    Preserve left index order. Reject missing or duplicate labels with ValueError; do not</span></span>
+<span class="source-line"><span class="syntax-string">    silently form a union and invent missing results.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement aligned_difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">assign_by_label</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a copied frame with a column assigned from a uniquely indexed Series covering</span></span>
+<span class="source-line"><span class="syntax-string">    exactly the frame index. Preserve frame order and existing source data. Reject duplicate</span></span>
+<span class="source-line"><span class="syntax-string">    or mismatched indices rather than assigning by position.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement assign_by_label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">nullable_positive</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span></span>
+<span class="source-line"><span class="syntax-string">    than zero. Preserve its index and unknown entries. Reject another dtype with ValueError</span></span>
+<span class="source-line"><span class="syntax-string">    so the missing-value representation is explicit.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement nullable_positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">select_known_true</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span></span>
+<span class="source-line"><span class="syntax-string">    same unique labels. Align by label, retain only known True entries, preserve frame order</span></span>
+<span class="source-line"><span class="syntax-string">    and return a copy. Reject integer flags or mismatched labels.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement select_known_true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">reindex_with_presence</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    For unique source labels and unique target labels, return a DataFrame indexed in target</span></span>
+<span class="source-line"><span class="syntax-string">    order with value and present columns. Reindex values without filling them; present</span></span>
+<span class="source-line"><span class="syntax-string">    indicates whether the label existed in the source even if its value was missing.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement reindex_with_presence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">strict_concat</span><span class="syntax-punctuation">(</span>frames<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span></span>
+<span class="source-line"><span class="syntax-string">    globally unique row indices. Reject schema differences or duplicate identities with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError. Permit an empty typed frame within the list.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement strict_concat</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    left <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    right <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> left <span class="syntax-operator">-</span> right</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">18</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> right<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">19</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Label subtraction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mask <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>gt<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    selected <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>mask<span class="syntax-operator">.</span>fillna<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> selected<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Known positive rows:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> selected<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Subtract by validated identities</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Subtract right from left after requiring unique indices and exactly the same label set.</span></span>
+<span class="source-line"><span class="syntax-comment"># Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently</span></span>
+<span class="source-line"><span class="syntax-comment"># form a union and invent missing results.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series</span></span>
+<span class="source-line"><span class="syntax-comment"># missing b or with duplicate a raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Assign without swapping entities</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a copied frame with a column assigned from a uniquely indexed Series covering</span></span>
+<span class="source-line"><span class="syntax-comment"># exactly the frame index. Preserve frame order and existing source data. Reject duplicate or</span></span>
+<span class="source-line"><span class="syntax-comment"># mismatched indices rather than assigning by position.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame</span></span>
+<span class="source-line"><span class="syntax-comment"># has no new column; an extra Series label c raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Keep unknown comparison results</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span></span>
+<span class="source-line"><span class="syntax-comment"># than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the</span></span>
+<span class="source-line"><span class="syntax-comment"># missing-value representation is explicit.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float</span></span>
+<span class="source-line"><span class="syntax-comment"># Series is rejected; an empty Int64 Series returns empty boolean.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Apply an explicit unknown-filter policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span></span>
+<span class="source-line"><span class="syntax-comment"># same unique labels. Align by label, retain only known True entries, preserve frame order and</span></span>
+<span class="source-line"><span class="syntax-comment"># return a copy. Reject integer flags or mismatched labels.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be</span></span>
+<span class="source-line"><span class="syntax-comment"># mutated without changing frame; Int64[1,0,1] is rejected.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Distinguish absent labels from unknown values</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For unique source labels and unique target labels, return a DataFrame indexed in target</span></span>
+<span class="source-line"><span class="syntax-comment"># order with value and present columns. Reindex values without filling them; present indicates</span></span>
+<span class="source-line"><span class="syntax-comment"># whether the label existed in the source even if its value was missing.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5</span></span>
+<span class="source-line"><span class="syntax-comment"># and missing a, c. Duplicate target labels raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Append typed batches without hiding identity conflicts</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span></span>
+<span class="source-line"><span class="syntax-comment"># globally unique row indices. Reject schema differences or duplicate identities with ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Permit an empty typed frame within the list.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated</span></span>
+<span class="source-line"><span class="syntax-comment"># a, reversed columns, changed dtype or an empty list is rejected.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -616,121 +664,121 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-subtract-by-validated-identities">Exercise 1: Subtract by validated identities<a class="heading-anchor" href="#solution-1--exercise-1-subtract-by-validated-identities" aria-label="Link to this section">#</a></h5>
 <p>Subtract right from left after requiring unique indices and exactly the same label set. Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently form a union and invent missing results.</p>
 <p><strong>Expected:</strong> left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series missing b or with duplicate a raises ValueError.</p>
-<pre><code class="language-python">def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:
-    if (
-        not left.index.is_unique
-        or not right.index.is_unique
-        or len(left) != len(right)
-        or not left.index.isin(right.index).all()
-    ):
-        raise ValueError(&quot;Expected the same unique labels&quot;)
-    return left - right.reindex(left.index)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">aligned_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-operator">not</span> left<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> right<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> left<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>right<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected the same unique labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> left <span class="syntax-operator">-</span> right<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span></code></pre>
 <p>The identity check precedes subtraction so no union-generated missing row can be mistaken for a real arithmetic result. Reindexing right to the left index makes output order explicit even though pandas also supports automatic alignment. Duplicate labels are rejected because the contract promises one value per identity. This does not require values to be nonmissing; a known identity with an unknown value can legitimately retain a missing difference.</p>
-<pre><code class="language-python">a = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])
-b = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])
-r = aligned_difference(a, b)
-assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;] and r.tolist() == [18, 9]
-expect_value_error(lambda: aligned_difference(a, b.iloc[:1]))
-expect_value_error(lambda: aligned_difference(a, pd.Series([1, 2], index=[&quot;a&quot;, &quot;a&quot;])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-2-assign-without-swapping-entities">Exercise 2: Assign without swapping entities<a class="heading-anchor" href="#solution-1--exercise-2-assign-without-swapping-entities" aria-label="Link to this section">#</a></h5>
 <p>Return a copied frame with a column assigned from a uniquely indexed Series covering exactly the frame index. Preserve frame order and existing source data. Reject duplicate or mismatched indices rather than assigning by position.</p>
 <p><strong>Expected:</strong> Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame has no new column; an extra Series label c raises ValueError.</p>
-<pre><code class="language-python">def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:
-    if (
-        not frame.index.is_unique
-        or not values.index.is_unique
-        or len(frame) != len(values)
-        or not frame.index.isin(values.index).all()
-    ):
-        raise ValueError(&quot;Assignment needs the same unique row identities&quot;)
-    result = frame.copy()
-    result[name] = values.reindex(frame.index)
-    return result</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">assign_by_label</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> values<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Assignment needs the same unique row identities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    result<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result</code></pre>
 <p>The new frame owns its tabular mutation boundary, and the Series is explicitly aligned before assignment. This avoids relying on coincidental physical order. A caller can replace an existing column through the same function, but the original frame remains unchanged. The extra-label rejection is deliberate: silently dropping c could hide an upstream population mismatch even though pandas can technically perform the assignment.</p>
-<pre><code class="language-python">frame = pd.DataFrame({&quot;old&quot;: [1, 2]}, index=[&quot;b&quot;, &quot;a&quot;])
-values = pd.Series([100, 200], index=[&quot;a&quot;, &quot;b&quot;])
-r = assign_by_label(frame, &quot;new&quot;, values)
-assert r[&quot;new&quot;].tolist() == [200, 100] and &quot;new&quot; not in frame
-expect_value_error(
-    lambda: assign_by_label(frame, &quot;new&quot;, pd.Series([1, 2, 3], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
-)</code></pre>
+<pre class="highlighted-code"><code class="language-python">frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">old</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> assign_by_label<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> frame
+expect_value_error<span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> assign_by_label<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-keep-unknown-comparison-results">Exercise 3: Keep unknown comparison results<a class="heading-anchor" href="#solution-1--exercise-3-keep-unknown-comparison-results" aria-label="Link to this section">#</a></h5>
 <p>Require an Int64 nullable Series and return a nullable Boolean mask for values greater than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the missing-value representation is explicit.</p>
 <p><strong>Expected:</strong> Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float Series is rejected; an empty Int64 Series returns empty boolean.</p>
-<pre><code class="language-python">def nullable_positive(values: pd.Series) -&gt; pd.Series:
-    if str(values.dtype) != &quot;Int64&quot;:
-        raise ValueError(&quot;Expected pandas nullable Int64&quot;)
-    return values.gt(0)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">nullable_positive</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected pandas nullable Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> values<span class="syntax-operator">.</span>gt<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A nullable integer comparison yields nullable Boolean values, retaining the distinction between unknown and known false. The strict dtype requirement is a teaching contract that prevents a different missingness convention from entering silently. Empty typed Series preserve schema even without observations. Downstream code must still decide how unknown truth values affect filtering, aggregation or validation; this function intentionally does not make that policy decision.</p>
-<pre><code class="language-python">s = pd.Series([2, pd.NA, 0, -1], dtype=&quot;Int64&quot;)
-r = nullable_positive(s)
-assert str(r.dtype) == &quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]
-assert str(nullable_positive(pd.Series([], dtype=&quot;Int64&quot;)).dtype) == &quot;boolean&quot;
-expect_value_error(lambda: nullable_positive(pd.Series([1.0, np.nan])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">s <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> nullable_positive<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>nullable_positive<span class="syntax-punctuation">(</span>pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> nullable_positive<span class="syntax-punctuation">(</span>pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-apply-an-explicit-unknown-filter-policy">Exercise 4: Apply an explicit unknown-filter policy<a class="heading-anchor" href="#solution-1--exercise-4-apply-an-explicit-unknown-filter-policy" aria-label="Link to this section">#</a></h5>
 <p>Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the same unique labels. Align by label, retain only known True entries, preserve frame order and return a copy. Reject integer flags or mismatched labels.</p>
 <p><strong>Expected:</strong> Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be mutated without changing frame; Int64[1,0,1] is rejected.</p>
-<pre><code class="language-python">def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:
-    if (
-        not frame.index.is_unique
-        or not mask.index.is_unique
-        or len(frame) != len(mask)
-        or not frame.index.isin(mask.index).all()
-        or str(mask.dtype) not in {&quot;bool&quot;, &quot;boolean&quot;}
-    ):
-        raise ValueError(&quot;Expected one Boolean mask value per unique frame label&quot;)
-    keep = mask.reindex(frame.index).fillna(False)
-    return frame.loc[keep].copy()</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">select_known_true</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> mask<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one Boolean mask value per unique frame label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    keep <span class="syntax-operator">=</span> mask<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fillna<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> frame<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>keep<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Unknown mask entries are converted to false only after index validation and alignment, so the choice is attached to the correct entity. The explicit copy establishes a safe modification boundary independent of pandas chained-assignment behavior or copy-on-write settings. Rejecting numeric flags prevents a common ambiguity between a mask and positional indexer. A different policy, such as returning unknown rows separately for review, should be a separately named contract.</p>
-<pre><code class="language-python">frame = pd.DataFrame({&quot;x&quot;: [2, 1, 3]}, index=[&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])
-mask = pd.Series([True, pd.NA, False], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], dtype=&quot;boolean&quot;)
-r = select_known_true(frame, mask)
-assert r.index.tolist() == [&quot;a&quot;]
-r.loc[&quot;a&quot;, &quot;x&quot;] = 99
-assert frame.loc[&quot;a&quot;, &quot;x&quot;] == 1
-expect_value_error(
-    lambda: select_known_true(frame, pd.Series([1, 0, 1], index=frame.index, dtype=&quot;Int64&quot;))
-)</code></pre>
+<pre class="highlighted-code"><code class="language-python">frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+mask <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> select_known_true<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span>
+<span class="syntax-keyword">assert</span> frame<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+expect_value_error<span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_known_true<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-5-distinguish-absent-labels-from-unknown-values">Exercise 5: Distinguish absent labels from unknown values<a class="heading-anchor" href="#solution-1--exercise-5-distinguish-absent-labels-from-unknown-values" aria-label="Link to this section">#</a></h5>
 <p>For unique source labels and unique target labels, return a DataFrame indexed in target order with value and present columns. Reindex values without filling them; present indicates whether the label existed in the source even if its value was missing.</p>
 <p><strong>Expected:</strong> Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5 and missing a, c. Duplicate target labels raise ValueError.</p>
-<pre><code class="language-python">def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:
-    target = pd.Index(labels)
-    if not values.index.is_unique or not target.is_unique:
-        raise ValueError(&quot;Expected unique source and target labels&quot;)
-    return pd.DataFrame(
-        {&quot;value&quot;: values.reindex(target), &quot;present&quot;: target.isin(values.index)}, index=target
-    )</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">reindex_with_presence</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    target <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Index<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> values<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> target<span class="syntax-operator">.</span>is_unique<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected unique source and target labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> target<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span>target
+    <span class="syntax-punctuation">)</span></code></pre>
 <p>The value column alone cannot distinguish an absent source label from an existing label with a missing measurement. The presence indicator records membership before reindexing, preserving that provenance. Target order is explicit and need not be sorted. This pattern is useful for reconciliation and feature availability because filling both cases with zero would erase the reason information is unavailable.</p>
-<pre><code class="language-python">s = pd.Series([pd.NA, 5], index=[&quot;a&quot;, &quot;b&quot;], dtype=&quot;Int64&quot;)
-r = reindex_with_presence(s, [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])
-assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and r[&quot;present&quot;].tolist() == [True, True, False]
-assert r.loc[&quot;b&quot;, &quot;value&quot;] == 5 and pd.isna(r.loc[&quot;a&quot;, &quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;, &quot;value&quot;])
-expect_value_error(lambda: reindex_with_presence(s, [&quot;a&quot;, &quot;a&quot;]))</code></pre>
+<pre class="highlighted-code"><code class="language-python">s <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> reindex_with_presence<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> reindex_with_presence<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-append-typed-batches-without-hiding-identity-conflicts">Exercise 6: Append typed batches without hiding identity conflicts<a class="heading-anchor" href="#solution-1--exercise-6-append-typed-batches-without-hiding-identity-conflicts" aria-label="Link to this section">#</a></h5>
 <p>Concatenate a nonempty list of frames with exactly matching column order and dtypes, and globally unique row indices. Reject schema differences or duplicate identities with ValueError. Permit an empty typed frame within the list.</p>
 <p><strong>Expected:</strong> Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated a, reversed columns, changed dtype or an empty list is rejected.</p>
-<pre><code class="language-python">def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:
-    if not frames:
-        raise ValueError(&quot;At least one typed frame is required&quot;)
-    first = frames[0]
-    if any(
-        not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes)
-        for frame in frames
-    ):
-        raise ValueError(&quot;Batch columns and dtypes must match exactly&quot;)
-    try:
-        return pd.concat(frames, axis=0, verify_integrity=True)
-    except ValueError as error:
-        raise ValueError(&quot;Batch row identities must be globally unique&quot;) from error</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">strict_concat</span><span class="syntax-punctuation">(</span>frames<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> frames<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">At least one typed frame is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    first <span class="syntax-operator">=</span> frames<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>columns<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>first<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>first<span class="syntax-operator">.</span>dtypes<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">for</span> frame <span class="syntax-operator">in</span> frames
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Batch columns and dtypes must match exactly</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> pd<span class="syntax-operator">.</span>concat<span class="syntax-punctuation">(</span>frames<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> verify_integrity<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Batch row identities must be globally unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> error</code></pre>
 <p>Concatenation is not a schema validator by default, so the function checks both ordered columns and logical dtypes first. verify_integrity then rejects duplicate row identities across the combined batches. This avoids silently resetting identities merely to make concatenation succeed. An empty list has no schema from which to construct a meaningful typed result, while an empty frame with the agreed schema can safely contribute no rows.</p>
-<pre><code class="language-python">a = pd.DataFrame({&quot;x&quot;: pd.Series([1], index=[&quot;a&quot;], dtype=&quot;Int64&quot;)})
-b = pd.DataFrame({&quot;x&quot;: pd.Series([2], index=[&quot;b&quot;], dtype=&quot;Int64&quot;)})
-r = strict_concat([a, b])
-assert r.index.tolist() == [&quot;a&quot;, &quot;b&quot;] and str(r[&quot;x&quot;].dtype) == &quot;Int64&quot;
-expect_value_error(lambda: strict_concat([a, a]))
-expect_value_error(lambda: strict_concat([a, b.astype(float)]))
-expect_value_error(lambda: strict_concat([]))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_pandas_01_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -765,143 +813,143 @@ expect_value_error(lambda: strict_concat([]))</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-pandas-01.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span>import numpy as np</span>
-<span>import pandas as pd  # type: ignore[import-untyped]</span>
-<span> </span>
-<span> </span>
-<span>def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:</span>
-<span>    if (</span>
-<span>        not left.index.is_unique</span>
-<span>        or not right.index.is_unique</span>
-<span>        or len(left) != len(right)</span>
-<span>        or not left.index.isin(right.index).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected the same unique labels&quot;)</span>
-<span>    return left - right.reindex(left.index)</span>
-<span> </span>
-<span> </span>
-<span>def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    if (</span>
-<span>        not frame.index.is_unique</span>
-<span>        or not values.index.is_unique</span>
-<span>        or len(frame) != len(values)</span>
-<span>        or not frame.index.isin(values.index).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Assignment needs the same unique row identities&quot;)</span>
-<span>    result = frame.copy()</span>
-<span>    result[name] = values.reindex(frame.index)</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def nullable_positive(values: pd.Series) -&gt; pd.Series:</span>
-<span>    if str(values.dtype) != &quot;Int64&quot;:</span>
-<span>        raise ValueError(&quot;Expected pandas nullable Int64&quot;)</span>
-<span>    return values.gt(0)</span>
-<span> </span>
-<span> </span>
-<span>def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    if (</span>
-<span>        not frame.index.is_unique</span>
-<span>        or not mask.index.is_unique</span>
-<span>        or len(frame) != len(mask)</span>
-<span>        or not frame.index.isin(mask.index).all()</span>
-<span>        or str(mask.dtype) not in {&quot;bool&quot;, &quot;boolean&quot;}</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected one Boolean mask value per unique frame label&quot;)</span>
-<span>    keep = mask.reindex(frame.index).fillna(False)</span>
-<span>    return frame.loc[keep].copy()</span>
-<span> </span>
-<span> </span>
-<span>def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:</span>
-<span>    target = pd.Index(labels)</span>
-<span>    if not values.index.is_unique or not target.is_unique:</span>
-<span>        raise ValueError(&quot;Expected unique source and target labels&quot;)</span>
-<span>    return pd.DataFrame(</span>
-<span>        {&quot;value&quot;: values.reindex(target), &quot;present&quot;: target.isin(values.index)}, index=target</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:</span>
-<span>    if not frames:</span>
-<span>        raise ValueError(&quot;At least one typed frame is required&quot;)</span>
-<span>    first = frames[0]</span>
-<span>    if any(</span>
-<span>        not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes)</span>
-<span>        for frame in frames</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Batch columns and dtypes must match exactly&quot;)</span>
-<span>    try:</span>
-<span>        return pd.concat(frames, axis=0, verify_integrity=True)</span>
-<span>    except ValueError as error:</span>
-<span>        raise ValueError(&quot;Batch row identities must be globally unique&quot;) from error</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Subtract by validated identities</span>
-<span>    a = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])</span>
-<span>    b = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])</span>
-<span>    r = aligned_difference(a, b)</span>
-<span>    assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;] and r.tolist() == [18, 9]</span>
-<span>    expect_value_error(lambda: aligned_difference(a, b.iloc[:1]))</span>
-<span>    expect_value_error(lambda: aligned_difference(a, pd.Series([1, 2], index=[&quot;a&quot;, &quot;a&quot;])))</span>
-<span>    # Exercise 2: Assign without swapping entities</span>
-<span>    frame = pd.DataFrame({&quot;old&quot;: [1, 2]}, index=[&quot;b&quot;, &quot;a&quot;])</span>
-<span>    values = pd.Series([100, 200], index=[&quot;a&quot;, &quot;b&quot;])</span>
-<span>    r = assign_by_label(frame, &quot;new&quot;, values)</span>
-<span>    assert r[&quot;new&quot;].tolist() == [200, 100] and &quot;new&quot; not in frame</span>
-<span>    expect_value_error(</span>
-<span>        lambda: assign_by_label(frame, &quot;new&quot;, pd.Series([1, 2, 3], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))</span>
-<span>    )</span>
-<span>    # Exercise 3: Keep unknown comparison results</span>
-<span>    s = pd.Series([2, pd.NA, 0, -1], dtype=&quot;Int64&quot;)</span>
-<span>    r = nullable_positive(s)</span>
-<span>    assert str(r.dtype) == &quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]</span>
-<span>    assert str(nullable_positive(pd.Series([], dtype=&quot;Int64&quot;)).dtype) == &quot;boolean&quot;</span>
-<span>    expect_value_error(lambda: nullable_positive(pd.Series([1.0, np.nan])))</span>
-<span>    # Exercise 4: Apply an explicit unknown-filter policy</span>
-<span>    frame = pd.DataFrame({&quot;x&quot;: [2, 1, 3]}, index=[&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])</span>
-<span>    mask = pd.Series([True, pd.NA, False], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], dtype=&quot;boolean&quot;)</span>
-<span>    r = select_known_true(frame, mask)</span>
-<span>    assert r.index.tolist() == [&quot;a&quot;]</span>
-<span>    r.loc[&quot;a&quot;, &quot;x&quot;] = 99</span>
-<span>    assert frame.loc[&quot;a&quot;, &quot;x&quot;] == 1</span>
-<span>    expect_value_error(</span>
-<span>        lambda: select_known_true(frame, pd.Series([1, 0, 1], index=frame.index, dtype=&quot;Int64&quot;))</span>
-<span>    )</span>
-<span>    # Exercise 5: Distinguish absent labels from unknown values</span>
-<span>    s = pd.Series([pd.NA, 5], index=[&quot;a&quot;, &quot;b&quot;], dtype=&quot;Int64&quot;)</span>
-<span>    r = reindex_with_presence(s, [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])</span>
-<span>    assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and r[&quot;present&quot;].tolist() == [True, True, False]</span>
-<span>    assert (</span>
-<span>        r.loc[&quot;b&quot;, &quot;value&quot;] == 5 and pd.isna(r.loc[&quot;a&quot;, &quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;, &quot;value&quot;])</span>
-<span>    )</span>
-<span>    expect_value_error(lambda: reindex_with_presence(s, [&quot;a&quot;, &quot;a&quot;]))</span>
-<span>    # Exercise 6: Append typed batches without hiding identity conflicts</span>
-<span>    a = pd.DataFrame({&quot;x&quot;: pd.Series([1], index=[&quot;a&quot;], dtype=&quot;Int64&quot;)})</span>
-<span>    b = pd.DataFrame({&quot;x&quot;: pd.Series([2], index=[&quot;b&quot;], dtype=&quot;Int64&quot;)})</span>
-<span>    r = strict_concat([a, b])</span>
-<span>    assert r.index.tolist() == [&quot;a&quot;, &quot;b&quot;] and str(r[&quot;x&quot;].dtype) == &quot;Int64&quot;</span>
-<span>    expect_value_error(lambda: strict_concat([a, a]))</span>
-<span>    expect_value_error(lambda: strict_concat([a, b.astype(float)]))</span>
-<span>    expect_value_error(lambda: strict_concat([]))</span>
-<span>    print(&quot;python-pandas-01: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-pandas-01.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd  <span class="syntax-comment"># type: ignore[import-untyped]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">aligned_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> left<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> right<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> left<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>right<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected the same unique labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> left <span class="syntax-operator">-</span> right<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">assign_by_label</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> values<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Assignment needs the same unique row identities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">nullable_positive</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected pandas nullable Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> values<span class="syntax-operator">.</span>gt<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">select_known_true</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> mask<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one Boolean mask value per unique frame label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    keep <span class="syntax-operator">=</span> mask<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fillna<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> frame<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>keep<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">reindex_with_presence</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">,</span> labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    target <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Index<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> values<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>is_unique <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> target<span class="syntax-operator">.</span>is_unique<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected unique source and target labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>reindex<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> target<span class="syntax-operator">.</span>isin<span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span>target</span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">strict_concat</span><span class="syntax-punctuation">(</span>frames<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> frames<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">At least one typed frame is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    first <span class="syntax-operator">=</span> frames<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>columns<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>first<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> frame<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>first<span class="syntax-operator">.</span>dtypes<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> frame <span class="syntax-operator">in</span> frames</span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Batch columns and dtypes must match exactly</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> pd<span class="syntax-operator">.</span>concat<span class="syntax-punctuation">(</span>frames<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> verify_integrity<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Batch row identities must be globally unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> error</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Subtract by validated identities</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> aligned_difference<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Assign without swapping entities</span></span>
+<span class="source-line">    frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">old</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> assign_by_label<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> frame</span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> assign_by_label<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Keep unknown comparison results</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> nullable_positive<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> r<span class="syntax-operator">.</span>iloc<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>nullable_positive<span class="syntax-punctuation">(</span>pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> nullable_positive<span class="syntax-punctuation">(</span>pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Apply an explicit unknown-filter policy</span></span>
+<span class="source-line">    frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mask <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> select_known_true<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> frame<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_known_true<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span>frame<span class="syntax-operator">.</span>index<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Distinguish absent labels from unknown values</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>pd<span class="syntax-operator">.</span>NA<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> reindex_with_presence<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> pd<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> reindex_with_presence<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Append typed batches without hiding identity conflicts</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Int64</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> strict_concat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-pandas-01: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

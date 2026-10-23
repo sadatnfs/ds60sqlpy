@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-025`
 
 ## Learning objectives
 
-Explain package, classpath, named module, export using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is ReadString.class module andpackage names. The final exercise transfers the mechanism to reject a missing module dependency.
+Explain package, classpath, named module, export using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Read `String.class` module and package names. The final exercise transfers the mechanism to reject a missing module dependency.
 
 ## Purpose and mental model
 
-Packages organize class names andaccess boundaries. Aclasspath tells the runtime where unnamed-module classes canbe found;it doesnot change the package declared in source. Java's module system adds explicitrequires andexports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
+Packages organize class names and access boundaries. Aclasspath tells the runtime where unnamed-module classes can be found;it does not change the package declared in source. Java's module system adds explicit requires and exports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
 
-This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors andruns the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
+This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors and runs the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
 
 ## Vocabulary and concepts
 
-**Package:** A namespace andaccess grouping declared by aJava source file.
+**Package:** A namespace and access grouping declared by a Java source file.
 
-**Classpath:** Locations used tofind classes in the unnamed-module model.
+**Classpath:** Locations used to find classes in the unnamed-module model.
 
-**Named module:** A unit declaring dependencies andexported packages.
+**Named module:** A unit declaring dependencies and exported packages.
 
-**Export:** Permission for other modules toaccess a package's publicAPI.
+**Export:** Permission for other modules to access a package's publicAPI.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-026/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -43,13 +43,13 @@ The [two-module fixture](../fixtures/java-026/README.md) contains the exact sour
 
 ## Syntax anatomy and execution trace
 
-The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules tocompile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable andbounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules to compile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable and bounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
 ### Example A: Inspect a platform module
 
-The fully qualified class name,package andmodule are distinct identities. Apackage name alone doesnot establish module membership.
+The fully qualified class name,package and module are distinct identities. Apackage name alone does not establish module membership.
 
 ```java
 import java.util.*;
@@ -85,11 +85,11 @@ public class Main {
 
 ```
 
-**Expected:** modulejava.base;packagejava.lang.
+**Expected:** module `java.base`;package `java.lang`.
 
 ### Example B: Inspect the classroom classpath context
 
-The classroom compiles a singleMain.java andlaunches it byclasspath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
+The classroom compiles a singleMain.java andlaunches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
 
 ```java
 import java.util.*;
@@ -127,7 +127,7 @@ public class Main {
 
 ```
 
-**Expected:** Main belongs to the unnamed module in the standardclasspath launch.
+**Expected:** Main belongs to the unnamed module in the standard classpath launch.
 
 ## Prediction before your attempt
 
@@ -135,19 +135,19 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Inspect a platform module.** ReadString.class module andpackage names.
-   **Expected:** modulejava.base;packagejava.lang.
-   **Verify:** Compare your assertion values or captured diagnostic with modulejava.base;packagejava.lang.
+1. **Inspect a platform module.** Read `String.class` module and package names.
+   **Expected:** module `java.base`;package `java.lang`.
+   **Verify:** Compare your assertion values or captured diagnostic with module `java.base`;package `java.lang`.
 
 2. **Inspect the classroom classpath context.** ReadMain.class module metadata.
-   **Expected:** Main belongs to the unnamed module in the standardclasspath launch.
-   **Verify:** Compare your assertion values or captured diagnostic with Main belongs to the unnamed module in the standardclasspath launch.
+   **Expected:** Main belongs to the unnamed module in the standard classpath launch.
+   **Verify:** Compare your assertion values or captured diagnostic with Main belongs to the unnamed module in the standard classpath launch.
 
-3. **Compile two real modules.** Create the owned greeting/application fixture andcompile both with--module-source-path.
-   **Expected:** compiler exit0 andmodule-info.class files present.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler exit0 andmodule-info.class files present.
+3. **Compile two real modules.** Create the owned greeting/application fixture and compile both with--module-source-path.
+   **Expected:** compiler exit 0 andmodule-info.class files present.
+   **Verify:** Compare your assertion values or captured diagnostic with compiler exit 0 andmodule-info.class files present.
 
-4. **Inspect declared dependencies andexports.** Read the compiled descriptors withModuleFinder.
+4. **Inspect declared dependencies and exports.** Read the compiled descriptors with ModuleFinder.
    **Expected:** app requirescourse.greeting;library exportsedu.example.greeting.
    **Verify:** Compare your assertion values or captured diagnostic with app requirescourse.greeting;library exportsedu.example.greeting.
 
@@ -156,8 +156,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with stdoutHello, modules! andexit0.
 
 6. **Reject a missing module dependency.** Compile an app requiringcourse.missing instead ofcourse.greeting.
-   **Expected:** nonzero compiler exit andcaptured diagnostic.
-   **Verify:** Compare your assertion values or captured diagnostic with nonzero compiler exit andcaptured diagnostic.
+   **Expected:** nonzero compiler exit and captured diagnostic.
+   **Verify:** Compare your assertion values or captured diagnostic with nonzero compiler exit and captured diagnostic.
 
 ## Common pitfalls and diagnosis
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,53 +161,53 @@
       <h1>Spark 013</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-013.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Row, SparkSession}</span>
-<span>import org.apache.spark.sql.functions._</span>
-<span>import org.apache.spark.sql.types._</span>
-<span> </span>
-<span>object Main {</span>
-<span>  def paidEvents(raw: org.apache.spark.sql.DataFrame): org.apache.spark.sql.DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete paid event filter&quot;)</span>
-<span>  def summarize(paid: org.apache.spark.sql.DataFrame): org.apache.spark.sql.DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete team summary&quot;)</span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-013-attempt&quot;)</span>
-<span>      .master(&quot;local[2]&quot;)</span>
-<span>      .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
-<span>      .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
-<span>      .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate()</span>
-<span>    try {</span>
-<span>      require(spark.sparkContext.master == &quot;local[2]&quot;)</span>
-<span>      val schema = StructType(Seq(</span>
-<span>        StructField(&quot;event_id&quot;, LongType, false),</span>
-<span>        StructField(&quot;team&quot;, StringType, true),</span>
-<span>        StructField(&quot;amount_cents&quot;, LongType, true),</span>
-<span>        StructField(&quot;status&quot;, StringType, false)</span>
-<span>      ))</span>
-<span>      val rows = Seq(</span>
-<span>        Row(1L, &quot;A&quot;, 100L, &quot;paid&quot;), Row(2L, &quot;A&quot;, null, &quot;paid&quot;),</span>
-<span>        Row(3L, &quot;B&quot;, 0L, &quot;paid&quot;), Row(4L, null, 50L, &quot;paid&quot;),</span>
-<span>        Row(5L, &quot;B&quot;, 150L, &quot;void&quot;), Row(6L, &quot;A&quot;, 100L, &quot;paid&quot;),</span>
-<span>        Row(7L, &quot;C&quot;, null, &quot;paid&quot;)</span>
-<span>      )</span>
-<span>      val raw = spark.createDataFrame(</span>
-<span>        spark.sparkContext.parallelize(rows, 2), schema</span>
-<span>      )</span>
-<span>      println(raw.schema.simpleString)</span>
-<span>      // Exercise 1: retain event identity and filter status.</span>
-<span>      // Exercise 2: inspect row count, observed count and sum.</span>
-<span>      // Exercise 3: aggregate by team and order NULL keys last.</span>
-<span>      // Exercise 4: distinguish NULL predicates and observed zero.</span>
-<span>      // Exercise 5: expose projected-distinct loss; repartition safely.</span>
-<span>      // Exercise 6: compare both APIs and SQL to the golden fixture.</span>
-<span>    } finally {</span>
-<span>      spark.stop()</span>
-<span>    }</span>
-<span>  }</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">paidEvents</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete paid event filter&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">summarize</span><span class="syntax-punctuation">(</span>paid<span class="syntax-punctuation">:</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete team summary&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> spark <span class="syntax-operator">=</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">.</span>builder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ds60-spark-013-attempt&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.ui.enabled&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.bindAddress&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.shuffle.partitions&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;2&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.session.timeZone&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UTC&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> schema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;event_id&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;team&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount_cents&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;status&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> rows <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;B&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;B&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">150L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;void&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">6L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">7L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;C&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> schema</span>
+<span class="source-line">      <span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">.</span>schema<span class="syntax-punctuation">.</span>simpleString<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 1: retain event identity and filter status.</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 2: inspect row count, observed count and sum.</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 3: aggregate by team and order NULL keys last.</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 4: distinguish NULL predicates and observed zero.</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 5: expose projected-distinct loss; repartition safely.</span></span>
+<span class="source-line">      <span class="syntax-comment">// Exercise 6: compare both APIs and SQL to the golden fixture.</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

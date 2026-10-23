@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-001</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. The central investigation is concrete: Create a2x3 float64 CPU tensor from values 0..5. The finish condition is shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. The central investigation is concrete: Create a 2-by-3 float64 CPU tensor from values 0..5. The finish condition is shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. Shape tells you the number of elements along each axis; strides describe how an index moves through storage. A view can share storage with another tensor, so mutation through one reference may change the other. clone creates independent storage. Transpose changes the interpretation of axes and often produces a noncontiguous view. reshape may return a view or a copy, so code should not infer ownership solely from its name.</p>
 <p>Device and dtype are part of a computation contract. This course uses CPU explicitly, with float64 for hand-derived numerical checks and float32 for small neural modules unless stated otherwise. Broadcasting aligns trailing dimensions and can silently create pairwise results. A vector of shape(3, ) subtracted from a column(3, 1) produces(3, 3), not three paired residuals.</p>
@@ -162,34 +208,34 @@
 <td>[-2, -1, 0]</td>
 </tr>
 </tbody></table></div>
-<p>The intended paired differences are only the diagonal zeros. The broadcast operation instead creates nine comparisons whose squared mean is 12/9=4/3. Reducing that grid to one scalar cannot restore the lost pairing. A model can therefore optimize a nonzero objective even though every intended prediction equals its target.</p>
+<p>The intended paired differences are only the diagonal zeros. The broadcast operation instead creates nine comparisons whose squared mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>12</mn></mrow><mrow><mn>9</mn></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{12}{9}=\frac{4}{3}</annotation></semantics></math>. Reducing that grid to one scalar cannot restore the lost pairing. A model can therefore optimize a nonzero objective even though every intended prediction equals its target.</p>
 <p>A practical tensor boundary should name every axis, required dtype, device and ownership rule. A shape check catches a column/vector mismatch, but it cannot detect that two equally shaped batches have different record orders or units. Keep those semantic checks beside the tensor metadata. The framework enforces legal arithmetic; the application defines which arithmetic corresponds to the task.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-inspect-shape-and-stride">Example A: Inspect shape and stride<a class="heading-anchor" href="#example-a-inspect-shape-and-stride" aria-label="Link to this section">#</a></h4>
 <p>The last axis advances by one stored element and the first by three. These metadata explain the matrix layout without relying on a printed table alone.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-x=torch.arange(6,dtype=torch.float64,device=&#x27;cpu&#x27;).reshape(2,3)
-assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type==&#x27;cpu&#x27; and x.dtype==torch.float64</code></pre>
+x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">,</span>device<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> x<span class="syntax-operator">.</span>stride<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> x<span class="syntax-operator">.</span>device<span class="syntax-operator">.</span>type<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> x<span class="syntax-operator">.</span>dtype<span class="syntax-operator">==</span>torch<span class="syntax-operator">.</span>float64</code></pre>
 <p><strong>Expected:</strong> shape(2, 3), stride(3, 1), CPU, float64.</p>
 <h4 id="example-b-expose-shared-storage">Example B: Expose shared storage<a class="heading-anchor" href="#example-b-expose-shared-storage" aria-label="Link to this section">#</a></h4>
 <p>Basic slicing returns a view here. A function receiving that view can mutate caller-owned data unless it copies or documents the ownership contract.</p>
-<pre><code class="language-python">row=x[0]; row[0]=99
-assert x[0,0].item()==99</code></pre>
+<pre class="highlighted-code"><code class="language-python">row<span class="syntax-operator">=</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">99</span>
+<span class="syntax-keyword">assert</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">99</span></code></pre>
 <p><strong>Expected:</strong> original x[0, 0] becomes 99.</p>
 <h4 id="example-c-create-an-independent-copy">Example C: Create an independent copy<a class="heading-anchor" href="#example-c-create-an-independent-copy" aria-label="Link to this section">#</a></h4>
 <p>clone copies storage and preserves a differentiable relationship when gradients are enabled. Detaching and copying are separate operations discussed later.</p>
-<pre><code class="language-python">owned=x.clone(); owned[0,0]=-1
-assert owned[0,0].item()==-1 and x[0,0].item()==99</code></pre>
+<pre class="highlighted-code"><code class="language-python">owned<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> owned<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> owned<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">99</span></code></pre>
 <p><strong>Expected:</strong> clone starts-1; original remains 99.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Inspect shape and stride.</strong> Create a2x3 float64 CPU tensor from values 0..5. <strong>Expected:</strong> shape(2, 3), stride(3, 1), CPU, float64. <strong>Verify:</strong> Save the assertion results for exercise 1, including shape(2, 3), stride(3, 1), CPU, float64.</li>
+<li><strong>Inspect shape and stride.</strong> Create a 2-by-3 float64 CPU tensor from values 0..5. <strong>Expected:</strong> shape(2, 3), stride(3, 1), CPU, float64. <strong>Verify:</strong> Save the assertion results for exercise 1, including shape(2, 3), stride(3, 1), CPU, float64.</li>
 </ol>
 <ol>
 <li><strong>Expose shared storage.</strong> Slice the first row, change its first value, and inspect the original tensor. <strong>Expected:</strong> original x[0, 0] becomes 99. <strong>Verify:</strong> Save the assertion results for exercise 2, including original x[0, 0] becomes 99.</li>
@@ -223,7 +269,7 @@ assert owned[0,0].item()==-1 and x[0,0].item()==99</code></pre>
 <p><strong>Why can a shape bug produce no exception?</strong></p>
 <p>Broadcasting may define a valid larger operation. The framework checks arithmetic compatibility, not whether the new axes match the intended prediction unit.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-002, Tensors, devices, dtypes, strides and views.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-002, Tensors, devices, dtypes, strides and views.
 Read courses/deep-learning-pytorch/guides/torch-002.md and courses/deep-learning-pytorch/lessons/torch-002.py. Direct prerequisites: `torch-001`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

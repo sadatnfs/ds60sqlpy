@@ -1210,3 +1210,15 @@ p:last-child {
 .source-heading button {
   padding: 6px 8px;
 }
+
+#receipt-source {
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 8px;
+}
+#receipt-source pre {
+  margin: 0;
+}
+#run-storage-status {
+  line-height: 1.7;
+}

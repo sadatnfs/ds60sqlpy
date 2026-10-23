@@ -18,7 +18,7 @@ Create frozen torch tensors and fit or derive a small linear probe separately fr
 
 ## Exercise 1: Construct transparent representations
 
-The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels0,0,1,1.
+The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1.
 
 The label is deliberately encoded in a coordinate. This supplies a clear positive control for the probing procedure.
 
@@ -48,7 +48,7 @@ assert torch.equal(got,truth)
 
 ## Exercise 3: Add shuffled-label control
 
-The question is: Compare predictions against shuffled labels0,1,0,1.
+The question is: Compare predictions against shuffled labels 0,1,0,1.
 
 The control breaks the specific association while preserving label balance. A high control score would suggest the probe or split can exploit another shortcut.
 
@@ -77,7 +77,7 @@ assert weight.grad is not None and features.grad is None and torch.equal(feature
 
 ## Exercise 5: Expose family leakage
 
-The question is: Mark rows0 and1 as versions of familyA and place them on opposite sides of a split.
+The question is: Mark rows0 and 1 as versions of familyA and place them on opposite sides of a split.
 
 A probe can memorize family-specific features. Row-level disjointness does not prevent related documents from leaking across evaluation.
 

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-42.html#learner">learner SQL</a> · <a href="sql-42.html#solution-1">solution reasoning</a> · <a href="sql-42.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-42 — Data Quality Validation</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day42_data_quality_validation.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day42_data_quality_validation.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day42_data_quality_validation.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,19 +466,19 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day42_data_quality_validation.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT &#x27;customers&#x27; AS table,
-       COUNT(*) AS rows,
-       SUM(CASE WHEN email IS NULL THEN 1 ELSE 0 END) AS null_emails,
-       SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) AS null_country
-FROM customers;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_emails<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_country
+<span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>table</code>, <code>rows</code>, <code>null_emails</code>, and <code>null_country</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns exactly one summary row with columns <code>rows</code>, <code>null_emails</code>, and <code>null_country</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT email, COUNT(*) AS cnt
-FROM customers
-GROUP BY email
-HAVING COUNT(*) &gt; 1
-ORDER BY cnt DESC;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> email<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cnt
+<span class="syntax-keyword">FROM</span> customers
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> email
+<span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cnt <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>email</code>, and <code>cnt</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>email</code>, and <code>cnt</code> with columns <code>email</code>, and <code>cnt</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -495,7 +543,7 @@ ORDER BY cnt DESC;</code></pre>
 <p>Reconcile stored totals to line revenue at order grain and use a one-cent tolerance deliberately. A duplicate report should retain raw email variants. For inclusive promotion dates, ranges overlap when each start is less than or equal to the other range&#x27;s end; compare each pair only once.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-42 — Data Quality Validation.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-42 — Data Quality Validation.
 
 I have completed the direct catalog prerequisite: `sql-41`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md
@@ -553,96 +601,96 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 42: Data Quality &amp; Validation</span>
-<span>-- BEGINNER WORKFLOW — sql-42: Data Quality Validation</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-42/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: customers, order_items, orders, payments.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Null analysis and basic profiling</span>
-<span>SELECT &#x27;customers&#x27; AS table,</span>
-<span>       COUNT(*) AS rows,</span>
-<span>       SUM(CASE WHEN email IS NULL THEN 1 ELSE 0 END) AS null_emails,</span>
-<span>       SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) AS null_country</span>
-<span>FROM customers;</span>
-<span> </span>
-<span>-- Duplicate detection (emails should be unique ideally)</span>
-<span>SELECT email, COUNT(*) AS cnt</span>
-<span>FROM customers</span>
-<span>GROUP BY email</span>
-<span>HAVING COUNT(*) &gt; 1</span>
-<span>ORDER BY cnt DESC;</span>
-<span> </span>
-<span>-- Orphan checks (should be zero due to FK, but as validation queries)</span>
-<span>SELECT oi.order_id</span>
-<span>FROM order_items oi</span>
-<span>LEFT JOIN orders o ON o.order_id = oi.order_id</span>
-<span>WHERE o.order_id IS NULL</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>SELECT p.payment_id</span>
-<span>FROM payments p</span>
-<span>LEFT JOIN orders o ON o.order_id = p.order_id</span>
-<span>WHERE o.order_id IS NULL</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>-- Domain/constraint validation examples</span>
-<span>SELECT * FROM orders WHERE total_amount &lt; 0 LIMIT 10;</span>
-<span>SELECT * FROM payments WHERE amount &lt; 0 LIMIT 10;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.</span>
-<span>--    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 1, expected output: seven rows with `check_name` and `failing_rows`. A nonzero result is evidence to investigate, not permission to delete data automatically. The final columns are `check_name`, and `failing_rows`. The final order is `check_name`.</span>
-<span>--    Verify: For sql-42 Exercise 1, project `check_name` plus the raw source columns from `customers`, `orders`, `order_items`, `products`, and `payments` at each join stage; record row count and distinct `check_name`, then assert the final `check_name`, and `failing_rows` values match those staged rows without unintended fanout or loss. Add one row for which `(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)` is true and one for which it is false; verify only the matching `check_name` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 1, start with the first relation in `customers`, `orders`, `order_items`, `products`, and `payments`; after each join, record total rows and distinct `check_name` so the exact fanout or loss is visible.</span>
-<span>-- 2. Detect customers with invalid email patterns using regex.</span>
-<span>--    Inputs: For sql-42 Exercise 2, read from `customers`. Build the answer toward `customer_id`, and `email`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 2, expected output: one row per `customer_id`. The final columns are `customer_id`, and `email`. The final order is `customer_id`.</span>
-<span>--    Verify: For sql-42 Exercise 2, run an anti-check that counts rows where NOT ((email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `email` against `customers`. Repeat with `NULL` in `customer_id`, and `email` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span>
-<span>-- 3. Prediction: explain why CHECK (amount &gt;= 0) rejects negative values but,</span>
-<span>--    without NOT NULL, would accept NULL under SQL&#x27;s three-valued logic.</span>
-<span>--    Inputs: For sql-42 Exercise 3, read from `information_schema.columns`. Build the answer toward `table_name`, `column_name`, and `is_nullable`; keep `table_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 3, expected output: one row per `table_name`. The final columns are `table_name`, `column_name`, and `is_nullable`. The final order is `table_name, column_name`.</span>
-<span>--    Verify: For sql-42 Exercise 3, run an anti-check that counts rows where NOT ((table_schema = &#x27;training&#x27; AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;) AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;))); require unique `table_name` where the expected grain is one row per key and confirm the projected `table_name`, `column_name`, and `is_nullable` against `information_schema.columns`. Repeat with `NULL` in `table_name`, and `column_name` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 3, inspect the source keys that survive `WHERE`; then check `table_name, column_name` before applying the row cap.</span>
-<span>-- 4. Construction: reconcile each order&#x27;s stored total_amount with calculated</span>
-<span>--    line-item revenue and return only differences greater than one cent.</span>
-<span>--    Inputs: For sql-42 Exercise 4, read from `order_items`, and `orders`. Build the answer toward `order_id`, `total_amount`, `line_total`, and `difference`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 4, expected output: one row per order before comparison. The final columns are `order_id`, `total_amount`, `line_total`, and `difference`. The final order is `o.order_id`.</span>
-<span>--    Verify: For sql-42 Exercise 4, project `order_id` plus the raw source columns from `order_items`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `total_amount`, `line_total`, and `difference` values match those staged rows without unintended fanout or loss. Add one row for which `(ABS(o.total_amount - c.line_total) &gt; 0.01)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 4, run `calculated` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 5. Debugging: repair a duplicate check that groups by lower(email) but reports</span>
-<span>--    only the normalized value, losing the raw variants needed for diagnosis.</span>
-<span>--    Inputs: For sql-42 Exercise 5, read from `customers`. Build the answer toward `normalized_email`, `raw_variants`, and `rows`; keep `normalized_email`, and `raw_variants` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 5, expected output: one row per `normalized_email`, and `raw_variants`. The final columns are `normalized_email`, `raw_variants`, and `rows`. The final order is `normalized_email`.</span>
-<span>--    Verify: For sql-42 Exercise 5, independently aggregate `customers` by `normalized_email`, and `raw_variants`; require one output row for every distinct `normalized_email`, and `raw_variants` tuple satisfying `(email IS NOT NULL)` and compare `rows` tuple by tuple. Add duplicate source candidates for `normalized_email`, and `raw_variants`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 5, inspect the source keys that survive `WHERE`; then confirm the groups are `normalized_email`, and `raw_variants`; then check `normalized_email` before applying the row cap.</span>
-<span>-- 6. Edge case: detect overlapping promotion date ranges for the same product,</span>
-<span>--    treating touching inclusive endpoints as an overlap.</span>
-<span>--    Inputs: For sql-42 Exercise 6, read from `promotions`. Build the answer toward `promotion_a`, `promotion_b`, and `product_id`; keep `product_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-42 Exercise 6, expected output: one row per `product_id`. The final columns are `promotion_a`, `promotion_b`, and `product_id`. The final order is `a.product_id, promotion_a, promotion_b`.</span>
-<span>--    Verify: For sql-42 Exercise 6, project `product_id` plus the raw source columns from `promotions` at each join stage; record row count and distinct `product_id`, then assert the final `promotion_a`, `promotion_b`, and `product_id` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span>
-<span>--    Hint ladder, rung 1: For sql-42 Exercise 6, start with the first relation in `promotions`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 42: Data Quality &amp; Validation</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-42: Data Quality Validation</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-42/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: customers, order_items, orders, payments.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Null analysis and basic profiling</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_emails<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_country</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Duplicate detection (emails should be unique ideally)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> email<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cnt</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> email</span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cnt <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Orphan checks (should be zero due to FK, but as validation queries)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>payment_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> payments p</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Domain/constraint validation examples</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">WHERE</span> amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 1, expected output: seven rows with `check_name` and `failing_rows`. A nonzero result is evidence to investigate, not permission to delete data automatically. The final columns are `check_name`, and `failing_rows`. The final order is `check_name`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 1, project `check_name` plus the raw source columns from `customers`, `orders`, `order_items`, `products`, and `payments` at each join stage; record row count and distinct `check_name`, then assert the final `check_name`, and `failing_rows` values match those staged rows without unintended fanout or loss. Add one row for which `(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)` is true and one for which it is false; verify only the matching `check_name` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 1, start with the first relation in `customers`, `orders`, `order_items`, `products`, and `payments`; after each join, record total rows and distinct `check_name` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Detect customers with invalid email patterns using regex.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 2, read from `customers`. Build the answer toward `customer_id`, and `email`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 2, expected output: one row per `customer_id`. The final columns are `customer_id`, and `email`. The final order is `customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 2, run an anti-check that counts rows where NOT ((email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `email` against `customers`. Repeat with `NULL` in `customer_id`, and `email` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: explain why CHECK (amount &gt;= 0) rejects negative values but,</span></span>
+<span class="source-line"><span class="syntax-comment">--    without NOT NULL, would accept NULL under SQL&#x27;s three-valued logic.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 3, read from `information_schema.columns`. Build the answer toward `table_name`, `column_name`, and `is_nullable`; keep `table_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 3, expected output: one row per `table_name`. The final columns are `table_name`, `column_name`, and `is_nullable`. The final order is `table_name, column_name`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 3, run an anti-check that counts rows where NOT ((table_schema = &#x27;training&#x27; AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;) AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;))); require unique `table_name` where the expected grain is one row per key and confirm the projected `table_name`, `column_name`, and `is_nullable` against `information_schema.columns`. Repeat with `NULL` in `table_name`, and `column_name` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 3, inspect the source keys that survive `WHERE`; then check `table_name, column_name` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: reconcile each order&#x27;s stored total_amount with calculated</span></span>
+<span class="source-line"><span class="syntax-comment">--    line-item revenue and return only differences greater than one cent.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 4, read from `order_items`, and `orders`. Build the answer toward `order_id`, `total_amount`, `line_total`, and `difference`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 4, expected output: one row per order before comparison. The final columns are `order_id`, `total_amount`, `line_total`, and `difference`. The final order is `o.order_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 4, project `order_id` plus the raw source columns from `order_items`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `total_amount`, `line_total`, and `difference` values match those staged rows without unintended fanout or loss. Add one row for which `(ABS(o.total_amount - c.line_total) &gt; 0.01)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 4, run `calculated` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: repair a duplicate check that groups by lower(email) but reports</span></span>
+<span class="source-line"><span class="syntax-comment">--    only the normalized value, losing the raw variants needed for diagnosis.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 5, read from `customers`. Build the answer toward `normalized_email`, `raw_variants`, and `rows`; keep `normalized_email`, and `raw_variants` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 5, expected output: one row per `normalized_email`, and `raw_variants`. The final columns are `normalized_email`, `raw_variants`, and `rows`. The final order is `normalized_email`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 5, independently aggregate `customers` by `normalized_email`, and `raw_variants`; require one output row for every distinct `normalized_email`, and `raw_variants` tuple satisfying `(email IS NOT NULL)` and compare `rows` tuple by tuple. Add duplicate source candidates for `normalized_email`, and `raw_variants`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 5, inspect the source keys that survive `WHERE`; then confirm the groups are `normalized_email`, and `raw_variants`; then check `normalized_email` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: detect overlapping promotion date ranges for the same product,</span></span>
+<span class="source-line"><span class="syntax-comment">--    treating touching inclusive endpoints as an overlap.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 6, read from `promotions`. Build the answer toward `promotion_a`, `promotion_b`, and `product_id`; keep `product_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 6, expected output: one row per `product_id`. The final columns are `promotion_a`, `promotion_b`, and `product_id`. The final order is `a.product_id, promotion_a, promotion_b`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 6, project `product_id` plus the raw source columns from `promotions` at each join stage; record row count and distinct `product_id`, then assert the final `promotion_a`, `promotion_b`, and `product_id` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 6, start with the first relation in `promotions`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -678,10 +726,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-42-solutions-data-quality-and-validation">Day 42 Solutions — Data Quality and Validation<a class="heading-anchor" href="#solution-1--day-42-solutions-data-quality-and-validation" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day42_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day42_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day42_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -698,46 +746,46 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The goal is to turn scattered checks into one auditable report, then isolate bad email values. Run the canonical file at <a href="sql-42.html#solution-2"><code>day42_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-core-table-validation-report">Exercise 1 — Core-table validation report<a class="heading-anchor" href="#solution-1--exercise-1-core-table-validation-report" aria-label="Link to this section">#</a></h4>
 <p>Each row is a named check and the number of failing records or duplicate groups. On the deterministic course seed, every count should be zero.</p>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-SELECT &#x27;customers.null_email&#x27; AS check_name,
-       COUNT(*) AS failing_rows
-FROM customers
-WHERE email IS NULL
-UNION ALL
-SELECT &#x27;customers.duplicate_normalized_email&#x27;,
-       COUNT(*)
-FROM (
-  SELECT lower(trim(email))
-  FROM customers
-  GROUP BY lower(trim(email))
-  HAVING COUNT(*) &gt; 1
-) duplicates
-UNION ALL
-SELECT &#x27;orders.negative_total&#x27;, COUNT(*)
-FROM orders
-WHERE total_amount &lt; 0
-UNION ALL
-SELECT &#x27;orders.orphan_customer&#x27;, COUNT(*)
-FROM orders o
-LEFT JOIN customers c USING (customer_id)
-WHERE c.customer_id IS NULL
-UNION ALL
-SELECT &#x27;order_items.orphan_order_or_product&#x27;, COUNT(*)
-FROM order_items oi
-LEFT JOIN orders o USING (order_id)
-LEFT JOIN products p USING (product_id)
-WHERE o.order_id IS NULL OR p.product_id IS NULL
-UNION ALL
-SELECT &#x27;order_items.invalid_quantity_or_discount&#x27;, COUNT(*)
-FROM order_items
-WHERE quantity &lt;= 0 OR discount NOT BETWEEN 0 AND 1
-UNION ALL
-SELECT &#x27;payments.negative_or_orphan&#x27;, COUNT(*)
-FROM payments p
-LEFT JOIN orders o USING (order_id)
-WHERE p.amount &lt; 0 OR o.order_id IS NULL
-ORDER BY check_name;</code></pre>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.null_email&#x27;</span> <span class="syntax-keyword">AS</span> check_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> failing_rows
+<span class="syntax-keyword">FROM</span> customers
+<span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.duplicate_normalized_email&#x27;</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">FROM</span> customers
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span> duplicates
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.negative_total&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> orders
+<span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.orphan_customer&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> orders o
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.orphan_order_or_product&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> order_items oi
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.invalid_quantity_or_discount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> order_items
+<span class="syntax-keyword">WHERE</span> quantity <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> discount <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;payments.negative_or_orphan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> payments p
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> check_name<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: seven rows with <code>check_name</code> and <code>failing_rows</code>. A nonzero result is evidence to investigate, not permission to delete data automatically.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -750,13 +798,13 @@ ORDER BY check_name;</code></pre>
 <li><strong>Edge case:</strong> Add one row for which <code>(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)</code> is true and one for which it is false; verify only the matching <code>check_name</code> value is returned.</li>
 </ul>
 <h4 id="solution-1--exercise-2-invalid-email-patterns">Exercise 2 — Invalid email patterns<a class="heading-anchor" href="#solution-1--exercise-2-invalid-email-patterns" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-SELECT customer_id, email
-FROM customers
-WHERE email IS NULL
-   OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;
-ORDER BY customer_id;</code></pre>
+<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> email
+<span class="syntax-keyword">FROM</span> customers
+<span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+   <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The seed should return zero rows. The regex is a practical course check, not a complete implementation of every valid RFC email address.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -855,117 +903,117 @@ ORDER BY customer_id;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 42 solutions: data-quality validation</span>
-<span>-- SOLUTION READING MAP — sql-42: Data Quality Validation</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day42_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day42_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: one compact validation report. Constraints make most counts zero;</span>
-<span>-- keeping the checks executable protects future changes and imported data.</span>
-<span>SELECT &#x27;customers.null_email&#x27; AS check_name,</span>
-<span>       COUNT(*) AS failing_rows</span>
-<span>FROM customers</span>
-<span>WHERE email IS NULL</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;customers.duplicate_normalized_email&#x27;,</span>
-<span>       COUNT(*)</span>
-<span>FROM (</span>
-<span>  SELECT lower(trim(email))</span>
-<span>  FROM customers</span>
-<span>  GROUP BY lower(trim(email))</span>
-<span>  HAVING COUNT(*) &gt; 1</span>
-<span>) duplicates</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;orders.negative_total&#x27;, COUNT(*)</span>
-<span>FROM orders</span>
-<span>WHERE total_amount &lt; 0</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;orders.orphan_customer&#x27;, COUNT(*)</span>
-<span>FROM orders o</span>
-<span>LEFT JOIN customers c USING (customer_id)</span>
-<span>WHERE c.customer_id IS NULL</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;order_items.orphan_order_or_product&#x27;, COUNT(*)</span>
-<span>FROM order_items oi</span>
-<span>LEFT JOIN orders o USING (order_id)</span>
-<span>LEFT JOIN products p USING (product_id)</span>
-<span>WHERE o.order_id IS NULL OR p.product_id IS NULL</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;order_items.invalid_quantity_or_discount&#x27;, COUNT(*)</span>
-<span>FROM order_items</span>
-<span>WHERE quantity &lt;= 0 OR discount NOT BETWEEN 0 AND 1</span>
-<span>UNION ALL</span>
-<span>SELECT &#x27;payments.negative_or_orphan&#x27;, COUNT(*)</span>
-<span>FROM payments p</span>
-<span>LEFT JOIN orders o USING (order_id)</span>
-<span>WHERE p.amount &lt; 0 OR o.order_id IS NULL</span>
-<span>ORDER BY check_name;</span>
-<span> </span>
-<span>-- Exercise 2: email-format validation.</span>
-<span>SELECT customer_id, email</span>
-<span>FROM customers</span>
-<span>WHERE email IS NULL</span>
-<span>   OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span>
-<span>ORDER BY customer_id;</span>
-<span> </span>
-<span>-- Exercise 3: a CHECK passes TRUE or UNKNOWN. The catalog query shows which</span>
-<span>-- course columns also carry NOT NULL, the separate rule that rejects NULL.</span>
-<span>SELECT table_name, column_name, is_nullable</span>
-<span>FROM information_schema.columns</span>
-<span>WHERE table_schema = &#x27;training&#x27;</span>
-<span>  AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;)</span>
-<span>  AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;)</span>
-<span>ORDER BY table_name, column_name;</span>
-<span> </span>
-<span>-- Exercise 4: aggregate lines to order grain before comparing with the stored</span>
-<span>-- header. The one-cent tolerance is an explicit currency policy.</span>
-<span>WITH calculated AS (</span>
-<span>  SELECT order_id,</span>
-<span>         SUM(quantity * unit_price * (1 - discount)) AS line_total</span>
-<span>  FROM order_items</span>
-<span>  GROUP BY order_id</span>
-<span>)</span>
-<span>SELECT o.order_id, o.total_amount, c.line_total,</span>
-<span>       o.total_amount - c.line_total AS difference</span>
-<span>FROM orders o</span>
-<span>JOIN calculated c USING (order_id)</span>
-<span>WHERE ABS(o.total_amount - c.line_total) &gt; 0.01</span>
-<span>ORDER BY o.order_id;</span>
-<span> </span>
-<span>-- Exercise 5: keep both normalized key and raw variants for remediation.</span>
-<span>SELECT lower(trim(email)) AS normalized_email,</span>
-<span>       array_agg(email ORDER BY email) AS raw_variants,</span>
-<span>       COUNT(*) AS rows</span>
-<span>FROM customers</span>
-<span>WHERE email IS NOT NULL</span>
-<span>GROUP BY lower(trim(email))</span>
-<span>HAVING COUNT(*) &gt; 1</span>
-<span>ORDER BY normalized_email;</span>
-<span> </span>
-<span>-- Exercise 6: compare each promotion pair once. Inclusive endpoints overlap</span>
-<span>-- when neither range ends strictly before the other starts.</span>
-<span>SELECT a.promotion_id AS promotion_a,</span>
-<span>       b.promotion_id AS promotion_b,</span>
-<span>       a.product_id</span>
-<span>FROM promotions a</span>
-<span>JOIN promotions b</span>
-<span>  ON b.product_id = a.product_id</span>
-<span> AND b.promotion_id &gt; a.promotion_id</span>
-<span> AND a.start_date &lt;= b.end_date</span>
-<span> AND b.start_date &lt;= a.end_date</span>
-<span>ORDER BY a.product_id, promotion_a, promotion_b;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 42 solutions: data-quality validation</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-42: Data Quality Validation</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day42_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day42_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: one compact validation report. Constraints make most counts zero;</span></span>
+<span class="source-line"><span class="syntax-comment">-- keeping the checks executable protects future changes and imported data.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.null_email&#x27;</span> <span class="syntax-keyword">AS</span> check_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> failing_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.duplicate_normalized_email&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> duplicates</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.negative_total&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.orphan_customer&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.orphan_order_or_product&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.invalid_quantity_or_discount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> quantity <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> discount <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;payments.negative_or_orphan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> payments p</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> check_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: email-format validation.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: a CHECK passes TRUE or UNKNOWN. The catalog query shows which</span></span>
+<span class="source-line"><span class="syntax-comment">-- course columns also carry NOT NULL, the separate rule that rejects NULL.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">,</span> is_nullable</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> information_schema<span class="syntax-punctuation">.</span>columns</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> table_schema <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;training&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">table_name</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;orders&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;payments&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">column_name</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;total_amount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;amount&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: aggregate lines to order grain before comparing with the stored</span></span>
+<span class="source-line"><span class="syntax-comment">-- header. The one-cent tolerance is an explicit currency policy.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> calculated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> order_items</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total <span class="syntax-keyword">AS</span> difference</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> calculated <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">01</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: keep both normalized key and raw variants for remediation.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       array_agg<span class="syntax-punctuation">(</span>email <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> raw_variants<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> normalized_email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: compare each promotion pair once. Inclusive endpoints overlap</span></span>
+<span class="source-line"><span class="syntax-comment">-- when neither range ends strictly before the other starts.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> promotions a</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> promotions b</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>promotion_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>end_date</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>end_date</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> promotion_a<span class="syntax-punctuation">,</span> promotion_b<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

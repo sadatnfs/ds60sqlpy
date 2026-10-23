@@ -112,7 +112,7 @@ A copy detaches the selected values before mutation. The transpose changes strid
 
 5. **Select a strided view deliberately.** Return every step-th value from a one-dimensional array as a view. Require a positive integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.
 
-**Expected:** For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 andTrue raise ValueError; an empty source returns shape(0,).
+**Expected:** For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 and True raise ValueError; an empty source returns shape(0,).
 
 6. **Transfer ownership across a cache boundary.** Copy each array in a mapping so future numeric mutations of source arrays do not affect the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with ValueError because copying their buffer would not deep-copy nested Python objects.
 

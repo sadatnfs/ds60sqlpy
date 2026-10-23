@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -140,11 +186,11 @@
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Compute boolean error vectors before aggregation. Groupby declared labels and retain integer error/count pairs. Compare row count with unique ID count to expose duplicates. Use None for an untested group rather than a rate of zero. Keep severity categories separate from overall pass rate, and make the decision gate explicit before inspecting results.</p>
 <h3 id="keep-population-perturbation-and-mechanism-claims-separate">Keep population, perturbation and mechanism claims separate<a class="heading-anchor" href="#keep-population-perturbation-and-mechanism-claims-separate" aria-label="Link to this section">#</a></h3>
-<p>The original three records contain one error: groupA has 1/2 and groupB has 0/1. Overall error is 1/3. Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes 1/8 even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.</p>
+<p>The original three records contain one error: groupA has <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math> and groupB has 0/1. Overall error is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>. Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>8</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{8}</annotation></semantics></math> even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.</p>
 <p>This counterexample does not imply that every repeated identity should be removed. A longitudinal task may legitimately contain several observations from one person or device. The question is which unit the reported quantity is intended to average over, and whether dependence is modeled. Exact duplicate detection, source-family grouping and a weighting policy are related but different controls. A set of three IDs alone also does not prove those units are statistically independent.</p>
-<p>Zero errors among one observation is weak evidence about an unknown error probability. Under a deliberately stated independent Bernoulli sampling model, the chance of observing zero errors in n cases is(1-p)^n. Solving(1-p)^n=0.05 gives a one-sided 95% upper bound 1-0.05^(1/n):0.95 at n=1 and approximately 0.0295 at n=100. This arithmetic illustrates why denominators matter. The hand-selected synthetic cases do not automatically satisfy the random-sampling assumptions needed to interpret that bound as a population claim.</p>
+<p>Zero errors among one observation is weak evidence about an unknown error probability. Under a deliberately stated independent Bernoulli sampling model, the chance of observing zero errors in n cases is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">(1-p)^n</annotation></semantics></math>. Solving <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>n</mi></msup><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">(1-p)^n=0.05</annotation></semantics></math> gives a one-sided 95% upper bound <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mrow><mn>0.05</mn></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">1-{0.05}^{\frac{1}{n}}</annotation></semantics></math>:0.95 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n=1</annotation></semantics></math> and approximately 0.0295 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n=100</annotation></semantics></math>. This arithmetic illustrates why denominators matter. The hand-selected synthetic cases do not automatically satisfy the random-sampling assumptions needed to interpret that bound as a population claim.</p>
 <p>An empty group has no measured rate. Returning None preserves that absence; returning zero invents a successful observation. A report or chart should not replace missing rates with zero merely to fill a display. Likewise, a confidence calculation cannot create coverage for a group or condition that never appeared in the data. Keep coverage counts and the intended target population beside every aggregate.</p>
-<p>The perturbation rule here is f(x)=1 when x&gt;=0. Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.</p>
+<p>The perturbation rule here is f(x)=1 when <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">x\ge 0</annotation></semantics></math>. Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.</p>
 <p>A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.</p>
 <p>Severity is another independent axis. Nine minor passes and one severe failure yield a90% overall pass rate. If the predeclared release rule blocks on any severe failure, the correct decision remains no-go. Choosing a favorable aggregate after observing the severe failure changes the decision policy. Preserve case-level identity, severity and the actual failed condition so a summary cannot erase it.</p>
 <p>Privacy is not established by removing names from an example or by obtaining a good accuracy score. Differential privacy describes a randomized mechanism&#x27;s output behavior under a defined change to a dataset. Its guarantee depends on the neighboring-dataset unit, privacy parameters and the mechanism/accounting assumptions. Record-level adjacency and person-level adjacency are different promises when a person contributes multiple rows. Clipping, noise, sampling and repeated releases require a coherent analysis; this chapter implements none of them. <a href="https://csrc.nist.gov/pubs/sp/800/226/final">NIST SP 800-226</a> discusses evaluation of such guarantees and implementation hazards.</p>
@@ -153,24 +199,24 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-count-group-errors">Example A: Count group errors<a class="heading-anchor" href="#example-a-count-group-errors" aria-label="Link to this section">#</a></h4>
 <p>Counts keep the evidence visible. Equal rates with different denominators do not imply equal uncertainty.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-truth=torch.tensor([1,1,0]); prediction=torch.tensor([1,0,0]); groups=[&#x27;A&#x27;,&#x27;A&#x27;,&#x27;B&#x27;]; errors=prediction!=truth
-report={group:(int(errors[torch.tensor([g==group for g in groups])].sum()),groups.count(group)) for group in [&#x27;A&#x27;,&#x27;B&#x27;]}
-assert report=={&#x27;A&#x27;:(1,2),&#x27;B&#x27;:(0,1)}</code></pre>
+truth<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> prediction<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> groups<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> errors<span class="syntax-operator">=</span>prediction<span class="syntax-operator">!=</span>truth
+report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>group<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>errors<span class="syntax-punctuation">[</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>g<span class="syntax-operator">==</span>group <span class="syntax-keyword">for</span> g <span class="syntax-operator">in</span> groups<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>groups<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> group <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> A1/2errors; B0/1.</p>
 <h4 id="example-b-expose-repeated-identities">Example B: Expose repeated identities<a class="heading-anchor" href="#example-b-expose-repeated-identities" aria-label="Link to this section">#</a></h4>
 <p>Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.</p>
-<pre><code class="language-python">ids=[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]+[&#x27;c&#x27;]*5
-assert len(ids)==8 and len(set(ids))==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">ids<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">*</span><span class="syntax-number">5</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">8</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> 8rows but 3 unique IDs.</p>
 <h4 id="example-c-trace-a-controlled-perturbation">Example C: Trace a controlled perturbation<a class="heading-anchor" href="#example-c-trace-a-controlled-perturbation" aria-label="Link to this section">#</a></h4>
 <p>The last shift crosses the defined boundary. Whether that counts as a robustness failure depends on the intended label semantics.</p>
-<pre><code class="language-python">base=torch.tensor(1.); shifts=torch.tensor([-.1,-.9,-1.1]); changed=(base+shifts&gt;=0).long()
-assert changed.tolist()==[1,1,0]</code></pre>
+<pre class="highlighted-code"><code class="language-python">base<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> shifts<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>base<span class="syntax-operator">+</span>shifts<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>long<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> changed<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> labels 1, 1, 0.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: A1/2errors; B0/1. card explicitly has no privacy guarantee. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -179,10 +225,10 @@ assert changed.tolist()==[1,1,0]</code></pre>
 <li><strong>Count group errors.</strong> Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0. <strong>Expected:</strong> A1/2errors; B0/1. <strong>Verify:</strong> Save the assertion results for exercise 1, including A1/2errors; B0/1.</li>
 </ol>
 <ol>
-<li><strong>Expose repeated identities.</strong> Repeatcorrectrecordc five times and compare row count with unique IDs. <strong>Expected:</strong> 8rows but 3 unique IDs. <strong>Verify:</strong> Save the assertion results for exercise 2, including 8rows but 3 unique IDs.</li>
+<li><strong>Expose repeated identities.</strong> Repeat correct record c five times and compare row count with unique IDs. <strong>Expected:</strong> 8rows but 3 unique IDs. <strong>Verify:</strong> Save the assertion results for exercise 2, including 8rows but 3 unique IDs.</li>
 </ol>
 <ol>
-<li><strong>Trace a controlled perturbation.</strong> Classify x&gt;=0 at base 1 after shifts-.1, -.9, -1.1. <strong>Expected:</strong> labels 1, 1, 0. <strong>Verify:</strong> Save the assertion results for exercise 3, including labels 1, 1, 0.</li>
+<li><strong>Trace a controlled perturbation.</strong> Classify <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">x\ge 0</annotation></semantics></math> at base 1 after shifts-.1, -.9, -1.1. <strong>Expected:</strong> labels 1, 1, 0. <strong>Verify:</strong> Save the assertion results for exercise 3, including labels 1, 1, 0.</li>
 </ol>
 <ol>
 <li><strong>Keep severe failures visible.</strong> Use 9 minor passes and 1 severe failure. <strong>Expected:</strong> overall pass rate.9; severe failure count 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including overall pass rate.9; severe failure count 1.</li>
@@ -210,7 +256,7 @@ assert changed.tolist()==[1,1,0]</code></pre>
 <p><strong>Can a model card prove privacy?</strong></p>
 <p>No. It can record a privacy mechanism and its analysis, but documentation does not replace a technical guarantee or empirical evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-034, Robustness, privacy and evidence beyond a score.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-034, Robustness, privacy and evidence beyond a score.
 Read courses/deep-learning-pytorch/guides/torch-034.md and courses/deep-learning-pytorch/lessons/torch-034.py. Direct prerequisites: `torch-033`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

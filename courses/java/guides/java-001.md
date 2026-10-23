@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: None. This lesson star
 
 ## Learning objectives
 
-Explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a message variable containing Hello,Java and print it once. The final exercise transfers the mechanism to observe a real compiler diagnostic.
+Explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a message variable containing Hello, Java and print it once. The final exercise transfers the mechanism to observe a real compiler diagnostic.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A Java program begins as text. The compiler checks syntax and types, then writes
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-001/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -92,7 +92,7 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Print a first result.** Create a message variable containing Hello,Java and print it once.
+1. **Print a first result.** Create a message variable containing Hello, Java and print it once.
    **Expected:** one line Hello, Java.
    **Verify:** Compare your assertion values or captured diagnostic with one line Hello, Java.
 
@@ -105,16 +105,16 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with final count6.
 
 4. **Verify assertion mode.** Use an assertion side effect only to detect whether this teaching launch enabled assertions; fail explicitly otherwise.
-   **Expected:** assertion-enabled flagtrue.
-   **Verify:** Compare your assertion values or captured diagnostic with assertion-enabled flagtrue.
+   **Expected:** assertion-enabled flag true.
+   **Verify:** Compare your assertion values or captured diagnostic with assertion-enabled flag true.
 
 5. **Separate runtime failure.** Divide an integer by a variable containing0 and catch exactly ArithmeticException.
    **Expected:** ArithmeticException observed;program continues after the catch.
    **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException observed;program continues after the catch.
 
 6. **Observe a real compiler diagnostic.** Compile a small in-memory Broken class whose return statement lacks a semicolon; capture diagnostics without executing it.
-   **Expected:** compiler resultfalse and at least one ERROR diagnostic.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler resultfalse and at least one ERROR diagnostic.
+   **Expected:** compiler result false and at least one ERROR diagnostic.
+   **Verify:** Compare your assertion values or captured diagnostic with compiler result false and at least one ERROR diagnostic.
 
 ## Common pitfalls and diagnosis
 

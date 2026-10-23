@@ -4,7 +4,7 @@ These original specifications and renderer own `llm-043` through `llm-048`. Run 
 
 Earlier LLM002..042 source ownership remains with the established original files and `courses/deep-learning-tensorflow/authoring/` specifications. Regenerating that earlier authoring set preserves the six expert entries and files. Do not replace one authoring source with the other.
 
-Every expert topic contains three worked demonstrations,six exercises,an explicit derivation and shape trace,a controlled case study,design tradeoffs and separate executable/explanatory solutions. Primary papers are linked in each guide. Default code uses only prepared NumPy orPyTorch CPU dependencies and doesnot download models ordata.
+Every expert topic contains three worked demonstrations,six exercises,an explicit derivation and shape trace,a controlled case study,design tradeoffs and separate executable/explanatory solutions. Primary papers are linked in each guide. Default code uses only prepared NumPy or PyTorch CPU dependencies and does not download models or data.
 
 ## Detailed review and program preservation
 
@@ -28,7 +28,7 @@ sets remain byte-identical to the pre-review snapshot. See
 
 Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
 `\[ ... \]` delimiters. Tag every fenced code example with its actual language.
-After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+After regenerating older prose sources, run `python scripts/normalize_lesson_prose.py --write`
 from the repository root before rebuilding HTML readers. The reviewed
 `curriculum/math-prose.json` registry preserves this migration across regeneration;
 it does not change executable fences, notebook code or the supplied statistics

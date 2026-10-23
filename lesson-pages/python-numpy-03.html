@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-numpy-03.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_numpy_03.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_numpy_03<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_03.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_03.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-03.html#solution-1">explanatory solutions</a> and <a href="python-numpy-03.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -363,23 +411,23 @@
 <p>The exercises connect these mechanisms to categorical aggregation, row selection, pair tables and reversible ordering. Every contract states whether duplicates are valid, whether negative indices are accepted, what empty inputs mean and whether output shares storage. These policies are part of the data operation, not optional error handling.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">values = np.array([10, 20, 30, 40])
-selected = values[np.array([3, 1, 1])]
-selected[0] = -1
-assert values.tolist() == [10, 20, 30, 40]
-assert selected.tolist() == [-1, 20, 20]
-print(&quot;Gathered copy:&quot;, selected.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+selected <span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+selected<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> values<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> selected<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Gathered copy:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> selected<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Integer indexing repeats index one and reorders the values without changing their source. Mutating the selected copy affects only that result. Repetition is meaningful here because the output represents requested positions, not a set of unique source rows.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">indices = np.array([0, 0, 2])
-updates = np.array([1.0, 2.0, 5.0])
-buffered = np.zeros(3)
-buffered[indices] += updates
-accumulated = np.zeros(3)
-np.add.at(accumulated, indices, updates)
-assert accumulated.tolist() == [3.0, 0.0, 5.0]
-assert buffered[0] != accumulated[0]
-print(&quot;Accumulated repeated indices:&quot;, accumulated.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">indices <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+updates <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+buffered <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+buffered<span class="syntax-punctuation">[</span>indices<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span><span class="syntax-operator">=</span> updates
+accumulated <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>add<span class="syntax-operator">.</span>at<span class="syntax-punctuation">(</span>accumulated<span class="syntax-punctuation">,</span> indices<span class="syntax-punctuation">,</span> updates<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> accumulated<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> buffered<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> accumulated<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Accumulated repeated indices:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> accumulated<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Two contributions belong to category zero, so the correct sum is three. add.at preserves both additions. The buffered advanced-index update is deliberately shown as a counterexample; do not use its observed last value as a portable specification for a duplicate-assignment policy.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -420,7 +468,7 @@ print(&quot;Accumulated repeated indices:&quot;, accumulated.tolist())</code></p
 <li><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html">NumPy ufunc.at repeated-index accumulation</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-03: Gather, Scatter, Masks, and Deterministic Selection.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-03: Gather, Scatter, Masks, and Deterministic Selection.
 Read python/professional/companion-guides/py_numpy_03.md and python/professional/lessons/py_numpy_03.py. Direct prerequisites: python-numpy-02.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -456,135 +504,135 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-numpy-03: Gather, Scatter, Masks, and Deterministic Selection.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def gather_positions(values: np.ndarray, positions: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Gather a one-dimensional source using a one-dimensional integer index array. Allow</span>
-<span>    negative positions in the normal NumPy range and preserve duplicates/order. Reject</span>
-<span>    Boolean, floating or out-of-range indices with ValueError. Return an independent result.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement gather_positions&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def sum_by_code(values: np.ndarray, codes: np.ndarray, bins: int) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Sum finite one-dimensional values into bins using one nonnegative integer code per</span>
-<span>    value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero</span>
-<span>    bins are allowed only with empty inputs. Preserve every repeated-code contribution.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement sum_by_code&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def select_rows(values: np.ndarray, mask: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve</span>
-<span>    selected order and return independent storage. Reject integer flags, a cell-shaped mask</span>
-<span>    or wrong row count with ValueError.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement select_rows&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def cartesian_submatrix(values: np.ndarray, rows: np.ndarray, columns: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve</span>
-<span>    duplicates and index-array order in both axes. Reject out-of-range, Boolean or</span>
-<span>    noninteger indices. An empty selection on either axis must preserve the other output</span>
-<span>    dimension.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement cartesian_submatrix&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def stable_top_indices(scores: np.ndarray, k: int) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return indices of the k largest finite one-dimensional scores in descending score order,</span>
-<span>    breaking ties by original position. Require an integer k between zero and the number of</span>
-<span>    scores, rejecting Boolean k. Do not mutate scores.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement stable_top_indices&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def inverse_permutation(order: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject</span>
-<span>    duplicates, missing positions, negative values and noninteger dtype. Support the empty</span>
-<span>    permutation. Demonstrate recovery of records after reordering.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement inverse_permutation&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    values = np.array([10, 20, 30, 40])</span>
-<span>    selected = values[np.array([3, 1, 1])]</span>
-<span>    selected[0] = -1</span>
-<span>    assert values.tolist() == [10, 20, 30, 40]</span>
-<span>    assert selected.tolist() == [-1, 20, 20]</span>
-<span>    print(&quot;Gathered copy:&quot;, selected.tolist())</span>
-<span> </span>
-<span>    indices = np.array([0, 0, 2])</span>
-<span>    updates = np.array([1.0, 2.0, 5.0])</span>
-<span>    buffered = np.zeros(3)</span>
-<span>    buffered[indices] += updates</span>
-<span>    accumulated = np.zeros(3)</span>
-<span>    np.add.at(accumulated, indices, updates)</span>
-<span>    assert accumulated.tolist() == [3.0, 0.0, 5.0]</span>
-<span>    assert buffered[0] != accumulated[0]</span>
-<span>    print(&quot;Accumulated repeated indices:&quot;, accumulated.tolist())</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Gather with explicit index rules</span>
-<span># Prompt: Gather a one-dimensional source using a one-dimensional integer index array. Allow</span>
-<span># negative positions in the normal NumPy range and preserve duplicates/order. Reject Boolean,</span>
-<span># floating or out-of-range indices with ValueError. Return an independent result.</span>
-<span># Expected: [10,20,30] with [2,-1,0] yields [30,30,10]. Empty integer positions return shape(0,).</span>
-<span># Position 3, float1.0 or a Boolean index array raises ValueError.</span>
-<span> </span>
-<span># Exercise 2: Accumulate repeated category codes</span>
-<span># Prompt: Sum finite one-dimensional values into bins using one nonnegative integer code per</span>
-<span># value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero bins are</span>
-<span># allowed only with empty inputs. Preserve every repeated-code contribution.</span>
-<span># Expected: Values[1,2,5] and codes[0,0,2] with 3 bins produce[3,0,5]. Empty inputs and zero bins</span>
-<span># produce shape(0,); code 3 for 3 bins raises ValueError.</span>
-<span> </span>
-<span># Exercise 3: Validate a row mask</span>
-<span># Prompt: Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve</span>
-<span># selected order and return independent storage. Reject integer flags, a cell-shaped mask or wrong</span>
-<span># row count with ValueError.</span>
-<span># Expected: [[1,2],[3,4],[5,6]] with [True, False, True] gives [[1,2],[5,6]]. All false gives</span>
-<span># shape(0,2); an integer[1,0,1] mask is rejected.</span>
-<span> </span>
-<span># Exercise 4: Select every row-column combination</span>
-<span># Prompt: Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve</span>
-<span># duplicates and index-array order in both axes. Reject out-of-range, Boolean or noninteger</span>
-<span># indices. An empty selection on either axis must preserve the other output dimension.</span>
-<span># Expected: np.arange(12).reshape(3,4), rows[2,0], columns[3,1] gives [[11,9],[3,1]]. Empty rows</span>
-<span># with two columns returns shape(0,2), not a flat vector.</span>
-<span> </span>
-<span># Exercise 5: Make top-k ties deterministic</span>
-<span># Prompt: Return indices of the k largest finite one-dimensional scores in descending score order,</span>
-<span># breaking ties by original position. Require an integer k between zero and the number of scores,</span>
-<span># rejecting Boolean k. Do not mutate scores.</span>
-<span># Expected: [5,9,9,1] with k=3 returns [1,2,0]. k=0 returns an empty integer array; k=5 or a NaN</span>
-<span># score raises ValueError.</span>
-<span> </span>
-<span># Exercise 6: Restore original observation order</span>
-<span># Prompt: Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject</span>
-<span># duplicates, missing positions, negative values and noninteger dtype. Support the empty</span>
-<span># permutation. Demonstrate recovery of records after reordering.</span>
-<span># Expected: Order[2,0,1] has inverse[1,2,0], and original[order][inverse] equals original.</span>
-<span># Order[0,0] is invalid; an empty integer array returns empty.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-numpy-03: Gather, Scatter, Masks, and Deterministic Selection.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">gather_positions</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> positions<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Gather a one-dimensional source using a one-dimensional integer index array. Allow</span></span>
+<span class="source-line"><span class="syntax-string">    negative positions in the normal NumPy range and preserve duplicates/order. Reject</span></span>
+<span class="source-line"><span class="syntax-string">    Boolean, floating or out-of-range indices with ValueError. Return an independent result.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement gather_positions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_by_code</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> codes<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> bins<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Sum finite one-dimensional values into bins using one nonnegative integer code per</span></span>
+<span class="source-line"><span class="syntax-string">    value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero</span></span>
+<span class="source-line"><span class="syntax-string">    bins are allowed only with empty inputs. Preserve every repeated-code contribution.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement sum_by_code</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">select_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve</span></span>
+<span class="source-line"><span class="syntax-string">    selected order and return independent storage. Reject integer flags, a cell-shaped mask</span></span>
+<span class="source-line"><span class="syntax-string">    or wrong row count with ValueError.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement select_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">cartesian_submatrix</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> columns<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve</span></span>
+<span class="source-line"><span class="syntax-string">    duplicates and index-array order in both axes. Reject out-of-range, Boolean or</span></span>
+<span class="source-line"><span class="syntax-string">    noninteger indices. An empty selection on either axis must preserve the other output</span></span>
+<span class="source-line"><span class="syntax-string">    dimension.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement cartesian_submatrix</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_top_indices</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return indices of the k largest finite one-dimensional scores in descending score order,</span></span>
+<span class="source-line"><span class="syntax-string">    breaking ties by original position. Require an integer k between zero and the number of</span></span>
+<span class="source-line"><span class="syntax-string">    scores, rejecting Boolean k. Do not mutate scores.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement stable_top_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">inverse_permutation</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject</span></span>
+<span class="source-line"><span class="syntax-string">    duplicates, missing positions, negative values and noninteger dtype. Support the empty</span></span>
+<span class="source-line"><span class="syntax-string">    permutation. Demonstrate recovery of records after reordering.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement inverse_permutation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    selected <span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    selected<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> values<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> selected<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Gathered copy:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> selected<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    indices <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    updates <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    buffered <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    buffered<span class="syntax-punctuation">[</span>indices<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span><span class="syntax-operator">=</span> updates</span>
+<span class="source-line">    accumulated <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>add<span class="syntax-operator">.</span>at<span class="syntax-punctuation">(</span>accumulated<span class="syntax-punctuation">,</span> indices<span class="syntax-punctuation">,</span> updates<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> accumulated<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> buffered<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> accumulated<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Accumulated repeated indices:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> accumulated<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Gather with explicit index rules</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Gather a one-dimensional source using a one-dimensional integer index array. Allow</span></span>
+<span class="source-line"><span class="syntax-comment"># negative positions in the normal NumPy range and preserve duplicates/order. Reject Boolean,</span></span>
+<span class="source-line"><span class="syntax-comment"># floating or out-of-range indices with ValueError. Return an independent result.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [10,20,30] with [2,-1,0] yields [30,30,10]. Empty integer positions return shape(0,).</span></span>
+<span class="source-line"><span class="syntax-comment"># Position 3, float1.0 or a Boolean index array raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Accumulate repeated category codes</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Sum finite one-dimensional values into bins using one nonnegative integer code per</span></span>
+<span class="source-line"><span class="syntax-comment"># value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero bins are</span></span>
+<span class="source-line"><span class="syntax-comment"># allowed only with empty inputs. Preserve every repeated-code contribution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Values[1,2,5] and codes[0,0,2] with 3 bins produce[3,0,5]. Empty inputs and zero bins</span></span>
+<span class="source-line"><span class="syntax-comment"># produce shape(0,); code 3 for 3 bins raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Validate a row mask</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve</span></span>
+<span class="source-line"><span class="syntax-comment"># selected order and return independent storage. Reject integer flags, a cell-shaped mask or wrong</span></span>
+<span class="source-line"><span class="syntax-comment"># row count with ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[1,2],[3,4],[5,6]] with [True, False, True] gives [[1,2],[5,6]]. All false gives</span></span>
+<span class="source-line"><span class="syntax-comment"># shape(0,2); an integer[1,0,1] mask is rejected.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Select every row-column combination</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicates and index-array order in both axes. Reject out-of-range, Boolean or noninteger</span></span>
+<span class="source-line"><span class="syntax-comment"># indices. An empty selection on either axis must preserve the other output dimension.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: np.arange(12).reshape(3,4), rows[2,0], columns[3,1] gives [[11,9],[3,1]]. Empty rows</span></span>
+<span class="source-line"><span class="syntax-comment"># with two columns returns shape(0,2), not a flat vector.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Make top-k ties deterministic</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return indices of the k largest finite one-dimensional scores in descending score order,</span></span>
+<span class="source-line"><span class="syntax-comment"># breaking ties by original position. Require an integer k between zero and the number of scores,</span></span>
+<span class="source-line"><span class="syntax-comment"># rejecting Boolean k. Do not mutate scores.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [5,9,9,1] with k=3 returns [1,2,0]. k=0 returns an empty integer array; k=5 or a NaN</span></span>
+<span class="source-line"><span class="syntax-comment"># score raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Restore original observation order</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicates, missing positions, negative values and noninteger dtype. Support the empty</span></span>
+<span class="source-line"><span class="syntax-comment"># permutation. Demonstrate recovery of records after reordering.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Order[2,0,1] has inverse[1,2,0], and original[order][inverse] equals original.</span></span>
+<span class="source-line"><span class="syntax-comment"># Order[0,0] is invalid; an empty integer array returns empty.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -623,131 +671,131 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-gather-with-explicit-index-rules">Exercise 1: Gather with explicit index rules<a class="heading-anchor" href="#solution-1--exercise-1-gather-with-explicit-index-rules" aria-label="Link to this section">#</a></h5>
 <p>Gather a one-dimensional source using a one-dimensional integer index array. Allow negative positions in the normal NumPy range and preserve duplicates/order. Reject Boolean, floating or out-of-range indices with ValueError. Return an independent result.</p>
 <p><strong>Expected:</strong> [10,20,30] with [2,-1,0] yields [30,30,10]. Empty integer positions return shape(0,). Position 3, float1.0 or a Boolean index array raises ValueError.</p>
-<pre><code class="language-python">def gather_positions(values: np.ndarray, positions: np.ndarray) -&gt; np.ndarray:
-    p = np.asarray(positions)
-    if (
-        values.ndim != 1
-        or p.ndim != 1
-        or not np.issubdtype(p.dtype, np.integer)
-        or np.any(p &lt; -len(values))
-        or np.any(p &gt;= len(values))
-    ):
-        raise ValueError(&quot;Expected in-range one-dimensional integer positions&quot;)
-    return np.asarray(values[p])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">gather_positions</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> positions<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>positions<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> p<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>p <span class="syntax-operator">&lt;</span> <span class="syntax-operator">-</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>p <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected in-range one-dimensional integer positions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The dtype check distinguishes positional indices from Boolean masks, which have a different meaning despite often containing zero/one-like values. Negative positions are validated against the actual source length rather than normalized without bounds. Advanced indexing creates the gathered output in the index-array order, retaining duplicate requests. An empty integer request is valid even for an empty source because no position is accessed.</p>
-<pre><code class="language-python">a = np.array([10, 20, 30])
-r = gather_positions(a, np.array([2, -1, 0]))
-assert r.tolist() == [30, 30, 10] and not np.shares_memory(a, r)
-assert gather_positions(a, np.array([], dtype=int)).shape == (0,)
-expect_value_error(lambda: gather_positions(a, np.array([3])))
-expect_value_error(lambda: gather_positions(a, np.array([1.0])))
-expect_value_error(lambda: gather_positions(a, np.array([True])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-2-accumulate-repeated-category-codes">Exercise 2: Accumulate repeated category codes<a class="heading-anchor" href="#solution-1--exercise-2-accumulate-repeated-category-codes" aria-label="Link to this section">#</a></h5>
 <p>Sum finite one-dimensional values into bins using one nonnegative integer code per value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero bins are allowed only with empty inputs. Preserve every repeated-code contribution.</p>
 <p><strong>Expected:</strong> Values[1,2,5] and codes[0,0,2] with 3 bins produce[3,0,5]. Empty inputs and zero bins produce shape(0,); code 3 for 3 bins raises ValueError.</p>
-<pre><code class="language-python">def sum_by_code(values: np.ndarray, codes: np.ndarray, bins: int) -&gt; np.ndarray:
-    v = np.asarray(values, dtype=float)
-    c = np.asarray(codes)
-    if (
-        isinstance(bins, bool)
-        or not isinstance(bins, (int, np.integer))
-        or bins &lt; 0
-        or v.ndim != 1
-        or c.ndim != 1
-        or len(v) != len(c)
-        or not np.isfinite(v).all()
-        or not np.issubdtype(c.dtype, np.integer)
-        or np.any(c &lt; 0)
-        or np.any(c &gt;= bins)
-    ):
-        raise ValueError(&quot;Expected finite values and valid category codes&quot;)
-    result = np.zeros(bins, dtype=float)
-    np.add.at(result, c, v)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_by_code</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> codes<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> bins<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    v <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    c <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>codes<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> bins <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+        <span class="syntax-operator">or</span> v<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> c<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>c<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> bins<span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite values and valid category codes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    np<span class="syntax-operator">.</span>add<span class="syntax-operator">.</span>at<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> c<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>The category vector names destinations, and multiple observations can legitimately share a destination. add.at implements the required accumulation rather than a buffered overwrite-like update. Starting from zeros also defines absent categories as known zero totals in this synthetic complete-input contract. Missing observations would require a separate count or missingness policy instead of assuming their absence means zero.</p>
-<pre><code class="language-python">assert sum_by_code(np.array([1, 2, 5]), np.array([0, 0, 2]), 3).tolist() == [3, 0, 5]
-assert sum_by_code(np.array([]), np.array([], dtype=int), 0).shape == (0,)
-expect_value_error(lambda: sum_by_code(np.array([1]), np.array([3]), 3))
-expect_value_error(lambda: sum_by_code(np.array([1]), np.array([0]), True))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-validate-a-row-mask">Exercise 3: Validate a row mask<a class="heading-anchor" href="#solution-1--exercise-3-validate-a-row-mask" aria-label="Link to this section">#</a></h5>
 <p>Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve selected order and return independent storage. Reject integer flags, a cell-shaped mask or wrong row count with ValueError.</p>
 <p><strong>Expected:</strong> [[1,2],[3,4],[5,6]] with [True, False, True] gives [[1,2],[5,6]]. All false gives shape(0,2); an integer[1,0,1] mask is rejected.</p>
-<pre><code class="language-python">def select_rows(values: np.ndarray, mask: np.ndarray) -&gt; np.ndarray:
-    m = np.asarray(mask)
-    if values.ndim != 2 or m.ndim != 1 or m.dtype != np.bool_ or len(m) != values.shape[0]:
-        raise ValueError(&quot;Expected one Boolean value per row&quot;)
-    return np.asarray(values[m])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">select_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    m <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> m<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> m<span class="syntax-operator">.</span>dtype <span class="syntax-operator">!=</span> np<span class="syntax-operator">.</span>bool_ <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one Boolean value per row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>m<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Requiring Boolean dtype prevents an integer array from being interpreted as positional advanced indexing. Requiring one dimension prevents a cell mask from flattening selected entries and losing the row grain. The all-false case preserves the feature count in an empty matrix, which is essential for downstream schema consistency. The gathered result is detached, so a caller can transform it without modifying the original table.</p>
-<pre><code class="language-python">a = np.array([[1, 2], [3, 4], [5, 6]])
-r = select_rows(a, np.array([True, False, True]))
-assert r.tolist() == [[1, 2], [5, 6]] and not np.shares_memory(a, r)
-assert select_rows(a, np.zeros(3, dtype=bool)).shape == (0, 2)
-expect_value_error(lambda: select_rows(a, np.array([1, 0, 1])))
-expect_value_error(lambda: select_rows(a, np.ones((3, 2), dtype=bool)))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-select-every-row-column-combination">Exercise 4: Select every row-column combination<a class="heading-anchor" href="#solution-1--exercise-4-select-every-row-column-combination" aria-label="Link to this section">#</a></h5>
 <p>Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve duplicates and index-array order in both axes. Reject out-of-range, Boolean or noninteger indices. An empty selection on either axis must preserve the other output dimension.</p>
 <p><strong>Expected:</strong> np.arange(12).reshape(3,4), rows[2,0], columns[3,1] gives [[11,9],[3,1]]. Empty rows with two columns returns shape(0,2), not a flat vector.</p>
-<pre><code class="language-python">def cartesian_submatrix(values: np.ndarray, rows: np.ndarray, columns: np.ndarray) -&gt; np.ndarray:
-    r = np.asarray(rows)
-    c = np.asarray(columns)
-    if (
-        values.ndim != 2
-        or r.ndim != 1
-        or c.ndim != 1
-        or not np.issubdtype(r.dtype, np.integer)
-        or not np.issubdtype(c.dtype, np.integer)
-        or np.any(r &lt; 0)
-        or np.any(c &lt; 0)
-        or np.any(r &gt;= values.shape[0])
-        or np.any(c &gt;= values.shape[1])
-    ):
-        raise ValueError(&quot;Expected valid nonnegative row and column positions&quot;)
-    return np.asarray(values[np.ix_(r, c)])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">cartesian_submatrix</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> columns<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    r <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span>
+    c <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>columns<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> r<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> c<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>c<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>r <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>r <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected valid nonnegative row and column positions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ix_<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> c<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>ix_ constructs index arrays with complementary singleton dimensions, so broadcasting produces every pair. Direct values[rows, columns] instead pairs corresponding positions and would return only two values for the normal fixture. Preserving output axes makes the result usable as a smaller matrix, including empty selections. Duplicate requests intentionally repeat rows or columns and must not be removed with unique unless the contract changes.</p>
-<pre><code class="language-python">a = np.arange(12).reshape(3, 4)
-assert cartesian_submatrix(a, np.array([2, 0]), np.array([3, 1])).tolist() == [[11, 9], [3, 1]]
-assert cartesian_submatrix(a, np.array([], dtype=int), np.array([3, 1])).shape == (0, 2)
-expect_value_error(lambda: cartesian_submatrix(a, np.array([3]), np.array([0])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-5-make-top-k-ties-deterministic">Exercise 5: Make top-k ties deterministic<a class="heading-anchor" href="#solution-1--exercise-5-make-top-k-ties-deterministic" aria-label="Link to this section">#</a></h5>
 <p>Return indices of the k largest finite one-dimensional scores in descending score order, breaking ties by original position. Require an integer k between zero and the number of scores, rejecting Boolean k. Do not mutate scores.</p>
 <p><strong>Expected:</strong> [5,9,9,1] with k=3 returns [1,2,0]. k=0 returns an empty integer array; k=5 or a NaN score raises ValueError.</p>
-<pre><code class="language-python">def stable_top_indices(scores: np.ndarray, k: int) -&gt; np.ndarray:
-    s = np.asarray(scores, dtype=float)
-    if (
-        s.ndim != 1
-        or not np.isfinite(s).all()
-        or isinstance(k, bool)
-        or not isinstance(k, (int, np.integer))
-        or not 0 &lt;= k &lt;= len(s)
-    ):
-        raise ValueError(&quot;Expected finite scores and a valid integer k&quot;)
-    return np.asarray(np.argsort(-s, kind=&quot;stable&quot;)[:k])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_top_indices</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        s<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> k <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite scores and a valid integer k</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>s<span class="syntax-punctuation">,</span> kind<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">stable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>k<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Negating finite floating scores converts descending ranking into ascending sorting. Stable sorting retains input position among equal keys, making the boundary tie policy explicit. A full sort is intentionally used before introducing partial selection optimization. Returning indices preserves access to associated records and avoids confusing a score value with a unique record identity.</p>
-<pre><code class="language-python">s = np.array([5.0, 9.0, 9.0, 1.0])
-assert stable_top_indices(s, 3).tolist() == [1, 2, 0] and s.tolist() == [5, 9, 9, 1]
-assert stable_top_indices(s, 0).size == 0
-expect_value_error(lambda: stable_top_indices(s, 5))
-expect_value_error(lambda: stable_top_indices(np.array([np.nan]), 1))</code></pre>
+<pre class="highlighted-code"><code class="language-python">s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> s<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stable_top_indices<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-restore-original-observation-order">Exercise 6: Restore original observation order<a class="heading-anchor" href="#solution-1--exercise-6-restore-original-observation-order" aria-label="Link to this section">#</a></h5>
 <p>Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject duplicates, missing positions, negative values and noninteger dtype. Support the empty permutation. Demonstrate recovery of records after reordering.</p>
 <p><strong>Expected:</strong> Order[2,0,1] has inverse[1,2,0], and original[order][inverse] equals original. Order[0,0] is invalid; an empty integer array returns empty.</p>
-<pre><code class="language-python">def inverse_permutation(order: np.ndarray) -&gt; np.ndarray:
-    p = np.asarray(order)
-    if (
-        p.ndim != 1
-        or not np.issubdtype(p.dtype, np.integer)
-        or not np.array_equal(np.sort(p), np.arange(len(p)))
-    ):
-        raise ValueError(&quot;Expected a permutation of every original position&quot;)
-    return np.asarray(np.argsort(p))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">inverse_permutation</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        p<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a permutation of every original position</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A true permutation has exactly one occurrence of every original position, which is verified by comparing its sorted values with arange(n). argsort then maps each original position back to the place where it appears in the reordered array. The round-trip identity is the independent correctness criterion. A selection with duplicates cannot be inverted because information was repeated or discarded, so it must be rejected rather than guessed.</p>
-<pre><code class="language-python">p = np.array([2, 0, 1])
-inverse = inverse_permutation(p)
-a = np.array([10, 20, 30])
-assert inverse.tolist() == [1, 2, 0] and np.array_equal(a[p][inverse], a)
-assert inverse_permutation(np.array([], dtype=int)).size == 0
-expect_value_error(lambda: inverse_permutation(np.array([0, 0])))
-expect_value_error(lambda: inverse_permutation(np.array([0.0, 1.0])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+inverse <span class="syntax-operator">=</span> inverse_permutation<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span>
+a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> inverse<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span>inverse<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_numpy_03_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -782,150 +830,150 @@ expect_value_error(lambda: inverse_permutation(np.array([0.0, 1.0])))</code></pr
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-03.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def gather_positions(values: np.ndarray, positions: np.ndarray) -&gt; np.ndarray:</span>
-<span>    p = np.asarray(positions)</span>
-<span>    if (</span>
-<span>        values.ndim != 1</span>
-<span>        or p.ndim != 1</span>
-<span>        or not np.issubdtype(p.dtype, np.integer)</span>
-<span>        or np.any(p &lt; -len(values))</span>
-<span>        or np.any(p &gt;= len(values))</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected in-range one-dimensional integer positions&quot;)</span>
-<span>    return np.asarray(values[p])</span>
-<span> </span>
-<span> </span>
-<span>def sum_by_code(values: np.ndarray, codes: np.ndarray, bins: int) -&gt; np.ndarray:</span>
-<span>    v = np.asarray(values, dtype=float)</span>
-<span>    c = np.asarray(codes)</span>
-<span>    if (</span>
-<span>        isinstance(bins, bool)</span>
-<span>        or not isinstance(bins, (int, np.integer))</span>
-<span>        or bins &lt; 0</span>
-<span>        or v.ndim != 1</span>
-<span>        or c.ndim != 1</span>
-<span>        or len(v) != len(c)</span>
-<span>        or not np.isfinite(v).all()</span>
-<span>        or not np.issubdtype(c.dtype, np.integer)</span>
-<span>        or np.any(c &lt; 0)</span>
-<span>        or np.any(c &gt;= bins)</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected finite values and valid category codes&quot;)</span>
-<span>    result = np.zeros(bins, dtype=float)</span>
-<span>    np.add.at(result, c, v)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def select_rows(values: np.ndarray, mask: np.ndarray) -&gt; np.ndarray:</span>
-<span>    m = np.asarray(mask)</span>
-<span>    if values.ndim != 2 or m.ndim != 1 or m.dtype != np.bool_ or len(m) != values.shape[0]:</span>
-<span>        raise ValueError(&quot;Expected one Boolean value per row&quot;)</span>
-<span>    return np.asarray(values[m])</span>
-<span> </span>
-<span> </span>
-<span>def cartesian_submatrix(values: np.ndarray, rows: np.ndarray, columns: np.ndarray) -&gt; np.ndarray:</span>
-<span>    r = np.asarray(rows)</span>
-<span>    c = np.asarray(columns)</span>
-<span>    if (</span>
-<span>        values.ndim != 2</span>
-<span>        or r.ndim != 1</span>
-<span>        or c.ndim != 1</span>
-<span>        or not np.issubdtype(r.dtype, np.integer)</span>
-<span>        or not np.issubdtype(c.dtype, np.integer)</span>
-<span>        or np.any(r &lt; 0)</span>
-<span>        or np.any(c &lt; 0)</span>
-<span>        or np.any(r &gt;= values.shape[0])</span>
-<span>        or np.any(c &gt;= values.shape[1])</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected valid nonnegative row and column positions&quot;)</span>
-<span>    return np.asarray(values[np.ix_(r, c)])</span>
-<span> </span>
-<span> </span>
-<span>def stable_top_indices(scores: np.ndarray, k: int) -&gt; np.ndarray:</span>
-<span>    s = np.asarray(scores, dtype=float)</span>
-<span>    if (</span>
-<span>        s.ndim != 1</span>
-<span>        or not np.isfinite(s).all()</span>
-<span>        or isinstance(k, bool)</span>
-<span>        or not isinstance(k, (int, np.integer))</span>
-<span>        or not 0 &lt;= k &lt;= len(s)</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected finite scores and a valid integer k&quot;)</span>
-<span>    return np.asarray(np.argsort(-s, kind=&quot;stable&quot;)[:k])</span>
-<span> </span>
-<span> </span>
-<span>def inverse_permutation(order: np.ndarray) -&gt; np.ndarray:</span>
-<span>    p = np.asarray(order)</span>
-<span>    if (</span>
-<span>        p.ndim != 1</span>
-<span>        or not np.issubdtype(p.dtype, np.integer)</span>
-<span>        or not np.array_equal(np.sort(p), np.arange(len(p)))</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected a permutation of every original position&quot;)</span>
-<span>    return np.asarray(np.argsort(p))</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Gather with explicit index rules</span>
-<span>    a = np.array([10, 20, 30])</span>
-<span>    r = gather_positions(a, np.array([2, -1, 0]))</span>
-<span>    assert r.tolist() == [30, 30, 10] and not np.shares_memory(a, r)</span>
-<span>    assert gather_positions(a, np.array([], dtype=int)).shape == (0,)</span>
-<span>    expect_value_error(lambda: gather_positions(a, np.array([3])))</span>
-<span>    expect_value_error(lambda: gather_positions(a, np.array([1.0])))</span>
-<span>    expect_value_error(lambda: gather_positions(a, np.array([True])))</span>
-<span>    # Exercise 2: Accumulate repeated category codes</span>
-<span>    assert sum_by_code(np.array([1, 2, 5]), np.array([0, 0, 2]), 3).tolist() == [3, 0, 5]</span>
-<span>    assert sum_by_code(np.array([]), np.array([], dtype=int), 0).shape == (0,)</span>
-<span>    expect_value_error(lambda: sum_by_code(np.array([1]), np.array([3]), 3))</span>
-<span>    expect_value_error(lambda: sum_by_code(np.array([1]), np.array([0]), True))</span>
-<span>    # Exercise 3: Validate a row mask</span>
-<span>    a = np.array([[1, 2], [3, 4], [5, 6]])</span>
-<span>    r = select_rows(a, np.array([True, False, True]))</span>
-<span>    assert r.tolist() == [[1, 2], [5, 6]] and not np.shares_memory(a, r)</span>
-<span>    assert select_rows(a, np.zeros(3, dtype=bool)).shape == (0, 2)</span>
-<span>    expect_value_error(lambda: select_rows(a, np.array([1, 0, 1])))</span>
-<span>    expect_value_error(lambda: select_rows(a, np.ones((3, 2), dtype=bool)))</span>
-<span>    # Exercise 4: Select every row-column combination</span>
-<span>    a = np.arange(12).reshape(3, 4)</span>
-<span>    assert cartesian_submatrix(a, np.array([2, 0]), np.array([3, 1])).tolist() == [[11, 9], [3, 1]]</span>
-<span>    assert cartesian_submatrix(a, np.array([], dtype=int), np.array([3, 1])).shape == (0, 2)</span>
-<span>    expect_value_error(lambda: cartesian_submatrix(a, np.array([3]), np.array([0])))</span>
-<span>    # Exercise 5: Make top-k ties deterministic</span>
-<span>    s = np.array([5.0, 9.0, 9.0, 1.0])</span>
-<span>    assert stable_top_indices(s, 3).tolist() == [1, 2, 0] and s.tolist() == [5, 9, 9, 1]</span>
-<span>    assert stable_top_indices(s, 0).size == 0</span>
-<span>    expect_value_error(lambda: stable_top_indices(s, 5))</span>
-<span>    expect_value_error(lambda: stable_top_indices(np.array([np.nan]), 1))</span>
-<span>    # Exercise 6: Restore original observation order</span>
-<span>    p = np.array([2, 0, 1])</span>
-<span>    inverse = inverse_permutation(p)</span>
-<span>    a = np.array([10, 20, 30])</span>
-<span>    assert inverse.tolist() == [1, 2, 0] and np.array_equal(a[p][inverse], a)</span>
-<span>    assert inverse_permutation(np.array([], dtype=int)).size == 0</span>
-<span>    expect_value_error(lambda: inverse_permutation(np.array([0, 0])))</span>
-<span>    expect_value_error(lambda: inverse_permutation(np.array([0.0, 1.0])))</span>
-<span>    print(&quot;python-numpy-03: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-03.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">gather_positions</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> positions<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>positions<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> p<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>p <span class="syntax-operator">&lt;</span> <span class="syntax-operator">-</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>p <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected in-range one-dimensional integer positions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_by_code</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> codes<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> bins<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    v <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    c <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>codes<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> bins <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> v<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> c<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>c<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> bins<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite values and valid category codes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span>bins<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>add<span class="syntax-operator">.</span>at<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> c<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">select_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    m <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> m<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> m<span class="syntax-operator">.</span>dtype <span class="syntax-operator">!=</span> np<span class="syntax-operator">.</span>bool_ <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one Boolean value per row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>m<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">cartesian_submatrix</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> columns<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    c <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>columns<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> r<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> c<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>r<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>c<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>r <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>r <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected valid nonnegative row and column positions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ix_<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> c<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_top_indices</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> k<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        s<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> k <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite scores and a valid integer k</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>s<span class="syntax-punctuation">,</span> kind<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">stable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>k<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">inverse_permutation</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        p<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>issubdtype<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>integer<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a permutation of every original position</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Gather with explicit index rules</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> gather_positions<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Accumulate repeated category codes</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_by_code<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Validate a row mask</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>shares_memory<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> r<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> select_rows<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Select every row-column combination</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> cartesian_submatrix<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Make top-k ties deterministic</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> s<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stable_top_indices<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> stable_top_indices<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Restore original observation order</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    inverse <span class="syntax-operator">=</span> inverse_permutation<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> inverse<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span>p<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span>inverse<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> inverse_permutation<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-numpy-03: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

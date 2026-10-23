@@ -4,13 +4,13 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Performance measurement starts with a correct,representative workload. JVM execution can change during warmup as classes load andJIT compilation occurs. A first-call timing and a warmed repeated timing answer different questions. Dead-code elimination can remove unused work,while logging orprofiling can add work that dominates a small calculation. A benchmark must retain observable results andrecord its measurement conditions.
+Performance measurement starts with a correct,representative workload. JVM execution can change during warmup as classes load and JIT compilation occurs. A first-call timing and a warmed repeated timing answer different questions. Dead-code elimination can remove unused work,while logging orprofiling can add work that dominates a small calculation. A benchmark must retain observable results and record its measurement conditions.
 
-Java Flight Recorder,JFR,records runtime events with relatively low overhead in suitable configurations,but any instrumentation can affect the workload. This lesson creates one owned recording containing a custom calculation event,then reads that event back. It doesnot start a persistent system recording orclaim a production performance diagnosis. Simple elapsed-time samples are reported without hardcoded speed thresholds oruniversal conclusions.
+Java Flight Recorder,JFR,records runtime events with relatively low overhead in suitable configurations,but any instrumentation can affect the workload. This lesson creates one owned recording containing a custom calculation event,then reads that event back. It does not start a persistent system recording or claim a production performance diagnosis. Simple elapsed-time samples are reported without hardcoded speed thresholds or universal conclusions.
 
-**Warmup:** Initial execution used toseparate setup/JIT effects from repeated work.
+**Warmup:** Initial execution used to separate setup/JIT effects from repeated work.
 
-**Measurement bias:** A distortion introduced by workload choice,ordering orinstrumentation.
+**Measurement bias:** A distortion introduced by workload choice,ordering or instrumentation.
 
 **JFR event:** A structured runtime observation recorded under an explicit configuration.
 
@@ -18,11 +18,11 @@ Java Flight Recorder,JFR,records runtime events with relatively low overhead in 
 
 ## Reading the reference
 
-System.nanoTime measures elapsed intervals,not wall-clock dates. Keep a checksum orvolatile sink so the calculation result remains observable. Separate warmup iterations from measured iterations. A customjdk.jfr.Event records declared fields;enable its event name,start theRecording,commit theevent,stop anddump to anownedfile. RecordingFile reads structured events forverification.
+System.nanoTime measures elapsed intervals,not wall-clock dates. Keep a checksum or volatile sink so the calculation result remains observable. Separate warmup iterations from measured iterations. A customjdk.jfr.Event records declared fields;enable its event name,start the Recording,commit the event,stop and dump to an owned file. RecordingFile reads structured events for verification.
 
 ## Exercise 1: Establish a numerical oracle
 
-Task: Sum1..1000 with a loop andcompare withn*(n+1)/2.
+Task: Sum 1..1000 with a loop and compare with n*(n+1)/2.
 
 Correctness is checked independently before timing. A faster wrong computation is not a useful optimization.
 
@@ -36,7 +36,7 @@ assert sum(1000)==500_500L && sum(1000)==1000L*1001/2;
 
 ## Exercise 2: Warm up without hiding results
 
-Task: Run the calculation100times andstore eachresult in a volatile sink.
+Task: Run the calculation100times and store each result in a volatile sink.
 
 The sink makes the result observable. This is a teaching safeguard,not a replacement for a dedicated benchmark harness such asJMH.
 
@@ -44,15 +44,15 @@ The sink makes the result observable. This is a teaching safeguard,not a replace
 for(int i=0;i<100;i++)sink=sum(1000);assert sink==500_500L;
 ```
 
-**Expected:** sink500500 afterwarmup.
+**Expected:** sink500500 after warmup.
 
-**Verify:** Compare the program values or named exception with sink500500 afterwarmup. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with sink500500 after warmup. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Measure repeated work with a checksum
 
-Task: Time20calculations andsum their outputs.
+Task: Time20calculations and sum their outputs.
 
-The test checks work identity andmeasurement validity without asserting a particular duration. Scheduling andhardware affect the observation.
+The test checks work identity and measurement validity without asserting a particular duration. Scheduling and hardware affect the observation.
 
 ```java
 long start=System.nanoTime(),checksum=0;for(int i=0;i<20;i++)checksum+=sum(1000);long elapsed=System.nanoTime()-start;
@@ -63,11 +63,11 @@ assert checksum==10_010_000L && elapsed>=0;
 
 **Verify:** Compare the program values or named exception with checksum10010000;elapsednanosecondsnonnegative. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 4: Record andread an actualJFR event
+## Exercise 4: Record and read an actualJFR event
 
 Task: Create a bounded recording withoneCalculation event containinginput100 andoutput5050.
 
-This verifies real recording andreadback of anowned event. It doesnot inferCPU hotspots orallocation rates from a custommarker alone.
+This verifies real recording and readback of an owned event. It does not inferCPU hotspots or allocation rates from a custom marker alone.
 
 ```java
 var root=java.nio.file.Files.createTempDirectory("ds60-jfr-");var file=root.resolve("fixture.jfr");
@@ -81,13 +81,13 @@ try {
 } finally {java.nio.file.Files.deleteIfExists(file);java.nio.file.Files.deleteIfExists(root);}
 ```
 
-**Expected:** one matching event withthedeclared fields.
+**Expected:** one matching event with the declared fields.
 
-**Verify:** Compare the program values or named exception with one matching event withthedeclared fields. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with one matching event with the declared fields. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Collect a small timing distribution
 
-Task: Measure the same boundedworkfive times andinspect sorted samples.
+Task: Measure the same bounded work five times and inspect sorted samples.
 
 A distribution is more informative than one lucky timing. Five samples remain a small teaching observation,not a statistical performance acceptance study.
 
@@ -104,16 +104,16 @@ Arrays.sort(samples);assert samples.length==5 && samples[0]>=0 && samples[0]<=sa
 
 Task: Record warmup,workload andprofiling state beside a measurement;refuse a universal speedup claim.
 
-A useful result states its conditions. Profiling,timing andcorrectness are related evidence,but they shouldnot be collapsed into one unlabeled success message.
+A useful result states its conditions. Profiling,timing and correctness are related evidence,but they should not be collapsed into one unlabeled success message.
 
 ```java
 Map<String,Object> receipt=Map.of("warmup_iterations",100,"n",1000,"measured_iterations",20,"profiling_during_timing",false,"universal_speedup_claim",false);
 assert receipt.get("warmup_iterations").equals(100) && receipt.get("universal_speedup_claim").equals(false);
 ```
 
-**Expected:** metadata names100warmups andprofilingfalse;universal claimfalse.
+**Expected:** metadata names 100 warmups and profiling false; universal claim false.
 
-**Verify:** Compare the program values or named exception with metadata names100warmups andprofilingfalse;universal claimfalse. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with metadata names 100 warmups and profiling false; universal claim false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

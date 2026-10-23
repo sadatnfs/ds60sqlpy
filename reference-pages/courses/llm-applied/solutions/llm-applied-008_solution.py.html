@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,54 +161,54 @@
       <h1>Llm Applied 008 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-008_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-008: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections import defaultdict</span>
-<span> </span>
-<span>def rrf(rankings,constant=60):</span>
-<span>    if constant&lt;=0: raise ValueError(&#x27;positive fusion constant required&#x27;)</span>
-<span>    scores=defaultdict(float)</span>
-<span>    for ranking in rankings:</span>
-<span>        unique=[]; seen=set()</span>
-<span>        for key in ranking:</span>
-<span>            if not isinstance(key,str): raise TypeError(&#x27;string document ID required&#x27;)</span>
-<span>            if key not in seen: unique.append(key); seen.add(key)</span>
-<span>        for position,key in enumerate(unique,1): scores[key]+=1/(constant+position)</span>
-<span>    return sorted(scores.items(),key=lambda row:(-row[1],row[0]))</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Fuse two rankings</span>
-<span>    ranked=rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;],[&#x27;b&#x27;,&#x27;d&#x27;,&#x27;a&#x27;]],60)</span>
-<span>    assert [key for key,score in ranked][:2]==[&#x27;b&#x27;,&#x27;a&#x27;]</span>
-<span> </span>
-<span>    # Exercise 2: Inspect one exact contribution</span>
-<span>    scores=dict(ranked)</span>
-<span>    assert abs(scores[&#x27;b&#x27;]-(1/62+1/61))&lt;1e-12</span>
-<span> </span>
-<span>    # Exercise 3: Prevent duplicate votes</span>
-<span>    assert rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)==rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)</span>
-<span> </span>
-<span>    # Exercise 4: Rerank a bounded candidate set</span>
-<span>    features={&#x27;a&#x27;:0,&#x27;b&#x27;:2,&#x27;c&#x27;:1}; candidates=[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]</span>
-<span>    reranked=sorted(candidates,key=lambda key:(-features[key],key))</span>
-<span>    assert reranked==[&#x27;b&#x27;,&#x27;c&#x27;,&#x27;a&#x27;]</span>
-<span> </span>
-<span>    # Exercise 5: Expose a candidate-recall ceiling</span>
-<span>    relevant={&#x27;d&#x27;}; assert not set(candidates)&amp;relevant</span>
-<span>    assert &#x27;d&#x27; not in reranked</span>
-<span> </span>
-<span>    # Exercise 6: Reject invalid fusion policy</span>
-<span>    for rankings,k,kind in [([[&#x27;a&#x27;]],0,ValueError),([[1]],60,TypeError)]:</span>
-<span>        try: rrf(rankings,k)</span>
-<span>        except kind: pass</span>
-<span>        else: raise AssertionError(&#x27;invalid fusion input&#x27;)</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-applied-008: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> defaultdict</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">rrf</span><span class="syntax-punctuation">(</span>rankings<span class="syntax-punctuation">,</span>constant<span class="syntax-operator">=</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> constant<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">positive fusion constant required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scores<span class="syntax-operator">=</span>defaultdict<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> ranking <span class="syntax-operator">in</span> rankings<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        unique<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> seen<span class="syntax-operator">=</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> ranking<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">string document ID required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> key <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span> unique<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> position<span class="syntax-punctuation">,</span>key <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>unique<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> scores<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>constant<span class="syntax-operator">+</span>position<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>scores<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Fuse two rankings</span></span>
+<span class="source-line">    ranked<span class="syntax-operator">=</span>rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>key <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span>score <span class="syntax-operator">in</span> ranked<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Inspect one exact contribution</span></span>
+<span class="source-line">    scores<span class="syntax-operator">=</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>ranked<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">62</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">61</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Prevent duplicate votes</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>rrf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Rerank a bounded candidate set</span></span>
+<span class="source-line">    features<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> candidates<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    reranked<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">,</span>key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> key<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>features<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> reranked<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Expose a candidate-recall ceiling</span></span>
+<span class="source-line">    relevant<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span>relevant</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> reranked</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Reject invalid fusion policy</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> rankings<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>kind <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">,</span>TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> rrf<span class="syntax-punctuation">(</span>rankings<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> kind<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid fusion input</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,45 +173,45 @@
 <h3 id="exercise-1-compute-local-differences">Exercise 1: Compute local differences<a class="heading-anchor" href="#exercise-1-compute-local-differences" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply kernel[[1,0],[0,-1]] to the image1..9 arranged3x3.</p>
 <p>Every patch has a bottom-right value four greater than its top-left value. The equal outputs are an arithmetic property of this ramp image, not a generic property of convolution.</p>
-<pre><code class="language-python">image=tf.reshape(tf.range(1,10,dtype=tf.float32),(1,3,3,1)); kernel=tf.reshape(tf.constant([1.,0.,0.,-1.]),(2,2,1,1))
-out=tf.nn.conv2d(image,kernel,strides=1,padding=&#x27;VALID&#x27;)
-np.testing.assert_array_equal(out.numpy().reshape(2,2),np.full((2,2),-4))</code></pre>
+<pre class="highlighted-code"><code class="language-python">image<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> kernel<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+out<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>kernel<span class="syntax-punctuation">,</span>strides<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>padding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VALID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>out<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> all four outputs-4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with all four outputs-4.</p>
 <h3 id="exercise-2-rotate-the-kernel">Exercise 2: Rotate the kernel<a class="heading-anchor" href="#exercise-2-rotate-the-kernel" aria-label="Link to this section">#</a></h3>
 <p>The question is: Reverse both spatial axes and repeat the calculation.</p>
 <p>Kernel orientation distinguishes cross-correlation from mathematical convolution. A symmetric kernel would hide this difference, which is why the asymmetric diagonal kernel is useful.</p>
-<pre><code class="language-python">rot=tf.reverse(kernel,axis=[0,1]); changed=tf.nn.conv2d(image,rot,strides=1,padding=&#x27;VALID&#x27;)
-np.testing.assert_array_equal(changed.numpy().reshape(2,2),np.full((2,2),4))</code></pre>
+<pre class="highlighted-code"><code class="language-python">rot<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reverse<span class="syntax-punctuation">(</span>kernel<span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>rot<span class="syntax-punctuation">,</span>strides<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>padding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VALID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>changed<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>full<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> all outputs+4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with all outputs+4.</p>
 <h3 id="exercise-3-count-output-positions">Exercise 3: Count output positions<a class="heading-anchor" href="#exercise-3-count-output-positions" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare VALID stride1 and stride2.</p>
 <p>A larger stride visits fewer legal patch starts. Shape arithmetic is a useful first check before interpreting any learned filter values.</p>
-<pre><code class="language-python">assert tuple(out.shape)==(1,2,2,1)
-assert tuple(tf.nn.conv2d(image,kernel,strides=2,padding=&#x27;VALID&#x27;).shape)==(1,1,1,1)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>out<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>kernel<span class="syntax-punctuation">,</span>strides<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>padding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VALID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> shapes(1,2,2,1) and(1,1,1,1).</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with shapes(1,2,2,1) and(1,1,1,1).</p>
 <h3 id="exercise-4-trace-one-pixel-influence">Exercise 4: Trace one pixel influence<a class="heading-anchor" href="#exercise-4-trace-one-pixel-influence" aria-label="Link to this section">#</a></h3>
 <p>The question is: Add10 to the top-left image pixel and inspect which output changes.</p>
 <p>The top-left pixel belongs only to the top-left valid patch. This controlled perturbation directly tests the local receptive field.</p>
-<pre><code class="language-python">changed_image=image.numpy().copy(); changed_image[0,0,0,0]+=10
-delta=tf.nn.conv2d(changed_image,kernel,strides=1,padding=&#x27;VALID&#x27;).numpy()-out.numpy()
-np.testing.assert_array_equal(delta.reshape(2,2),[[10,0],[0,0]])</code></pre>
+<pre class="highlighted-code"><code class="language-python">changed_image<span class="syntax-operator">=</span>image<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed_image<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">10</span>
+delta<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>changed_image<span class="syntax-punctuation">,</span>kernel<span class="syntax-punctuation">,</span>strides<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>padding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VALID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>out<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>delta<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> only output[0,0] increases10.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with only output[0,0] increases10.</p>
 <h3 id="exercise-5-count-shared-parameters">Exercise 5: Count shared parameters<a class="heading-anchor" href="#exercise-5-count-shared-parameters" aria-label="Link to this section">#</a></h3>
 <p>The question is: Construct a bias-free Conv2D layer with2 filters of size2x2 on one input channel.</p>
 <p>Each output channel has its own four kernel coefficients. Reusing the layer at more spatial locations increases computation but does not create a separate weight set for each location.</p>
-<pre><code class="language-python">layer=tf.keras.layers.Conv2D(2,2,use_bias=False); layer(image)
-assert layer.count_params()==8</code></pre>
+<pre class="highlighted-code"><code class="language-python">layer<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>Conv2D<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>use_bias<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> layer<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> layer<span class="syntax-operator">.</span>count_params<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">8</span></code></pre>
 <p><strong>Expected:</strong> 8 trainable scalars regardless of image height.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 8 trainable scalars regardless of image height.</p>
 <h3 id="exercise-6-add-a-constant-image-offset">Exercise 6: Add a constant image offset<a class="heading-anchor" href="#exercise-6-add-a-constant-image-offset" aria-label="Link to this section">#</a></h3>
 <p>The question is: Add100 to every pixel and compare outputs under the zero-sum kernel.</p>
 <p>The kernel coefficients sum to zero, so a constant offset cancels. This invariance belongs to this kernel; a general learned kernel need not preserve it.</p>
-<pre><code class="language-python">offset=tf.nn.conv2d(image+100,kernel,strides=1,padding=&#x27;VALID&#x27;)
-np.testing.assert_array_equal(offset.numpy(),out.numpy())</code></pre>
+<pre class="highlighted-code"><code class="language-python">offset<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-operator">+</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span>kernel<span class="syntax-punctuation">,</span>strides<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>padding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VALID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>offset<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>out<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> output unchanged.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with output unchanged.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

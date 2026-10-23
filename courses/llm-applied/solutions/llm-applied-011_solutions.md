@@ -18,7 +18,7 @@ This chapter implements an extractive subject-assistant baseline. It selects an 
 
 ## Reading the implementation
 
-An answer record containsstatus, claims andcitations. Each citation includesdocument_id, version, start, end. The examples check source-slice equality and inspect an authored support map separately. The helper constructs the span record; a complete caller must enforce semantic claim support before accepting it. For missing evidence, returnstatusunknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.
+An answer record contains status, claims and citations. Each citation includesdocument_id, version, start, end. The examples check source-slice equality and inspect an authored support map separately. The helper constructs the span record; a complete caller must enforce semantic claim support before accepting it. For missing evidence, return status unknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.
 
 ## Separate the four questions behind a citation
 
@@ -30,11 +30,11 @@ For the metric fixture, the first sentence ends at the first period. The returne
 
 An answer can also preserve the words while changing the scope. Suppose a source says “Exclude test accounts from this experiment's eligible population.” A generated claim that all company metrics exclude test accounts adds a universal scope not established by that sentence. Citation existence and overlapping vocabulary are weak proxies for entailment. Human rubrics or a separately validated support evaluator must assess the actual proposition.
 
-Computed claims need a different lineage. The result0.3 comes from purchases 3 divided by eligible visits 10. A useful record preserves those inputs, the formula, relevant definition version and calculation output. The source definition supports the formula; it does not itself supply the measured count values. A generated explanation should consume the computed artifact rather than recomputing an approximate number from memory. Neither the ratio nor the definition establishes a causal treatment effect.
+Computed claims need a different lineage. The result 0.3 comes from purchases 3 divided by eligible visits 10. A useful record preserves those inputs, the formula, relevant definition version and calculation output. The source definition supports the formula; it does not itself supply the measured count values. A generated explanation should consume the computed artifact rather than recomputing an approximate number from memory. Neither the ratio nor the definition establishes a causal treatment effect.
 
 Abstention is a decision under uncertainty about support. In a simple illustrative utility model, a correct supported answer earns benefit B, an incorrect or unsupported answer incurs cost C, and abstention has utility zero. If p were a calibrated probability of meeting the complete answer contract, answering is favored when pB-(1-p)C>0, or \(p>\frac{C}{B+C}\). This is a derivation under explicit assumptions, not permission to interpret a retrieval score as p. Additional answer costs or asymmetric abstention costs change the threshold.
 
-Coverage and conditional quality must be reported together. If a system answers six of ten questions and five answers satisfy the full contract, coverage is0.6 and accepted-answer accuracy is5/6. Reporting only5/6 hides the four refusals; reporting only five successes hides whether the failures were unsupported answers or appropriate unknowns. The final task population and cost policy determine which tradeoff is useful.
+Coverage and conditional quality must be reported together. If a system answers six of ten questions and five answers satisfy the full contract, coverage is 0.6 and accepted-answer accuracy is5/6. Reporting only5/6 hides the four refusals; reporting only five successes hides whether the failures were unsupported answers or appropriate unknowns. The final task population and cost policy determine which tradeoff is useful.
 
 Conflicting sources need a policy too. A newer version may supersede an older one for current questions, but historical questions can require the older rule. Two simultaneously applicable sources may disagree. Preserve the conflict and source-precedence rule rather than using fluent synthesis to erase it. A supported quote from each side can establish that a conflict exists without establishing which side is correct.
 
@@ -60,9 +60,9 @@ assert answer['status']=='answered' and len(answer['claims'])==1
 assert text[answer['citations'][0]['start']:answer['citations'][0]['end']]==answer['claims'][0]['quote']
 ```
 
-**Expected:** statusanswered; one claim; citation slices the exact sentence.
+**Expected:** status answered; one claim; citation slices the exact sentence.
 
-**Verify:** Compare the computed values or written argument with statusanswered; one claim; citation slices the exact sentence.
+**Verify:** Compare the computed values or written argument with status answered; one claim; citation slices the exact sentence.
 
 ## Exercise 2: Reject a corrupted span
 
@@ -90,9 +90,9 @@ unknown=extractive_answer(None,0,0,'comet-period')
 assert unknown=={'status':'unknown','claims':[],'citations':[],'reason':'missing evidence'}
 ```
 
-**Expected:** statusunknown; claims empty; reasonmissing evidence.
+**Expected:** status unknown; claims empty; reason missing evidence.
 
-**Verify:** Compare the computed values or written argument with statusunknown; claims empty; reasonmissing evidence.
+**Verify:** Compare the computed values or written argument with status unknown; claims empty; reason missing evidence.
 
 ## Exercise 4: Separate a valid citation from support
 

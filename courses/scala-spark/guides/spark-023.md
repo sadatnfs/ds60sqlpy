@@ -30,9 +30,9 @@ The [Scala learner](../lessons/spark-023.scala) and [PySpark learner](../lessons
 
 - **Strategy evidence:** The observed physical join operator in the actual configured plan, checked separately from the relational result.
 
-The fixture joins 20000 fact identities to a20-row dimension with one row per key. Each fact key is fact_id modulo 20, so every fact has exactly one dimension match. The fact amount cycles from one through seven and the dimension factor is key plus one. The independent arithmetic totals are 79997 for amount and 839916 for amount times factor. These values are the correctness anchor for every strategy experiment.
+The fixture joins 20000 fact identities to a 20-row dimension with one row per key. Each fact key is fact_id modulo 20, so every fact has exactly one dimension match. The fact amount cycles from one through seven and the dimension factor is key plus one. The independent arithmetic totals are 79997 for amount and 839916 for amount times factor. These values are the correctness anchor for every strategy experiment.
 
-Broadcasting can avoid shuffling the large side for an eligible equijoin by making the small build relation available to workers. The small relation must still be materialized and distributed, and each worker needs memory for its representation. A20-row range is safely bounded for this local teaching fixture. A production relation called dimension can still contain millions of rows or wide payloads; its name does not establish that broadcasting is sensible.
+Broadcasting can avoid shuffling the large side for an eligible equijoin by making the small build relation available to workers. The small relation must still be materialized and distributed, and each worker needs memory for its representation. A 20-row range is safely bounded for this local teaching fixture. A production relation called dimension can still contain millions of rows or wide payloads; its name does not establish that broadcasting is sensible.
 
 The optimizer uses statistics and configuration to choose a strategy. This lesson records the optimized plan estimate of the dimension and a deliberately set 10 MiB automatic threshold. The estimate is inspected through classic Spark plan metadata, which is a version-specific diagnostic boundary. It is not substituted for the measured row-count/uniqueness gate or treated as a precise prediction of hash-table memory. Missing statistics can make an automatic decision unexpectedly conservative or unsafe.
 
@@ -163,7 +163,7 @@ Request a broadcast dimension in a full outer equality join and inspect the chos
 
 Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
 
-**Expected result/shape:** The 20-row dimension passes; the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate.
+**Expected result/shape:** The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate.
 
 **Verify:** Assert accepted logical join metrics and explicit rejection for duplicate and row-budget cases.
 
@@ -171,7 +171,7 @@ Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estim
 
 ## Common pitfalls
 
-Do not broadcast a relation just because it is named dimension. Do not treat a hint as a guarantee for every join type or as a uniqueness check. Statistics can be missing or stale, and in-memory build structures may exceed the estimated bytes. Disable or account forAQE when isolating static planning. Keep full-output reconciliation separate from the plan comparison. This local demonstration establishes strategy behavior and logical parity, not a cluster speedup or a safe production memory limit.
+Do not broadcast a relation just because it is named dimension. Do not treat a hint as a guarantee for every join type or as a uniqueness check. Statistics can be missing or stale, and in-memory build structures may exceed the estimated bytes. Disable or account for AQE when isolating static planning. Keep full-output reconciliation separate from the plan comparison. This local demonstration establishes strategy behavior and logical parity, not a cluster speedup or a safe production memory limit.
 
 ## Self-check
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -124,7 +170,7 @@
 <p>Separate surface similarity, semantic similarity, source support and user usefulness. A learned semantic metric can recognize paraphrases better than exact overlap, but it is itself a model with training data and failure modes. A model judge adds a rubric and another inference process, not an automatic ground-truth oracle.</p>
 <h3 id="derive-clipped-n-gram-precision-and-brevity">Derive clipped n-gram precision and brevity<a class="heading-anchor" href="#derive-clipped-n-gram-precision-and-brevity" aria-label="Link to this section">#</a></h3>
 <p>An n-gram is a consecutive sequence of n tokens. Modified precision counts candidate n-grams but clips each count to the number available in the reference. If the candidate repeats the four times while the reference contains it once, only one occurrence earns credit. Without clipping, repetition could inflate precision without adding useful content.</p>
-<p>The teaching BLEU score combines precision at orders one through N through a geometric mean, then multiplies a brevity penalty. For candidate length c and reference length r, BP=min(1,exp(1-r/c)) when c&gt;0. A short candidate can have perfect local precision by omitting difficult content; the penalty discourages that shortcut. An empty candidate returns zero under our explicit convention.</p>
+<p>The teaching BLEU score combines precision at orders one through N through a geometric mean, then multiplies a brevity penalty. For candidate length c and reference length r, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mo>min</mo><mo stretchy="false">(</mo><mn>1</mn><mo>,</mo><mi>exp</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>r</mi></mrow><mrow><mi>c</mi></mrow></mfrac><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{BP}=\min(1,\exp(1-\frac{r}{c}))</annotation></semantics></math> when <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>c</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">c&gt;0</annotation></semantics></math>. A short candidate can have perfect local precision by omitting difficult content; the penalty discourages that shortcut. An empty candidate returns zero under our explicit convention.</p>
 <p>Zero precision at one included order makes the unsmoothed geometric mean zero. Real benchmark implementations use defined corpus aggregation, tokenization, multiple-reference and smoothing conventions. Report the complete configuration when comparing published scores. Averaging this toy sentence score is not automatically equivalent to corpus BLEU.</p>
 <h3 id="rouge-subsequences-and-semantic-failure">ROUGE, subsequences and semantic failure<a class="heading-anchor" href="#rouge-subsequences-and-semantic-failure" aria-label="Link to this section">#</a></h3>
 <p>Recall-oriented overlap asks how much reference content is recovered. ROUGE-N variants count n-gram overlap, while ROUGE-L uses longest common subsequence structure. A subsequence preserves order but can skip tokens; it differs from a contiguous substring. Dynamic programming compares prefixes and reuses smaller longest-subsequence results.</p>
@@ -141,22 +187,22 @@
 <h4 id="worked-example-1-prevent-repetition-from-earning-extra-credit">Worked example 1: Prevent repetition from earning extra credit<a class="heading-anchor" href="#worked-example-1-prevent-repetition-from-earning-extra-credit" aria-label="Link to this section">#</a></h4>
 <p>Candidate the the the the has four unigram occurrences, while reference the cat contains only one matching the. Clipping gives one match out of four and precision 0.25. This counterexample verifies the count mechanism independently of a complete metric implementation.</p>
 <h4 id="worked-example-2-penalize-a-truncated-exact-prefix">Worked example 2: Penalize a truncated exact prefix<a class="heading-anchor" href="#worked-example-2-penalize-a-truncated-exact-prefix" aria-label="Link to this section">#</a></h4>
-<p>Candidate the cat matches both its unigrams and its one bigram in reference the cat sat, so both precisions are one. Its length is two versus three, giving BP=exp(-0.5) and the same final teaching BLEU score, about 0.60653. Perfect local overlap did not recover all reference content.</p>
+<p>Candidate the cat matches both its unigrams and its one bigram in reference the cat sat, so both precisions are one. Its length is two versus three, giving <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{BP}=\exp(-0.5)</annotation></semantics></math> and the same final teaching BLEU score, about 0.60653. Perfect local overlap did not recover all reference content.</p>
 <h4 id="worked-example-3-keep-a-high-scoring-contradiction-visible">Worked example 3: Keep a high-scoring contradiction visible<a class="heading-anchor" href="#worked-example-3-keep-a-high-scoring-contradiction-visible" aria-label="Link to this section">#</a></h4>
 <p>The candidate service is ready gets ROUGE-L-style F1 six-sevenths against service is not ready, yet reverses the meaning. The reference records this explicit human-understandable failure. It does not pretend that searching for the token not is a general factuality evaluator.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">from collections import Counter
-candidate=Counter(&#x27;the the the the&#x27;.split());reference=Counter(&#x27;the cat&#x27;.split())
-clipped=sum(min(count,reference[word]) for word,count in candidate.items())/sum(candidate.values())
-print(clipped)
-assert clipped==.25</code></pre>
-<pre><code class="language-python">reference=&#x27;service is not ready&#x27;.split();candidate=&#x27;service is ready&#x27;.split()
-matched=3;precision=matched/len(candidate);recall=matched/len(reference)
-f1=2*precision*recall/(precision+recall)
-print(precision,recall,f1)
-assert precision==1 and recall==.75 and f1==6/7
-# The source and candidate contradict despite high overlap.</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
+candidate<span class="syntax-operator">=</span>Counter<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">the the the the</span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>reference<span class="syntax-operator">=</span>Counter<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">the cat</span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+clipped<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">,</span>reference<span class="syntax-punctuation">[</span>word<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word<span class="syntax-punctuation">,</span>count <span class="syntax-operator">in</span> candidate<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>candidate<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>clipped<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> clipped<span class="syntax-operator">==</span><span class="syntax-number">.25</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">reference<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">service is not ready</span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>candidate<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">service is ready</span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+matched<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">;</span>precision<span class="syntax-operator">=</span>matched<span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>candidate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>recall<span class="syntax-operator">=</span>matched<span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>reference<span class="syntax-punctuation">)</span>
+f1<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>precision<span class="syntax-operator">*</span>recall<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>precision<span class="syntax-operator">+</span>recall<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>precision<span class="syntax-punctuation">,</span>recall<span class="syntax-punctuation">,</span>f1<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> precision<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> recall<span class="syntax-operator">==</span><span class="syntax-number">.75</span> <span class="syntax-operator">and</span> f1<span class="syntax-operator">==</span><span class="syntax-number">6</span><span class="syntax-operator">/</span><span class="syntax-number">7</span>
+<span class="syntax-comment"># The source and candidate contradict despite high overlap.</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-017.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-017-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-017.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-017_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -167,13 +213,13 @@ assert precision==1 and recall==.75 and f1==6/7
 <p><strong>Hints:</strong> Clip each candidate count by its reference count.</p>
 <h4 id="exercise-2-derive-the-brevity-penalty">Exercise 2: Derive the brevity penalty<a class="heading-anchor" href="#exercise-2-derive-the-brevity-penalty" aria-label="Link to this section">#</a></h4>
 <p>Score the cat against the cat sat with maximum order2 and no smoothing.</p>
-<p><strong>Expected:</strong> Both precisions1; BP and score exp(-.5).</p>
-<p><strong>Verify:</strong> Both precisions1; BP and score exp(-.5). Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> Both precisions1; BP and score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-0.5)</annotation></semantics></math>.</p>
+<p><strong>Verify:</strong> Both precisions1; BP and score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-0.5)</annotation></semantics></math>. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Candidate length is2 and reference length3.</p>
 <h4 id="exercise-3-implement-longest-common-subsequence">Exercise 3: Implement longest common subsequence<a class="heading-anchor" href="#exercise-3-implement-longest-common-subsequence" aria-label="Link to this section">#</a></h4>
 <p>Compute LCS and P/R/F1 for the readiness minimal pair.</p>
-<p><strong>Expected:</strong> LCS3, precision1, recall.75, F1=6/7.</p>
-<p><strong>Verify:</strong> LCS3, precision1, recall.75, F1=6/7. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> LCS3, precision1, recall.75, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>F</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mrow><mn>6</mn></mrow><mrow><mn>7</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">F_{1}=\frac{6}{7}</annotation></semantics></math>.</p>
+<p><strong>Verify:</strong> LCS3, precision1, recall.75, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>F</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mrow><mn>6</mn></mrow><mrow><mn>7</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">F_{1}=\frac{6}{7}</annotation></semantics></math>. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Compare token prefixes in a dynamic-programming table.</p>
 <h4 id="exercise-4-document-semantic-failure">Exercise 4: Document semantic failure<a class="heading-anchor" href="#exercise-4-document-semantic-failure" aria-label="Link to this section">#</a></h4>
 <p>Write a source-support judgment for the same minimal pair.</p>
@@ -209,7 +255,7 @@ assert precision==1 and recall==.75 and f1==6/7
 <h3 id="related-local-tracks">Related local tracks<a class="heading-anchor" href="#related-local-tracks" aria-label="Link to this section">#</a></h3>
 <p>The <a href="../../statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md.html">statistics book LLM evaluation chapter</a> expands the sampling, judge and uncertainty design. The <a href="../../llm-applied/guides/llm-applied-012.md.html">applied retrieval/answer guide</a> adds oracle-context controls.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-017.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-017.
 Read courses/nlp/guides/nlp-017.md and courses/nlp/learners/nlp-017.py.
 Direct prerequisites: `nlp-016`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

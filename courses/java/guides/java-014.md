@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-013`
 
 ## Learning objectives
 
-Explain lazy pipeline, terminal operation, associative reduction using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Keep even values from1,2,3,4 and sum their squares. The final exercise transfers the mechanism to expose nonassociative subtraction.
+Explain lazy pipeline, terminal operation, associative reduction using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Keep even values from 1,2,3,4 and sum their squares. The final exercise transfers the mechanism to expose nonassociative subtraction.
 
 ## Purpose and mental model
 
-A stream is a single-use computation pipeline over a source. Intermediate operations such asfilter andmap are lazy: defining them does not necessarily process elements. A terminal operation such ascollect orsum triggers the computation. The pipeline describes transformations, not a mutable container. Reduction requires an identity and an associative combination rule if it is to behave predictably under partitioning. Side effects in stream operations can make execution order and parallel behavior difficult to reason about. Prefer collectors and pure mappings over appending to a shared list from a parallelforEach.
+A stream is a single-use computation pipeline over a source. Intermediate operations such as filter and map are lazy: defining them does not necessarily process elements. A terminal operation such as collect or sum triggers the computation. The pipeline describes transformations, not a mutable container. Reduction requires an identity and an associative combination rule if it is to behave predictably under partitioning. Side effects in stream operations can make execution order and parallel behavior difficult to reason about. Prefer collectors and pure mappings over appending to a shared list from a parallelforEach.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ A stream is a single-use computation pipeline over a source. Intermediate operat
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-014/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -90,7 +90,7 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Filter and sum.** Keep even values from1,2,3,4 and sum their squares.
+1. **Filter and sum.** Keep even values from 1,2,3,4 and sum their squares.
    **Expected:** 20.
    **Verify:** Compare your assertion values or captured diagnostic with 20.
 
@@ -98,7 +98,7 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** counter0 before terminal and3 after.
    **Verify:** Compare your assertion values or captured diagnostic with counter0 before terminal and3 after.
 
-3. **Group with a collector.** Count red,blue,red withgroupingBy andcounting.
+3. **Group with a collector.** Count red,blue,red withgroupingBy and counting.
    **Expected:** red2L,blue1L.
    **Verify:** Compare your assertion values or captured diagnostic with red2L,blue1L.
 
@@ -111,8 +111,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with correct6;wrong16 in the sequential fixture.
 
 6. **Expose nonassociative subtraction.** Compare(10-3)-2 with10-(3-2),then use an associative sum for a parallel fixture.
-   **Expected:** 5 versus9;parallel sum5050.
-   **Verify:** Compare your assertion values or captured diagnostic with 5 versus9;parallel sum5050.
+   **Expected:** 5 versus 9; parallel sum 5050.
+   **Verify:** Compare your assertion values or captured diagnostic with 5 versus 9; parallel sum 5050.
 
 ## Common pitfalls and diagnosis
 

@@ -22,7 +22,7 @@ Use one-based ranks and a positive fusion constant. Deduplicate each input ranki
 
 ## Calculate the fused ordering and its limits
 
-For constant c and one-based rank r, this fixture contributes1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant60, the scores are:
+For constant c and one-based rank r, this fixture contributes1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant 60, the scores are:
 
 | Document | Contributions | Fused score |
 | --- | --- | --- |
@@ -53,9 +53,9 @@ The example reranker sorts authored features0, 2, 1. It is neither a trained cro
 
 ## Exercise 1: Fuse two rankings
 
-The question is: Fuse lexical[a, b, c] and dense[b, d, a] with constant60.
+The question is: Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.
 
-Documentb receives ranks2 and1, whilea receives1 and3. The difference comes from rank evidence rather than incompatible raw score scales.
+Documentb receives ranks2 and 1, whilea receives1 and3. The difference comes from rank evidence rather than incompatible raw score scales.
 
 ```python
 ranked=rrf([['a','b','c'],['b','d','a']],60)

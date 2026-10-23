@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -124,97 +170,97 @@
 <p><strong>Expected:</strong> an explicit check for each value and size exits0. A drawing has two owning vector boxes and an arrow from <code>alias</code> to the original box. The objects&#x27; addresses need not have any particular relationship.</p>
 <p><strong>Verify:</strong> changing the original again changes the alias observation but leaves the copied snapshot unchanged. Replacing the copy declaration with a reference changes this result, which is a useful controlled counterexample.</p>
 <h4 id="exercise-2-sum-positive-readings-with-a-wide-accumulator">Exercise 2: Sum positive readings with a wide accumulator<a class="heading-anchor" href="#exercise-2-sum-positive-readings-with-a-wide-accumulator" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">long long positive_sum(const std::vector&lt;int&gt;&amp; readings) {
-    long long total = 0;
-    for (const int value : readings) {
-        if (value &gt; 0) total += value;
-    }
-    return total;
-}</code></pre>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> <span class="syntax-function">positive_sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> total <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> value <span class="syntax-operator">:</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> total<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>The const reference avoids an unnecessary input copy and prevents this function from mutating through its parameter. <code>total</code> is <code>long long</code>, not the element&#x27;s <code>int</code> type. Under the stated bounds, the largest sum is 10000 multiplied by 1000000, or 10000000000, which is representable by the standard&#x27;s minimum 64-bit <code>long long</code> range.</p>
 <p><strong>Expected:</strong> <code>{4,-2,7,0,9}</code> produces 20; empty/all-negative inputs produce 0; the large fixture produces 10000000000. The input remains equal to its saved copy.</p>
 <p><strong>Verify:</strong> all four sum checks in the independent program pass. A solution using an <code>int</code> total can pass the small fixture and fail the large one; signed overflow is undefined behavior, not an acceptable alternative result. This contract does not promise safe accumulation for arbitrarily large vectors or values outside its declared bounds.</p>
 <h4 id="exercise-3-replace-only-a-valid-position">Exercise 3: Replace only a valid position<a class="heading-anchor" href="#exercise-3-replace-only-a-valid-position" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">bool replace_at(std::vector&lt;int&gt;&amp; readings, std::size_t index, int replacement) {
-    if (index &gt;= readings.size()) return false;
-    readings.at(index) = replacement;
-    return true;
-}</code></pre>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">bool</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span> index<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> replacement<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>index <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> readings<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    readings<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> replacement<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>The mutable reference is intentional: this task changes the caller&#x27;s vector. The guard includes equality because <code>size()</code> is one past the final element. Nothing is inserted and no vector capacity change is needed.</p>
 <p><strong>Expected:</strong> index 1 changes <code>{4,7,9}</code> to <code>{4,8,9}</code> and returns true. Index3 and empty/index 0 return false without mutation.</p>
 <p><strong>Verify:</strong> compare both the Boolean and the complete vector for all three fixtures. Checking only a returned flag would miss a function that mutates before rejecting. Using unchecked indexing before the guard would violate the contract even if one run appeared correct.</p>
 <h4 id="exercise-4-repair-the-element-lifetime-deliberately">Exercise 4: Repair the element lifetime deliberately<a class="heading-anchor" href="#exercise-4-repair-the-element-lifetime-deliberately" aria-label="Link to this section">#</a></h4>
 <p>For an old snapshot, own the integer value:</p>
-<pre><code class="language-cpp">std::vector&lt;int&gt; values{4, 7, 9};
-const int snapshot = values.at(0);
-values.push_back(11);
-values.at(0) = 6;
-if (snapshot != 4 || values.size() != 4) return 1;</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> snapshot <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+values<span class="syntax-punctuation">.</span>push_back<span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+values<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>snapshot <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> values<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
 <p>For the current value after append-only growth, keep a position and fetch after the change:</p>
-<pre><code class="language-cpp">std::vector&lt;int&gt; values{4, 7, 9};
-const std::size_t first_index = 0;
-values.push_back(11);
-values.at(0) = 6;
-const int current = values.at(first_index);
-if (current != 6 || values.size() != 4) return 1;</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span> first_index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+values<span class="syntax-punctuation">.</span>push_back<span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+values<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> current <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>first_index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>current <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> values<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> the old snapshot is 4, the newly fetched current value is 6, and both variants have size 4. The original borrowed-reference proposal has no reliable output contract after a possible reallocation, so it is not executed as a test.</p>
 <p><strong>Verify:</strong> run only these safe variants, then explain the diagram: vector growth may end the old element-storage lifetime, whereas the owned integer remains alive and an index is only a position used for a later checked lookup. If elements were erased or reordered, the same position might refer to a different logical record. An index is not a universal identity mechanism. Calling <code>reserve</code> can help within a carefully stated capacity bound, but it is not a substitute for reasoning about all invalidating operations.</p>
 <h4 id="exercise-5-validate-representation-before-conversion">Exercise 5: Validate representation before conversion<a class="heading-anchor" href="#exercise-5-validate-representation-before-conversion" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::optional&lt;int&gt; checked_read(const std::vector&lt;int&gt;&amp; readings, long long index) {
-    if (!std::in_range&lt;std::size_t&gt;(index)) return std::nullopt;
-    const auto position = static_cast&lt;std::size_t&gt;(index);
-    if (position &gt;= readings.size()) return std::nullopt;
-    return readings.at(position);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> checked_read<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> index<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>in_range<span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nullopt<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> position <span class="syntax-operator">=</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>position <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> readings<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nullopt<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> readings<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>position<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>Include <code>&lt;utility&gt;</code> for <code>std::in_range</code>. This tests negative or too-large values before converting them. The second guard asks a different question: even if the type can represent the index, does this particular vector contain that position? Returning an optional value creates an independent integer result rather than exporting a borrowed element reference.</p>
 <p><strong>Expected:</strong> index 1 yields7; -1, size 3/index 3 and empty/index 0 yield no value. The input remains unchanged.</p>
 <p><strong>Verify:</strong> all four published read checks pass, and the learner states both guard purposes. A cast-first implementation is fragile on a narrower index type: a large external integer can wrap into a small index. A supported 64-bit build alone does not prove that such a cast-first implementation is portable.</p>
 <h4 id="exercise-6-return-an-independently-owned-filtered-batch">Exercise 6: Return an independently owned filtered batch<a class="heading-anchor" href="#exercise-6-return-an-independently-owned-filtered-batch" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;int&gt; nonnegative_copy(const std::vector&lt;int&gt;&amp; readings) {
-    std::vector&lt;int&gt; result;
-    for (const int value : readings) {
-        if (value &gt;= 0) result.push_back(value);
-    }
-    return result;
-}</code></pre>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> result<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> value <span class="syntax-operator">:</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> result<span class="syntax-punctuation">.</span>push_back<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>The source is borrowed read-only during the call. The result owns new elements and preserves encounter order. Returning this vector value transfers the result to the caller through normal value semantics; no manual pointer ownership is introduced.</p>
 <p><strong>Expected:</strong> <code>{3,-1,0,5}</code> becomes <code>{3,0,5}</code>. Empty/all-negative inputs produce an empty vector. Changing the result&#x27;s first value to 99 leaves the source&#x27;s first value 3.</p>
 <p><strong>Verify:</strong> all three filtering checks pass, including input immutability and independence after result mutation. Reusing the input as output would fail those checks. This lesson does not claim that reserving capacity or changing syntax necessarily improves performance; that requires a later measured comparison.</p>
 <h3 id="complete-exercise-implementation">Complete exercise implementation<a class="heading-anchor" href="#complete-exercise-implementation" aria-label="Link to this section">#</a></h3>
 <p>Save this as <code>exercises.cpp</code> only after comparing your attempt. It matches the declarations and check program in the learner guide.</p>
-<pre><code class="language-cpp">#include &quot;exercises.hpp&quot;
-#include &lt;utility&gt;
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&quot;exercises.hpp&quot;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;utility&gt;</span>
 
-namespace ds60 {
-long long positive_sum(const std::vector&lt;int&gt;&amp; readings) {
-    long long total = 0;
-    for (const int value : readings) {
-        if (value &gt; 0) total += value;
-    }
-    return total;
-}
+<span class="syntax-keyword">namespace</span> ds60 <span class="syntax-punctuation">{</span>
+<span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> <span class="syntax-function">positive_sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> total <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> value <span class="syntax-operator">:</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> total<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-bool replace_at(std::vector&lt;int&gt;&amp; readings, std::size_t index, int replacement) {
-    if (index &gt;= readings.size()) return false;
-    readings.at(index) = replacement;
-    return true;
-}
+<span class="syntax-keyword">bool</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span> index<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> replacement<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>index <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> readings<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    readings<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> replacement<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-std::optional&lt;int&gt; checked_read(const std::vector&lt;int&gt;&amp; readings, long long index) {
-    if (!std::in_range&lt;std::size_t&gt;(index)) return std::nullopt;
-    const auto position = static_cast&lt;std::size_t&gt;(index);
-    if (position &gt;= readings.size()) return std::nullopt;
-    return readings.at(position);
-}
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> checked_read<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> index<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>in_range<span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nullopt<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> position <span class="syntax-operator">=</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>position <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> readings<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nullopt<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> readings<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>position<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-std::vector&lt;int&gt; nonnegative_copy(const std::vector&lt;int&gt;&amp; readings) {
-    std::vector&lt;int&gt; result;
-    for (const int value : readings) {
-        if (value &gt;= 0) result.push_back(value);
-    }
-    return result;
-}
-}</code></pre>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> result<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> value <span class="syntax-operator">:</span> readings<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> result<span class="syntax-punctuation">.</span>push_back<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>With the exercise option enabled, the intended acceptance is two passing CTest tests, the worked example&#x27;s two exact output lines and <code>14 checks passed</code> from the exercise program. Repeat the checks in a separate Release build. A direct compiler check of these snippets is narrower evidence than a CMake/CTest run or a proven browser compiler adapter. Native platform and sanitizer claims require their own actual transcripts.</p>
 <h3 id="review-rubric-and-retrieval">Review rubric and retrieval<a class="heading-anchor" href="#review-rubric-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>A strong explanation names the owner, the lifetime, the access contract and the observable boundary. Use the learner rubric: at least 8/10, all fourteen function checks, safe Exercise4 variants and an independent transfer explanation. A learner who copied these implementations but cannot explain why <code>index==size()</code> fails, why <code>const</code> does not freeze aliases or why a dangling read is not a valid experiment needs another prediction/transfer attempt.</p>

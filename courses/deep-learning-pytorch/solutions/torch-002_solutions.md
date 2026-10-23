@@ -44,7 +44,7 @@ A practical tensor boundary should name every axis, required dtype, device and o
 
 ## Exercise 1: Inspect shape and stride
 
-The question is: Create a2x3 float64 CPU tensor from values 0..5.
+The question is: Create a 2-by-3 float64 CPU tensor from values 0..5.
 
 The last axis advances by one stored element and the first by three. These metadata explain the matrix layout without relying on a printed table alone.
 

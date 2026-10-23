@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,69 +176,69 @@
 <h3 id="exercise-1-request-a-valid-local-calculation">Exercise 1: Request a valid local calculation<a class="heading-anchor" href="#exercise-1-request-a-valid-local-calculation" aria-label="Link to this section">#</a></h3>
 <p>Task: GET /sum with a=2 and b=3 and inspect status, content type and JSON.</p>
 <p>The checks distinguish transport completion, protocol success and representation content. An endpoint can respond successfully at one layer while violating another layer&#x27;s contract.</p>
-<pre><code class="language-javascript">await withServer(async base =&gt; {
-  const response = await fetch(new URL(&#x27;/sum?a=2&amp;b=3&#x27;, base), { signal: AbortSignal.timeout(2000) });
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get(&#x27;content-type&#x27;), /application\/json/u);
-  assert.deepEqual(await response.json(), { total: 5 });
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withServer<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> base <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> fetch<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;/sum?a=2&amp;b=3&#x27;</span><span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> AbortSignal<span class="syntax-punctuation">.</span>timeout<span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>headers<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;content-type&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/application\/json/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> total<span class="syntax-operator">:</span> <span class="syntax-number">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> status 200; application/json; total 5.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-inspect-an-http-error-without-expecting-fetch-rejection">Exercise 2: Inspect an HTTP error without expecting fetch rejection<a class="heading-anchor" href="#exercise-2-inspect-an-http-error-without-expecting-fetch-rejection" aria-label="Link to this section">#</a></h3>
 <p>Task: Request an unknown route and inspect the actual response.</p>
 <p>fetch rejects for failures such as network errors or aborts, not simply because the server sent a 404. A client that only catches rejection may mistakenly treat a protocol error body as success data.</p>
-<pre><code class="language-javascript">await withServer(async base =&gt; {
-  const response = await fetch(new URL(&#x27;/missing&#x27;, base), { signal: AbortSignal.timeout(2000) });
-  assert.equal(response.status, 404);
-  assert.equal(response.ok, false);
-  assert.deepEqual(await response.json(), { error: &#x27;not_found&#x27; });
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withServer<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> base <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> fetch<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;/missing&#x27;</span><span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> AbortSignal<span class="syntax-punctuation">.</span>timeout<span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">404</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> error<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;not_found&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> fetch resolves; status 404, ok false, error not_found.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-encode-query-values-through-the-url-api">Exercise 3: Encode query values through the URL API<a class="heading-anchor" href="#exercise-3-encode-query-values-through-the-url-api" aria-label="Link to this section">#</a></h3>
 <p>Task: Round-trip a query containing spaces, ampersand and equals without contacting a server.</p>
 <p>URLSearchParams preserves delimiters as data by encoding them. This is URL encoding, not HTML escaping or SQL parameter binding; each boundary has its own rules.</p>
-<pre><code class="language-javascript">const url = new URL(&#x27;http://127.0.0.1/search&#x27;);
-url.searchParams.set(&#x27;q&#x27;, &#x27;a &amp; b=c&#x27;);
-assert.equal(url.searchParams.get(&#x27;q&#x27;), &#x27;a &amp; b=c&#x27;);
-assert.equal([...url.searchParams].length, 1);
-assert.ok(url.href.includes(&#x27;%26&#x27;));</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> url <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;http://127.0.0.1/search&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+url<span class="syntax-punctuation">.</span>searchParams<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;q&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;a &amp; b=c&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">.</span>searchParams<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;q&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;a &amp; b=c&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">...</span>url<span class="syntax-punctuation">.</span>searchParams<span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;%26&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> the value round-trips as one parameter.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-reject-repeated-or-invalid-parameters">Exercise 4: Reject repeated or invalid parameters<a class="heading-anchor" href="#exercise-4-reject-repeated-or-invalid-parameters" aria-label="Link to this section">#</a></h3>
 <p>Task: Request repeated a values and a non-integer b value.</p>
 <p>Checking getAll length prevents an ambiguous duplicate-parameter policy. The numeric parser rejects strings that JavaScript Number might otherwise coerce in unintended ways.</p>
-<pre><code class="language-javascript">await withServer(async base =&gt; {
-  for (const path of [&#x27;/sum?a=1&amp;a=2&amp;b=3&#x27;, &#x27;/sum?a=1&amp;b=hello&#x27;]) {
-    const response = await fetch(new URL(path, base), { signal: AbortSignal.timeout(2000) });
-    assert.equal(response.status, 400);
-    assert.deepEqual(await response.json(), { error: &#x27;invalid_parameters&#x27; });
-  }
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withServer<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> base <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> path <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;/sum?a=1&amp;a=2&amp;b=3&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/sum?a=1&amp;b=hello&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> fetch<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> AbortSignal<span class="syntax-punctuation">.</span>timeout<span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> error<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;invalid_parameters&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both responses are 400 with invalid_parameters.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-reject-an-unsupported-method">Exercise 5: Reject an unsupported method<a class="heading-anchor" href="#exercise-5-reject-an-unsupported-method" aria-label="Link to this section">#</a></h3>
 <p>Task: POST to the read-only sum route without a body.</p>
 <p>A route includes method semantics, not just its path. Explicit method rejection prevents an accidental write-looking request from being accepted as an ordinary read.</p>
-<pre><code class="language-javascript">await withServer(async base =&gt; {
-  const response = await fetch(new URL(&#x27;/sum?a=1&amp;b=2&#x27;, base), { method: &#x27;POST&#x27;, signal: AbortSignal.timeout(2000) });
-  assert.equal(response.status, 405);
-  assert.equal(response.headers.get(&#x27;allow&#x27;), &#x27;GET&#x27;);
-  assert.deepEqual(await response.json(), { error: &#x27;method_not_allowed&#x27; });
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withServer<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> base <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> fetch<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;/sum?a=1&amp;b=2&#x27;</span><span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> signal<span class="syntax-operator">:</span> AbortSignal<span class="syntax-punctuation">.</span>timeout<span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">405</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>headers<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;allow&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GET&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> error<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;method_not_allowed&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> status 405 and Allow: GET.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-guard-arithmetic-overflow-after-parsing">Exercise 6: Guard arithmetic overflow after parsing<a class="heading-anchor" href="#exercise-6-guard-arithmetic-overflow-after-parsing" aria-label="Link to this section">#</a></h3>
 <p>Task: Add one to Number.MAX_SAFE_INTEGER through the endpoint.</p>
 <p>Each input can be a safe integer while the result is outside the safe range. Validate derived output invariants as well as input syntax.</p>
-<pre><code class="language-javascript">await withServer(async base =&gt; {
-  const url = new URL(&#x27;/sum&#x27;, base);
-  url.searchParams.set(&#x27;a&#x27;, String(Number.MAX_SAFE_INTEGER));
-  url.searchParams.set(&#x27;b&#x27;, &#x27;1&#x27;);
-  const response = await fetch(url, { signal: AbortSignal.timeout(2000) });
-  assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), { error: &#x27;unsafe_total&#x27; });
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withServer<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> base <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> url <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;/sum&#x27;</span><span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  url<span class="syntax-punctuation">.</span>searchParams<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  url<span class="syntax-punctuation">.</span>searchParams<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> fetch<span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> AbortSignal<span class="syntax-punctuation">.</span>timeout<span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> error<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;unsafe_total&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> status 400 rather than a rounded success value.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

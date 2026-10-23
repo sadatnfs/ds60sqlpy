@@ -18,7 +18,7 @@ An interface declares a method; implementing classes or lambdas supply its body.
 
 ## Exercise 1: Call through an interface
 
-Task: UsePricing references to identity andhalf-price implementations on100 cents.
+Task: Use Pricing references to identity and half-price implementations on 100 cents.
 
 The caller invokes the same method name while the concrete behavior differs. The shared nonnegative-input contract keeps both implementations substitutable.
 
@@ -28,9 +28,9 @@ Pricing half = amount -> { requireNonnegative(amount); return amount / 2; };
 assert regular.price(100) == 100 && half.price(100) == 50;
 ```
 
-**Expected:** 100 and50.
+**Expected:** 100 and 50.
 
-**Verify:** Compare the program values or named exception with 100 and50. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 100 and 50. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Compose a fee policy
 
@@ -57,13 +57,13 @@ Rounding is part of the pricing contract. A different business rule could requir
 assert half.price(101) == 50;
 ```
 
-**Expected:** 50 cents beforefee.
+**Expected:** 50 cents before fee.
 
-**Verify:** Compare the program values or named exception with 50 cents beforefee. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 50 cents before fee. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Validate every implementation
 
-Task: Call regular,half andfee policy with-1.
+Task: Call regular,half and fee policy with-1.
 
 A caller should not need to know the concrete type to predict whether a domain input is accepted. Consistent validation supports substitution.
 
@@ -83,7 +83,7 @@ for (Pricing policy : List.of(regular, half, withFee)) {
 
 Task: Iterate over the three policies and collect prices for100.
 
-The loop depends only onPricing. Adding another valid implementation does not require a class-name conditional in the caller.
+The loop depends only on Pricing. Adding another valid implementation does not require a class-name conditional in the caller.
 
 ```java
 List<Integer> prices = new ArrayList<>();
@@ -97,7 +97,7 @@ assert prices.equals(List.of(100, 50, 60));
 
 ## Exercise 6: Reject an invalid wrapper
 
-Task: Construct a fee wrapper with a negative fee ornull delegate.
+Task: Construct a fee wrapper with a negative fee or null delegate.
 
 A composed object must establish its own valid state at construction. Deferring a null failure until the first pricing call makes the error harder to locate.
 
@@ -108,9 +108,9 @@ try { new Fee(null,1); } catch(NullPointerException expected) { delegateRejected
 assert feeRejected && delegateRejected;
 ```
 
-**Expected:** negative feeIllegalArgumentException;null delegateNullPointerException.
+**Expected:** negative fee IllegalArgumentException;null delegate NullPointerException.
 
-**Verify:** Compare the program values or named exception with negative feeIllegalArgumentException;null delegateNullPointerException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with negative fee IllegalArgumentException;null delegate NullPointerException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

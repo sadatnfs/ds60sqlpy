@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-016`. The 
 
 ## Learning objectives
 
-Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights 1, -2 and compute L1and squared L2sums. The finish condition is \(L_{1}=3\); squared \(L_{2}=5\). output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights 1, -2 and compute L1 and squared L2 sums. The finish condition is \(L_{1}=3\); squared \(L_{2}=5\). output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -118,7 +118,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Calculate two penalties.** Use weights 1, -2 and compute L1and squared L2sums.
+1. **Calculate two penalties.** Use weights 1, -2 and compute L1 and squared L2 sums.
    **Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
    **Verify:** Save the assertion results for exercise 1, including \(L_{1}=3\); squared \(L_{2}=5\).
 

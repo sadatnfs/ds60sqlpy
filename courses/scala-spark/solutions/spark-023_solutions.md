@@ -115,7 +115,7 @@ A physical hash strategy that cannot represent the required outer semantics must
 
 Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
 
-**Expected:** The 20-row dimension passes; the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate.
+**Expected:** The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate.
 
 ```scala
 def boundedBroadcast(dimension: DataFrame): DataFrame = {

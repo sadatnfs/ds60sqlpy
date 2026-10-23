@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,58 +177,58 @@
 <h3 id="exercise-1-aggregate-valid-split-byte-input">Exercise 1: Aggregate valid split-byte input<a class="heading-anchor" href="#exercise-1-aggregate-valid-split-byte-input" aria-label="Link to this section">#</a></h3>
 <p>Task: Decode rows for groups A and B from three-byte chunks and aggregate their values.</p>
 <p>Chunk boundaries are independent of JSON record boundaries. The pipeline carries partial decoder and line state instead of parsing each chunk as a complete row.</p>
-<pre><code class="language-typescript">const text = [{ group: &#x27;A&#x27;, value: 2 }, { group: &#x27;B&#x27;, value: 4 }, { group: &#x27;A&#x27;, value: 3 }].map(row =&gt; JSON.stringify(row)).join(&#x27;\n&#x27;);
-const result = await analyze(chunks(text, 3));
-assert.deepEqual([...result.groups], [[&#x27;A&#x27;, { count: 2, sum: 5 }], [&#x27;B&#x27;, { count: 1, sum: 4 }]]);
-assert.equal(result.accepted, 3);
-assert.deepEqual(result.rejected, []);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> text <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> group<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> group<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">4</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> group<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>row <span class="syntax-punctuation">=&gt;</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;\n&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">...</span>result<span class="syntax-punctuation">.</span>groups<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> sum<span class="syntax-operator">:</span> <span class="syntax-keyword">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> sum<span class="syntax-operator">:</span> <span class="syntax-keyword">4</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>accepted<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> A count 2 sum 5; B count 1 sum 4; zero rejected.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-quarantine-syntax-and-domain-failures-with-physical-line-numbers">Exercise 2: Quarantine syntax and domain failures with physical line numbers<a class="heading-anchor" href="#exercise-2-quarantine-syntax-and-domain-failures-with-physical-line-numbers" aria-label="Link to this section">#</a></h3>
 <p>Task: Place malformed JSON and a string-valued amount after a valid row.</p>
 <p>Rejected values never enter the aggregate. The diagnostic identifies where and why the row failed without reproducing the entire source payload.</p>
-<pre><code class="language-typescript">const text = &#x27;{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:2}\n{broken\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:&quot;wrong&quot;}\n&#x27;;
-const result = await analyze(chunks(text, 2));
-assert.equal(result.accepted, 1);
-assert.deepEqual(result.rejected, [{ line: 2, code: &#x27;json&#x27; }, { line: 3, code: &#x27;schema&#x27; }]);
-assert.deepEqual(result.groups.get(&#x27;A&#x27;), { count: 1, sum: 2 });</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:2}\n{broken\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:&quot;wrong&quot;}\n&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>accepted<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> line<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> code<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;json&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> line<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span><span class="syntax-punctuation">,</span> code<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;schema&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>groups<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> sum<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> one accepted row; diagnostics at lines 2 and 3 with json/schema categories.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-preserve-a-multi-byte-group-name-across-single-byte-chunks">Exercise 3: Preserve a multi-byte group name across single-byte chunks<a class="heading-anchor" href="#exercise-3-preserve-a-multi-byte-group-name-across-single-byte-chunks" aria-label="Link to this section">#</a></h3>
 <p>Task: Use an emoji group and split every UTF-8 byte.</p>
 <p>A raw chunk.toString call per byte would introduce replacement characters. The decoder retains incomplete sequences until enough bytes arrive.</p>
-<pre><code class="language-typescript">const result = await analyze(chunks(JSON.stringify({ group: &#x27;😀&#x27;, value: 7 }), 1));
-assert.deepEqual(result.groups.get(&#x27;😀&#x27;), { count: 1, sum: 7 });
-assert.equal(result.rejected.length, 0);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> group<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;😀&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>groups<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;😀&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> sum<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> group name remains intact with sum 7.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-handle-blank-lines-and-a-final-line-without-newline">Exercise 4: Handle blank lines and a final line without newline<a class="heading-anchor" href="#exercise-4-handle-blank-lines-and-a-final-line-without-newline" aria-label="Link to this section">#</a></h3>
 <p>Task: Supply blank lines, CRLF and one final valid row.</p>
 <p>Blank lines are ignored under this declared format policy, while physical line numbering still advances. The final buffered record is processed even without a trailing newline.</p>
-<pre><code class="language-typescript">const text = &#x27;\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:1}\r\n\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:2}&#x27;;
-const result = await analyze(chunks(text, 4));
-assert.equal(result.accepted, 2);
-assert.deepEqual(result.groups.get(&#x27;A&#x27;), { count: 2, sum: 3 });
-assert.deepEqual(result.rejected, []);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:1}\r\n\n{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:2}&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>accepted<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>groups<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> sum<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> two accepted rows; no fabricated empty records.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-enforce-input-and-record-budgets">Exercise 5: Enforce input and record budgets<a class="heading-anchor" href="#exercise-5-enforce-input-and-record-budgets" aria-label="Link to this section">#</a></h3>
 <p>Task: Reject a line exceeding 1024 bytes and an input exceeding 16384 bytes.</p>
 <p>A budget violation aborts the stream rather than becoming a harmless row diagnostic. Continuing could retain or process more data than the application agreed to accept.</p>
-<pre><code class="language-typescript">await assert.rejects(analyze(chunks(&#x27;x&#x27;.repeat(1025), 10)), RangeError);
-await assert.rejects(analyze(chunks(&#x27;\n&#x27;.repeat(16385), 1000)), RangeError);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;x&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">1025</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;\n&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">16385</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> RangeError for each resource-limit violation.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-expose-incomplete-data-counts-and-empty-input">Exercise 6: Expose incomplete-data counts and empty input<a class="heading-anchor" href="#exercise-6-expose-incomplete-data-counts-and-empty-input" aria-label="Link to this section">#</a></h3>
 <p>Task: Analyze one invalid row and no valid rows, then analyze an empty stream.</p>
 <p>An empty aggregate can arise from no data or from entirely rejected data. Reporting accepted and rejected counts preserves that crucial interpretation difference.</p>
-<pre><code class="language-typescript">const invalid = await analyze(chunks(&#x27;{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:null}&#x27;, 5));
-const empty = await analyze(chunks(&#x27;&#x27;, 5));
-assert.equal(invalid.accepted, 0);
-assert.equal(invalid.rejected.length, 1);
-assert.equal(empty.accepted, 0);
-assert.equal(empty.rejected.length, 0);
-assert.equal(empty.groups.size, 0);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> invalid <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;group&quot;:&quot;A&quot;,&quot;value&quot;:null}&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> empty <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> analyze<span class="syntax-punctuation">(</span>chunks<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">.</span>accepted<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">.</span>accepted<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">.</span>rejected<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">.</span>groups<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> zero accepted with one rejected versus zero accepted with zero rejected.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

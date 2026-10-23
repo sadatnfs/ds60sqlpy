@@ -53,7 +53,7 @@ The saved errors here are teaching data. Their bootstrap computation is real ari
 
 ## Exercise 1: Align paired errors
 
-The question is: Use systemA errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) andB \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
+The question is: Use system A errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) and B \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
 
 Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favorsA because the metric is error.
 
@@ -115,7 +115,7 @@ assert answered/total==.6 and correct/answered==5/6 and total-answered==4
 
 ## Exercise 5: Block a severe boundary failure
 
-The question is: Combine a favorable mean comparison withone access leak and apply a zero-access-leak gate.
+The question is: Combine a favorable mean comparison with one access leak and apply a zero-access-leak gate.
 
 An average quality improvement does not compensate for a required authorization failure. The gate should be declared before inspecting results.
 
@@ -131,7 +131,7 @@ assert not release
 
 ## Exercise 6: Keep final tests out of selection
 
-The question is: Record retriever selection onvalidation and final scoring ontest; flag a test-based parameter change.
+The question is: Record retriever selection on validation and final scoring on test; flag a test-based parameter change.
 
 Once the test influences a configuration choice, it is part of selection. A new untouched assessment is needed for a fresh final claim.
 

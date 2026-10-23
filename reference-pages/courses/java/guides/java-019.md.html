@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,64 +165,64 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate, approximately 90 minutes. Direct prerequisites: <code>java-018</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain bigo, deque, heap using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Adda,b,c to anArrayDeque and remove from the front. The final exercise transfers the mechanism to handle empty removal explicitly.</p>
+<p>Explain bigo, deque, heap using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Add a,b,c to an ArrayDeque and remove from the front. The final exercise transfers the mechanism to handle empty removal explicitly.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>A data structure is a set of operations with representation and cost tradeoffs. AnArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. AHashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. ADeque supports queue and stack operations without shifting an array prefix. APriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.</p>
+<p>A data structure is a set of operations with representation and cost tradeoffs. An ArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. A HashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. A Deque supports queue and stack operations without shifting an array prefix. A PriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>BigO:</strong> An asymptotic upper-bound description of growth in work or space.</p>
 <p><strong>Deque:</strong> A double-ended queue supporting insertion and removal at both ends.</p>
 <p><strong>Heap:</strong> A partial ordering that keeps a minimum or maximum at the root.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-019/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
-<p>ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add andpoll maintain a heap ordering,and repeatedpoll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.</p>
+<p>ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add and poll maintain a heap ordering,and repeated poll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-use-a-fifo-queue">Example A: Use a FIFO queue<a class="heading-anchor" href="#example-a-use-a-fifo-queue" aria-label="Link to this section">#</a></h4>
 <p>The queue preserves arrival order. ChoosingremoveLast instead would create a stack-like policy.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    record Task(int priority,int sequence,String name){}
-    static int comparisons(int[] values,int target){int count=0;for(int value:values){count++;if(value==target)break;}return count;}
-    public static void main(String[] args) throws Exception {
-        Deque&lt;String&gt; queue=new ArrayDeque&lt;&gt;(); queue.addLast(&quot;a&quot;);queue.addLast(&quot;b&quot;);queue.addLast(&quot;c&quot;);
-        assert List.of(queue.removeFirst(),queue.removeFirst(),queue.removeFirst()).equals(List.of(&quot;a&quot;,&quot;b&quot;,&quot;c&quot;));
-    }
-}
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">record</span> <span class="syntax-class">Task</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> priority<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> sequence<span class="syntax-punctuation">,</span>String name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">comparisons</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> values<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">int</span> count<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">:</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>count<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">=</span><span class="syntax-operator">=</span>target<span class="syntax-punctuation">)</span><span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">return</span> count<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        Deque<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> queue<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayDeque<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> a,b,c order.</p>
 <h4 id="example-b-use-a-lifo-stack">Example B: Use a LIFO stack<a class="heading-anchor" href="#example-b-use-a-lifo-stack" aria-label="Link to this section">#</a></h4>
 <p>The most recently pushed value is removed first. Stack behavior is useful for nested traversal or undo histories but differs from fair arrival-order processing.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    record Task(int priority,int sequence,String name){}
-    static int comparisons(int[] values,int target){int count=0;for(int value:values){count++;if(value==target)break;}return count;}
-    public static void main(String[] args) throws Exception {
-        Deque&lt;String&gt; queue=new ArrayDeque&lt;&gt;(); queue.addLast(&quot;a&quot;);queue.addLast(&quot;b&quot;);queue.addLast(&quot;c&quot;);
-        assert List.of(queue.removeFirst(),queue.removeFirst(),queue.removeFirst()).equals(List.of(&quot;a&quot;,&quot;b&quot;,&quot;c&quot;));
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">record</span> <span class="syntax-class">Task</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> priority<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> sequence<span class="syntax-punctuation">,</span>String name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">comparisons</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> values<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">int</span> count<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">:</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>count<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">=</span><span class="syntax-operator">=</span>target<span class="syntax-punctuation">)</span><span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">return</span> count<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        Deque<span class="syntax-operator">&lt;</span>String<span class="syntax-operator">&gt;</span> queue<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayDeque<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">addLast</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>queue<span class="syntax-punctuation">.</span><span class="syntax-attribute">removeFirst</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-        Deque&lt;Integer&gt; stack=new ArrayDeque&lt;&gt;();stack.push(1);stack.push(2);stack.push(3);
-        assert List.of(stack.pop(),stack.pop(),stack.pop()).equals(List.of(3,2,1));
-    }
-}
+        Deque<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> stack<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayDeque<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">push</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">push</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">push</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">pop</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">pop</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>stack<span class="syntax-punctuation">.</span><span class="syntax-attribute">pop</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> 3,2,1.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Use a FIFO queue.</strong> Adda,b,c to anArrayDeque and remove from the front. <strong>Expected:</strong> a,b,c order. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with a,b,c order.</li>
+<li><strong>Use a FIFO queue.</strong> Add a,b,c to an ArrayDeque and remove from the front. <strong>Expected:</strong> a,b,c order. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with a,b,c order.</li>
 </ol>
 <ol>
-<li><strong>Use a LIFO stack.</strong> Push1,2,3 onto aDeque andpop all values. <strong>Expected:</strong> 3,2,1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 3,2,1.</li>
+<li><strong>Use a LIFO stack.</strong> Push1,2,3 onto a Deque and pop all values. <strong>Expected:</strong> 3,2,1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 3,2,1.</li>
 </ol>
 <ol>
-<li><strong>Poll a priority queue.</strong> Insert5,1,4,2 and repeatedlypoll. <strong>Expected:</strong> 1,2,4,5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 1,2,4,5.</li>
+<li><strong>Poll a priority queue.</strong> Insert5,1,4,2 and repeatedly poll. <strong>Expected:</strong> 1,2,4,5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 1,2,4,5.</li>
 </ol>
 <ol>
 <li><strong>Count linear-search work.</strong> Search for the final item in arrays oflength4 and8 using a comparison counter. <strong>Expected:</strong> 4 and8 comparisons. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 4 and8 comparisons.</li>
@@ -185,7 +231,7 @@ public class Main {
 <li><strong>Preserve duplicate priorities.</strong> Insert tasks with equal priority and a stable sequence tie-breaker. <strong>Expected:</strong> earlier sequence removed first. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with earlier sequence removed first.</li>
 </ol>
 <ol>
-<li><strong>Handle empty removal explicitly.</strong> CompareDeque.pollFirst withremoveFirst on an empty queue. <strong>Expected:</strong> poll returnsnull;remove throwsNoSuchElementException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with poll returnsnull;remove throwsNoSuchElementException.</li>
+<li><strong>Handle empty removal explicitly.</strong> CompareDeque.pollFirst withremoveFirst on an empty queue. <strong>Expected:</strong> poll returns null; remove throws NoSuchElementException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with poll returns null; remove throws NoSuchElementException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
@@ -199,7 +245,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-019: Data structures and complexity.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-019: Data structures and complexity.
 Read courses/java/guides/java-019.md and courses/java/lessons/java-019.java. Direct prerequisites: `java-018`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

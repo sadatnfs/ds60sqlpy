@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,7 +164,7 @@
     <article class="document"><h2 id="llm-041-explanatory-solutions">llm-041: explanatory solutions<a class="heading-anchor" href="#llm-041-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection asX@W. PyTorch Linear stores weights in output-by-input orientation and appliesX@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses1 orTrue for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.</p>
+<p>Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection asX@W. PyTorch Linear stores weights in output-by-input orientation and appliesX@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses1 or True for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.</p>
 <p><strong>Weight layout:</strong> The semantic orientation of stored parameter axes.</p>
 <p><strong>Mask polarity:</strong> Whether True means allowed or excluded.</p>
 <p><strong>API parity:</strong> Matching mathematical behavior after translating interface conventions.</p>
@@ -127,7 +173,7 @@
 <h3 id="exercise-1-translate-linear-weights">Exercise 1: Translate linear weights<a class="heading-anchor" href="#exercise-1-translate-linear-weights" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use row input[1,2] and NumPy/Keras kernel[[1,2,3],[4,5,6]]. State the PyTorch Linear weight.</p>
 <p>A square symmetric matrix would hide a transpose error. The rectangular fixture makes the orientation and output feature count explicit.</p>
-<pre><code class="language-text">X shape(1,2)
+<pre class="highlighted-code"><code class="language-text">X shape(1,2)
 NumPy/Keras W shape(2,3): [[1,2,3],[4,5,6]]
 PyTorch Linear.weight shape(3,2): [[1,4],[2,5],[3,6]]
 Output: [1*1+2*4,1*2+2*5,1*3+2*6] = [9,12,15]</code></pre>
@@ -136,7 +182,7 @@ Output: [1*1+2*4,1*2+2*5,1*3+2*6] = [9,12,15]</code></pre>
 <h3 id="exercise-2-translate-a-causal-mask">Exercise 2: Translate a causal mask<a class="heading-anchor" href="#exercise-2-translate-a-causal-mask" aria-label="Link to this section">#</a></h3>
 <p>The question is: Write the3x3 allowed lower triangle and its forbidden-mask complement.</p>
 <p>The diagonal is allowed because inputs are paired with shifted next-token labels. Excluding it would remove the current token from its own prediction context.</p>
-<pre><code class="language-text">Allowed:
+<pre class="highlighted-code"><code class="language-text">Allowed:
 1 0 0
 1 1 0
 1 1 1
@@ -149,7 +195,7 @@ Forbidden:
 <h3 id="exercise-3-name-exact-mask-apis">Exercise 3: Name exact mask APIs<a class="heading-anchor" href="#exercise-3-name-exact-mask-apis" aria-label="Link to this section">#</a></h3>
 <p>The question is: Map course allowed masks to PyTorch functional SDPA,PyTorch key_padding_mask and Keras attention_mask.</p>
 <p>A framework name alone does not define boolean semantics. The exact parameter and documented shape must be recorded before translating masks.</p>
-<pre><code class="language-text">PyTorch F.scaled_dot_product_attention attn_mask bool: True participates.
+<pre class="highlighted-code"><code class="language-text">PyTorch F.scaled_dot_product_attention attn_mask bool: True participates.
 PyTorch MultiheadAttention key_padding_mask bool: True ignored.
 Keras MultiHeadAttention attention_mask: 1/True allows.
 These parameters have different shapes as well as polarity.</code></pre>
@@ -158,30 +204,30 @@ These parameters have different shapes as well as polarity.</code></pre>
 <h3 id="exercise-4-specify-evaluation-dropout">Exercise 4: Specify evaluation dropout<a class="heading-anchor" href="#exercise-4-specify-evaluation-dropout" aria-label="Link to this section">#</a></h3>
 <p>The question is: Describe why model.eval alone is insufficient if functional SDPA is called withdropout_p=.1.</p>
 <p>A functional operation receives explicit arguments. The caller must connect the module mode to those arguments; otherwise evaluation can remain stochastic.</p>
-<pre><code class="language-text">Module evaluation policy:
+<pre class="highlighted-code"><code class="language-text">Module evaluation policy:
 training=True -&gt; chosen training dropout probability
 training=False -&gt; dropout_p=0.0 passed to functional SDPA
 Do not assume the functional call reads module.training automatically.</code></pre>
 <p><strong>Expected:</strong> functional call must receive dropout_p0 for deterministic evaluation.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with functional call must receive dropout_p0 for deterministic evaluation.</p>
 <h3 id="exercise-5-design-a-cross-framework-oracle">Exercise 5: Design a cross-framework oracle<a class="heading-anchor" href="#exercise-5-design-a-cross-framework-oracle" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use zeroQ/K andV[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs.</p>
+<p>The question is: Use zeroQ/K and V[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs.</p>
 <p>The expected values come from arithmetic, not from treating one framework as infallible. A nonuniform-score case should follow to test scaling and score orientation.</p>
-<pre><code class="language-text">Input width2;scale1/sqrt2;zero scores.
+<pre class="highlighted-code"><code class="language-text">Input width2;scale1/sqrt2;zero scores.
 Legal-key counts1,2,3.
 Outputs: V0,(V0+V1)/2,(V0+V1+V2)/3.
 Compare float32 atatol1e-6 and float64 atatol1e-12.</code></pre>
-<p><strong>Expected:</strong> [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.</p>
+<p><strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]</annotation></semantics></math> within declared dtype tolerance.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]</annotation></semantics></math> within declared dtype tolerance.</p>
 <h3 id="exercise-6-preserve-optionality">Exercise 6: Preserve optionality<a class="heading-anchor" href="#exercise-6-preserve-optionality" aria-label="Link to this section">#</a></h3>
-<p>The question is: Write a verification record when onlyNumPy andPyTorch are prepared,withTensorFlow unavailable.</p>
+<p>The question is: Write a verification record when onlyNumPy and PyTorch are prepared,with TensorFlow unavailable.</p>
 <p>A comparison worksheet does not justify installing a second framework or inventing runtime evidence. Optional execution remains optional and explicitly reported.</p>
-<pre><code class="language-text">NumPy reasoning: checked separately.
+<pre class="highlighted-code"><code class="language-text">NumPy reasoning: checked separately.
 PyTorch execution: record actual receipt if run.
 TensorFlow: unavailable/unexecuted, not passed.
 llm-042 does not require llm-041.</code></pre>
-<p><strong>Expected:</strong> TensorFlowunexecuted;LLMfinalcapstoneremainsavailable.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with TensorFlowunexecuted;LLMfinalcapstoneremainsavailable.</p>
+<p><strong>Expected:</strong> TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

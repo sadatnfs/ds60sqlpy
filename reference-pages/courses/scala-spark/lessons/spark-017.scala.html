@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,74 +161,74 @@
       <h1>Spark 017</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-017.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
-<span>import org.apache.spark.sql.functions._</span>
-<span>import org.apache.spark.sql.types._</span>
-<span> </span>
-<span> </span>
-<span>object Main {</span>
-<span>  val payloadSchema = StructType(Seq(StructField(&quot;parent_id&quot;,LongType,true),StructField(&quot;items&quot;,ArrayType(StructType(Seq(StructField(&quot;sku&quot;,StringType,true),StructField(&quot;qty&quot;,LongType,true))),true),true),StructField(&quot;_corrupt_record&quot;,StringType,true)))</span>
-<span>  def rows(frame: DataFrame): Seq[String] = frame.toJSON.collect().toSeq</span>
-<span> </span>
-<span>  def parseRecords(raw: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseRecords&quot;)</span>
-<span> </span>
-<span>  def parentLedger(parsed: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parentLedger&quot;)</span>
-<span> </span>
-<span>  def children(parents: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete children&quot;)</span>
-<span> </span>
-<span>  def outerChildren(parents: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete outerChildren&quot;)</span>
-<span> </span>
-<span>  def summarizeChildren(outer: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete summarizeChildren&quot;)</span>
-<span> </span>
-<span>  def arrayRelationships(spark: SparkSession): (DataFrame,DataFrame) =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete arrayRelationships&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-017&quot;).master(&quot;local[2]&quot;)</span>
-<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
-<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
-<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
-<span>    try {</span>
-<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
-<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>      val inputSchema = StructType(Seq(StructField(&quot;source_id&quot;,LongType,false),StructField(&quot;raw&quot;,StringType,true)))</span>
-<span>      val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(</span>
-<span>       Row(1L,&quot;&quot;&quot;{&quot;parent_id&quot;:10,&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:2},{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:3}]}&quot;&quot;&quot;),</span>
-<span>       Row(2L,&quot;&quot;&quot;{&quot;parent_id&quot;:20,&quot;items&quot;:[]}&quot;&quot;&quot;),Row(3L,&quot;&quot;&quot;{&quot;parent_id&quot;:30,&quot;items&quot;:null}&quot;&quot;&quot;),</span>
-<span>       Row(4L,&quot;&quot;&quot;{&quot;parent_id&quot;:40,&quot;items&quot;:[{&quot;sku&quot;:&quot;b&quot;,&quot;qty&quot;:null}]}&quot;&quot;&quot;),</span>
-<span>       Row(5L,&quot;{bad&quot;),Row(6L,&quot;&quot;&quot;{&quot;items&quot;:[]}&quot;&quot;&quot;),Row(7L,null)),2),inputSchema)</span>
-<span>      locally {</span>
-<span>        val sample = spark.sql(&quot;SELECT array(10,20) AS values&quot;)</span>
-<span>        assert(sample.select(posexplode(col(&quot;values&quot;))).count() == 2L)</span>
-<span>        println(&quot;Two array occurrences become two child rows&quot;)</span>
-<span>      }</span>
-<span>      locally {</span>
-<span>        val sample = spark.sql(&quot;SELECT CAST(array() AS ARRAY&lt;BIGINT&gt;) AS empty_items, CAST(NULL AS ARRAY&lt;BIGINT&gt;) AS unknown_items&quot;)</span>
-<span>        assert(sample.select(explode(col(&quot;empty_items&quot;))).count() == 0L)</span>
-<span>        assert(sample.select(explode_outer(col(&quot;unknown_items&quot;))).count() == 1L)</span>
-<span>        println(&quot;An outer row can be a placeholder, not an item&quot;)</span>
-<span>      }</span>
-<span>      println(&quot;spark-017: worked examples passed; six task implementations remain&quot;)</span>
-<span>    } finally { spark.stop() }</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Parse once and retain rejection evidence. Inputs/task: Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw. Expected: Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4. Verify: Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.</span>
-<span>// Exercise 2: Record collection state before changing grain. Inputs/task: For accepted records return source_id, parent_id, items, array_state, with array_state unknown, empty or populated. Keep arrays typed and preserve the two repeated SKU occurrences. Expected: Parent 10 populated,20 empty,30 unknown,40 populated. Parent 10 has size 2;parent 40 size 1. Verify: Assert the four parent/state rows and item lengths independently of any later explode output.</span>
-<span>// Exercise 3: Flatten observed child occurrences. Inputs/task: Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a. Expected: Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children;parents 20 and 30 produce none. Verify: Assert the entire three-row occurrence list and unique(parent_id, position) count 3.</span>
-<span>// Exercise 4: Preserve parents without inventing observed children. Inputs/task: Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays. Expected: Five rows:the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL). Verify: Assert five rows, four distinct parents and exactly three nonnull generated positions.</span>
-<span>// Exercise 5: Reconcile child counts and nullable measures. Inputs/task: Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities. Expected: Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible. Verify: Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</span>
-<span>// Exercise 6: Choose Cartesian or positional array semantics. Inputs/task: For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation. Expected: Independent generators produce 6 pairs;zip produces(a, web),(b, shop),(NULL, api), three rows. Verify: Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">val</span> payloadSchema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;parent_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;items&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">ArrayType</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;sku&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;qty&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;_corrupt_record&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">rows</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>toJSON<span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSeq</span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseRecords</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseRecords&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parentLedger</span><span class="syntax-punctuation">(</span>parsed<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parentLedger&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">children</span><span class="syntax-punctuation">(</span>parents<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete children&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">outerChildren</span><span class="syntax-punctuation">(</span>parents<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete outerChildren&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">summarizeChildren</span><span class="syntax-punctuation">(</span>outer<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete summarizeChildren&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">arrayRelationships</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span><span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete arrayRelationships&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> spark <span class="syntax-operator">=</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">.</span>builder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ds60-spark-017&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.ui.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.host&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.bindAddress&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.shuffle.partitions&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;2&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.adaptive.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.session.timeZone&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;UTC&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;local-only course session&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ERROR&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> inputSchema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;source_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;raw&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">       <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:10,&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:2},{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:3}]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:20,&quot;items&quot;:[]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:30,&quot;items&quot;:null}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:40,&quot;items&quot;:[{&quot;sku&quot;:&quot;b&quot;,&quot;qty&quot;:null}]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;{bad&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">6L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;items&quot;:[]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">7L</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>inputSchema<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> sample <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;SELECT array(10,20) AS values&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>posexplode<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;values&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Two array occurrences become two child rows&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> sample <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;SELECT CAST(array() AS ARRAY&lt;BIGINT&gt;) AS empty_items, CAST(NULL AS ARRAY&lt;BIGINT&gt;) AS unknown_items&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>explode<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;empty_items&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>explode_outer<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;unknown_items&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;An outer row can be a placeholder, not an item&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-017: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> spark<span class="syntax-punctuation">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Parse once and retain rejection evidence. Inputs/task: Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw. Expected: Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4. Verify: Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Record collection state before changing grain. Inputs/task: For accepted records return source_id, parent_id, items, array_state, with array_state unknown, empty or populated. Keep arrays typed and preserve the two repeated SKU occurrences. Expected: Parent 10 populated,20 empty,30 unknown,40 populated. Parent 10 has size 2;parent 40 size 1. Verify: Assert the four parent/state rows and item lengths independently of any later explode output.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Flatten observed child occurrences. Inputs/task: Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a. Expected: Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children;parents 20 and 30 produce none. Verify: Assert the entire three-row occurrence list and unique(parent_id, position) count 3.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Preserve parents without inventing observed children. Inputs/task: Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays. Expected: Five rows:the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL). Verify: Assert five rows, four distinct parents and exactly three nonnull generated positions.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Reconcile child counts and nullable measures. Inputs/task: Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities. Expected: Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible. Verify: Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Choose Cartesian or positional array semantics. Inputs/task: For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation. Expected: Independent generators produce 6 pairs;zip produces(a, web),(b, shop),(NULL, api), three rows. Verify: Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

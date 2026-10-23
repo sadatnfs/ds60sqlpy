@@ -55,12 +55,12 @@ def test_container_public_port_retains_exact_host_origin_and_token_checks(
             connection.close()
 
     try:
-        assert server.expected_host == "127.0.0.1:80" and server.url == "http://127.0.0.1:80/"
+        assert server.expected_host == "127.0.0.1" and server.url == "http://127.0.0.1/"
         assert request("GET", "/journeys", {"Host": server.expected_host}) == 200
         assert request("GET", "/journeys", {"Host": f"127.0.0.1:{server.server_port}"}) == 400
         headers = {
             "Host": server.expected_host,
-            "Origin": "http://127.0.0.1:80",
+            "Origin": "http://127.0.0.1",
             "X-DS60-Token": server.token,
             "Content-Type": "application/json",
         }
@@ -115,7 +115,7 @@ def test_container_healthcheck_uses_public_host_on_the_internal_connection() -> 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802
             observed.append(self.headers.get("Host"))
-            self.send_response(200 if self.headers.get("Host") == "127.0.0.1:80" else 400)
+            self.send_response(200 if self.headers.get("Host") == "127.0.0.1" else 400)
             self.end_headers()
 
         def log_message(self, format: str, *args: object) -> None:
@@ -132,7 +132,7 @@ def test_container_healthcheck_uses_public_host_on_the_internal_connection() -> 
             capture_output=True,
             timeout=5,
         )
-        assert result.returncode == 0 and observed == ["127.0.0.1:80"]
+        assert result.returncode == 0 and observed == ["127.0.0.1"]
         environment["DS60_PUBLIC_PORT"] = "0"
         result = subprocess.run(
             [sys.executable, str(ROOT / "docker/healthcheck.py")],
@@ -140,7 +140,7 @@ def test_container_healthcheck_uses_public_host_on_the_internal_connection() -> 
             capture_output=True,
             timeout=5,
         )
-        assert result.returncode == 1 and observed == ["127.0.0.1:80"]
+        assert result.returncode == 1 and observed == ["127.0.0.1"]
     finally:
         server.shutdown()
         server.server_close()

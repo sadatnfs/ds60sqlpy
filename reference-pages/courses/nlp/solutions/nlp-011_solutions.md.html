@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -128,7 +174,7 @@
 <p><strong>Expected:</strong> C++ Labs occupies [0,8); empty names raise a clear error.</p>
 <h3 id="exercise-4-compute-entity-metrics">Exercise 4: Compute entity metrics<a class="heading-anchor" href="#exercise-4-compute-entity-metrics" aria-label="Link to this section">#</a></h3>
 <p>The partial Acme span is not equal to Acme Labs, so it contributes a false positive and leaves the gold organization as a false negative. Paris adds another false negative. Set comparison avoids awarding duplicate predictions extra credit. State the empty-denominator convention if extending the evaluator.</p>
-<p><strong>Expected:</strong> TP=1,FP=1,FN=2,precision=.5,recall=1/3,F1=.4.</p>
+<p><strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">T</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{TP}=1</annotation></semantics></math>,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{FP}=1</annotation></semantics></math>,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">N</mi></mrow><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\mathrm{FN}=2</annotation></semantics></math>,precision=.5,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi></mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{recall}=\frac{1}{3}</annotation></semantics></math>,F1=.4.</p>
 <h3 id="exercise-5-extract-directed-relations">Exercise 5: Extract directed relations<a class="heading-anchor" href="#exercise-5-extract-directed-relations" aria-label="Link to this section">#</a></h3>
 <p>The grammar deliberately recognizes only one unambiguous surface form. Named groups preserve role direction and raw spans. Fullmatching prevents a rumor prefix from being silently discarded. This raises precision on the authored contract at the cost of recall for paraphrases, which is a measured tradeoff rather than a hidden capability claim.</p>
 <p><strong>Expected:</strong> Roles reverse exactly; negation and rumor-prefixed sentences abstain.</p>
@@ -141,7 +187,7 @@
 <p>The executable system is an explicitly limited dictionary matcher plus a strict relation grammar over authored examples. It does not claim the general linguistic capability of a trained NER or relation model. Its narrow scope is useful because offsets, overlap, direction, negation and evaluation errors can be inspected exactly before replacing a component with a more flexible model.</p>
 <h3 id="mechanism-review-and-counterexample">Mechanism review and counterexample<a class="heading-anchor" href="#mechanism-review-and-counterexample" aria-label="Link to this section">#</a></h3>
 <p>Exact entity precision divides correctly recovered typed spans by predicted typed spans. Recall divides by gold spans. A boundary error can count as both a false positive and false negative even when most tokens match. Relaxed overlap metrics can be useful diagnostics, but they answer a different question and must be labeled separately.</p>
-<p>The fixture has three gold entities and two predictions, only one exact. That gives TP=1, FP=1, FN=2, precision=1/2, recall=1/3 and F1=2/(2+1+2)=0.4. Do not report token accuracy as if it measured correct entity extraction. Also inspect errors by type and span length, since short common names can dominate a pooled score.</p></article>
+<p>The fixture has three gold entities and two predictions, only one exact. That gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">T</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{TP}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{FP}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">N</mi></mrow><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\mathrm{FN}=2</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{precision}=\frac{1}{2}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi></mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{recall}=\frac{1}{3}</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>F</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>2</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn></mrow></mfrac><mo>=</mo><mn>0.4</mn></mrow><annotation encoding="application/x-tex">F_{1}=\frac{2}{2+1+2}=0.4</annotation></semantics></math>. Do not report token accuracy as if it measured correct entity extraction. Also inspect errors by type and span length, since short common names can dominate a pooled score.</p></article>
   </main>
 </body>
 </html>

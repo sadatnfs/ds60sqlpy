@@ -1,10 +1,10 @@
 # spark-003: Functions, arguments, and explicit return contracts
 
-Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
 
 ## Level and prerequisites
 
-Beginner; 60 minutes. Direct design prerequisites: `spark-002`. An ID in this prerequisite list may still be unpublished. Use its concept diagnostic or wait for the authored bridge; do not infer an executable prerequisite from a planning ID.
+Beginner; 60 minutes. Direct design prerequisites: `spark-002`. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
 
 Learner artifact: [spark-003.scala](../lessons/spark-003.scala). Keep [solutions](../solutions/spark-003_solutions.md) closed until an attempt or explicit reveal.
 

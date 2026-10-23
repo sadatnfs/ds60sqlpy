@@ -4,11 +4,11 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Serialization turns domain values into a representation that another process orversion can read. A format needs an explicit schema,version,encoding andsize policy. A reader should validate before allocating large buffers orconstructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default orupgrade rule. Unknown versions should not be guessed at silently.
+Serialization turns domain values into a representation that another process or version can read. A format needs an explicit schema,version,encoding and size policy. A reader should validate before allocating large buffers or constructing trusted domain objects. Schema evolution is a compatibility decision:an older version may omit a newly added field,which needs a documented default or upgrade rule. Unknown versions should not be guessed at silently.
 
-This lesson defines a small explicit binary format using DataInputStream andDataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents andan optional version2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes anddomain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.
+This lesson defines a small explicit binary format using DataInputStream and DataOutputStream. It deliberately avoids Java object deserialization for untrusted input. The format has a magic number,a version,bounded UTF-8 text,integer cents and an optional version 2 note. A version1 record receives a declared default note. The decoder rejects invalid lengths,malformed UTF-8,truncation,trailing bytes and domain violations. These checks make the data boundary visible rather than relying on a class name to imply trust.
 
-**Wire schema:** The field order,types,encoding andversion of serialized data.
+**Wire schema:** The field order,types,encoding and version of serialized data.
 
 **Schema evolution:** A declared compatibility policy between format versions.
 
@@ -18,28 +18,28 @@ This lesson defines a small explicit binary format using DataInputStream andData
 
 ## Reading the reference
 
-Write a fixed magicint andversion number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read thelength,validate it,then read exactly thatmany bytes. A CharsetDecoder withREPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents andidentifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.
+Write a fixed magicint and version number before fields. Text is UTF-8 bytes preceded by a bounded integer length. Read the length,validate it,then read exactly that many bytes. A CharsetDecoder with REPORT rejects malformed sequences instead of replacing them. The domain record validates nonnegative cents and identifier shape. Version2 adds a note;version1 decodes with the explicit defaultunlabelled.
 
-## Exercise 1: Round-trip version2 data
+## Exercise 1: Round-trip version 2 data
 
-Task: Encode accounta1,balance125,noteCafé withversion2 anddecode.
+Task: Encode account a1, balance 125, note Café with version 2 and decode.
 
-The comparison includes both domain values andtext identity. A successful bytewrite alone would not show that the reader agrees onencoding andfield order.
+The comparison includes both domain values and text identity. A successful byte write alone would not show that the reader agrees on encoding and field order.
 
 ```java
 Account record=new Account("a1",125,"Café");byte[] encoded=encode(record,2);
 assert decode(encoded).equals(record);
 ```
 
-**Expected:** equal domain record andexact Unicode note.
+**Expected:** equal domain record and exact Unicode note.
 
-**Verify:** Compare the program values or named exception with equal domain record andexact Unicode note. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with equal domain record and exact Unicode note. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Apply a version1 default
 
-Task: Encode the same core fields usingversion1,which lacksnote.
+Task: Encode the same core fields usingversion1,which lacks note.
 
-The default is an explicit compatibility rule. It should not be inferred from an emptyString orwhatever value happened to initialize a field.
+The default is an explicit compatibility rule. It should not be inferred from an emptyString or whatever value happened to initialize a field.
 
 ```java
 Account legacy=decode(encode(new Account("a1",125,"ignored by v1"),1));
@@ -52,7 +52,7 @@ assert legacy.id().equals("a1") && legacy.cents()==125 && legacy.note().equals("
 
 ## Exercise 3: Reject an unknown version
 
-Task: Change theversion bytes to99 anddecode.
+Task: Change the version bytes to99 and decode.
 
 A reader that guesses the layout of an unknown version can reinterpret bytes incorrectly while appearing to succeed.
 
@@ -62,15 +62,15 @@ try{decode(unknown);}catch(java.io.IOException expected){rejected=expected.getMe
 assert rejected;
 ```
 
-**Expected:** IOException namingversion.
+**Expected:** IOException naming version.
 
-**Verify:** Compare the program values or named exception with IOException namingversion. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with IOException naming version. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Detect truncation
 
-Task: Remove thefinalbyte from a validversion2payload.
+Task: Remove the final byte from a validversion2payload.
 
-The reader must obtain exactly the declared fieldlength. A partial field is not a valid shorter value.
+The reader must obtain exactly the declared field length. A partial field is not a valid shorter value.
 
 ```java
 boolean truncated=false;
@@ -78,15 +78,15 @@ try{decode(Arrays.copyOf(encoded,encoded.length-1));}catch(java.io.IOException e
 assert truncated;
 ```
 
-**Expected:** IOException orEOFException before returning a record.
+**Expected:** IOException or EOFException before returning a record.
 
-**Verify:** Compare the program values or named exception with IOException orEOFException before returning a record. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with IOException or EOFException before returning a record. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Reject an oversized declared text length
 
-Task: Replace thefirsttextlength withInteger.MAX_VALUE.
+Task: Replace the first text length withInteger.MAX_VALUE.
 
-Length-prefix validation is a resource boundary. Reading orallocating first andchecking afterward defeats that protection.
+Length-prefix validation is a resource boundary. Reading orallocating first and checking afterward defeats that protection.
 
 ```java
 byte[] huge=encoded.clone();java.nio.ByteBuffer.wrap(huge,6,4).putInt(Integer.MAX_VALUE);boolean bounded=false;
@@ -94,15 +94,15 @@ try{decode(huge);}catch(java.io.IOException expected){bounded=expected.getMessag
 assert bounded;
 ```
 
-**Expected:** IOException forlength before allocating thatsize.
+**Expected:** IOException for length before allocating that size.
 
-**Verify:** Compare the program values or named exception with IOException forlength before allocating thatsize. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with IOException for length before allocating that size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 6: Reject trailing data andinvalid domain state
+## Exercise 6: Reject trailing data and invalid domain state
 
-Task: Append anextra byte,then try constructing a negative-balance account.
+Task: Append an extra byte,then try constructing a negative-balance account.
 
-Format validity anddomain validity are separate gates. The fixture chooses strict trailing-byte rejection rather than an undocumented forward-compatibility policy.
+Format validity and domain validity are separate gates. The fixture chooses strict trailing-byte rejection rather than an undocumented forward-compatibility policy.
 
 ```java
 byte[] trailing=Arrays.copyOf(encoded,encoded.length+1);boolean extra=false,negative=false;
@@ -111,9 +111,9 @@ try{new Account("a1",-1,"x");}catch(IllegalArgumentException expected){negative=
 assert extra && negative;
 ```
 
-**Expected:** trailing payloadIOException;negative balanceIllegalArgumentException.
+**Expected:** trailing payload IOException; negative balance IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with trailing payloadIOException;negative balanceIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with trailing payload IOException; negative balance IllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

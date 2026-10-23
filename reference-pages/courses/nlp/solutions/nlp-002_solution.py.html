@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,78 +161,78 @@
       <h1>Nlp 002 Solution</h1>
       <p class="source-path">Generated from <code>courses/nlp/solutions/nlp-002_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Unicode representation and loss checks for the authored local fixture.&quot;&quot;&quot;</span>
-<span>from collections import defaultdict</span>
-<span>import unicodedata as ud</span>
-<span> </span>
-<span> </span>
-<span>def compatibility_groups(raw_values):</span>
-<span>    groups = defaultdict(list)</span>
-<span>    for raw in raw_values:</span>
-<span>        groups[ud.normalize(&quot;NFKC&quot;, raw)].append(raw)</span>
-<span>    return dict(groups)</span>
-<span> </span>
-<span> </span>
-<span>def checked_span(raw, start, end):</span>
-<span>    if type(start) is not int or type(end) is not int or not 0 &lt;= start &lt;= end &lt;= len(raw):</span>
-<span>        raise ValueError(&quot;Offsets must be valid code-point positions in this exact text version.&quot;)</span>
-<span>    return raw[start:end]</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    composed, decomposed = &quot;café&quot;, &quot;cafe\u0301&quot;</span>
-<span>    # Exercise 1: lengths are observations of different representations.</span>
-<span>    assert composed != decomposed</span>
-<span>    assert (len(composed), len(decomposed)) == (4, 5)</span>
-<span>    assert (len(composed.encode(&quot;utf-8&quot;)), len(decomposed.encode(&quot;utf-8&quot;))) == (5, 6)</span>
-<span> </span>
-<span>    # Exercise 2: canonical equivalence and idempotence.</span>
-<span>    assert ud.normalize(&quot;NFC&quot;, composed) == ud.normalize(&quot;NFC&quot;, decomposed)</span>
-<span>    assert ud.normalize(&quot;NFD&quot;, composed) == ud.normalize(&quot;NFD&quot;, decomposed)</span>
-<span>    assert len(ud.normalize(&quot;NFC&quot;, decomposed)) == 4</span>
-<span>    assert len(ud.normalize(&quot;NFD&quot;, composed)) == 5</span>
-<span>    for form in (&quot;NFC&quot;, &quot;NFD&quot;, &quot;NFKC&quot;, &quot;NFKD&quot;):</span>
-<span>        for raw in (composed, decomposed, &quot;① ﬁ Ａ&quot;, &quot;Straße&quot;, &quot;👩‍💻&quot;):</span>
-<span>            once = ud.normalize(form, raw)</span>
-<span>            assert ud.normalize(form, once) == once</span>
-<span> </span>
-<span>    # Exercise 3: retain the preimages of a many-to-one transformation.</span>
-<span>    raw_values = [&quot;1&quot;, &quot;①&quot;, composed, decomposed]</span>
-<span>    assert compatibility_groups(raw_values) == {&quot;1&quot;: [&quot;1&quot;, &quot;①&quot;], &quot;café&quot;: [composed, decomposed]}</span>
-<span>    assert raw_values == [&quot;1&quot;, &quot;①&quot;, composed, decomposed]</span>
-<span> </span>
-<span>    # Exercise 4: matching forms are not lossless display forms.</span>
-<span>    assert &quot;Straße&quot;.casefold() == &quot;strasse&quot; and len(&quot;Straße&quot;.casefold()) == 7</span>
-<span>    assert ud.normalize(&quot;NFC&quot;, &quot;a&quot;) != ud.normalize(&quot;NFC&quot;, &quot;\u0430&quot;)</span>
-<span> </span>
-<span>    # Exercise 5: corruption is explicit, and original bytes survive.</span>
-<span>    raw_bytes = b&quot;caf\xff&quot;</span>
-<span>    try:</span>
-<span>        raw_bytes.decode(&quot;utf-8&quot;, errors=&quot;strict&quot;)</span>
-<span>    except UnicodeDecodeError as error:</span>
-<span>        assert (error.start, error.end) == (3, 4)</span>
-<span>    else:</span>
-<span>        raise AssertionError(&quot;Invalid UTF-8 was accepted.&quot;)</span>
-<span>    assert raw_bytes.decode(&quot;utf-8&quot;, errors=&quot;replace&quot;) == &quot;caf\ufffd&quot;</span>
-<span>    assert raw_bytes == b&quot;caf\xff&quot;</span>
-<span> </span>
-<span>    # Exercise 6: offsets refer to a version, not an abstract visual word.</span>
-<span>    assert checked_span(decomposed, 0, 5) == decomposed</span>
-<span>    normalized = ud.normalize(&quot;NFC&quot;, decomposed)</span>
-<span>    try:</span>
-<span>        checked_span(normalized, 0, 5)</span>
-<span>    except ValueError:</span>
-<span>        pass</span>
-<span>    else:</span>
-<span>        raise AssertionError(&quot;An offset from the wrong text version was accepted.&quot;)</span>
-<span>    assert &quot;Straße&quot;[4:5] == &quot;ß&quot;</span>
-<span>    assert &quot;Straße&quot;.casefold()[4:5] == &quot;s&quot; != &quot;ß&quot;.casefold()</span>
-<span>    return {&quot;status&quot;: &quot;passed&quot;, &quot;automated_exercises&quot;: 6}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Unicode representation and loss checks for the authored local fixture.&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> defaultdict</span>
+<span class="source-line"><span class="syntax-keyword">import</span> unicodedata <span class="syntax-keyword">as</span> ud</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compatibility_groups</span><span class="syntax-punctuation">(</span>raw_values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    groups <span class="syntax-operator">=</span> defaultdict<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> raw <span class="syntax-operator">in</span> raw_values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        groups<span class="syntax-punctuation">[</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFKC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">checked_span</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>end<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> end <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Offsets must be valid code-point positions in this exact text version.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> raw<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    composed<span class="syntax-punctuation">,</span> decomposed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cafe</span><span class="syntax-string">\u0301</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: lengths are observations of different representations.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> composed <span class="syntax-operator">!=</span> decomposed</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>composed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>composed<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>decomposed<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: canonical equivalence and idempotence.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> form <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">NFD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">NFKC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">NFKD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> raw <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>composed<span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">① ﬁ Ａ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">👩‍💻</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            once <span class="syntax-operator">=</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span>form<span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span>form<span class="syntax-punctuation">,</span> once<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> once</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: retain the preimages of a many-to-one transformation.</span></span>
+<span class="source-line">    raw_values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">①</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> compatibility_groups<span class="syntax-punctuation">(</span>raw_values<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">①</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>composed<span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> raw_values <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">①</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: matching forms are not lossless display forms.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">strasse</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\u0430</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: corruption is explicit, and original bytes survive.</span></span>
+<span class="source-line">    raw_bytes <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">caf</span><span class="syntax-string">\xff</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        raw_bytes<span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">strict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> UnicodeDecodeError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>error<span class="syntax-operator">.</span>start<span class="syntax-punctuation">,</span> error<span class="syntax-operator">.</span>end<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Invalid UTF-8 was accepted.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> raw_bytes<span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">replace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">caf</span><span class="syntax-string">\ufffd</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> raw_bytes <span class="syntax-operator">==</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">caf</span><span class="syntax-string">\xff</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: offsets refer to a version, not an abstract visual word.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> checked_span<span class="syntax-punctuation">(</span>decomposed<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> decomposed</span>
+<span class="source-line">    normalized <span class="syntax-operator">=</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        checked_span<span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">An offset from the wrong text version was accepted.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ß</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">s</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ß</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">automated_exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

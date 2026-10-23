@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>tf-013</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Choose target shape and loss from the task rather than the final layer name. The central investigation is concrete: Contrast one-of-three integer targets with three independent binary labels; compute cross entropy for uniform three-class logits. The finish condition is Uniform three-class CE=log(3); sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Choose target shape and loss from the task rather than the final layer name. The central investigation is concrete: Contrast one-of-three integer targets with three independent binary labels; compute cross entropy for uniform three-class logits. The finish condition is Uniform three-class <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{CE}=\log(3)</annotation></semantics></math>; sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1,0,1] names two independently present labels. Converting one task into the other changes the meaning of the data.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -127,40 +173,40 @@
 <p><strong>Multilabel:</strong> Independent binary outcomes that may coexist.</p>
 <p><strong>Sparse target:</strong> An integer index of the observed class.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>tf-014</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-014/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-014</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-014/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Sparse categorical cross entropy takes class indices with shape(batch,), alongside logits shaped(batch,classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.</p>
 <h3 id="let-the-target-s-meaning-determine-the-output-geometry">Let the target&#x27;s meaning determine the output geometry<a class="heading-anchor" href="#let-the-target-s-meaning-determine-the-output-geometry" aria-label="Link to this section">#</a></h3>
-<p>Multiclass classification assumes one selected class among C alternatives. The model produces C competing logits and softmax normalizes their probability mass to one. With three equal logits, each class has probability 1/3 and the negative log probability of the selected class is log(3).</p>
+<p>Multiclass classification assumes one selected class among C alternatives. The model produces C competing logits and softmax normalizes their probability mass to one. With three equal logits, each class has probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> and the negative log probability of the selected class is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</p>
 <p>Multilabel classification permits several labels to be true at once. Three zero logits passed through independent sigmoids produce three probabilities of 0.5 whose sum is 1.5. That sum is valid because the labels are not mutually exclusive outcomes of one categorical draw. Replacing those sigmoids with softmax would force labels to compete and change the modeling assumptions.</p>
 <p>Target shapes encode part of this distinction. Sparse categorical targets use one class index per example, often shape (B,). A multilabel target uses one indicator for each example-label pair, shape (B,C). A categorical one-hot target also has shape (B,C), so shape alone cannot identify the task: its row constraints and intended probability distribution must agree too.</p>
-<p>Reduction defines the reported unit. For two examples and three independent binary labels with zero logits, six binary losses each equal log(2). Their sum is 6 log(2), and their mean is log(2). If some labels are unobserved, count only the intended active targets; treating an unknown label as a negative creates supervision that the data did not supply.</p>
+<p>Reduction defines the reported unit. For two examples and three independent binary labels with zero logits, six binary losses each equal <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>. Their sum is 6 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>, and their mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>. If some labels are unobserved, count only the intended active targets; treating an unknown label as a negative creates supervision that the data did not supply.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-uniform-class-uncertainty">Example A: Uniform class uncertainty<a class="heading-anchor" href="#example-a-uniform-class-uncertainty" aria-label="Link to this section">#</a></h4>
 <p>Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log3, independent of which class index is chosen.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1],logits=logits)
-np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> loss log(3).</p>
+logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sparse_softmax_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>logits<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</p>
 <h4 id="example-b-independent-labels">Example B: Independent labels<a class="heading-anchor" href="#example-b-independent-labels" aria-label="Link to this section">#</a></h4>
 <p>Independent binary probabilities do not need to sum to one. Forcing a softmax here would make the two present labels compete for probability mass.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1],logits=logits)
-np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)
-probs=tf.math.sigmoid(logits).numpy()
-np.testing.assert_array_equal(probs,[[.5,.5,.5]])
-assert probs.sum()==1.5</code></pre>
+logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sparse_softmax_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>logits<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+probs<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>probs<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> probs<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1.5</span></code></pre>
 <p><strong>Expected:</strong> three probabilities.5 with total1.5.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Uniform three-class CE=log(3); sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Uniform three-class <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{CE}=\log(3)</annotation></semantics></math>; sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Uniform class uncertainty.</strong> Compute sparse cross entropy for target1 and three zero logits. <strong>Expected:</strong> loss log(3). <strong>Verify:</strong> Save the assertion results for exercise 1, including loss log(3).</li>
+<li><strong>Uniform class uncertainty.</strong> Compute sparse cross entropy for target1 and three zero logits. <strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>. <strong>Verify:</strong> Save the assertion results for exercise 1, including loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</li>
 </ol>
 <ol>
 <li><strong>Independent labels.</strong> Calculate sigmoid probabilities for three zero logits and labels[1,0,1]. <strong>Expected:</strong> three probabilities.5 with total1.5. <strong>Verify:</strong> Save the assertion results for exercise 2, including three probabilities.5 with total1.5.</li>
@@ -188,7 +234,7 @@ assert probs.sum()==1.5</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://www.tensorflow.org/guide">TensorFlow guide</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-014, Multiclass and multilabel are different tasks.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-014, Multiclass and multilabel are different tasks.
 Read courses/deep-learning-tensorflow/guides/tf-014.md and courses/deep-learning-tensorflow/lessons/tf-014.py. Direct prerequisites: `tf-013`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

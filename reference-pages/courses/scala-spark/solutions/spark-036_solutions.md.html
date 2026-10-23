@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,77 +167,77 @@
 <h4 id="exercise-1-define-canonical-bounded-microbatch-content">Exercise 1: Define canonical bounded microbatch content<a class="heading-anchor" href="#exercise-1-define-canonical-bounded-microbatch-content" aria-label="Link to this section">#</a></h4>
 <p>Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows;return sorted id, cents newline records preserving multiplicity.</p>
 <p><strong>Expected:</strong> Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.</p>
-<pre><code class="language-scala">def encodeBatch(frame: DataFrame): String = {
-  canonicalBatch(frame)
-}</code></pre>
-<pre><code class="language-python">def encode_batch(frame):
-    return canonical_batch(frame)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">encodeBatch</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  canonicalBatch<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">encode_batch</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> canonical_batch<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span></code></pre>
 <p>Canonical bytes make a retry comparison independent of task order. Validation and a fixed eight-row limit make the driver collection deliberate. A digest is computed only after the schema and domain contract holds. Repeated equal rows remain repeated source occurrences, so canonicalization does not secretly implement business-event deduplication.</p>
 <p><strong>Verification evidence:</strong> Compare exact bytes and reject NULL cents before publication.</p>
 <h4 id="exercise-2-publish-one-logical-batch-idempotently">Exercise 2: Publish one logical batch idempotently<a class="heading-anchor" href="#exercise-2-publish-one-logical-batch-idempotently" aria-label="Link to this section">#</a></h4>
 <p>Publish the same canonical content twice under identity manual-v1 and batch 7. Compare the existing receipt instead of appending.</p>
 <p><strong>Expected:</strong> First call publishes true;second returns false;exactly 2 logical rows remain.</p>
-<pre><code class="language-scala">def publishOnce(root: Path,identity: String,batchId: Long,text: String): Boolean = {
-  publishBatch(root,identity,batchId,text,false)
-}</code></pre>
-<pre><code class="language-python">def publish_once(root,identity,batch_id,text):
-    return publish_batch(root,identity,batch_id,text,False)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">publishOnce</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>identity<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">,</span>batchId<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Boolean</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  publishBatch<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>identity<span class="syntax-punctuation">,</span>batchId<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">publish_once</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>identity<span class="syntax-punctuation">,</span>batch_id<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> publish_batch<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>identity<span class="syntax-punctuation">,</span>batch_id<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The local commit file contains both data and the batch identity, digest together. Its atomic rename is the visibility boundary. A repeated call with identical content is a no-op;the sink does not add a second copy. This assumes a single writer and the prepared same-filesystem rename semantics, not distributed transaction coordination or power-loss durability.</p>
 <p><strong>Verification evidence:</strong> Assert return values, unchanged receipt bytes and one batch file.</p>
 <h4 id="exercise-3-inject-a-real-callback-failure-before-publication">Exercise 3: Inject a real callback failure before publication<a class="heading-anchor" href="#exercise-3-inject-a-real-callback-failure-before-publication" aria-label="Link to this section">#</a></h4>
 <p>Run the actual foreachBatch query with failure after staging and before rename. Retain the wrapped streaming exception and attempted batch ID.</p>
 <p><strong>Expected:</strong> The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0.</p>
-<pre><code class="language-scala">def failCallback(spark: SparkSession,input: Path,checkpoint: Path,sink: Path): Unit = {
-  var observed=false
-  try runForeach(spark,input,checkpoint,sink,&quot;stream-v1&quot;,true) catch { case e: org.apache.spark.sql.streaming.StreamingQueryException if e.toString.contains(&quot;injected_before_publication&quot;) =&gt; observed=true }
-  require(observed,&quot;Expected injected streaming failure&quot;)
-}</code></pre>
-<pre><code class="language-python">def fail_callback(spark,input_path,checkpoint,sink):
-    from pyspark.errors import StreamingQueryException
-    try:
-        run_foreach(spark,input_path,checkpoint,sink,&quot;stream-v1&quot;,True)
-    except StreamingQueryException as error:
-        if &quot;injected_before_publication&quot; not in str(error):raise
-    else:
-        raise AssertionError(&quot;Expected injected streaming failure&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">failCallback</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">var</span> observed<span class="syntax-operator">=</span><span class="syntax-keyword">false</span>
+  <span class="syntax-keyword">try</span> runForeach<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;stream-v1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> e<span class="syntax-punctuation">:</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-class">StreamingQueryException</span> <span class="syntax-keyword">if</span> e<span class="syntax-punctuation">.</span>toString<span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;injected_before_publication&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> observed<span class="syntax-operator">=</span><span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span>
+  require<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;Expected injected streaming failure&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fail_callback</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">from</span> pyspark.errors <span class="syntax-keyword">import</span> StreamingQueryException
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        run_foreach<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">stream-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> StreamingQueryException <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-string">&quot;</span><span class="syntax-string">injected_before_publication</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected injected streaming failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>This is an actual streaming callback failure, not only a direct helper exception. The staged file never becomes a visible batch file, and cleanup removes its unpublished temporary file. The source offset may have been recorded before failure, while completion has not been committed. Letting the exception escape is essential so the compatible restart retries the batch.</p>
 <p><strong>Verification evidence:</strong> Check the exception marker, empty published rows and inactive query.</p>
 <h4 id="exercise-4-recover-the-same-checkpoint-and-observe-replay">Exercise 4: Recover the same checkpoint and observe replay<a class="heading-anchor" href="#exercise-4-recover-the-same-checkpoint-and-observe-replay" aria-label="Link to this section">#</a></h4>
 <p>Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs.</p>
 <p><strong>Expected:</strong> Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes.</p>
-<pre><code class="language-scala">def recoverCallback(spark: SparkSession,input: Path,checkpoint: Path,sink: Path): RunReceipt = {
-  runForeach(spark,input,checkpoint,sink,&quot;stream-v1&quot;,false)
-}</code></pre>
-<pre><code class="language-python">def recover_callback(spark,input_path,checkpoint,sink):
-    return run_foreach(spark,input_path,checkpoint,sink,&quot;stream-v1&quot;,False)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">recoverCallback</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">RunReceipt</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  runForeach<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;stream-v1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">recover_callback</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> run_foreach<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span>checkpoint<span class="syntax-punctuation">,</span>sink<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">stream-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The repeated batch ID is direct evidence that callback delivery can repeat. The sink key is stable across runs, so replay refers to the same logical work. A key based on runId would change after restart and defeat this protection. The application-defined namespace is also bound to its source/checkpoint/schema contract to reject accidental reuse for an unrelated query.</p>
 <p><strong>Verification evidence:</strong> Assert attempt sequence 0,0, exact rows and corresponding identities.</p>
 <h4 id="exercise-5-expose-a-non-idempotent-append-counterexample">Exercise 5: Expose a non-idempotent append counterexample<a class="heading-anchor" href="#exercise-5-expose-a-non-idempotent-append-counterexample" aria-label="Link to this section">#</a></h4>
 <p>Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch.</p>
 <p><strong>Expected:</strong> Unsafe append has 4 row occurrences;the committed batch remains 2.</p>
-<pre><code class="language-scala">def unsafeAppend(path: Path,text: String): Unit = {
-  Files.writeString(path,text,StandardCharsets.UTF_8,StandardOpenOption.CREATE,StandardOpenOption.APPEND)
-  ()
-}</code></pre>
-<pre><code class="language-python">def unsafe_append(path,text):
-    with path.open(&quot;a&quot;,encoding=&quot;utf-8&quot;) as handle:handle.write(text)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">unsafeAppend</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>writeString<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">,</span><span class="syntax-class">StandardCharsets</span><span class="syntax-punctuation">.</span><span class="syntax-class">UTF_8</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">.</span><span class="syntax-class">CREATE</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">.</span><span class="syntax-class">APPEND</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">unsafe_append</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>handle<span class="syntax-operator">.</span>write<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></code></pre>
 <p>This intentionally unsafe local side effect is isolated from the real sink. Its duplicate result does not depend on a race or random timing;two deliveries visibly append two copies. The counterexample shows why a successful callback or checkpoint configuration cannot magically make a non-idempotent external operation exactly once.</p>
 <p><strong>Verification evidence:</strong> Compare exact repeated lines and preserve the unsafe file as a separate diagnostic until owned cleanup.</p>
 <h4 id="exercise-6-reject-identity-collisions-and-admit-the-next-batch">Exercise 6: Reject identity collisions and admit the next batch<a class="heading-anchor" href="#exercise-6-reject-identity-collisions-and-admit-the-next-batch" aria-label="Link to this section">#</a></h4>
 <p>Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.</p>
 <p><strong>Expected:</strong> The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.</p>
-<pre><code class="language-scala">def rejectCollision(root: Path,text: String): Unit = {
-  var rejected=false
-  try publishBatch(root,&quot;manual-v1&quot;,7L,text+&quot;9,999\n&quot;,false) catch { case _: IllegalArgumentException =&gt; rejected=true }
-  require(rejected)
-}</code></pre>
-<pre><code class="language-python">def reject_collision(root,text):
-    try:
-        publish_batch(root,&quot;manual-v1&quot;,7,text+&quot;9,999\n&quot;,False)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(&quot;Changed content reused a committed batch key&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">rejectCollision</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">var</span> rejected<span class="syntax-operator">=</span><span class="syntax-keyword">false</span>
+  <span class="syntax-keyword">try</span> publishBatch<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;manual-v1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">7L</span><span class="syntax-punctuation">,</span>text<span class="syntax-operator">+</span><span class="syntax-string">&quot;9,999\n&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">case</span> _: <span class="syntax-class">IllegalArgumentException</span> <span class="syntax-operator">=&gt;</span> rejected<span class="syntax-operator">=</span><span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span>
+  require<span class="syntax-punctuation">(</span>rejected<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">reject_collision</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        publish_batch<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">manual-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>text<span class="syntax-operator">+</span><span class="syntax-string">&quot;</span><span class="syntax-string">9,999</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">pass</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Changed content reused a committed batch key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Idempotency is a content-aware identity rule, not unconditional suppression of anything with a repeated number. A collision signals incompatible reuse or corruption and must not silently overwrite the committed result. The subsequent real microbatch demonstrates that the sink can accept new logical work while maintaining replay safety for old work.</p>
 <p><strong>Verification evidence:</strong> Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>

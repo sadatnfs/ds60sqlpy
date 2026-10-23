@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -368,11 +414,11 @@
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run the learner artifact. Its baseline returns the first value encountered for a second time, but repeatedly scans prefixes.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_perf_01_measurement_optimization.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_perf_01_measurement_optimization<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_perf_01_measurement_optimization.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_perf_01_measurement_optimization.py</code></pre>
 <p>The reference path is:</p>
-<pre><code class="language-text">representative values
+<pre class="highlighted-code"><code class="language-text">representative values
     -&gt; prove baseline/candidate equivalence
     -&gt; timeit repeated samples
     -&gt; cProfile hotspot report
@@ -381,16 +427,18 @@
     -&gt; keep, measure, or optimize</code></pre>
 <p>Run the full local demonstration:</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\solutions\py_perf_01_measurement_optimization_solution.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>py_perf_01_measurement_optimization_solution<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_perf_01_measurement_optimization_solution.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/solutions/py_perf_01_measurement_optimization_solution.py</code></pre>
 <p>Numbers will differ by machine. Compare report structure and conclusions about where work occurs, not exact seconds.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_perf_01_measurement_optimization.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_perf_01_measurement_optimization<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_perf_01_measurement_optimization.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_perf_01_measurement_optimization.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -402,41 +450,41 @@
 <li><strong>scale curve + budget:</strong> measures several input sizes and checks latency/memory against an explicit threshold.</li>
 </ul>
 <h5 id="guide--micro-example-a-report-repeat-timing-instead-of-one-lucky-run">Micro-example A — report repeat timing instead of one lucky run<a class="heading-anchor" href="#guide--micro-example-a-report-repeat-timing-instead-of-one-lucky-run" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import statistics
-import timeit
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> statistics
+<span class="syntax-keyword">import</span> timeit
 
-samples = timeit.repeat(
-    &quot;sum(range(10_000))&quot;,
-    repeat=7,
-    number=200,
-)
-report = {
-    &quot;median_seconds&quot;: statistics.median(samples),
-    &quot;min_seconds&quot;: min(samples),
-    &quot;max_seconds&quot;: max(samples),
-}
-print(report)
-assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</code></pre>
+samples <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">sum(range(10_000))</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    repeat<span class="syntax-operator">=</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>
+    number<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">median_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> statistics<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">min_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">max_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">min_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">median_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Repeated timings vary; median and range reveal noise that one measurement hides.</p>
 <p><strong>Why it matters:</strong> The setup/workload matches the real bottleneck and <code>number=200</code> is included consistently in interpretation.</p>
 <h5 id="guide--micro-example-b-contrast-quadratic-and-linear-duplicate-detection">Micro-example B — contrast quadratic and linear duplicate detection<a class="heading-anchor" href="#guide--micro-example-b-contrast-quadratic-and-linear-duplicate-detection" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">def has_duplicate_quadratic(values):
-    return any(values[i] in values[:i] for i in range(len(values)))
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">has_duplicate_quadratic</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-operator">in</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>i<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
-def has_duplicate_linear(values):
-    seen = set()
-    for value in values:
-        if value in seen:
-            return True
-        seen.add(value)
-    return False
+<span class="syntax-keyword">def</span> <span class="syntax-function">has_duplicate_linear</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    seen <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">return</span> <span class="syntax-keyword">True</span>
+        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">False</span>
 
 
-for size in (100, 1_000):
-    data = list(range(size))
-    assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False
-print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
+<span class="syntax-keyword">for</span> size <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    data <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> has_duplicate_quadratic<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> has_duplicate_linear<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">False</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">both implementations agree on measured inputs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Both functions preserve the Boolean contract, while the set-based design has expected linear rather than quadratic growth.</p>
 <p><strong>Why it matters:</strong> Values are hashable and set memory/order semantics are acceptable.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -508,7 +556,7 @@ print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
 <p><strong>Verify:</strong> diagnose warmup, GC, and environment noise — measure cold import/first call separately from steady state; repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <h5 id="guide--exercise-12-trade-algorithm-speed-for-memory">Exercise 12 — trade algorithm speed for memory<a class="heading-anchor" href="#guide--exercise-12-trade-algorithm-speed-for-memory" aria-label="Link to this section">#</a></h5>
 <p>Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
-<p><strong>Progressive hint:</strong> An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.</p>
+<p><strong>Progressive hint:</strong> An algorithm with lower expected time can retain <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math> state. Alternative semantics or external sorting must be stated honestly.</p>
 <p><strong>Verify:</strong> trade algorithm speed for memory — compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget; preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
 <h5 id="guide--exercise-13-test-vectorized-dtype-boundaries">Exercise 13 — test vectorized dtype boundaries<a class="heading-anchor" href="#guide--exercise-13-test-vectorized-dtype-boundaries" aria-label="Link to this section">#</a></h5>
 <p>Compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow. Detect silent overflow and choose a validated dtype.</p>
@@ -548,10 +596,10 @@ print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
 <li>No benchmark, profiler, or Hypothesis cache remains in the repository.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_perf_01_measurement_optimization -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_perf_01_measurement_optimization -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_perf_01_measurement_optimization -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_perf_01_measurement_optimization -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>A toy input drives the decision:</strong> workload shape or size is not representative.</li>
@@ -569,7 +617,7 @@ print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
 <p>Apply the measurement record to one capstone hotspot and keep the before/after correctness evidence. Combine with <code>python-pro-02</code> when processes or threads are considered, and with <code>python-data-01</code> when columnar/vectorized execution changes the data boundary.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-perf-01` — Measurement-first performance engineering.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-perf-01` — Measurement-first performance engineering.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize measurement design, complexity, profiling, and performance budgets. Use exactly these maintained learner materials:
@@ -628,287 +676,287 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-perf-01 learner lab: measurement-first optimization.</span>
-<span> </span>
-<span>Professional learner deep dive (python-perf-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Performance engineering begins with a user-visible budget and a reproducible workload. Wall-</span>
-<span>clock timing includes noise from warm-up, caching, scheduling, CPU frequency, allocation, and</span>
-<span>I/O. Repeat measurements, report a distribution, and keep correctness checks beside the</span>
-<span>benchmark.  Profiling locates where time or memory is spent; algorithmic analysis explains how</span>
-<span>cost grows. Optimize the measured bottleneck, then rerun correctness and end-to-end evidence.</span>
-<span>Faster code that changes results, ordering, errors, or resource bounds is a regression.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* benchmark contract: fixes data size/distribution, environment, warm-up, repetitions,</span>
-<span>  statistic, and correctness invariant.</span>
-<span>* profile → hypothesis → one change: connects an observed hotspot to a scoped optimization</span>
-<span>  rather than guessing.</span>
-<span>* scale curve + budget: measures several input sizes and checks latency/memory against an</span>
-<span>  explicit threshold.</span>
-<span> </span>
-<span>Micro-example A — report repeat timing instead of one lucky run::</span>
-<span> </span>
-<span>    import statistics</span>
-<span>    import timeit</span>
-<span> </span>
-<span>    samples = timeit.repeat(</span>
-<span>        &quot;sum(range(10_000))&quot;,</span>
-<span>        repeat=7,</span>
-<span>        number=200,</span>
-<span>    )</span>
-<span>    report = {</span>
-<span>        &quot;median_seconds&quot;: statistics.median(samples),</span>
-<span>        &quot;min_seconds&quot;: min(samples),</span>
-<span>        &quot;max_seconds&quot;: max(samples),</span>
-<span>    }</span>
-<span>    print(report)</span>
-<span>    assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</span>
-<span> </span>
-<span>Expected: Repeated timings vary; median and range reveal noise that one measurement hides.</span>
-<span> </span>
-<span>Micro-example B — contrast quadratic and linear duplicate detection::</span>
-<span> </span>
-<span>    def has_duplicate_quadratic(values):</span>
-<span>        return any(values[i] in values[:i] for i in range(len(values)))</span>
-<span> </span>
-<span>    def has_duplicate_linear(values):</span>
-<span>        seen = set()</span>
-<span>        for value in values:</span>
-<span>            if value in seen:</span>
-<span>                return True</span>
-<span>            seen.add(value)</span>
-<span>        return False</span>
-<span> </span>
-<span>    for size in (100, 1_000):</span>
-<span>        data = list(range(size))</span>
-<span>        assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False</span>
-<span>    print(&quot;both implementations agree on measured inputs&quot;)</span>
-<span> </span>
-<span>Expected: Both functions preserve the Boolean contract, while the set-based design has expected</span>
-<span>          linear rather than quadratic growth.</span>
-<span> </span>
-<span>Debugging rule: Reproduce the workload, record environment, profile CPU/memory/I/O, validate</span>
-<span>                outputs, change one hotspot, and compare repeated end-to-end distributions.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable, Sequence</span>
-<span>from typing import Literal</span>
-<span> </span>
-<span>Decision = Literal[</span>
-<span>    &quot;fix-correctness&quot;,</span>
-<span>    &quot;reduce-memory&quot;,</span>
-<span>    &quot;reduce-transfer&quot;,</span>
-<span>    &quot;optimize-hotspot&quot;,</span>
-<span>    &quot;keep-current&quot;,</span>
-<span>]</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate_linear(values: Sequence[int]) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;Return the first value encountered for a second time.</span>
-<span> </span>
-<span>    TODO: preserve semantics while replacing repeated prefix scans with a set.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete first_duplicate_linear&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def estimated_transfer_bytes(</span>
-<span>    payload_bytes: int,</span>
-<span>    *,</span>
-<span>    workers: int,</span>
-<span>    copies_per_worker: int,</span>
-<span>) -&gt; int:</span>
-<span>    &quot;&quot;&quot;TODO: validate nonnegative inputs and estimate copied process bytes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete estimated_transfer_bytes&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def choose_next_step(</span>
-<span>    *,</span>
-<span>    equivalent: bool,</span>
-<span>    peak_bytes: int,</span>
-<span>    memory_budget_bytes: int,</span>
-<span>    transfer_fraction: float,</span>
-<span>    hotspot_fraction: float,</span>
-<span>) -&gt; Decision:</span>
-<span>    &quot;&quot;&quot;TODO: apply the guide&#x27;s deterministic evidence-priority policy.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete choose_next_step&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate_quadratic(values: Sequence[int]) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;Worked baseline whose repeated prefix membership is O(n squared).&quot;&quot;&quot;</span>
-<span> </span>
-<span>    for index, value in enumerate(values):</span>
-<span>        if value in values[:index]:</span>
-<span>            return value</span>
-<span>    return None</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    workload = [4, 1, 3, 2, 3, 4]</span>
-<span>    print(&quot;Worked baseline duplicate:&quot;, first_duplicate_quadratic(workload))</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;linear equivalent&quot;, lambda: first_duplicate_linear(workload)),</span>
-<span>        (</span>
-<span>            &quot;process transfer estimate&quot;,</span>
-<span>            lambda: estimated_transfer_bytes(1_024, workers=4, copies_per_worker=2),</span>
-<span>        ),</span>
-<span>        (</span>
-<span>            &quot;evidence decision&quot;,</span>
-<span>            lambda: choose_next_step(</span>
-<span>                equivalent=True,</span>
-<span>                peak_bytes=100,</span>
-<span>                memory_budget_bytes=1_000,</span>
-<span>                transfer_fraction=0.1,</span>
-<span>                hotspot_fraction=0.2,</span>
-<span>            ),</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_perf_01_measurement_optimization.md</span>
-<span>#</span>
-<span># Exercise 1 — Define semantics before speed</span>
-<span># Prompt: For `[4, 1, 3, 2, 3, 4]`, the answer is `3`: the duplicate whose *second*</span>
-<span># occurrence appears first. Complete `first_duplicate_linear` with a set and prove</span>
-<span># equivalence for empty, unique, immediate, and competing duplicates.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Build a representative timing plan</span>
-<span># Prompt: Choose a workload size large enough to rise above timer noise but small enough</span>
-<span># for quick study. Warm up separately, then collect at least five repeated batches with</span>
-<span># `timeit`. Record Python version, platform, input size, and plan. Do not assert</span>
-<span># “candidate &lt; baseline” in the test suite. CI hosts, antivirus, power state, and</span>
-<span># schedulers make that flaky.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Ask cProfile a different question</span>
-<span># Prompt: Profile one complete representative call and sort by cumulative time. Locate the</span>
-<span># call path, not just the leaf with the largest self time. Reduce the workload if</span>
-<span># profiling overhead dominates, and do not compare profiled seconds directly with</span>
-<span># unprofiled `timeit` seconds.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Measure allocation pressure</span>
-<span># Prompt: Compare materialized-list and generator sums with `tracemalloc`. Assert equal</span>
-<span># results and report bounds (`peak &gt;= current &gt;= 0`). Explain why `tracemalloc` may not</span>
-<span># see memory allocated inside every native library.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Compare optional vectorization</span>
-<span># Prompt: With NumPy installed, compare a Python loop with `np.square(array).sum()`.</span>
-<span># Include conversion from Python values when that conversion exists in the real workflow.</span>
-<span># Small input can favor the loop; already-resident large arrays can favor vectorized</span>
-<span># native work. Measure both representative cases.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Model process transfer</span>
-<span># Prompt: Serialize a safe local JSON payload and measure its byte length. Complete</span>
-<span># `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload</span>
-<span># equivalents before computation. Real process protocols may add framing, copies, or</span>
-<span># shared-memory complexity.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — Evaluate caching</span>
-<span># Prompt: Use `cached_fibonacci.cache_info()` to observe hits. Then evaluate a real</span>
-<span># candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules,</span>
-<span># - key cardinality, and - whether retained objects prevent memory release. Caching a low-</span>
-<span># reuse, high-cardinality result can make performance worse.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — Bound native/FFI work</span>
-<span># Prompt: Use the policy to prefer an available algorithm improvement. If a measured</span>
-<span># hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++</span>
-<span># extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety</span>
-<span># obligations before choosing one.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — Apply the evidence decision</span>
-<span># Prompt: Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2.</span>
-<span># reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4.</span>
-<span># optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation.</span>
-<span># Thresholds are a transparent lesson policy, not universal laws. Return the evidence and</span>
-<span># selected action so a reviewer can reproduce the decision.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — compare timing distributions</span>
-<span># Prompt: Run interleaved repeated batches for baseline and candidate, report median,</span>
-<span># spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed</span>
-<span># assertion.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — diagnose warmup, GC, and environment noise</span>
-<span># Prompt: Measure cold import/first call separately from steady state. Repeat with garbage</span>
-<span># collection controlled, background load noted, and process affinity/power assumptions</span>
-<span># documented rather than hidden.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — trade algorithm speed for memory</span>
-<span># Prompt: Compare set-based first-duplicate search with a sorted/indexed alternative under</span>
-<span># a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report</span>
-<span># time/peak memory across unique-heavy and duplicate-early inputs.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — test vectorized dtype boundaries</span>
-<span># Prompt: Compare Python integer sum-of-squares with NumPy int32, int64, float, and object</span>
-<span># arrays near overflow. Detect silent overflow and choose a validated dtype.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — evaluate shared-memory process input</span>
-<span># Prompt: Compare normal process serialization with read-only shared memory for one large</span>
-<span># numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and</span>
-<span># ownership failure cases.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 15 — separate I/O concurrency from CPU optimization</span>
-<span># Prompt: Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential,</span>
-<span># async/thread, and process designs. Explain why each model helps one workload and may</span>
-<span># hurt another.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 16 — prevent a cache stampede</span>
-<span># Prompt: Model many callers missing one expensive cache key. Add single-flight ownership,</span>
-<span># bounded wait, success publication, failure cleanup, and stale/retry policy with injected</span>
-<span># time.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 17 — review an FFI ownership boundary</span>
-<span># Prompt: Specify one batched native function: accepted buffer dtype/layout, length,</span>
-<span># ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception</span>
-<span># containment, and platform wheel matrix.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 18 — design a continuous performance gate</span>
-<span># Prompt: Define a stable local/CI benchmark artifact with workload version, correctness</span>
-<span># hash, environment, raw timings, peak memory, practical regression budget, comparison</span>
-<span># policy, and an investigation path instead of an immediate flaky fail.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-perf-01 learner lab: measurement-first optimization.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-perf-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Performance engineering begins with a user-visible budget and a reproducible workload. Wall-</span></span>
+<span class="source-line"><span class="syntax-string">clock timing includes noise from warm-up, caching, scheduling, CPU frequency, allocation, and</span></span>
+<span class="source-line"><span class="syntax-string">I/O. Repeat measurements, report a distribution, and keep correctness checks beside the</span></span>
+<span class="source-line"><span class="syntax-string">benchmark.  Profiling locates where time or memory is spent; algorithmic analysis explains how</span></span>
+<span class="source-line"><span class="syntax-string">cost grows. Optimize the measured bottleneck, then rerun correctness and end-to-end evidence.</span></span>
+<span class="source-line"><span class="syntax-string">Faster code that changes results, ordering, errors, or resource bounds is a regression.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* benchmark contract: fixes data size/distribution, environment, warm-up, repetitions,</span></span>
+<span class="source-line"><span class="syntax-string">  statistic, and correctness invariant.</span></span>
+<span class="source-line"><span class="syntax-string">* profile → hypothesis → one change: connects an observed hotspot to a scoped optimization</span></span>
+<span class="source-line"><span class="syntax-string">  rather than guessing.</span></span>
+<span class="source-line"><span class="syntax-string">* scale curve + budget: measures several input sizes and checks latency/memory against an</span></span>
+<span class="source-line"><span class="syntax-string">  explicit threshold.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — report repeat timing instead of one lucky run::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import statistics</span></span>
+<span class="source-line"><span class="syntax-string">    import timeit</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    samples = timeit.repeat(</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;sum(range(10_000))&quot;,</span></span>
+<span class="source-line"><span class="syntax-string">        repeat=7,</span></span>
+<span class="source-line"><span class="syntax-string">        number=200,</span></span>
+<span class="source-line"><span class="syntax-string">    )</span></span>
+<span class="source-line"><span class="syntax-string">    report = {</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;median_seconds&quot;: statistics.median(samples),</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;min_seconds&quot;: min(samples),</span></span>
+<span class="source-line"><span class="syntax-string">        &quot;max_seconds&quot;: max(samples),</span></span>
+<span class="source-line"><span class="syntax-string">    }</span></span>
+<span class="source-line"><span class="syntax-string">    print(report)</span></span>
+<span class="source-line"><span class="syntax-string">    assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Repeated timings vary; median and range reveal noise that one measurement hides.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — contrast quadratic and linear duplicate detection::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def has_duplicate_quadratic(values):</span></span>
+<span class="source-line"><span class="syntax-string">        return any(values[i] in values[:i] for i in range(len(values)))</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def has_duplicate_linear(values):</span></span>
+<span class="source-line"><span class="syntax-string">        seen = set()</span></span>
+<span class="source-line"><span class="syntax-string">        for value in values:</span></span>
+<span class="source-line"><span class="syntax-string">            if value in seen:</span></span>
+<span class="source-line"><span class="syntax-string">                return True</span></span>
+<span class="source-line"><span class="syntax-string">            seen.add(value)</span></span>
+<span class="source-line"><span class="syntax-string">        return False</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    for size in (100, 1_000):</span></span>
+<span class="source-line"><span class="syntax-string">        data = list(range(size))</span></span>
+<span class="source-line"><span class="syntax-string">        assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False</span></span>
+<span class="source-line"><span class="syntax-string">    print(&quot;both implementations agree on measured inputs&quot;)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Both functions preserve the Boolean contract, while the set-based design has expected</span></span>
+<span class="source-line"><span class="syntax-string">          linear rather than quadratic growth.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Reproduce the workload, record environment, profile CPU/memory/I/O, validate</span></span>
+<span class="source-line"><span class="syntax-string">                outputs, change one hotspot, and compare repeated end-to-end distributions.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal</span>
+<span class="source-line"></span>
+<span class="source-line">Decision <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">fix-correctness</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-memory</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-transfer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">optimize-hotspot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">keep-current</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate_linear</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return the first value encountered for a second time.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: preserve semantics while replacing repeated prefix scans with a set.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete first_duplicate_linear</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">estimated_transfer_bytes</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    payload_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    workers<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    copies_per_worker<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate nonnegative inputs and estimate copied process bytes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete estimated_transfer_bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_next_step</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    equivalent<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    peak_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    memory_budget_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transfer_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    hotspot_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Decision<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: apply the guide&#x27;s deterministic evidence-priority policy.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete choose_next_step</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate_quadratic</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked baseline whose repeated prefix membership is O(n squared).&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> index<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> value</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    workload <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked baseline duplicate:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> first_duplicate_quadratic<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">linear equivalent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> first_duplicate_linear<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">process transfer estimate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> estimated_transfer_bytes<span class="syntax-punctuation">(</span><span class="syntax-number">1_024</span><span class="syntax-punctuation">,</span> workers<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> copies_per_worker<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">evidence decision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> choose_next_step<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                equivalent<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                peak_bytes<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                memory_budget_bytes<span class="syntax-operator">=</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                transfer_fraction<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                hotspot_fraction<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_perf_01_measurement_optimization.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Define semantics before speed</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For `[4, 1, 3, 2, 3, 4]`, the answer is `3`: the duplicate whose *second*</span></span>
+<span class="source-line"><span class="syntax-comment"># occurrence appears first. Complete `first_duplicate_linear` with a set and prove</span></span>
+<span class="source-line"><span class="syntax-comment"># equivalence for empty, unique, immediate, and competing duplicates.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Build a representative timing plan</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Choose a workload size large enough to rise above timer noise but small enough</span></span>
+<span class="source-line"><span class="syntax-comment"># for quick study. Warm up separately, then collect at least five repeated batches with</span></span>
+<span class="source-line"><span class="syntax-comment"># `timeit`. Record Python version, platform, input size, and plan. Do not assert</span></span>
+<span class="source-line"><span class="syntax-comment"># “candidate &lt; baseline” in the test suite. CI hosts, antivirus, power state, and</span></span>
+<span class="source-line"><span class="syntax-comment"># schedulers make that flaky.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Ask cProfile a different question</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Profile one complete representative call and sort by cumulative time. Locate the</span></span>
+<span class="source-line"><span class="syntax-comment"># call path, not just the leaf with the largest self time. Reduce the workload if</span></span>
+<span class="source-line"><span class="syntax-comment"># profiling overhead dominates, and do not compare profiled seconds directly with</span></span>
+<span class="source-line"><span class="syntax-comment"># unprofiled `timeit` seconds.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Measure allocation pressure</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare materialized-list and generator sums with `tracemalloc`. Assert equal</span></span>
+<span class="source-line"><span class="syntax-comment"># results and report bounds (`peak &gt;= current &gt;= 0`). Explain why `tracemalloc` may not</span></span>
+<span class="source-line"><span class="syntax-comment"># see memory allocated inside every native library.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Compare optional vectorization</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: With NumPy installed, compare a Python loop with `np.square(array).sum()`.</span></span>
+<span class="source-line"><span class="syntax-comment"># Include conversion from Python values when that conversion exists in the real workflow.</span></span>
+<span class="source-line"><span class="syntax-comment"># Small input can favor the loop; already-resident large arrays can favor vectorized</span></span>
+<span class="source-line"><span class="syntax-comment"># native work. Measure both representative cases.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Model process transfer</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Serialize a safe local JSON payload and measure its byte length. Complete</span></span>
+<span class="source-line"><span class="syntax-comment"># `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload</span></span>
+<span class="source-line"><span class="syntax-comment"># equivalents before computation. Real process protocols may add framing, copies, or</span></span>
+<span class="source-line"><span class="syntax-comment"># shared-memory complexity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — Evaluate caching</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use `cached_fibonacci.cache_info()` to observe hits. Then evaluate a real</span></span>
+<span class="source-line"><span class="syntax-comment"># candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules,</span></span>
+<span class="source-line"><span class="syntax-comment"># - key cardinality, and - whether retained objects prevent memory release. Caching a low-</span></span>
+<span class="source-line"><span class="syntax-comment"># reuse, high-cardinality result can make performance worse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — Bound native/FFI work</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use the policy to prefer an available algorithm improvement. If a measured</span></span>
+<span class="source-line"><span class="syntax-comment"># hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++</span></span>
+<span class="source-line"><span class="syntax-comment"># extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety</span></span>
+<span class="source-line"><span class="syntax-comment"># obligations before choosing one.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — Apply the evidence decision</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4.</span></span>
+<span class="source-line"><span class="syntax-comment"># optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Thresholds are a transparent lesson policy, not universal laws. Return the evidence and</span></span>
+<span class="source-line"><span class="syntax-comment"># selected action so a reviewer can reproduce the decision.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — compare timing distributions</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run interleaved repeated batches for baseline and candidate, report median,</span></span>
+<span class="source-line"><span class="syntax-comment"># spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed</span></span>
+<span class="source-line"><span class="syntax-comment"># assertion.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — diagnose warmup, GC, and environment noise</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Measure cold import/first call separately from steady state. Repeat with garbage</span></span>
+<span class="source-line"><span class="syntax-comment"># collection controlled, background load noted, and process affinity/power assumptions</span></span>
+<span class="source-line"><span class="syntax-comment"># documented rather than hidden.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — trade algorithm speed for memory</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare set-based first-duplicate search with a sorted/indexed alternative under</span></span>
+<span class="source-line"><span class="syntax-comment"># a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report</span></span>
+<span class="source-line"><span class="syntax-comment"># time/peak memory across unique-heavy and duplicate-early inputs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — test vectorized dtype boundaries</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare Python integer sum-of-squares with NumPy int32, int64, float, and object</span></span>
+<span class="source-line"><span class="syntax-comment"># arrays near overflow. Detect silent overflow and choose a validated dtype.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — evaluate shared-memory process input</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare normal process serialization with read-only shared memory for one large</span></span>
+<span class="source-line"><span class="syntax-comment"># numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and</span></span>
+<span class="source-line"><span class="syntax-comment"># ownership failure cases.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15 — separate I/O concurrency from CPU optimization</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential,</span></span>
+<span class="source-line"><span class="syntax-comment"># async/thread, and process designs. Explain why each model helps one workload and may</span></span>
+<span class="source-line"><span class="syntax-comment"># hurt another.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16 — prevent a cache stampede</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Model many callers missing one expensive cache key. Add single-flight ownership,</span></span>
+<span class="source-line"><span class="syntax-comment"># bounded wait, success publication, failure cleanup, and stale/retry policy with injected</span></span>
+<span class="source-line"><span class="syntax-comment"># time.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 17 — review an FFI ownership boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Specify one batched native function: accepted buffer dtype/layout, length,</span></span>
+<span class="source-line"><span class="syntax-comment"># ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception</span></span>
+<span class="source-line"><span class="syntax-comment"># containment, and platform wheel matrix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 18 — design a continuous performance gate</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Define a stable local/CI benchmark artifact with workload version, correctness</span></span>
+<span class="source-line"><span class="syntax-comment"># hash, environment, raw timings, peak memory, practical regression budget, comparison</span></span>
+<span class="source-line"><span class="syntax-comment"># policy, and an investigation path instead of an immediate flaky fail.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -943,7 +991,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--measurement-first-optimization-solution-reasoning">Measurement-first optimization solution reasoning<a class="heading-anchor" href="#solution-1--measurement-first-optimization-solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Attempt <code>python-perf-01</code> before opening <a href="python-perf-01.html#solution-2"><code>py_perf_01_measurement_optimization_solution.py</code></a>.</p>
-<p>The solution first fixes the workload and output semantics. The quadratic duplicate search repeatedly scans prefixes; the set-based implementation keeps the value whose second occurrence appears first while changing expected complexity from O(n squared) to O(n). Correctness tests compare varied edge cases before any timing is interpreted.</p>
+<p>The solution first fixes the workload and output semantics. The quadratic duplicate search repeatedly scans prefixes; the set-based implementation keeps the value whose second occurrence appears first while changing expected complexity from O(n squared) to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>. Correctness tests compare varied edge cases before any timing is interpreted.</p>
 <p><code>timeit</code> performs warmups and repeated batches. Minimum, median, and maximum are reported as evidence from one machine; none becomes a universal test threshold. <code>cProfile</code> locates cumulative hotspots, while <code>tracemalloc</code> measures Python allocations and peak pressure. Native-library buffers and operating system memory may require additional tools.</p>
 <p>The streamed sum avoids an intermediate list. NumPy is an optional vectorized comparison, not a promised speedup: conversion cost and array size matter. Likewise, process work may copy or serialize the payload per worker, so adding processes can increase elapsed time and memory.</p>
 <p>Caching trades recomputation for memory and staleness. The deterministic policy refuses cache when freshness or budget disallows it, accepts high measured reuse within budget, and otherwise requests more evidence.</p>
@@ -964,21 +1012,21 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Assert output equivalence and failures, benchmark repeated realistic workloads/sizes, report distribution and resources, profile the hotspot, and enforce the stated budget.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">import statistics
-import timeit
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> statistics
+<span class="syntax-keyword">import</span> timeit
 
-samples = timeit.repeat(
-    &quot;sum(range(10_000))&quot;,
-    repeat=7,
-    number=200,
-)
-report = {
-    &quot;median_seconds&quot;: statistics.median(samples),
-    &quot;min_seconds&quot;: min(samples),
-    &quot;max_seconds&quot;: max(samples),
-}
-print(report)
-assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</code></pre>
+samples <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">sum(range(10_000))</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    repeat<span class="syntax-operator">=</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>
+    number<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">median_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> statistics<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">min_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">max_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">min_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">median_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Repeated timings vary; median and range reveal noise that one measurement hides.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1055,7 +1103,7 @@ assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] 
 <p><strong>Verify:</strong> diagnose warmup, GC, and environment noise — measure cold import/first call separately from steady state; repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <h5 id="solution-1--exercise-12-trade-algorithm-speed-for-memory">Exercise 12 — trade algorithm speed for memory<a class="heading-anchor" href="#solution-1--exercise-12-trade-algorithm-speed-for-memory" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
-<p><strong>Reasoning path:</strong> An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.</p>
+<p><strong>Reasoning path:</strong> An algorithm with lower expected time can retain <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math> state. Alternative semantics or external sorting must be stated honestly.</p>
 <p>The set solution is the correct linear baseline under available memory. If the budget cannot hold all seen values, exact streaming detection may need disk/ partitioning or multiple passes. Sorting values alone loses encounter-order semantics unless original indices are preserved.</p>
 <p>Measure representative distributions and choose based on both time and peak budget. Approximate probabilistic structures require an explicit false-positive contract and cannot silently replace exact output.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
@@ -1141,316 +1189,316 @@ assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] 
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-perf-01.</span>
-<span> </span>
-<span>Timings are evidence printed for the current machine. Correctness tests never</span>
-<span>assert that an implementation must be faster by a universal threshold.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import cProfile</span>
-<span>import importlib.util</span>
-<span>import io</span>
-<span>import json</span>
-<span>import pstats</span>
-<span>import timeit</span>
-<span>import tracemalloc</span>
-<span>from collections.abc import Callable, Mapping, Sequence</span>
-<span>from dataclasses import dataclass</span>
-<span>from functools import lru_cache</span>
-<span>from statistics import median</span>
-<span>from typing import Generic, Literal, TypeVar</span>
-<span> </span>
-<span>T = TypeVar(&quot;T&quot;)</span>
-<span>Decision = Literal[</span>
-<span>    &quot;fix-correctness&quot;,</span>
-<span>    &quot;reduce-memory&quot;,</span>
-<span>    &quot;reduce-transfer&quot;,</span>
-<span>    &quot;optimize-hotspot&quot;,</span>
-<span>    &quot;keep-current&quot;,</span>
-<span>]</span>
-<span>CacheDecision = Literal[&quot;cache&quot;, &quot;do-not-cache&quot;, &quot;measure&quot;]</span>
-<span>NativeDecision = Literal[&quot;improve-algorithm&quot;, &quot;batch-native-boundary&quot;, &quot;keep-python&quot;, &quot;measure&quot;]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class BenchmarkPlan:</span>
-<span>    warmup_calls: int = 3</span>
-<span>    repeats: int = 5</span>
-<span>    calls_per_repeat: int = 10</span>
-<span> </span>
-<span>    def __post_init__(self) -&gt; None:</span>
-<span>        if self.warmup_calls &lt; 0:</span>
-<span>            raise ValueError(&quot;warmup_calls must be non-negative&quot;)</span>
-<span>        if self.repeats &lt; 1 or self.calls_per_repeat &lt; 1:</span>
-<span>            raise ValueError(&quot;repeats and calls_per_repeat must be positive&quot;)</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class TimingReport:</span>
-<span>    samples_seconds: tuple[float, ...]</span>
-<span>    calls_per_repeat: int</span>
-<span>    minimum_seconds: float</span>
-<span>    median_seconds: float</span>
-<span>    maximum_seconds: float</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Profiled(Generic[T]):</span>
-<span>    result: T</span>
-<span>    report: str</span>
-<span>    displayed_rows: int</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class MemoryMeasured(Generic[T]):</span>
-<span>    result: T</span>
-<span>    current_bytes: int</span>
-<span>    peak_bytes: int</span>
-<span> </span>
-<span> </span>
-<span>def benchmark(</span>
-<span>    operation: Callable[[], object],</span>
-<span>    plan: BenchmarkPlan | None = None,</span>
-<span>) -&gt; TimingReport:</span>
-<span>    &quot;&quot;&quot;Warm up and collect repeated ``timeit`` samples.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    active_plan = BenchmarkPlan() if plan is None else plan</span>
-<span>    for _ in range(active_plan.warmup_calls):</span>
-<span>        operation()</span>
-<span>    timer = timeit.Timer(operation)</span>
-<span>    samples = tuple(</span>
-<span>        timer.repeat(</span>
-<span>            repeat=active_plan.repeats,</span>
-<span>            number=active_plan.calls_per_repeat,</span>
-<span>        )</span>
-<span>    )</span>
-<span>    return TimingReport(</span>
-<span>        samples_seconds=samples,</span>
-<span>        calls_per_repeat=active_plan.calls_per_repeat,</span>
-<span>        minimum_seconds=min(samples),</span>
-<span>        median_seconds=median(samples),</span>
-<span>        maximum_seconds=max(samples),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def profile_call(operation: Callable[[], T], *, rows: int = 8) -&gt; Profiled[T]:</span>
-<span>    &quot;&quot;&quot;Return the value and a cumulative ``cProfile`` text report.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if rows &lt; 1:</span>
-<span>        raise ValueError(&quot;rows must be positive&quot;)</span>
-<span>    profiler = cProfile.Profile()</span>
-<span>    result = profiler.runcall(operation)</span>
-<span>    stream = io.StringIO()</span>
-<span>    pstats.Stats(profiler, stream=stream).strip_dirs().sort_stats(&quot;cumulative&quot;).print_stats(rows)</span>
-<span>    return Profiled(result, stream.getvalue(), rows)</span>
-<span> </span>
-<span> </span>
-<span>def measure_peak_memory(operation: Callable[[], T]) -&gt; MemoryMeasured[T]:</span>
-<span>    &quot;&quot;&quot;Measure traced Python allocation state for one local operation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if tracemalloc.is_tracing():</span>
-<span>        raise RuntimeError(&quot;tracemalloc is already active&quot;)</span>
-<span>    tracemalloc.start()</span>
-<span>    try:</span>
-<span>        result = operation()</span>
-<span>        current, peak = tracemalloc.get_traced_memory()</span>
-<span>    finally:</span>
-<span>        tracemalloc.stop()</span>
-<span>    return MemoryMeasured(result, current, peak)</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate_quadratic(values: Sequence[int]) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;Repeated prefix scans preserve first-second-occurrence semantics.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    for index, value in enumerate(values):</span>
-<span>        if value in values[:index]:</span>
-<span>            return value</span>
-<span>    return None</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate_linear(values: Sequence[int]) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;Use expected O(n) set membership while preserving the same semantics.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    seen: set[int] = set()</span>
-<span>    for value in values:</span>
-<span>        if value in seen:</span>
-<span>            return value</span>
-<span>        seen.add(value)</span>
-<span>    return None</span>
-<span> </span>
-<span> </span>
-<span>def sum_materialized_squares(values: Sequence[int]) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Allocate an intermediate list before summing.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    return sum([value * value for value in values])</span>
-<span> </span>
-<span> </span>
-<span>def sum_streamed_squares(values: Sequence[int]) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Stream values through a generator expression.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    return sum(value * value for value in values)</span>
-<span> </span>
-<span> </span>
-<span>def sum_squares_loop(values: Sequence[float]) -&gt; float:</span>
-<span>    total = 0.0</span>
-<span>    for value in values:</span>
-<span>        total += value * value</span>
-<span>    return total</span>
-<span> </span>
-<span> </span>
-<span>def numpy_sum_squares(values: Sequence[float]) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Optional vectorized comparison; package availability is explicit.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if importlib.util.find_spec(&quot;numpy&quot;) is None:</span>
-<span>        raise ModuleNotFoundError(&quot;NumPy is not installed; use the data profile&quot;)</span>
-<span>    import numpy as np</span>
-<span> </span>
-<span>    array = np.asarray(values, dtype=np.float64)</span>
-<span>    return float(np.square(array).sum())</span>
-<span> </span>
-<span> </span>
-<span>def serialized_payload_bytes(payload: Mapping[str, Sequence[int]]) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Measure one safe JSON representation used for a process-boundary model.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    text = json.dumps(</span>
-<span>        payload,</span>
-<span>        separators=(&quot;,&quot;, &quot;:&quot;),</span>
-<span>        sort_keys=True,</span>
-<span>    )</span>
-<span>    return len(text.encode(&quot;utf-8&quot;))</span>
-<span> </span>
-<span> </span>
-<span>def estimated_transfer_bytes(</span>
-<span>    payload_bytes: int,</span>
-<span>    *,</span>
-<span>    workers: int,</span>
-<span>    copies_per_worker: int,</span>
-<span>) -&gt; int:</span>
-<span>    if payload_bytes &lt; 0 or workers &lt; 1 or copies_per_worker &lt; 1:</span>
-<span>        raise ValueError(&quot;payload must be nonnegative and copy counts positive&quot;)</span>
-<span>    return payload_bytes * workers * copies_per_worker</span>
-<span> </span>
-<span> </span>
-<span>@lru_cache(maxsize=128)</span>
-<span>def cached_fibonacci(number: int) -&gt; int:</span>
-<span>    if number &lt; 0:</span>
-<span>        raise ValueError(&quot;number must be non-negative&quot;)</span>
-<span>    if number &lt; 2:</span>
-<span>        return number</span>
-<span>    return cached_fibonacci(number - 1) + cached_fibonacci(number - 2)</span>
-<span> </span>
-<span> </span>
-<span>def choose_cache_policy(</span>
-<span>    *,</span>
-<span>    reuse_fraction: float,</span>
-<span>    estimated_entries: int,</span>
-<span>    bytes_per_entry: int,</span>
-<span>    memory_budget_bytes: int,</span>
-<span>    freshness_required: bool,</span>
-<span>) -&gt; CacheDecision:</span>
-<span>    if not 0 &lt;= reuse_fraction &lt;= 1:</span>
-<span>        raise ValueError(&quot;reuse_fraction must be between zero and one&quot;)</span>
-<span>    if min(estimated_entries, bytes_per_entry, memory_budget_bytes) &lt; 0:</span>
-<span>        raise ValueError(&quot;memory values must be non-negative&quot;)</span>
-<span>    if freshness_required or estimated_entries * bytes_per_entry &gt; memory_budget_bytes:</span>
-<span>        return &quot;do-not-cache&quot;</span>
-<span>    if reuse_fraction &gt;= 0.5:</span>
-<span>        return &quot;cache&quot;</span>
-<span>    return &quot;measure&quot;</span>
-<span> </span>
-<span> </span>
-<span>def choose_native_boundary(</span>
-<span>    *,</span>
-<span>    hotspot_fraction: float,</span>
-<span>    calls_across_boundary: int,</span>
-<span>    transfer_bytes: int,</span>
-<span>    algorithm_improvement_available: bool,</span>
-<span>) -&gt; NativeDecision:</span>
-<span>    if not 0 &lt;= hotspot_fraction &lt;= 1:</span>
-<span>        raise ValueError(&quot;hotspot_fraction must be between zero and one&quot;)</span>
-<span>    if calls_across_boundary &lt; 0 or transfer_bytes &lt; 0:</span>
-<span>        raise ValueError(&quot;boundary costs must be non-negative&quot;)</span>
-<span>    if algorithm_improvement_available:</span>
-<span>        return &quot;improve-algorithm&quot;</span>
-<span>    if hotspot_fraction &lt; 0.5:</span>
-<span>        return &quot;keep-python&quot;</span>
-<span>    if calls_across_boundary &gt; 1_000 or transfer_bytes &gt; 10_000_000:</span>
-<span>        return &quot;measure&quot;</span>
-<span>    return &quot;batch-native-boundary&quot;</span>
-<span> </span>
-<span> </span>
-<span>def choose_next_step(</span>
-<span>    *,</span>
-<span>    equivalent: bool,</span>
-<span>    peak_bytes: int,</span>
-<span>    memory_budget_bytes: int,</span>
-<span>    transfer_fraction: float,</span>
-<span>    hotspot_fraction: float,</span>
-<span>) -&gt; Decision:</span>
-<span>    &quot;&quot;&quot;Prioritize correctness, hard bounds, and measured concentration.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if min(peak_bytes, memory_budget_bytes) &lt; 0:</span>
-<span>        raise ValueError(&quot;memory values must be non-negative&quot;)</span>
-<span>    if not 0 &lt;= transfer_fraction &lt;= 1 or not 0 &lt;= hotspot_fraction &lt;= 1:</span>
-<span>        raise ValueError(&quot;fractions must be between zero and one&quot;)</span>
-<span>    if not equivalent:</span>
-<span>        return &quot;fix-correctness&quot;</span>
-<span>    if peak_bytes &gt; memory_budget_bytes:</span>
-<span>        return &quot;reduce-memory&quot;</span>
-<span>    if transfer_fraction &gt;= 0.3:</span>
-<span>        return &quot;reduce-transfer&quot;</span>
-<span>    if hotspot_fraction &gt;= 0.5:</span>
-<span>        return &quot;optimize-hotspot&quot;</span>
-<span>    return &quot;keep-current&quot;</span>
-<span> </span>
-<span> </span>
-<span>def representative_workload(size: int = 2_000) -&gt; list[int]:</span>
-<span>    if size &lt; 2:</span>
-<span>        raise ValueError(&quot;size must be at least two&quot;)</span>
-<span>    values = list(range(size))</span>
-<span>    values.append(size // 2)</span>
-<span>    return values</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    workload = representative_workload()</span>
-<span>    baseline = first_duplicate_quadratic(workload)</span>
-<span>    candidate = first_duplicate_linear(workload)</span>
-<span>    print(&quot;equivalent:&quot;, baseline == candidate, &quot;duplicate:&quot;, candidate)</span>
-<span> </span>
-<span>    plan = BenchmarkPlan(warmup_calls=2, repeats=5, calls_per_repeat=5)</span>
-<span>    baseline_timing = benchmark(lambda: first_duplicate_quadratic(workload), plan)</span>
-<span>    candidate_timing = benchmark(lambda: first_duplicate_linear(workload), plan)</span>
-<span>    print(&quot;baseline timing evidence:&quot;, baseline_timing)</span>
-<span>    print(&quot;candidate timing evidence:&quot;, candidate_timing)</span>
-<span> </span>
-<span>    profile = profile_call(lambda: first_duplicate_linear(workload))</span>
-<span>    print(&quot;profile report first line:&quot;, profile.report.splitlines()[0])</span>
-<span>    materialized = measure_peak_memory(lambda: sum_materialized_squares(workload))</span>
-<span>    streamed = measure_peak_memory(lambda: sum_streamed_squares(workload))</span>
-<span>    print(</span>
-<span>        &quot;memory evidence:&quot;,</span>
-<span>        {&quot;materialized_peak&quot;: materialized.peak_bytes, &quot;streamed_peak&quot;: streamed.peak_bytes},</span>
-<span>    )</span>
-<span> </span>
-<span>    payload_bytes = serialized_payload_bytes({&quot;values&quot;: workload})</span>
-<span>    print(</span>
-<span>        &quot;four-worker transfer estimate:&quot;,</span>
-<span>        estimated_transfer_bytes(payload_bytes, workers=4, copies_per_worker=1),</span>
-<span>    )</span>
-<span>    if importlib.util.find_spec(&quot;numpy&quot;) is None:</span>
-<span>        print(&quot;NumPy comparison skipped; install the data profile&quot;)</span>
-<span>    else:</span>
-<span>        floats = [float(value) for value in workload]</span>
-<span>        print(&quot;NumPy equivalent:&quot;, numpy_sum_squares(floats) == sum_squares_loop(floats))</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-perf-01.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Timings are evidence printed for the current machine. Correctness tests never</span></span>
+<span class="source-line"><span class="syntax-string">assert that an implementation must be faster by a universal threshold.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> cProfile</span>
+<span class="source-line"><span class="syntax-keyword">import</span> importlib.util</span>
+<span class="source-line"><span class="syntax-keyword">import</span> io</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pstats</span>
+<span class="source-line"><span class="syntax-keyword">import</span> timeit</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tracemalloc</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Mapping<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> lru_cache</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statistics <span class="syntax-keyword">import</span> median</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Generic<span class="syntax-punctuation">,</span> Literal<span class="syntax-punctuation">,</span> TypeVar</span>
+<span class="source-line"></span>
+<span class="source-line">T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Decision <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">fix-correctness</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-memory</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-transfer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">optimize-hotspot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">keep-current</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line">CacheDecision <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cache</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">do-not-cache</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">measure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">NativeDecision <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">improve-algorithm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">batch-native-boundary</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep-python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">measure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">BenchmarkPlan</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    warmup_calls<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    repeats<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line">    calls_per_repeat<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">10</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__post_init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>warmup_calls <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">warmup_calls must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>repeats <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>calls_per_repeat <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">repeats and calls_per_repeat must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">TimingReport</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    samples_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    calls_per_repeat<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    minimum_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    median_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    maximum_seconds<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Profiled</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result<span class="syntax-punctuation">:</span> T</span>
+<span class="source-line">    report<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    displayed_rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">MemoryMeasured</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result<span class="syntax-punctuation">:</span> T</span>
+<span class="source-line">    current_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    peak_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">benchmark</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    operation<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    plan<span class="syntax-punctuation">:</span> BenchmarkPlan <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> TimingReport<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Warm up and collect repeated ``timeit`` samples.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    active_plan <span class="syntax-operator">=</span> BenchmarkPlan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> plan <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">else</span> plan</span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>active_plan<span class="syntax-operator">.</span>warmup_calls<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        operation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    timer <span class="syntax-operator">=</span> timeit<span class="syntax-operator">.</span>Timer<span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    samples <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        timer<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            repeat<span class="syntax-operator">=</span>active_plan<span class="syntax-operator">.</span>repeats<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            number<span class="syntax-operator">=</span>active_plan<span class="syntax-operator">.</span>calls_per_repeat<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> TimingReport<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        samples_seconds<span class="syntax-operator">=</span>samples<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        calls_per_repeat<span class="syntax-operator">=</span>active_plan<span class="syntax-operator">.</span>calls_per_repeat<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        minimum_seconds<span class="syntax-operator">=</span><span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        median_seconds<span class="syntax-operator">=</span>median<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        maximum_seconds<span class="syntax-operator">=</span><span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">profile_call</span><span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Profiled<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return the value and a cumulative ``cProfile`` text report.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> rows <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    profiler <span class="syntax-operator">=</span> cProfile<span class="syntax-operator">.</span>Profile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> profiler<span class="syntax-operator">.</span>runcall<span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    stream <span class="syntax-operator">=</span> io<span class="syntax-operator">.</span>StringIO<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    pstats<span class="syntax-operator">.</span>Stats<span class="syntax-punctuation">(</span>profiler<span class="syntax-punctuation">,</span> stream<span class="syntax-operator">=</span>stream<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip_dirs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sort_stats<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cumulative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>print_stats<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> Profiled<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> stream<span class="syntax-operator">.</span>getvalue<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">measure_peak_memory</span><span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> MemoryMeasured<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Measure traced Python allocation state for one local operation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> tracemalloc<span class="syntax-operator">.</span>is_tracing<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tracemalloc is already active</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tracemalloc<span class="syntax-operator">.</span>start<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> operation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        current<span class="syntax-punctuation">,</span> peak <span class="syntax-operator">=</span> tracemalloc<span class="syntax-operator">.</span>get_traced_memory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        tracemalloc<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> MemoryMeasured<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> current<span class="syntax-punctuation">,</span> peak<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate_quadratic</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Repeated prefix scans preserve first-second-occurrence semantics.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> index<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> value</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate_linear</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Use expected O(n) set membership while preserving the same semantics.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    seen<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> value</span>
+<span class="source-line">        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_materialized_squares</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Allocate an intermediate list before summing.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>value <span class="syntax-operator">*</span> value <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_streamed_squares</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Stream values through a generator expression.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">*</span> value <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sum_squares_loop</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    total <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value <span class="syntax-operator">*</span> value</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> total</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">numpy_sum_squares</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Optional vectorized comparison; package availability is explicit.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">numpy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ModuleNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NumPy is not installed; use the data profile</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">    array <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>array<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">serialized_payload_bytes</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Measure one safe JSON representation used for a process-boundary model.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    text <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        payload<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">estimated_transfer_bytes</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    payload_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    workers<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    copies_per_worker<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> payload_bytes <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> workers <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> copies_per_worker <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">payload must be nonnegative and copy counts positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> payload_bytes <span class="syntax-operator">*</span> workers <span class="syntax-operator">*</span> copies_per_worker</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@lru_cache</span><span class="syntax-punctuation">(</span>maxsize<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">cached_fibonacci</span><span class="syntax-punctuation">(</span>number<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> number <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">number must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> number <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> number</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> cached_fibonacci<span class="syntax-punctuation">(</span>number <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> cached_fibonacci<span class="syntax-punctuation">(</span>number <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_cache_policy</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    reuse_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    estimated_entries<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    bytes_per_entry<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    memory_budget_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    freshness_required<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> CacheDecision<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> reuse_fraction <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">reuse_fraction must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>estimated_entries<span class="syntax-punctuation">,</span> bytes_per_entry<span class="syntax-punctuation">,</span> memory_budget_bytes<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">memory values must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> freshness_required <span class="syntax-operator">or</span> estimated_entries <span class="syntax-operator">*</span> bytes_per_entry <span class="syntax-operator">&gt;</span> memory_budget_bytes<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">do-not-cache</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> reuse_fraction <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cache</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">measure</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_native_boundary</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    hotspot_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    calls_across_boundary<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transfer_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    algorithm_improvement_available<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> NativeDecision<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> hotspot_fraction <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">hotspot_fraction must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> calls_across_boundary <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> transfer_bytes <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">boundary costs must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> algorithm_improvement_available<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">improve-algorithm</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> hotspot_fraction <span class="syntax-operator">&lt;</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep-python</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> calls_across_boundary <span class="syntax-operator">&gt;</span> <span class="syntax-number">1_000</span> <span class="syntax-operator">or</span> transfer_bytes <span class="syntax-operator">&gt;</span> <span class="syntax-number">10_000_000</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">measure</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">batch-native-boundary</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">choose_next_step</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    equivalent<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    peak_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    memory_budget_bytes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    transfer_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    hotspot_fraction<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Decision<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Prioritize correctness, hard bounds, and measured concentration.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>peak_bytes<span class="syntax-punctuation">,</span> memory_budget_bytes<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">memory values must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> transfer_fraction <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> hotspot_fraction <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">fractions must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> equivalent<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fix-correctness</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> peak_bytes <span class="syntax-operator">&gt;</span> memory_budget_bytes<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-memory</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> transfer_fraction <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reduce-transfer</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> hotspot_fraction <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">optimize-hotspot</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">keep-current</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">representative_workload</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">2_000</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> size <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">size must be at least two</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    values<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>size <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> values</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    workload <span class="syntax-operator">=</span> representative_workload<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    baseline <span class="syntax-operator">=</span> first_duplicate_quadratic<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    candidate <span class="syntax-operator">=</span> first_duplicate_linear<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">equivalent:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> baseline <span class="syntax-operator">==</span> candidate<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> candidate<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    plan <span class="syntax-operator">=</span> BenchmarkPlan<span class="syntax-punctuation">(</span>warmup_calls<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> calls_per_repeat<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    baseline_timing <span class="syntax-operator">=</span> benchmark<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> first_duplicate_quadratic<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> plan<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    candidate_timing <span class="syntax-operator">=</span> benchmark<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> first_duplicate_linear<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> plan<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline timing evidence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> baseline_timing<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">candidate timing evidence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> candidate_timing<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    profile <span class="syntax-operator">=</span> profile_call<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> first_duplicate_linear<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">profile report first line:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> profile<span class="syntax-operator">.</span>report<span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    materialized <span class="syntax-operator">=</span> measure_peak_memory<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_materialized_squares<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    streamed <span class="syntax-operator">=</span> measure_peak_memory<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> sum_streamed_squares<span class="syntax-punctuation">(</span>workload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">memory evidence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">materialized_peak</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> materialized<span class="syntax-operator">.</span>peak_bytes<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">streamed_peak</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> streamed<span class="syntax-operator">.</span>peak_bytes<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    payload_bytes <span class="syntax-operator">=</span> serialized_payload_bytes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> workload<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">four-worker transfer estimate:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        estimated_transfer_bytes<span class="syntax-punctuation">(</span>payload_bytes<span class="syntax-punctuation">,</span> workers<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> copies_per_worker<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">numpy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NumPy comparison skipped; install the data profile</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        floats <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> workload<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NumPy equivalent:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> numpy_sum_squares<span class="syntax-punctuation">(</span>floats<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> sum_squares_loop<span class="syntax-punctuation">(</span>floats<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

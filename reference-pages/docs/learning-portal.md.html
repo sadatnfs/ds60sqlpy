@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -143,20 +189,20 @@
 <p>Setup, documentation, and incidental SQL links open generated pages under <code>reference-pages/</code>, not raw Markdown or SQL. In static mode, use the lesson reader&#x27;s <strong>Track completion on the course dashboard</strong> link and mark the card on <code>START_HERE.html</code>. The per-lesson completion checkbox appears only in private launcher mode, where the dashboard, reader, CLI, and Codex can share the ignored progress file.</p>
 <h3 id="start-private-launcher-mode">Start private launcher mode<a class="heading-anchor" href="#start-private-launcher-mode" aria-label="Link to this section">#</a></h3>
 <p>Complete setup first, then run:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-# Or simply double-click START_DS60.cmd, which performs readiness checks first.
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+<span class="syntax-comment"># Or simply double-click START_DS60.cmd, which performs readiness checks first.</span>
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>learning_portal<span class="syntax-punctuation">.</span>py</code></pre>
 <p>The resolver supports both the standard <code>venv</code> layout and the Anaconda conda-prefix fallback. Reuse <code>$CoursePython</code> for later Windows commands in the same PowerShell window.</p>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/learning_portal.py</code></pre>
 <p>The command chooses a free loopback port, prints the private URL, and opens the default browser. Keep that terminal open; press <code>Ctrl+C</code> to stop the server. Jupyter inherits <code>PATH</code> and <code>DS60_DATABASE_URL</code> from this terminal. Native Windows PostgreSQL users should complete the <a href="setup/windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">password-file handoff</a> and start the portal from that configured PowerShell window; the portal never asks for or stores a database password.</p>
 <p>Useful options:</p>
-<pre><code class="language-text">--no-browser   print the URL without opening a browser
+<pre class="highlighted-code"><code class="language-text">--no-browser   print the URL without opening a browser
 --no-launches  synchronize progress but disable native process actions
 --port 8765    request a particular loopback port</code></pre>
 <p>You can also choose <strong>Terminal → Run Task → Course: Learning portal</strong> in Visual Studio Code.</p>
@@ -176,12 +222,12 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <h3 id="progress-and-portability">Progress and portability<a class="heading-anchor" href="#progress-and-portability" aria-label="Link to this section">#</a></h3>
 <p>A completion check means the learner can explain the concept and produce a working attempt - not merely that a file was opened.</p>
 <p>Private launcher mode and these CLI commands share <code>.learning/progress.json</code>:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-&amp; $CoursePython scripts\course.py progress show
-&amp; $CoursePython scripts\course.py progress complete python-01 --notes &quot;Evidence&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py progress show
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py progress complete python<span class="syntax-punctuation">-</span>01 <span class="syntax-punctuation">-</span>-notes <span class="syntax-string">&quot;</span><span class="syntax-string">Evidence</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/course.py progress show
-.venv/bin/python scripts/course.py progress complete python-01 --notes &quot;Evidence&quot;</code></pre>
+.venv/bin/python scripts/course.py progress <span class="syntax-builtin">complete</span> python-01 --notes <span class="syntax-string">&quot;Evidence&quot;</span></code></pre>
 <p>The progress directory is intentionally ignored. Use <strong>Export progress</strong> to create a JSON backup before changing browsers or making a source-only USB copy. <strong>Import progress</strong> validates stable lesson IDs before replacing the local completion set. Setup-checklist state remains browser-local.</p>
 <h3 id="local-security-boundary">Local security boundary<a class="heading-anchor" href="#local-security-boundary" aria-label="Link to this section">#</a></h3>
 <p>The private launcher:</p>
@@ -197,13 +243,13 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <p>This boundary is defense in depth for a learner convenience tool. Do not modify it to accept arbitrary commands, paths, remote binding, or credentials.</p>
 <h3 id="maintainer-workflow">Maintainer workflow<a class="heading-anchor" href="#maintainer-workflow" aria-label="Link to this section">#</a></h3>
 <p>Edit <code>scripts/build_course_guide.py</code>, never <code>START_HERE.html</code> directly:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-&amp; $CoursePython scripts\build_course_guide.py
-&amp; $CoursePython scripts\build_course_guide.py --check
-&amp; $CoursePython scripts\build_lesson_readers.py
-&amp; $CoursePython scripts\build_lesson_readers.py --check
-&amp; $CoursePython -m pytest tests\test_course_guide.py tests\test_lesson_reader.py tests\test_portal.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_course_guide<span class="syntax-punctuation">.</span>py
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_course_guide<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-check
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_lesson_readers<span class="syntax-punctuation">.</span>py
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_lesson_readers<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-check
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">\</span>test_course_guide<span class="syntax-punctuation">.</span>py tests<span class="syntax-punctuation">\</span>test_lesson_reader<span class="syntax-punctuation">.</span>py tests<span class="syntax-punctuation">\</span>test_portal<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/build_course_guide.py
 .venv/bin/python scripts/build_course_guide.py --check
 .venv/bin/python scripts/build_lesson_readers.py

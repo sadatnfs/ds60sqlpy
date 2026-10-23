@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-012`
 
 ## Learning objectives
 
-Explain functional interface, capture, pure transformation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a Predicate<Integer> accepting positive values and test3,0,-1. The final exercise transfers the mechanism to use a named function for a contract.
+Explain functional interface, capture, pure transformation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a Predicate<Integer> accepting positive values and test 3,0,-1. The final exercise transfers the mechanism to use a named function for a contract.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A lambda supplies the behavior of a functional interface, an interface with one 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-013/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -61,7 +61,7 @@ public class Main {
 
 ```
 
-**Expected:** true,false,false.
+**Expected:** true, false, false.
 
 ### Example B: Compose transformations
 
@@ -87,7 +87,7 @@ public class Main {
 
 ```
 
-**Expected:** inputspace red space becomesRED.
+**Expected:** input space red space becomesRED.
 
 ## Prediction before your attempt
 
@@ -95,29 +95,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use a predicate.** Create a Predicate<Integer> accepting positive values and test3,0,-1.
-   **Expected:** true,false,false.
-   **Verify:** Compare your assertion values or captured diagnostic with true,false,false.
+1. **Use a predicate.** Create a Predicate<Integer> accepting positive values and test 3,0,-1.
+   **Expected:** true, false, false.
+   **Verify:** Compare your assertion values or captured diagnostic with true, false, false.
 
 2. **Compose transformations.** Strip a string,then uppercase it withLocale.ROOT.
-   **Expected:** inputspace red space becomesRED.
-   **Verify:** Compare your assertion values or captured diagnostic with inputspace red space becomesRED.
+   **Expected:** input space red space becomesRED.
+   **Verify:** Compare your assertion values or captured diagnostic with input space red space becomesRED.
 
-3. **Distinguish composition order.** Compose add1 andmultiply2 usingandThen andcompose on3.
-   **Expected:** andThen8;compose7.
-   **Verify:** Compare your assertion values or captured diagnostic with andThen8;compose7.
+3. **Distinguish composition order.** Compose add1 andmultiply2 usingandThen and compose on3.
+   **Expected:** andThen gives 8;compose7.
+   **Verify:** Compare your assertion values or captured diagnostic with andThen gives 8;compose7.
 
 4. **Capture a stable threshold.** Capture local threshold10 in a predicate and test9,10,11.
    **Expected:** false,true,true under>=.
    **Verify:** Compare your assertion values or captured diagnostic with false,true,true under>=.
 
-5. **Expose mutable captured state.** Capture a list in aConsumer and append two values.
+5. **Expose mutable captured state.** Capture a list in a Consumer and append two values.
    **Expected:** captured list becomesa,b.
    **Verify:** Compare your assertion values or captured diagnostic with captured list becomesa,b.
 
 6. **Use a named function for a contract.** Pass a method reference to a parser that rejects blank input and parses a positive integer.
-   **Expected:** 7 accepted;blank rejected.
-   **Verify:** Compare your assertion values or captured diagnostic with 7 accepted;blank rejected.
+   **Expected:** 7 accepted; blank rejected.
+   **Verify:** Compare your assertion values or captured diagnostic with 7 accepted; blank rejected.
 
 ## Common pitfalls and diagnosis
 

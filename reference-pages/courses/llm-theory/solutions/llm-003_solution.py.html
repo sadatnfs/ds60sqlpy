@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,65 +161,65 @@
       <h1>Llm 003 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-003_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>import math</span>
-<span> </span>
-<span> </span>
-<span>def sequence_score(probabilities):</span>
-<span>    probabilities = list(probabilities)</span>
-<span>    if not probabilities:</span>
-<span>        raise ValueError(&quot;nonempty probability sequence required&quot;)</span>
-<span>    if any(isinstance(p, bool) for p in probabilities):</span>
-<span>        raise TypeError(&quot;probabilities must be real numbers, not boolean&quot;)</span>
-<span>    probabilities = [float(p) for p in probabilities]</span>
-<span>    if any(not math.isfinite(p) or p &lt; 0 or p &gt; 1 for p in probabilities):</span>
-<span>        raise ValueError(&quot;finite probabilities in [0,1] required&quot;)</span>
-<span>    nll = math.inf if 0 in probabilities else math.fsum(-math.log(p) for p in probabilities)</span>
-<span>    return {</span>
-<span>        &quot;probability&quot;: math.prod(probabilities),</span>
-<span>        &quot;nll&quot;: nll,</span>
-<span>        &quot;targets&quot;: len(probabilities),</span>
-<span>        &quot;mean_nll&quot;: nll / len(probabilities),</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: conditional chain</span>
-<span>    result = sequence_score([0.5, 0.25, 0.8])</span>
-<span>    assert math.isclose(result[&quot;probability&quot;], 0.1, rel_tol=0, abs_tol=1e-12)</span>
-<span>    assert (</span>
-<span>        math.isclose(result[&quot;nll&quot;], math.log(10), rel_tol=0, abs_tol=1e-12)</span>
-<span>        and result[&quot;targets&quot;] == 3</span>
-<span>    )</span>
-<span>    # Exercise 2: a different conditional table</span>
-<span>    assert sequence_score([0.5, 0.5, 0.5])[&quot;probability&quot;] == 0.125</span>
-<span>    # Exercise 3: underflow without infinite log loss</span>
-<span>    long = sequence_score([0.01] * 1000)</span>
-<span>    assert long[&quot;probability&quot;] == 0 and math.isfinite(long[&quot;nll&quot;])</span>
-<span>    assert math.isclose(long[&quot;nll&quot;], 1000 * math.log(100), rel_tol=0, abs_tol=1e-9)</span>
-<span>    # Exercise 4: certain and impossible events</span>
-<span>    assert sequence_score([1, 1])[&quot;nll&quot;] == 0 and math.isinf(sequence_score([0.5, 0])[&quot;nll&quot;])</span>
-<span>    # Exercise 5: invalid probability contracts</span>
-<span>    for values in ([], [-0.1], [1.1], [math.nan]):</span>
-<span>        try:</span>
-<span>            sequence_score(values)</span>
-<span>        except ValueError:</span>
-<span>            pass</span>
-<span>        else:</span>
-<span>            raise AssertionError(&quot;invalid probabilities accepted&quot;)</span>
-<span>    # Exercise 6: aggregation units</span>
-<span>    a, b = sequence_score([0.5]), sequence_score([0.25] * 3)</span>
-<span>    assert math.isclose((a[&quot;nll&quot;] + b[&quot;nll&quot;]) / 4, 7 * math.log(2) / 4, rel_tol=0, abs_tol=1e-12)</span>
-<span>    assert math.isclose(</span>
-<span>        (a[&quot;mean_nll&quot;] + b[&quot;mean_nll&quot;]) / 2, 3 * math.log(2) / 2, rel_tol=0, abs_tol=1e-12</span>
-<span>    )</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sequence_score</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    probabilities <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> probabilities<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty probability sequence required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">probabilities must be real numbers, not boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    probabilities <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> p <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> p <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite probabilities in [0,1] required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    nll <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>inf <span class="syntax-keyword">if</span> <span class="syntax-number">0</span> <span class="syntax-operator">in</span> probabilities <span class="syntax-keyword">else</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">probability</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> math<span class="syntax-operator">.</span>prod<span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> nll<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">targets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">mean_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> nll <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: conditional chain</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.25</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">probability</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">and</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">targets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: a different conditional table</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">probability</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.125</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: underflow without infinite log loss</span></span>
+<span class="source-line">    long <span class="syntax-operator">=</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> long<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">probability</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>long<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>long<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span> <span class="syntax-operator">*</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-9</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: certain and impossible events</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> math<span class="syntax-operator">.</span>isinf<span class="syntax-punctuation">(</span>sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: invalid probability contracts</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> values <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>math<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            sequence_score<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid probabilities accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: aggregation units</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sequence_score<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.25</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> b<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span> <span class="syntax-operator">*</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> b<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span> <span class="syntax-operator">*</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

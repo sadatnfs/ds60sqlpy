@@ -34,7 +34,7 @@ This suggests evaluating chunking at the claim level. For a formula question, la
 
 ## Tables and headings need an explicit representation
 
-Suppose a table contains columns account_type,eligible andreason. A row containing “test,false,internal traffic” is hard to interpret if retrieved without its column labels. A structure-aware representation can attach those labels to the row or preserve a small table region. If the representation repeats labels for retrieval, keep a separate link to the original source span so the generated text is not falsely presented as a verbatim quote.
+Suppose a table contains columns account_type,eligible and reason. A row containing “test,false,internal traffic” is hard to interpret if retrieved without its column labels. A structure-aware representation can attach those labels to the row or preserve a small table region. If the representation repeats labels for retrieval, keep a separate link to the original source span so the generated text is not falsely presented as a verbatim quote.
 
 Headings have a similar role. The sentence “Use account-level resampling” under “Repeated visits within accounts” has a more specific meaning than the same sentence in isolation. A chunk can carry the heading as metadata or expanded context. Repeating the heading into every indexed chunk also changes lexical frequencies and embedding inputs, so it becomes part of the retrieval policy rather than a neutral display choice.
 

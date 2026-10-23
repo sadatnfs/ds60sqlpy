@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,92 +167,92 @@
 <h4 id="exercise-1-transform-without-collapsing-occurrences-or-unknowns">Exercise 1: Transform without collapsing occurrences or unknowns<a class="heading-anchor" href="#exercise-1-transform-without-collapsing-occurrences-or-unknowns" aria-label="Link to this section">#</a></h4>
 <p>Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.</p>
 <p><strong>Expected:</strong> Seven rows, known total 130 and oneNULL doubled value. The negative entity 6 row is excluded.</p>
-<pre><code class="language-scala">def transform(source: DataFrame): DataFrame = {
-  source.filter(col(&quot;amount&quot;) &gt;= 0L || col(&quot;amount&quot;).isNull).select(col(&quot;entity_id&quot;),col(&quot;segment&quot;),(col(&quot;amount&quot;) * 2L).as(&quot;doubled&quot;))
-}</code></pre>
-<pre><code class="language-python">def transform(source):
-    return source.filter((F.col(&quot;amount&quot;)&gt;=0)|F.col(&quot;amount&quot;).isNull()).select(&quot;entity_id&quot;,&quot;segment&quot;,(F.col(&quot;amount&quot;)*2).alias(&quot;doubled&quot;))</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">transform</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  source<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span> <span class="syntax-operator">||</span> col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isNull<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;entity_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;segment&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>as<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;doubled&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">transform</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> source<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isNull<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">entity_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">doubled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The predicate makes unknown-amount retention a policy rather than an accident of three-valued logic. Arithmetic preservesNULL instead of manufacturing zero. No deduplication is requested, so identical source occurrences remain identical output occurrences. Aggregate checks provide a readable first diagnostic while the later bag oracle checks every occurrence.</p>
 <p><strong>Verification evidence:</strong> Assert population, total and unknown count, then compare with the literal golden relation in later tasks.</p>
 <h4 id="exercise-2-define-an-ordered-field-type-contract">Exercise 2: Define an ordered field/type contract<a class="heading-anchor" href="#exercise-2-define-an-ordered-field-type-contract" aria-label="Link to this section">#</a></h4>
 <p>Return ordered(name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.</p>
 <p><strong>Expected:</strong> Exactly those three fields in that order. Casting entity_id to string changes the contract even when printed values look alike.</p>
-<pre><code class="language-scala">def schemaContract(frame: DataFrame): Seq[(String,String)] = {
-  frame.schema.fields.toSeq.map(field =&gt; (field.name,field.dataType.simpleString))
-}</code></pre>
-<pre><code class="language-python">def schema_contract(frame):
-    return [(field.name,field.dataType.simpleString()) for field in frame.schema.fields]</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">schemaContract</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span><span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  frame<span class="syntax-punctuation">.</span>schema<span class="syntax-punctuation">.</span>fields<span class="syntax-punctuation">.</span>toSeq<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>field <span class="syntax-operator">=&gt;</span> <span class="syntax-punctuation">(</span>field<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>field<span class="syntax-punctuation">.</span>dataType<span class="syntax-punctuation">.</span>simpleString<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">schema_contract</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>field<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span>field<span class="syntax-operator">.</span>dataType<span class="syntax-operator">.</span>simpleString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> field <span class="syntax-operator">in</span> frame<span class="syntax-operator">.</span>schema<span class="syntax-operator">.</span>fields<span class="syntax-punctuation">]</span></code></pre>
 <p>The contract is explicit about names, order and data types. This fixture compares nullability semantics through actual values rather than demanding an identical optimizer-derived nullable flag. A different product could include stricter nullability metadata, but it should state that requirement separately rather than confusing values with schema annotations.</p>
 <p><strong>Verification evidence:</strong> Assert the correct type list and a different list after the deliberate cast.</p>
 <h4 id="exercise-3-compare-schemas-before-duplicate-sensitive-values">Exercise 3: Compare schemas before duplicate-sensitive values<a class="heading-anchor" href="#exercise-3-compare-schemas-before-duplicate-sensitive-values" aria-label="Link to this section">#</a></h4>
 <p>Reject a schema mismatch first, then require both exceptAll differences to be empty. Accept a repartitioned correct result and reject the deliberate string-ID result.</p>
 <p><strong>Expected:</strong> Correct result passes in different physical layouts; string-ID candidate fails with a named schema contract error.</p>
-<pre><code class="language-scala">def assertSameBag(actual: DataFrame, expected: DataFrame): Unit = {
-  require(schemaContract(actual) == schemaContract(expected),&quot;schema contract mismatch&quot;)
-  require(actual.exceptAll(expected).count() == 0L &amp;&amp; expected.exceptAll(actual).count() == 0L,&quot;bag contract mismatch&quot;)
-}</code></pre>
-<pre><code class="language-python">def assert_same_bag(actual, expected):
-    if schema_contract(actual) != schema_contract(expected):
-        raise ValueError(&quot;schema contract mismatch&quot;)
-    if actual.exceptAll(expected).count() or expected.exceptAll(actual).count():
-        raise ValueError(&quot;bag contract mismatch&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">assertSameBag</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span>schemaContract<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> schemaContract<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;schema contract mismatch&quot;</span><span class="syntax-punctuation">)</span>
+  require<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">.</span>exceptAll<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span> <span class="syntax-operator">&amp;&amp;</span> expected<span class="syntax-punctuation">.</span>exceptAll<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;bag contract mismatch&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">assert_same_bag</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> schema_contract<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> schema_contract<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema contract mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> actual<span class="syntax-operator">.</span>exceptAll<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> expected<span class="syntax-operator">.</span>exceptAll<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bag contract mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Checking schema first prevents a set operation from silently finding a common coerced type. The two directional bag differences preserve multiplicity and NULL equality semantics while ignoring arrival order. A repartitioned correct relation therefore passes, and a visually similar but type-incompatible relation fails for the right reason.</p>
 <p><strong>Verification evidence:</strong> Assert acceptance for golden/repartitioned values and explicit schema rejection before a coercing bag comparison.</p>
 <h4 id="exercise-4-register-materialize-reuse-and-release-one-cached-relation">Exercise 4: Register, materialize, reuse and release one cached relation<a class="heading-anchor" href="#exercise-4-register-materialize-reuse-and-release-one-cached-relation" aria-label="Link to this section">#</a></h4>
 <p>Persist the supplied transformed relation with MEMORY_AND_DISK, materialize via count, reuse for a total and inspect a filtered consumer plan. Unpersist with blocking cleanup in finally.</p>
 <p><strong>Expected:</strong> Count 7, total 130, an InMemoryTableScan reuse marker, and no registered storage level after return.</p>
-<pre><code class="language-scala">def cachedSummary(frame: DataFrame): (Long,Long,String) = {
-  frame.persist(StorageLevel.MEMORY_AND_DISK)
-  try {
-   require(frame.storageLevel != StorageLevel.NONE,&quot;cache not registered&quot;)
-   val rows = frame.count()
-   val total = frame.agg(sum(&quot;doubled&quot;)).first().getLong(0)
-   val plan = frame.filter(col(&quot;doubled&quot;) &gt;= 0L).queryExecution.executedPlan.toString
-   (rows,total,plan)
-  } finally frame.unpersist(blocking=true)
-}</code></pre>
-<pre><code class="language-python">def cached_summary(frame):
-    frame.persist(StorageLevel.MEMORY_AND_DISK)
-    try:
-        assert frame.storageLevel != StorageLevel.NONE
-        rows = frame.count()
-        total = frame.agg(F.sum(&quot;doubled&quot;)).first()[0]
-        plan = frame.filter(F.col(&quot;doubled&quot;)&gt;=0)._jdf.queryExecution().executedPlan().toString()
-        return rows,total,plan
-    finally:
-        frame.unpersist(blocking=True)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">cachedSummary</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">String</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  frame<span class="syntax-punctuation">.</span>persist<span class="syntax-punctuation">(</span><span class="syntax-class">StorageLevel</span><span class="syntax-punctuation">.</span><span class="syntax-class">MEMORY_AND_DISK</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+   require<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">.</span>storageLevel <span class="syntax-operator">!=</span> <span class="syntax-class">StorageLevel</span><span class="syntax-punctuation">.</span><span class="syntax-class">NONE</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;cache not registered&quot;</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-keyword">val</span> rows <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-keyword">val</span> total <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>agg<span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;doubled&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-keyword">val</span> plan <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;doubled&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>queryExecution<span class="syntax-punctuation">.</span>executedPlan<span class="syntax-punctuation">.</span>toString
+   <span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span>total<span class="syntax-punctuation">,</span>plan<span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> frame<span class="syntax-punctuation">.</span>unpersist<span class="syntax-punctuation">(</span>blocking<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">cached_summary</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    frame<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>StorageLevel<span class="syntax-operator">.</span>MEMORY_AND_DISK<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">assert</span> frame<span class="syntax-operator">.</span>storageLevel <span class="syntax-operator">!=</span> StorageLevel<span class="syntax-operator">.</span>NONE
+        rows <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        total <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">doubled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+        plan <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>filter<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">doubled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>_jdf<span class="syntax-operator">.</span>queryExecution<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>executedPlan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>toString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> rows<span class="syntax-punctuation">,</span>total<span class="syntax-punctuation">,</span>plan
+    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+        frame<span class="syntax-operator">.</span>unpersist<span class="syntax-punctuation">(</span>blocking<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The sequence distinguishes marking a relation for persistence from computing and reusing it. The captured plan belongs to a consumer while the cache is active. Finally-based blocking unpersist makes cleanup observable after the helper returns. This teaches a lifecycle contract without asserting that caching a seven-row relation is faster or representative of production economics.</p>
 <p><strong>Verification evidence:</strong> Assert result values, cache-scan evidence and post-returnStorageLevel.NONE. Do not use a timing threshold.</p>
 <h4 id="exercise-5-release-persistence-when-a-consumer-fails">Exercise 5: Release persistence when a consumer fails<a class="heading-anchor" href="#exercise-5-release-persistence-when-a-consumer-fails" aria-label="Link to this section">#</a></h4>
 <p>Persist and materialize the relation, then raise an injected failure before a later consumer. Unpersist in finally and verify the original error reaches the caller.</p>
 <p><strong>Expected:</strong> The injected_after_materialize error is observed and storage level isNONE afterward. Correct uncached output still passes the golden oracle.</p>
-<pre><code class="language-scala">def failingReuse(frame: DataFrame): Unit = {
-  frame.persist(StorageLevel.MEMORY_AND_DISK)
-  try {
-   frame.count()
-   throw new IllegalStateException(&quot;injected_after_materialize&quot;)
-  } finally frame.unpersist(blocking=true)
-}</code></pre>
-<pre><code class="language-python">def failing_reuse(frame):
-    frame.persist(StorageLevel.MEMORY_AND_DISK)
-    try:
-        frame.count()
-        raise RuntimeError(&quot;injected_after_materialize&quot;)
-    finally:
-        frame.unpersist(blocking=True)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">failingReuse</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  frame<span class="syntax-punctuation">.</span>persist<span class="syntax-punctuation">(</span><span class="syntax-class">StorageLevel</span><span class="syntax-punctuation">.</span><span class="syntax-class">MEMORY_AND_DISK</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+   frame<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">IllegalStateException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;injected_after_materialize&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> frame<span class="syntax-punctuation">.</span>unpersist<span class="syntax-punctuation">(</span>blocking<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">failing_reuse</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    frame<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>StorageLevel<span class="syntax-operator">.</span>MEMORY_AND_DISK<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        frame<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">injected_after_materialize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+        frame<span class="syntax-operator">.</span>unpersist<span class="syntax-punctuation">(</span>blocking<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The deliberate failure tests the resource boundary rather than only a happy-path value. Recomputing the correct relation afterward shows that cleanup did not corrupt source data or require a hidden cached result. Persistence remains an optimization inside this application; it is not durable state that the next run must inherit.</p>
 <p><strong>Verification evidence:</strong> Assert the named failure, post-failure release and full golden equality on a subsequent computation.</p>
 <h4 id="exercise-6-demonstrate-why-set-equality-misses-duplicate-loss">Exercise 6: Demonstrate why set equality misses duplicate loss<a class="heading-anchor" href="#exercise-6-demonstrate-why-set-equality-misses-duplicate-loss" aria-label="Link to this section">#</a></h4>
 <p>Return directional exceptAll row counts after schema validation. Compare transformed.distinct with golden and require the golden validator to reject it.</p>
 <p><strong>Expected:</strong> Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch.</p>
-<pre><code class="language-scala">def differenceCounts(actual: DataFrame, expected: DataFrame): (Long,Long) = {
-  require(schemaContract(actual) == schemaContract(expected),&quot;schema contract mismatch&quot;)
-  (actual.exceptAll(expected).count(),expected.exceptAll(actual).count())
-}</code></pre>
-<pre><code class="language-python">def difference_counts(actual, expected):
-    if schema_contract(actual) != schema_contract(expected):
-        raise ValueError(&quot;schema contract mismatch&quot;)
-    return actual.exceptAll(expected).count(),expected.exceptAll(actual).count()</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">differenceCounts</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span>schemaContract<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> schemaContract<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;schema contract mismatch&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">.</span>exceptAll<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">.</span>exceptAll<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">difference_counts</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> schema_contract<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> schema_contract<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema contract mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> actual<span class="syntax-operator">.</span>exceptAll<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>expected<span class="syntax-operator">.</span>exceptAll<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The negative control proves that the oracle protects occurrence multiplicity rather than only value membership. There are no new distinct values, so a set comparator would miss the error. Directional bag counts explain the failure as two missing occurrences, which is more useful than a generic mismatch message when diagnosing an accidentalDISTINCT or deduplication step.</p>
 <p><strong>Verification evidence:</strong> Assert(0,2), count 5 and the explicit negative-control rejection.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>

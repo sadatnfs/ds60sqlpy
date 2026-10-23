@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,46 +177,46 @@
 <h3 id="exercise-1-render-a-markup-looking-title-as-literal-text">Exercise 1: Render a markup-looking title as literal text<a class="heading-anchor" href="#exercise-1-render-a-markup-looking-title-as-literal-text" aria-label="Link to this section">#</a></h3>
 <p>Task: Save the snippet and inspect the resulting DOM and visible title.</p>
 <p>The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Literal text&lt;/title&gt;
-&lt;p id=&#x27;title&#x27;&gt;&lt;/p&gt;&lt;p id=&#x27;status&#x27; role=&#x27;status&#x27;&gt;&lt;/p&gt;
-&lt;script&gt;
-const input = &#x27;&lt;img src=x onerror=alert(1)&gt;&#x27;;
-const title = document.querySelector(&#x27;#title&#x27;);
-title.textContent = input;
-document.querySelector(&#x27;#status&#x27;).textContent = `Image elements: ${title.querySelectorAll(&#x27;img&#x27;).length}`;
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Literal text<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;title&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span> <span class="syntax-attribute">role</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">const</span> input <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&lt;img src=x onerror=alert(1)&gt;&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> title <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#title&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+title<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> input<span class="syntax-punctuation">;</span>
+<span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#status&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Image elements: </span><span class="syntax-string">${</span>title<span class="syntax-punctuation">.</span>querySelectorAll<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;img&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>length<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> the angle-bracket text is visible; no img element is created.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-validate-a-url-before-creating-a-link">Exercise 2: Validate a URL before creating a link<a class="heading-anchor" href="#exercise-2-validate-a-url-before-creating-a-link" aria-label="Link to this section">#</a></h3>
 <p>Task: Use a same-origin relative link and reject a javascript URL under the shown policy.</p>
 <p>The policy acts on parsed components rather than textual resemblance. Serve this example over loopback HTTP; a file origin does not satisfy its HTTP navigation contract.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;URL policy&lt;/title&gt;&lt;pre id=&#x27;result&#x27;&gt;&lt;/pre&gt;
-&lt;script&gt;
-function localLink(text) {
-  const url = new URL(text, location.href);
-  if (![&#x27;http:&#x27;, &#x27;https:&#x27;].includes(url.protocol) || url.origin !== location.origin || url.username || url.password) throw new Error(&#x27;Local HTTP link required&#x27;);
-  return url;
-}
-const result = document.querySelector(&#x27;#result&#x27;);
-try { result.textContent = `Accepted: ${localLink(&#x27;./help.html&#x27;).pathname}`; }
-catch (error) { result.textContent = error.message; }
-try { localLink(&#x27;javascript:alert(1)&#x27;); }
-catch { result.textContent += &#x27;\nRejected javascript URL&#x27;; }
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>URL policy<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">pre</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;result&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">pre</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">function</span> localLink<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> url <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> URL<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> location<span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;http:&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;https:&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>includes<span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">.</span>protocol<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> url<span class="syntax-punctuation">.</span>origin <span class="syntax-operator">!==</span> location<span class="syntax-punctuation">.</span>origin <span class="syntax-operator">||</span> url<span class="syntax-punctuation">.</span>username <span class="syntax-operator">||</span> url<span class="syntax-punctuation">.</span>password<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Local HTTP link required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> url<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#result&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> result<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Accepted: </span><span class="syntax-string">${</span>localLink<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;./help.html&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>pathname<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> result<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> error<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> localLink<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;javascript:alert(1)&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> result<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">+=</span> <span class="syntax-string">&#x27;\nRejected javascript URL&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> local help is accepted; javascript: is rejected.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-install-the-complete-fixture-csp">Exercise 3: Install the complete fixture CSP<a class="heading-anchor" href="#exercise-3-install-the-complete-fixture-csp" aria-label="Link to this section">#</a></h3>
 <p>Task: Inspect the reference HTML and load its external script and stylesheet under the meta policy.</p>
 <p>The policy permits only the local resource categories the fixture requires. It is a second layer around correct DOM code, not a substitute for that code.</p>
-<pre><code class="language-html">&lt;meta http-equiv=&#x27;Content-Security-Policy&#x27; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;self&#x27;; style-src &#x27;self&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;link rel=&#x27;stylesheet&#x27; href=&#x27;style.css&#x27;&gt;
-&lt;script src=&#x27;app.js&#x27; defer&gt;&lt;/script&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">http-equiv</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;Content-Security-Policy&#x27;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;default-src &#x27;none&#x27;; script-src &#x27;self&#x27;; style-src &#x27;self&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">link</span> <span class="syntax-attribute">rel</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;stylesheet&#x27;</span> <span class="syntax-attribute">href</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;style.css&#x27;</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span> <span class="syntax-attribute">src</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;app.js&#x27;</span> <span class="syntax-attribute">defer</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> local resources load; no inline handlers or eval are needed.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-reject-origin-and-credential-tricks">Exercise 4: Reject origin and credential tricks<a class="heading-anchor" href="#exercise-4-reject-origin-and-credential-tricks" aria-label="Link to this section">#</a></h3>
 <p>Task: Try a different port, an external origin, a data URL and embedded credentials.</p>
 <p>Changing the port changes origin. Credentials and non-HTTP schemes are rejected independently. The task inspects decisions without sending requests to the candidate destinations.</p>
-<pre><code class="language-html">const credentialed = new URL(location.href);
+<pre class="highlighted-code"><code class="language-html">const credentialed = new URL(location.href);
 credentialed.username = &#x27;public-demo&#x27;;
 credentialed.password = &#x27;not-a-secret&#x27;;
 for (const candidate of [&#x27;http://127.0.0.1:1/&#x27;, &#x27;https://example.invalid/&#x27;, &#x27;data:text/html,hello&#x27;, credentialed.href]) {
@@ -181,7 +227,7 @@ for (const candidate of [&#x27;http://127.0.0.1:1/&#x27;, &#x27;https://example.
 <h3 id="exercise-5-inspect-dynamic-text-without-changing-policy">Exercise 5: Inspect dynamic text without changing policy<a class="heading-anchor" href="#exercise-5-inspect-dynamic-text-without-changing-policy" aria-label="Link to this section">#</a></h3>
 <p>Task: Enter strong-tag-looking text, render it, then inspect child element count.</p>
 <p>An allowlisted script can still be unsafe if it uses an injection sink. Correct text insertion remains necessary even with a restrictive CSP.</p>
-<pre><code class="language-html">output.textContent = userText;
+<pre class="highlighted-code"><code class="language-html">output.textContent = userText;
 const count = output.childElementCount;
 // Expected count: 0, even when userText contains angle brackets.</code></pre>
 <p><strong>Expected:</strong> text remains literal and child element count stays zero.</p>
@@ -189,7 +235,7 @@ const count = output.childElementCount;
 <h3 id="exercise-6-explain-the-actual-policy-boundary">Exercise 6: Explain the actual policy boundary<a class="heading-anchor" href="#exercise-6-explain-the-actual-policy-boundary" aria-label="Link to this section">#</a></h3>
 <p>Task: Record what the meta policy proves and what needs headers or server authorization.</p>
 <p>Browser restrictions and server decisions solve different problems. An accurate security explanation names which component enforces each claim and avoids inferring deployment protection from a local fixture.</p>
-<pre><code class="language-html">// Inspect browser console policy messages and the loaded resource list.
+<pre class="highlighted-code"><code class="language-html">// Inspect browser console policy messages and the loaded resource list.
 // Keep document-policy observations separate from server authentication claims.</code></pre>
 <p><strong>Expected:</strong> no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>

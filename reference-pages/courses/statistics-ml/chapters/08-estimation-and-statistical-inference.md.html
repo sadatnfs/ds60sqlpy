@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -126,7 +172,7 @@
 <h4 id="stat-08-02">Sampling distributions<a class="heading-anchor" href="#stat-08-02" aria-label="Link to this section">#</a></h4>
 <p>The sampling distribution is the distribution of an estimator under repeated samples. It is distinct from the empirical distribution of raw observations. Simulation can visualize it when the generating model is specified.</p>
 <h4 id="stat-08-03">Standard errors<a class="heading-anchor" href="#stat-08-03" aria-label="Link to this section">#</a></h4>
-<p>A standard error estimates the standard deviation of an estimator&#x27;s sampling distribution. For independent observations, the mean&#x27;s SE is sample SD divided by sqrt(n). Dependence changes that calculation.</p>
+<p>A standard error estimates the standard deviation of an estimator&#x27;s sampling distribution. For independent observations, the mean&#x27;s SE is sample SD divided by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{n}</annotation></semantics></math>. Dependence changes that calculation.</p>
 <h4 id="stat-08-04">Bias<a class="heading-anchor" href="#stat-08-04" aria-label="Link to this section">#</a></h4>
 <p>Bias is E[estimate] minus the target under a specified model and sampling process. One observed estimate&#x27;s error is not its bias. Regularization intentionally introduces bias that may reduce total error.</p>
 <h4 id="stat-08-05">Consistency<a class="heading-anchor" href="#stat-08-05" aria-label="Link to this section">#</a></h4>
@@ -181,13 +227,13 @@
 <p>Multiply residuals by random mean-zero weights while preserving the design. Wild bootstrap methods can address heteroskedastic regression settings; cluster variants require cluster-level multipliers and appropriate small-cluster care.</p>
 <h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="case-study-confidence-coverage-is-a-property-of-a-procedure">Case study: confidence coverage is a property of a procedure<a class="heading-anchor" href="#case-study-confidence-coverage-is-a-property-of-a-procedure" aria-label="Link to this section">#</a></h4>
-<p>Imagine repeatedly drawing n independent normal observations from a population with mean mu and known SD sigma. For each sample, form mean(X) plus or minus 1.96*sigma/sqrt(n). Across repetitions, approximately 95% of these intervals contain the fixed mu. Each realized interval either contains mu or does not; the frequency statement refers to the procedure under its assumptions.</p>
+<p>Imagine repeatedly drawing n independent normal observations from a population with mean mu and known SD sigma. For each sample, form <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mover><mrow><mi>X</mi></mrow><mo stretchy="true">¯</mo></mover><mi>±</mi><mfrac><mrow><mn>1.96</mn><mi>σ</mi></mrow><mrow><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\bar{X}\pm\frac{1.96\sigma}{\sqrt{n}}</annotation></semantics></math>. Across repetitions, approximately 95% of these intervals contain the fixed mu. Each realized interval either contains mu or does not; the frequency statement refers to the procedure under its assumptions.</p>
 <p>A simulation with a known generating mean can check whether the implemented procedure has the expected repeated-sampling behavior. It does not prove coverage for a different distribution, dependence structure or selection process. If the analyst repeatedly inspects intervals and stops when one excludes zero, the reported interval belongs to a different procedure and ordinary fixed-sample coverage need not hold.</p>
 <p>A Bayesian credible interval can assign posterior probability to a parameter region because the parameter has a probability distribution within that model. Its frequentist coverage may be good, poor or calibrated under particular priors and models. Similar-looking intervals do not erase the distinction between their interpretations.</p>
 <h4 id="case-study-derive-the-delta-method-for-a-rate-ratio">Case study: derive the delta method for a rate ratio<a class="heading-anchor" href="#case-study-derive-the-delta-method-for-a-rate-ratio" aria-label="Link to this section">#</a></h4>
-<p>Let estimates A and B have a joint approximate normal distribution with covariance matrix Sigma. For g(A,B)=A/B, the gradient is (1/B,-A/B-squared). The approximate variance is gradient-transpose Sigma gradient. Expanding it produces a numerator variance term, denominator variance term and a covariance term. Ignoring covariance can substantially change the standard error when numerator and denominator arise from the same units.</p>
+<p>Let estimates A and B have a joint approximate normal distribution with covariance matrix Sigma. For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>A</mi></mrow><mrow><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">g(A,B)=\frac{A}{B}</annotation></semantics></math>, the gradient is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mn>1</mn><mi>B</mi></mfrac><mo>,</mo><mo>−</mo><mfrac><mrow><mi>A</mi></mrow><mrow><msup><mi>B</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\left(\frac1B,-\frac{A}{B^2}\right)</annotation></semantics></math>. The approximate variance is gradient-transpose Sigma gradient. Expanding it produces a numerator variance term, denominator variance term and a covariance term. Ignoring covariance can substantially change the standard error when numerator and denominator arise from the same units.</p>
 <p>The approximation is local. If B is near zero or highly uncertain, the ratio distribution can be skewed or have extreme tails, and a symmetric normal interval may be misleading. Fieller-type reasoning, transformations, likelihood methods or a carefully designed bootstrap may be more appropriate depending on the problem. The choice follows the denominator behavior and target, not a rule that bootstrap always fixes ratios.</p>
-<p>For g(theta)=log(theta), the derivative is 1/theta, so the approximate SE is SE(theta)/theta. This provides a route to multiplicative intervals, but only when theta is positive and the local approximation is adequate. Reporting a transformed estimate requires explaining whether it targets a transformed parameter or a transformed future observation.</p>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mi>log</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">g(\theta)=\log\theta</annotation></semantics></math>, the derivative is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>θ</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{\theta}</annotation></semantics></math>, so the approximate SE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>SE</mo><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><mrow><mi>θ</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\operatorname{SE}(\theta)}{\theta}</annotation></semantics></math>. This provides a route to multiplicative intervals, but only when theta is positive and the local approximation is adequate. Reporting a transformed estimate requires explaining whether it targets a transformed parameter or a transformed future observation.</p>
 <h4 id="case-study-choose-the-bootstrap-s-unit-and-generating-world">Case study: choose the bootstrap&#x27;s unit and generating world<a class="heading-anchor" href="#case-study-choose-the-bootstrap-s-unit-and-generating-world" aria-label="Link to this section">#</a></h4>
 <p>A dataset contains several visits per customer. Resampling visits independently produces pseudo-samples with an unrealistic amount of independent information. Resampling customers with all their visits preserves some within-customer dependence and better matches a customer-sampling process. For time series, blocks preserve local serial relationships, with block length governing a bias-variance tradeoff.</p>
 <p>A parametric bootstrap fits a model, simulates new data from it and refits the entire analysis. It can handle a statistic whose analytic sampling distribution is awkward, but it assumes the fitted model captures the relevant generating process. A nonparametric bootstrap resamples the empirical distribution and relies on its own approximation conditions. Neither observes unseen selection mechanisms or hidden confounders.</p>
@@ -198,56 +244,56 @@
 <p>Separate the target&#x27;s identification, the estimator&#x27;s bias, the covariance approximation and numerical computation. A single robust flag in software changes only part of this chain. A scientific review should ask which failure mode the adjustment addresses and which important uncertainties remain outside the reported interval.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_08.py.html">chapter_08.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_08.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_08.py</code></pre>
 <h4 id="which-uncertainty-belongs-to-the-question">Which uncertainty belongs to the question?<a class="heading-anchor" href="#which-uncertainty-belongs-to-the-question" aria-label="Link to this section">#</a></h4>
-<p>For five normal-model observations, both intervals use a t critical value with four degrees of freedom. Mean uncertainty divides SD by sqrt(n); a new individual&#x27;s uncertainty multiplies SD by sqrt(1+1/n). The code verifies that prediction uncertainty exceeds uncertainty about the mean.</p>
+<p>For five normal-model observations, both intervals use a t critical value with four degrees of freedom. Mean uncertainty divides SD by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{n}</annotation></semantics></math>; a new individual&#x27;s uncertainty multiplies SD by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{1+\frac{1}{n}}</annotation></semantics></math>. The code verifies that prediction uncertainty exceeds uncertainty about the mean.</p>
 <h4 id="resampling-and-local-propagation">Resampling and local propagation<a class="heading-anchor" href="#resampling-and-local-propagation" aria-label="Link to this section">#</a></h4>
-<p>The bootstrap repeatedly samples from the empirical distribution, whose variance uses divisor n, and its simulated SE is compared with that exact conditional target. The delta method uses the derivative of log(theta), 1/theta, so variance 0.25 at theta 4 yields log-scale SE 0.125.</p>
+<p>The bootstrap repeatedly samples from the empirical distribution, whose variance uses divisor n, and its simulated SE is compared with that exact conditional target. The delta method uses the derivative of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(\theta)</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>θ</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{\theta}</annotation></semantics></math>, so variance 0.25 at theta 4 yields log-scale SE 0.125.</p>
 <h4 id="check-an-interval-procedure-over-repeated-samples">Check an interval procedure over repeated samples<a class="heading-anchor" href="#check-an-interval-procedure-over-repeated-samples" aria-label="Link to this section">#</a></h4>
 <p>Five thousand independent samples are drawn from a known normal population with mean three and SD two. The known-SD interval contains the true mean close to 95% of the time, within four Monte Carlo standard errors. This tests the implemented procedure under its generating assumptions and keeps simulation error separate from inferential uncertainty.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
 
-def mean_and_prediction():
-    x = np.array([8.,9.,10.,11.,12.])
-    n, mean, sd = len(x), x.mean(), x.std(ddof=1)
-    critical = stats.t.ppf(.975, n-1)
-    mean_halfwidth = critical*sd/np.sqrt(n)
-    prediction_halfwidth = critical*sd*np.sqrt(1+1/n)
-    assert prediction_halfwidth &gt; mean_halfwidth
-    assert np.isclose(mean_halfwidth, 1.9632431615)
-    print(&quot;Mean:&quot;, mean, &quot;mean CI halfwidth:&quot;, mean_halfwidth, &quot;prediction halfwidth:&quot;, prediction_halfwidth)
+<span class="syntax-keyword">def</span> <span class="syntax-function">mean_and_prediction</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">11.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    n<span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> sd <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    critical <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>t<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.975</span><span class="syntax-punctuation">,</span> n<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    mean_halfwidth <span class="syntax-operator">=</span> critical<span class="syntax-operator">*</span>sd<span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span>
+    prediction_halfwidth <span class="syntax-operator">=</span> critical<span class="syntax-operator">*</span>sd<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>n<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> prediction_halfwidth <span class="syntax-operator">&gt;</span> mean_halfwidth
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>mean_halfwidth<span class="syntax-punctuation">,</span> <span class="syntax-number">1.9632431615</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">mean CI halfwidth:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> mean_halfwidth<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction halfwidth:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> prediction_halfwidth<span class="syntax-punctuation">)</span>
 
-def bootstrap_and_delta():
-    rng = np.random.default_rng(8)
-    x = np.array([1.,2.,3.,4.,5.])
-    means = rng.choice(x, size=(4000,len(x)), replace=True).mean(axis=1)
-    expected_bootstrap_se = x.std(ddof=0)/np.sqrt(len(x))
-    assert abs(means.std(ddof=1)-expected_bootstrap_se) &lt; .04
-    theta, variance = 4., .25
-    log_se = np.sqrt(variance)/theta
-    assert log_se == .125
-    print(&quot;Bootstrap SE:&quot;, means.std(ddof=1), &quot;delta log SE:&quot;, log_se)
+<span class="syntax-keyword">def</span> <span class="syntax-function">bootstrap_and_delta</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    means <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">4000</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> replace<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    expected_bootstrap_se <span class="syntax-operator">=</span> x<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>means<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>expected_bootstrap_se<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">.04</span>
+    theta<span class="syntax-punctuation">,</span> variance <span class="syntax-operator">=</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.25</span>
+    log_se <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>theta
+    <span class="syntax-keyword">assert</span> log_se <span class="syntax-operator">==</span> <span class="syntax-number">.125</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Bootstrap SE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> means<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">delta log SE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> log_se<span class="syntax-punctuation">)</span>
 
-def repeated_sample_coverage():
-    rng=np.random.default_rng(808)
-    samples=rng.normal(loc=3.,scale=2.,size=(5000,20))
-    means=samples.mean(axis=1)
-    halfwidth=stats.norm.ppf(.975)*2/np.sqrt(20)
-    coverage=np.mean(np.abs(means-3)&lt;=halfwidth)
-    monte_carlo_se=np.sqrt(.95*.05/len(means))
-    assert abs(coverage-.95)&lt;4*monte_carlo_se
-    assert halfwidth&lt;stats.norm.ppf(.975)*2
-    print(&quot;Repeated-sample coverage:&quot;,coverage,&quot;Monte Carlo SE near target:&quot;,monte_carlo_se)
+<span class="syntax-keyword">def</span> <span class="syntax-function">repeated_sample_coverage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    rng<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">808</span><span class="syntax-punctuation">)</span>
+    samples<span class="syntax-operator">=</span>rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>loc<span class="syntax-operator">=</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span>scale<span class="syntax-operator">=</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    means<span class="syntax-operator">=</span>samples<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    halfwidth<span class="syntax-operator">=</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.975</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span>
+    coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>means<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>halfwidth<span class="syntax-punctuation">)</span>
+    monte_carlo_se<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">.95</span><span class="syntax-operator">*</span><span class="syntax-number">.05</span><span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>coverage<span class="syntax-operator">-</span><span class="syntax-number">.95</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">4</span><span class="syntax-operator">*</span>monte_carlo_se
+    <span class="syntax-keyword">assert</span> halfwidth<span class="syntax-operator">&lt;</span>stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">.975</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Repeated-sample coverage:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>coverage<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">Monte Carlo SE near target:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>monte_carlo_se<span class="syntax-punctuation">)</span>
 
-def main():
-    repeated_sample_coverage()
-    mean_and_prediction()
-    bootstrap_and_delta()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    repeated_sample_coverage<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    mean_and_prediction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    bootstrap_and_delta<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why does a bootstrap not solve every uncertainty problem?</strong> It approximates the process represented by the resampling scheme. If rows are clustered, selected or missing systematically, resampling them independently reproduces the wrong process. It also cannot invent information about an unidentified target.</p>
 <p><strong>Interview: Can a biased estimator be preferable?</strong> Yes, under a stated loss. If a small bias substantially reduces variance, mean squared error falls. The scientific question is whether the tradeoff improves the decision and whether any inferential intervals account for that bias.</p>

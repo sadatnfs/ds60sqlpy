@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,67 +167,67 @@
 <h4 id="exercise-1-validate-the-generated-skewed-fixture">Exercise 1: Validate the generated skewed fixture<a class="heading-anchor" href="#exercise-1-validate-the-generated-skewed-fixture" aria-label="Link to this section">#</a></h4>
 <p>Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.</p>
 <p><strong>Expected:</strong> Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.</p>
-<pre><code class="language-scala">def fixtureMetrics(source: DataFrame): Seq[Long] = {
-  val r=source.agg(count(lit(1)),countDistinct(&quot;id&quot;),countDistinct(&quot;key&quot;),sum(&quot;id&quot;)).first()
-  Seq(r.getLong(0),r.getLong(1),r.getLong(2),r.getLong(3))
-}</code></pre>
-<pre><code class="language-python">def fixture_metrics(source):
-    return tuple(source.agg(F.count(F.lit(1)),F.countDistinct(&quot;id&quot;),F.countDistinct(&quot;key&quot;),F.sum(&quot;id&quot;)).first())</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">fixtureMetrics</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">val</span> r<span class="syntax-operator">=</span>source<span class="syntax-punctuation">.</span>agg<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">(</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fixture_metrics</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>source<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The source formula supplies an independent expected distribution before any configuration comparison. A hot key is deliberate, so the experiment can show why adding partitions does not divide one unsalted key arbitrarily. Schema and population are fixed;no external large table is collected.</p>
 <p><strong>Verification evidence:</strong> Compare aggregate counts and the independent formula 16000+4000/100.</p>
 <h4 id="exercise-2-measure-the-two-partition-configuration">Exercise 2: Measure the two-partition configuration<a class="heading-anchor" href="#exercise-2-measure-the-two-partition-configuration" aria-label="Link to this section">#</a></h4>
 <p>Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.</p>
 <p><strong>Expected:</strong> 100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files.</p>
-<pre><code class="language-scala">def measureTwo(spark: SparkSession,source: DataFrame,root: Path): BudgetReport = {
-  measured(spark,source,2,root)
-}</code></pre>
-<pre><code class="language-python">def measure_two(spark,source,root):
-    return measured(spark,source,2,root)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">measureTwo</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">BudgetReport</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">measure_two</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span></code></pre>
 <p>The report combines actual query metrics, retained scheduler stage counters and a separate physical partition-row observation. Timing covers the grouped collect only;the extra diagnostic scan and file write are outside that interval and are stated explicitly. The persisted readback ensures the measured transformation still produces the intended product.</p>
 <p><strong>Verification evidence:</strong> Compare all rows with the literal formula before accepting any work/time report.</p>
 <h4 id="exercise-3-compare-four-partitions-without-assuming-a-speedup">Exercise 3: Compare four partitions without assuming a speedup<a class="heading-anchor" href="#exercise-3-compare-four-partitions-without-assuming-a-speedup" aria-label="Link to this section">#</a></h4>
 <p>Repeat with 4 partitions and a separate output directory.</p>
 <p><strong>Expected:</strong> All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed.</p>
-<pre><code class="language-scala">def measureFour(spark: SparkSession,source: DataFrame,root: Path): BudgetReport = {
-  measured(spark,source,4,root)
-}</code></pre>
-<pre><code class="language-python">def measure_four(spark,source,root):
-    return measured(spark,source,4,root)</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">measureFour</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">BudgetReport</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">measure_four</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span></code></pre>
 <p>Increasing partitions changes task granularity and output-file opportunities, not the configured local CPU thread count. It may add scheduling overhead while leaving the dominant key together. A valid comparison preserves the full row contract and reports measurements rather than asserting that more partitions must be faster.</p>
 <p><strong>Verification evidence:</strong> Assert parity and print actual elapsed time/file/metric values without an ordering claim.</p>
 <h4 id="exercise-4-interpret-work-imbalance-and-spill-honestly">Exercise 4: Interpret work imbalance and spill honestly<a class="heading-anchor" href="#exercise-4-interpret-work-imbalance-and-spill-honestly" aria-label="Link to this section">#</a></h4>
 <p>Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.</p>
 <p><strong>Expected:</strong> Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.</p>
-<pre><code class="language-scala">def imbalance(counts: Seq[Long]): Double = {
-  require(counts.nonEmpty &amp;&amp; counts.forall(_&gt;=0L) &amp;&amp; counts.sum&gt;0L)
-  counts.max.toDouble/(counts.sum.toDouble/counts.size)
-}</code></pre>
-<pre><code class="language-python">def imbalance(counts):
-    if not counts or any(value&lt;0 for value in counts) or sum(counts)&lt;=0:raise ValueError(&quot;Positive bounded work counts required&quot;)
-    return max(counts)/(sum(counts)/len(counts))</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">imbalance</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">.</span>nonEmpty <span class="syntax-operator">&amp;&amp;</span> counts<span class="syntax-punctuation">.</span>forall<span class="syntax-punctuation">(</span>_&gt;=<span class="syntax-number">0L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> counts<span class="syntax-punctuation">.</span>sum<span class="syntax-operator">&gt;</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
+  counts<span class="syntax-punctuation">.</span>max<span class="syntax-punctuation">.</span>toDouble<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">.</span>sum<span class="syntax-punctuation">.</span>toDouble<span class="syntax-operator">/</span>counts<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">imbalance</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> counts <span class="syntax-operator">or</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> counts<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Positive bounded work counts required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>SQL metric names are retained because serialized dataSize is not automatically remote-network bytes. spillSize is the reported operator metric, not invented disk I/O when absent. A tiny run may legitimately spill zero. Partition row counts reveal the work distribution, but per-task timing would require additional actual task metrics;the ratio is labeled accordingly.</p>
 <p><strong>Verification evidence:</strong> Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.</p>
 <h4 id="exercise-5-compute-a-separate-hypothetical-cost-model">Exercise 5: Compute a separate hypothetical cost model<a class="heading-anchor" href="#exercise-5-compute-a-separate-hypothetical-cost-model" aria-label="Link to this section">#</a></h4>
 <p>Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month.</p>
 <p><strong>Expected:</strong> Estimated 0.14 currency units, not an actual cloud bill or a price recommendation.</p>
-<pre><code class="language-scala">def estimatedCost(vcpu: Double,seconds: Double,gib: Double,days: Double): Double = {
-  require(Seq(vcpu,seconds,gib,days).forall(x =&gt; x&gt;=0.0 &amp;&amp; x.isFinite))
-  vcpu*(seconds/3600.0)*0.05 + gib*(days/30.0)*0.02
-}</code></pre>
-<pre><code class="language-python">def estimated_cost(vcpu,seconds,gib,days):
-    import math
-    if any(not math.isfinite(value) or value&lt;0 for value in (vcpu,seconds,gib,days)):raise ValueError(&quot;Finite nonnegative model inputs required&quot;)
-    return vcpu*(seconds/3600)*.05+gib*(days/30)*.02</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">estimatedCost</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>forall<span class="syntax-punctuation">(</span>x <span class="syntax-operator">=&gt;</span> x<span class="syntax-operator">&gt;=</span><span class="syntax-number">0.0</span> <span class="syntax-operator">&amp;&amp;</span> x<span class="syntax-punctuation">.</span>isFinite<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  vcpu<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>seconds<span class="syntax-operator">/</span><span class="syntax-number">3600.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.05</span> <span class="syntax-operator">+</span> gib<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>days<span class="syntax-operator">/</span><span class="syntax-number">30.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.02</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">estimated_cost</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">import</span> math
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> value<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Finite nonnegative model inputs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> vcpu<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>seconds<span class="syntax-operator">/</span><span class="syntax-number">3600</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.05</span><span class="syntax-operator">+</span>gib<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>days<span class="syntax-operator">/</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.02</span></code></pre>
 <p>The model exposes its units and intentionally hypothetical prices. It omits billing minimums, network, requests, replication and operational overhead. Feeding a small local elapsed time into it would not turn the estimate into a measured production bill. Correct unit arithmetic is necessary but not sufficient for a real cost forecast.</p>
 <p><strong>Verification evidence:</strong> Check each unit conversion and reject negative durations/resources.</p>
 <h4 id="exercise-6-enforce-the-stop-budget-before-scaling-data">Exercise 6: Enforce the stop budget before scaling data<a class="heading-anchor" href="#exercise-6-enforce-the-stop-budget-before-scaling-data" aria-label="Link to this section">#</a></h4>
 <p>Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.</p>
 <p><strong>Expected:</strong> 20000/4 accepted;20001/4 and 20000/9 rejected.</p>
-<pre><code class="language-scala">def withinBudget(rows: Long,partitions: Int): Boolean = {
-  rows&gt;=1L &amp;&amp; rows&lt;=20000L &amp;&amp; partitions&gt;=1 &amp;&amp; partitions&lt;=8
-}</code></pre>
-<pre><code class="language-python">def within_budget(rows,partitions):
-    return type(rows) is int and type(partitions) is int and 1&lt;=rows&lt;=20000 and 1&lt;=partitions&lt;=8</code></pre>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">withinBudget</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">,</span>partitions<span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Boolean</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  rows<span class="syntax-operator">&gt;=</span><span class="syntax-number">1L</span> <span class="syntax-operator">&amp;&amp;</span> rows<span class="syntax-operator">&lt;=</span><span class="syntax-number">20000L</span> <span class="syntax-operator">&amp;&amp;</span> partitions<span class="syntax-operator">&gt;=</span><span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> partitions<span class="syntax-operator">&lt;=</span><span class="syntax-number">8</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">within_budget</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span>partitions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>partitions<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">and</span> <span class="syntax-number">1</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>rows<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">20000</span> <span class="syntax-operator">and</span> <span class="syntax-number">1</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>partitions<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">8</span></code></pre>
 <p>The limit is a declared teaching workload budget, not a universal safe size for Spark. Requiring an explicit review before expanding it prevents a casual performance experiment from becoming an unbounded resource request. Temporary SQL configuration is restored in finally and only the newly created product root is removed.</p>
 <p><strong>Verification evidence:</strong> Assert both refusals and confirm the session shuffle setting restored to 2.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,6 +162,7 @@
       <p class="source-path">Generated from <code>sql/professional/README.md</code></p>
     </header>
     <article class="document"><h2 id="postgresql-professional-modules">PostgreSQL professional modules<a class="heading-anchor" href="#postgresql-professional-modules" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
 <p>These named modules extend the numbered PostgreSQL track without renumbering Days 1–60. They teach database responsibilities that are normally encountered in application and production work: owning a relational model, evolving it through reviewed migrations, and enforcing least privilege.</p>
 <p>All runnable work targets PostgreSQL 16 or newer and the disposable <code>advanced_sql_training</code> database. Run commands from the repository root. Never substitute a production, shared, or personally valuable database.</p>
 <h3 id="learning-path">Learning path<a class="heading-anchor" href="#learning-path" aria-label="Link to this section">#</a></h3>
@@ -133,25 +180,25 @@
 <li><a href="../../../lesson-pages/sql-concurrency-01.html#guide">Isolation traces and optimistic concurrency</a> tests versioned writes and supplies a separately prepared, optional two-session visibility experiment.</li>
 </ul>
 <p>Use the generated catalog for the exact inventory, ordering, levels, direct prerequisites, and artifact paths rather than copying a second module table:</p>
-<pre><code class="language-text">python scripts/course.py catalog --track sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track sql</code></pre>
 <p>The professional modules&#x27; default paths are deliberately single-database and offline. The extension module detects optional packages but never installs one. The replication module models change capture locally but never creates a publication, subscription, replication slot, or standby. The temporal module reads <code>btree_gist</code> availability but uses a trigger fallback, so it never enables an extension. Optional extension and multi-node labs are operator-reviewed follow-ons, not prerequisites.</p>
 <h3 id="running-a-learner-script">Running a learner script<a class="heading-anchor" href="#running-a-learner-script" aria-label="Link to this section">#</a></h3>
 <p>The same command works in Windows PowerShell, macOS, and Linux:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></pre>
 <p>Replace the filename with the module you are studying. The relational-design lesson rolls back its schema. The security lesson either rolls back its roles and schema or prints a safe instructional skip when the connected role cannot administer roles. Every P1 learner and solution script rolls back its lab schema. The operations lessons inspect settings/statistics but do not change host configuration, enable extensions, run VACUUM, create backup files, or perform cluster recovery.</p>
 <p>The migration lesson uses the isolated <code>pro_migration_lab</code> schema. Its learner script resets that schema, runs every migration, verifies the result, and removes the schema on normal completion:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
 <p>To inspect the fixture between steps, run its files directly:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/migrations/reset.sql
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/migrations/reset.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/migrations/run_all.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/migrations/verify.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/migrations/cleanup.sql</code></pre>
 <p><code>reset.sql</code> and <code>cleanup.sql</code> drop only the course-owned <code>pro_migration_lab</code> schema. The second command intentionally leaves that isolated schema in place so you can rerun the migration runner and observe metadata-based skips; always run the cleanup command afterward.</p>
 <p>Maintainers can execute the six P1 learner/solution pairs and a final cleanup assertion with:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/tests/run_p1.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/tests/run_p1.sql</code></pre>
 <p>The test runner invokes no optional dump, container, VACUUM, extension, or server-administration command.</p>
 <p>Run the three P2 learner/solution pairs and the same cleanup assertion with:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/tests/run_p2.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/tests/run_p2.sql</code></pre>
 <p>This runner is also safe for the default local database: it performs only read-only capability inspection outside transaction-scoped labs and leaves extensions, replication configuration, roles, and the filesystem unchanged.</p>
 <h3 id="solutions-and-safe-experimentation">Solutions and safe experimentation<a class="heading-anchor" href="#solutions-and-safe-experimentation" aria-label="Link to this section">#</a></h3>
 <p>Attempt the commented exercises before opening <code>solutions/</code>. Every executable solution cleans up its normal-run objects. Keep <code>-X</code> so personal <code>psql</code> configuration cannot alter a lesson, and keep <code>ON_ERROR_STOP=1</code> so unexpected errors stop immediately.</p>

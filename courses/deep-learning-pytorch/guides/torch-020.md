@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-019`. The 
 
 ## Learning objectives
 
-Pooling reduces local spatial information. The central investigation is concrete: Pool patch 1, 3; 2, 4 with a2x2window. The finish condition is max 4; average 2.5. left->right->left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Pooling reduces local spatial information. The central investigation is concrete: Pool patch 1, 3; 2, 4 with a 2-by-2 window. The finish condition is max 4; average 2.5. left->right->left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -109,7 +109,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Compare local reductions.** Pool patch 1, 3; 2, 4 with a2x2window.
+1. **Compare local reductions.** Pool patch 1, 3; 2, 4 with a 2-by-2 window.
    **Expected:** max 4; average 2.5.
    **Verify:** Save the assertion results for exercise 1, including max 4; average 2.5.
 

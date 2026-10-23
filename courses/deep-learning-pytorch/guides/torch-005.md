@@ -126,7 +126,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** all agree within 1e-10.
    **Verify:** Save the assertion results for exercise 2, including all agree within 1e-10.
 
-3. **Separate gradient from update.** Use learning rate.1 and gradient-4 from w0.
+3. **Separate gradient from update.** Use learning rate 0.1 and gradient-4 from w = 0.
    **Expected:** new \(w=0.4\), not-4.
    **Verify:** Save the assertion results for exercise 3, including new \(w=0.4\), not-4.
 

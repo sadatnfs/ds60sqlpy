@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -139,15 +185,15 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-convert-before-division">Worked example 1: Convert before division<a class="heading-anchor" href="#worked-example-1-convert-before-division" aria-label="Link to this section">#</a></h4>
 <p>The cast belongs to an operand, so floating arithmetic occurs before the result is printed.</p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-int main(){ std::cout &lt;&lt; 7/2 &lt;&lt; &quot; &quot; &lt;&lt; static_cast&lt;double&gt;(7)/2 &lt;&lt; &quot;\n&quot;; }</code></pre>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-number">7</span><span class="syntax-operator">/</span><span class="syntax-number">2</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">double</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> 3 3.5 followed by newline.</p>
 <h4 id="worked-example-2-reject-a-negative-count">Worked example 2: Reject a negative count<a class="heading-anchor" href="#worked-example-2-reject-a-negative-count" aria-label="Link to this section">#</a></h4>
 <p>The source never turns the negative value into an unsigned size. The fixture is a validation example, not a request to allocate memory.</p>
-<pre><code class="language-cpp">#include &lt;cstddef&gt;
-#include &lt;iostream&gt;
-int main(){ const long long count=-1; if(count&lt;0){std::cout&lt;&lt;&quot;rejected\n&quot;; return 0;} return 1; }</code></pre>
-<p><strong>Expected:</strong> rejected followed by newline; exit0 means the intended rejection branch was observed.</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cstddef&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span> <span class="syntax-keyword">const</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> count<span class="syntax-operator">=</span><span class="syntax-number">-1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>count<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout<span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span><span class="syntax-string">&quot;</span><span class="syntax-string">rejected</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> rejected followed by newline; exit 0 means the intended rejection branch was observed.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-integer-division">Exercise 1: Predict integer division<a class="heading-anchor" href="#exercise-1-predict-integer-division" aria-label="Link to this section">#</a></h4>
 <p>Evaluate before choosing an output type.</p>
@@ -208,7 +254,7 @@ int main(){ const long long count=-1; if(count&lt;0){std::cout&lt;&lt;&quot;reje
 <p>Convert an already validated small positive count.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 6, positive=3, known representable by size_t.</p>
 <p><strong>Expected result/shape:</strong> For cpp-003 Exercise 6, count 3; zero would also be valid, while-1 is not.</p>
-<p><strong>Verify:</strong> For cpp-003 Exercise 6, test3 and 0 after validation and explain that arbitrary huge values still need a range check.</p>
+<p><strong>Verify:</strong> For cpp-003 Exercise 6, test 3 and 0 after validation and explain that arbitrary huge values still need a range check.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Validation can succeed.</li>
@@ -227,7 +273,7 @@ int main(){ const long long count=-1; if(count&lt;0){std::cout&lt;&lt;&quot;reje
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>The next design lesson cpp 004 introduces branches and loops. It is not assumed published yet; consult the <a href="../../../docs/expansion/tracks/cpp.md.html">track plan</a>.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-003.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-003.
 Read courses/cpp/guides/cpp-003.md and courses/cpp/lessons/cpp-003.cpp.
 Direct design prerequisites: `cpp-002`. This is authored beta content; check actual runtime capability and prerequisite concepts.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. Reciprocal rank is1 divided by the first relevant rank, or0 when none appears. For unanswerable questions, returnNone for recall and score abstention separately. Keep retrieval misses, unsupported claims, incorrect answers and appropriate abstentions as distinct counters. Compare observed and oracle results by the same question ID.</p>
 <h3 id="calculate-metrics-without-losing-the-task-s-evidence-structure">Calculate metrics without losing the task&#x27;s evidence structure<a class="heading-anchor" href="#calculate-metrics-without-losing-the-task-s-evidence-structure" aria-label="Link to this section">#</a></h3>
-<p>For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank 1/2. If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.</p>
+<p>For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>. If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.</p>
 <p>A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.</p>
 <p>Duplicate retrieved IDs are rejected before metrics. Without that boundary, a naive count could reward repeated evidence. The current recall uses a set intersection, which prevents numerator inflation, but duplicate list entries would still distort ranks and consumed budget. Requiring unique identities makes the evaluation unit explicit.</p>
 <p>For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.</p>
@@ -142,42 +188,42 @@
 <h3 id="exercise-1-calculate-recall-and-reciprocal-rank">Exercise 1: Calculate recall and reciprocal rank<a class="heading-anchor" href="#exercise-1-calculate-recall-and-reciprocal-rank" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use relevant IDs a, c and retrieved b, c, a.</p>
 <p>Both relevant documents are retrieved, but the first appears second. Recall alone would not reveal that ordering.</p>
-<pre><code class="language-python">recall,rr=retrieval_metrics([&#x27;b&#x27;,&#x27;c&#x27;,&#x27;a&#x27;],{&#x27;a&#x27;,&#x27;c&#x27;})
-assert recall==1 and rr==.5</code></pre>
-<p><strong>Expected:</strong> recall1; reciprocal rank.5.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with recall1; reciprocal rank.5.</p>
+<pre class="highlighted-code"><code class="language-python">recall<span class="syntax-punctuation">,</span>rr<span class="syntax-operator">=</span>retrieval_metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> recall<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> rr<span class="syntax-operator">==</span><span class="syntax-number">.5</span></code></pre>
+<p><strong>Expected:</strong> recall 1; reciprocal rank 0.5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with recall 1; reciprocal rank 0.5.</p>
 <h3 id="exercise-2-measure-a-retrieval-miss">Exercise 2: Measure a retrieval miss<a class="heading-anchor" href="#exercise-2-measure-a-retrieval-miss" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use relevant a and retrieved b, c.</p>
 <p>The answer stage cannot use evidence absent from its context. This is a retrieval failure even if a language model guesses the answer from prior training.</p>
-<pre><code class="language-python">assert retrieval_metrics([&#x27;b&#x27;,&#x27;c&#x27;],{&#x27;a&#x27;})==(0.,0.)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> retrieval_metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> recall0; reciprocal rank 0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with recall0; reciprocal rank 0.</p>
 <h3 id="exercise-3-handle-an-unanswerable-question">Exercise 3: Handle an unanswerable question<a class="heading-anchor" href="#exercise-3-handle-an-unanswerable-question" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use an empty relevant set and a saved abstention result.</p>
 <p>A denominator of zero does not mean perfect recall. The correct task behavior is evaluated through an explicit answerability and abstention policy.</p>
-<pre><code class="language-python">assert retrieval_metrics([&#x27;b&#x27;],set())==(None,0.)
-result={&#x27;question&#x27;:&#x27;q-missing&#x27;,&#x27;answerable&#x27;:False,&#x27;abstained&#x27;:True}; assert not result[&#x27;answerable&#x27;] and result[&#x27;abstained&#x27;]</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> retrieval_metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+result<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">question</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q-missing</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">answerable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">abstained</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">answerable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">abstained</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> recallNone; appropriate abstentionTrue.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with recallNone; appropriate abstentionTrue.</p>
 <h3 id="exercise-4-separate-support-from-correctness">Exercise 4: Separate support from correctness<a class="heading-anchor" href="#exercise-4-separate-support-from-correctness" aria-label="Link to this section">#</a></h3>
 <p>The question is: Record a correct-looking answer whose cited context does not support it.</p>
 <p>A system can answer from memorized knowledge or chance while failing an evidence-grounded contract. Both outcomes should remain visible.</p>
-<pre><code class="language-python">saved={&#x27;question&#x27;:&#x27;q1&#x27;,&#x27;correct&#x27;:True,&#x27;supported&#x27;:False,&#x27;retrieval_miss&#x27;:True}
-assert saved[&#x27;correct&#x27;] and not saved[&#x27;supported&#x27;]</code></pre>
+<pre class="highlighted-code"><code class="language-python">saved<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">question</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">correct</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">supported</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">retrieval_miss</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> saved<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">correct</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> saved<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">supported</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> correctTrue but supportedFalse.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with correctTrue but supportedFalse.</p>
 <h3 id="exercise-5-apply-an-oracle-context-control">Exercise 5: Apply an oracle-context control<a class="heading-anchor" href="#exercise-5-apply-an-oracle-context-control" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare q1 observed incorrect with oracle-context correct under the same rubric.</p>
 <p>The unchanged failure onq2 shows that retrieval is not always the sole bottleneck. The control should not silently change the question or answer criteria.</p>
-<pre><code class="language-python">observed={&#x27;q1&#x27;:0,&#x27;q2&#x27;:0}; oracle={&#x27;q1&#x27;:1,&#x27;q2&#x27;:0}
-assert oracle[&#x27;q1&#x27;]-observed[&#x27;q1&#x27;]==1 and oracle[&#x27;q2&#x27;]-observed[&#x27;q2&#x27;]==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">observed<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> oracle<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> oracle<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>observed<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> oracle<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>observed<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> paired improvement1 for q1.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with paired improvement1 for q1.</p>
 <h3 id="exercise-6-reject-duplicate-result-identities">Exercise 6: Reject duplicate result identities<a class="heading-anchor" href="#exercise-6-reject-duplicate-result-identities" aria-label="Link to this section">#</a></h3>
 <p>The question is: Validate one score row per question and inject a duplicateq1.</p>
 <p>Duplicated question rows can inflate counts and distort paired comparisons. Identity checks belong before calculating aggregate metrics.</p>
-<pre><code class="language-python">ids=[&#x27;q1&#x27;,&#x27;q2&#x27;,&#x27;q3&#x27;]; assert len(ids)==len(set(ids))
-bad=ids+[&#x27;q1&#x27;]; assert len(bad)!=len(set(bad))</code></pre>
+<pre class="highlighted-code"><code class="language-python">ids<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q3</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+bad<span class="syntax-operator">=</span>ids<span class="syntax-operator">+</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>bad<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>bad<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> duplicate ID detected.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with duplicate ID detected.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

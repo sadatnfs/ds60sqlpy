@@ -1,6 +1,6 @@
 # spark-001 learner worksheet
 
-Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
 
 Read the [guide](../guides/spark-001.md), predict first, and keep an independent response for each task. These are reasoning fixtures, not commands to execute.
 
@@ -33,7 +33,7 @@ receipt: profile absent; no executed probe
 
 Label each artifact and explain what can be edited.
 
-**Inputs/evidence:** For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit0.
+**Inputs/evidence:** For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit 0.
 
 **Expected result/shape:** For spark-001 Exercise 1, source, compiled bytecode, observed output and process status are four different categories.
 

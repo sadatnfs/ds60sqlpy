@@ -78,7 +78,7 @@
       ],
       "outcome": "A domain corpus is a versioned dataset.",
       "lab": "Add source=course-authored, permission=course-fixture and SHA256 to each local document.",
-      "verification": "6 complete records; all hashes contain64 characters. attack text remains data; restricted record remains restricted."
+      "verification": "6 complete records; all hashes contain 64 characters. attack text remains data; restricted record remains restricted."
     },
     {
       "id": "llm-applied-005",
@@ -116,7 +116,7 @@
       ],
       "outcome": "Lexical retrieval ranks documents using observed terms.",
       "lab": "Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.",
-      "verification": "a ranks first with a positive score; the other scores are0. empty result for no documents; finite zero score for an empty document."
+      "verification": "a ranks first with a positive score; the other scores are 0. empty result for no documents; finite zero score for an empty document."
     },
     {
       "id": "llm-applied-007",
@@ -135,7 +135,7 @@
       ],
       "outcome": "Embedding retrieval maps queries and documents to vectors and compares their geometry.",
       "lab": "Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].",
-      "verification": "purchase ranks first, mixed second, geometry last. top-ranked IDwrong is outside the authored relevant set."
+      "verification": "purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set."
     },
     {
       "id": "llm-applied-008",
@@ -153,7 +153,7 @@
         "Candidate recall"
       ],
       "outcome": "Hybrid retrieval combines complementary candidate generators.",
-      "lab": "Fuse lexical[a, b, c] and dense[b, d, a] with constant60.",
+      "lab": "Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.",
       "verification": "b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID."
     },
     {
@@ -211,7 +211,7 @@
       ],
       "outcome": "Grounded answering requires a connection between each substantive claim and supporting evidence.",
       "lab": "Answer the conversion-definition question from the metric document and its first sentence.",
-      "verification": "statusanswered; one claim; citation slices the exact sentence. rate.3 with input counts preserved."
+      "verification": "status answered; one claim; citation slices the exact sentence. rate.3 with input counts preserved."
     },
     {
       "id": "llm-applied-012",
@@ -230,7 +230,7 @@
       ],
       "outcome": "A RAG evaluation should identify where the pipeline failed.",
       "lab": "Use relevant IDs a, c and retrieved b, c, a.",
-      "verification": "recall1; reciprocal rank.5. duplicate ID detected."
+      "verification": "recall 1; reciprocal rank 0.5. duplicate ID detected."
     },
     {
       "id": "llm-applied-013",
@@ -248,7 +248,7 @@
         "Selective accuracy"
       ],
       "outcome": "Reliability comparisons require an explicit unit of independence.",
-      "lab": "Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.",
+      "lab": "Use system A errors q1=0, q2=0, q3=1 and B q1=1, q2=1, q3=0.",
       "verification": "differences[-1, -1, 1] by sortedID. test-based selection rejected."
     },
     {
@@ -267,7 +267,7 @@
         "Training denominator"
       ],
       "outcome": "Supervised fine-tuning data specifies the behavior a model is asked to imitate.",
-      "lab": "Use promptIDs[1, 2] andanswerIDs[5, 6, 3].",
+      "lab": "Use prompt IDs[1, 2] and answer IDs[5, 6, 3].",
       "verification": "inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays."
     },
     {
@@ -288,7 +288,7 @@
       ],
       "outcome": "Full supervised fine-tuning updates all trainable model parameters on governed target examples.",
       "lab": "Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.",
-      "verification": "inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says20 updates, 4 active training targets and no natural-language competence claim."
+      "verification": "inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says 20 updates, 4 active training targets and no natural-language competence claim."
     },
     {
       "id": "llm-applied-016",
@@ -327,8 +327,8 @@
         "QLoRA boundary"
       ],
       "outcome": "QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters.",
-      "lab": "QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.",
-      "verification": "codes[[0, -4], [7, -1]]. all four unimplemented claims explicitlyFalse."
+      "lab": "QuantizeW[[.1, -.9], [1.7, -.2]] with scale 1.7/7 andnearest-even rounding.",
+      "verification": "codes[[0, -4], [7, -1]]. all four unimplemented claims explicitly False."
     },
     {
       "id": "llm-applied-018",
@@ -347,7 +347,7 @@
       ],
       "outcome": "A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks.",
       "lab": "Create a seed 31 decoder and copy its state into full and adapted candidates.",
-      "verification": "all initial base parameters equal. adapter96 entries; 20 updates each; scope literal-token task."
+      "verification": "all initial base parameters equal. adapter 96 entries; 20 updates each; scope literal-token task."
     },
     {
       "id": "llm-applied-019",
@@ -365,8 +365,8 @@
         "RLHF distinction"
       ],
       "outcome": "Preference optimization uses labels describing which of two responses is preferred.",
-      "lab": "Set policy difference0, reference difference0, beta.5.",
-      "verification": "losslog2. offline updateTrue; reward_model_trainedFalse; online_rlFalse."
+      "lab": "Set policy difference 0, reference difference 0, beta.5.",
+      "verification": "loss log 2. offline update True; reward_model_trained False; online_rl False."
     },
     {
       "id": "llm-applied-020",
@@ -384,8 +384,8 @@
         "Pairwise reranker"
       ],
       "outcome": "Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation.",
-      "lab": "Use queries anddocuments equal to the2x2identity matrix, withpositive labels0, 1.",
-      "verification": "score shape(2, 2); one positive perquery. actual gradient updatesTrue; pretrained_semantic_encoderFalse."
+      "lab": "Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1.",
+      "verification": "score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False."
     },
     {
       "id": "llm-applied-021",
@@ -404,7 +404,7 @@
       ],
       "outcome": "A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs.",
       "lab": "Read the supplied model manifest and identify model ID, revision and license note before any download.",
-      "verification": "exact40-character revision and Apache-2.0 card note are present. pretrained executionunverified; no generated success receipt."
+      "verification": "exact 40-character revision and Apache-2.0 card note are present. pretrained execution unverified; no generated success receipt."
     },
     {
       "id": "llm-applied-022",
@@ -422,8 +422,8 @@
         "Interpretation boundary"
       ],
       "outcome": "An LLM can help propose data-science operations, but the application should execute only typed, bounded operations whose semantics are understood.",
-      "lab": "Use rowsA1, A3, B10 and the admittedgroup_mean request.",
-      "verification": "A count 2 mean2; B count 1 mean10. descriptive statisticavailable; causal claimnot established."
+      "lab": "Use rows A1, A3, B10 and the admittedgroup_mean request.",
+      "verification": "A count 2 mean 2; B count 1 mean 10. descriptive statistic available; causal claim not established."
     },
     {
       "id": "llm-applied-023",
@@ -441,8 +441,8 @@
         "Safe trace"
       ],
       "outcome": "A production-oriented domain assistant needs controls around the model as well as a good prompt.",
-      "lab": "Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.",
-      "verification": "freshTrue. answer admissionFalse; reasonstale evidence."
+      "lab": "Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.",
+      "verification": "fresh True. answer admission False; reason stale evidence."
     },
     {
       "id": "llm-applied-024",
@@ -463,7 +463,7 @@
       ],
       "outcome": "A subject-assistant capstone should demonstrate an entire evidence path: task admission, authorized retrieval, versioned source selection, grounded output, deterministic data-science computation and independent evaluation.",
       "lab": "Ask the public assistant forconversion_definition.",
-      "verification": "answered withmetric-v1 citation and source text. local_fixture_passTrue; production_gono-go."
+      "verification": "answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go."
     }
   ]
 }

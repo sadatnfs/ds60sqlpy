@@ -88,7 +88,7 @@ else: raise AssertionError('cross-request cache accepted')
 
 ## Exercise 5: Start a fresh request empty
 
-The question is: Run token2 with no cache and compare with the first full-prefix position.
+The question is: Run token 2 with no cache and compare with the first full-prefix position.
 
 An empty cache resets both context and position offset. Clearing only metadata while retaining tensors would not restore a fresh request.
 

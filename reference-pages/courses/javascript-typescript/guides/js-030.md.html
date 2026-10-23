@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -141,38 +187,38 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-validate-one-local-form-submission">Example A: Validate one local form submission<a class="heading-anchor" href="#example-a-validate-one-local-form-submission" aria-label="Link to this section">#</a></h4>
 <p>Native constraints stop many invalid user submissions before the submit handler. The explicit domain check still defines the accepted state and protects alternate invocation paths.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Local form&lt;/title&gt;
-&lt;form id=&#x27;form&#x27;&gt;&lt;label&gt;Name &lt;input name=&#x27;name&#x27; required maxlength=&#x27;40&#x27;&gt;&lt;/label&gt;
-&lt;label&gt;Quantity &lt;input name=&#x27;quantity&#x27; type=&#x27;number&#x27; min=&#x27;1&#x27; max=&#x27;20&#x27; step=&#x27;1&#x27; required&gt;&lt;/label&gt;
-&lt;button&gt;Apply&lt;/button&gt;&lt;/form&gt;&lt;p role=&#x27;status&#x27; id=&#x27;status&#x27;&gt;No accepted state&lt;/p&gt;
-&lt;script&gt;
-const form = document.querySelector(&#x27;#form&#x27;);
-const status = document.querySelector(&#x27;#status&#x27;);
-form.addEventListener(&#x27;submit&#x27;, event =&gt; {
-  event.preventDefault();
-  const fields = new FormData(form);
-  const name = String(fields.get(&#x27;name&#x27;) ?? &#x27;&#x27;).trim();
-  const quantity = Number(fields.get(&#x27;quantity&#x27;));
-  if (!name || !Number.isInteger(quantity) || quantity &lt; 1 || quantity &gt; 20) return;
-  status.textContent = `${name}: ${quantity}`;
-});
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Local form<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">form</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;form&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">label</span><span class="syntax-punctuation">&gt;</span>Name <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">input</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;name&#x27;</span> <span class="syntax-attribute">required</span> <span class="syntax-attribute">maxlength</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;40&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">label</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">label</span><span class="syntax-punctuation">&gt;</span>Quantity <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">input</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;quantity&#x27;</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;number&#x27;</span> <span class="syntax-attribute">min</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;1&#x27;</span> <span class="syntax-attribute">max</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;20&#x27;</span> <span class="syntax-attribute">step</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;1&#x27;</span> <span class="syntax-attribute">required</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">label</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span>Apply<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">form</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">role</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span><span class="syntax-punctuation">&gt;</span>No accepted state<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">const</span> form <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#form&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> status <span class="syntax-operator">=</span> <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#status&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+form<span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;submit&#x27;</span><span class="syntax-punctuation">,</span> event <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  event<span class="syntax-punctuation">.</span>preventDefault<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> fields <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> FormData<span class="syntax-punctuation">(</span>form<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> name <span class="syntax-operator">=</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;name&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">??</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>trim<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;quantity&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>name <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> quantity <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">||</span> quantity <span class="syntax-operator">&gt;</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span><span class="syntax-punctuation">;</span>
+  status<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">${</span>name<span class="syntax-string">}</span><span class="syntax-string">: </span><span class="syntax-string">${</span>quantity<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> valid output Ada: 2; invalid input produces no accepted state.</p>
 <h4 id="example-b-handle-storage-success-and-failure-explicitly">Example B: Handle storage success and failure explicitly<a class="heading-anchor" href="#example-b-handle-storage-success-and-failure-explicitly" aria-label="Link to this section">#</a></h4>
 <p>A successful state update and a successful storage operation are separate observations. The interface reports the actual persistence outcome without hiding failure behind a local display update.</p>
-<pre><code class="language-html">&lt;!doctype html&gt;&lt;html lang=&#x27;en&#x27;&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Storage boundary&lt;/title&gt;
-&lt;button id=&#x27;save&#x27; type=&#x27;button&#x27;&gt;Save tiny draft&lt;/button&gt;&lt;p id=&#x27;status&#x27; role=&#x27;status&#x27;&gt;Not saved&lt;/p&gt;
-&lt;script&gt;
-const key = &#x27;ds60-js030-demo&#x27;;
-document.querySelector(&#x27;#save&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
-  try {
-    localStorage.setItem(key, JSON.stringify({ version: 1, name: &#x27;Ada&#x27;, quantity: 2 }));
-    document.querySelector(&#x27;#status&#x27;).textContent = &#x27;Saved&#x27;;
-  } catch {
-    document.querySelector(&#x27;#status&#x27;).textContent = &#x27;Storage unavailable; draft is not persisted&#x27;;
-  }
-});
-&lt;/script&gt;&lt;/html&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Storage boundary<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">button</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;save&#x27;</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;button&#x27;</span><span class="syntax-punctuation">&gt;</span>Save tiny draft<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span> <span class="syntax-attribute">role</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;status&#x27;</span><span class="syntax-punctuation">&gt;</span>Not saved<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-keyword">const</span> key <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ds60-js030-demo&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#save&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;click&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+    localStorage<span class="syntax-punctuation">.</span>setItem<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> version<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Ada&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#status&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Saved&#x27;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#status&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Storage unavailable; draft is not persisted&#x27;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> either Saved or a visible Storage unavailable message, never an invented success.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
@@ -206,7 +252,7 @@ document.querySelector(&#x27;#save&#x27;).addEventListener(&#x27;click&#x27;, ()
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://html.spec.whatwg.org/multipage/webstorage.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-030: Forms, browser storage and application state.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-030: Forms, browser storage and application state.
 Read courses/javascript-typescript/guides/js-030.md and courses/javascript-typescript/lessons/js-030.md. Direct prerequisites: `js-029`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

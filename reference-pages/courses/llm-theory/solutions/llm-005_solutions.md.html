@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,8 +165,8 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/llm-005.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="llm-005_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-trace-a-perplexity">Exercise 1: Trace a perplexity<a class="heading-anchor" href="#exercise-1-trace-a-perplexity" aria-label="Link to this section">#</a></h3>
-<p>The two negative log terms are ln(2) and ln(4), so total NLL is 3<em>ln(2). Divide by the two active targets to obtain 1.5</em>ln(2), then exponentiate for perplexity 2**1.5. Each field has a different interpretation. Keeping the count next to the result makes later padding and batching errors visible. The perplexity is not a count of correct predictions or a probability that the observed text is factually true.</p>
-<p><strong>Expected:</strong> Total 3<em>log(2), count 2, mean 1.5</em>log(2), perplexity 2**1.5.</p>
+<p>The two negative log terms are ln(2) and ln(4), so total NLL is 3<em>ln(2). Divide by the two active targets to obtain 1.5</em>ln(2), then exponentiate for perplexity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mn>1.5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{1.5}</annotation></semantics></math>. Each field has a different interpretation. Keeping the count next to the result makes later padding and batching errors visible. The perplexity is not a count of correct predictions or a probability that the observed text is factually true.</p>
+<p><strong>Expected:</strong> Total <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot \log(2)</annotation></semantics></math>, count 2, mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1.5\cdot \log(2)</annotation></semantics></math>, perplexity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mn>1.5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{1.5}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Assert all four fields with explicit tolerances rather than comparing one unlabeled number.</p>
 <h3 id="exercise-2-construct-a-masked-score">Exercise 2: Construct a masked score<a class="heading-anchor" href="#exercise-2-construct-a-masked-score" aria-label="Link to this section">#</a></h3>
 <p>The ignored third slot contributes neither a negative log term nor a target count. The complete score therefore matches the original two-target result. Selecting by a boolean mask before reduction is the canonical reference behavior. Merely appending zero loss and averaging all three entries would lower the objective without improving any prediction. Preserve a test where adding ignored padding leaves the active count and every reported normalized value unchanged.</p>
@@ -128,52 +174,52 @@
 <p><strong>Verify:</strong> Compare the complete returned metrics and the active count against the unpadded result.</p>
 <h3 id="exercise-3-compare-document-weighting">Exercise 3: Compare document weighting<a class="heading-anchor" href="#exercise-3-compare-document-weighting" aria-label="Link to this section">#</a></h3>
 <p>Document A has total ln(2) over one target; B has total 6<em>ln(2) over three. Combining all targets gives 7</em>ln(2)/4. Averaging the two document means gives (ln(2)+2<em>ln(2))/2, or 3</em>ln(2)/2. The discrepancy is weighting, not floating-point error. Declare whether documents or targets are the primary units before comparing systems. The later corpus split should also preserve source families rather than pretending repeated paraphrases are independent evidence.</p>
-<p><strong>Expected:</strong> Token-weighted mean is 7<em>log(2)/4, while equal-document mean is 3</em>log(2)/2.</p>
+<p><strong>Expected:</strong> Token-weighted mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>7</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{7\cdot \log(2)}{4}</annotation></semantics></math>, while equal-document mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3\cdot \log(2)}{2}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Record both the four-target denominator and two-document denominator in a labeled table.</p>
 <h3 id="exercise-4-handle-zero-probability">Exercise 4: Handle zero probability<a class="heading-anchor" href="#exercise-4-handle-zero-probability" aria-label="Link to this section">#</a></h3>
 <p>A zero-probability active target is impossible under the supplied distribution, so mean NLL and perplexity are infinite. If the zero slot is explicitly ignored, only the probability 0.5 remains, giving ln(2) and perplexity 2. This distinction relies on the mask policy, not on silently clipping probabilities. Ignoring an inconvenient real target after seeing its score would be selection bias; only predeclared padding or exclusion rules justify its removal.</p>
-<p><strong>Expected:</strong> Active zero gives infinite mean and perplexity; ignoring it leaves mean log(2) and perplexity 2.</p>
+<p><strong>Expected:</strong> Active zero gives infinite mean and perplexity; ignoring it leaves mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> and perplexity 2.</p>
 <p><strong>Verify:</strong> Use math.isinf for the first case and assert active count 1 in the second.</p>
 <h3 id="exercise-5-reject-an-absent-or-invalid-score">Exercise 5: Reject an absent or invalid score<a class="heading-anchor" href="#exercise-5-reject-an-absent-or-invalid-score" aria-label="Link to this section">#</a></h3>
 <p>An all-false mask and an empty sequence have no defined empirical mean. A value above one is not a probability. Reject those with ValueError and reject an integer mask with TypeError under the explicit boolean convention. Do not use a default zero score to hide absence or a malformed request. Repeat the normal two-target fixture after the failures to demonstrate the reference is not mutating input lists or retaining accidental state between calls.</p>
 <p><strong>Expected:</strong> The first three raise ValueError; integer mask raises TypeError.</p>
 <p><strong>Verify:</strong> Capture each exception independently and confirm the original two-target result still passes.</p>
 <h3 id="exercise-6-challenge-a-tokenizer-ranking">Exercise 6: Challenge a tokenizer ranking<a class="heading-anchor" href="#exercise-6-challenge-a-tokenizer-ranking" aria-label="Link to this section">#</a></h3>
-<p>A assigns probability 0.25 to its one token, so mean NLL is ln(4) and perplexity 4. B assigns 0.5 to each of three character targets, yielding perplexity 2 but complete-string probability 0.5**3=0.125. The smaller B perplexity did not mean it assigned more probability to the same complete string. Neither alone proves answer quality. A compatible comparison must state representation and unit, or use an independently justified common scoring basis rather than sorting raw token perplexities.</p>
+<p>A assigns probability 0.25 to its one token, so mean NLL is ln(4) and perplexity 4. B assigns 0.5 to each of three character targets, yielding perplexity 2 but complete-string probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>0.5</mn></mrow><mrow><mn>3</mn></mrow></msup><mo>=</mo><mn>0.125</mn></mrow><annotation encoding="application/x-tex">{0.5}^{3}=0.125</annotation></semantics></math>. The smaller B perplexity did not mean it assigned more probability to the same complete string. Neither alone proves answer quality. A compatible comparison must state representation and unit, or use an independently justified common scoring basis rather than sorting raw token perplexities.</p>
 <p><strong>Expected:</strong> A perplexity 4 with string probability 0.25; B perplexity 2 with string probability 0.125.</p>
 <p><strong>Verify:</strong> Assert both scores and explain why the smaller raw perplexity cannot directly rank these incompatible token units.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import math
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
 
 
-def score_targets(probabilities, mask=None):
-    probabilities = list(probabilities)
-    if not probabilities:
-        raise ValueError(&quot;nonempty probability sequence required&quot;)
-    if any(not math.isfinite(float(p)) or float(p) &lt; 0 or float(p) &gt; 1 for p in probabilities):
-        raise ValueError(&quot;finite probabilities in [0,1] required&quot;)
-    if mask is None:
-        mask = [True] * len(probabilities)
-    mask = list(mask)
-    if any(type(value) is not bool for value in mask):
-        raise TypeError(&quot;mask must be boolean&quot;)
-    if len(mask) != len(probabilities) or not any(mask):
-        raise ValueError(&quot;same-length mask with active targets required&quot;)
-    active = [float(p) for p, include in zip(probabilities, mask) if include]
-    total = math.inf if 0 in active else math.fsum(-math.log(p) for p in active)
-    mean = total / len(active)
-    try:
-        perplexity = math.exp(mean)
-    except OverflowError:
-        perplexity = math.inf
-    return {
-        &quot;total_nll&quot;: total,
-        &quot;active_targets&quot;: len(active),
-        &quot;mean_nll&quot;: mean,
-        &quot;perplexity&quot;: perplexity,
-    }</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">score_targets</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">,</span> mask<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    probabilities <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> probabilities<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty probability sequence required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite probabilities in [0,1] required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> mask <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        mask <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span>
+    mask <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">bool</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> mask<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">mask must be boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">same-length mask with active targets required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    active <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p<span class="syntax-punctuation">,</span> include <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> include<span class="syntax-punctuation">]</span>
+    total <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>inf <span class="syntax-keyword">if</span> <span class="syntax-number">0</span> <span class="syntax-operator">in</span> active <span class="syntax-keyword">else</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> active<span class="syntax-punctuation">)</span>
+    mean <span class="syntax-operator">=</span> total <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>active<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        perplexity <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> OverflowError<span class="syntax-punctuation">:</span>
+        perplexity <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>inf
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">total_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> total<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">active_targets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>active<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">mean_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> mean<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">perplexity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perplexity<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without formulas in view, derive the mean loss and perplexity for probabilities [1,0.5]. Then explain why adding an ignored padding target should change neither the loss nor the active-target count.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

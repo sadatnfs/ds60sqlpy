@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <p>F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image: geometry alone cannot prove semantic invariance.</p>
 <h3 id="trace-discarded-information-gradients-and-target-semantics">Trace discarded information, gradients and target semantics<a class="heading-anchor" href="#trace-discarded-information-gradients-and-target-semantics" aria-label="Link to this section">#</a></h3>
 <p>For the patch[[1, 3], [2, 4]], max pooling returns 4 and average pooling returns(1+3+2+4)/4=2.5. Now change only the first entry from 1 to 0. The maximum stays 4, while the average becomes 9/4=2.25. The two maps are therefore not interchangeable summaries even though both return one number. Many different patches share the same maximum, so no later layer can reconstruct all discarded values from that output alone.</p>
-<p>Consider an upstream derivative g=1 for this one pooled output. With a unique maximum, the max-pool backward route sends one to the selected 4 and zero to the other positions. Average pooling sends 1/4 to every entry. This explains the perturbation result locally: a small change to the nonmaximum 1 has zero first-order effect on the max but a quarter-sized effect on the average. Raising 3 past 4 changes the selected maximum, so the derivative route changes at that boundary. At a tie there is no unique ordinary derivative of the max function; do not assume gradients are split equally or use a tied point as a smooth finite-difference oracle.</p>
+<p>Consider an upstream derivative <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">g=1</annotation></semantics></math> for this one pooled output. With a unique maximum, the max-pool backward route sends one to the selected 4 and zero to the other positions. Average pooling sends <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math> to every entry. This explains the perturbation result locally: a small change to the nonmaximum 1 has zero first-order effect on the max but a quarter-sized effect on the average. Raising 3 past 4 changes the selected maximum, so the derivative route changes at that boundary. At a tie there is no unique ordinary derivative of the max function; do not assume gradients are split equally or use a tied point as a smooth finite-difference oracle.</p>
 <p>The worked call uses kernel_size2 and the default stride equal to the kernel size. With overlapping windows, one input can receive contributions from several pooled outputs, so its final gradient sums those routes. Pooling itself has no learned kernel coefficients in these examples. Its effect on training is through the information and derivatives it passes to learned layers.</p>
 <p>Padding conventions matter on negative inputs. PyTorch max pooling uses implicit negative infinity for its padding, so a padded location cannot defeat a valid negative maximum. Replacing that with ordinary zero padding would make a patch of negative responses appear to contain a larger zero. For average pooling, count_include_pad and any divisor override affect the denominator near boundaries. The paired TensorFlow worked example uses VALID padding, so none of those boundary differences is exercised there. Match explicit conventions before claiming a padded cross-framework equivalence. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.MaxPool2d.html">PyTorch 2.9 MaxPool2d</a>.</p>
 <p>A local pool can be invariant to permutations inside one fixed window, but shifting an image can move values between windows. Max pooling is not a general guarantee that the complete model ignores translations. Stride and window boundaries can discard small features or alias a pattern. Whether that tradeoff helps depends on the task and the downstream representation, not only the smaller tensor shape.</p>
@@ -136,45 +182,45 @@
 <p>The evaluation exercise adds an ownership promise: return equal values in an independent tensor, so a caller&#x27;s later mutation cannot alter the source. An identity-valued alias would pass a value comparison and fail that ownership contract. In PyTorch, clone is the relevant explicit storage operation here. TensorFlow&#x27;s ordinary immutable tensor API has different mutation semantics, so do not infer the same storage promise merely from the paired chapter&#x27;s identity-valued transformation.</p>
 <p>Random training augmentation, when introduced, belongs to the experiment&#x27;s RNG state. A seeded CPU demonstration is useful reproducibility evidence within its declared environment, not a universal promise of identical random transforms across platforms. Test semantic and geometric invariants and keep the actual sample/seed configuration with the run. Evaluation variation should be intentional and separately described, not accidental training-mode behavior.</p>
 <h3 id="exercise-1-compare-local-reductions">Exercise 1: Compare local reductions<a class="heading-anchor" href="#exercise-1-compare-local-reductions" aria-label="Link to this section">#</a></h3>
-<p>The question is: Pool patch 1, 3; 2, 4 with a2x2window.</p>
+<p>The question is: Pool patch 1, 3; 2, 4 with a 2-by-2 window.</p>
 <p>The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.</p>
-<pre><code class="language-python">image=torch.tensor([[[[1.,3.],[2.,4.]]]])
-assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5</code></pre>
+<pre class="highlighted-code"><code class="language-python">image<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> F<span class="syntax-operator">.</span>max_pool2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> F<span class="syntax-operator">.</span>avg_pool2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.5</span></code></pre>
 <p><strong>Expected:</strong> max 4; average 2.5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with max 4; average 2.5.</p>
 <h3 id="exercise-2-inspect-a-horizontal-flip">Exercise 2: Inspect a horizontal flip<a class="heading-anchor" href="#exercise-2-inspect-a-horizontal-flip" aria-label="Link to this section">#</a></h3>
 <p>The question is: Flip the width axis and read the pixel s.</p>
 <p>The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.</p>
-<pre><code class="language-python">flipped=torch.flip(image,dims=(-1,))
-assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]</code></pre>
+<pre class="highlighted-code"><code class="language-python">flipped<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>dims<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> flipped<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> rows 3, 1 and 4, 2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with rows 3, 1 and 4, 2.</p>
 <h3 id="exercise-3-check-the-round-trip">Exercise 3: Check the round trip<a class="heading-anchor" href="#exercise-3-check-the-round-trip" aria-label="Link to this section">#</a></h3>
 <p>The question is: Flip the image horizontal l y twice.</p>
 <p>Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.</p>
-<pre><code class="language-python">assert torch.equal(torch.flip(flipped,dims=(-1,)),image)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>flipped<span class="syntax-punctuation">,</span>dims<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>image<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> exact original values.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with exact original values.</p>
 <h3 id="exercise-4-expose-discarded-information">Exercise 4: Expose discarded information<a class="heading-anchor" href="#exercise-4-expose-discarded-information" aria-label="Link to this section">#</a></h3>
 <p>The question is: Change only the non maximum pixel 1 to0 and compare pool s.</p>
 <p>The perturbation is invisible to max pooling. That can be useful robustness or harmful information loss, depending on the task.</p>
-<pre><code class="language-python">changed=image.clone(); changed[0,0,0,0]=0
-assert F.max_pool2d(changed,2).item()==4 and F.avg_pool2d(changed,2).item()==2.25</code></pre>
+<pre class="highlighted-code"><code class="language-python">changed<span class="syntax-operator">=</span>image<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> F<span class="syntax-operator">.</span>max_pool2d<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span> <span class="syntax-operator">and</span> F<span class="syntax-operator">.</span>avg_pool2d<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.25</span></code></pre>
 <p><strong>Expected:</strong> max still 4; average 2.25.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with max still 4; average 2.25.</p>
 <h3 id="exercise-5-keep-evaluation-transforms-deterministic">Exercise 5: Keep evaluation transforms deterministic<a class="heading-anchor" href="#exercise-5-keep-evaluation-transforms-deterministic" aria-label="Link to this section">#</a></h3>
 <p>The question is: Define a transform that flips only in training and returns an owned copy in evaluation.</p>
 <p>A clear branch makes mode behavior reviewable. The owned copy also prevents downstream mutation from changing the original fixture.</p>
-<pre><code class="language-python">def transform(value,training): return torch.flip(value,(-1,)) if training else value.clone()
-evaluated=transform(image,False); assert torch.equal(evaluated,image)
-evaluated[0,0,0,0]=99; assert image[0,0,0,0].item()==1</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">transform</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span>training<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> training <span class="syntax-keyword">else</span> value<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+evaluated<span class="syntax-operator">=</span>transform<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>evaluated<span class="syntax-punctuation">,</span>image<span class="syntax-punctuation">)</span>
+evaluated<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">99</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> image<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span></code></pre>
 <p><strong>Expected:</strong> evaluation equals source and does not alias it.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with evaluation equals source and does not alias it.</p>
 <h3 id="exercise-6-transform-directional-labels-consistently">Exercise 6: Transform directional labels consistently<a class="heading-anchor" href="#exercise-6-transform-directional-labels-consistently" aria-label="Link to this section">#</a></h3>
 <p>The question is: Map left to right under horizontal reflect i on and check the inverse.</p>
 <p>A valid augmentation can transform the target rather than preserve it, but that mapping must be explicit. Keeping the left label after a flip would teach contradictory examples.</p>
-<pre><code class="language-python">labels={&#x27;left&#x27;:&#x27;right&#x27;,&#x27;right&#x27;:&#x27;left&#x27;}
-assert labels[&#x27;left&#x27;]==&#x27;right&#x27; and labels[labels[&#x27;left&#x27;]]==&#x27;left&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python">labels<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">left</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">right</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">right</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">left</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> labels<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">left</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">right</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> labels<span class="syntax-punctuation">[</span>labels<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">left</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">left</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> left-&gt;right-&gt;left.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with left-&gt;right-&gt;left.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

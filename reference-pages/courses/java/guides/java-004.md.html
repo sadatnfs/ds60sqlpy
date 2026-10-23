@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner, approximately 90 minutes. Direct prerequisites: <code>java-003</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is ImplementdoubleValue(intx) and evaluate7 and0. The final exercise transfers the mechanism to inspect overload selection.</p>
+<p>Explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Implement doubleValue(int x) and evaluate 7 and 0. The final exercise transfers the mechanism to inspect overload selection.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input. Parameters are local variables initialized from argument values. Java always passes values. For an object argument, the copied value is a reference, so both caller and callee can refer to the same mutable object. Reassigning the parameter changes only the local reference; mutating the referenced object can be visible to the caller. Overloading selects among methods by parameter types at compile time, while overriding is a different runtime mechanism introduced later. Small explicit contracts make methods testable without reading every caller.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -127,9 +173,9 @@
 <p><strong>Return value:</strong> The result passed back when a method completes.</p>
 <p><strong>Pass by value:</strong> Copying argument values into method parameters.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-004/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
@@ -137,61 +183,61 @@ java -ea Main</code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-call-a-pure-calculation">Example A: Call a pure calculation<a class="heading-anchor" href="#example-a-call-a-pure-calculation" aria-label="Link to this section">#</a></h4>
 <p>The result depends only on the argument and the method changes no external state. That makes normal and boundary cases easy to test independently.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static int doubleValue(int x) { return Math.multiplyExact(x, 2); }
-    static int positiveArea(int width, int height) {
-        if (width &lt;= 0 || height &lt;= 0) throw new IllegalArgumentException(&quot;positive dimensions required&quot;);
-        return Math.multiplyExact(width, height);
-    }
-    static void reassignInt(int value) { value = 99; }
-    static void append(List&lt;Integer&gt; values) { values.add(2); }
-    static void replace(List&lt;Integer&gt; values) { values = new ArrayList&lt;&gt;(); }
-    static String describe(int value) { return &quot;int&quot;; }
-    static String describe(long value) { return &quot;long&quot;; }
-    public static void main(String[] args) throws Exception {
-        assert doubleValue(7) == 14;
-        assert doubleValue(0) == 0;
-    }
-}
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">doubleValue</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">multiplyExact</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">positiveArea</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> width<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> height<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>width <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> height <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> IllegalArgumentException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">positive dimensions required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">return</span> Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">multiplyExact</span><span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">reassignInt</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> value <span class="syntax-operator">=</span> <span class="syntax-number">99</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">append</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">replace</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> String <span class="syntax-function">describe</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> String <span class="syntax-function">describe</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">long</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">long</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">assert</span> doubleValue<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">14</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> doubleValue<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
-<p><strong>Expected:</strong> 14 and0.</p>
+<p><strong>Expected:</strong> 14 and 0.</p>
 <h4 id="example-b-validate-a-precondition">Example B: Validate a precondition<a class="heading-anchor" href="#example-b-validate-a-precondition" aria-label="Link to this section">#</a></h4>
 <p>A zero dimension is rejected because this method models a strictly positive rectangle. Another domain could allow zero, but its contract must say so.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static int doubleValue(int x) { return Math.multiplyExact(x, 2); }
-    static int positiveArea(int width, int height) {
-        if (width &lt;= 0 || height &lt;= 0) throw new IllegalArgumentException(&quot;positive dimensions required&quot;);
-        return Math.multiplyExact(width, height);
-    }
-    static void reassignInt(int value) { value = 99; }
-    static void append(List&lt;Integer&gt; values) { values.add(2); }
-    static void replace(List&lt;Integer&gt; values) { values = new ArrayList&lt;&gt;(); }
-    static String describe(int value) { return &quot;int&quot;; }
-    static String describe(long value) { return &quot;long&quot;; }
-    public static void main(String[] args) throws Exception {
-        assert doubleValue(7) == 14;
-        assert doubleValue(0) == 0;
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">doubleValue</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">multiplyExact</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">positiveArea</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> width<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> height<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>width <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> height <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> IllegalArgumentException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">positive dimensions required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">return</span> Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">multiplyExact</span><span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">reassignInt</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> value <span class="syntax-operator">=</span> <span class="syntax-number">99</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">append</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">replace</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> String <span class="syntax-function">describe</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> String <span class="syntax-function">describe</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">long</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">long</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">assert</span> doubleValue<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">14</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> doubleValue<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 
-        assert positiveArea(3, 4) == 12;
-        boolean badArea = false;
-        try { positiveArea(0, 4); } catch (IllegalArgumentException expected) { badArea = true; }
-        assert badArea;
-    }
-}
+        <span class="syntax-keyword">assert</span> positiveArea<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">boolean</span> badArea <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> positiveArea<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>IllegalArgumentException expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> badArea <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">assert</span> badArea<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> 3by4 gives12;zero width throwsIllegalArgumentException.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Call a pure calculation.</strong> ImplementdoubleValue(intx) and evaluate7 and0. <strong>Expected:</strong> 14 and0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 14 and0.</li>
+<li><strong>Call a pure calculation.</strong> Implement doubleValue(int x) and evaluate 7 and 0. <strong>Expected:</strong> 14 and 0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 14 and 0.</li>
 </ol>
 <ol>
-<li><strong>Validate a precondition.</strong> ImplementpositiveArea(width,height) rejecting nonpositive dimensions. <strong>Expected:</strong> 3by4 gives12;zero width throwsIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 3by4 gives12;zero width throwsIllegalArgumentException.</li>
+<li><strong>Validate a precondition.</strong> Implement positiveArea(width,height) rejecting nonpositive dimensions. <strong>Expected:</strong> 3by4 gives12;zero width throwsIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 3by4 gives12;zero width throwsIllegalArgumentException.</li>
 </ol>
 <ol>
 <li><strong>Observe copied primitive values.</strong> Passint5 to a helper that reassigns its local parameter to99. <strong>Expected:</strong> caller value remains5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with caller value remains5.</li>
@@ -203,7 +249,7 @@ public class Main {
 <li><strong>Distinguish reference reassignment.</strong> Pass the list to a helper that replaces only its local parameter with a new list. <strong>Expected:</strong> caller list remains1,2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with caller list remains1,2.</li>
 </ol>
 <ol>
-<li><strong>Inspect overload selection.</strong> Call describe withint1 andlong1L using two overloads. <strong>Expected:</strong> int andlong respectively. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with int andlong respectively.</li>
+<li><strong>Inspect overload selection.</strong> Call describe withint1 andlong1L using two overloads. <strong>Expected:</strong> int and long respectively. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with int and long respectively.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
@@ -217,7 +263,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-004: Methods and explicit contracts.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-004: Methods and explicit contracts.
 Read courses/java/guides/java-004.md and courses/java/lessons/java-004.java. Direct prerequisites: `java-003`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

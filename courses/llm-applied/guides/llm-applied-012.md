@@ -129,7 +129,7 @@ recall,rr=retrieval_metrics(['b','c','a'],{'a','c'})
 assert recall==1 and rr==.5
 ```
 
-**Expected:** recall 1; reciprocal rank.5.
+**Expected:** recall 1; reciprocal rank 0.5.
 
 ### Example B: Measure a retrieval miss
 
@@ -154,13 +154,13 @@ result={'question':'q-missing','answerable':False,'abstained':True}; assert not 
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: recall 1; reciprocal rank.5. duplicate ID detected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: recall 1; reciprocal rank 0.5. duplicate ID detected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Calculate recall and reciprocal rank.** Use relevant IDs a, c and retrieved b, c, a.
-   **Expected:** recall 1; reciprocal rank.5.
-   **Verify:** Save the assertion results for exercise 1, including recall 1; reciprocal rank.5.
+   **Expected:** recall 1; reciprocal rank 0.5.
+   **Verify:** Save the assertion results for exercise 1, including recall 1; reciprocal rank 0.5.
 
 2. **Measure a retrieval miss.** Use relevant a and retrieved b, c.
    **Expected:** recall 0; reciprocal rank 0.

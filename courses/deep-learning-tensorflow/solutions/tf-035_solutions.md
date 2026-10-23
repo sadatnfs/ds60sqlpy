@@ -103,9 +103,9 @@ assert all(row['partition']=='validation' for row in ledger if row['action']=='c
 bad={'action':'choose','partition':'test'}; assert bad['partition']!='validation'
 ```
 
-**Expected:** selection partitionvalidation; final-test tuning prohibited.
+**Expected:** selection partition validation; final-test tuning prohibited.
 
-**Verify:** Compare the computed values or written argument with selection partitionvalidation; final-test tuning prohibited.
+**Verify:** Compare the computed values or written argument with selection partition validation; final-test tuning prohibited.
 
 ## Review after comparison
 

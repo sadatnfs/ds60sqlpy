@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -129,54 +175,54 @@
 <h3 id="exercise-1-compare-false-and-truthy-containers">Exercise 1: Compare false and truthy containers<a class="heading-anchor" href="#exercise-1-compare-false-and-truthy-containers" aria-label="Link to this section">#</a></h3>
 <p>Task: Inspect Boolean conversions of 0, empty string, empty array and empty object.</p>
 <p>An empty collection is still an object. Testing if(array) does not establish that it contains any elements.</p>
-<pre><code class="language-javascript">assert.deepEqual([Boolean(0), Boolean(&#x27;&#x27;), Boolean([]), Boolean({})], [false, false, true, true]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Boolean</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Boolean</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Boolean</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Boolean</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> false, false, true, true.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-preserve-a-valid-zero-with-nullish-fallback">Exercise 2: Preserve a valid zero with nullish fallback<a class="heading-anchor" href="#exercise-2-preserve-a-valid-zero-with-nullish-fallback" aria-label="Link to this section">#</a></h3>
 <p>Task: Compare 0||10 with 0??10, and null??10.</p>
 <p>The operators encode different absence policies. A valid zero count should not silently become a default because it is falsy.</p>
-<pre><code class="language-javascript">assert.equal(0 || 10, 10);
-assert.equal(0 ?? 10, 0);
-assert.equal(null ?? 10, 10);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span> <span class="syntax-operator">||</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span> <span class="syntax-operator">??</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span> <span class="syntax-operator">??</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 10, 0, 10.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-trace-a-prefix-sum">Exercise 3: Trace a prefix sum<a class="heading-anchor" href="#exercise-3-trace-a-prefix-sum" aria-label="Link to this section">#</a></h3>
 <p>Task: Sum 2, 4, 6 and record the accumulator after each iteration.</p>
 <p>Each element contributes exactly once. The recorded states make the invariant inspectable rather than only checking a final total.</p>
-<pre><code class="language-javascript">let sum = 0;
-const prefixes = [];
-for (const value of [2, 4, 6]) { sum += value; prefixes.push(sum); }
-assert.deepEqual(prefixes, [2, 6, 12]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> sum <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> prefixes <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> value <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> sum <span class="syntax-operator">+=</span> value<span class="syntax-punctuation">;</span> prefixes<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>prefixes<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> prefixes 2, 6, 12.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-handle-an-empty-collection">Exercise 4: Handle an empty collection<a class="heading-anchor" href="#exercise-4-handle-an-empty-collection" aria-label="Link to this section">#</a></h3>
 <p>Task: Run the same accumulation pattern on an empty array.</p>
 <p>The additive identity already represents the empty result. No fabricated element is needed.</p>
-<pre><code class="language-javascript">let sum = 0;
-let iterations = 0;
-for (const value of []) { sum += value; iterations += 1; }
-assert.equal(sum, 0);
-assert.equal(iterations, 0);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> sum <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> iterations <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> value <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> sum <span class="syntax-operator">+=</span> value<span class="syntax-punctuation">;</span> iterations <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>iterations<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> sum 0 and iterations 0.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-stop-at-the-first-match">Exercise 5: Stop at the first match<a class="heading-anchor" href="#exercise-5-stop-at-the-first-match" aria-label="Link to this section">#</a></h3>
 <p>Task: Find the first 8 in 3, 8, 8 using an indexed loop and break.</p>
 <p>Without break, a later match could overwrite the first index. The sentinel -1 distinguishes absence from index 0.</p>
-<pre><code class="language-javascript">const values = [3, 8, 8];
-let found = -1;
-for (let index = 0; index &lt; values.length; index += 1) {
-  if (values[index] === 8) { found = index; break; }
-}
-assert.equal(found, 1);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> found <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">===</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> found <span class="syntax-operator">=</span> index<span class="syntax-punctuation">;</span> <span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>found<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> index 1.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-make-a-wrong-boundary-observable">Exercise 6: Make a wrong boundary observable<a class="heading-anchor" href="#exercise-6-make-a-wrong-boundary-observable" aria-label="Link to this section">#</a></h3>
 <p>Task: Iterate with index&lt;=length over a one-element array and record the values.</p>
 <p>JavaScript array out-of-range reads return undefined rather than throwing by default. A loop bug can therefore travel into later arithmetic as NaN unless the contract is checked.</p>
-<pre><code class="language-javascript">const values = [7];
-const observed = [];
-for (let index = 0; index &lt;= values.length; index += 1) observed.push(values[index]);
-assert.deepEqual(observed, [7, undefined]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> observed <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;=</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> observed<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> extra undefined element exposes the off-by-one.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -121,20 +167,20 @@
 <p>Before starting, check current host and engine-VM disk space, RAM allocation, existing resources and download sizes. Budget the worker plus the control-plane node separately from any Spark/TensorFlow worker. Stop other owned heavy tests through their normal lifecycle before preparing this node. Do not prune unrelated images, restart the engine or change its settings as an automatic repair.</p>
 <p>Use the course&#x27;s configured Python interpreter for the host companion. It never reads or rewrites the user&#x27;s default kubeconfig. It creates a new private runtime directory, uses explicit kubeconfig/context arguments, binds the host API only to127.0.0.1 and refuses remote Docker endpoints. The Windows implementation sets and verifies a current-user/SYSTEM ACL on only that newly created directory; actual native Windows acceptance remains a separate required test. WSL uses its Linux tools and paths. Do not hand a Windows path to a Linux CLI.</p>
 <p>Read-only inventory, from the repository root:</p>
-<pre><code class="language-text">python scripts/prepare_kubernetes.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/prepare_kubernetes.py doctor</code></pre>
 <p>Connected tool preparation is explicit and installs into the chosen tool cache, not a global PATH or home configuration:</p>
-<pre><code class="language-text">python scripts/prepare_kubernetes.py tools --allow-download</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/prepare_kubernetes.py tools --allow-download</code></pre>
 <p>Build the tiny fixture and optional worker only after the resource/download preflight is approved. Both Dockerfiles accept a previously qualified <code>DS60_PYTHON_IMAGE</code> base override. Building is a separate action; no job Run performs an image pull or dependency installation.</p>
-<pre><code class="language-text">docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
+<pre class="highlighted-code"><code class="language-text">docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
 docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .</code></pre>
 <p>Use the local engine endpoint reported by the existing launcher doctor. For Rancher Desktop on macOS, the common endpoint is the user&#x27;s <code>.rd/docker.sock</code>; other engines may use a different socket. This is an example only when that is the engine you selected:</p>
-<pre><code class="language-bash">python scripts/prepare_kubernetes.py prepare --confirm-create \
-  --docker-host &quot;unix://$HOME/.rd/docker.sock&quot; --allow-node-download</code></pre>
+<pre class="highlighted-code"><code class="language-bash">python scripts/prepare_kubernetes.py prepare --confirm-create <span class="syntax-string">\</span>
+  --docker-host <span class="syntax-string">&quot;</span><span class="syntax-string">unix://</span>$HOME<span class="syntax-string">/.rd/docker.sock</span><span class="syntax-string">&quot;</span> --allow-node-download</code></pre>
 <p>For a native Windows Docker-compatible named-pipe endpoint:</p>
-<pre><code class="language-powershell">python scripts/prepare_kubernetes.py prepare --confirm-create `
-  --docker-host &#x27;npipe:////./pipe/docker_engine&#x27; --allow-node-download</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">python scripts<span class="syntax-punctuation">/</span>prepare_kubernetes<span class="syntax-punctuation">.</span>py prepare <span class="syntax-punctuation">-</span>-confirm-create <span class="syntax-punctuation">`</span>
+  <span class="syntax-punctuation">-</span>-docker-host <span class="syntax-string">&#x27;npipe:////./pipe/docker_engine&#x27;</span> <span class="syntax-punctuation">-</span>-allow-node-download</code></pre>
 <p><code>--allow-node-download</code> is required only when the pinned node bytes are absent. The fixture must already exist locally and is explicitly loaded into the owned kind node. Where the official registry path has a certificate-chain failure, an explicit mirror option is accepted only with the <strong>same</strong> release/index digest:</p>
-<pre><code class="language-text">--node-image mirror.gcr.io/kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5</code></pre>
+<pre class="highlighted-code"><code class="language-text">--node-image mirror.gcr.io/kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5</code></pre>
 <p>The helper prints the private session path and nonsecret status; it never prints the token, admin certificate or kubeconfig contents. Keep that directory outside <code>.learning</code>, source, exported notes and backups. Save the returned <code>DS60_K8S_SESSION_DIR</code> value in the launching shell. Both optional Compose routes mount the lease and scoped kubeconfig from this explicit directory. Their worker HTTP credential comes from different storage:</p>
 <ul>
 <li>The primary Docker classroom uses <code>compose.classroom.kubernetes.yaml</code> with <code>compose.classroom.yaml</code>. Its initializer owns the private <code>classroom-runtime</code> named volume, shared read-only with the app and broker. This route does not require <code>DS60_MODULE_RUNTIME_DIR</code>.</li>
@@ -144,7 +190,7 @@ docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlp
 <p>The worker must prove that demoted UIDs65533 and65534 cannot read the original supervisor credentials, verify the namespace UID/owner against its private lease, and disable readiness when that probe or lease becomes invalid. Kubectl runs as the separate credential-only UID65533. Learner YAML cannot choose an image, command, namespace, host path, plugin, proxy, context or credential.</p>
 <p>The original hello path supports the fixed-name Deployment and optional Service; the contract-2 extension below adds a bounded ConfigMap and a standalone finite task. It verifies controller and Ready Pod identities, deduplicated ready EndpointSlice Pod UIDs, and a fresh in-cluster <code>/version</code> client when a Service is supplied. The client is a fixed broker-created Job; users cannot submit arbitrary Jobs. Every Run cleans only its recorded owner+job-nonce+UID resources, including readback recovery when creation committed but its response was lost. Deletion sends an API UID precondition. The private cluster lease remains until explicit host release. Rolling revisions, Pod-deletion tasks and second-Service transfer remain scoped manual/teacher exercises in this initial adapter.</p>
 <p>Release only the exact owned session after checking its receipt:</p>
-<pre><code class="language-text">python scripts/prepare_kubernetes.py release --session &lt;PRIVATE_SESSION_PATH&gt; --confirm-release</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/prepare_kubernetes.py release --session &lt;PRIVATE_SESSION_PATH&gt; --confirm-release</code></pre>
 <p>The helper checks the control-plane container ID, kind ownership label and namespace UID before deletion. A replacement or ambiguous object is preserved. It confirms the owned node is absent before removing its credential files. Shared networks, public image caches, learner source/evidence and unrelated containers remain intact. A failed partial preparation retains a private recovery receipt; where the exact created node identity was recorded, cleanup is attempted only for that unchanged node. Unproved partial state requires explicit inspection rather than a broad delete-all or engine reset.</p>
 <p>The <a href="../../docs/modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">module runtime walkthrough</a> connects build, private host preparation, explicit-session start, stop and release. Prepare after building because the scoped lease lasts15 minutes. Release/failed-preparation cleanup targets only the recorded full64hex Docker node ID. It does not run a name-based global kind cleanup or remove shared networks. Same-name replacements and ambiguous engine failures preserve the private recovery evidence.</p>
 <h3 id="fixture-contract-2-and-bounded-ordinary-labs">Fixture contract 2 and bounded ordinary labs<a class="heading-anchor" href="#fixture-contract-2-and-bounded-ordinary-labs" aria-label="Link to this section">#</a></h3>

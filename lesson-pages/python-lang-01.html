@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -346,7 +392,7 @@
 <li>Explain descriptor lookup and validate assignment.</li>
 <li>Trace cooperative <code>super()</code> through method resolution order (MRO).</li>
 <li>Separate static promises from runtime enforcement.</li>
-<li>Recognize when <code><strong>init_subclass</strong></code> is simpler than a metaclass.</li>
+<li>Recognize when <code>__init_subclass__</code> is simpler than a metaclass.</li>
 </ol>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -358,18 +404,18 @@
 <li><strong>Literal:</strong> a type restricted to exact values.</li>
 <li><strong>Overload:</strong> multiple static call signatures for one implementation.</li>
 <li><strong>Data model:</strong> Python protocols behind iteration, context management, descriptors, operators, and class creation.</li>
-<li><strong>Descriptor:</strong> object whose <code><strong>get</strong></code>, <code><strong>set</strong></code>, or <code><strong>delete</strong></code> controls attribute access.</li>
+<li><strong>Descriptor:</strong> object whose <code>__get__</code>, <code>__set__</code>, or <code>__delete__</code> controls attribute access.</li>
 <li><strong>MRO:</strong> ordered classes Python searches and <code>super()</code> follows.</li>
 <li><strong>Metaclass:</strong> class of a class, able to customize class creation.</li>
 </ul>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run the learner parser and iterator scaffold.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_lang_01_typing_data_model.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_lang_01_typing_data_model<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_lang_01_typing_data_model.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_lang_01_typing_data_model.py</code></pre>
 <p>The solution then composes several contracts:</p>
-<pre><code class="language-text">Reader[T_co]      -&gt; read-only covariance
+<pre class="highlighted-code"><code class="language-text">Reader[T_co]      -&gt; read-only covariance
 MutableRepository -&gt; invariant read/write boundary
 DomainEvent       -&gt; TypedDict union narrowed by &quot;kind&quot;
 Batches[T]        -&gt; __iter__ + __next__
@@ -379,11 +425,13 @@ ApiRecord         -&gt; cooperative super() through its MRO
 Handler           -&gt; __init_subclass__ registry</code></pre>
 <p>Static checking catches impossible uses before execution. Runtime code still validates text, schemas, transaction state, and descriptor assignments.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_lang_01_typing_data_model.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_lang_01_typing_data_model<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_lang_01_typing_data_model.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_lang_01_typing_data_model.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -392,38 +440,38 @@ Handler           -&gt; __init_subclass__ registry</code></pre>
 <ul>
 <li><strong><code>Protocol</code> + <code>TypeVar</code>:</strong> expresses the smallest structural interface and its variance from producer/consumer behavior.</li>
 <li><strong><code>@overload</code> signatures + one implementation:</strong> gives static callers precise return types while runtime code still validates the discriminant.</li>
-<li><strong><code><strong>iter</strong></code> / <code><strong>next</strong></code> / <code><strong>enter</strong></code> / <code><strong>exit</strong></code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
+<li><strong><code>__iter__</code> / <code>__next__</code> / <code>__enter__</code> / <code>__exit__</code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
 </ul>
 <h5 id="guide--micro-example-a-show-structural-compatibility-without-inheritance">Micro-example A — show structural compatibility without inheritance<a class="heading-anchor" href="#guide--micro-example-a-show-structural-compatibility-without-inheritance" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from typing import Protocol
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Protocol
 
 
-class Named(Protocol):
-    @property
-    def name(self) -&gt; str: ...
+<span class="syntax-keyword">class</span> <span class="syntax-class">Named</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-decorator">@property</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">name</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span>
 
 
-class PlainRecord:
-    def __init__(self, name):
-        self.name = name
+<span class="syntax-keyword">class</span> <span class="syntax-class">PlainRecord</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>name <span class="syntax-operator">=</span> name
 
 
-def label(value: Named) -&gt; str:
-    return value.name.upper()
+<span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> Named<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> value<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>upper<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
 
-print(label(PlainRecord(&quot;ada&quot;)))
-assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span>PlainRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> label<span class="syntax-punctuation">(</span>PlainRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ADA</span><span class="syntax-string">&quot;</span></code></pre>
 <p><strong>Expected observation:</strong> <code>PlainRecord</code> never inherits from <code>Named</code>; static structural matching uses its available member.</p>
 <p><strong>Why it matters:</strong> At runtime, the provided <code>name</code> is actually a string; the Protocol alone does not validate decoded input.</p>
 <h5 id="guide--micro-example-b-honor-iterator-exhaustion-and-partial-batches">Micro-example B — honor iterator exhaustion and partial batches<a class="heading-anchor" href="#guide--micro-example-b-honor-iterator-exhaustion-and-partial-batches" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])
-assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)
-assert next(iterator) == (&quot;c&quot;,)
-try:
-    next(iterator)
-except StopIteration:
-    print(&quot;iterator exhausted exactly once input ended&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">iterator <span class="syntax-operator">=</span> <span class="syntax-builtin">iter</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>iterator<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>iterator<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>iterator<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> StopIteration<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">iterator exhausted exactly once input ended</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The final partial batch is a valid value; only the following call signals exhaustion.</p>
 <p><strong>Why it matters:</strong> Empty and partial batches are part of the iterator&#x27;s documented contract.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -433,12 +481,12 @@ except StopIteration:
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-complete-and-type-the-overloaded-parser">1. Complete and type the overloaded parser<a class="heading-anchor" href="#guide--1-complete-and-type-the-overloaded-parser" aria-label="Link to this section">#</a></h5>
 <p>Implement the three promised return behaviors. Reject boolean text other than <code>true</code> and <code>false</code>. In VS Code, inspect the inferred type of:</p>
-<pre><code class="language-python">number = parse_scalar(&quot;12&quot;, &quot;int&quot;)
-flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">number <span class="syntax-operator">=</span> parse_scalar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+flag <span class="syntax-operator">=</span> parse_scalar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Passing a variable typed as arbitrary <code>str</code> needs a broader overload or prior narrowing; overloads do not inspect future runtime text.</p>
 <p><strong>Verify:</strong> Complete and type the overloaded parser — assert parse_scalar(&#x27;12&#x27;,&#x27;int&#x27;) returns int 12, parse_scalar(&#x27;true&#x27;,&#x27;bool&#x27;) returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.</p>
 <h5 id="guide--2-implement-the-iterator-protocol">2. Implement the iterator protocol<a class="heading-anchor" href="#guide--2-implement-the-iterator-protocol" aria-label="Link to this section">#</a></h5>
-<p>Complete <code>Batches.<strong>next</strong></code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
+<p>Complete <code>Batches.__next__</code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
 <p><strong>Verify:</strong> Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.</p>
 <h5 id="guide--3-reason-about-variance">3. Reason about variance<a class="heading-anchor" href="#guide--3-reason-about-variance" aria-label="Link to this section">#</a></h5>
 <p>Assign <code>SequenceReader[str]</code> to <code>Reader[object]</code>; this is safe because callers only read. Explain why a mutable repository of strings cannot be treated as a repository of objects: a caller might store an integer into it.</p>
@@ -447,16 +495,16 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Add a third event with a unique literal <code>kind</code>. Update <code>describe_event</code> and let the checker identify unhandled or invalid fields. Add runtime validation at the JSON boundary; TypedDict alone does not validate decoded data.</p>
 <p><strong>Verify:</strong> Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.</p>
 <h5 id="guide--5-exercise-context-manager-failure">5. Exercise context-manager failure<a class="heading-anchor" href="#guide--5-exercise-context-manager-failure" aria-label="Link to this section">#</a></h5>
-<p>Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code><strong>exit</strong></code> would suppress it; this implementation deliberately returns false.</p>
+<p>Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code>__exit__</code> would suppress it; this implementation deliberately returns false.</p>
 <p><strong>Verify:</strong> Exercise context-manager failure — start with target [&#x27;before&#x27;], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains [&#x27;before&#x27;] and the same exception object/message reaches the caller.</p>
 <h5 id="guide--6-trace-descriptor-lookup">6. Trace descriptor lookup<a class="heading-anchor" href="#guide--6-trace-descriptor-lookup" aria-label="Link to this section">#</a></h5>
 <p>Compare <code>Customer.name</code> with <code>Customer(&quot;Ada&quot;).name</code>. Explain why the descriptor returns itself for class access. Corrupt the private field deliberately and observe the runtime type guard.</p>
 <p><strong>Verify:</strong> Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer(&#x27;Ada&#x27;).name returns &#x27;Ada&#x27;, and corrupting the private storage with a non-string makes instance access raise the declared TypeError.</p>
 <h5 id="guide--7-draw-the-mro">7. Draw the MRO<a class="heading-anchor" href="#guide--7-draw-the-mro" aria-label="Link to this section">#</a></h5>
-<p>Print <code>ApiRecord.<strong>mro</strong></code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
+<p>Print <code>ApiRecord.__mro__</code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
 <p><strong>Verify:</strong> Draw the MRO — record the predicted label and ApiRecord.<strong>mro</strong> before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.</p>
 <h5 id="guide--8-bound-metaclass-use">8. Bound metaclass use<a class="heading-anchor" href="#guide--8-bound-metaclass-use" aria-label="Link to this section">#</a></h5>
-<p>Add a second <code>Handler</code> with <code><strong>init_subclass</strong></code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
+<p>Add a second <code>Handler</code> with <code>__init_subclass__</code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <p><strong>Verify:</strong> Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
@@ -477,7 +525,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p><strong>Progressive hint:</strong> Hashable keys must not change equality-relevant fields while stored. <code>unsafe_hash</code> does not make mutation safe.</p>
 <p><strong>Verify:</strong> choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.</p>
 <h5 id="guide--exercise-13-implement-cooperative-equality">Exercise 13 — implement cooperative equality<a class="heading-anchor" href="#guide--exercise-13-implement-cooperative-equality" aria-label="Link to this section">#</a></h5>
-<p>Implement <code><strong>eq</strong></code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
+<p>Implement <code>__eq__</code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
 <p><strong>Progressive hint:</strong> <code>NotImplemented</code> lets Python try the reflected comparison and then fall back appropriately; it is not the same object as <code>NotImplementedError</code>.</p>
 <p><strong>Verify:</strong> implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct <strong>eq</strong> with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.</p>
 <h5 id="guide--exercise-14-evolve-a-typed-serialization-boundary">Exercise 14 — evolve a typed serialization boundary<a class="heading-anchor" href="#guide--exercise-14-evolve-a-typed-serialization-boundary" aria-label="Link to this section">#</a></h5>
@@ -505,18 +553,18 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <li>MRO output explains the mixin result.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_lang_01_typing_data_model -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_lang_01_typing_data_model -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_lang_01_typing_data_model -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_lang_01_typing_data_model -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>A Protocol is treated as an abstract base class:</strong> structural types do not require inheritance.</li>
 <li><strong><code>isinstance</code> is assumed to prove full types:</strong> runtime Protocol checks see members, not complete annotated semantics.</li>
 <li><strong>A mutable generic is made covariant:</strong> callers could insert an incompatible value.</li>
 <li><strong>Overloads contain separate implementations:</strong> overload bodies are static declarations; exactly one runtime implementation follows.</li>
-<li><strong><code><strong>next</strong></code> returns a sentinel:</strong> Python iteration ends with <code>StopIteration</code>.</li>
-<li><strong>A context manager hides errors:</strong> <code><strong>exit</strong></code> accidentally returned true.</li>
+<li><strong><code>__next__</code> returns a sentinel:</strong> Python iteration ends with <code>StopIteration</code>.</li>
+<li><strong>A context manager hides errors:</strong> <code>__exit__</code> accidentally returned true.</li>
 <li><strong>A mixin names its parent:</strong> cooperative MRO composition is broken.</li>
 <li><strong>A metaclass solves ordinary validation:</strong> a descriptor or subclass hook is usually simpler.</li>
 </ul>
@@ -524,7 +572,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Apply these boundaries to <code>python-test-01</code>, <code>python-svc-01</code>, and the engineering bridge. For deeper study, add a typed async context manager and compare static checker diagnostics with explicit runtime validation.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-lang-01` — Advanced typing and the Python data model.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-lang-01` — Advanced typing and the Python data model.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize static type contracts, structural protocols, overloads, and Python data-model hooks. Use exactly these maintained learner materials:
@@ -583,237 +631,237 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-lang-01 learner lab: typing and the Python data model.</span>
-<span> </span>
-<span>Professional learner deep dive (python-lang-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Type hints describe contracts for static tools and readers; they do not automatically validate</span>
-<span>runtime data. A Protocol is structural: a class satisfies it by providing required members,</span>
-<span>without inheritance. Covariance is safe for values a container only produces; mutable read/write</span>
-<span>containers are generally invariant.  Python syntax such as iteration, context management,</span>
-<span>attribute access, and `super()` is powered by data-model protocols. Implementing these hooks</span>
-<span>means honoring their full lifecycle: `StopIteration`, exception propagation and cleanup,</span>
-<span>descriptor class/instance access, and cooperative method-resolution order.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* `Protocol` + `TypeVar`: expresses the smallest structural interface and its variance from</span>
-<span>  producer/consumer behavior.</span>
-<span>* `@overload` signatures + one implementation: gives static callers precise return types while</span>
-<span>  runtime code still validates the discriminant.</span>
-<span>* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle</span>
-<span>  and must honor exhaustion, cleanup, and exception rules.</span>
-<span> </span>
-<span>Micro-example A — show structural compatibility without inheritance::</span>
-<span> </span>
-<span>    from typing import Protocol</span>
-<span> </span>
-<span>    class Named(Protocol):</span>
-<span>        @property</span>
-<span>        def name(self) -&gt; str: ...</span>
-<span> </span>
-<span>    class PlainRecord:</span>
-<span>        def __init__(self, name):</span>
-<span>            self.name = name</span>
-<span> </span>
-<span>    def label(value: Named) -&gt; str:</span>
-<span>        return value.name.upper()</span>
-<span> </span>
-<span>    print(label(PlainRecord(&quot;ada&quot;)))</span>
-<span>    assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</span>
-<span> </span>
-<span>Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its</span>
-<span>          available member.</span>
-<span> </span>
-<span>Micro-example B — honor iterator exhaustion and partial batches::</span>
-<span> </span>
-<span>    iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])</span>
-<span>    assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)</span>
-<span>    assert next(iterator) == (&quot;c&quot;,)</span>
-<span>    try:</span>
-<span>        next(iterator)</span>
-<span>    except StopIteration:</span>
-<span>        print(&quot;iterator exhausted exactly once input ended&quot;)</span>
-<span> </span>
-<span>Expected: The final partial batch is a valid value; only the following call signals exhaustion.</span>
-<span> </span>
-<span>Debugging rule: Run mypy/pyright on intended and intentionally invalid uses, then separately</span>
-<span>                test runtime boundary validation and every data-model lifecycle edge.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable, Iterator, Sequence</span>
-<span>from typing import Generic, Literal, TypeVar, overload</span>
-<span> </span>
-<span>T = TypeVar(&quot;T&quot;)</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;int&quot;]) -&gt; int: ...</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;bool&quot;]) -&gt; bool: ...</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;text&quot;]) -&gt; str: ...</span>
-<span> </span>
-<span> </span>
-<span>def parse_scalar(</span>
-<span>    text: str,</span>
-<span>    kind: Literal[&quot;int&quot;, &quot;bool&quot;, &quot;text&quot;],</span>
-<span>) -&gt; int | bool | str:</span>
-<span>    &quot;&quot;&quot;TODO: implement the runtime behavior promised by the overloads.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete parse_scalar&quot;)</span>
-<span> </span>
-<span> </span>
-<span>class Batches(Generic[T], Iterator[tuple[T, ...]]):</span>
-<span>    &quot;&quot;&quot;Iterator exercise that makes ``iter`` and ``next`` explicit.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def __init__(self, items: Sequence[T], size: int) -&gt; None:</span>
-<span>        if size &lt; 1:</span>
-<span>            raise ValueError(&quot;size must be positive&quot;)</span>
-<span>        self._items = items</span>
-<span>        self._size = size</span>
-<span>        self._offset = 0</span>
-<span> </span>
-<span>    def __iter__(self) -&gt; Batches[T]:</span>
-<span>        return self</span>
-<span> </span>
-<span>    def __next__(self) -&gt; tuple[T, ...]:</span>
-<span>        &quot;&quot;&quot;TODO: return the next tuple and raise StopIteration when exhausted.&quot;&quot;&quot;</span>
-<span> </span>
-<span>        raise NotImplementedError(&quot;complete Batches.__next__&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;overloaded parser&quot;, lambda: parse_scalar(&quot;12&quot;, &quot;int&quot;)),</span>
-<span>        (&quot;iterator protocol&quot;, lambda: list(Batches([1, 2, 3], 2))),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_lang_01_typing_data_model.md</span>
-<span>#</span>
-<span># Exercise 1 — Complete and type the overloaded parser</span>
-<span># Prompt: Implement the three promised return behaviors. Reject boolean text other than</span>
-<span># `true` and `false`. In VS Code, inspect the inferred types of</span>
-<span># `parse_scalar(&quot;12&quot;, &quot;int&quot;)` and `parse_scalar(&quot;true&quot;, &quot;bool&quot;)`. A variable typed as</span>
-<span># arbitrary `str` needs a broader overload or prior narrowing.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Implement the iterator protocol</span>
-<span># Prompt: Complete `Batches.__next__`. Return tuples, advance the offset, and raise</span>
-<span># `StopIteration` only after exhaustion. Test empty input and a final partial batch.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Reason about variance</span>
-<span># Prompt: Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers</span>
-<span># only read. Explain why a mutable repository of strings cannot be treated as a repository</span>
-<span># of objects: a caller might store an integer into it.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Model events with TypedDict</span>
-<span># Prompt: Add a third event with a unique literal `kind`. Update `describe_event` and let</span>
-<span># the checker identify unhandled or invalid fields. Add runtime validation at the JSON</span>
-<span># boundary; TypedDict alone does not validate decoded data.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Exercise context-manager failure</span>
-<span># Prompt: Append inside `Transaction`, then raise. Verify the target remains unchanged and</span>
-<span># the exception propagates. Returning true from `__exit__` would suppress it; this</span>
-<span># implementation deliberately returns false.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Trace descriptor lookup</span>
-<span># Prompt: Compare `Customer.name` with `Customer(&quot;Ada&quot;).name`. Explain why the descriptor</span>
-<span># returns itself for class access. Corrupt the private field deliberately and observe the</span>
-<span># runtime type guard.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — Draw the MRO</span>
-<span># Prompt: Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses</span>
-<span># cooperative `super()`; directly naming a parent would skip or duplicate work.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — Bound metaclass use</span>
-<span># Prompt: Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could</span>
-<span># enforce the same rule, then state why the hook is preferable here. Use a metaclass only</span>
-<span># when class-creation behavior cannot be expressed by descriptors, decorators, or subclass</span>
-<span># hooks.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — design a structural Protocol</span>
-<span># Prompt: Define a minimal generic `Serializer[T]` Protocol and implement JSON and text</span>
-<span># serializers without inheritance. Add a consumer and let mypy reject one incompatible</span>
-<span># implementation.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — preserve signatures with ParamSpec</span>
-<span># Prompt: Write a timing decorator that preserves arbitrary positional/keyword parameters</span>
-<span># and return type, injects a log sink/clock for tests, and re-raises the wrapped exception</span>
-<span># unchanged.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — narrow decoded data safely</span>
-<span># Prompt: Implement a `TypeGuard` that validates a decoded JSON object as a specific</span>
-<span># TypedDict, including exact required keys, value types, and the bool-versus-int edge</span>
-<span># case.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — choose frozen, slots, and hash semantics</span>
-<span># Prompt: Create a small value-object dataclass and compare mutable, frozen, slotted, and</span>
-<span># `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve</span>
-<span># hash invariants.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — implement cooperative equality</span>
-<span># Prompt: Implement `__eq__` for a value type so unrelated types receive `NotImplemented`,</span>
-<span># subclasses behave deliberately, and hashing remains consistent. Contrast this with</span>
-<span># returning `False` immediately.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — evolve a typed serialization boundary</span>
-<span># Prompt: Version a discriminated TypedDict union, add an optional field to one event, and</span>
-<span># parse old/new payloads into immutable domain objects. Define unknown-version and</span>
-<span># unknown-kind failures.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 15 — trace weak references and caches</span>
-<span># Prompt: Compare a normal dictionary cache with `WeakValueDictionary` for objects that</span>
-<span># support weak references. Drop strong references, force collection only as an</span>
-<span># observation, and state when cache disappearance is acceptable.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 16 — review typing compatibility</span>
-<span># Prompt: Change a public function from accepting `Sequence[str]` to `list[str]`, and</span>
-<span># another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for</span>
-<span># callers and implement a deprecation-safe alternative.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-lang-01 learner lab: typing and the Python data model.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-lang-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Type hints describe contracts for static tools and readers; they do not automatically validate</span></span>
+<span class="source-line"><span class="syntax-string">runtime data. A Protocol is structural: a class satisfies it by providing required members,</span></span>
+<span class="source-line"><span class="syntax-string">without inheritance. Covariance is safe for values a container only produces; mutable read/write</span></span>
+<span class="source-line"><span class="syntax-string">containers are generally invariant.  Python syntax such as iteration, context management,</span></span>
+<span class="source-line"><span class="syntax-string">attribute access, and `super()` is powered by data-model protocols. Implementing these hooks</span></span>
+<span class="source-line"><span class="syntax-string">means honoring their full lifecycle: `StopIteration`, exception propagation and cleanup,</span></span>
+<span class="source-line"><span class="syntax-string">descriptor class/instance access, and cooperative method-resolution order.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* `Protocol` + `TypeVar`: expresses the smallest structural interface and its variance from</span></span>
+<span class="source-line"><span class="syntax-string">  producer/consumer behavior.</span></span>
+<span class="source-line"><span class="syntax-string">* `@overload` signatures + one implementation: gives static callers precise return types while</span></span>
+<span class="source-line"><span class="syntax-string">  runtime code still validates the discriminant.</span></span>
+<span class="source-line"><span class="syntax-string">* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle</span></span>
+<span class="source-line"><span class="syntax-string">  and must honor exhaustion, cleanup, and exception rules.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — show structural compatibility without inheritance::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    from typing import Protocol</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    class Named(Protocol):</span></span>
+<span class="source-line"><span class="syntax-string">        @property</span></span>
+<span class="source-line"><span class="syntax-string">        def name(self) -&gt; str: ...</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    class PlainRecord:</span></span>
+<span class="source-line"><span class="syntax-string">        def __init__(self, name):</span></span>
+<span class="source-line"><span class="syntax-string">            self.name = name</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def label(value: Named) -&gt; str:</span></span>
+<span class="source-line"><span class="syntax-string">        return value.name.upper()</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    print(label(PlainRecord(&quot;ada&quot;)))</span></span>
+<span class="source-line"><span class="syntax-string">    assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its</span></span>
+<span class="source-line"><span class="syntax-string">          available member.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — honor iterator exhaustion and partial batches::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])</span></span>
+<span class="source-line"><span class="syntax-string">    assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)</span></span>
+<span class="source-line"><span class="syntax-string">    assert next(iterator) == (&quot;c&quot;,)</span></span>
+<span class="source-line"><span class="syntax-string">    try:</span></span>
+<span class="source-line"><span class="syntax-string">        next(iterator)</span></span>
+<span class="source-line"><span class="syntax-string">    except StopIteration:</span></span>
+<span class="source-line"><span class="syntax-string">        print(&quot;iterator exhausted exactly once input ended&quot;)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The final partial batch is a valid value; only the following call signals exhaustion.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Run mypy/pyright on intended and intentionally invalid uses, then separately</span></span>
+<span class="source-line"><span class="syntax-string">                test runtime boundary validation and every data-model lifecycle edge.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Iterator<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Generic<span class="syntax-punctuation">,</span> Literal<span class="syntax-punctuation">,</span> TypeVar<span class="syntax-punctuation">,</span> overload</span>
+<span class="source-line"></span>
+<span class="source-line">T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: implement the runtime behavior promised by the overloads.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete parse_scalar</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Batches</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Iterator<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Iterator exercise that makes ``iter`` and ``next`` explicit.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> items<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> size <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">size must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_items <span class="syntax-operator">=</span> items</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_size <span class="syntax-operator">=</span> size</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__iter__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Batches<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__next__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;TODO: return the next tuple and raise StopIteration when exhausted.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete Batches.__next__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">overloaded parser</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> parse_scalar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">iterator protocol</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>Batches<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_lang_01_typing_data_model.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Complete and type the overloaded parser</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement the three promised return behaviors. Reject boolean text other than</span></span>
+<span class="source-line"><span class="syntax-comment"># `true` and `false`. In VS Code, inspect the inferred types of</span></span>
+<span class="source-line"><span class="syntax-comment"># `parse_scalar(&quot;12&quot;, &quot;int&quot;)` and `parse_scalar(&quot;true&quot;, &quot;bool&quot;)`. A variable typed as</span></span>
+<span class="source-line"><span class="syntax-comment"># arbitrary `str` needs a broader overload or prior narrowing.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Implement the iterator protocol</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Complete `Batches.__next__`. Return tuples, advance the offset, and raise</span></span>
+<span class="source-line"><span class="syntax-comment"># `StopIteration` only after exhaustion. Test empty input and a final partial batch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Reason about variance</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers</span></span>
+<span class="source-line"><span class="syntax-comment"># only read. Explain why a mutable repository of strings cannot be treated as a repository</span></span>
+<span class="source-line"><span class="syntax-comment"># of objects: a caller might store an integer into it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Model events with TypedDict</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add a third event with a unique literal `kind`. Update `describe_event` and let</span></span>
+<span class="source-line"><span class="syntax-comment"># the checker identify unhandled or invalid fields. Add runtime validation at the JSON</span></span>
+<span class="source-line"><span class="syntax-comment"># boundary; TypedDict alone does not validate decoded data.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Exercise context-manager failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Append inside `Transaction`, then raise. Verify the target remains unchanged and</span></span>
+<span class="source-line"><span class="syntax-comment"># the exception propagates. Returning true from `__exit__` would suppress it; this</span></span>
+<span class="source-line"><span class="syntax-comment"># implementation deliberately returns false.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Trace descriptor lookup</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare `Customer.name` with `Customer(&quot;Ada&quot;).name`. Explain why the descriptor</span></span>
+<span class="source-line"><span class="syntax-comment"># returns itself for class access. Corrupt the private field deliberately and observe the</span></span>
+<span class="source-line"><span class="syntax-comment"># runtime type guard.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — Draw the MRO</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses</span></span>
+<span class="source-line"><span class="syntax-comment"># cooperative `super()`; directly naming a parent would skip or duplicate work.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — Bound metaclass use</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could</span></span>
+<span class="source-line"><span class="syntax-comment"># enforce the same rule, then state why the hook is preferable here. Use a metaclass only</span></span>
+<span class="source-line"><span class="syntax-comment"># when class-creation behavior cannot be expressed by descriptors, decorators, or subclass</span></span>
+<span class="source-line"><span class="syntax-comment"># hooks.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — design a structural Protocol</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Define a minimal generic `Serializer[T]` Protocol and implement JSON and text</span></span>
+<span class="source-line"><span class="syntax-comment"># serializers without inheritance. Add a consumer and let mypy reject one incompatible</span></span>
+<span class="source-line"><span class="syntax-comment"># implementation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — preserve signatures with ParamSpec</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write a timing decorator that preserves arbitrary positional/keyword parameters</span></span>
+<span class="source-line"><span class="syntax-comment"># and return type, injects a log sink/clock for tests, and re-raises the wrapped exception</span></span>
+<span class="source-line"><span class="syntax-comment"># unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — narrow decoded data safely</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement a `TypeGuard` that validates a decoded JSON object as a specific</span></span>
+<span class="source-line"><span class="syntax-comment"># TypedDict, including exact required keys, value types, and the bool-versus-int edge</span></span>
+<span class="source-line"><span class="syntax-comment"># case.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — choose frozen, slots, and hash semantics</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a small value-object dataclass and compare mutable, frozen, slotted, and</span></span>
+<span class="source-line"><span class="syntax-comment"># `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve</span></span>
+<span class="source-line"><span class="syntax-comment"># hash invariants.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — implement cooperative equality</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `__eq__` for a value type so unrelated types receive `NotImplemented`,</span></span>
+<span class="source-line"><span class="syntax-comment"># subclasses behave deliberately, and hashing remains consistent. Contrast this with</span></span>
+<span class="source-line"><span class="syntax-comment"># returning `False` immediately.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — evolve a typed serialization boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Version a discriminated TypedDict union, add an optional field to one event, and</span></span>
+<span class="source-line"><span class="syntax-comment"># parse old/new payloads into immutable domain objects. Define unknown-version and</span></span>
+<span class="source-line"><span class="syntax-comment"># unknown-kind failures.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15 — trace weak references and caches</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare a normal dictionary cache with `WeakValueDictionary` for objects that</span></span>
+<span class="source-line"><span class="syntax-comment"># support weak references. Drop strong references, force collection only as an</span></span>
+<span class="source-line"><span class="syntax-comment"># observation, and state when cache disappearance is acceptable.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16 — review typing compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Change a public function from accepting `Sequence[str]` to `list[str]`, and</span></span>
+<span class="source-line"><span class="syntax-comment"># another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for</span></span>
+<span class="source-line"><span class="syntax-comment"># callers and implement a deprecation-safe alternative.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -849,9 +897,9 @@ merely ran is not evidence of mastery.</code></pre></div>
         <div class="artifact-content"><h3 id="solution-1--advanced-typing-and-data-model-solution-reasoning">Advanced typing and data-model solution reasoning<a class="heading-anchor" href="#solution-1--advanced-typing-and-data-model-solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Attempt <code>python-lang-01</code> before reading <a href="python-lang-01.html#solution-2"><code>py_lang_01_typing_data_model_solution.py</code></a>.</p>
 <p><code>Reader[T_co]</code> is covariant because it only produces values. A mutable repository both consumes and produces its type, so it remains invariant. <code>TypedDict</code> describes the shape of existing dictionaries; its literal <code>kind</code> field lets a checker narrow a union. Overloads describe the relationship between a literal argument and return type, while one runtime implementation must still validate input.</p>
-<p><code>Batches</code> implements <code><strong>iter</strong></code> and <code><strong>next</strong></code>; <code>Transaction</code> implements the context-manager protocol and never suppresses exceptions. <code>NonBlankText</code> demonstrates descriptor lookup through both the class and an instance. <code>ApiRecord</code> shows cooperative <code>super()</code> following the method resolution order (MRO), not simply “calling the parent.”</p>
+<p><code>Batches</code> implements <code>__iter__</code> and <code>__next__</code>; <code>Transaction</code> implements the context-manager protocol and never suppresses exceptions. <code>NonBlankText</code> demonstrates descriptor lookup through both the class and an instance. <code>ApiRecord</code> shows cooperative <code>super()</code> following the method resolution order (MRO), not simply “calling the parent.”</p>
 <p><code>@runtime_checkable</code> verifies only that an object has named protocol members; it does not run a static type checker or validate full signatures. TypedDict and overloads also disappear as enforcement unless runtime code validates them.</p>
-<p>Metaclasses can customize class creation, but they complicate inheritance and tooling. The solution uses <code><strong>init_subclass</strong></code> for a small registry, which is usually sufficient. Metaclasses remain appropriate for framework-level class construction when simpler hooks cannot express the invariant.</p>
+<p>Metaclasses can customize class creation, but they complicate inheritance and tooling. The solution uses <code>__init_subclass__</code> for a small registry, which is usually sufficient. Metaclasses remain appropriate for framework-level class construction when simpler hooks cannot express the invariant.</p>
 <p>Edge cases include exhausted iterators, zero batch sizes, exceptions inside a transaction, corrupted descriptor storage, conflicting mixin order, and a runtime object that has a <code>name</code> attribute of the wrong semantic type.</p>
 <hr>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
@@ -859,7 +907,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li><strong><code>Protocol</code> + <code>TypeVar</code>:</strong> expresses the smallest structural interface and its variance from producer/consumer behavior.</li>
 <li><strong><code>@overload</code> signatures + one implementation:</strong> gives static callers precise return types while runtime code still validates the discriminant.</li>
-<li><strong><code><strong>iter</strong></code> / <code><strong>next</strong></code> / <code><strong>enter</strong></code> / <code><strong>exit</strong></code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
+<li><strong><code>__iter__</code> / <code>__next__</code> / <code>__enter__</code> / <code>__exit__</code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
 <li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
 </ol>
 <p><strong>Alternative:</strong> Abstract base classes provide nominal inheritance and shared implementation; concrete types may be clearer when substitution is not needed.</p>
@@ -868,25 +916,25 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Run static positive/negative cases, validate decoded data at runtime, test iterator/context/descriptor boundaries, and trace MRO plus cleanup under exceptions.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">from typing import Protocol
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Protocol
 
 
-class Named(Protocol):
-    @property
-    def name(self) -&gt; str: ...
+<span class="syntax-keyword">class</span> <span class="syntax-class">Named</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-decorator">@property</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">name</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span>
 
 
-class PlainRecord:
-    def __init__(self, name):
-        self.name = name
+<span class="syntax-keyword">class</span> <span class="syntax-class">PlainRecord</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>name <span class="syntax-operator">=</span> name
 
 
-def label(value: Named) -&gt; str:
-    return value.name.upper()
+<span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> Named<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> value<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>upper<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
 
-print(label(PlainRecord(&quot;ada&quot;)))
-assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span>PlainRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> label<span class="syntax-punctuation">(</span>PlainRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ADA</span><span class="syntax-string">&quot;</span></code></pre>
 <p><strong>Expected observation:</strong> <code>PlainRecord</code> never inherits from <code>Named</code>; static structural matching uses its available member.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -898,7 +946,7 @@ assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> Complete and type the overloaded parser — assert parse_scalar(&#x27;12&#x27;,&#x27;int&#x27;) returns int 12, parse_scalar(&#x27;true&#x27;,&#x27;bool&#x27;) returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.</p>
 <h5 id="solution-1--exercise-2-implement-the-iterator-protocol">Exercise 2 — Implement the iterator protocol<a class="heading-anchor" href="#solution-1--exercise-2-implement-the-iterator-protocol" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Complete <code>Batches.<strong>next</strong></code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
+<p><strong>Prompt recap:</strong> Complete <code>Batches.__next__</code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
@@ -916,7 +964,7 @@ assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.</p>
 <h5 id="solution-1--exercise-5-exercise-context-manager-failure">Exercise 5 — Exercise context-manager failure<a class="heading-anchor" href="#solution-1--exercise-5-exercise-context-manager-failure" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code><strong>exit</strong></code> would suppress it; this implementation deliberately returns false.</p>
+<p><strong>Prompt recap:</strong> Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code>__exit__</code> would suppress it; this implementation deliberately returns false.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
@@ -928,13 +976,13 @@ assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer(&#x27;Ada&#x27;).name returns &#x27;Ada&#x27;, and corrupting the private storage with a non-string makes instance access raise the declared TypeError.</p>
 <h5 id="solution-1--exercise-7-draw-the-mro">Exercise 7 — Draw the MRO<a class="heading-anchor" href="#solution-1--exercise-7-draw-the-mro" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Print <code>ApiRecord.<strong>mro</strong></code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
+<p><strong>Prompt recap:</strong> Print <code>ApiRecord.__mro__</code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> Draw the MRO — record the predicted label and ApiRecord.<strong>mro</strong> before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.</p>
 <h5 id="solution-1--exercise-8-bound-metaclass-use">Exercise 8 — Bound metaclass use<a class="heading-anchor" href="#solution-1--exercise-8-bound-metaclass-use" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Add a second <code>Handler</code> with <code><strong>init_subclass</strong></code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
+<p><strong>Prompt recap:</strong> Add a second <code>Handler</code> with <code>__init_subclass__</code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
@@ -966,13 +1014,13 @@ assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
 <h5 id="solution-1--exercise-12-choose-frozen-slots-and-hash-semantics">Exercise 12 — choose frozen, slots, and hash semantics<a class="heading-anchor" href="#solution-1--exercise-12-choose-frozen-slots-and-hash-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a small value-object dataclass and compare mutable, frozen, slotted, and <code>unsafe_hash</code> choices. Use it as a dictionary key and show which combinations preserve hash invariants.</p>
 <p><strong>Reasoning path:</strong> Hashable keys must not change equality-relevant fields while stored. <code>unsafe_hash</code> does not make mutation safe.</p>
-<p>For an immutable value object, <code>@dataclass(frozen=True, slots=True)</code> provides generated equality and a compatible hash while avoiding an instance <code><strong>dict</strong></code>. Attempted field assignment fails. A mutable equality-bearing dataclass should normally remain unhashable.</p>
-<p>Do not use frozen as a security boundary: contained mutable objects can still change. Validate fields in <code><strong>post_init</strong></code> with <code>object.<strong>setattr</strong></code> only for carefully documented normalization.</p>
+<p>For an immutable value object, <code>@dataclass(frozen=True, slots=True)</code> provides generated equality and a compatible hash while avoiding an instance <code>__dict__</code>. Attempted field assignment fails. A mutable equality-bearing dataclass should normally remain unhashable.</p>
+<p>Do not use frozen as a security boundary: contained mutable objects can still change. Validate fields in <code>__post_init__</code> with <code>object.__setattr__</code> only for carefully documented normalization.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
 <p><strong>Verify:</strong> choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.</p>
 <h5 id="solution-1--exercise-13-implement-cooperative-equality">Exercise 13 — implement cooperative equality<a class="heading-anchor" href="#solution-1--exercise-13-implement-cooperative-equality" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt recap:</strong> Implement <code><strong>eq</strong></code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
+<p><strong>Prompt recap:</strong> Implement <code>__eq__</code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
 <p><strong>Reasoning path:</strong> <code>NotImplemented</code> lets Python try the reflected comparison and then fall back appropriately; it is not the same object as <code>NotImplementedError</code>.</p>
 <p>Compare only values under the declared compatible-type policy and otherwise return <code>NotImplemented</code>. If exact type identity is required, check <code>type(other) is type(self)</code>; if subclasses share semantics, use a documented <code>isinstance</code> policy. Equal objects must produce equal hashes.</p>
 <p>Test both operand orders, an unrelated object, and subclass behavior. Avoid raising merely because comparison is unsupported.</p>
@@ -1035,277 +1083,277 @@ assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-lang-01.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Iterator, Sequence</span>
-<span>from dataclasses import dataclass</span>
-<span>from types import TracebackType</span>
-<span>from typing import (</span>
-<span>    ClassVar,</span>
-<span>    Generic,</span>
-<span>    Literal,</span>
-<span>    Protocol,</span>
-<span>    Self,</span>
-<span>    TypedDict,</span>
-<span>    TypeVar,</span>
-<span>    overload,</span>
-<span>    runtime_checkable,</span>
-<span>)</span>
-<span> </span>
-<span>T = TypeVar(&quot;T&quot;)</span>
-<span>T_co = TypeVar(&quot;T_co&quot;, covariant=True)</span>
-<span> </span>
-<span> </span>
-<span>class Reader(Protocol[T_co]):</span>
-<span>    &quot;&quot;&quot;Read-only output makes covariance safe.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def get(self, index: int) -&gt; T_co:</span>
-<span>        &quot;&quot;&quot;Return one value.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class SequenceReader(Generic[T_co]):</span>
-<span>    values: Sequence[T_co]</span>
-<span> </span>
-<span>    def get(self, index: int) -&gt; T_co:</span>
-<span>        return self.values[index]</span>
-<span> </span>
-<span> </span>
-<span>class MutableRepository(Protocol[T]):</span>
-<span>    &quot;&quot;&quot;Reading and writing make the type parameter invariant.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def get(self, key: str) -&gt; T | None:</span>
-<span>        &quot;&quot;&quot;Read a value.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def put(self, key: str, value: T) -&gt; None:</span>
-<span>        &quot;&quot;&quot;Write a value.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class UserCreated(TypedDict):</span>
-<span>    kind: Literal[&quot;user_created&quot;]</span>
-<span>    user_id: str</span>
-<span>    email_verified: bool</span>
-<span> </span>
-<span> </span>
-<span>class QuotaChanged(TypedDict):</span>
-<span>    kind: Literal[&quot;quota_changed&quot;]</span>
-<span>    user_id: str</span>
-<span>    new_limit: int</span>
-<span> </span>
-<span> </span>
-<span>DomainEvent = UserCreated | QuotaChanged</span>
-<span> </span>
-<span> </span>
-<span>def describe_event(event: DomainEvent) -&gt; str:</span>
-<span>    if event[&quot;kind&quot;] == &quot;user_created&quot;:</span>
-<span>        verification = &quot;verified&quot; if event[&quot;email_verified&quot;] else &quot;unverified&quot;</span>
-<span>        return f&quot;user {event[&#x27;user_id&#x27;]} created ({verification})&quot;</span>
-<span>    return f&quot;user {event[&#x27;user_id&#x27;]} quota -&gt; {event[&#x27;new_limit&#x27;]}&quot;</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;int&quot;]) -&gt; int: ...</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;bool&quot;]) -&gt; bool: ...</span>
-<span> </span>
-<span> </span>
-<span>@overload</span>
-<span>def parse_scalar(text: str, kind: Literal[&quot;text&quot;]) -&gt; str: ...</span>
-<span> </span>
-<span> </span>
-<span>def parse_scalar(</span>
-<span>    text: str,</span>
-<span>    kind: Literal[&quot;int&quot;, &quot;bool&quot;, &quot;text&quot;],</span>
-<span>) -&gt; int | bool | str:</span>
-<span>    if kind == &quot;int&quot;:</span>
-<span>        return int(text)</span>
-<span>    if kind == &quot;bool&quot;:</span>
-<span>        normalized = text.strip().lower()</span>
-<span>        if normalized not in {&quot;true&quot;, &quot;false&quot;}:</span>
-<span>            raise ValueError(&quot;boolean text must be true or false&quot;)</span>
-<span>        return normalized == &quot;true&quot;</span>
-<span>    return text</span>
-<span> </span>
-<span> </span>
-<span>class Batches(Generic[T], Iterator[tuple[T, ...]]):</span>
-<span>    def __init__(self, items: Sequence[T], size: int) -&gt; None:</span>
-<span>        if size &lt; 1:</span>
-<span>            raise ValueError(&quot;size must be positive&quot;)</span>
-<span>        self._items = items</span>
-<span>        self._size = size</span>
-<span>        self._offset = 0</span>
-<span> </span>
-<span>    def __iter__(self) -&gt; Self:</span>
-<span>        return self</span>
-<span> </span>
-<span>    def __next__(self) -&gt; tuple[T, ...]:</span>
-<span>        if self._offset &gt;= len(self._items):</span>
-<span>            raise StopIteration</span>
-<span>        batch = tuple(self._items[self._offset : self._offset + self._size])</span>
-<span>        self._offset += self._size</span>
-<span>        return batch</span>
-<span> </span>
-<span> </span>
-<span>class Transaction:</span>
-<span>    &quot;&quot;&quot;Context manager that commits a working copy only on success.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def __init__(self, target: list[str]) -&gt; None:</span>
-<span>        self._target = target</span>
-<span>        self._working: list[str] | None = None</span>
-<span> </span>
-<span>    def __enter__(self) -&gt; Self:</span>
-<span>        self._working = self._target.copy()</span>
-<span>        return self</span>
-<span> </span>
-<span>    def append(self, value: str) -&gt; None:</span>
-<span>        if self._working is None:</span>
-<span>            raise RuntimeError(&quot;transaction is not active&quot;)</span>
-<span>        self._working.append(value)</span>
-<span> </span>
-<span>    def __exit__(</span>
-<span>        self,</span>
-<span>        exception_type: type[BaseException] | None,</span>
-<span>        exception: BaseException | None,</span>
-<span>        traceback: TracebackType | None,</span>
-<span>    ) -&gt; Literal[False]:</span>
-<span>        if exception_type is None:</span>
-<span>            assert self._working is not None</span>
-<span>            self._target[:] = self._working</span>
-<span>        self._working = None</span>
-<span>        return False</span>
-<span> </span>
-<span> </span>
-<span>class NonBlankText:</span>
-<span>    &quot;&quot;&quot;Descriptor that validates assignment and owns a private attribute name.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def __set_name__(self, owner: type[object], name: str) -&gt; None:</span>
-<span>        self._storage_name = f&quot;_{name}&quot;</span>
-<span> </span>
-<span>    @overload</span>
-<span>    def __get__(</span>
-<span>        self,</span>
-<span>        instance: None,</span>
-<span>        owner: type[object] | None = None,</span>
-<span>    ) -&gt; NonBlankText: ...</span>
-<span> </span>
-<span>    @overload</span>
-<span>    def __get__(</span>
-<span>        self,</span>
-<span>        instance: object,</span>
-<span>        owner: type[object] | None = None,</span>
-<span>    ) -&gt; str: ...</span>
-<span> </span>
-<span>    def __get__(</span>
-<span>        self,</span>
-<span>        instance: object | None,</span>
-<span>        owner: type[object] | None = None,</span>
-<span>    ) -&gt; str | NonBlankText:</span>
-<span>        if instance is None:</span>
-<span>            return self</span>
-<span>        value = getattr(instance, self._storage_name)</span>
-<span>        if not isinstance(value, str):</span>
-<span>            raise TypeError(&quot;descriptor storage was corrupted&quot;)</span>
-<span>        return value</span>
-<span> </span>
-<span>    def __set__(self, instance: object, value: str) -&gt; None:</span>
-<span>        clean = value.strip()</span>
-<span>        if not clean:</span>
-<span>            raise ValueError(&quot;text must not be blank&quot;)</span>
-<span>        setattr(instance, self._storage_name, clean)</span>
-<span> </span>
-<span> </span>
-<span>class Customer:</span>
-<span>    name = NonBlankText()</span>
-<span> </span>
-<span>    def __init__(self, name: str) -&gt; None:</span>
-<span>        self.name = name</span>
-<span> </span>
-<span> </span>
-<span>@runtime_checkable</span>
-<span>class Named(Protocol):</span>
-<span>    @property</span>
-<span>    def name(self) -&gt; str:</span>
-<span>        &quot;&quot;&quot;Return a display name.&quot;&quot;&quot;</span>
-<span> </span>
-<span> </span>
-<span>class Labeler:</span>
-<span>    def label(self) -&gt; str:</span>
-<span>        raise NotImplementedError</span>
-<span> </span>
-<span> </span>
-<span>class Record(Labeler):</span>
-<span>    def label(self) -&gt; str:</span>
-<span>        return &quot;record&quot;</span>
-<span> </span>
-<span> </span>
-<span>class JsonLabelMixin(Labeler):</span>
-<span>    def label(self) -&gt; str:</span>
-<span>        return f&quot;json:{super().label()}&quot;</span>
-<span> </span>
-<span> </span>
-<span>class AuditedLabelMixin(Labeler):</span>
-<span>    def label(self) -&gt; str:</span>
-<span>        return f&quot;audit:{super().label()}&quot;</span>
-<span> </span>
-<span> </span>
-<span>class ApiRecord(JsonLabelMixin, AuditedLabelMixin, Record):</span>
-<span>    pass</span>
-<span> </span>
-<span> </span>
-<span>class Handler:</span>
-<span>    &quot;&quot;&quot;Prefer ``__init_subclass__`` over a metaclass for simple registration.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    registry: ClassVar[dict[str, type[Handler]]] = {}</span>
-<span>    key: ClassVar[str]</span>
-<span> </span>
-<span>    def __init_subclass__(cls, *, key: str, **kwargs: object) -&gt; None:</span>
-<span>        super().__init_subclass__()</span>
-<span>        if not key:</span>
-<span>            raise ValueError(&quot;handler key must not be blank&quot;)</span>
-<span>        cls.key = key</span>
-<span>        Handler.registry[key] = cls</span>
-<span> </span>
-<span>    def handle(self, text: str) -&gt; str:</span>
-<span>        raise NotImplementedError</span>
-<span> </span>
-<span> </span>
-<span>class UpperHandler(Handler, key=&quot;upper&quot;):</span>
-<span>    def handle(self, text: str) -&gt; str:</span>
-<span>        return text.upper()</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    reader: Reader[object] = SequenceReader([&quot;alpha&quot;, &quot;beta&quot;])</span>
-<span>    print(&quot;covariant reader:&quot;, reader.get(0))</span>
-<span>    print(</span>
-<span>        &quot;typed event:&quot;,</span>
-<span>        describe_event(</span>
-<span>            UserCreated(</span>
-<span>                kind=&quot;user_created&quot;,</span>
-<span>                user_id=&quot;u1&quot;,</span>
-<span>                email_verified=True,</span>
-<span>            )</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    print(&quot;batches:&quot;, list(Batches([1, 2, 3, 4, 5], 2)))</span>
-<span>    values = [&quot;original&quot;]</span>
-<span>    with Transaction(values) as transaction:</span>
-<span>        transaction.append(&quot;committed&quot;)</span>
-<span>    print(&quot;transaction:&quot;, values)</span>
-<span>    customer = Customer(&quot;  Ada  &quot;)</span>
-<span>    print(&quot;descriptor:&quot;, customer.name, isinstance(customer, Named))</span>
-<span>    print(&quot;MRO label:&quot;, ApiRecord().label())</span>
-<span>    print(&quot;registry:&quot;, UpperHandler().handle(&quot;local&quot;))</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-lang-01.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterator<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> types <span class="syntax-keyword">import</span> TracebackType</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    ClassVar<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    Generic<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    Literal<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    Protocol<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    Self<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    TypedDict<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    TypeVar<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    overload<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    runtime_checkable<span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">T_co <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">T_co</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> covariant<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Reader</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">[</span>T_co<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Read-only output makes covariance safe.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> T_co<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return one value.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">SequenceReader</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>T_co<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>T_co<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> T_co<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">MutableRepository</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Reading and writing make the type parameter invariant.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">get</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> T <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Read a value.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">put</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> T<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Write a value.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">UserCreated</span><span class="syntax-punctuation">(</span>TypedDict<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">user_created</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    user_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    email_verified<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">QuotaChanged</span><span class="syntax-punctuation">(</span>TypedDict<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quota_changed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    user_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    new_limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">DomainEvent <span class="syntax-operator">=</span> UserCreated <span class="syntax-operator">|</span> QuotaChanged</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">describe_event</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">:</span> DomainEvent<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> event<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">kind</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">user_created</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        verification <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">verified</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">if</span> event<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">email_verified</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unverified</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">user </span><span class="syntax-string">{</span>event<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">user_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">}</span><span class="syntax-string"> created (</span><span class="syntax-string">{</span>verification<span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">user </span><span class="syntax-string">{</span>event<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">user_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">}</span><span class="syntax-string"> quota -&gt; </span><span class="syntax-string">{</span>event<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">new_limit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@overload</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_scalar</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    kind<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> kind <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> kind <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        normalized <span class="syntax-operator">=</span> text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> normalized <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">boolean text must be true or false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> normalized <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> text</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Batches</span><span class="syntax-punctuation">(</span>Generic<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Iterator<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> items<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> size <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">size must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_items <span class="syntax-operator">=</span> items</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_size <span class="syntax-operator">=</span> size</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__iter__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Self<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__next__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> StopIteration</span>
+<span class="source-line">        batch <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_items<span class="syntax-punctuation">[</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-punctuation">:</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-operator">+</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_size<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_offset <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_size</span>
+<span class="source-line">        <span class="syntax-keyword">return</span> batch</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Transaction</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Context manager that commits a working copy only on success.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_target <span class="syntax-operator">=</span> target</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__enter__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Self<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_target<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">append</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">transaction is not active</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__exit__</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        exception_type<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span>BaseException<span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        exception<span class="syntax-punctuation">:</span> BaseException <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        traceback<span class="syntax-punctuation">:</span> TracebackType <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> exception_type <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_target<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working</span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_working <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">NonBlankText</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Descriptor that validates assignment and owns a private attribute name.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__set_name__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> owner<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_storage_name <span class="syntax-operator">=</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">_</span><span class="syntax-string">{</span>name<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@overload</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__get__</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        instance<span class="syntax-punctuation">:</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        owner<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> NonBlankText<span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@overload</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__get__</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        instance<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        owner<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__get__</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        instance<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        owner<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> NonBlankText<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> instance <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span></span>
+<span class="source-line">        value <span class="syntax-operator">=</span> <span class="syntax-builtin">getattr</span><span class="syntax-punctuation">(</span>instance<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_storage_name<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">descriptor storage was corrupted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__set__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> instance<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        clean <span class="syntax-operator">=</span> value<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> clean<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">text must not be blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">setattr</span><span class="syntax-punctuation">(</span>instance<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_storage_name<span class="syntax-punctuation">,</span> clean<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Customer</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    name <span class="syntax-operator">=</span> NonBlankText<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>name <span class="syntax-operator">=</span> name</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@runtime_checkable</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Named</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">name</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return a display name.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Labeler</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> NotImplementedError</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Record</span><span class="syntax-punctuation">(</span>Labeler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">record</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">JsonLabelMixin</span><span class="syntax-punctuation">(</span>Labeler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">json:</span><span class="syntax-string">{</span><span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">AuditedLabelMixin</span><span class="syntax-punctuation">(</span>Labeler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">audit:</span><span class="syntax-string">{</span><span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ApiRecord</span><span class="syntax-punctuation">(</span>JsonLabelMixin<span class="syntax-punctuation">,</span> AuditedLabelMixin<span class="syntax-punctuation">,</span> Record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">pass</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Handler</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Prefer ``__init_subclass__`` over a metaclass for simple registration.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    registry<span class="syntax-punctuation">:</span> ClassVar<span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span>Handler<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    key<span class="syntax-punctuation">:</span> ClassVar<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init_subclass__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">cls</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__init_subclass__<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> key<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">handler key must not be blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">cls</span><span class="syntax-operator">.</span>key <span class="syntax-operator">=</span> key</span>
+<span class="source-line">        Handler<span class="syntax-operator">.</span>registry<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">cls</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">handle</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> NotImplementedError</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">UpperHandler</span><span class="syntax-punctuation">(</span>Handler<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">upper</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">handle</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> text<span class="syntax-operator">.</span>upper<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    reader<span class="syntax-punctuation">:</span> Reader<span class="syntax-punctuation">[</span><span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> SequenceReader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beta</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">covariant reader:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> reader<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">typed event:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        describe_event<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            UserCreated<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                kind<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">user_created</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                user_id<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">u1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                email_verified<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">batches:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>Batches<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">original</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> Transaction<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> transaction<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        transaction<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">committed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">transaction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    customer <span class="syntax-operator">=</span> Customer<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">  Ada  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">descriptor:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> customer<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>customer<span class="syntax-punctuation">,</span> Named<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">MRO label:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ApiRecord<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">registry:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> UpperHandler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>handle<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">local</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

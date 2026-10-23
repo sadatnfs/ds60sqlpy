@@ -21,7 +21,7 @@ def windowed(events):
     return events.withWatermark("event_time","5 minutes").groupBy(F.window("event_time","5 minutes"),"team").agg(F.count(F.lit(1)).alias("records"),F.sum("amount").alias("total"))
 ```
 
-Watermark metadata must be associated with the event-time expression that drives the stateful window. The aggregate retains the window boundaries so finalization and later output interpretation remain inspectable. Constructing this plan does not yet prove that any watermark has advanced orany window has been emitted.
+Watermark metadata must be associated with the event-time expression that drives the stateful window. The aggregate retains the window boundaries so finalization and later output interpretation remain inspectable. Constructing this plan does not yet prove that any watermark has advanced or any window has been emitted.
 
 **Verification evidence:** Assert streaming status and the four output fields before starting the first phase.
 
@@ -93,7 +93,7 @@ The drop counter and unchanged emitted result jointly substantiate the tested po
 
 **Verification evidence:** Assert input 2, drop counter 1 and the unchanged sink tuple. Preserve missing metric evidence as an error rather than guessing zero.
 
-### Exercise 5: Advance event time and distinguish finalized frompending output
+### Exercise 5: Advance event time and distinguish finalized from pending output
 
 Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.
 
@@ -110,7 +110,7 @@ def event_ledger(phases, output):
     return sum(p["numInputRows"] for phase in phases for p in phase),sum(dropped_rows(phase) for phase in phases),sum(row[2] for row in output)
 ```
 
-The reconciliation separates consumed input, discarded late state updates and finalized business output. The administrative event is neither lost norpart of the five business records; its own window has not crossed the finalization threshold. This prevents a finite test from mislabeling pending state as missing output orclaiming every source record must immediately appear in append mode.
+The reconciliation separates consumed input, discarded late state updates and finalized business output. The administrative event is neither lost norpart of the five business records; its own window has not crossed the finalization threshold. This prevents a finite test from mislabeling pending state as missing output or claiming every source record must immediately appear in append mode.
 
 **Verification evidence:** Assert all final tuples, input/drop reconciliation and actual watermark at least 00:25.
 
@@ -118,7 +118,7 @@ The reconciliation separates consumed input, discarded late state updates and fi
 
 Attempt two invalid configurations in separate owned paths: Update mode to Parquet, and Append mode for an unwatermarked team aggregate. Require analysis rejection and stop any unexpectedly created query in finally.
 
-**Expected:** Both configurations raiseAnalysisException; no active query remains. The valid windowed append sink stays intact.
+**Expected:** Both configurations raise AnalysisException; no active query remains. The valid windowed append sink stays intact.
 
 ```scala
 def rejectUnsupported(spark: SparkSession, root: Path, kind: String): Unit = {

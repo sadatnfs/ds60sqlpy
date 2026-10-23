@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-algo-01.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_algo_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_algo_01<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_algo_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_algo_01.py</code></pre>
 <p>Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-algo-01.html#solution-1">explanatory solutions</a> and <a href="python-algo-01.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -363,22 +411,22 @@
 <p>The exercises move from explicit comparison counting to hash counting, duplicate detection, bag reconciliation and an indexed join. They keep inputs unchanged and use small counterexamples where a tempting faster-looking implementation loses information. The goal is choosing a data structure that preserves semantics before optimizing a loop.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">for n in [4, 8]:
-    comparisons = sum(1 for i in range(n) for j in range(i + 1, n))
-    assert comparisons == n * (n - 1) // 2
-    print(&quot;Distinct pairs:&quot;, n, comparisons)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    comparisons <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> j <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>i <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> comparisons <span class="syntax-operator">==</span> n <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Distinct pairs:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">,</span> comparisons<span class="syntax-punctuation">)</span></code></pre>
 <p>The inner range starts after i, so each unordered pair is counted once and self-pairs are excluded. Four items produce six comparisons; eight produce 28. The count demonstrates quadratic growth without depending on processor speed or timing noise.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">left = Counter([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;])
-right = Counter([&quot;a&quot;, &quot;b&quot;, &quot;b&quot;])
-difference = {
-    key: left[key] - right[key]
-    for key in sorted(left.keys() | right.keys())
-    if left[key] != right[key]
-}
-assert difference == {&quot;a&quot;: 1, &quot;b&quot;: -1}
-assert set(left) == set(right)
-print(&quot;Bag difference:&quot;, difference)</code></pre>
+<pre class="highlighted-code"><code class="language-python">left <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+right <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+difference <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    key<span class="syntax-punctuation">:</span> left<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> right<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> right<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> left<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> right<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> difference <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Bag difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> difference<span class="syntax-punctuation">)</span></code></pre>
 <p>Equal membership sets conceal changed multiplicity. Counter stores counts, and the signed difference preserves which side has an extra occurrence. Ordinary Counter subtraction drops nonpositive results, so explicitly subtracting per key is necessary for a two-direction diagnostic.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -419,7 +467,7 @@ print(&quot;Bag difference:&quot;, difference)</code></pre>
 <li><a href="https://docs.python.org/3/library/collections.html#collections.Counter">Python Counter</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-algo-01: Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-algo-01: Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching.
 Read python/professional/companion-guides/py_algo_01.md and python/professional/lessons/py_algo_01.py. Direct prerequisites: python-06, python-10.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -455,125 +503,125 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-algo-01: Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections import Counter</span>
-<span> </span>
-<span> </span>
-<span>def pair_comparisons(size: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative</span>
-<span>    non-Boolean integer size. Return the number of pair visits. Compare the result with</span>
-<span>    n*(n-1)//2; do not use the formula as the implementation.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement pair_comparisons&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate(values: list[int]) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Scan integer values left to right and return the value whose repeated occurrence is</span>
-<span>    encountered first. Return None when all values are distinct. Preserve input and</span>
-<span>    distinguish a duplicate zero from no duplicate.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement first_duplicate&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def frequencies(values: list[str]) -&gt; dict[str, int]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a dictionary of occurrence counts for string values in first-appearance order. Do</span>
-<span>    not remove repeated values or sort the input. Empty input returns an empty dictionary.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement frequencies&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def bag_difference(left: list[str], right: list[str]) -&gt; dict[str, int]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return sorted string keys whose left count minus right count is nonzero. Preserve</span>
-<span>    negative differences as well as positive ones. Do not mutate either list.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement bag_difference&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def position_index(values: list[str]) -&gt; dict[str, list[int]]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Build a key-to-list-of-positions index for string values. Preserve positions in</span>
-<span>    ascending encounter order and keys in first-appearance order. Empty input returns{}.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement position_index&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def indexed_pairs(left: list[str], right: list[str]) -&gt; list[tuple[int, int]]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return every matching(left_position, right_position) pair using a hash index of right.</span>
-<span>    Order results by left encounter position, then right encounter position. Preserve</span>
-<span>    duplicate matches and inputs; do not compare every unrelated pair.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement indexed_pairs&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    for n in [4, 8]:</span>
-<span>        comparisons = sum(1 for i in range(n) for j in range(i + 1, n))</span>
-<span>        assert comparisons == n * (n - 1) // 2</span>
-<span>        print(&quot;Distinct pairs:&quot;, n, comparisons)</span>
-<span> </span>
-<span>    left = Counter([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;])</span>
-<span>    right = Counter([&quot;a&quot;, &quot;b&quot;, &quot;b&quot;])</span>
-<span>    difference = {</span>
-<span>        key: left[key] - right[key]</span>
-<span>        for key in sorted(left.keys() | right.keys())</span>
-<span>        if left[key] != right[key]</span>
-<span>    }</span>
-<span>    assert difference == {&quot;a&quot;: 1, &quot;b&quot;: -1}</span>
-<span>    assert set(left) == set(right)</span>
-<span>    print(&quot;Bag difference:&quot;, difference)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Count work rather than guessing from timing</span>
-<span># Prompt: Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative</span>
-<span># non-Boolean integer size. Return the number of pair visits. Compare the result with n*(n-1)//2;</span>
-<span># do not use the formula as the implementation.</span>
-<span># Expected: Sizes 0,1,4,8 return 0,0,6,28. Negative size, True and 2.5 raise ValueError.</span>
-<span> </span>
-<span># Exercise 2: Return the first repeated occurrence</span>
-<span># Prompt: Scan integer values left to right and return the value whose repeated occurrence is</span>
-<span># encountered first. Return None when all values are distinct. Preserve input and distinguish a</span>
-<span># duplicate zero from no duplicate.</span>
-<span># Expected: [4,1,4,1] returns 4, [1,2,2,1] returns 2, [0,0] returns 0 and [] returns None.</span>
-<span> </span>
-<span># Exercise 3: Build counts while preserving first appearance</span>
-<span># Prompt: Return a dictionary of occurrence counts for string values in first-appearance order. Do</span>
-<span># not remove repeated values or sort the input. Empty input returns an empty dictionary.</span>
-<span># Expected: [b, a, b, c, a, b] yields insertion order[b, a, c] and counts 3,2,1. The sum of counts</span>
-<span># equals input length for every fixture.</span>
-<span> </span>
-<span># Exercise 4: Reconcile occurrences in both directions</span>
-<span># Prompt: Return sorted string keys whose left count minus right count is nonzero. Preserve</span>
-<span># negative differences as well as positive ones. Do not mutate either list.</span>
-<span># Expected: [a, a, b] versus[a, b, b] returns{a:1, b:-1}; identical bags with different order</span>
-<span># return{}; an empty left versus[x, x] gives{x:-2}.</span>
-<span> </span>
-<span># Exercise 5: Index every occurrence instead of overwriting</span>
-<span># Prompt: Build a key-to-list-of-positions index for string values. Preserve positions in</span>
-<span># ascending encounter order and keys in first-appearance order. Empty input returns{}.</span>
-<span># Expected: [a, b, a] yields{a:[0,2], b:[1]}. Every input position occurs exactly once among index</span>
-<span># lists, including repeated keys.</span>
-<span> </span>
-<span># Exercise 6: Produce an output-sensitive equality join</span>
-<span># Prompt: Return every matching(left_position, right_position) pair using a hash index of right.</span>
-<span># Order results by left encounter position, then right encounter position. Preserve duplicate</span>
-<span># matches and inputs; do not compare every unrelated pair.</span>
-<span># Expected: Left[a, a, b], right[a, b, a] yields [(0,0),(0,2),(1,0),(1,2),(2,1)]. No common keys</span>
-<span># gives []; two repeated left and right a values produce four pairs.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-algo-01: Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">pair_comparisons</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative</span></span>
+<span class="source-line"><span class="syntax-string">    non-Boolean integer size. Return the number of pair visits. Compare the result with</span></span>
+<span class="source-line"><span class="syntax-string">    n*(n-1)//2; do not use the formula as the implementation.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement pair_comparisons</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Scan integer values left to right and return the value whose repeated occurrence is</span></span>
+<span class="source-line"><span class="syntax-string">    encountered first. Return None when all values are distinct. Preserve input and</span></span>
+<span class="source-line"><span class="syntax-string">    distinguish a duplicate zero from no duplicate.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement first_duplicate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">frequencies</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a dictionary of occurrence counts for string values in first-appearance order. Do</span></span>
+<span class="source-line"><span class="syntax-string">    not remove repeated values or sort the input. Empty input returns an empty dictionary.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement frequencies</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">bag_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return sorted string keys whose left count minus right count is nonzero. Preserve</span></span>
+<span class="source-line"><span class="syntax-string">    negative differences as well as positive ones. Do not mutate either list.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement bag_difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">position_index</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Build a key-to-list-of-positions index for string values. Preserve positions in</span></span>
+<span class="source-line"><span class="syntax-string">    ascending encounter order and keys in first-appearance order. Empty input returns{}.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement position_index</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">indexed_pairs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return every matching(left_position, right_position) pair using a hash index of right.</span></span>
+<span class="source-line"><span class="syntax-string">    Order results by left encounter position, then right encounter position. Preserve</span></span>
+<span class="source-line"><span class="syntax-string">    duplicate matches and inputs; do not compare every unrelated pair.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement indexed_pairs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        comparisons <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> j <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>i <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> comparisons <span class="syntax-operator">==</span> n <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Distinct pairs:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">,</span> comparisons<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    left <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    right <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    difference <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        key<span class="syntax-punctuation">:</span> left<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> right<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>left<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> right<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> left<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> right<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> difference <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Bag difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> difference<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Count work rather than guessing from timing</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative</span></span>
+<span class="source-line"><span class="syntax-comment"># non-Boolean integer size. Return the number of pair visits. Compare the result with n*(n-1)//2;</span></span>
+<span class="source-line"><span class="syntax-comment"># do not use the formula as the implementation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Sizes 0,1,4,8 return 0,0,6,28. Negative size, True and 2.5 raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Return the first repeated occurrence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Scan integer values left to right and return the value whose repeated occurrence is</span></span>
+<span class="source-line"><span class="syntax-comment"># encountered first. Return None when all values are distinct. Preserve input and distinguish a</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicate zero from no duplicate.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [4,1,4,1] returns 4, [1,2,2,1] returns 2, [0,0] returns 0 and [] returns None.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Build counts while preserving first appearance</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a dictionary of occurrence counts for string values in first-appearance order. Do</span></span>
+<span class="source-line"><span class="syntax-comment"># not remove repeated values or sort the input. Empty input returns an empty dictionary.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [b, a, b, c, a, b] yields insertion order[b, a, c] and counts 3,2,1. The sum of counts</span></span>
+<span class="source-line"><span class="syntax-comment"># equals input length for every fixture.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Reconcile occurrences in both directions</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return sorted string keys whose left count minus right count is nonzero. Preserve</span></span>
+<span class="source-line"><span class="syntax-comment"># negative differences as well as positive ones. Do not mutate either list.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [a, a, b] versus[a, b, b] returns{a:1, b:-1}; identical bags with different order</span></span>
+<span class="source-line"><span class="syntax-comment"># return{}; an empty left versus[x, x] gives{x:-2}.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Index every occurrence instead of overwriting</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build a key-to-list-of-positions index for string values. Preserve positions in</span></span>
+<span class="source-line"><span class="syntax-comment"># ascending encounter order and keys in first-appearance order. Empty input returns{}.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [a, b, a] yields{a:[0,2], b:[1]}. Every input position occurs exactly once among index</span></span>
+<span class="source-line"><span class="syntax-comment"># lists, including repeated keys.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Produce an output-sensitive equality join</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return every matching(left_position, right_position) pair using a hash index of right.</span></span>
+<span class="source-line"><span class="syntax-comment"># Order results by left encounter position, then right encounter position. Preserve duplicate</span></span>
+<span class="source-line"><span class="syntax-comment"># matches and inputs; do not compare every unrelated pair.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Left[a, a, b], right[a, b, a] yields [(0,0),(0,2),(1,0),(1,2),(2,1)]. No common keys</span></span>
+<span class="source-line"><span class="syntax-comment"># gives []; two repeated left and right a values produce four pairs.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -612,97 +660,97 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-count-work-rather-than-guessing-from-timing">Exercise 1: Count work rather than guessing from timing<a class="heading-anchor" href="#solution-1--exercise-1-count-work-rather-than-guessing-from-timing" aria-label="Link to this section">#</a></h5>
 <p>Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative non-Boolean integer size. Return the number of pair visits. Compare the result with n*(n-1)//2; do not use the formula as the implementation.</p>
 <p><strong>Expected:</strong> Sizes 0,1,4,8 return 0,0,6,28. Negative size, True and 2.5 raise ValueError.</p>
-<pre><code class="language-python">def pair_comparisons(size: int) -&gt; int:
-    if isinstance(size, bool) or not isinstance(size, int) or size &lt; 0:
-        raise ValueError(&quot;Expected a nonnegative integer size&quot;)
-    count = 0
-    for left in range(size):
-        for _right in range(left + 1, size):
-            count += 1
-    return count</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">pair_comparisons</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> size <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a nonnegative integer size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    count <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">for</span> left <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">for</span> _right <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>left <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> count</code></pre>
 <p>The loop embodies the work being measured, while the closed-form identity is an independent oracle. Starting the second index at left+1 excludes self-pairs and avoids counting both orientations. Empty and singleton inputs naturally contain no pairs. Rejecting Boolean size avoids treating True as an accidental one-item problem. The implementation is deliberately quadratic because the lesson is about observing that growth, not optimizing this count.</p>
-<pre><code class="language-python">assert [pair_comparisons(n) for n in [0, 1, 4, 8]] == [0, 0, 6, 28]
-for n in range(20):
-    assert pair_comparisons(n) == n * (n - 1) // 2
-expect_value_error(lambda: pair_comparisons(-1))
-expect_value_error(lambda: pair_comparisons(True))
-expect_value_error(lambda: pair_comparisons(2.5))  # type: ignore[arg-type]  # Invalid-type boundary.</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>pair_comparisons<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">28</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> pair_comparisons<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> n <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[arg-type]  # Invalid-type boundary.</span></code></pre>
 <h5 id="solution-1--exercise-2-return-the-first-repeated-occurrence">Exercise 2: Return the first repeated occurrence<a class="heading-anchor" href="#solution-1--exercise-2-return-the-first-repeated-occurrence" aria-label="Link to this section">#</a></h5>
 <p>Scan integer values left to right and return the value whose repeated occurrence is encountered first. Return None when all values are distinct. Preserve input and distinguish a duplicate zero from no duplicate.</p>
 <p><strong>Expected:</strong> [4,1,4,1] returns 4, [1,2,2,1] returns 2, [0,0] returns 0 and [] returns None.</p>
-<pre><code class="language-python">def first_duplicate(values: list[int]) -&gt; int | None:
-    seen = set()
-    for value in values:
-        if value in seen:
-            return value
-        seen.add(value)
-    return None</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    seen <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">return</span> value
+        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></code></pre>
 <p>Membership is checked before inserting the current value, so the function identifies the first repeated occurrence in scan order. Sorting first would answer a different question and mutate or reorder the evidence. None is used as the absence sentinel because zero is a valid data value. Expected time is linear with state proportional to the distinct values seen before the first duplicate.</p>
-<pre><code class="language-python">values_2 = [4, 1, 4, 1]
-assert first_duplicate(values_2) == 4 and values_2 == [4, 1, 4, 1]
-assert first_duplicate([1, 2, 2, 1]) == 2 and first_duplicate([0, 0]) == 0
-assert first_duplicate([]) is None and first_duplicate([1, 2, 3]) is None</code></pre>
+<pre class="highlighted-code"><code class="language-python">values_2 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span>values_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">and</span> values_2 <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
 <h5 id="solution-1--exercise-3-build-counts-while-preserving-first-appearance">Exercise 3: Build counts while preserving first appearance<a class="heading-anchor" href="#solution-1--exercise-3-build-counts-while-preserving-first-appearance" aria-label="Link to this section">#</a></h5>
 <p>Return a dictionary of occurrence counts for string values in first-appearance order. Do not remove repeated values or sort the input. Empty input returns an empty dictionary.</p>
 <p><strong>Expected:</strong> [b, a, b, c, a, b] yields insertion order[b, a, c] and counts 3,2,1. The sum of counts equals input length for every fixture.</p>
-<pre><code class="language-python">def frequencies(values: list[str]) -&gt; dict[str, int]:
-    counts: dict[str, int] = {}
-    for value in values:
-        counts[value] = counts.get(value, 0) + 1
-    return counts</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">frequencies</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    counts<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
+        counts<span class="syntax-punctuation">[</span>value<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> counts<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> counts</code></pre>
 <p>get supplies zero only for a previously unseen key, then every occurrence increments its count. Updating an existing dictionary entry does not move its insertion position in the supported Python versions. The count-sum invariant catches accidental dropping or double-counting, while the explicit key-order assertion checks a different part of the contract. A set would preserve neither multiplicity nor this presentation policy.</p>
-<pre><code class="language-python">values_3 = [&quot;b&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;, &quot;b&quot;]
-result_3 = frequencies(values_3)
-assert list(result_3) == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and result_3 == {&quot;b&quot;: 3, &quot;a&quot;: 2, &quot;c&quot;: 1}
-assert sum(result_3.values()) == len(values_3) and frequencies([]) == {}</code></pre>
+<pre class="highlighted-code"><code class="language-python">values_3 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+result_3 <span class="syntax-operator">=</span> frequencies<span class="syntax-punctuation">(</span>values_3<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>result_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> result_3 <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>result_3<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> frequencies<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></code></pre>
 <h5 id="solution-1--exercise-4-reconcile-occurrences-in-both-directions">Exercise 4: Reconcile occurrences in both directions<a class="heading-anchor" href="#solution-1--exercise-4-reconcile-occurrences-in-both-directions" aria-label="Link to this section">#</a></h5>
 <p>Return sorted string keys whose left count minus right count is nonzero. Preserve negative differences as well as positive ones. Do not mutate either list.</p>
 <p><strong>Expected:</strong> [a, a, b] versus[a, b, b] returns{a:1, b:-1}; identical bags with different order return{}; an empty left versus[x, x] gives{x:-2}.</p>
-<pre><code class="language-python">def bag_difference(left: list[str], right: list[str]) -&gt; dict[str, int]:
-    a = Counter(left)
-    b = Counter(right)
-    return {key: a[key] - b[key] for key in sorted(a.keys() | b.keys()) if a[key] != b[key]}</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">bag_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    a <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span>
+    b <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> b<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> a<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> b<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></code></pre>
 <p>The union of keys includes values present on only one side, and Counter returns zero for absent keys. Explicit signed subtraction is required because Counter&#x27;s subtraction operator discards zero and negative counts. Sorting keys makes the diagnostic deterministic without changing bag semantics. Equality of total lengths is insufficient: a missing occurrence of one value can be offset by an extra occurrence of another.</p>
-<pre><code class="language-python">assert bag_difference([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;], [&quot;a&quot;, &quot;b&quot;, &quot;b&quot;]) == {&quot;a&quot;: 1, &quot;b&quot;: -1}
-assert bag_difference([&quot;b&quot;, &quot;a&quot;], [&quot;a&quot;, &quot;b&quot;]) == {}
-assert bag_difference([], [&quot;x&quot;, &quot;x&quot;]) == {&quot;x&quot;: -2}</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span></code></pre>
 <h5 id="solution-1--exercise-5-index-every-occurrence-instead-of-overwriting">Exercise 5: Index every occurrence instead of overwriting<a class="heading-anchor" href="#solution-1--exercise-5-index-every-occurrence-instead-of-overwriting" aria-label="Link to this section">#</a></h5>
 <p>Build a key-to-list-of-positions index for string values. Preserve positions in ascending encounter order and keys in first-appearance order. Empty input returns{}.</p>
 <p><strong>Expected:</strong> [a, b, a] yields{a:[0,2], b:[1]}. Every input position occurs exactly once among index lists, including repeated keys.</p>
-<pre><code class="language-python">def position_index(values: list[str]) -&gt; dict[str, list[int]]:
-    index: dict[str, list[int]] = {}
-    for position, value in enumerate(values):
-        index.setdefault(value, []).append(position)
-    return index</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">position_index</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    index<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">for</span> position<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        index<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>position<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> index</code></pre>
 <p>A single-value dictionary assignment would overwrite the earlier position of a, losing a legitimate occurrence. A list at each key retains all matches and therefore supports duplicate-aware joins. The flattened-position invariant verifies that indexing neither loses nor invents rows. Memory is linear in the input size because every position is stored once, even if the number of distinct keys is much smaller.</p>
-<pre><code class="language-python">values_5 = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;]
-result_5 = position_index(values_5)
-assert result_5 == {&quot;a&quot;: [0, 2], &quot;b&quot;: [1]} and list(result_5) == [&quot;a&quot;, &quot;b&quot;]
-assert sorted(position for positions in result_5.values() for position in positions) == list(
-    range(len(values_5))
-)
-assert position_index([]) == {}</code></pre>
+<pre class="highlighted-code"><code class="language-python">values_5 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+result_5 <span class="syntax-operator">=</span> position_index<span class="syntax-punctuation">(</span>values_5<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> result_5 <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>result_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>position <span class="syntax-keyword">for</span> positions <span class="syntax-operator">in</span> result_5<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> position <span class="syntax-operator">in</span> positions<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> position_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></code></pre>
 <h5 id="solution-1--exercise-6-produce-an-output-sensitive-equality-join">Exercise 6: Produce an output-sensitive equality join<a class="heading-anchor" href="#solution-1--exercise-6-produce-an-output-sensitive-equality-join" aria-label="Link to this section">#</a></h5>
 <p>Return every matching(left_position, right_position) pair using a hash index of right. Order results by left encounter position, then right encounter position. Preserve duplicate matches and inputs; do not compare every unrelated pair.</p>
 <p><strong>Expected:</strong> Left[a, a, b], right[a, b, a] yields [(0,0),(0,2),(1,0),(1,2),(2,1)]. No common keys gives []; two repeated left and right a values produce four pairs.</p>
-<pre><code class="language-python">def indexed_pairs(left: list[str], right: list[str]) -&gt; list[tuple[int, int]]:
-    index = position_index(right)
-    result = []
-    for left_position, value in enumerate(left):
-        for right_position in index.get(value, []):
-            result.append((left_position, right_position))
-    return result</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">indexed_pairs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    index <span class="syntax-operator">=</span> position_index<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> left_position<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">for</span> right_position <span class="syntax-operator">in</span> index<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>left_position<span class="syntax-punctuation">,</span> right_position<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result</code></pre>
 <p>Building the right index costs expected linear work, and probing it costs expected linear work in left size plus the number of emitted matches. The output can still be quadratic when every key repeats on both sides, because those pairs are genuinely required. This explains why an efficient hash join does not make an unintended many-to-many relationship harmless. Complexity and row-grain correctness must both be reviewed.</p>
-<pre><code class="language-python">assert indexed_pairs([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;], [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;]) == [
-    (0, 0),
-    (0, 2),
-    (1, 0),
-    (1, 2),
-    (2, 1),
-]
-assert indexed_pairs([&quot;a&quot;], [&quot;b&quot;]) == []
-assert len(indexed_pairs([&quot;a&quot;, &quot;a&quot;], [&quot;a&quot;, &quot;a&quot;])) == 4
-assert indexed_pairs([], []) == []</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_algo_01_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -737,115 +785,115 @@ assert indexed_pairs([], []) == []</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-01.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections import Counter</span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span> </span>
-<span>def pair_comparisons(size: int) -&gt; int:</span>
-<span>    if isinstance(size, bool) or not isinstance(size, int) or size &lt; 0:</span>
-<span>        raise ValueError(&quot;Expected a nonnegative integer size&quot;)</span>
-<span>    count = 0</span>
-<span>    for left in range(size):</span>
-<span>        for _right in range(left + 1, size):</span>
-<span>            count += 1</span>
-<span>    return count</span>
-<span> </span>
-<span> </span>
-<span>def first_duplicate(values: list[int]) -&gt; int | None:</span>
-<span>    seen = set()</span>
-<span>    for value in values:</span>
-<span>        if value in seen:</span>
-<span>            return value</span>
-<span>        seen.add(value)</span>
-<span>    return None</span>
-<span> </span>
-<span> </span>
-<span>def frequencies(values: list[str]) -&gt; dict[str, int]:</span>
-<span>    counts: dict[str, int] = {}</span>
-<span>    for value in values:</span>
-<span>        counts[value] = counts.get(value, 0) + 1</span>
-<span>    return counts</span>
-<span> </span>
-<span> </span>
-<span>def bag_difference(left: list[str], right: list[str]) -&gt; dict[str, int]:</span>
-<span>    a = Counter(left)</span>
-<span>    b = Counter(right)</span>
-<span>    return {key: a[key] - b[key] for key in sorted(a.keys() | b.keys()) if a[key] != b[key]}</span>
-<span> </span>
-<span> </span>
-<span>def position_index(values: list[str]) -&gt; dict[str, list[int]]:</span>
-<span>    index: dict[str, list[int]] = {}</span>
-<span>    for position, value in enumerate(values):</span>
-<span>        index.setdefault(value, []).append(position)</span>
-<span>    return index</span>
-<span> </span>
-<span> </span>
-<span>def indexed_pairs(left: list[str], right: list[str]) -&gt; list[tuple[int, int]]:</span>
-<span>    index = position_index(right)</span>
-<span>    result = []</span>
-<span>    for left_position, value in enumerate(left):</span>
-<span>        for right_position in index.get(value, []):</span>
-<span>            result.append((left_position, right_position))</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Count work rather than guessing from timing</span>
-<span>    assert [pair_comparisons(n) for n in [0, 1, 4, 8]] == [0, 0, 6, 28]</span>
-<span>    for n in range(20):</span>
-<span>        assert pair_comparisons(n) == n * (n - 1) // 2</span>
-<span>    expect_value_error(lambda: pair_comparisons(-1))</span>
-<span>    expect_value_error(lambda: pair_comparisons(True))</span>
-<span>    expect_value_error(lambda: pair_comparisons(2.5))  # type: ignore[arg-type]  # Invalid-type boundary.</span>
-<span>    # Exercise 2: Return the first repeated occurrence</span>
-<span>    values_2 = [4, 1, 4, 1]</span>
-<span>    assert first_duplicate(values_2) == 4 and values_2 == [4, 1, 4, 1]</span>
-<span>    assert first_duplicate([1, 2, 2, 1]) == 2 and first_duplicate([0, 0]) == 0</span>
-<span>    assert first_duplicate([]) is None and first_duplicate([1, 2, 3]) is None</span>
-<span>    # Exercise 3: Build counts while preserving first appearance</span>
-<span>    values_3 = [&quot;b&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;, &quot;b&quot;]</span>
-<span>    result_3 = frequencies(values_3)</span>
-<span>    assert list(result_3) == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and result_3 == {&quot;b&quot;: 3, &quot;a&quot;: 2, &quot;c&quot;: 1}</span>
-<span>    assert sum(result_3.values()) == len(values_3) and frequencies([]) == {}</span>
-<span>    # Exercise 4: Reconcile occurrences in both directions</span>
-<span>    assert bag_difference([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;], [&quot;a&quot;, &quot;b&quot;, &quot;b&quot;]) == {&quot;a&quot;: 1, &quot;b&quot;: -1}</span>
-<span>    assert bag_difference([&quot;b&quot;, &quot;a&quot;], [&quot;a&quot;, &quot;b&quot;]) == {}</span>
-<span>    assert bag_difference([], [&quot;x&quot;, &quot;x&quot;]) == {&quot;x&quot;: -2}</span>
-<span>    # Exercise 5: Index every occurrence instead of overwriting</span>
-<span>    values_5 = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;]</span>
-<span>    result_5 = position_index(values_5)</span>
-<span>    assert result_5 == {&quot;a&quot;: [0, 2], &quot;b&quot;: [1]} and list(result_5) == [&quot;a&quot;, &quot;b&quot;]</span>
-<span>    assert sorted(position for positions in result_5.values() for position in positions) == list(</span>
-<span>        range(len(values_5))</span>
-<span>    )</span>
-<span>    assert position_index([]) == {}</span>
-<span>    # Exercise 6: Produce an output-sensitive equality join</span>
-<span>    assert indexed_pairs([&quot;a&quot;, &quot;a&quot;, &quot;b&quot;], [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;]) == [</span>
-<span>        (0, 0),</span>
-<span>        (0, 2),</span>
-<span>        (1, 0),</span>
-<span>        (1, 2),</span>
-<span>        (2, 1),</span>
-<span>    ]</span>
-<span>    assert indexed_pairs([&quot;a&quot;], [&quot;b&quot;]) == []</span>
-<span>    assert len(indexed_pairs([&quot;a&quot;, &quot;a&quot;], [&quot;a&quot;, &quot;a&quot;])) == 4</span>
-<span>    assert indexed_pairs([], []) == []</span>
-<span>    print(&quot;python-algo-01: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-01.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">pair_comparisons</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> size <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a nonnegative integer size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    count <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> left <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> _right <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>left <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> count</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">first_duplicate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    seen <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> value <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> value</span>
+<span class="source-line">        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">frequencies</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    counts<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        counts<span class="syntax-punctuation">[</span>value<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> counts<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> counts</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">bag_difference</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> a<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> b<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> a<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> b<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">position_index</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    index<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> position<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        index<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>position<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> index</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">indexed_pairs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    index <span class="syntax-operator">=</span> position_index<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> left_position<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> right_position <span class="syntax-operator">in</span> index<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>left_position<span class="syntax-punctuation">,</span> right_position<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Count work rather than guessing from timing</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>pair_comparisons<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">28</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> pair_comparisons<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> n <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pair_comparisons<span class="syntax-punctuation">(</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[arg-type]  # Invalid-type boundary.</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Return the first repeated occurrence</span></span>
+<span class="source-line">    values_2 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span>values_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">and</span> values_2 <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> first_duplicate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Build counts while preserving first appearance</span></span>
+<span class="source-line">    values_3 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    result_3 <span class="syntax-operator">=</span> frequencies<span class="syntax-punctuation">(</span>values_3<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>result_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> result_3 <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>result_3<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> frequencies<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Reconcile occurrences in both directions</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bag_difference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Index every occurrence instead of overwriting</span></span>
+<span class="source-line">    values_5 <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    result_5 <span class="syntax-operator">=</span> position_index<span class="syntax-punctuation">(</span>values_5<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result_5 <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>result_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>position <span class="syntax-keyword">for</span> positions <span class="syntax-operator">in</span> result_5<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> position <span class="syntax-operator">in</span> positions<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> position_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Produce an output-sensitive equality join</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> indexed_pairs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-algo-01: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

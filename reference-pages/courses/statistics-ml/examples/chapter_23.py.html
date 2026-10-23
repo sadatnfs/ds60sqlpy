@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,39 +161,39 @@
       <h1>Chapter 23</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_23.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def conformal_rank():</span>
-<span>    scores=np.arange(1.,20.)</span>
-<span>    alpha=.1;n=len(scores);k=int(np.ceil((n+1)*(1-alpha)))</span>
-<span>    q=np.sort(scores)[k-1] if k&lt;=n else np.inf</span>
-<span>    assert k==18 and q==18</span>
-<span>    possible_new_scores=np.arange(.5,20.,1.)</span>
-<span>    rank_coverage=np.mean(possible_new_scores&lt;=q)</span>
-<span>    assert rank_coverage==.9</span>
-<span>    print(&quot;Calibration n/k/q:&quot;,n,k,q,&quot;coverage over illustrative equally likely ranks:&quot;,rank_coverage)</span>
-<span> </span>
-<span>def shift_weighting():</span>
-<span>    source=np.array([.8,.2]);target=np.array([.2,.8]);outcome=np.array([1.,9.])</span>
-<span>    weights=target/source</span>
-<span>    target_mean=np.sum(source*weights*outcome)</span>
-<span>    assert np.isclose(target_mean,target@outcome) and np.isclose(target_mean,7.4)</span>
-<span>    assert np.isclose(source@outcome,2.6)</span>
-<span>    print(&quot;Source mean:&quot;,source@outcome,&quot;target reweighted mean:&quot;,target_mean,&quot;ratios:&quot;,weights)</span>
-<span> </span>
-<span>def selective_prediction():</span>
-<span>    confidence=np.array([.55,.6,.8,.95]);error=np.array([1.,1.,0.,0.])</span>
-<span>    accepted=confidence&gt;=.8</span>
-<span>    coverage=accepted.mean();risk=error[accepted].mean()</span>
-<span>    assert coverage==.5 and risk==0 and error.mean()==.5</span>
-<span>    print(&quot;Accepted fraction:&quot;,coverage,&quot;accepted empirical error:&quot;,risk,&quot;all-case error:&quot;,error.mean())</span>
-<span> </span>
-<span>def main():</span>
-<span>    conformal_rank();shift_weighting();selective_prediction()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">conformal_rank</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    alpha<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">;</span>n<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>k<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>k<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> k<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>n <span class="syntax-keyword">else</span> np<span class="syntax-operator">.</span>inf</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> k<span class="syntax-operator">==</span><span class="syntax-number">18</span> <span class="syntax-operator">and</span> q<span class="syntax-operator">==</span><span class="syntax-number">18</span></span>
+<span class="source-line">    possible_new_scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    rank_coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>possible_new_scores<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>q<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> rank_coverage<span class="syntax-operator">==</span><span class="syntax-number">.9</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Calibration n/k/q:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>n<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>q<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">coverage over illustrative equally likely ranks:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>rank_coverage<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">shift_weighting</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    source<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>target<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>outcome<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    weights<span class="syntax-operator">=</span>target<span class="syntax-operator">/</span>source</span>
+<span class="source-line">    target_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>source<span class="syntax-operator">*</span>weights<span class="syntax-operator">*</span>outcome<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span>target<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-number">7.4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.6</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Source mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">target reweighted mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ratios:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weights<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">selective_prediction</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    confidence<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.55</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.95</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>error<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    accepted<span class="syntax-operator">=</span>confidence<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.8</span></span>
+<span class="source-line">    coverage<span class="syntax-operator">=</span>accepted<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>risk<span class="syntax-operator">=</span>error<span class="syntax-punctuation">[</span>accepted<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> coverage<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> risk<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Accepted fraction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>coverage<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted empirical error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>risk<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">all-case error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    conformal_rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>shift_weighting<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>selective_prediction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

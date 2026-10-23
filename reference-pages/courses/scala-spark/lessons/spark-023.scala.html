@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,75 +161,75 @@
       <h1>Spark 023</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-023.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
-<span>import org.apache.spark.sql.functions._</span>
-<span>import org.apache.spark.sql.types._</span>
-<span> </span>
-<span> </span>
-<span>object Main {</span>
-<span>  def logicalMetrics(frame: DataFrame): (Long,Long,Long,Long) = {</span>
-<span>    val row = frame.agg(count(lit(1)),countDistinct(&quot;fact_id&quot;),sum(&quot;amount&quot;),sum(col(&quot;amount&quot;) * col(&quot;factor&quot;))).first()</span>
-<span>    (row.getLong(0),row.getLong(1),row.getLong(2),row.getLong(3))</span>
-<span>  }</span>
-<span>  def joinPlan(frame: DataFrame): String = frame.queryExecution.executedPlan.toString</span>
-<span> </span>
-<span>  def estimatedBytes(frame: DataFrame): BigInt =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete estimatedBytes&quot;)</span>
-<span> </span>
-<span>  def ordinaryJoin(facts: DataFrame, dimension: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete ordinaryJoin&quot;)</span>
-<span> </span>
-<span>  def withoutAutomaticBroadcast(facts: DataFrame, dimension: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete withoutAutomaticBroadcast&quot;)</span>
-<span> </span>
-<span>  def hintedJoin(facts: DataFrame, dimension: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete hintedJoin&quot;)</span>
-<span> </span>
-<span>  def unsupportedHint(facts: DataFrame, dimension: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete unsupportedHint&quot;)</span>
-<span> </span>
-<span>  def boundedBroadcast(dimension: DataFrame): DataFrame =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete boundedBroadcast&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span> </span>
-<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-023&quot;).master(&quot;local[2]&quot;)</span>
-<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
-<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
-<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
-<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
-<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
-<span>    try {</span>
-<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
-<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>      val facts = spark.range(0L,20000L,1L,4).withColumnRenamed(&quot;id&quot;,&quot;fact_id&quot;).withColumn(&quot;key&quot;,col(&quot;fact_id&quot;) % 20L).withColumn(&quot;amount&quot;,col(&quot;fact_id&quot;) % 7L + 1L)</span>
-<span>      val dimension = spark.range(0L,20L,1L,2).withColumnRenamed(&quot;id&quot;,&quot;key&quot;).withColumn(&quot;factor&quot;,col(&quot;key&quot;) + 1L)</span>
-<span>      spark.conf.set(&quot;spark.sql.autoBroadcastJoinThreshold&quot;,&quot;10485760&quot;)</span>
-<span>      spark.conf.set(&quot;spark.sql.join.preferSortMergeJoin&quot;,&quot;true&quot;)</span>
-<span>      locally {</span>
-<span>        assert(facts.count() == 20000L &amp;&amp; dimension.count() == 20L)</span>
-<span>        assert(dimension.select(&quot;key&quot;).distinct().count() == 20L)</span>
-<span>        println(&quot;Known finite build side:20 unique keys&quot;)</span>
-<span>      }</span>
-<span>      locally {</span>
-<span>        val total = (0L until 20000L).map(i =&gt; (i%7L+1L)*(i%20L+1L)).sum</span>
-<span>        assert(total == 839916L)</span>
-<span>        println(&quot;Independent weighted-total oracle=&quot; + total)</span>
-<span>      }</span>
-<span>      println(&quot;spark-023: worked examples passed; six task implementations remain&quot;)</span>
-<span>    } finally { try { () } finally { spark.stop() } }</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Inspect statistics and the automatic threshold separately. Inputs/task: Return the optimized-plan size estimate for dimension as a nonnegative integer, and record the configured automatic broadcast threshold and actual dimension row count. Expected: A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement. Verify: Assert the finite estimate range and print estimate, threshold, rows andSpark version as separate fields.</span>
-<span>// Exercise 2: Observe the automatic plan and verify its relational output. Inputs/task: Build an ordinary inner equality join on key, projecting fact_id, key, amount, factor. Execute logical metrics and record the physical plan chosen with the declared threshold. Expected: Metrics(20000,20000,79997,839916). The observed plan identifies a join strategy and is printed with current threshold. Verify: Assert all metrics and a join operator marker. Report the observed automatic strategy without treating a default as a universal guarantee.</span>
-<span>// Exercise 3: Disable automatic broadcasting for a fresh comparison. Inputs/task: Set automatic broadcast threshold to-1, build a fresh ordinary join and record its plan withAQE disabled. Keep the logical result contract. Expected: Same metrics as automatic. No BroadcastHashJoin in this fresh query underAQEfalse and threshold-1. Verify: Assert all four metrics, the disabled setting and observed absence of BroadcastHashJoin.</span>
-<span>// Exercise 4: Request an eligible explicit broadcast and reconcile bags. Inputs/task: Apply broadcast to the dimension for an inner equality join while automatic threshold remains-1. Project the same columns and compare duplicate-sensitive output with the ordinary join in both directions. Expected: BroadcastHashJoin and BroadcastExchange appear. Both exceptAll differences are empty and logical metrics remain exact. Verify: Assert the two operator markers, all metrics and both bag differences.</span>
-<span>// Exercise 5: Observe an unsupported hint without changing the business result. Inputs/task: Request a broadcast dimension in a full outer equality join and inspect the chosen plan. Explain why this fixture still has the same output rows as the inner join. Expected: No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain(20000,20000,79997,839916) because both key domains are fully covered. Verify: Assert the observed absence of BroadcastHashJoin and exact output metrics;report a hint warning if emitted rather than hiding it.</span>
-<span>// Exercise 6: Gate a broadcast candidate on explicit bounded evidence. Inputs/task: Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1MiB]. Return the bounded dimension with a broadcast hint only after those checks. Expected: The 20-row dimension passes;the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate. Verify: Assert accepted logical join metrics and explicit rejection for duplicate and row-budget cases.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">logicalMetrics</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span><span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> row <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>agg<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">(</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;fact_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>sum<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;factor&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>row<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">joinPlan</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> frame<span class="syntax-punctuation">.</span>queryExecution<span class="syntax-punctuation">.</span>executedPlan<span class="syntax-punctuation">.</span>toString</span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">estimatedBytes</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">BigInt</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete estimatedBytes&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">ordinaryJoin</span><span class="syntax-punctuation">(</span>facts<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> dimension<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete ordinaryJoin&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">withoutAutomaticBroadcast</span><span class="syntax-punctuation">(</span>facts<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> dimension<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete withoutAutomaticBroadcast&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">hintedJoin</span><span class="syntax-punctuation">(</span>facts<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> dimension<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete hintedJoin&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">unsupportedHint</span><span class="syntax-punctuation">(</span>facts<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> dimension<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete unsupportedHint&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">boundedBroadcast</span><span class="syntax-punctuation">(</span>dimension<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete boundedBroadcast&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">val</span> spark <span class="syntax-operator">=</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">.</span>builder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ds60-spark-023&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.ui.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.host&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.driver.bindAddress&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;127.0.0.1&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.shuffle.partitions&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;2&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.adaptive.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.session.timeZone&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;UTC&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;local[2]&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;local-only course session&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ERROR&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> facts <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumnRenamed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;fact_id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">,</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;fact_id&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">20L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">,</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;fact_id&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">7L</span> <span class="syntax-operator">+</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> dimension <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumnRenamed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;factor&quot;</span><span class="syntax-punctuation">,</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.autoBroadcastJoinThreshold&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;10485760&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.join.preferSortMergeJoin&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>facts<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20000L</span> <span class="syntax-operator">&amp;&amp;</span> dimension<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>dimension<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>distinct<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Known finite build side:20 unique keys&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">val</span> total <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0L</span> until <span class="syntax-number">20000L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>i <span class="syntax-operator">=&gt;</span> <span class="syntax-punctuation">(</span>i<span class="syntax-operator">%</span><span class="syntax-number">7L</span><span class="syntax-operator">+</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>i<span class="syntax-operator">%</span><span class="syntax-number">20L</span><span class="syntax-operator">+</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sum</span>
+<span class="source-line">        assert<span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">839916L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Independent weighted-total oracle=&quot;</span> <span class="syntax-operator">+</span> total<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-023: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> spark<span class="syntax-punctuation">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Inspect statistics and the automatic threshold separately. Inputs/task: Return the optimized-plan size estimate for dimension as a nonnegative integer, and record the configured automatic broadcast threshold and actual dimension row count. Expected: A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement. Verify: Assert the finite estimate range and print estimate, threshold, rows andSpark version as separate fields.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Observe the automatic plan and verify its relational output. Inputs/task: Build an ordinary inner equality join on key, projecting fact_id, key, amount, factor. Execute logical metrics and record the physical plan chosen with the declared threshold. Expected: Metrics(20000,20000,79997,839916). The observed plan identifies a join strategy and is printed with current threshold. Verify: Assert all metrics and a join operator marker. Report the observed automatic strategy without treating a default as a universal guarantee.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Disable automatic broadcasting for a fresh comparison. Inputs/task: Set automatic broadcast threshold to-1, build a fresh ordinary join and record its plan withAQE disabled. Keep the logical result contract. Expected: Same metrics as automatic. No BroadcastHashJoin in this fresh query underAQEfalse and threshold-1. Verify: Assert all four metrics, the disabled setting and observed absence of BroadcastHashJoin.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Request an eligible explicit broadcast and reconcile bags. Inputs/task: Apply broadcast to the dimension for an inner equality join while automatic threshold remains-1. Project the same columns and compare duplicate-sensitive output with the ordinary join in both directions. Expected: BroadcastHashJoin and BroadcastExchange appear. Both exceptAll differences are empty and logical metrics remain exact. Verify: Assert the two operator markers, all metrics and both bag differences.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Observe an unsupported hint without changing the business result. Inputs/task: Request a broadcast dimension in a full outer equality join and inspect the chosen plan. Explain why this fixture still has the same output rows as the inner join. Expected: No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain(20000,20000,79997,839916) because both key domains are fully covered. Verify: Assert the observed absence of BroadcastHashJoin and exact output metrics;report a hint warning if emitted rather than hiding it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Gate a broadcast candidate on explicit bounded evidence. Inputs/task: Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1MiB]. Return the bounded dimension with a broadcast hint only after those checks. Expected: The 20-row dimension passes;the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate. Verify: Assert accepted logical join metrics and explicit rejection for duplicate and row-budget cases.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

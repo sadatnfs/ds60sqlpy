@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-numpy-04.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_numpy_04.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_numpy_04<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_04.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_04.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-04.html#solution-1">explanatory solutions</a> and <a href="python-numpy-04.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -356,36 +404,36 @@
 <li><strong>Tolerance:</strong> An explicit absolute or relative error allowance chosen for a comparison, not proof of mathematical equality.</li>
 </ul>
 <p>Scientific programs represent most real values approximately. An algorithm can be mathematically correct and still lose useful digits through cancellation, overflow or an inappropriate data type. Numerical stability asks whether the computation adds avoidable error. Conditioning asks whether the underlying problem itself is sensitive. A stable solver cannot recover a well-determined answer from nearly indistinguishable input columns without additional assumptions.</p>
-<p>Exponentials illustrate avoidable overflow. A softmax divides exp(x_i) by the sum of all exponentials. Adding the same constant to every score leaves the probabilities unchanged, so subtract the maximum before exponentiating. The largest exponent becomes zero and all others are nonpositive. The log-sum-exp identity similarly writes log(sum(exp(x))) as m+log(sum(exp(x-m))). The transformation preserves the mathematical result while avoiding huge intermediate exponentials.</p>
+<p>Exponentials illustrate avoidable overflow. A softmax divides <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>e</mi><mrow><msub><mi>x</mi><mi>i</mi></msub></mrow></msup></mrow><annotation encoding="application/x-tex">e^{x_i}</annotation></semantics></math> by the sum of all exponentials. Adding the same constant to every score leaves the probabilities unchanged, so subtract the maximum before exponentiating. The largest exponent becomes zero and all others are nonpositive. The log-sum-exp identity similarly writes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><msub><mo>∑</mo><mi>i</mi></msub><msup><mi>e</mi><mrow><msub><mi>x</mi><mi>i</mi></msub></mrow></msup></mrow><annotation encoding="application/x-tex">\log\sum_i e^{x_i}</annotation></semantics></math> as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>m</mi><mo>+</mo><mi>log</mi><msub><mo>∑</mo><mi>i</mi></msub><msup><mi>e</mi><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">m+\log\sum_i e^{x_i-m}</annotation></semantics></math>. The transformation preserves the mathematical result while avoiding huge intermediate exponentials.</p>
 <p>Summation order matters because floating addition is not associative. For values 1e16, one and -1e16, an ordinary sequential or array sum can lose the one. math.fsum tracks partial sums to recover more accurate results for this example. It is not arbitrary-precision arithmetic and cannot represent a final result outside the floating range. Explicitly distinguish a recoverable rounding problem from a genuinely unrepresentable answer.</p>
 <p>Integer arrays have their own range limits. Multiplying int64 values before converting to float can overflow in integer arithmetic. Converting operands first avoids that specific failure, but float conversion may lose exact low bits for very large integers. Exact accounting and identity calculations should retain exact integer or decimal contracts instead of assuming scientific floating operations are interchangeable.</p>
 <p>Solving A*x=b should use a solver rather than explicitly forming inverse(A). Inspect the condition number and the residual norm. A tiny residual shows that the computed result approximately solves the supplied system; it does not prove the solution is insensitive to measurement error. A nearly singular system can have a tiny residual and wildly unstable coefficients.</p>
 <p>Finally, choose comparison tolerances from units and scale. Absolute tolerance controls behavior near zero, while relative tolerance scales with a reference magnitude. Comparing arrays with mismatched shapes through broadcasting can accidentally validate unrelated outputs, so the exercise&#x27;s comparison contract requires identical shapes. A tolerance should explain which differences are operationally negligible, not be enlarged until a failing computation passes.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">scores = np.array([1000.0, 1001.0, 999.0])
-shifted = scores - scores.max()
-probability = np.exp(shifted) / np.exp(shifted).sum()
-assert np.isfinite(probability).all() and np.isclose(probability.sum(), 1)
-assert probability.argmax() == 1
-print(&quot;Stable probabilities:&quot;, probability.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">scores <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1001.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+shifted <span class="syntax-operator">=</span> scores <span class="syntax-operator">-</span> scores<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+probability <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>probability<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>probability<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> probability<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stable probabilities:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> probability<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The raw exponentials would overflow at these scores, while subtracting 1001 changes neither their relative ratios nor the resulting probabilities. The maximum-score class remains the most probable. Checking finite values, normalization and ordering gives three independent observations about the transformation.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">values = [1e16, 1.0, -1e16]
-ordinary = float(np.sum(values))
-accurate = math.fsum(values)
-assert accurate == 1.0 and ordinary == 0.0
-a = np.array([[2.0, 0.0], [0.0, 4.0]])
-b = np.array([6.0, 8.0])
-x = np.linalg.solve(a, b)
-assert np.allclose(x, [3.0, 2.0]) and np.allclose(a @ x, b)
-print(&quot;Summation:&quot;, ordinary, accurate, &quot;linear solution:&quot;, x.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">]</span>
+ordinary <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+accurate <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> accurate <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span> <span class="syntax-operator">and</span> ordinary <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span>
+a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>solve<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>a <span class="syntax-operator">@</span> x<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Summation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ordinary<span class="syntax-punctuation">,</span> accurate<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">linear solution:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The summation counterexample exposes lost low-order information. The diagonal system then makes a solver result independently inspectable: two times three is six and four times two is eight. A library success flag is weaker evidence than both the expected solution and a checked residual on a known fixture.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
-<li><strong>Aggregate log weights without overflow.</strong> Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</li>
+<li><strong>Aggregate log weights without overflow.</strong> Implement stable <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><msub><mo>∑</mo><mi>i</mi></msub><msup><mi>e</mi><mrow><msub><mrow><mi mathvariant="normal">v</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi></mrow><mi>i</mi></msub></mrow></msup></mrow><annotation encoding="application/x-tex">\log\sum_i e^{\mathrm{values}_i}</annotation></semantics></math> for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</li>
 </ol>
-<p><strong>Expected:</strong> [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
+<p><strong>Expected:</strong> [1000,1000] yields <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1000</mn><mo>+</mo><mi>log</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">1000+\log2</annotation></semantics></math> without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
 <ol>
 <li><strong>Normalize large scores.</strong> Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</li>
 </ol>
@@ -423,7 +471,7 @@ print(&quot;Summation:&quot;, ordinary, accurate, &quot;linear solution:&quot;, 
 <li><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html">NumPy linear solve</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-04: Stable Numerical Computation and Honest Error Bounds.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-04: Stable Numerical Computation and Honest Error Bounds.
 Read python/professional/companion-guides/py_numpy_04.md and python/professional/lessons/py_numpy_04.py. Direct prerequisites: python-numpy-03.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -459,141 +507,141 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-numpy-04: Stable Numerical Computation and Honest Error Bounds.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>import math</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def logsumexp(values: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span>
-<span>    and negative infinity; reject NaN or positive infinity. Define the empty input and an</span>
-<span>    all-negative-infinity input as negative infinity.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement logsumexp&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return softmax probabilities for a nonempty finite vector using a maximum shift.</span>
-<span>    Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance</span>
-<span>    when a constant is added to every score.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement softmax&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span>
-<span>    Return zero for empty input. Reject nonfinite inputs or a final overflow with</span>
-<span>    ValueError. Demonstrate a cancellation case rather than only positive small integers.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement accurate_sum&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Compute a floating dot product of equal-length finite vectors, converting operands</span>
-<span>    before multiplication. Reject shape mismatch or an unrepresentable nonfinite result.</span>
-<span>    Empty equal vectors return zero. This contract is approximate floating arithmetic, not</span>
-<span>    exact integer accounting.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement floating_dot&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def solve_checked(</span>
-<span>    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10</span>
-<span>) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Solve a nonempty finite square system with a matching finite target vector. Require a</span>
-<span>    finite condition limit of at least one and reject systems whose condition number exceeds</span>
-<span>    it. Use np.linalg.solve, not an explicit inverse.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement solve_checked&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Compare finite arrays with exactly equal shapes using</span>
-<span>    abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span>
-<span>    tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values.</span>
-<span>    Empty equal arrays return True.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement within_tolerance&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    scores = np.array([1000.0, 1001.0, 999.0])</span>
-<span>    shifted = scores - scores.max()</span>
-<span>    probability = np.exp(shifted) / np.exp(shifted).sum()</span>
-<span>    assert np.isfinite(probability).all() and np.isclose(probability.sum(), 1)</span>
-<span>    assert probability.argmax() == 1</span>
-<span>    print(&quot;Stable probabilities:&quot;, probability.tolist())</span>
-<span> </span>
-<span>    values = [1e16, 1.0, -1e16]</span>
-<span>    ordinary = float(np.sum(values))</span>
-<span>    accurate = math.fsum(values)</span>
-<span>    assert accurate == 1.0 and ordinary == 0.0</span>
-<span>    a = np.array([[2.0, 0.0], [0.0, 4.0]])</span>
-<span>    b = np.array([6.0, 8.0])</span>
-<span>    x = np.linalg.solve(a, b)</span>
-<span>    assert np.allclose(x, [3.0, 2.0]) and np.allclose(a @ x, b)</span>
-<span>    print(&quot;Summation:&quot;, ordinary, accurate, &quot;linear solution:&quot;, x.tolist())</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Aggregate log weights without overflow</span>
-<span># Prompt: Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span>
-<span># and negative infinity; reject NaN or positive infinity. Define the empty input and an</span>
-<span># all-negative-infinity input as negative infinity.</span>
-<span># Expected: [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf.</span>
-<span># [NaN] and [inf] raise ValueError.</span>
-<span> </span>
-<span># Exercise 2: Normalize large scores</span>
-<span># Prompt: Return softmax probabilities for a nonempty finite vector using a maximum shift.</span>
-<span># Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a</span>
-<span># constant is added to every score.</span>
-<span># Expected: [1000,1001] returns finite probabilities summing to one with the second larger.</span>
-<span># Adding-1000 produces the same probabilities; equal scores give [.5,.5].</span>
-<span> </span>
-<span># Exercise 3: Preserve small contributions</span>
-<span># Prompt: Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span>
-<span># Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError.</span>
-<span># Demonstrate a cancellation case rather than only positive small integers.</span>
-<span># Expected: [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</span>
-<span> </span>
-<span># Exercise 4: Promote before multiplying</span>
-<span># Prompt: Compute a floating dot product of equal-length finite vectors, converting operands</span>
-<span># before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal</span>
-<span># vectors return zero. This contract is approximate floating arithmetic, not exact integer</span>
-<span># accounting.</span>
-<span># Expected: int64[2**62] dotted with int64[4] yields float(2**64), not integer overflow zero.</span>
-<span># Length mismatch raises ValueError, and empty vectors return 0.</span>
-<span> </span>
-<span># Exercise 5: Separate solver residual from conditioning</span>
-<span># Prompt: Solve a nonempty finite square system with a matching finite target vector. Require a</span>
-<span># finite condition limit of at least one and reject systems whose condition number exceeds it. Use</span>
-<span># np.linalg.solve, not an explicit inverse.</span>
-<span># Expected: diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A</span>
-<span># duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</span>
-<span> </span>
-<span># Exercise 6: Make numerical comparison semantics explicit</span>
-<span># Prompt: Compare finite arrays with exactly equal shapes using</span>
-<span># abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span>
-<span># tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal</span>
-<span># arrays return True.</span>
-<span># Expected: Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails</span>
-<span># with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-numpy-04: Stable Numerical Computation and Honest Error Bounds.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">logsumexp</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span></span>
+<span class="source-line"><span class="syntax-string">    and negative infinity; reject NaN or positive infinity. Define the empty input and an</span></span>
+<span class="source-line"><span class="syntax-string">    all-negative-infinity input as negative infinity.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement logsumexp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">softmax</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return softmax probabilities for a nonempty finite vector using a maximum shift.</span></span>
+<span class="source-line"><span class="syntax-string">    Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance</span></span>
+<span class="source-line"><span class="syntax-string">    when a constant is added to every score.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement softmax</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">accurate_sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span></span>
+<span class="source-line"><span class="syntax-string">    Return zero for empty input. Reject nonfinite inputs or a final overflow with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError. Demonstrate a cancellation case rather than only positive small integers.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement accurate_sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">floating_dot</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Compute a floating dot product of equal-length finite vectors, converting operands</span></span>
+<span class="source-line"><span class="syntax-string">    before multiplication. Reject shape mismatch or an unrepresentable nonfinite result.</span></span>
+<span class="source-line"><span class="syntax-string">    Empty equal vectors return zero. This contract is approximate floating arithmetic, not</span></span>
+<span class="source-line"><span class="syntax-string">    exact integer accounting.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement floating_dot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">solve_checked</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    matrix<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> max_condition<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">1e10</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Solve a nonempty finite square system with a matching finite target vector. Require a</span></span>
+<span class="source-line"><span class="syntax-string">    finite condition limit of at least one and reject systems whose condition number exceeds</span></span>
+<span class="source-line"><span class="syntax-string">    it. Use np.linalg.solve, not an explicit inverse.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement solve_checked</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">within_tolerance</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> atol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Compare finite arrays with exactly equal shapes using</span></span>
+<span class="source-line"><span class="syntax-string">    abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span></span>
+<span class="source-line"><span class="syntax-string">    tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values.</span></span>
+<span class="source-line"><span class="syntax-string">    Empty equal arrays return True.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement within_tolerance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    scores <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1001.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    shifted <span class="syntax-operator">=</span> scores <span class="syntax-operator">-</span> scores<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    probability <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>probability<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>probability<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> probability<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stable probabilities:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> probability<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    ordinary <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    accurate <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> accurate <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span> <span class="syntax-operator">and</span> ordinary <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>solve<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>a <span class="syntax-operator">@</span> x<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Summation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ordinary<span class="syntax-punctuation">,</span> accurate<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">linear solution:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Aggregate log weights without overflow</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span></span>
+<span class="source-line"><span class="syntax-comment"># and negative infinity; reject NaN or positive infinity. Define the empty input and an</span></span>
+<span class="source-line"><span class="syntax-comment"># all-negative-infinity input as negative infinity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf.</span></span>
+<span class="source-line"><span class="syntax-comment"># [NaN] and [inf] raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Normalize large scores</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return softmax probabilities for a nonempty finite vector using a maximum shift.</span></span>
+<span class="source-line"><span class="syntax-comment"># Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a</span></span>
+<span class="source-line"><span class="syntax-comment"># constant is added to every score.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1000,1001] returns finite probabilities summing to one with the second larger.</span></span>
+<span class="source-line"><span class="syntax-comment"># Adding-1000 produces the same probabilities; equal scores give [.5,.5].</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Preserve small contributions</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span></span>
+<span class="source-line"><span class="syntax-comment"># Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Demonstrate a cancellation case rather than only positive small integers.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Promote before multiplying</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compute a floating dot product of equal-length finite vectors, converting operands</span></span>
+<span class="source-line"><span class="syntax-comment"># before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal</span></span>
+<span class="source-line"><span class="syntax-comment"># vectors return zero. This contract is approximate floating arithmetic, not exact integer</span></span>
+<span class="source-line"><span class="syntax-comment"># accounting.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: int64[2**62] dotted with int64[4] yields float(2**64), not integer overflow zero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Length mismatch raises ValueError, and empty vectors return 0.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Separate solver residual from conditioning</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Solve a nonempty finite square system with a matching finite target vector. Require a</span></span>
+<span class="source-line"><span class="syntax-comment"># finite condition limit of at least one and reject systems whose condition number exceeds it. Use</span></span>
+<span class="source-line"><span class="syntax-comment"># np.linalg.solve, not an explicit inverse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Make numerical comparison semantics explicit</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare finite arrays with exactly equal shapes using</span></span>
+<span class="source-line"><span class="syntax-comment"># abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span></span>
+<span class="source-line"><span class="syntax-comment"># tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal</span></span>
+<span class="source-line"><span class="syntax-comment"># arrays return True.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails</span></span>
+<span class="source-line"><span class="syntax-comment"># with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -630,144 +678,144 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <p>These answers implement the contracts in <a href="python-numpy-04.html#guide">Stable Numerical Computation and Honest Error Bounds</a>. Compare after an attempt. The <a href="python-numpy-04.html#solution-2">executable reference</a> contains the complete implementations and assertions. Each answer explains the mechanism, not just the final value.</p>
 <h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-aggregate-log-weights-without-overflow">Exercise 1: Aggregate log weights without overflow<a class="heading-anchor" href="#solution-1--exercise-1-aggregate-log-weights-without-overflow" aria-label="Link to this section">#</a></h5>
-<p>Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</p>
-<p><strong>Expected:</strong> [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
-<pre><code class="language-python">def logsumexp(values: np.ndarray) -&gt; float:
-    x = np.asarray(values, dtype=float)
-    if x.ndim != 1 or np.isnan(x).any() or np.isposinf(x).any():
-        raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)
-    if x.size == 0 or np.isneginf(x).all():
-        return -math.inf
-    maximum = float(x.max())
-    with np.errstate(over=&quot;ignore&quot;):
-        shifted = x - maximum
-    return maximum + math.log(float(np.exp(shifted).sum()))</code></pre>
+<p>Implement stable <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><msub><mo>∑</mo><mi>i</mi></msub><msup><mi>e</mi><mrow><msub><mrow><mi mathvariant="normal">v</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi></mrow><mi>i</mi></msub></mrow></msup></mrow><annotation encoding="application/x-tex">\log\sum_i e^{\mathrm{values}_i}</annotation></semantics></math> for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</p>
+<p><strong>Expected:</strong> [1000,1000] yields <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1000</mn><mo>+</mo><mi>log</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">1000+\log2</annotation></semantics></math> without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">logsumexp</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isnan<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isposinf<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite or negative-infinite log weights</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isneginf<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>inf
+    maximum <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        shifted <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> maximum
+    <span class="syntax-keyword">return</span> maximum <span class="syntax-operator">+</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The maximum shift bounds all exponential inputs above by zero. A very negative shifted value can become negative infinity through subtraction overflow, which correctly contributes zero exponential weight; this specific operation is handled explicitly. The all-negative-infinity case is separated before subtracting to avoid an undefined infinity-minus-infinity operation. Empty aggregation has zero total weight, whose logarithm is the declared negative-infinity identity.</p>
-<pre><code class="language-python">assert math.isclose(logsumexp(np.array([1000.0, 1000.0])), 1000 + math.log(2))
-assert logsumexp(np.array([-np.inf, -np.inf])) == -np.inf
-assert logsumexp(np.array([])) == -np.inf
-expect_value_error(lambda: logsumexp(np.array([np.nan])))
-expect_value_error(lambda: logsumexp(np.array([np.inf])))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span> <span class="syntax-operator">+</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf
+<span class="syntax-keyword">assert</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-2-normalize-large-scores">Exercise 2: Normalize large scores<a class="heading-anchor" href="#solution-1--exercise-2-normalize-large-scores" aria-label="Link to this section">#</a></h5>
 <p>Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</p>
 <p><strong>Expected:</strong> [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</p>
-<pre><code class="language-python">def softmax(scores: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(scores, dtype=float)
-    if x.ndim != 1 or x.size == 0 or not np.isfinite(x).all():
-        raise ValueError(&quot;Expected a nonempty finite score vector&quot;)
-    with np.errstate(over=&quot;ignore&quot;):
-        weight = np.exp(x - x.max())
-    return np.asarray(weight / weight.sum())</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">softmax</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a nonempty finite score vector</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        weight <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-</span> x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">/</span> weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>At least one shifted score is zero, so at least one exponential is one and the denominator cannot vanish. Other sufficiently negative scores can underflow to zero without causing normalization failure. Shift invariance is a mathematical property independent of the exact printed probabilities. The result is a normalized score transformation, not proof that the probabilities are statistically calibrated for any real classification problem.</p>
-<pre><code class="language-python">s = np.array([1000.0, 1001.0])
-p = softmax(s)
-assert np.isfinite(p).all() and np.isclose(p.sum(), 1) and p[1] &gt; p[0]
-assert np.allclose(p, softmax(s - 1000)) and np.allclose(softmax(np.array([7.0, 7.0])), [0.5, 0.5])
-expect_value_error(lambda: softmax(np.array([])))
-expect_value_error(lambda: softmax(np.array([np.inf])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1001.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+p <span class="syntax-operator">=</span> softmax<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> softmax<span class="syntax-punctuation">(</span>s <span class="syntax-operator">-</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">7.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-preserve-small-contributions">Exercise 3: Preserve small contributions<a class="heading-anchor" href="#solution-1--exercise-3-preserve-small-contributions" aria-label="Link to this section">#</a></h5>
 <p>Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</p>
 <p><strong>Expected:</strong> [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</p>
-<pre><code class="language-python">def accurate_sum(values: np.ndarray) -&gt; float:
-    x = np.asarray(values, dtype=float)
-    if x.ndim != 1 or not np.isfinite(x).all():
-        raise ValueError(&quot;Expected finite summands&quot;)
-    try:
-        return math.fsum(float(value) for value in x)
-    except OverflowError as error:
-        raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">accurate_sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite summands</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> x<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> OverflowError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">The sum exceeds floating-point range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> error</code></pre>
 <p>Compensated partial-sum logic avoids losing the small contribution in the supplied cancellation example. Converting inputs to Python floats makes the representation boundary explicit. The overflow case distinguishes precision loss that an improved algorithm can reduce from a final result the representation cannot hold. Returning infinity would violate the finite-result interpretation, so overflow is surfaced as a contract error.</p>
-<pre><code class="language-python">assert accurate_sum(np.array([1e16, 1.0, -1e16])) == 1.0
-assert accurate_sum(np.array([])) == 0.0
-expect_value_error(lambda: accurate_sum(np.array([np.inf])))
-expect_value_error(lambda: accurate_sum(np.array([1e308, 1e308])))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span>
+<span class="syntax-keyword">assert</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-promote-before-multiplying">Exercise 4: Promote before multiplying<a class="heading-anchor" href="#solution-1--exercise-4-promote-before-multiplying" aria-label="Link to this section">#</a></h5>
 <p>Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</p>
 <p><strong>Expected:</strong> int64[2<strong>62] dotted with int64[4] yields float(2</strong>64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</p>
-<pre><code class="language-python">def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:
-    a = np.asarray(left, dtype=float)
-    b = np.asarray(right, dtype=float)
-    if (
-        a.ndim != 1
-        or b.ndim != 1
-        or a.shape != b.shape
-        or not np.isfinite(a).all()
-        or not np.isfinite(b).all()
-    ):
-        raise ValueError(&quot;Expected equal finite vectors&quot;)
-    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
-        result = float(np.dot(a, b))
-    if not math.isfinite(result):
-        raise ValueError(&quot;Dot product exceeds finite floating range&quot;)
-    return result</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">floating_dot</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected equal finite vectors</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        result <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>dot<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Dot product exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result</code></pre>
 <p>Promotion happens before the multiplication, which avoids wrapping the int64 product. The chosen power-of-two result is exactly representable as a float, making the expected value unambiguous. Other large integers may lose low-order digits on conversion, so this is not an exactness guarantee for arbitrary integer values. A finite-output check catches arithmetic range failures that a successful array shape match cannot detect.</p>
-<pre><code class="language-python">a = np.array([2**62], dtype=np.int64)
-b = np.array([4], dtype=np.int64)
-assert floating_dot(a, b) == float(2**64)
-assert floating_dot(np.array([]), np.array([])) == 0
-expect_value_error(lambda: floating_dot(np.array([1]), np.array([1, 2])))
-expect_value_error(lambda: floating_dot(np.array([1e308]), np.array([1e308])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">62</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> floating_dot<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">64</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-5-separate-solver-residual-from-conditioning">Exercise 5: Separate solver residual from conditioning<a class="heading-anchor" href="#solution-1--exercise-5-separate-solver-residual-from-conditioning" aria-label="Link to this section">#</a></h5>
 <p>Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</p>
 <p><strong>Expected:</strong> diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</p>
-<pre><code class="language-python">def solve_checked(
-    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10
-) -&gt; np.ndarray:
-    a = np.asarray(matrix, dtype=float)
-    b = np.asarray(target, dtype=float)
-    if (
-        a.ndim != 2
-        or a.shape[0] == 0
-        or a.shape[0] != a.shape[1]
-        or b.shape != (a.shape[0],)
-        or not np.isfinite(a).all()
-        or not np.isfinite(b).all()
-        or not math.isfinite(max_condition)
-        or max_condition &lt; 1
-    ):
-        raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)
-    condition = float(np.linalg.cond(a))
-    if not math.isfinite(condition) or condition &gt; max_condition:
-        raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)
-    return np.asarray(np.linalg.solve(a, b))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">solve_checked</span><span class="syntax-punctuation">(</span>
+    matrix<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> max_condition<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">1e10</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>matrix<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> <span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>max_condition<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> max_condition <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite square system and valid condition limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    condition <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> condition <span class="syntax-operator">&gt;</span> max_condition<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">System is singular or exceeds the condition policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>solve<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The condition-number gate is an explicit policy about sensitivity, not a universal scientific cutoff. A matrix can be invertible yet too sensitive for the intended precision. Solving directly avoids forming an unnecessary inverse, while the residual check verifies the answer against the supplied equations. It does not prove that small changes to measured matrix entries would leave the solution stable; that is why conditioning is examined separately.</p>
-<pre><code class="language-python">a = np.diag([2.0, 4.0])
-b = np.array([6.0, 8.0])
-x = solve_checked(a, b)
-assert np.allclose(x, [3, 2]) and np.linalg.norm(a @ x - b) &lt; 1e-12
-expect_value_error(lambda: solve_checked(np.ones((2, 2)), np.ones(2)))
-expect_value_error(lambda: solve_checked(np.diag([1.0, 1e-12]), np.ones(2)))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>diag<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+x <span class="syntax-operator">=</span> solve_checked<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>a <span class="syntax-operator">@</span> x <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-12</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> solve_checked<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> solve_checked<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diag<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-make-numerical-comparison-semantics-explicit">Exercise 6: Make numerical comparison semantics explicit<a class="heading-anchor" href="#solution-1--exercise-6-make-numerical-comparison-semantics-explicit" aria-label="Link to this section">#</a></h5>
 <p>Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</p>
 <p><strong>Expected:</strong> Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</p>
-<pre><code class="language-python">def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:
-    a = np.asarray(actual, dtype=float)
-    b = np.asarray(expected, dtype=float)
-    if (
-        a.shape != b.shape
-        or not np.isfinite(a).all()
-        or not np.isfinite(b).all()
-        or not math.isfinite(atol)
-        or not math.isfinite(rtol)
-        or atol &lt; 0
-        or rtol &lt; 0
-    ):
-        raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)
-    scale = np.maximum(np.abs(a), np.abs(b))
-    safe_scale = np.where(scale == 0, 1.0, scale)
-    with np.errstate(over=&quot;ignore&quot;, under=&quot;ignore&quot;):
-        distance = np.abs(a / safe_scale - b / safe_scale)
-        allowance = atol / safe_scale + rtol * (np.abs(b) / safe_scale)
-    return bool(np.all(distance &lt;= allowance))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">within_tolerance</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> atol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span>
+    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        a<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>atol<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>rtol<span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> atol <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+        <span class="syntax-operator">or</span> rtol <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected equal finite shapes and nonnegative tolerances</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>maximum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    safe_scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>scale <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> scale<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> under<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        distance <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>a <span class="syntax-operator">/</span> safe_scale <span class="syntax-operator">-</span> b <span class="syntax-operator">/</span> safe_scale<span class="syntax-punctuation">)</span>
+        allowance <span class="syntax-operator">=</span> atol <span class="syntax-operator">/</span> safe_scale <span class="syntax-operator">+</span> rtol <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> safe_scale<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>distance <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> allowance<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Absolute tolerance allows a small error near a zero reference, while relative tolerance scales with the expected magnitude. Scaling both sides by the larger absolute input avoids an infinity-versus-infinity comparison when opposite large finite values are subtracted. The comparison remains reference-oriented rather than symmetric. Exact shape equality prevents broadcasting from turning a structural error into a passing numerical check. Empty matching arrays satisfy the all-elements condition vacuously, but a caller still needs separate evidence that an empty output is scientifically appropriate.</p>
-<pre><code class="language-python">a = np.array([1e8 + 1, 1e-9])
-b = np.array([1e8, 0.0])
-assert within_tolerance(a, b, 1e-8, 1e-7) and not within_tolerance(a, b, 0, 0)
-assert within_tolerance(np.array([]), np.array([]), 0, 0)
-assert not within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 1.9)
-assert within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 2.0)
-expect_value_error(lambda: within_tolerance(np.ones(2), np.ones((1, 2)), 0, 0))
-expect_value_error(lambda: within_tolerance(a, b, -1, 0))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e8</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-number">1e-8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.9</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_numpy_04_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -802,164 +850,164 @@ expect_value_error(lambda: within_tolerance(a, b, -1, 0))</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-04.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import math</span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def logsumexp(values: np.ndarray) -&gt; float:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    if x.ndim != 1 or np.isnan(x).any() or np.isposinf(x).any():</span>
-<span>        raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)</span>
-<span>    if x.size == 0 or np.isneginf(x).all():</span>
-<span>        return -math.inf</span>
-<span>    maximum = float(x.max())</span>
-<span>    with np.errstate(over=&quot;ignore&quot;):</span>
-<span>        shifted = x - maximum</span>
-<span>    return maximum + math.log(float(np.exp(shifted).sum()))</span>
-<span> </span>
-<span> </span>
-<span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(scores, dtype=float)</span>
-<span>    if x.ndim != 1 or x.size == 0 or not np.isfinite(x).all():</span>
-<span>        raise ValueError(&quot;Expected a nonempty finite score vector&quot;)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;):</span>
-<span>        weight = np.exp(x - x.max())</span>
-<span>    return np.asarray(weight / weight.sum())</span>
-<span> </span>
-<span> </span>
-<span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    if x.ndim != 1 or not np.isfinite(x).all():</span>
-<span>        raise ValueError(&quot;Expected finite summands&quot;)</span>
-<span>    try:</span>
-<span>        return math.fsum(float(value) for value in x)</span>
-<span>    except OverflowError as error:</span>
-<span>        raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</span>
-<span> </span>
-<span> </span>
-<span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
-<span>    a = np.asarray(left, dtype=float)</span>
-<span>    b = np.asarray(right, dtype=float)</span>
-<span>    if (</span>
-<span>        a.ndim != 1</span>
-<span>        or b.ndim != 1</span>
-<span>        or a.shape != b.shape</span>
-<span>        or not np.isfinite(a).all()</span>
-<span>        or not np.isfinite(b).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected equal finite vectors&quot;)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):</span>
-<span>        result = float(np.dot(a, b))</span>
-<span>    if not math.isfinite(result):</span>
-<span>        raise ValueError(&quot;Dot product exceeds finite floating range&quot;)</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def solve_checked(</span>
-<span>    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10</span>
-<span>) -&gt; np.ndarray:</span>
-<span>    a = np.asarray(matrix, dtype=float)</span>
-<span>    b = np.asarray(target, dtype=float)</span>
-<span>    if (</span>
-<span>        a.ndim != 2</span>
-<span>        or a.shape[0] == 0</span>
-<span>        or a.shape[0] != a.shape[1]</span>
-<span>        or b.shape != (a.shape[0],)</span>
-<span>        or not np.isfinite(a).all()</span>
-<span>        or not np.isfinite(b).all()</span>
-<span>        or not math.isfinite(max_condition)</span>
-<span>        or max_condition &lt; 1</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)</span>
-<span>    condition = float(np.linalg.cond(a))</span>
-<span>    if not math.isfinite(condition) or condition &gt; max_condition:</span>
-<span>        raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)</span>
-<span>    return np.asarray(np.linalg.solve(a, b))</span>
-<span> </span>
-<span> </span>
-<span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
-<span>    a = np.asarray(actual, dtype=float)</span>
-<span>    b = np.asarray(expected, dtype=float)</span>
-<span>    if (</span>
-<span>        a.shape != b.shape</span>
-<span>        or not np.isfinite(a).all()</span>
-<span>        or not np.isfinite(b).all()</span>
-<span>        or not math.isfinite(atol)</span>
-<span>        or not math.isfinite(rtol)</span>
-<span>        or atol &lt; 0</span>
-<span>        or rtol &lt; 0</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)</span>
-<span>    scale = np.maximum(np.abs(a), np.abs(b))</span>
-<span>    safe_scale = np.where(scale == 0, 1.0, scale)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;, under=&quot;ignore&quot;):</span>
-<span>        distance = np.abs(a / safe_scale - b / safe_scale)</span>
-<span>        allowance = atol / safe_scale + rtol * (np.abs(b) / safe_scale)</span>
-<span>    return bool(np.all(distance &lt;= allowance))</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Aggregate log weights without overflow</span>
-<span>    assert math.isclose(logsumexp(np.array([1000.0, 1000.0])), 1000 + math.log(2))</span>
-<span>    assert logsumexp(np.array([-np.inf, -np.inf])) == -np.inf</span>
-<span>    assert logsumexp(np.array([])) == -np.inf</span>
-<span>    expect_value_error(lambda: logsumexp(np.array([np.nan])))</span>
-<span>    expect_value_error(lambda: logsumexp(np.array([np.inf])))</span>
-<span>    # Exercise 2: Normalize large scores</span>
-<span>    s = np.array([1000.0, 1001.0])</span>
-<span>    p = softmax(s)</span>
-<span>    assert np.isfinite(p).all() and np.isclose(p.sum(), 1) and p[1] &gt; p[0]</span>
-<span>    assert np.allclose(p, softmax(s - 1000)) and np.allclose(</span>
-<span>        softmax(np.array([7.0, 7.0])), [0.5, 0.5]</span>
-<span>    )</span>
-<span>    expect_value_error(lambda: softmax(np.array([])))</span>
-<span>    expect_value_error(lambda: softmax(np.array([np.inf])))</span>
-<span>    # Exercise 3: Preserve small contributions</span>
-<span>    assert accurate_sum(np.array([1e16, 1.0, -1e16])) == 1.0</span>
-<span>    assert accurate_sum(np.array([])) == 0.0</span>
-<span>    expect_value_error(lambda: accurate_sum(np.array([np.inf])))</span>
-<span>    expect_value_error(lambda: accurate_sum(np.array([1e308, 1e308])))</span>
-<span>    # Exercise 4: Promote before multiplying</span>
-<span>    a = np.array([2**62], dtype=np.int64)</span>
-<span>    b = np.array([4], dtype=np.int64)</span>
-<span>    assert floating_dot(a, b) == float(2**64)</span>
-<span>    assert floating_dot(np.array([]), np.array([])) == 0</span>
-<span>    expect_value_error(lambda: floating_dot(np.array([1]), np.array([1, 2])))</span>
-<span>    expect_value_error(lambda: floating_dot(np.array([1e308]), np.array([1e308])))</span>
-<span>    # Exercise 5: Separate solver residual from conditioning</span>
-<span>    a = np.diag([2.0, 4.0])</span>
-<span>    b = np.array([6.0, 8.0])</span>
-<span>    x = solve_checked(a, b)</span>
-<span>    assert np.allclose(x, [3, 2]) and np.linalg.norm(a @ x - b) &lt; 1e-12</span>
-<span>    expect_value_error(lambda: solve_checked(np.ones((2, 2)), np.ones(2)))</span>
-<span>    expect_value_error(lambda: solve_checked(np.diag([1.0, 1e-12]), np.ones(2)))</span>
-<span>    # Exercise 6: Make numerical comparison semantics explicit</span>
-<span>    a = np.array([1e8 + 1, 1e-9])</span>
-<span>    b = np.array([1e8, 0.0])</span>
-<span>    assert within_tolerance(a, b, 1e-8, 1e-7) and not within_tolerance(a, b, 0, 0)</span>
-<span>    assert within_tolerance(np.array([]), np.array([]), 0, 0)</span>
-<span>    assert not within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 1.9)</span>
-<span>    assert within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 2.0)</span>
-<span>    expect_value_error(lambda: within_tolerance(np.ones(2), np.ones((1, 2)), 0, 0))</span>
-<span>    expect_value_error(lambda: within_tolerance(a, b, -1, 0))</span>
-<span>    print(&quot;python-numpy-04: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-04.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">logsumexp</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isnan<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isposinf<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite or negative-infinite log weights</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>isneginf<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>inf</span>
+<span class="source-line">    maximum <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        shifted <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> maximum</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> maximum <span class="syntax-operator">+</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>shifted<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">softmax</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a nonempty finite score vector</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        weight <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-</span> x<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weight <span class="syntax-operator">/</span> weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">accurate_sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite summands</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> OverflowError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">The sum exceeds floating-point range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> error</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">floating_dot</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected equal finite vectors</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>dot<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Dot product exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">solve_checked</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    matrix<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> max_condition<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">1e10</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>matrix<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> <span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>max_condition<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> max_condition <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite square system and valid condition limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    condition <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> condition <span class="syntax-operator">&gt;</span> max_condition<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">System is singular or exceeds the condition policy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>solve<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">within_tolerance</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> atol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        a<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>atol<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>rtol<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> atol <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> rtol <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected equal finite shapes and nonnegative tolerances</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>maximum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    safe_scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>scale <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> scale<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> under<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        distance <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>a <span class="syntax-operator">/</span> safe_scale <span class="syntax-operator">-</span> b <span class="syntax-operator">/</span> safe_scale<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        allowance <span class="syntax-operator">=</span> atol <span class="syntax-operator">/</span> safe_scale <span class="syntax-operator">+</span> rtol <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> safe_scale<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>distance <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> allowance<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Aggregate log weights without overflow</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span> <span class="syntax-operator">+</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>inf</span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> logsumexp<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Normalize large scores</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1001.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    p <span class="syntax-operator">=</span> softmax<span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> softmax<span class="syntax-punctuation">(</span>s <span class="syntax-operator">-</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">7.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> softmax<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Preserve small contributions</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1e16</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1.0</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> accurate_sum<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Promote before multiplying</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">62</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> floating_dot<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">64</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> floating_dot<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Separate solver residual from conditioning</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>diag<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> solve_checked<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>a <span class="syntax-operator">@</span> x <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-12</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> solve_checked<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> solve_checked<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diag<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Make numerical comparison semantics explicit</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e8</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-number">1e-8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e-7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.9</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.7e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> within_tolerance<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> within_tolerance<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-numpy-04: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

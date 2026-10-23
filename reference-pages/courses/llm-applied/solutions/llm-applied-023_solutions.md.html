@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -139,54 +185,54 @@
 <p><strong>Does a three-call budget bound latency?</strong> No. One call can take arbitrarily long unless the execution layer enforces a deadline and cancellation. Count and duration are different resource dimensions.</p>
 <p><strong>Does an allowlisted trace guarantee no sensitive data leaks?</strong> It restricts keys. Allowed values, downstream access, retention and correlation can still disclose information, so their contracts need separate validation.</p>
 <h3 id="exercise-1-check-evidence-freshness">Exercise 1: Check evidence freshness<a class="heading-anchor" href="#exercise-1-check-evidence-freshness" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.</p>
+<p>The question is: Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.</p>
 <p>The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.</p>
-<pre><code class="language-python">now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
-assert fresh(published,now,timedelta(days=2))</code></pre>
-<p><strong>Expected:</strong> freshTrue.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with freshTrue.</p>
+<pre class="highlighted-code"><code class="language-python">now<span class="syntax-operator">=</span>datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">22</span><span class="syntax-punctuation">,</span>tzinfo<span class="syntax-operator">=</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> published<span class="syntax-operator">=</span>now<span class="syntax-operator">-</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> fresh<span class="syntax-punctuation">(</span>published<span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> fresh True.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with fresh True.</p>
 <h3 id="exercise-2-reject-stale-and-future-evidence">Exercise 2: Reject stale and future evidence<a class="heading-anchor" href="#exercise-2-reject-stale-and-future-evidence" aria-label="Link to this section">#</a></h3>
 <p>The question is: Test a three-day-old document and a document dated one hour in the future.</p>
 <p>Future timestamps can indicate clock or metadata errors. Accepting them as indefinitely fresh would conceal that data-quality problem.</p>
-<pre><code class="language-python">assert not fresh(now-timedelta(days=3),now,timedelta(days=2))
-assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> fresh<span class="syntax-punctuation">(</span>now<span class="syntax-operator">-</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> fresh<span class="syntax-punctuation">(</span>now<span class="syntax-operator">+</span>timedelta<span class="syntax-punctuation">(</span>hours<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both fail freshness admission.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both fail freshness admission.</p>
 <h3 id="exercise-3-enforce-a-three-call-budget">Exercise 3: Enforce a three-call budget<a class="heading-anchor" href="#exercise-3-enforce-a-three-call-budget" aria-label="Link to this section">#</a></h3>
 <p>The question is: Consume exactly3 operations, then attempt a fourth.</p>
 <p>The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.</p>
-<pre><code class="language-python">budget=Budget(3)
-for _ in range(3): budget.consume()
-try: budget.consume()
-except RuntimeError: pass
-else: raise AssertionError(&#x27;budget exceeded&#x27;)
-assert budget.used==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">budget<span class="syntax-operator">=</span>Budget<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> budget<span class="syntax-operator">.</span>consume<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> budget<span class="syntax-operator">.</span>consume<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">budget exceeded</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> budget<span class="syntax-operator">.</span>used<span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> used3; fourth raisesRuntimeError before increment.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with used3; fourth raisesRuntimeError before increment.</p>
 <h3 id="exercise-4-reject-naive-timestamp-assumptions">Exercise 4: Reject naive timestamp assumptions<a class="heading-anchor" href="#exercise-4-reject-naive-timestamp-assumptions" aria-label="Link to this section">#</a></h3>
 <p>The question is: Pass a datetime without timezone information.</p>
-<p>A local wall-clock value cannot be safely compared with aUTCinstant without an explicit zone policy. Silent assumptions can shift freshness boundaries.</p>
-<pre><code class="language-python">try: fresh(datetime(2026,10,21),now,timedelta(days=2))
-except ValueError: pass
-else: raise AssertionError(&#x27;naive timestamp accepted&#x27;)</code></pre>
+<p>A local wall-clock value cannot be safely compared with a UTC instant without an explicit zone policy. Silent assumptions can shift freshness boundaries.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> fresh<span class="syntax-punctuation">(</span>datetime<span class="syntax-punctuation">(</span><span class="syntax-number">2026</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">21</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">naive timestamp accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError.</p>
 <h3 id="exercise-5-build-an-allowlisted-trace">Exercise 5: Build an allowlisted trace<a class="heading-anchor" href="#exercise-5-build-an-allowlisted-trace" aria-label="Link to this section">#</a></h3>
 <p>The question is: Create a trace from metadata plussecret/source_text fields and inspect the output.</p>
 <p>Observability can leak information if it copies raw inputs indiscriminately. An explicit metadata schema makes the diagnostic surface reviewable.</p>
-<pre><code class="language-python">raw={&#x27;request_id&#x27;:&#x27;r1&#x27;,&#x27;corpus_version&#x27;:&#x27;v2&#x27;,&#x27;policy&#x27;:&#x27;public&#x27;,&#x27;result&#x27;:&#x27;abstained_stale&#x27;,&#x27;secret&#x27;:&#x27;hidden&#x27;,&#x27;source_text&#x27;:&#x27;restricted body&#x27;}
-trace=trace_record(raw)
-assert set(trace)=={&#x27;request_id&#x27;,&#x27;corpus_version&#x27;,&#x27;policy&#x27;,&#x27;result&#x27;} and &#x27;secret&#x27; not in trace and &#x27;source_text&#x27; not in trace</code></pre>
+<pre class="highlighted-code"><code class="language-python">raw<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">request_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">r1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">corpus_version</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">public</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">result</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">abstained_stale</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">secret</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">hidden</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">source_text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">restricted body</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+trace<span class="syntax-operator">=</span>trace_record<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">request_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">corpus_version</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">result</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">secret</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> trace <span class="syntax-operator">and</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">source_text</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> trace</code></pre>
 <p><strong>Expected:</strong> only request_id, corpus_version, policy, result fields retained.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with only request_id, corpus_version, policy, result fields retained.</p>
 <h3 id="exercise-6-make-stale-evidence-produce-abstention">Exercise 6: Make stale evidence produce abstention<a class="heading-anchor" href="#exercise-6-make-stale-evidence-produce-abstention" aria-label="Link to this section">#</a></h3>
 <p>The question is: Combine authorizedTrue withfreshFalse and require both before answering.</p>
 <p>Authorization and freshness are independent gates. A permitted but stale source should not be treated as current merely because it is accessible.</p>
-<pre><code class="language-python">authorized=True; current=fresh(now-timedelta(days=3),now,timedelta(days=2)); answer_allowed=authorized and current
-assert not answer_allowed
-result={&#x27;status&#x27;:&#x27;unknown&#x27;,&#x27;reason&#x27;:&#x27;stale evidence&#x27;}; assert result[&#x27;reason&#x27;]==&#x27;stale evidence&#x27;</code></pre>
-<p><strong>Expected:</strong> answer admissionFalse; reasonstale evidence.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with answer admissionFalse; reasonstale evidence.</p>
+<pre class="highlighted-code"><code class="language-python">authorized<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">;</span> current<span class="syntax-operator">=</span>fresh<span class="syntax-punctuation">(</span>now<span class="syntax-operator">-</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>now<span class="syntax-punctuation">,</span>timedelta<span class="syntax-punctuation">(</span>days<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> answer_allowed<span class="syntax-operator">=</span>authorized <span class="syntax-operator">and</span> current
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> answer_allowed
+result<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">status</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">reason</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stale evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">reason</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stale evidence</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> answer admission False; reason stale evidence.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with answer admission False; reason stale evidence.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

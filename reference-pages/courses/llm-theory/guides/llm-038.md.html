@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -154,7 +200,7 @@
 <p><strong>Schema validation:</strong> Checking structure, types and allowed fields before use.</p>
 <p><strong>Trust boundary:</strong> The point where untrusted proposals meet authorized actions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>llm-038</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-038/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-038</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-038/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Require an object with exactly the keys tool and document_id. Compare tool to the literal read_fixture. Validate IDs against an explicit local dictionary rather than turning them into paths. Return a typed accepted proposal or raise a named ValueError/TypeError. Do not coerce a list or number into a string to make it pass. The downstream demonstration only reads the in-memory fixture after successful validation.</p>
@@ -168,32 +214,32 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-accept-one-bounded-proposal">Example A: Accept one bounded proposal<a class="heading-anchor" href="#example-a-accept-one-bounded-proposal" aria-label="Link to this section">#</a></h4>
 <p>Acceptance follows exact structure and identity checks. It does not infer authority from explanatory prose or from the model confidence.</p>
-<pre><code class="language-python">import numpy as np
-def validate(value):
-    if not isinstance(value,dict): raise TypeError(&#x27;proposal must be an object&#x27;)
-    if set(value)!={&#x27;tool&#x27;,&#x27;document_id&#x27;}: raise ValueError(&#x27;exact fields required&#x27;)
-    if not all(isinstance(v,str) for v in value.values()): raise TypeError(&#x27;string values required&#x27;)
-    if value[&#x27;tool&#x27;]!=&#x27;read_fixture&#x27;: raise ValueError(&#x27;unknown tool&#x27;)
-    if value[&#x27;document_id&#x27;] not in {&#x27;d1&#x27;,&#x27;d2&#x27;}: raise ValueError(&#x27;unknown document ID&#x27;)
-    return dict(value)
-proposal={&#x27;tool&#x27;:&#x27;read_fixture&#x27;,&#x27;document_id&#x27;:&#x27;d1&#x27;}; accepted=validate(proposal)
-assert accepted==proposal</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">proposal must be an object</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact fields required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">,</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> value<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">string values required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">read_fixture</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown document ID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+proposal<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">read_fixture</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> accepted<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span>proposal<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> accepted<span class="syntax-operator">==</span>proposal</code></pre>
 <p><strong>Expected:</strong> accepted proposal identifiesd1.</p>
 <h4 id="example-b-reject-an-unknown-operation">Example B: Reject an unknown operation<a class="heading-anchor" href="#example-b-reject-an-unknown-operation" aria-label="Link to this section">#</a></h4>
 <p>A dispatcher should never reinterpret an unknown name as a shell command or dynamically import a matching function. The available operation set is fixed in trusted code.</p>
-<pre><code class="language-python">import numpy as np
-def validate(value):
-    if not isinstance(value,dict): raise TypeError(&#x27;proposal must be an object&#x27;)
-    if set(value)!={&#x27;tool&#x27;,&#x27;document_id&#x27;}: raise ValueError(&#x27;exact fields required&#x27;)
-    if not all(isinstance(v,str) for v in value.values()): raise TypeError(&#x27;string values required&#x27;)
-    if value[&#x27;tool&#x27;]!=&#x27;read_fixture&#x27;: raise ValueError(&#x27;unknown tool&#x27;)
-    if value[&#x27;document_id&#x27;] not in {&#x27;d1&#x27;,&#x27;d2&#x27;}: raise ValueError(&#x27;unknown document ID&#x27;)
-    return dict(value)
-proposal={&#x27;tool&#x27;:&#x27;read_fixture&#x27;,&#x27;document_id&#x27;:&#x27;d1&#x27;}; accepted=validate(proposal)
-assert accepted==proposal
-try: validate({&#x27;tool&#x27;:&#x27;run_shell&#x27;,&#x27;document_id&#x27;:&#x27;d1&#x27;})
-except ValueError: pass
-else: raise AssertionError(&#x27;unknown tool accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">proposal must be an object</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact fields required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">,</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> value<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">string values required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">read_fixture</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown document ID</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+proposal<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">read_fixture</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> accepted<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span>proposal<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> accepted<span class="syntax-operator">==</span>proposal
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">run_shell</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown tool accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError;no execution.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Only the declared read-only fixture operation is accepted as data. Unknown fields/operations and unsafe paths are rejected; no process, shell or external service is invoked. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -205,7 +251,7 @@ else: raise AssertionError(&#x27;unknown tool accepted&#x27;)</code></pre>
 <li><strong>Reject an unknown operation.</strong> Submit toolrun_shell with document_idd1. <strong>Expected:</strong> ValueError;no execution. <strong>Verify:</strong> Save the assertion results for exercise 2, including ValueError;no execution.</li>
 </ol>
 <ol>
-<li><strong>Reject extra fields.</strong> Add command orpath to an otherwise valid object. <strong>Expected:</strong> extra fields rejected. <strong>Verify:</strong> Save the assertion results for exercise 3, including extra fields rejected.</li>
+<li><strong>Reject extra fields.</strong> Add command or path to an otherwise valid object. <strong>Expected:</strong> extra fields rejected. <strong>Verify:</strong> Save the assertion results for exercise 3, including extra fields rejected.</li>
 </ol>
 <ol>
 <li><strong>Reject traversal-like identifiers.</strong> Submit ../secret as the document ID. <strong>Expected:</strong> ValueError because the ID is outside the fixture allowlist. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError because the ID is outside the fixture allowlist.</li>
@@ -227,7 +273,7 @@ else: raise AssertionError(&#x27;unknown tool accepted&#x27;)</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://docs.python.org/3.12/library/json.html">Python json documentation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-038, Tools, structured output and trust boundaries.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-038, Tools, structured output and trust boundaries.
 Read courses/llm-theory/guides/llm-038.md and courses/llm-theory/lessons/llm-038.py. Direct prerequisites: `llm-037`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

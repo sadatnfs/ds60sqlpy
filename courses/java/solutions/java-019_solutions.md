@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-A data structure is a set of operations with representation and cost tradeoffs. AnArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. AHashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. ADeque supports queue and stack operations without shifting an array prefix. APriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.
+A data structure is a set of operations with representation and cost tradeoffs. An ArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. A HashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. A Deque supports queue and stack operations without shifting an array prefix. A PriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.
 
 **BigO:** An asymptotic upper-bound description of growth in work or space.
 
@@ -14,11 +14,11 @@ A data structure is a set of operations with representation and cost tradeoffs. 
 
 ## Reading the reference
 
-ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add andpoll maintain a heap ordering,and repeatedpoll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.
+ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add and poll maintain a heap ordering,and repeated poll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.
 
 ## Exercise 1: Use a FIFO queue
 
-Task: Adda,b,c to anArrayDeque and remove from the front.
+Task: Add a,b,c to an ArrayDeque and remove from the front.
 
 The queue preserves arrival order. ChoosingremoveLast instead would create a stack-like policy.
 
@@ -33,7 +33,7 @@ assert List.of(queue.removeFirst(),queue.removeFirst(),queue.removeFirst()).equa
 
 ## Exercise 2: Use a LIFO stack
 
-Task: Push1,2,3 onto aDeque andpop all values.
+Task: Push1,2,3 onto a Deque and pop all values.
 
 The most recently pushed value is removed first. Stack behavior is useful for nested traversal or undo histories but differs from fair arrival-order processing.
 
@@ -48,7 +48,7 @@ assert List.of(stack.pop(),stack.pop(),stack.pop()).equals(List.of(3,2,1));
 
 ## Exercise 3: Poll a priority queue
 
-Task: Insert5,1,4,2 and repeatedlypoll.
+Task: Insert5,1,4,2 and repeatedly poll.
 
 The heap guarantees the next minimum,not that its backing iteration is sorted. Repeated removal establishes the sorted sequence.
 
@@ -105,9 +105,9 @@ try{empty.removeFirst();}catch(NoSuchElementException expected){failed=true;}
 assert failed;
 ```
 
-**Expected:** poll returnsnull;remove throwsNoSuchElementException.
+**Expected:** poll returns null; remove throws NoSuchElementException.
 
-**Verify:** Compare the program values or named exception with poll returnsnull;remove throwsNoSuchElementException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with poll returns null; remove throws NoSuchElementException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,15 +165,15 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-006.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="tf-006_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-build-a-forward-backward-table">Exercise 1: Build a forward/backward table<a class="heading-anchor" href="#exercise-1-build-a-forward-backward-table" aria-label="Link to this section">#</a></h3>
-<p>At w=1, z=2, a=4 and L=9. The immediate sensitivities are 2 from w to z, 4 from z to a, and 6 from a to loss. Their product is 48. Expanding the loss as 16<em>w^4-8</em>w^2+1 gives derivative 64<em>w^3-16</em>w, also 48 at one. These two representations provide independent bookkeeping. A forward table alone cannot check the backward multiplication because the gradient is not used to produce the original loss.</p>
+<p>At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">z=2</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">L=9</annotation></semantics></math>. The immediate sensitivities are 2 from w to z, 4 from z to a, and 6 from a to loss. Their product is 48. Expanding the loss as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>16</mn><mo>·</mo><msup><mrow><mi>w</mi></mrow><mrow><mn>4</mn></mrow></msup><mo>−</mo><mn>8</mn><mo>·</mo><msup><mrow><mi>w</mi></mrow><mrow><mn>2</mn></mrow></msup><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">16\cdot {w}^{4}-8\cdot {w}^{2}+1</annotation></semantics></math> gives derivative <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>64</mn><mo>·</mo><msup><mrow><mi>w</mi></mrow><mrow><mn>3</mn></mrow></msup><mo>−</mo><mn>16</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">64\cdot {w}^{3}-16\cdot w</annotation></semantics></math>, also 48 at one. These two representations provide independent bookkeeping. A forward table alone cannot check the backward multiplication because the gradient is not used to produce the original loss.</p>
 <p><strong>Expected:</strong> Forward values [2,4,9], factors [2,4,6] in forward order, total gradient 48.</p>
 <p><strong>Verify:</strong> Assert the product of the three factors and compare it with the derivative of the expanded scalar polynomial.</p>
 <h3 id="exercise-2-change-one-inner-operation">Exercise 2: Change one inner operation<a class="heading-anchor" href="#exercise-2-change-one-inner-operation" aria-label="Link to this section">#</a></h3>
 <p>With inner scale 3, z becomes 3, a becomes 9 and loss becomes 64. Local factors are 3, 6 and 16, whose product is 288. Only changing one occurrence of the old factor 2 would be wrong because the derivative is evaluated at changed intermediate values as well. Recompute the forward path first, then calculate all sensitivities at that same state. Retaining the old activation while changing the inner derivative defines an inconsistent backward trace.</p>
-<p><strong>Expected:</strong> z=3, a=9, loss=64 and gradient 288.</p>
-<p><strong>Verify:</strong> Inspect the changed forward trace and assert 16<em>6</em>3 equals the total gradient.</p>
+<p><strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">z=3</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">a=9</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">\mathrm{loss}=64</annotation></semantics></math> and gradient 288.</p>
+<p><strong>Verify:</strong> Inspect the changed forward trace and assert <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>16</mn><mo>·</mo><mn>6</mn><mo>·</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">16\cdot 6\cdot 3</annotation></semantics></math> equals the total gradient.</p>
 <h3 id="exercise-3-construct-an-independent-probe">Exercise 3: Construct an independent probe<a class="heading-anchor" href="#exercise-3-construct-an-independent-probe" aria-label="Link to this section">#</a></h3>
-<p>The reference returns both forward fields and their connected gradient. The finite probe must call the scalar forward function at 1+h and 1-h, fully recomputing z and a. At h=1e-5, the polynomial approximation meets the stated 1e-7 absolute tolerance. It need not equal 48 bit-for-bit. Using an already stored activation in both probe calls would instead measure a constant function and would not independently check the original derivative.</p>
+<p>The reference returns both forward fields and their connected gradient. The finite probe must call the scalar forward function at 1+h and 1-h, fully recomputing z and a. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>h</mi><mo>=</mo><mn>1</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">h=1\times10^{-5}</annotation></semantics></math>, the polynomial approximation meets the stated 1e-7 absolute tolerance. It need not equal 48 bit-for-bit. Using an already stored activation in both probe calls would instead measure a constant function and would not independently check the original derivative.</p>
 <p><strong>Expected:</strong> Analytic gradient 48 and central estimate within 1e-7.</p>
 <p><strong>Verify:</strong> Recompute every intermediate in both perturbed calls and retain the numeric absolute error.</p>
 <h3 id="exercise-4-state-the-activation-boundary">Exercise 4: State the activation boundary<a class="heading-anchor" href="#exercise-4-state-the-activation-boundary" aria-label="Link to this section">#</a></h3>
@@ -135,30 +181,30 @@
 <p><strong>Expected:</strong> Negative-side slope 0, positive-side slope 1; the zero kink has no unique ordinary derivative.</p>
 <p><strong>Verify:</strong> Inspect one-sided values and show a central probe at zero yields 0.5 rather than proving the chosen convention.</p>
 <h3 id="exercise-5-diagnose-a-disconnected-calculation">Exercise 5: Diagnose a disconnected calculation<a class="heading-anchor" href="#exercise-5-diagnose-a-disconnected-calculation" aria-label="Link to this section">#</a></h3>
-<p>A function closing over frozen_a=4 returns loss 9 for every w. Its slope is therefore zero, despite matching the full path at w=1. The full composition still changes with w and has slope 48 there. This counterexample shows why dependency recording matters: equal forward numbers at one point do not imply equal functions or gradients. Restore the calculation from w through z and a inside each evaluation rather than patching the final derivative value.</p>
+<p>A function closing over frozen_a=4 returns loss 9 for every w. Its slope is therefore zero, despite matching the full path at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>. The full composition still changes with w and has slope 48 there. This counterexample shows why dependency recording matters: equal forward numbers at one point do not imply equal functions or gradients. Restore the calculation from w through z and a inside each evaluation rather than patching the final derivative value.</p>
 <p><strong>Expected:</strong> Both losses are 9; frozen slope 0 and full slope 48.</p>
 <p><strong>Verify:</strong> Assert both equal forward values and the two different slopes instead of accepting the matching loss as a dependency check.</p>
 <h3 id="exercise-6-find-a-missing-factor">Exercise 6: Find a missing factor<a class="heading-anchor" href="#exercise-6-find-a-missing-factor" aria-label="Link to this section">#</a></h3>
-<p>Omitting dz/dw leaves 6<em>4=24 in the scale-2 case and 16</em>6=96 in the scale-3 case. Multiplying by the missing scale restores 48 and 288. A single adjusted learning rate cannot generally repair this omission across different operations or model states. Keep the derivative factors with their named input/output relationships. This trace becomes a useful explanation when the next lesson reports a missing or incorrect gradient from an automatic recording scope.</p>
+<p>Omitting dz/dw leaves <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>6</mn><mo>·</mo><mn>4</mn><mo>=</mo><mn>24</mn></mrow><annotation encoding="application/x-tex">6\cdot 4=24</annotation></semantics></math> in the scale-2 case and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>16</mn><mo>·</mo><mn>6</mn><mo>=</mo><mn>96</mn></mrow><annotation encoding="application/x-tex">16\cdot 6=96</annotation></semantics></math> in the scale-3 case. Multiplying by the missing scale restores 48 and 288. A single adjusted learning rate cannot generally repair this omission across different operations or model states. Keep the derivative factors with their named input/output relationships. This trace becomes a useful explanation when the next lesson reports a missing or incorrect gradient from an automatic recording scope.</p>
 <p><strong>Expected:</strong> The incorrect gradients are 24 and 96, versus correct 48 and 288.</p>
 <p><strong>Verify:</strong> Write the missing scale factor explicitly and assert the repaired products for both fixtures.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import math
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
 
 
-def chain_trace(weight, scale=2):
-    weight, scale = float(weight), float(scale)
-    if not math.isfinite(weight) or not math.isfinite(scale):
-        raise ValueError(&quot;finite weight and scale required&quot;)
-    z = scale * weight
-    activation = z * z
-    loss = (activation - 1) ** 2
-    gradient = 2 * (activation - 1) * 2 * z * scale
-    return {&quot;z&quot;: z, &quot;activation&quot;: activation, &quot;loss&quot;: loss, &quot;gradient&quot;: gradient}</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">chain_trace</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    weight<span class="syntax-punctuation">,</span> scale <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>scale<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>scale<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite weight and scale required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    z <span class="syntax-operator">=</span> scale <span class="syntax-operator">*</span> weight
+    activation <span class="syntax-operator">=</span> z <span class="syntax-operator">*</span> z
+    loss <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>activation <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span>
+    gradient <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>activation <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> z <span class="syntax-operator">*</span> scale
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> z<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">activation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> activation<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">loss</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> loss<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gradient</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> gradient<span class="syntax-punctuation">}</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
-<p>Without viewing the trace, replace the inner scale with 1 and derive the loss and gradient at w=2. Then explain why holding a fixed changes the function even when the original loss remains identical.</p>
+<p>Without viewing the trace, replace the inner scale with 1 and derive the loss and gradient at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">w=2</annotation></semantics></math>. Then explain why holding a fixed changes the function even when the original loss remains identical.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
   </main>
 </body>

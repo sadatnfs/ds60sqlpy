@@ -18,7 +18,7 @@ Records generate component-basedequals andhashCode. Comparator.comparing selects
 
 ## Exercise 1: Use immutable value keys
 
-Task: Create two equalPoint records and insert one into a map.
+Task: Create two equal Point records and insert one into a map.
 
 The lookup uses logical equality rather than reference identity. A record supplies a useful default for immutable coordinate values.
 
@@ -27,13 +27,13 @@ Point a=new Point(0,0), b=new Point(0,0); Map<Point,String> map=new HashMap<>();
 assert a.equals(b) && a.hashCode()==b.hashCode() && map.get(b).equals("origin");
 ```
 
-**Expected:** lookup with the other returnsorigin;hashes equal.
+**Expected:** lookup with the other returns origin; hashes equal.
 
-**Verify:** Compare the program values or named exception with lookup with the other returnsorigin;hashes equal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with lookup with the other returns origin; hashes equal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Sort with a tie-breaker
 
-Task: Sort people(age20,idb),(age20,ida),(age18,idc) byage thenid.
+Task: Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.
 
 The secondary key makes equal-age ordering explicit. Without it, a presentation may depend on input order rather than the intended identity ordering.
 
@@ -49,9 +49,9 @@ assert people.stream().map(Person::id).toList().equals(List.of("c","a","b"));
 
 ## Exercise 3: Expose comparator uniqueness
 
-Task: Insert two different people ofage20 into aTreeSet comparingage only.
+Task: Insert two different people ofage20 into a TreeSet comparingage only.
 
-TreeSet treats comparator result0 as equivalent for its membership rule. The comparator must reflect the uniqueness contract the caller actually wants.
+TreeSet treats comparator result 0 as equivalent for its membership rule. The comparator must reflect the uniqueness contract the caller actually wants.
 
 ```java
 Set<Person> byAge=new TreeSet<>(Comparator.comparingInt(Person::age)); byAge.add(new Person("a",20)); byAge.add(new Person("b",20));
@@ -79,7 +79,7 @@ assert mutable.get(key)==null && mutable.size()==1;
 
 ## Exercise 5: Avoid comparator subtraction
 
-Task: CompareInteger.MIN_VALUE and1 usingInteger.compare.
+Task: CompareInteger.MIN_VALUE and 1 usingInteger.compare.
 
 A comparator must preserve ordering for the whole accepted range. Arithmetic subtraction can wrap and violate that contract.
 
@@ -103,9 +103,9 @@ Point left=new Point(1,2), right=new Point(2,1); String labelLeft="point",labelR
 assert labelLeft.equals(labelRight) && !left.equals(right);
 ```
 
-**Expected:** display labels equal;points unequal.
+**Expected:** display labels equal; points unequal.
 
-**Verify:** Compare the program values or named exception with display labels equal;points unequal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with display labels equal; points unequal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

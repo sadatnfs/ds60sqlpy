@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-015`
 
 ## Learning objectives
 
-Explain path, encoding, atomic move using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is WriteCafé and an emoji to an owned temporary file,then read it withUTF-8. The final exercise transfers the mechanism to verify cleanup after failure.
+Explain path, encoding, atomic move using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Write Café and an emoji to an owned temporary file,then read it with UTF-8. The final exercise transfers the mechanism to verify cleanup after failure.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ A path names a location; it is not the file contents or a guarantee that the loc
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-016/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Path.resolve appends a child path,normalize removes lexicaldot segments,andtoRealPath consults the filesystem. Files.writeString/readString acceptStandardCharsets.UTF_8. Files.list andFiles.walk return streams that must close. Files.move withATOMIC_MOVE requests atomicity and may throwAtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
+Path.resolve appends a child path,normalize removes lexicaldot segments,andtoRealPath consults the filesystem. Files.writeString/readString acceptStandardCharsets.UTF_8. Files.list andFiles.walk return streams that must close. Files.move with ATOMIC_MOVE requests atomicity and may throwAtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
 
 ## Worked example / walkthrough
 
 ### Example A: Round-trip explicit UTF-8
 
-Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading,not just aString kept in memory.
+Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading,not just a String kept in memory.
 
 ```java
 import java.util.*;
@@ -74,7 +74,7 @@ public class Main {
 
 ### Example B: Distinguish a path from existence
 
-Constructing aPath does not create a file. Keeping those actions separate prevents accidental assumptions about setup state.
+Constructing a Path does not create a file. Keeping those actions separate prevents accidental assumptions about setup state.
 
 ```java
 import java.util.*;
@@ -114,7 +114,7 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Round-trip explicit UTF-8.** WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.
+1. **Round-trip explicit UTF-8.** Write Café and an emoji to an owned temporary file,then read it with UTF-8.
    **Expected:** exact text equality.
    **Verify:** Compare your assertion values or captured diagnostic with exact text equality.
 
@@ -127,16 +127,16 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with count2.
 
 4. **Request atomic replacement honestly.** Write old and staged files,requestATOMIC_MOVE,then verify the selected outcome without claiming a fallback is atomic.
-   **Expected:** either targetnew withstagedabsent,or explicit unsupported result retainingold.
-   **Verify:** Compare your assertion values or captured diagnostic with either targetnew withstagedabsent,or explicit unsupported result retainingold.
+   **Expected:** either targetnew with staged absent,or explicit unsupported result retaining old.
+   **Verify:** Compare your assertion values or captured diagnostic with either targetnew with staged absent,or explicit unsupported result retaining old.
 
 5. **Expose a lexical path escape.** Resolve../outside under an owned root and normalize it before checking containment.
    **Expected:** normalized path is outside the root.
    **Verify:** Compare your assertion values or captured diagnostic with normalized path is outside the root.
 
 6. **Verify cleanup after failure.** Throw inside the owned temporary scope and confirm the directory is removed by the helper.
-   **Expected:** original exception propagated;owned directory absent.
-   **Verify:** Compare your assertion values or captured diagnostic with original exception propagated;owned directory absent.
+   **Expected:** original exception propagated; owned directory absent.
+   **Verify:** Compare your assertion values or captured diagnostic with original exception propagated; owned directory absent.
 
 ## Common pitfalls and diagnosis
 

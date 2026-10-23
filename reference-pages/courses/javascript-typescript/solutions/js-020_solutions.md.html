@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,66 +176,66 @@
 <h3 id="exercise-1-handle-a-result-union">Exercise 1: Handle a result union<a class="heading-anchor" href="#exercise-1-handle-a-result-union" aria-label="Link to this section">#</a></h3>
 <p>Task: Format both successful value 7 and a failure message.</p>
 <p>The kind check determines which payload exists. A failure result cannot accidentally be read as if it contained the success value.</p>
-<pre><code class="language-typescript">assert.equal(formatResult({ kind: &#x27;success&#x27;, value: 7 }), &#x27;value:7&#x27;);
-assert.equal(formatResult({ kind: &#x27;failure&#x27;, message: &#x27;offline&#x27; }), &#x27;error:offline&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>formatResult<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;success&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;value:7&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>formatResult<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;offline&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;error:offline&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> value:7 and error:offline.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-preserve-an-empty-string-during-narrowing">Exercise 2: Preserve an empty string during narrowing<a class="heading-anchor" href="#exercise-2-preserve-an-empty-string-during-narrowing" aria-label="Link to this section">#</a></h3>
 <p>Task: Handle string or undefined using an explicit undefined comparison.</p>
 <p>if(value) would merge the empty-string case with absence. A guard should encode the domain distinction, not merely satisfy the checker.</p>
-<pre><code class="language-typescript">function describe(value: string | undefined): number | &#x27;missing&#x27; {
-  return value === undefined ? &#x27;missing&#x27; : value.length;
-}
-assert.equal(describe(&#x27;&#x27;), 0);
-assert.equal(describe(undefined), &#x27;missing&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> describe<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-operator">|</span> <span class="syntax-string">&#x27;missing&#x27;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">return</span> value <span class="syntax-operator">===</span> <span class="syntax-keyword">undefined</span> <span class="syntax-operator">?</span> <span class="syntax-string">&#x27;missing&#x27;</span> <span class="syntax-operator">:</span> value<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>describe<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>describe<span class="syntax-punctuation">(</span><span class="syntax-keyword">undefined</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> empty string has length 0; absent value returns missing.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-reject-access-to-another-variant-payload">Exercise 3: Reject access to another variant payload<a class="heading-anchor" href="#exercise-3-reject-access-to-another-variant-payload" aria-label="Link to this section">#</a></h3>
 <p>Task: Demonstrate that a failure branch cannot read value.</p>
 <p>The type prevents a concrete impossible-state mistake. It is stronger than optional fields that would allow reading undefined and hoping the caller checks it later.</p>
-<pre><code class="language-typescript">function negativeTypeCheck(result: Result): void {
-  if (result.kind === &#x27;failure&#x27;) {
-    // @ts-expect-error failure has message, not value.
-    void result.value;
-  }
-}
-void negativeTypeCheck;
-assert.equal(formatResult({ kind: &#x27;failure&#x27;, message: &#x27;bad&#x27; }), &#x27;error:bad&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span>result<span class="syntax-operator">:</span> <span class="syntax-keyword">Result</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-comment">// @ts-expect-error failure has message, not value.</span>
+    <span class="syntax-operator">void</span> result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>formatResult<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;bad&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;error:bad&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> expected compiler error on value; valid failure formatting remains unchanged.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-catch-an-unhandled-new-variant-at-compile-time">Exercise 4: Catch an unhandled new variant at compile time<a class="heading-anchor" href="#exercise-4-catch-an-unhandled-new-variant-at-compile-time" aria-label="Link to this section">#</a></h3>
 <p>Task: Add a pending variant and intentionally omit it from a switch in an uncalled function.</p>
 <p>The missing handler becomes a compiler obligation when the union grows. The error is evidence that the exhaustiveness guard is connected to the actual type.</p>
-<pre><code class="language-typescript">type Extended = Result | { kind: &#x27;pending&#x27;; attempt: number };
-function negativeTypeCheck(result: Extended): string {
-  switch (result.kind) {
-    case &#x27;success&#x27;: return String(result.value);
-    case &#x27;failure&#x27;: return result.message;
-    default:
-      // @ts-expect-error pending remains possible here.
-      return assertNever(result);
-  }
-}
-void negativeTypeCheck;
-assert.equal(formatResult({ kind: &#x27;success&#x27;, value: 0 }), &#x27;value:0&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> Extended <span class="syntax-operator">=</span> Result <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;pending&#x27;</span><span class="syntax-punctuation">;</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span>result<span class="syntax-operator">:</span> <span class="syntax-keyword">Extended</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">switch</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>kind<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;success&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-keyword">return</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">default</span><span class="syntax-operator">:</span>
+      <span class="syntax-comment">// @ts-expect-error pending remains possible here.</span>
+      <span class="syntax-keyword">return</span> assertNever<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>formatResult<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;success&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;value:0&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> expected compiler error at assertNever for pending.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-use-an-honest-unknown-value-predicate">Exercise 5: Use an honest unknown-value predicate<a class="heading-anchor" href="#exercise-5-use-an-honest-unknown-value-predicate" aria-label="Link to this section">#</a></h3>
 <p>Task: Check for a record with a finite numeric value before consuming it.</p>
 <p>The predicate inspects every property it claims. A declaration of value is SomeType is not automatically verified against the function body by the compiler.</p>
-<pre><code class="language-typescript">function hasFiniteValue(value: unknown): value is { value: number } {
-  return typeof value === &#x27;object&#x27; &amp;&amp; value !== null &amp;&amp; !Array.isArray(value)
-    &amp;&amp; &#x27;value&#x27; in value &amp;&amp; typeof value.value === &#x27;number&#x27; &amp;&amp; Number.isFinite(value.value);
-}
-assert.equal(hasFiniteValue({ value: 2 }), true);
-for (const value of [null, [], { value: &#x27;2&#x27; }, { value: NaN }]) assert.equal(hasFiniteValue(value), false);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> hasFiniteValue<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> value is <span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-operator">typeof</span> value <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;object&#x27;</span> <span class="syntax-operator">&amp;&amp;</span> value <span class="syntax-operator">!==</span> <span class="syntax-keyword">null</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span>isArray<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-string">&#x27;value&#x27;</span> <span class="syntax-operator">in</span> value <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">typeof</span> value<span class="syntax-punctuation">.</span>value <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;number&#x27;</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>hasFiniteValue<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> value <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;2&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">NaN</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>hasFiniteValue<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> valid record accepted; null, arrays and string-valued records rejected.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-expose-the-runtime-limit-of-an-asserted-union">Exercise 6: Expose the runtime limit of an asserted union<a class="heading-anchor" href="#exercise-6-expose-the-runtime-limit-of-an-asserted-union" aria-label="Link to this section">#</a></h3>
 <p>Task: Force a malformed external value into Result for demonstration and call the handler.</p>
 <p>The intentionally unsafe assertion shows why exhaustiveness does not validate external data. The runtime fallback preserves diagnosis, but a real input boundary should reject the malformed value earlier.</p>
-<pre><code class="language-typescript">const malformed: unknown = { kind: &#x27;unexpected&#x27; };
-assert.throws(() =&gt; formatResult(malformed as Result), /unhandled variant/u);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> malformed<span class="syntax-operator">:</span> <span class="syntax-keyword">unknown</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;unexpected&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> formatResult<span class="syntax-punctuation">(</span>malformed <span class="syntax-keyword">as</span> Result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/unhandled variant/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> runtime fallback throws rather than fabricating success.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

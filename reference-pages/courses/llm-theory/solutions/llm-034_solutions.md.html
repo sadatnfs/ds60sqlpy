@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,48 +169,48 @@
 <p><strong>Saturation:</strong> A value clipped to the allowed integer boundary.</p>
 <p><strong>Error budget:</strong> A declared tolerance for the effect of approximation.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>For a nonzero block, scale=max(abs(W))/127. Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].</p>
+<p>For a nonzero block, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mo>=</mo><mfrac><mrow><mo>max</mo><mo stretchy="false">(</mo><mrow><mo stretchy="true" fence="true" form="prefix">|</mo><mi>W</mi><mo stretchy="true" fence="true" form="postfix">|</mo></mrow><mo stretchy="false">)</mo></mrow><mrow><mn>127</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\mathrm{scale}=\frac{\max(\left|W\right|)}{127}</annotation></semantics></math>. Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].</p>
 <h3 id="exercise-1-compute-the-full-precision-reference">Exercise 1: Compute the full-precision reference<a class="heading-anchor" href="#exercise-1-compute-the-full-precision-reference" aria-label="Link to this section">#</a></h3>
 <p>The question is: Multiply W[[.1,-.9],[1.7,-.2]] byx[1,-2].</p>
 <p>The reference keeps the original floating-point values. It must not be recomputed from dequantized weights, which would erase the approximation being measured.</p>
-<pre><code class="language-python">w=np.array([[.1,-.9],[1.7,-.2]]); x=np.array([1.,-2.]); reference=w@x
-np.testing.assert_allclose(reference,[1.9,2.1],atol=1e-12,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> reference<span class="syntax-operator">=</span>w<span class="syntax-decorator">@x</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>reference<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> output[1.9,2.1].</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with output[1.9,2.1].</p>
 <h3 id="exercise-2-quantize-one-shared-scale">Exercise 2: Quantize one shared scale<a class="heading-anchor" href="#exercise-2-quantize-one-shared-scale" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use maxabs1.7 divided by127,nearest-even rounding and signed int8.</p>
 <p>The smaller first row uses the scale set by the largest value in the second row. Its values therefore receive coarser relative resolution.</p>
-<pre><code class="language-python">scale=np.abs(w).max()/127; raw=np.rint(w/scale); q=np.clip(raw,-127,127).astype(np.int8)
-np.testing.assert_array_equal(q,[[7,-67],[127,-15]]); assert scale==1.7/127</code></pre>
+<pre class="highlighted-code"><code class="language-python">scale<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">;</span> raw<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>w<span class="syntax-operator">/</span>scale<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">67</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">15</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> scale<span class="syntax-operator">==</span><span class="syntax-number">1.7</span><span class="syntax-operator">/</span><span class="syntax-number">127</span></code></pre>
 <p><strong>Expected:</strong> scale1.7/127;integer array[[7,-67],[127,-15]].</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with scale1.7/127;integer array[[7,-67],[127,-15]].</p>
 <h3 id="exercise-3-measure-output-error">Exercise 3: Measure output error<a class="heading-anchor" href="#exercise-3-measure-output-error" aria-label="Link to this section">#</a></h3>
 <p>The question is: Dequantize the shared-scale matrix and compare its output with the reference.</p>
 <p>Weight error can be amplified or cancelled by the input vector. Measuring the actual output difference makes the approximation relevant to this computation.</p>
-<pre><code class="language-python">restored=q.astype(float)*scale; output=restored@x; error=float(np.max(np.abs(output-reference)))
-assert np.isfinite(error) and 0&lt;error&lt;.02</code></pre>
+<pre class="highlighted-code"><code class="language-python">restored<span class="syntax-operator">=</span>q<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>scale<span class="syntax-punctuation">;</span> output<span class="syntax-operator">=</span>restored<span class="syntax-decorator">@x</span><span class="syntax-punctuation">;</span> error<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>output<span class="syntax-operator">-</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span>error<span class="syntax-operator">&lt;</span><span class="syntax-number">.02</span></code></pre>
 <p><strong>Expected:</strong> finite maximum absolute output error below.02.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with finite maximum absolute output error below.02.</p>
 <h3 id="exercise-4-use-per-row-scales">Exercise 4: Use per-row scales<a class="heading-anchor" href="#exercise-4-use-per-row-scales" aria-label="Link to this section">#</a></h3>
 <p>The question is: Quantize each row using its own maximum absolute value.</p>
 <p>Per-row scaling allocates resolution separately. It often changes errors, but no universal ordering is asserted from one fixture.</p>
-<pre><code class="language-python">scales=np.max(np.abs(w),axis=1,keepdims=True)/127; qr=np.clip(np.rint(w/scales),-127,127).astype(np.int8)
-np.testing.assert_array_equal(qr[0],[14,-127]); np.testing.assert_allclose(scales[:,0],[.9/127,1.7/127],atol=1e-12,rtol=0)
-row_error=float(np.max(np.abs((qr.astype(float)*scales)@x-reference))); assert np.isfinite(row_error)</code></pre>
-<p><strong>Expected:</strong> row scales.9/127 and1.7/127;row0 integers[14,-127].</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with row scales.9/127 and1.7/127;row0 integers[14,-127].</p>
+<pre class="highlighted-code"><code class="language-python">scales<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">;</span> qr<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>clip<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>w<span class="syntax-operator">/</span>scales<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>int8<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>qr<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>scales<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.7</span><span class="syntax-operator">/</span><span class="syntax-number">127</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+row_error<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>qr<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>scales<span class="syntax-punctuation">)</span><span class="syntax-decorator">@x</span><span class="syntax-operator">-</span>reference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>row_error<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> row scales.9/127 and 1.7/127;row0 integers[14,-127].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with row scales.9/127 and 1.7/127;row0 integers[14,-127].</p>
 <h3 id="exercise-5-account-for-storage-metadata">Exercise 5: Account for storage metadata<a class="heading-anchor" href="#exercise-5-account-for-storage-metadata" aria-label="Link to this section">#</a></h3>
 <p>The question is: Count4 int8 weights plusone float32 scale versus two float32 row scales.</p>
 <p>For tiny arrays, scale metadata can dominate. A claimed compression ratio should state whether it counts metadata, alignment and runtime representations.</p>
-<pre><code class="language-python">per_tensor=4*1+1*4; per_row=4*1+2*4
-assert (per_tensor,per_row)==(8,12)</code></pre>
+<pre class="highlighted-code"><code class="language-python">per_tensor<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-operator">*</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">*</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span> per_row<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-operator">*</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>per_tensor<span class="syntax-punctuation">,</span>per_row<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> 8 bytes per-tensor;12 bytes per-row;excluding overhead.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 8 bytes per-tensor;12 bytes per-row;excluding overhead.</p>
 <h3 id="exercise-6-expose-clipping-and-tie-policy">Exercise 6: Expose clipping and tie policy<a class="heading-anchor" href="#exercise-6-expose-clipping-and-tie-policy" aria-label="Link to this section">#</a></h3>
 <p>The question is: Quantize values exceeding a scale1 range and inspect nearest-even rounding of.5,1.5,2.5.</p>
 <p>The calibration maximum from one dataset does not guarantee future values remain in range. Counting saturation exposes a distinct source of error beyond ordinary rounding.</p>
-<pre><code class="language-python">values=np.array([127.,128.]); rounded=np.rint(values); saturated=np.count_nonzero((rounded&lt;-127)|(rounded&gt;127))
-assert saturated==1; np.testing.assert_array_equal(np.rint([.5,1.5,2.5]),[0,2,2])</code></pre>
+<pre class="highlighted-code"><code class="language-python">values<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">127.</span><span class="syntax-punctuation">,</span><span class="syntax-number">128.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> rounded<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saturated<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>rounded<span class="syntax-operator">&lt;</span><span class="syntax-operator">-</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span><span class="syntax-punctuation">(</span>rounded<span class="syntax-operator">&gt;</span><span class="syntax-number">127</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> saturated<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>rint<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> one saturation for128;ties round0,2,2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with one saturation for128;ties round0,2,2.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

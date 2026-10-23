@@ -6,15 +6,15 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-014`
 
 ## Learning objectives
 
-Explain instant, local date-time, zone rule using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York. The final exercise transfers the mechanism to use a half-open time window.
+Explain instant, local date-time, zone rule using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York. The final exercise transfers the mechanism to use a half-open time window.
 
 ## Purpose and mental model
 
-Time has several meanings. Instant identifies a point on theUTCtimeline. LocalDate describes a calendar date without a time zone. LocalDateTime is a wall-clock reading that may be ambiguous or nonexistent in a region because of daylight-saving transitions. ZonedDateTime combines local fields with a zone and resolved offset. A calendar day is not always24 elapsed hours. Store the meaning required by the domain rather than treating every timestamp as interchangeable text. Parse explicit offsets for event instants, and use a region zone when calendar rules matter.
+Time has several meanings. Instant identifies a point on the UTC timeline. LocalDate describes a calendar date without a time zone. LocalDateTime is a wall-clock reading that may be ambiguous or nonexistent in a region because of daylight-saving transitions. ZonedDateTime combines local fields with a zone and resolved offset. A calendar day is not always24 elapsed hours. Store the meaning required by the domain rather than treating every timestamp as interchangeable text. Parse explicit offsets for event instants, and use a region zone when calendar rules matter.
 
 ## Vocabulary and concepts
 
-**Instant:** A point on theUTCtimeline.
+**Instant:** A point on the UTC timeline.
 
 **Local date-time:** Calendar and clock fields without a resolved zone offset.
 
@@ -22,7 +22,7 @@ Time has several meanings. Instant identifies a point on theUTCtimeline. LocalDa
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-015/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Instant.parse acceptsISO8601UTCtext. atZone converts an instant to a regional representation without changing the instant. plusDays follows local calendar arithmetic,while plusHours follows elapsed time forZonedDateTime. ZoneRules.getValidOffsets reveals zero,one or two valid offsets for a local date-time. Use explicit formatters andLocale rather than relying on machine defaults.
+Instant.parse acceptsISO8601UTCtext. atZone converts an instant to a regional representation without changing the instant. plusDays follows local calendar arithmetic,while plusHours follows elapsed time for ZonedDateTime. ZoneRules.getValidOffsets reveals zero,one or two valid offsets for a local date-time. Use explicit formatters and Locale rather than relying on machine defaults.
 
 ## Worked example / walkthrough
 
@@ -60,7 +60,7 @@ public class Main {
 
 ```
 
-**Expected:** same instant;New York local date2023-12-31.
+**Expected:** same instant; New York local date 2023-12-31.
 
 ### Example B: Compare calendar and elapsed days
 
@@ -94,29 +94,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Preserve an instant across zones.** Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York.
-   **Expected:** same instant;New York local date2023-12-31.
-   **Verify:** Compare your assertion values or captured diagnostic with same instant;New York local date2023-12-31.
+1. **Preserve an instant across zones.** Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York.
+   **Expected:** same instant; New York local date 2023-12-31.
+   **Verify:** Compare your assertion values or captured diagnostic with same instant; New York local date 2023-12-31.
 
 2. **Compare calendar and elapsed days.** Start at noon before the2024New York spring transition and compareplusDays1 withplusHours24.
    **Expected:** calendar next noon is23 elapsed hours later;24hours reaches13:00.
    **Verify:** Compare your assertion values or captured diagnostic with calendar next noon is23 elapsed hours later;24hours reaches13:00.
 
-3. **Detect a nonexistent local time.** Ask for valid offsets at2024-03-10 02:30 inNew York.
+3. **Detect a nonexistent local time.** Ask for valid offsets at2024-03-10 02:30 in New York.
    **Expected:** zero valid offsets.
    **Verify:** Compare your assertion values or captured diagnostic with zero valid offsets.
 
-4. **Detect an ambiguous local time.** Ask for offsets at2024-11-03 01:30 inNew York.
+4. **Detect an ambiguous local time.** Ask for offsets at2024-11-03 01:30 in New York.
    **Expected:** two valid offsets.
    **Verify:** Compare your assertion values or captured diagnostic with two valid offsets.
 
-5. **Parse a strict calendar date.** Parse2024-02-29 and reject2023-02-29 withISO_LOCAL_DATE.
+5. **Parse a strict calendar date.** Parse 2024-02-29 and reject 2023-02-29 with ISO_LOCAL_DATE.
    **Expected:** leap-day accepted only for2024.
    **Verify:** Compare your assertion values or captured diagnostic with leap-day accepted only for2024.
 
 6. **Use a half-open time window.** Include an instant at the start and exclude an instant exactly at the end of a one-hour window.
-   **Expected:** start included;end excluded.
-   **Verify:** Compare your assertion values or captured diagnostic with start included;end excluded.
+   **Expected:** start included; end excluded.
+   **Verify:** Compare your assertion values or captured diagnostic with start included; end excluded.
 
 ## Common pitfalls and diagnosis
 

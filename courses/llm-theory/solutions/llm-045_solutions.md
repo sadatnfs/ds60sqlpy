@@ -46,7 +46,7 @@ np.testing.assert_allclose(rms.detach().numpy(),np.array([3.,4.])/np.sqrt(12.5+1
 
 The question is: Set the transformed branch to zero and compare pre-norm x with post-norm LayerNorm(x).
 
-The zero-branch control isolates placement. LayerNorm removes a common feature shift, so its derivative along the all-ones direction iszero rather than identity.
+The zero-branch control isolates placement. LayerNorm removes a common feature shift, so its derivative along the all-ones direction is zero rather than identity.
 
 ```python
 value=torch.tensor([1.,2.,4.],dtype=torch.float64,requires_grad=True)
@@ -64,7 +64,7 @@ torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,
 
 The question is: Use scalar \(g=0\), \(u=2\) and output SiLU(g)*u.
 
-At zero, SiLU has derivative one-half. Multiplication by up2 givesgate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
+At zero, SiLU has derivative one-half. Multiplication by up2 gives gate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
 
 ```python
 gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
@@ -80,7 +80,7 @@ assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0
 
 The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\cdot {r}^{3}}\) at x=[1, 2, 3].
 
-The derivative contains a directcoordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling wouldtreat normalization asconstant scaling andproduce incorrectgradients.
+The derivative contains a direct coordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.
 
 ```python
 value=torch.tensor([1.,2.,3.],dtype=torch.float64,requires_grad=True); r=torch.sqrt(value.square().mean()+1e-8); width=value.numel()
@@ -97,7 +97,7 @@ torch.testing.assert_close(automatic,analytic,atol=1e-10,rtol=0)
 
 The question is: Compare plain FFN model width \(d=4\), hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4.
 
-Matching hidden widths wouldnotmatch parameter counts. The2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
+Matching hidden widths would not match parameter counts. The2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
 
 ```python
 d=4; plain_hidden=6; gated_hidden=4
@@ -115,7 +115,7 @@ assert tuple(result.shape)==(2,4) and torch.isfinite(result).all()
 
 The question is: Shift x=[1, 2, 3] by 5, compare the two normalizers, and normalize zero.
 
-Epsilon handles zero magnitude, but does notcreate the mean-subtraction invariance thatRMSNorm deliberately omits. These invariants clarify what information eachnormalizer removes.
+Epsilon handles zero magnitude, but does not create the mean-subtraction invariance thatRMSNorm deliberately omits. These invariants clarify what information each normalizer removes.
 
 ```python
 base=torch.tensor([1.,2.,3.],dtype=torch.float64)

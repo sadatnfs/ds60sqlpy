@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,91 +161,91 @@
       <h1>Js 026 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-026_solution.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span>function validCents(value: number): void {</span>
-<span>  if (!Number.isSafeInteger(value) || value &lt; 0) throw new RangeError(&#x27;nonnegative safe integer cents required&#x27;);</span>
-<span>}</span>
-<span>class Wallet {</span>
-<span>  #balance: number;</span>
-<span>  constructor(initial: number) { validCents(initial); this.#balance = initial; }</span>
-<span>  get cents(): number { return this.#balance; }</span>
-<span>  deposit(amount: number): void {</span>
-<span>    validCents(amount);</span>
-<span>    const next = this.#balance + amount;</span>
-<span>    validCents(next);</span>
-<span>    this.#balance = next;</span>
-<span>  }</span>
-<span>  withdraw(amount: number): void {</span>
-<span>    validCents(amount);</span>
-<span>    if (amount &gt; this.#balance) throw new RangeError(&#x27;insufficient balance&#x27;);</span>
-<span>    this.#balance -= amount;</span>
-<span>  }</span>
-<span>}</span>
-<span>interface Clock { now(): Date }</span>
-<span>class ReceiptService {</span>
-<span>  constructor(private readonly clock: Clock) {}</span>
-<span>  create(id: string): { id: string; createdAt: string } {</span>
-<span>    if (id === &#x27;&#x27;) throw new TypeError(&#x27;id required&#x27;);</span>
-<span>    return { id, createdAt: this.clock.now().toISOString() };</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {</span>
-<span>  // Exercise 1: Maintain balance through methods</span>
-<span>  {</span>
-<span>    const wallet = new Wallet(100);</span>
-<span>    wallet.deposit(50);</span>
-<span>    wallet.withdraw(30);</span>
-<span>    assert.equal(wallet.cents, 120);</span>
-<span>    assert.equal(Object.hasOwn(wallet, &#x27;balance&#x27;), false);</span>
-<span>    assert.deepEqual(Object.keys(wallet), []);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Inject a deterministic clock</span>
-<span>  {</span>
-<span>    const service = new ReceiptService({ now: () =&gt; new Date(&#x27;2026-01-01T00:00:00.000Z&#x27;) });</span>
-<span>    assert.deepEqual(service.create(&#x27;A&#x27;), { id: &#x27;A&#x27;, createdAt: &#x27;2026-01-01T00:00:00.000Z&#x27; });</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Reject invalid transitions without mutation</span>
-<span>  {</span>
-<span>    const wallet = new Wallet(100);</span>
-<span>    assert.throws(() =&gt; wallet.deposit(-1), RangeError);</span>
-<span>    assert.throws(() =&gt; wallet.withdraw(101), RangeError);</span>
-<span>    assert.equal(wallet.cents, 100);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Guard derived overflow</span>
-<span>  {</span>
-<span>    const wallet = new Wallet(Number.MAX_SAFE_INTEGER);</span>
-<span>    assert.throws(() =&gt; wallet.deposit(1), RangeError);</span>
-<span>    assert.equal(wallet.cents, Number.MAX_SAFE_INTEGER);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Reject an incompatible collaborator</span>
-<span>  {</span>
-<span>    function negativeTypeCheck(): void {</span>
-<span>      // @ts-expect-error Clock.now must return Date.</span>
-<span>      new ReceiptService({ now: () =&gt; &#x27;today&#x27; });</span>
-<span>    }</span>
-<span>    void negativeTypeCheck;</span>
-<span>    assert.equal(new ReceiptService({ now: () =&gt; new Date(0) }).create(&#x27;B&#x27;).createdAt, &#x27;1970-01-01T00:00:00.000Z&#x27;);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Distinguish private storage from a lookalike property</span>
-<span>  {</span>
-<span>    const wallet = new Wallet(2);</span>
-<span>    Object.assign(wallet, { balance: 999 });</span>
-<span>    assert.equal(Reflect.get(wallet, &#x27;balance&#x27;), 999);</span>
-<span>    assert.equal(wallet.cents, 2);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">function</span> validCents<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isSafeInteger<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> value <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;nonnegative safe integer cents required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> Wallet <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  #balance<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">constructor</span><span class="syntax-punctuation">(</span>initial<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> validCents<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance <span class="syntax-operator">=</span> initial<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  get cents<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  deposit<span class="syntax-punctuation">(</span>amount<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    validCents<span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> next <span class="syntax-operator">=</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance <span class="syntax-operator">+</span> amount<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    validCents<span class="syntax-punctuation">(</span>next<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance <span class="syntax-operator">=</span> next<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  withdraw<span class="syntax-punctuation">(</span>amount<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    validCents<span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>amount <span class="syntax-operator">&gt;</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;insufficient balance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>#balance <span class="syntax-operator">-=</span> amount<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">interface</span> Clock <span class="syntax-punctuation">{</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Date</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> ReceiptService <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">constructor</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">private</span> <span class="syntax-keyword">readonly</span> clock<span class="syntax-operator">:</span> <span class="syntax-keyword">Clock</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">  create<span class="syntax-punctuation">(</span>id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> createdAt<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>id <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;id required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> id<span class="syntax-punctuation">,</span> createdAt<span class="syntax-operator">:</span> <span class="syntax-keyword">this.clock.now</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toISOString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Maintain balance through methods</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    wallet<span class="syntax-punctuation">.</span>withdraw<span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;balance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Inject a deterministic clock</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> service <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-01-01T00:00:00.000Z&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>service<span class="syntax-punctuation">.</span>create<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> createdAt<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;2026-01-01T00:00:00.000Z&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Reject invalid transitions without mutation</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>withdraw<span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Guard derived overflow</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Reject an incompatible collaborator</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">// @ts-expect-error Clock.now must return Date.</span></span>
+<span class="source-line">      <span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-string">&#x27;today&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>create<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>createdAt<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1970-01-01T00:00:00.000Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Distinguish private storage from a lookalike property</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> balance<span class="syntax-operator">:</span> <span class="syntax-keyword">999</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Reflect</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;balance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

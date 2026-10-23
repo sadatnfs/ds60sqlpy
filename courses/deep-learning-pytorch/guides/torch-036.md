@@ -6,7 +6,7 @@ Advanced; approximately 240 minutes. Direct prerequisites: `torch-035`. The prer
 
 ## Learning objectives
 
-A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. The central investigation is concrete: Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs. The finish condition is 3training and 2 holdout records. local checks True; production no-go; directory absent. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. The central investigation is concrete: Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs. The finish condition is 3 training and 2 holdout records. local checks True; production no-go; directory absent. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -98,7 +98,7 @@ x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([
 split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2
 ```
 
-**Expected:** 3training and 2 holdout records.
+**Expected:** 3 training and 2 holdout records.
 
 ### Example B: Train within a declared budget
 
@@ -132,13 +132,13 @@ assert len(manifest['weight_sha256'])==64 and manifest['schema']['width']==1
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3training and 2 holdout records. local checks True; production no-go; directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training and 2 holdout records. local checks True; production no-go; directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze the scalar experiment.** Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.
-   **Expected:** 3training and 2 holdout records.
-   **Verify:** Save the assertion results for exercise 1, including 3training and 2 holdout records.
+1. **Freeze the scalar experiment.** Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.
+   **Expected:** 3 training and 2 holdout records.
+   **Verify:** Save the assertion results for exercise 1, including 3 training and 2 holdout records.
 
 2. **Train within a declared budget.** Zero-initialize float64 Linear and run 30 SGD.01 updates.
    **Expected:** finite weights; holdout error below constant training-mean baseline 26.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,57 +164,57 @@
     <article class="document"><h2 id="java-025-explanatory-solutions">java-025: explanatory solutions<a class="heading-anchor" href="#java-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals orlisteners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.</p>
-<p>System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection andimplementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.</p>
+<p>The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals or listeners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.</p>
+<p>System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection and implementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.</p>
 <p><strong>Reachability:</strong> Whether an object can be reached through active reference paths.</p>
 <p><strong>Retention:</strong> Keeping an object alive through a reference that still exists.</p>
 <p><strong>Garbage collection:</strong> Reclaiming managed memory according to runtime policy.</p>
 <p><strong>Allocation rate:</strong> The amount of new storage created over a period of work.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent ornull depending on reachability andcollection. Runtime memory values describe the current process andshould not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicitclose forfiles,sockets andexecutors.</p>
+<p>A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent or null depending on reachability and collection. Runtime memory values describe the current process and should not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicit close for files,sockets and executors.</p>
 <h3 id="exercise-1-expose-a-strong-retention-path">Exercise 1: Expose a strong retention path<a class="heading-anchor" href="#exercise-1-expose-a-strong-retention-path" aria-label="Link to this section">#</a></h3>
-<p>Task: Store a small byte array in a list anddrop the local variable reference.</p>
-<p>The local reference disappearing does not remove the list&#x27;s ownership path. This is a common source of unbounded cache orlistener retention.</p>
-<pre><code class="language-java">List&lt;byte[]&gt; retained=new ArrayList&lt;&gt;();byte[] payload=new byte[1024];payload[0]=7;retained.add(payload);payload=null;
-assert retained.get(0)[0]==7 &amp;&amp; retained.get(0).length==1024;</code></pre>
+<p>Task: Store a small byte array in a list and drop the local variable reference.</p>
+<p>The local reference disappearing does not remove the list&#x27;s ownership path. This is a common source of unbounded cache or listener retention.</p>
+<pre class="highlighted-code"><code class="language-java">List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-operator">&gt;</span> retained<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> payload<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-number">1024</span><span class="syntax-operator">]</span><span class="syntax-punctuation">;</span>payload<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">7</span><span class="syntax-punctuation">;</span>retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>payload<span class="syntax-operator">=</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">1024</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> list still exposes the same array contents.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with list still exposes the same array contents. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-remove-one-ownership-path-deliberately">Exercise 2: Remove one ownership path deliberately<a class="heading-anchor" href="#exercise-2-remove-one-ownership-path-deliberately" aria-label="Link to this section">#</a></h3>
-<p>Task: Keep a separate reference,clear the list,andinspect the separate reference.</p>
+<p>Task: Keep a separate reference,clear the list,and inspect the separate reference.</p>
 <p>Clearing a container removes its references,but another strong reference can keep the object reachable. Reachability is a graph property.</p>
-<pre><code class="language-java">byte[] separate=retained.get(0);retained.clear();
-assert retained.isEmpty() &amp;&amp; separate[0]==7;</code></pre>
-<p><strong>Expected:</strong> list empty;separate array stillvalid.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with list empty;separate array stillvalid. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> separate<span class="syntax-operator">=</span>retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">clear</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> retained<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> separate<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">7</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> list empty;separate array still valid.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with list empty;separate array still valid. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-inspect-a-weak-reference-without-timing-assumptions">Exercise 3: Inspect a weak reference without timing assumptions<a class="heading-anchor" href="#exercise-3-inspect-a-weak-reference-without-timing-assumptions" aria-label="Link to this section">#</a></h3>
-<p>Task: Create aWeakReference to the still-strongly-referenced array.</p>
+<p>Task: Create a WeakReference to the still-strongly-referenced array.</p>
 <p>The reachability fence makes the intended lifetime explicit for this observation. The exercise does not assert when collection occurs after strong references disappear.</p>
-<pre><code class="language-java">var weak=new java.lang.ref.WeakReference&lt;&gt;(separate);
-assert weak.get()==separate;java.lang.ref.Reference.reachabilityFence(separate);</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> weak<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">lang</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ref</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">WeakReference</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>separate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> weak<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span>separate<span class="syntax-punctuation">;</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">lang</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ref</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Reference</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">reachabilityFence</span><span class="syntax-punctuation">(</span>separate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> weakget returns the same object while strong reference exists.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with weakget returns the same object while strong reference exists. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-separate-value-size-from-allocation-count">Exercise 4: Separate value size from allocation count<a class="heading-anchor" href="#exercise-4-separate-value-size-from-allocation-count" aria-label="Link to this section">#</a></h3>
-<p>Task: Create ten arrays of128bytes andcount logical payload bytes.</p>
-<p>Array headers,alignment,references andcontainer overhead are additional. Logical payload arithmetic is not a measured object-layout receipt.</p>
-<pre><code class="language-java">List&lt;byte[]&gt; blocks=new ArrayList&lt;&gt;();for(int i=0;i&lt;10;i++)blocks.add(new byte[128]);
-int logical=blocks.stream().mapToInt(block -&gt; block.length).sum();assert logical==1280;</code></pre>
+<p>Task: Create ten arrays of 128 bytes and count logical payload bytes.</p>
+<p>Array headers,alignment,references and container overhead are additional. Logical payload arithmetic is not a measured object-layout receipt.</p>
+<pre class="highlighted-code"><code class="language-java">List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-operator">&gt;</span> blocks<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> i<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>i<span class="syntax-operator">&lt;</span><span class="syntax-number">10</span><span class="syntax-punctuation">;</span>i<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span>blocks<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-number">128</span><span class="syntax-operator">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">int</span> logical<span class="syntax-operator">=</span>blocks<span class="syntax-punctuation">.</span><span class="syntax-attribute">stream</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">mapToInt</span><span class="syntax-punctuation">(</span>block <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> block<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">assert</span> logical<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">1280</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 1280 logical bytes;no exact heap-overhead claim.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with 1280 logical bytes;no exact heap-overhead claim. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-reuse-a-bounded-working-buffer">Exercise 5: Reuse a bounded working buffer<a class="heading-anchor" href="#exercise-5-reuse-a-bounded-working-buffer" aria-label="Link to this section">#</a></h3>
 <p>Task: Fill one array repeatedly rather than retaining every intermediate array.</p>
 <p>Reuse can reduce allocations when ownership permits mutation. It can also create aliasing bugs if callers expect historical snapshots,so the contract matters.</p>
-<pre><code class="language-java">byte[] buffer=new byte[16];int identity=System.identityHashCode(buffer);
-for(int i=0;i&lt;10;i++)Arrays.fill(buffer,(byte)i);
-assert System.identityHashCode(buffer)==identity &amp;&amp; buffer[0]==9;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> buffer<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">byte</span><span class="syntax-operator">[</span><span class="syntax-number">16</span><span class="syntax-operator">]</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">int</span> identity<span class="syntax-operator">=</span>System<span class="syntax-punctuation">.</span><span class="syntax-attribute">identityHashCode</span><span class="syntax-punctuation">(</span>buffer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> i<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span>i<span class="syntax-operator">&lt;</span><span class="syntax-number">10</span><span class="syntax-punctuation">;</span>i<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span>Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">fill</span><span class="syntax-punctuation">(</span>buffer<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">byte</span><span class="syntax-punctuation">)</span>i<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> System<span class="syntax-punctuation">.</span><span class="syntax-attribute">identityHashCode</span><span class="syntax-punctuation">(</span>buffer<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span>identity <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> buffer<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">9</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> same buffer identity;final value9.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with same buffer identity;final value9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-record-process-memory-cautiously">Exercise 6: Record process memory cautiously<a class="heading-anchor" href="#exercise-6-record-process-memory-cautiously" aria-label="Link to this section">#</a></h3>
-<p>Task: ReadRuntime total/free/max memory andcheck only valid ordering relationships.</p>
-<p>Counters can change between reads andinclude runtime behavior outside this fixture. Profiling andcontrolled measurement are needed for a memory diagnosis.</p>
-<pre><code class="language-java">Runtime runtime=Runtime.getRuntime();long total=runtime.totalMemory(),free=runtime.freeMemory(),maximum=runtime.maxMemory();
-assert total&gt;=0 &amp;&amp; free&gt;=0 &amp;&amp; maximum&gt;=total;</code></pre>
-<p><strong>Expected:</strong> nonnegative counters;max at leasttotal;no claim of exact object size.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with nonnegative counters;max at leasttotal;no claim of exact object size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p>Task: ReadRuntime total/free/max memory and check only valid ordering relationships.</p>
+<p>Counters can change between reads and include runtime behavior outside this fixture. Profiling and controlled measurement are needed for a memory diagnosis.</p>
+<pre class="highlighted-code"><code class="language-java">Runtime runtime<span class="syntax-operator">=</span>Runtime<span class="syntax-punctuation">.</span><span class="syntax-attribute">getRuntime</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">long</span> total<span class="syntax-operator">=</span>runtime<span class="syntax-punctuation">.</span><span class="syntax-attribute">totalMemory</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>free<span class="syntax-operator">=</span>runtime<span class="syntax-punctuation">.</span><span class="syntax-attribute">freeMemory</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>maximum<span class="syntax-operator">=</span>runtime<span class="syntax-punctuation">.</span><span class="syntax-attribute">maxMemory</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> total<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> free<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> maximum<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>total<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> nonnegative counters; max at least total; no claim of exact object size.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with nonnegative counters; max at least total; no claim of exact object size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

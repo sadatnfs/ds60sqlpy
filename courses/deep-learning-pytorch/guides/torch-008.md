@@ -6,13 +6,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-007`. The prer
 
 ## Learning objectives
 
-One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64 x1, 2, 3, y2x and scalar w0. The finish condition is mean squared loss \(\frac{56}{3}\). w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64 x = [1, 2, 3], y = 2x and scalar w = 0. The finish condition is mean squared loss \(\frac{56}{3}\). w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
 
-The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at \(\frac{56}{3}\), the derivative is-\(\frac{56}{3}\), the new weight is \(\frac{28}{15}\), and the new loss is \(\frac{56}{675}\). A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
+The scalar fixture x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 has an exact oracle. Mean squared loss starts at \(\frac{56}{3}\), the derivative is-\(\frac{56}{3}\), the new weight is \(\frac{28}{15}\), and the new loss is \(\frac{56}{675}\). A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
 
 ## Design decisions and when to use this method
 
@@ -118,7 +118,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Calculate the initial loss.** Use float64 x1, 2, 3, y2x and scalar w0.
+1. **Calculate the initial loss.** Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.
    **Expected:** mean squared loss \(\frac{56}{3}\).
    **Verify:** Save the assertion results for exercise 1, including mean squared loss \(\frac{56}{3}\).
 
@@ -126,15 +126,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** gradient-\(\frac{56}{3}\); weight still 0.
    **Verify:** Save the assertion results for exercise 2, including gradient-\(\frac{56}{3}\); weight still 0.
 
-3. **Apply exactly one SGD update.** Use SGD learning rate.1 onw and recompute the objective afterward.
+3. **Apply exactly one SGD update.** Use SGD learning rate 0.1 onw and recompute the objective afterward.
    **Expected:** w28/15; loss \(\frac{56}{675}\).
    **Verify:** Save the assertion results for exercise 3, including w28/15; loss \(\frac{56}{675}\).
 
-4. **Expose the broadcast counterexample.** At a fresh w0, compare vector predictions with column targets shaped(3, 1).
+4. **Expose the broadcast counterexample.** At a fresh w = 0, compare vector predictions with column targets shaped(3, 1).
    **Expected:** initial loss still \(\frac{56}{3}\), but gradient-16.
    **Verify:** Save the assertion results for exercise 4, including initial loss still \(\frac{56}{3}\), but gradient-16.
 
-5. **Check a finite-difference gradient.** Use a plain NumPy scalar objective around w0 with h.001.
+5. **Check a finite-difference gradient.** Use a plain NumPy scalar objective around w = 0 with h.001.
    **Expected:** slope-\(\frac{56}{3}\) within 1e-9.
    **Verify:** Save the assertion results for exercise 5, including slope-\(\frac{56}{3}\) within 1e-9.
 

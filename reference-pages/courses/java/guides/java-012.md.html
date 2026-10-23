@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,77 +165,77 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner, approximately 90 minutes. Direct prerequisites: <code>java-011</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is SumList.of(1,2,3) andList.of(1.5,2.5) throughList&lt;?extendsNumber&gt;. The final exercise transfers the mechanism to observe erasure carefully.</p>
+<p>Explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Sum <code>List.of(1, 2, 3)</code> and <code>List.of(1.5, 2.5)</code> through List&lt;?extends Number&gt;. The final exercise transfers the mechanism to observe erasure carefully.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Generics express type relationships so many errors can be detected before execution. List&lt;Integer&gt; is not a subtype ofList&lt;Number&gt;, because a caller holdingList&lt;Number&gt; could insert aDouble and violate the original integer list. A producer wildcard?extendsNumber permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguishArrayList&lt;String&gt; fromArrayList&lt;Integer&gt;. Avoid raw types that bypass these checks.</p>
+<p>Generics express type relationships so many errors can be detected before execution. List&lt;Integer&gt; is not a subtype of List&lt;Number&gt;, because a caller holdingList&lt;Number&gt; could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList&lt;String&gt; from ArrayList&lt;Integer&gt;. Avoid raw types that bypass these checks.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Type parameter:</strong> A named placeholder relating types in a declaration.</p>
 <p><strong>Invariance:</strong> Different generic arguments do not imply a subtype relationship.</p>
 <p><strong>Wildcard bound:</strong> A restriction describing safe reads or writes through a generic reference.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-012/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
-<p>The&lt;T&gt; before a method return type declares a method type parameter. List&lt;?extendsNumber&gt; can be iterated asNumber for summation. List&lt;?superInteger&gt; can acceptInteger values. Use&lt;T&gt;voidcopy(List&lt;?extendsT&gt;source,List&lt;?superT&gt;target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.</p>
+<p>The&lt;T&gt; before a method return type declares a method type parameter. List&lt;?extends Number&gt; can be iterated asNumber for summation. List&lt;?superInteger&gt; can acceptInteger values. Use&lt;T&gt;void copy(List&lt;?extendsT&gt;source,List&lt;?superT&gt;target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-read-from-a-producer">Example A: Read from a producer<a class="heading-anchor" href="#example-a-read-from-a-producer" aria-label="Link to this section">#</a></h4>
-<p>The method needs only to readNumber values, so anextends bound accepts both integer and double lists without permitting unsafe insertion.</p>
-<pre><code class="language-java">import java.util.*;
+<p>The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static double sum(List&lt;? extends Number&gt; values){double total=0;for(Number value:values)total+=value.doubleValue();return total;}
-    static void addTwo(List&lt;? super Integer&gt; values){values.add(1);values.add(2);}
-    static &lt;T&gt; void copy(List&lt;? extends T&gt; source,List&lt;? super T&gt; target){target.addAll(source);}
-    static &lt;T&gt; T first(List&lt;T&gt; values){if(values.isEmpty())throw new NoSuchElementException(&quot;empty list&quot;);return values.get(0);}
-    public static void main(String[] args) throws Exception {
-        assert sum(List.of(1,2,3))==6.0;
-        assert sum(List.of(1.5,2.5))==4.0;
-    }
-}
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">double</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">extends</span> Number<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">double</span> total<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span>Number value<span class="syntax-punctuation">:</span>values<span class="syntax-punctuation">)</span>total<span class="syntax-operator">+</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">.</span><span class="syntax-attribute">doubleValue</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">return</span> total<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">addTwo</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">super</span> Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-keyword">void</span> <span class="syntax-function">copy</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">extends</span> T<span class="syntax-operator">&gt;</span> source<span class="syntax-punctuation">,</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">super</span> T<span class="syntax-operator">&gt;</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>target<span class="syntax-punctuation">.</span><span class="syntax-attribute">addAll</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> T <span class="syntax-function">first</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> NoSuchElementException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty list</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">return</span> values<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
-<p><strong>Expected:</strong> sums6.0 and4.0.</p>
+<p><strong>Expected:</strong> sums 6.0 and 4.0.</p>
 <h4 id="example-b-write-to-a-consumer">Example B: Write to a consumer<a class="heading-anchor" href="#example-b-write-to-a-consumer" aria-label="Link to this section">#</a></h4>
-<p>ANumber list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.</p>
-<pre><code class="language-java">import java.util.*;
+<p>A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
-    static double sum(List&lt;? extends Number&gt; values){double total=0;for(Number value:values)total+=value.doubleValue();return total;}
-    static void addTwo(List&lt;? super Integer&gt; values){values.add(1);values.add(2);}
-    static &lt;T&gt; void copy(List&lt;? extends T&gt; source,List&lt;? super T&gt; target){target.addAll(source);}
-    static &lt;T&gt; T first(List&lt;T&gt; values){if(values.isEmpty())throw new NoSuchElementException(&quot;empty list&quot;);return values.get(0);}
-    public static void main(String[] args) throws Exception {
-        assert sum(List.of(1,2,3))==6.0;
-        assert sum(List.of(1.5,2.5))==4.0;
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">double</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">extends</span> Number<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">double</span> total<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span>Number value<span class="syntax-punctuation">:</span>values<span class="syntax-punctuation">)</span>total<span class="syntax-operator">+</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">.</span><span class="syntax-attribute">doubleValue</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">return</span> total<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">addTwo</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">super</span> Integer<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-keyword">void</span> <span class="syntax-function">copy</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">extends</span> T<span class="syntax-operator">&gt;</span> source<span class="syntax-punctuation">,</span>List<span class="syntax-operator">&lt;</span><span class="syntax-operator">?</span> <span class="syntax-keyword">super</span> T<span class="syntax-operator">&gt;</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>target<span class="syntax-punctuation">.</span><span class="syntax-attribute">addAll</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">static</span> <span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> T <span class="syntax-function">first</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">isEmpty</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> NoSuchElementException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty list</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">return</span> values<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> sum<span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">;</span>
 
-        List&lt;Number&gt; numbers=new ArrayList&lt;&gt;(); addTwo(numbers);
-        assert numbers.equals(List.of(1,2));
-    }
-}
+        List<span class="syntax-operator">&lt;</span>Number<span class="syntax-operator">&gt;</span> numbers<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> addTwo<span class="syntax-punctuation">(</span>numbers<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> numbers<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> listcontains1,2.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Read from a producer.</strong> SumList.of(1,2,3) andList.of(1.5,2.5) throughList&lt;?extendsNumber&gt;. <strong>Expected:</strong> sums6.0 and4.0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sums6.0 and4.0.</li>
+<li><strong>Read from a producer.</strong> Sum <code>List.of(1, 2, 3)</code> and <code>List.of(1.5, 2.5)</code> through List&lt;?extends Number&gt;. <strong>Expected:</strong> sums 6.0 and 4.0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sums 6.0 and 4.0.</li>
 </ol>
 <ol>
-<li><strong>Write to a consumer.</strong> Append integers1,2 to aList&lt;Number&gt; throughList&lt;?superInteger&gt;. <strong>Expected:</strong> listcontains1,2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with listcontains1,2.</li>
+<li><strong>Write to a consumer.</strong> Append integers1,2 to a List&lt;Number&gt; through List&lt;?superInteger&gt;. <strong>Expected:</strong> listcontains1,2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with listcontains1,2.</li>
 </ol>
 <ol>
 <li><strong>Connect source and destination types.</strong> CopyList&lt;Integer&gt; intoList&lt;Number&gt; with a bounded generic method. <strong>Expected:</strong> destinationcontains3,4. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with destinationcontains3,4.</li>
 </ol>
 <ol>
-<li><strong>Preserve generic return type.</strong> Callfirst on aString list and assign directly toString. <strong>Expected:</strong> resultalpha. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with resultalpha.</li>
+<li><strong>Preserve generic return type.</strong> Callfirst on a String list and assign directly toString. <strong>Expected:</strong> result alpha. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with result alpha.</li>
 </ol>
 <ol>
 <li><strong>Handle an empty input contract.</strong> Callfirst on an empty list and require a named failure. <strong>Expected:</strong> NoSuchElementException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with NoSuchElementException.</li>
 </ol>
 <ol>
-<li><strong>Observe erasure carefully.</strong> Compare runtime classes ofArrayList&lt;String&gt; andArrayList&lt;Integer&gt;;explain why this does not permit unsafe assignments. <strong>Expected:</strong> runtime classes equal;compile-time contracts remain distinct. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with runtime classes equal;compile-time contracts remain distinct.</li>
+<li><strong>Observe erasure carefully.</strong> Compare runtime classes of ArrayList&lt;String&gt; and ArrayList&lt;Integer&gt;;explain why this does not permit unsafe assignments. <strong>Expected:</strong> runtime classes equal; compile-time contracts remain distinct. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with runtime classes equal; compile-time contracts remain distinct.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
@@ -203,7 +249,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-012: Generics and variance.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-012: Generics and variance.
 Read courses/java/guides/java-012.md and courses/java/lessons/java-012.java. Direct prerequisites: `java-011`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

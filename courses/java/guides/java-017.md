@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-016`
 
 ## Learning objectives
 
-Explain optional, domain error, lazy fallback using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Look up knowna andunknownb in a fixed map throughOptional. The final exercise transfers the mechanism to expose unsafeget.
+Explain optional, domain error, lazy fallback using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Look up known a and unknown b in a fixed map through Optional. The final exercise transfers the mechanism to expose unsafeget.
 
 ## Purpose and mental model
 
-Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not returnnull. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.
+Optional represents the presence or absence of a value in a return contract. It can make a missing lookup explicit,but it does not replace every null or every domain error. An absent record is different from a malformed identifier,an unavailable service or a zero numeric value. UseOptional for an expected missing result and exceptions or a richer result type for invalid inputs and operational failures. A method returningOptional should not return null. Optional itself is a value container; callingget without checking simply moves an unchecked absence failure to a later line.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ Optional represents the presence or absence of a value in a return contract. It 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-017/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Optional.of rejectsnull,ofNullable mapsnull toempty,andmap transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.
+Optional.of rejects null,ofNullable maps null to empty,and map transforms only a present value. orElse evaluates its fallback argument eagerly,whileorElseGet invokes a supplier only when needed. flatMap avoids nestedOptional when the mapper already returns one. A boundary parser can validate text before performing a lookup so malformed input does not masquerade as an ordinary miss.
 
 ## Worked example / walkthrough
 
@@ -60,11 +60,11 @@ public class Main {
 
 ```
 
-**Expected:** a present with7;b empty.
+**Expected:** a present with 7; b empty.
 
 ### Example B: Transform only present values
 
-The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeatednull conditionals.
+The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeated null conditionals.
 
 ```java
 import java.util.*;
@@ -84,7 +84,7 @@ public class Main {
 
 ```
 
-**Expected:** 14 andempty.
+**Expected:** 14 and empty.
 
 ## Prediction before your attempt
 
@@ -92,27 +92,27 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Represent a missing lookup.** Look up knowna andunknownb in a fixed map throughOptional.
-   **Expected:** a present with7;b empty.
-   **Verify:** Compare your assertion values or captured diagnostic with a present with7;b empty.
+1. **Represent a missing lookup.** Look up known a and unknown b in a fixed map through Optional.
+   **Expected:** a present with 7; b empty.
+   **Verify:** Compare your assertion values or captured diagnostic with a present with 7; b empty.
 
-2. **Transform only present values.** Map the known value todouble and apply the same mapping toempty.
-   **Expected:** 14 andempty.
-   **Verify:** Compare your assertion values or captured diagnostic with 14 andempty.
+2. **Transform only present values.** Map the known value to double and apply the same mapping to empty.
+   **Expected:** 14 and empty.
+   **Verify:** Compare your assertion values or captured diagnostic with 14 and empty.
 
 3. **Compare eager and lazy fallback.** Use a counter-producing fallback withorElse andorElseGet on a present value.
    **Expected:** orElse increments;orElseGet does not.
    **Verify:** Compare your assertion values or captured diagnostic with orElse increments;orElseGet does not.
 
 4. **Reject malformed lookup input.** Validate an empty identifier before consulting the map.
-   **Expected:** IllegalArgumentException rather thanempty.
-   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException rather thanempty.
+   **Expected:** IllegalArgumentException rather than empty.
+   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException rather than empty.
 
 5. **Flatten a nullable transformation.** Parse an optional numeric string through a helper returningOptional<Integer>.
    **Expected:** valid12 present;badtext empty under this declared parser policy.
    **Verify:** Compare your assertion values or captured diagnostic with valid12 present;badtext empty under this declared parser policy.
 
-6. **Expose unsafeget.** Callget onempty and catchNoSuchElementException.
+6. **Expose unsafeget.** Callget on empty and catchNoSuchElementException.
    **Expected:** specific absence failure.
    **Verify:** Compare your assertion values or captured diagnostic with specific absence failure.
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,44 +173,44 @@
 <h3 id="exercise-1-align-paired-question-results">Exercise 1: Align paired question results<a class="heading-anchor" href="#exercise-1-align-paired-question-results" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use questionsq1,q2 inA andq3 inB; system error differences[-1,-1,1].</p>
 <p>The repeated familyA receives twice the weight under a row mean. The family mean asks a different question and prevents variants from silently dominating the comparison.</p>
-<pre><code class="language-python">families=[&#x27;A&#x27;,&#x27;A&#x27;,&#x27;B&#x27;]; diff=np.array([-1.,-1.,1.]); grouped=np.array([diff[np.array(families)==f].mean() for f in [&#x27;A&#x27;,&#x27;B&#x27;]])
-np.testing.assert_array_equal(grouped,[-1,1]); np.testing.assert_allclose(diff.mean(),-1/3,atol=1e-12,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">families<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> diff<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> grouped<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>diff<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span>families<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>f<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> f <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>grouped<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>diff<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> question mean-1/3;family meansA-1,B1.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with question mean-1/3;family meansA-1,B1.</p>
 <h3 id="exercise-2-resample-whole-families">Exercise 2: Resample whole families<a class="heading-anchor" href="#exercise-2-resample-whole-families" aria-label="Link to this section">#</a></h3>
 <p>The question is: Draw1000 bootstrap samples of the two family differences with seed8.</p>
 <p>The sample space is tiny and visibly discrete. A smooth-looking interval would not create more independent families than the two observed.</p>
-<pre><code class="language-python">indices=np.random.default_rng(8).integers(0,2,size=(1000,2)); estimates=grouped[indices].mean(1)
-assert set(np.unique(estimates))&lt;={-1.,0.,1.} and grouped.mean()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">indices<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>integers<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> estimates<span class="syntax-operator">=</span>grouped<span class="syntax-punctuation">[</span>indices<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>estimates<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> grouped<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> estimates only-1,0,1;mean of original family values0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with estimates only-1,0,1;mean of original family values0.</p>
 <h3 id="exercise-3-expose-row-weighting-dependence">Exercise 3: Expose row-weighting dependence<a class="heading-anchor" href="#exercise-3-expose-row-weighting-dependence" aria-label="Link to this section">#</a></h3>
 <p>The question is: Repeatq1 ten times and compare row mean with unchanged family means.</p>
 <p>Duplicating a variant can alter a row-weighted conclusion without adding new task families. The test demonstrates why the unit must be chosen before scoring.</p>
-<pre><code class="language-python">repeated=np.concatenate([diff,[-1.]*10]); assert repeated.mean()!=diff.mean() and grouped.mean()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">repeated<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>concatenate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>diff<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-operator">*</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> repeated<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span>diff<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> grouped<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> row mean changes;family mean remains0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with row mean changes;family mean remains0.</p>
 <h3 id="exercise-4-report-selective-accuracy">Exercise 4: Report selective accuracy<a class="heading-anchor" href="#exercise-4-report-selective-accuracy" aria-label="Link to this section">#</a></h3>
 <p>The question is: Of4 questions,answer2 correctly and abstain on2. Compute coverage and answered accuracy.</p>
 <p>Perfect accuracy among answered questions can coexist with limited usefulness. Coverage makes the abstention tradeoff visible.</p>
-<pre><code class="language-python">total,answered,correct=4,2,2
-assert answered/total==.5 and correct/answered==1 and correct==2</code></pre>
+<pre class="highlighted-code"><code class="language-python">total<span class="syntax-punctuation">,</span>answered<span class="syntax-punctuation">,</span>correct<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> answered<span class="syntax-operator">/</span>total<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> correct<span class="syntax-operator">/</span>answered<span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> correct<span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> coverage.5;answered accuracy1;total correct answers2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with coverage.5;answered accuracy1;total correct answers2.</p>
 <h3 id="exercise-5-audit-decision-chronology">Exercise 5: Audit decision chronology<a class="heading-anchor" href="#exercise-5-audit-decision-chronology" aria-label="Link to this section">#</a></h3>
-<p>The question is: Record prompt selection onvalidation followed by final-test assessment; flag a test-driven prompt change.</p>
+<p>The question is: Record prompt selection on validation followed by final-test assessment; flag a test-driven prompt change.</p>
 <p>Information use determines the boundary. Renaming a file or calling a repeated assessment a confirmation does not restore an untouched holdout.</p>
-<pre><code class="language-python">ledger=[(&#x27;select_prompt&#x27;,&#x27;validation&#x27;),(&#x27;assess&#x27;,&#x27;test&#x27;)]
-assert all(part==&#x27;validation&#x27; for action,part in ledger if action==&#x27;select_prompt&#x27;)
-forbidden=(&#x27;select_prompt&#x27;,&#x27;test&#x27;); assert forbidden[1]!=&#x27;validation&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python">ledger<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">select_prompt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assess</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>part<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">for</span> action<span class="syntax-punctuation">,</span>part <span class="syntax-operator">in</span> ledger <span class="syntax-keyword">if</span> action<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">select_prompt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+forbidden<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">select_prompt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> forbidden<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> test-driven selection is invalid for a fresh final claim.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with test-driven selection is invalid for a fresh final claim.</p>
 <h3 id="exercise-6-combine-gates-with-uncertainty">Exercise 6: Combine gates with uncertainty<a class="heading-anchor" href="#exercise-6-combine-gates-with-uncertainty" aria-label="Link to this section">#</a></h3>
-<p>The question is: Require no severe failures and adequate family coverage; evaluate a report withone severe failure.</p>
+<p>The question is: Require no severe failures and adequate family coverage; evaluate a report with one severe failure.</p>
 <p>The decision reflects a predeclared constraint. A mean difference and a bootstrap summary provide evidence but do not replace a required failure-severity gate.</p>
-<pre><code class="language-python">gates={&#x27;severe_failures&#x27;:1,&#x27;tested_families&#x27;:2,&#x27;minimum_families&#x27;:2}
-go=gates[&#x27;severe_failures&#x27;]==0 and gates[&#x27;tested_families&#x27;]&gt;=gates[&#x27;minimum_families&#x27;]
-assert not go</code></pre>
+<pre class="highlighted-code"><code class="language-python">gates<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">severe_failures</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tested_families</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">minimum_families</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span>
+go<span class="syntax-operator">=</span>gates<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">severe_failures</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> gates<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tested_families</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>gates<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">minimum_families</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> go</code></pre>
 <p><strong>Expected:</strong> decisionno-go regardless of favorable average.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with decisionno-go regardless of favorable average.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

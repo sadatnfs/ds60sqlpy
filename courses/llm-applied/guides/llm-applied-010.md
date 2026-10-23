@@ -161,7 +161,7 @@ graph={'metric':['exclusions'],'exclusions':['test_accounts'],'test_accounts':[]
 assert walk('metric',graph,2)==['metric','exclusions','test_accounts']
 ```
 
-**Expected:** visitedmetric, exclusions, test_accounts.
+**Expected:** visited metric, exclusions, test_accounts.
 
 ## Prediction before your attempt
 
@@ -178,8 +178,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 2, including trace includes all three fields.
 
 3. **Follow two evidence hops.** Use graphmetric->exclusions->test_accounts with a two-hop bound.
-   **Expected:** visitedmetric, exclusions, test_accounts.
-   **Verify:** Save the assertion results for exercise 3, including visitedmetric, exclusions, test_accounts.
+   **Expected:** visited metric, exclusions, test_accounts.
+   **Verify:** Save the assertion results for exercise 3, including visited metric, exclusions, test_accounts.
 
 4. **Stop at the declared depth.** Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and negative budgets.
    **Expected:** test_accounts is absent; invalid budgets raise ValueError before traversal.

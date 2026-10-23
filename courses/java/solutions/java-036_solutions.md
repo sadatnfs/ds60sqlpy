@@ -4,27 +4,27 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts andhow failures are diagnosed. Source compilation alone doesnot prove that packaging preserved theentrypoint orthat thetargetruntime supports theclass version. Hashes identify artifactbytes,but avalidhash doesnot establish correct behavior. A deliberate failing integrity check proves that thegate isconnected to thedecision rather than merely printing a success label.
+A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts and how failures are diagnosed. Source compilation alone does not prove that packaging preserved the entrypoint or that the target runtime supports the class version. Hashes identify artifact bytes,but avalidhash does not establish correct behavior. A deliberate failing integrity check proves that the gate is connected to the decision rather than merely printing a success label.
 
-This capstone builds a smallJava21JAR witha fixedtimestamp,checks class-file version65,executes a self-test in a freshJVM andrejects bothaninvalidlaunchargument andtamperedartifactbytes. It retains a previous-artifact identity in therelease record. jlink is explained as a separate custom-runtime packaging step;thedefault reference only probes toolavailability anddoesnotbuild a large runtime image inside thebounded browser job. Production deployment andoperational acceptance remain separate from this localartifact check.
+This capstone builds a smallJava21JAR witha fixed timestamp,checks class-file version65,executes a self-test in a freshJVM and rejects both an invalid launch argument and tampered artifact bytes. It retains a previous-artifact identity in the release record. jlink is explained as a separate custom-runtime packaging step;the default reference only probes tool availability and does not build a large runtime image inside the bounded browser job. Production deployment and operational acceptance remain separate from this local artifact check.
 
-**Release artifact:** The packaged program andmetadata intended fordistribution.
+**Release artifact:** The packaged program and metadata intended for distribution.
 
-**Class-file version:** The bytecode format level required by aJVM.
+**Class-file version:** The bytecode format level required by a JVM.
 
-**Integrity gate:** A check thatartifactbytes match theexpectedidentity.
+**Integrity gate:** A check that artifact bytes match the expected identity.
 
-**Custom runtime image:** A platform-specificJava runtime assembled fromselectedmodules.
+**Custom runtime image:** A platform-specificJava runtime assembled from selected modules.
 
 ## Reading the reference
 
-Use thepreparedcompiler with--release21,then inspect theclass magic andmajorversion throughDataInputStream. Package withtheJDKjar tool andanexplicitMain-Class. Launch theartifact using a fixedlocaljava executable withboundedwait andcapturedoutput. SHA256 verification occurs before execution. A manualjlink recipe mustname requiredmodules,anownedoutputdirectory andactualplatform;itcannot create one universalruntime for everyOS/architecture. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+Use the prepared compiler with --release 21,then inspect the class magic and major version throughDataInputStream. Package withtheJDKjar tool andanexplicitMain-Class. Launch the artifact using a fixed local java executable with bounded wait and captured output. SHA256 verification occurs before execution. A manualjlink recipe must name required modules,an owned output directory and actual platform;itcannot create one universal runtime for everyOS/architecture. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Exercise 1: Verify the compiler target
 
-Task: Compile thefixture with--release21 andinspect itsclassheader.
+Task: Compile the fixture with --release 21 and inspect its class header.
 
-The header is direct evidence ofthetargetbytecode level. Afilename orREADMEclaim cannot replace it.
+The header is direct evidence of the target bytecode level. Afilename or README claim cannot replace it.
 
 ```java
 try(ReleaseFixture fixture=new ReleaseFixture()) {
@@ -32,15 +32,15 @@ try(ReleaseFixture fixture=new ReleaseFixture()) {
 }
 ```
 
-**Expected:** magicCAFEBABE;majorversion65.
+**Expected:** magic CAFEBABE; major version 65.
 
-**Verify:** Compare the program values or named exception with magicCAFEBABE;majorversion65. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with magic CAFEBABE; major version 65. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Inspect packaged launch metadata
 
 Task: Open thebuiltJAR andcheckMain-Class andApp.class.
 
-Packaging canfail independently ofcompilation. The archive mustcontain theintendedentrypoint andmatchingmetadata.
+Packaging can fail independently of compilation. The archive must contain the intended entrypoint and matching metadata.
 
 ```java
 try(ReleaseFixture fixture=new ReleaseFixture()) {
@@ -48,43 +48,43 @@ try(ReleaseFixture fixture=new ReleaseFixture()) {
 }
 ```
 
-**Expected:** Main-ClassApp;classentrypresent.
+**Expected:** Main-ClassApp;class entry present.
 
-**Verify:** Compare the program values or named exception with Main-ClassApp;classentrypresent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with Main-ClassApp;class entry present. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Run a fresh-process self-test
 
-Task: Launch theJAR with--self-test through a bounded childJVM.
+Task: Launch the JAR with--self-test through a bounded childJVM.
 
-The newprocess cannotreuseclasses loaded bytheauthoring program. Thischecks theactualpackagedlaunch path.
+The newprocess cannot reuse classes loaded by the authoring program. Thischecks the actual packaged launch path.
 
 ```java
 try(ReleaseFixture fixture=new ReleaseFixture()) {fixture.build();Run result=fixture.run("--self-test");assert result.code()==0 && result.output().strip().equals("release-ok");}
 ```
 
-**Expected:** exit0 andoutputrelease-ok.
+**Expected:** exit 0 andoutputrelease-ok.
 
-**Verify:** Compare the program values or named exception with exit0 andoutputrelease-ok. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with exit 0 andoutputrelease-ok. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Verify an invalid launch fails clearly
 
-Task: Run thesameJAR withanunsupportedargument.
+Task: Run thesameJAR with an unsupported argument.
 
-An acceptance suite shouldinclude a meaningfulfailure path. Returningexit0 for everyargument would make automation unable todistinguish misuse.
+An acceptance suite should include a meaningful failure path. Returningexit0 for every argument would make automation unable to distinguish misuse.
 
 ```java
 try(ReleaseFixture fixture=new ReleaseFixture()) {fixture.build();Run result=fixture.run("--unsupported");assert result.code()==2 && result.error().contains("unknown argument");}
 ```
 
-**Expected:** exit2 andunknown argument diagnostic.
+**Expected:** exit2 and unknown argument diagnostic.
 
-**Verify:** Compare the program values or named exception with exit2 andunknown argument diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with exit2 and unknown argument diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Reject artifact tampering before execution
 
-Task: Hash theJAR,fliponebyte,andcalltheintegrity gate.
+Task: Hash the JAR,fliponebyte,and call the integrity gate.
 
-The corruptartifact isneverexecuted. Ahashcheck verifiesbyteidentity,while theself-test separately verifiesbehavior.
+The corrupt artifact is never executed. Ahashcheck verifies byte identity,while theself-test separately verifies behavior.
 
 ```java
 try(ReleaseFixture fixture=new ReleaseFixture()) {
@@ -94,15 +94,15 @@ try(ReleaseFixture fixture=new ReleaseFixture()) {
 }
 ```
 
-**Expected:** SecurityException;originalbytesrestored forcleanup.
+**Expected:** SecurityException;original bytes restored for cleanup.
 
-**Verify:** Compare the program values or named exception with SecurityException;originalbytesrestored forcleanup. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with SecurityException;original bytes restored for cleanup. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 6: Record runtime-image scope androllback identity
+## Exercise 6: Record runtime-image scope and rollback identity
 
-Task: Inspectwhetherjlinkexists,andwrite a record distinguishinglocalJARacceptance fromanunbuiltcustomruntime.
+Task: Inspect whether jlink exists,and write a record distinguishing local JAR acceptance fromanunbuiltcustomruntime.
 
-Toolpresence isnot a runtime-image buildreceipt. Amanualjlink buildneeds itsownmoduleclosure,platform,launch andfailure checks beforedistribution.
+Toolpresence is not a runtime-image build receipt. Amanualjlink build needs its own module closure,platform,launch and failure checks before distribution.
 
 ```java
 var jlink=java.nio.file.Path.of(System.getProperty("java.home"),"bin","jlink");
@@ -110,9 +110,9 @@ Map<String,Object> receipt=Map.of("jar_contract_checked",true,"previous_artifact
 assert receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false);
 ```
 
-**Expected:** previousartifactv1 retained;custom_runtime_builtFalse.
+**Expected:** previous artifact v1 retained; custom_runtime_built False.
 
-**Verify:** Compare the program values or named exception with previousartifactv1 retained;custom_runtime_builtFalse. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with previous artifact v1 retained; custom_runtime_built False. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

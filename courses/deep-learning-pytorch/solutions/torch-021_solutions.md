@@ -10,7 +10,7 @@ pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a 
 
 **Padding index:** A vocabulary entry reserved for artificial storage positions.
 
-**Packed sequence:** A representationallowing recurrent layers to skip invalid tail positions.
+**Packed sequence:** A representation allowing recurrent layers to skip invalid tail positions.
 
 **Final valid state:** The hidden state after the last real observation.
 
@@ -18,7 +18,7 @@ pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a 
 
 ## Reading the implementation
 
-Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known 4 x2table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
+Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known 4 x 2 table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
 
 ## Follow lookup, recurrent state and loss participation separately
 
@@ -42,7 +42,7 @@ A per-sequence mean followed by averaging sequences is a different objective whe
 
 ## Exercise 1: Lookup and mark padding
 
-The question is: Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row.
+The question is: Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.
 
 The mask comes from the vocabulary policy. A real token could have a zero vector, so vector magnitude is not a reliable padding detector.
 
@@ -76,7 +76,7 @@ assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
 
 The question is: Use fixed GRU parameters.1 and length 2; compare packed run with the unpadded first two embeddings.
 
-The packedsequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
+The packed sequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
 
 ```python
 gru=nn.GRU(2,2,batch_first=True)

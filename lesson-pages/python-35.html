@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,27 +427,29 @@
 </tbody></table></div>
 <p>Cross-validation evaluates the entire fitting recipe. If feature selection, scaling, or imputation learns from data, it belongs inside the pipeline that each fold fits.</p>
 <h4 id="guide--worked-example-make-the-resampling-procedure-explicit">Worked example: make the resampling procedure explicit<a class="heading-anchor" href="#guide--worked-example-make-the-resampling-procedure-explicit" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold, cross_validate
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> StratifiedKFold<span class="syntax-punctuation">,</span> cross_validate
+<span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> make_pipeline
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-X, y = load_breast_cancer(return_X_y=True)
-pipeline = make_pipeline(
-    StandardScaler(),
-    LogisticRegression(max_iter=1_000),
-)
-folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-scores = cross_validate(
-    pipeline,
-    X,
-    y,
-    cv=folds,
-    scoring={&quot;accuracy&quot;: &quot;accuracy&quot;, &quot;f1&quot;: &quot;f1&quot;, &quot;auc&quot;: &quot;roc_auc&quot;},
-)</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+pipeline <span class="syntax-operator">=</span> make_pipeline<span class="syntax-punctuation">(</span>
+    StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+folds <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+scores <span class="syntax-operator">=</span> cross_validate<span class="syntax-punctuation">(</span>
+    pipeline<span class="syntax-punctuation">,</span>
+    X<span class="syntax-punctuation">,</span>
+    y<span class="syntax-punctuation">,</span>
+    cv<span class="syntax-operator">=</span>folds<span class="syntax-punctuation">,</span>
+    scoring<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">f1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">f1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p>The metric arrays describe variation across these particular folds; their standard deviation is not automatically a confidence interval. Report how the folds were formed so someone else can reproduce the estimate.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 35 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -409,9 +457,9 @@ scores = cross_validate(
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates">Concept deep dive — metrics, resampling design, and honest generalization estimates<a class="heading-anchor" href="#guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -426,35 +474,35 @@ scores = cross_validate(
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-derive-precision-and-recall-from-outcome-counts">Focused example A — derive precision and recall from outcome counts<a class="heading-anchor" href="#guide--focused-example-a-derive-precision-and-recall-from-outcome-counts" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.metrics import confusion_matrix, precision_score, recall_score
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> confusion_matrix<span class="syntax-punctuation">,</span> precision_score<span class="syntax-punctuation">,</span> recall_score
 
-y_true = np.array([1, 1, 1, 1, 0, 0, 0, 0])
-y_pred = np.array([1, 0, 1, 0, 1, 0, 0, 0])
-tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-precision = precision_score(y_true, y_pred)
-recall = recall_score(y_true, y_pred)
-print({&quot;tn&quot;: tn, &quot;fp&quot;: fp, &quot;fn&quot;: fn, &quot;tp&quot;: tp,
-       &quot;precision&quot;: precision, &quot;recall&quot;: recall})
-assert precision == tp / (tp + fp)
-assert recall == tp / (tp + fn)</code></pre>
+y_true <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y_pred <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+tn<span class="syntax-punctuation">,</span> fp<span class="syntax-punctuation">,</span> fn<span class="syntax-punctuation">,</span> tp <span class="syntax-operator">=</span> confusion_matrix<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+precision <span class="syntax-operator">=</span> precision_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span>
+recall <span class="syntax-operator">=</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">tn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tn<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> fp<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> fn<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tp<span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">precision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> precision<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> recall<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> precision <span class="syntax-operator">==</span> tp <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>tp <span class="syntax-operator">+</span> fp<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> recall <span class="syntax-operator">==</span> tp <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>tp <span class="syntax-operator">+</span> fn<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Precision is 2/3 and recall is 1/2; the two metrics answer different questions.</p>
 <p><strong>Assumption to name:</strong> Class <code>1</code> is the positive class and each error type has a known operational consequence.</p>
 <h5 id="guide--focused-example-b-keep-entity-groups-out-of-each-other-s-folds">Focused example B — keep entity groups out of each other&#x27;s folds<a class="heading-anchor" href="#guide--focused-example-b-keep-entity-groups-out-of-each-other-s-folds" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.model_selection import GroupKFold
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> GroupKFold
 
-groups = np.repeat([&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;], 3)
-X = np.arange(groups.size).reshape(-1, 1)
-y = np.tile([0, 1, 0], 4)
-splitter = GroupKFold(n_splits=4)
+groups <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span>groups<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
 
-for train_idx, valid_idx in splitter.split(X, y, groups):
-    train_groups = set(groups[train_idx])
-    valid_groups = set(groups[valid_idx])
-    assert train_groups.isdisjoint(valid_groups)
-print(&quot;all validation groups were unseen during training&quot;)</code></pre>
+<span class="syntax-keyword">for</span> train_idx<span class="syntax-punctuation">,</span> valid_idx <span class="syntax-operator">in</span> splitter<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> groups<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    train_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    valid_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> train_groups<span class="syntax-operator">.</span>isdisjoint<span class="syntax-punctuation">(</span>valid_groups<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">all validation groups were unseen during training</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Each entity appears entirely in training or validation for a fold, never both.</p>
 <p><strong>Assumption to name:</strong> The group ID captures the dependence that would otherwise create optimistic validation.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -577,7 +625,7 @@ print(&quot;all validation groups were unseen during training&quot;)</code></pre
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize metrics, resampling design, and honest generalization estimates. Use exactly these maintained learner materials:
@@ -644,16 +692,16 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>k-fold cross-validation.</li>
 <li>Bias/variance intuition.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.model_selection import cross_val_score</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span>X,y = load_breast_cancer(return_X_y=True)</span>
-<span>pipe = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;lr&#x27;, LogisticRegression(max_iter=1000))])</span>
-<span>scores = cross_val_score(pipe, X, y, cv=5, scoring=&#x27;roc_auc&#x27;)</span>
-<span>scores.mean(), scores</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">pipe <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>pipe<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> scores</span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -671,37 +719,37 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-derive-precision-and-recall-from-outcome-counts">Focused example A — derive precision and recall from outcome counts<a class="heading-anchor" href="#learner--cell-4--focused-example-a-derive-precision-and-recall-from-outcome-counts" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Class <code>1</code> is the positive class and each error type has a known operational consequence.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.metrics import confusion_matrix, precision_score, recall_score</span>
-<span> </span>
-<span>y_true = np.array([1, 1, 1, 1, 0, 0, 0, 0])</span>
-<span>y_pred = np.array([1, 0, 1, 0, 1, 0, 0, 0])</span>
-<span>tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()</span>
-<span>precision = precision_score(y_true, y_pred)</span>
-<span>recall = recall_score(y_true, y_pred)</span>
-<span>print({&quot;tn&quot;: tn, &quot;fp&quot;: fp, &quot;fn&quot;: fn, &quot;tp&quot;: tp,</span>
-<span>       &quot;precision&quot;: precision, &quot;recall&quot;: recall})</span>
-<span>assert precision == tp / (tp + fp)</span>
-<span>assert recall == tp / (tp + fn)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> confusion_matrix<span class="syntax-punctuation">,</span> precision_score<span class="syntax-punctuation">,</span> recall_score</span>
+<span class="source-line"></span>
+<span class="source-line">y_true <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y_pred <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">tn<span class="syntax-punctuation">,</span> fp<span class="syntax-punctuation">,</span> fn<span class="syntax-punctuation">,</span> tp <span class="syntax-operator">=</span> confusion_matrix<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">precision <span class="syntax-operator">=</span> precision_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span></span>
+<span class="source-line">recall <span class="syntax-operator">=</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> y_pred<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">tn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tn<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> fp<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> fn<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tp<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">precision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> precision<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> recall<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> precision <span class="syntax-operator">==</span> tp <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>tp <span class="syntax-operator">+</span> fp<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> recall <span class="syntax-operator">==</span> tp <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>tp <span class="syntax-operator">+</span> fn<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Precision is 2/3 and recall is 1/2; the two metrics answer different questions.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-keep-entity-groups-out-of-each-other-s-folds">Focused example B — keep entity groups out of each other&#x27;s folds<a class="heading-anchor" href="#learner--cell-7--focused-example-b-keep-entity-groups-out-of-each-other-s-folds" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The group ID captures the dependence that would otherwise create optimistic validation.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.model_selection import GroupKFold</span>
-<span> </span>
-<span>groups = np.repeat([&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;], 3)</span>
-<span>X = np.arange(groups.size).reshape(-1, 1)</span>
-<span>y = np.tile([0, 1, 0], 4)</span>
-<span>splitter = GroupKFold(n_splits=4)</span>
-<span> </span>
-<span>for train_idx, valid_idx in splitter.split(X, y, groups):</span>
-<span>    train_groups = set(groups[train_idx])</span>
-<span>    valid_groups = set(groups[valid_idx])</span>
-<span>    assert train_groups.isdisjoint(valid_groups)</span>
-<span>print(&quot;all validation groups were unseen during training&quot;)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> GroupKFold</span>
+<span class="source-line"></span>
+<span class="source-line">groups <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span>groups<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">for</span> train_idx<span class="syntax-punctuation">,</span> valid_idx <span class="syntax-operator">in</span> splitter<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> groups<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    train_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>train_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    valid_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>groups<span class="syntax-punctuation">[</span>valid_idx<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> train_groups<span class="syntax-operator">.</span>isdisjoint<span class="syntax-punctuation">(</span>valid_groups<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">all validation groups were unseen during training</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Each entity appears entirely in training or validation for a fold, never both.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -775,19 +823,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Threshold analysis</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Grouped resampling</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Selection-bias debugging</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Threshold analysis</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Grouped resampling</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Selection-bias debugging</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -831,29 +879,29 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Metrics with CV</p>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score<span class="syntax-punctuation">,</span> StratifiedKFold
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
+<span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
 
-X, y = load_breast_cancer(return_X_y=True)
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+cv <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 
-clf = Pipeline([
-    (&#x27;sc&#x27;, StandardScaler()),
-    (&#x27;lr&#x27;, LogisticRegression(max_iter=1000, solver=&#x27;lbfgs&#x27;))
-])
+clf <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> solver<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lbfgs</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-scores_acc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;accuracy&#x27;)
-scores_f1  = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;f1&#x27;)
-scores_auc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;roc_auc&#x27;)
+scores_acc <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+scores_f1  <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">f1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+scores_auc <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
 
-{
-    &#x27;acc_mean&#x27;: scores_acc.mean(), &#x27;acc_std&#x27;: scores_acc.std(),
-    &#x27;f1_mean&#x27;: scores_f1.mean(),   &#x27;f1_std&#x27;: scores_f1.std(),
-    &#x27;auc_mean&#x27;: scores_auc.mean(), &#x27;auc_std&#x27;: scores_auc.std(),
-}</code></pre>
+<span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&#x27;</span><span class="syntax-string">acc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_acc<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">acc_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_acc<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;</span><span class="syntax-string">f1_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_f1<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>   <span class="syntax-string">&#x27;</span><span class="syntax-string">f1_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_f1<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;</span><span class="syntax-string">auc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_auc<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_auc<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>Use StratifiedKFold for classification to preserve class ratios</li>
@@ -861,11 +909,11 @@ scores_auc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;roc_auc&#x27;)
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — 5-fold vs 10-fold</p>
-<pre><code class="language-python">cv5  = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
-cv10 = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
-auc5  = cross_val_score(clf, X, y, cv=cv5,  scoring=&#x27;roc_auc&#x27;)
-auc10 = cross_val_score(clf, X, y, cv=cv10, scoring=&#x27;roc_auc&#x27;)
-{&#x27;auc5_mean&#x27;: auc5.mean(), &#x27;auc5_std&#x27;: auc5.std(), &#x27;auc10_mean&#x27;: auc10.mean(), &#x27;auc10_std&#x27;: auc10.std()}</code></pre>
+<pre class="highlighted-code"><code class="language-python">cv5  <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+cv10 <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+auc5  <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv5<span class="syntax-punctuation">,</span>  scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+auc10 <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv10<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auc5_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc5<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc5_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc5<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc10_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc10<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc10_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc10<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Observation</p>
 <ul>
 <li>10-fold gives more train data per fold (less bias), but more variance across folds; compare stds</li>
@@ -925,17 +973,17 @@ auc10 = cross_val_score(clf, X, y, cv=cv10, scoring=&#x27;roc_auc&#x27;)
 <p><strong>Prompt:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</p>
 <p>Rows from one entity are correlated, so random row-level folds can let the model recognize entity-specific patterns rather than generalize to new entities.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.model_selection import StratifiedGroupKFold
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> StratifiedGroupKFold
 
-X = np.arange(80, dtype=float).reshape(40, 2)
-y = np.tile([0, 1], 20)
-entity_ids = np.repeat(np.arange(20), 2)
-splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=35)
-for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
-    train_groups = set(entity_ids[train_index])
-    valid_groups = set(entity_ids[valid_index])
-    assert train_groups.isdisjoint(valid_groups)</code></pre>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span>
+entity_ids <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+splitter <span class="syntax-operator">=</span> StratifiedGroupKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">35</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> train_index<span class="syntax-punctuation">,</span> valid_index <span class="syntax-operator">in</span> splitter<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> groups<span class="syntax-operator">=</span>entity_ids<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    train_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>entity_ids<span class="syntax-punctuation">[</span>train_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    valid_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>entity_ids<span class="syntax-punctuation">[</span>valid_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> train_groups<span class="syntax-operator">.</span>isdisjoint<span class="syntax-punctuation">(</span>valid_groups<span class="syntax-punctuation">)</span></code></pre>
 <p>If deployment predicts future rows for already-known entities, a different split may be appropriate; align the split with that real decision explicitly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
@@ -986,29 +1034,29 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-35-solutions-model-evaluation-cross-validation">Day 35 — Solutions: Model Evaluation &amp; Cross-Validation<a class="heading-anchor" href="#solution-2--cell-1--day-35-solutions-model-evaluation-cross-validation" aria-label="Link to this section">#</a></h3>
 <p>CV with multiple metrics, 5 vs 10 folds, and leakage notes.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.model_selection import cross_val_score, StratifiedKFold</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)</span>
-<span>clf = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;lr&#x27;, LogisticRegression(max_iter=1000))])</span>
-<span>scores_acc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;accuracy&#x27;)</span>
-<span>scores_f1  = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;f1&#x27;)</span>
-<span>scores_auc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;roc_auc&#x27;)</span>
-<span>{&#x27;acc_mean&#x27;: scores_acc.mean(), &#x27;acc_std&#x27;: scores_acc.std(),</span>
-<span> &#x27;f1_mean&#x27;: scores_f1.mean(),   &#x27;f1_std&#x27;: scores_f1.std(),</span>
-<span> &#x27;auc_mean&#x27;: scores_auc.mean(), &#x27;auc_std&#x27;: scores_auc.std()}</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score<span class="syntax-punctuation">,</span> StratifiedKFold</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cv <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">lr</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores_acc <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores_f1  <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">f1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores_auc <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">acc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_acc<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">acc_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_acc<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-string">&#x27;</span><span class="syntax-string">f1_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_f1<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>   <span class="syntax-string">&#x27;</span><span class="syntax-string">f1_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_f1<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_auc<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> scores_auc<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>cv5  = StratifiedKFold(n_splits=5,  shuffle=True, random_state=0)</span>
-<span>cv10 = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)</span>
-<span>auc5  = cross_val_score(clf, X, y, cv=cv5,  scoring=&#x27;roc_auc&#x27;)</span>
-<span>auc10 = cross_val_score(clf, X, y, cv=cv10, scoring=&#x27;roc_auc&#x27;)</span>
-<span>{&#x27;auc5_mean&#x27;: auc5.mean(), &#x27;auc5_std&#x27;: auc5.std(), &#x27;auc10_mean&#x27;: auc10.mean(), &#x27;auc10_std&#x27;: auc10.std()}</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">cv5  <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>  shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cv10 <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">auc5  <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv5<span class="syntax-punctuation">,</span>  scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">auc10 <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span>cv10<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auc5_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc5<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc5_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc5<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc10_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc10<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">auc10_std</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> auc10<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Pipelines avoid leakage by fitting preprocessing within each fold only.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><hr>
@@ -1036,18 +1084,18 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
 <p><strong>Prompt:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</p>
 <p>Rows from one entity are correlated, so random row-level folds can let the model recognize entity-specific patterns rather than generalize to new entities.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.model_selection import StratifiedGroupKFold</span>
-<span> </span>
-<span>X = np.arange(80, dtype=float).reshape(40, 2)</span>
-<span>y = np.tile([0, 1], 20)</span>
-<span>entity_ids = np.repeat(np.arange(20), 2)</span>
-<span>splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=35)</span>
-<span>for train_index, valid_index in splitter.split(X, y, groups=entity_ids):</span>
-<span>    train_groups = set(entity_ids[train_index])</span>
-<span>    valid_groups = set(entity_ids[valid_index])</span>
-<span>    assert train_groups.isdisjoint(valid_groups)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> StratifiedGroupKFold</span>
+<span class="source-line"></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">entity_ids <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">splitter <span class="syntax-operator">=</span> StratifiedGroupKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">35</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> train_index<span class="syntax-punctuation">,</span> valid_index <span class="syntax-operator">in</span> splitter<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> groups<span class="syntax-operator">=</span>entity_ids<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    train_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>entity_ids<span class="syntax-punctuation">[</span>train_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    valid_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>entity_ids<span class="syntax-punctuation">[</span>valid_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> train_groups<span class="syntax-operator">.</span>isdisjoint<span class="syntax-punctuation">(</span>valid_groups<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>If deployment predicts future rows for already-known entities, a different split may be appropriate; align the split with that real decision explicitly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>

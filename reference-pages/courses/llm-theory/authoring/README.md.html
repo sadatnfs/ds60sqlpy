@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,10 +164,12 @@
     <article class="document"><h2 id="expert-transformer-authoring-sources">Expert transformer authoring sources<a class="heading-anchor" href="#expert-transformer-authoring-sources" aria-label="Link to this section">#</a></h2>
 <p>These original specifications and renderer own <code>llm-043</code> through <code>llm-048</code>. Run <code>python courses/llm-theory/authoring/build.py</code> from the repository root. The plan update appends missing expert IDs only and preserves earlier IDs,prerequisites and pilot metadata. The renderer writes only the six authored expert bundles plus the shared LLM authored manifest and reviewed plan metadata.</p>
 <p>Earlier LLM002..042 source ownership remains with the established original files and <code>courses/deep-learning-tensorflow/authoring/</code> specifications. Regenerating that earlier authoring set preserves the six expert entries and files. Do not replace one authoring source with the other.</p>
-<p>Every expert topic contains three worked demonstrations,six exercises,an explicit derivation and shape trace,a controlled case study,design tradeoffs and separate executable/explanatory solutions. Primary papers are linked in each guide. Default code uses only prepared NumPy orPyTorch CPU dependencies and doesnot download models ordata.</p>
+<p>Every expert topic contains three worked demonstrations,six exercises,an explicit derivation and shape trace,a controlled case study,design tradeoffs and separate executable/explanatory solutions. Primary papers are linked in each guide. Default code uses only prepared NumPy or PyTorch CPU dependencies and does not download models or data.</p>
 <h3 id="detailed-review-and-program-preservation">Detailed review and program preservation<a class="heading-anchor" href="#detailed-review-and-program-preservation" aria-label="Link to this section">#</a></h3>
 <p><code>depth_reviews_foundations_expert.py</code> contains the reviewed mechanism and counterexample additions for directly maintained <code>llm-001</code> through <code>llm-009</code> and generated experts <code>llm-043</code> through <code>llm-048</code>. The expert renderer applies this guide hook on every regeneration. <code>review_guides.py</code> reapplies only those 15 guide additions and prose spacing repairs in their explanatory solutions; it does not write shared metadata, learner programs or executable references. Every fenced program is excluded from prose transformations. The direct pilot guides remain authoritative for their preexisting content.</p>
-<p>The review&#x27;s only approved executable changes were the043/046 attention helper guards for zero head width and overflowed computed scores. Those changes live in <code>specs.py</code>, the guide helpers and the executable references, with dedicated regressions and fresh Docker receipts. The other13 reviewed program/reference sets remain byte-identical to the pre-review snapshot. See <code>docs/implementation/llm-expert-status.md</code> for current evidence and limits.</p></article>
+<p>The review&#x27;s only approved executable changes were the043/046 attention helper guards for zero head width and overflowed computed scores. Those changes live in <code>specs.py</code>, the guide helpers and the executable references, with dedicated regressions and fresh Docker receipts. The other13 reviewed program/reference sets remain byte-identical to the pre-review snapshot. See <code>docs/implementation/llm-expert-status.md</code> for current evidence and limits.</p>
+<h3 id="unified-classroom-presentation">Unified classroom presentation<a class="heading-anchor" href="#unified-classroom-presentation" aria-label="Link to this section">#</a></h3>
+<p>Author mathematical expressions with explicit LaTeX <code>\( ... \)</code> and standalone <code>\[ ... \]</code> delimiters. Tag every fenced code example with its actual language. After regenerating older prose sources, run <code>python scripts/normalize_lesson_prose.py --write</code> from the repository root before rebuilding HTML readers. The reviewed <code>curriculum/math-prose.json</code> registry preserves this migration across regeneration; it does not change executable fences, notebook code or the supplied statistics outline. The public learner entrypoint is <code>/classroom</code>, shared by every subject. See <a href="../../../docs/content-authoring.md.html">the content contract</a> for the rendering and subject-theme requirements.</p></article>
   </main>
 </body>
 </html>

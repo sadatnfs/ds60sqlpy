@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -393,7 +439,7 @@
 </ul>
 <p>Avoid inventing a target number before seeing baseline variability and decision requirements. Criteria should be ambitious enough to matter and honest enough to test.</p>
 <h4 id="guide--recommended-project-skeleton">Recommended project skeleton<a class="heading-anchor" href="#guide--recommended-project-skeleton" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">capstone/
+<pre class="highlighted-code"><code class="language-text">capstone/
   data/README.md          # source, license, schema; large/private data ignored
   notebooks/              # EDA and communication, not hidden production state
   src/capstone/           # importable data/features/model/evaluation modules
@@ -442,6 +488,8 @@
 </tr>
 </tbody></table></div>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 59 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -449,9 +497,9 @@
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules">Concept deep dive — capstone scope, decision framing, data contracts, and early stop rules<a class="heading-anchor" href="#guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -466,42 +514,42 @@
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-validate-a-project-charter-as-data">Focused example A — validate a project charter as data<a class="heading-anchor" href="#guide--focused-example-a-validate-a-project-charter-as-data" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">charter = {
-    &quot;stakeholder&quot;: &quot;course reviewer&quot;,
-    &quot;decision&quot;: &quot;prioritize which records receive manual review&quot;,
-    &quot;prediction_time&quot;: &quot;after validation, before review&quot;,
-    &quot;baseline&quot;: &quot;review in arrival order&quot;,
-    &quot;primary_metric&quot;: &quot;recall at fixed review capacity&quot;,
-    &quot;guardrails&quot;: [&quot;no prohibited identifiers&quot;, &quot;latency under 100 ms&quot;],
-    &quot;stop_rule&quot;: &quot;stop if target cannot be reproduced from source evidence&quot;,
-}
-required = {
-    &quot;stakeholder&quot;, &quot;decision&quot;, &quot;prediction_time&quot;, &quot;baseline&quot;,
-    &quot;primary_metric&quot;, &quot;guardrails&quot;, &quot;stop_rule&quot;,
-}
-missing = required - charter.keys()
-print({&quot;missing&quot;: sorted(missing), &quot;charter&quot;: charter})
-assert not missing</code></pre>
+<pre class="highlighted-code"><code class="language-python">charter <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">stakeholder</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course reviewer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">decision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prioritize which records receive manual review</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after validation, before review</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">review in arrival order</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">primary_metric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall at fixed review capacity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">guardrails</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">no prohibited identifiers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency under 100 ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">stop_rule</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">stop if target cannot be reproduced from source evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+required <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">stakeholder</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">decision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">primary_metric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">guardrails</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">stop_rule</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+missing <span class="syntax-operator">=</span> required <span class="syntax-operator">-</span> charter<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">charter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> charter<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> missing</code></pre>
 <p><strong>Expected observation:</strong> The charter is reviewable because every required decision field has a concrete value.</p>
 <p><strong>Assumption to name:</strong> The stakeholder confirms the metric and capacity actually reflect the intended action.</p>
 <h5 id="guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks">Focused example B — turn a claim into predeclared acceptance checks<a class="heading-anchor" href="#guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">acceptance = [
-    {&quot;name&quot;: &quot;quality&quot;, &quot;observed&quot;: 1.0, &quot;operator&quot;: &quot;&gt;=&quot;, &quot;threshold&quot;: 1.0},
-    {&quot;name&quot;: &quot;recall_at_capacity&quot;, &quot;observed&quot;: 0.82, &quot;operator&quot;: &quot;&gt;=&quot;, &quot;threshold&quot;: 0.80},
-    {&quot;name&quot;: &quot;latency_ms&quot;, &quot;observed&quot;: 42, &quot;operator&quot;: &quot;&lt;=&quot;, &quot;threshold&quot;: 100},
-]
+<pre class="highlighted-code"><code class="language-python">acceptance <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall_at_capacity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.82</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.80</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency_ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">100</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
 
-def passes(item):
-    return (
-        item[&quot;observed&quot;] &gt;= item[&quot;threshold&quot;]
-        if item[&quot;operator&quot;] == &quot;&gt;=&quot;
-        else item[&quot;observed&quot;] &lt;= item[&quot;threshold&quot;]
-    )
+<span class="syntax-keyword">def</span> <span class="syntax-function">passes</span><span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>
+        item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-keyword">if</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-keyword">else</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-punctuation">)</span>
 
-results = {item[&quot;name&quot;]: passes(item) for item in acceptance}
-print(results)
-assert all(results.values())</code></pre>
+results <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> passes<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> acceptance<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>results<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Each claim has direction, threshold, and observed evidence instead of a vague &#x27;good enough&#x27; judgment.</p>
 <p><strong>Assumption to name:</strong> Thresholds were approved before final evaluation and each observation comes from the declared evidence boundary.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -629,7 +677,7 @@ assert all(results.values())</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-59` — Day 59 — Capstone Kickoff.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-59` — Day 59 — Capstone Kickoff.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize capstone scope, decision framing, data contracts, and early stop rules. Use exactly these maintained learner materials:
@@ -705,7 +753,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Milestones: data -&gt; baseline -&gt; improvements -&gt; deployment.</li>
 </ul>
 <h4 id="learner--cell-2--repository-skeleton">Repository skeleton<a class="heading-anchor" href="#learner--cell-2--repository-skeleton" aria-label="Link to this section">#</a></h4>
-<pre><code>capstone/
+<pre class="highlighted-code"><code class="language-text">capstone/
   data/                  # raw/processed (gitignored if large)
   notebooks/             # EDA, baseline, experiments
   src/                   # reusable modules
@@ -729,44 +777,44 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h5 id="learner--cell-4--focused-example-a-validate-a-project-charter-as-data">Focused example A — validate a project charter as data<a class="heading-anchor" href="#learner--cell-4--focused-example-a-validate-a-project-charter-as-data" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The stakeholder confirms the metric and capacity actually reflect the intended action.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>charter = {</span>
-<span>    &quot;stakeholder&quot;: &quot;course reviewer&quot;,</span>
-<span>    &quot;decision&quot;: &quot;prioritize which records receive manual review&quot;,</span>
-<span>    &quot;prediction_time&quot;: &quot;after validation, before review&quot;,</span>
-<span>    &quot;baseline&quot;: &quot;review in arrival order&quot;,</span>
-<span>    &quot;primary_metric&quot;: &quot;recall at fixed review capacity&quot;,</span>
-<span>    &quot;guardrails&quot;: [&quot;no prohibited identifiers&quot;, &quot;latency under 100 ms&quot;],</span>
-<span>    &quot;stop_rule&quot;: &quot;stop if target cannot be reproduced from source evidence&quot;,</span>
-<span>}</span>
-<span>required = {</span>
-<span>    &quot;stakeholder&quot;, &quot;decision&quot;, &quot;prediction_time&quot;, &quot;baseline&quot;,</span>
-<span>    &quot;primary_metric&quot;, &quot;guardrails&quot;, &quot;stop_rule&quot;,</span>
-<span>}</span>
-<span>missing = required - charter.keys()</span>
-<span>print({&quot;missing&quot;: sorted(missing), &quot;charter&quot;: charter})</span>
-<span>assert not missing</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line">charter <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">stakeholder</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course reviewer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">decision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prioritize which records receive manual review</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after validation, before review</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">review in arrival order</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">primary_metric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall at fixed review capacity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">guardrails</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">no prohibited identifiers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency under 100 ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">stop_rule</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">stop if target cannot be reproduced from source evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line">required <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">stakeholder</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">decision</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">primary_metric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">guardrails</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">stop_rule</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line">missing <span class="syntax-operator">=</span> required <span class="syntax-operator">-</span> charter<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">charter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> charter<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> missing</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The charter is reviewable because every required decision field has a concrete value.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-7--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks">Focused example B — turn a claim into predeclared acceptance checks<a class="heading-anchor" href="#learner--cell-7--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Thresholds were approved before final evaluation and each observation comes from the declared evidence boundary.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>acceptance = [</span>
-<span>    {&quot;name&quot;: &quot;quality&quot;, &quot;observed&quot;: 1.0, &quot;operator&quot;: &quot;&gt;=&quot;, &quot;threshold&quot;: 1.0},</span>
-<span>    {&quot;name&quot;: &quot;recall_at_capacity&quot;, &quot;observed&quot;: 0.82, &quot;operator&quot;: &quot;&gt;=&quot;, &quot;threshold&quot;: 0.80},</span>
-<span>    {&quot;name&quot;: &quot;latency_ms&quot;, &quot;observed&quot;: 42, &quot;operator&quot;: &quot;&lt;=&quot;, &quot;threshold&quot;: 100},</span>
-<span>]</span>
-<span> </span>
-<span>def passes(item):</span>
-<span>    return (</span>
-<span>        item[&quot;observed&quot;] &gt;= item[&quot;threshold&quot;]</span>
-<span>        if item[&quot;operator&quot;] == &quot;&gt;=&quot;</span>
-<span>        else item[&quot;observed&quot;] &lt;= item[&quot;threshold&quot;]</span>
-<span>    )</span>
-<span> </span>
-<span>results = {item[&quot;name&quot;]: passes(item) for item in acceptance}</span>
-<span>print(results)</span>
-<span>assert all(results.values())</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">acceptance <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">recall_at_capacity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.82</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.80</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency_ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">100</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">passes</span><span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">results <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>item<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> passes<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> acceptance<span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>results<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> Each claim has direction, threshold, and observed evidence instead of a vague &#x27;good enough&#x27; judgment.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -849,19 +897,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Scope and stop rules</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Capstone data contract</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Decision log</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Scope and stop rules</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Capstone data contract</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Decision log</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -905,38 +953,38 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Problem and hypotheses (template)</p>
-<pre><code class="language-markdown"># Problem Statement
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic"># Problem Statement</span>
 We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;business value&gt;.
 
-## Hypotheses
-- H1: Feature A (e.g., last_login) is predictive of churn.
-- H2: Text sentiment from tickets correlates with upsell.
-- H3: Seasonality drives demand; including holidays improves forecast.
+<span class="syntax-generic">## Hypotheses</span>
+<span class="syntax-keyword">-</span> H1: Feature A (e.g., last_login) is predictive of churn.
+<span class="syntax-keyword">-</span> H2: Text sentiment from tickets correlates with upsell.
+<span class="syntax-keyword">-</span> H3: Seasonality drives demand; including holidays improves forecast.
 
-## Success Metrics
-- Primary: AUC ≥ 0.80 on holdout within ±2% over 4 weeks
+<span class="syntax-generic">## Success Metrics</span>
+<span class="syntax-keyword">-</span> Primary: AUC ≥ 0.80 on holdout within ±2% over 4 weeks
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95</code></pre>
 <p>Worked reference for Exercise 2 — Data sources and contracts</p>
-<pre><code class="language-markdown">## Sources
-- Warehouse table analytics.users_daily (owner: data-eng)
-- CRM API /tickets (owner: ops)
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Sources</span>
+<span class="syntax-keyword">-</span> Warehouse table analytics.users_daily (owner: data-eng)
+<span class="syntax-keyword">-</span> CRM API /tickets (owner: ops)
 
-## Contracts
-- Schema, freshness (daily by 02:00 UTC), null rate &lt; 1%
+<span class="syntax-generic">## Contracts</span>
+<span class="syntax-keyword">-</span> Schema, freshness (daily by 02:00 UTC), null rate &lt; 1%
 - Access: request via JIRA SEC‑123; principle of least privilege</code></pre>
 <p>Worked reference for Exercise 3 — Baseline, risks, milestones</p>
-<pre><code class="language-markdown">## Baseline
-- Heuristic: last_30d_activity&gt;0 → non‑churner; baseline AUC ≈ 0.62
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Baseline</span>
+<span class="syntax-keyword">-</span> Heuristic: last_30d_activity&gt;0 → non‑churner; baseline AUC ≈ 0.62
 
-## Risks
-- Data leakage from future‑derived features
-- Nonstationarity; quarterly product changes
-- PII handling for GDPR/CCPA
+<span class="syntax-generic">## Risks</span>
+<span class="syntax-keyword">-</span> Data leakage from future‑derived features
+<span class="syntax-keyword">-</span> Nonstationarity; quarterly product changes
+<span class="syntax-keyword">-</span> PII handling for GDPR/CCPA
 
-## Milestones
-- Week 1: Data audit + baseline
-- Week 2: Feature engineering + model v1
-- Week 3: Evaluation + error analysis
+<span class="syntax-generic">## Milestones</span>
+<span class="syntax-keyword">-</span> Week 1: Data audit + baseline
+<span class="syntax-keyword">-</span> Week 2: Feature engineering + model v1
+<span class="syntax-keyword">-</span> Week 3: Evaluation + error analysis
 - Week 4: Packaging + demo + report</code></pre>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
@@ -1034,38 +1082,38 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Problem and hypotheses (template)</p>
-<pre><code class="language-markdown"># Problem Statement
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic"># Problem Statement</span>
 We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;business value&gt;.
 
-## Hypotheses
-- H1: Feature A (e.g., last_login) is predictive of churn.
-- H2: Text sentiment from tickets correlates with upsell.
-- H3: Seasonality drives demand; including holidays improves forecast.
+<span class="syntax-generic">## Hypotheses</span>
+<span class="syntax-keyword">-</span> H1: Feature A (e.g., last_login) is predictive of churn.
+<span class="syntax-keyword">-</span> H2: Text sentiment from tickets correlates with upsell.
+<span class="syntax-keyword">-</span> H3: Seasonality drives demand; including holidays improves forecast.
 
-## Success Metrics
-- Primary: AUC ≥ 0.80 on holdout within ±2% over 4 weeks
+<span class="syntax-generic">## Success Metrics</span>
+<span class="syntax-keyword">-</span> Primary: AUC ≥ 0.80 on holdout within ±2% over 4 weeks
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95</code></pre>
 <p>Worked reference for Exercise 2 — Data sources and contracts</p>
-<pre><code class="language-markdown">## Sources
-- Warehouse table analytics.users_daily (owner: data-eng)
-- CRM API /tickets (owner: ops)
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Sources</span>
+<span class="syntax-keyword">-</span> Warehouse table analytics.users_daily (owner: data-eng)
+<span class="syntax-keyword">-</span> CRM API /tickets (owner: ops)
 
-## Contracts
-- Schema, freshness (daily by 02:00 UTC), null rate &lt; 1%
+<span class="syntax-generic">## Contracts</span>
+<span class="syntax-keyword">-</span> Schema, freshness (daily by 02:00 UTC), null rate &lt; 1%
 - Access: request via JIRA SEC‑123; principle of least privilege</code></pre>
 <p>Worked reference for Exercise 3 — Baseline, risks, milestones</p>
-<pre><code class="language-markdown">## Baseline
-- Heuristic: last_30d_activity&gt;0 → non‑churner; baseline AUC ≈ 0.62
+<pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Baseline</span>
+<span class="syntax-keyword">-</span> Heuristic: last_30d_activity&gt;0 → non‑churner; baseline AUC ≈ 0.62
 
-## Risks
-- Data leakage from future‑derived features
-- Nonstationarity; quarterly product changes
-- PII handling for GDPR/CCPA
+<span class="syntax-generic">## Risks</span>
+<span class="syntax-keyword">-</span> Data leakage from future‑derived features
+<span class="syntax-keyword">-</span> Nonstationarity; quarterly product changes
+<span class="syntax-keyword">-</span> PII handling for GDPR/CCPA
 
-## Milestones
-- Week 1: Data audit + baseline
-- Week 2: Feature engineering + model v1
-- Week 3: Evaluation + error analysis
+<span class="syntax-generic">## Milestones</span>
+<span class="syntax-keyword">-</span> Week 1: Data audit + baseline
+<span class="syntax-keyword">-</span> Week 2: Feature engineering + model v1
+<span class="syntax-keyword">-</span> Week 3: Evaluation + error analysis
 - Week 4: Packaging + demo + report</code></pre>
 <hr>
 <h4 id="solution-2--cell-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>

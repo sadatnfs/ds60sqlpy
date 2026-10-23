@@ -14,11 +14,11 @@ Algorithms connect a problem contract to a sequence of operations and invariants
 
 ## Reading the reference
 
-A lower-bound search returns the first index whose value is at least the target,orlength if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming tabledp[amount] stores the minimum coin count for that exact amount,withdp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
+A lower-bound search returns the first index whose value is at least the target,or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming tabledp[amount] stores the minimum coin count for that exact amount,withdp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
 
 ## Exercise 1: Find the first duplicate boundary
 
-Task: RunlowerBound on1,2,2,5 withtarget2 andtarget6.
+Task: Run lowerBound on 1,2,2,5 with target 2 and target 6.
 
 Returning the first qualifying position gives a precise duplicate policy. An arbitrary matching index would satisfy a different search contract.
 
@@ -26,9 +26,9 @@ Returning the first qualifying position gives a precise duplicate policy. An arb
 int[] sorted={1,2,2,5};assert lowerBound(sorted,2)==1 && lowerBound(sorted,6)==4;
 ```
 
-**Expected:** indices1 and4.
+**Expected:** indices 1 and 4.
 
-**Verify:** Compare the program values or named exception with indices1 and4. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with indices 1 and 4. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Handle empty and outside searches
 
@@ -103,9 +103,9 @@ try{minimumCoins(3,new int[]{0,1});}catch(IllegalArgumentException expected){zer
 assert negative&&zeroCoin;
 ```
 
-**Expected:** IllegalArgumentException forboth.
+**Expected:** IllegalArgumentException for both.
 
-**Verify:** Compare the program values or named exception with IllegalArgumentException forboth. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with IllegalArgumentException for both. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

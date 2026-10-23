@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 12 (<code>python-12</code>), plus generators from Day 4 (<code>python-04</code>).</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day13_functional_tools.md</code>, then open <code>python/ds-60day/notebooks/day13_functional_tools.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,24 +423,24 @@
 <p><code>map(normalize, names)</code> receives the function object <code>normalize</code>—without parentheses—and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
 <h5 id="guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1 — Pass a named function into a lazy transformation<a class="heading-anchor" href="#guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
 <p>Keep the operation testable on its own. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">def normalize_name(text: str) -&gt; str:
-    return &quot; &quot;.join(text.strip().title().split())
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">normalize_name</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-raw_names = [&quot;  ada lovelace&quot;, &quot;GRACE   HOPPER  &quot;]
-normalized_iter = map(normalize_name, raw_names)
-list(normalized_iter)</code></pre>
+raw_names <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">  ada lovelace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GRACE   HOPPER  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+normalized_iter <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span>normalize_name<span class="syntax-punctuation">,</span> raw_names<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>normalized_iter<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]`. `map` is lazy; `list` consumes it.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]`. `map` is lazy; `list` consumes it.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2 — Compose lazy filtering and slicing<a class="heading-anchor" href="#guide--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
 <p>Generate only as many values as the consumer requests. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">from itertools import islice
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> islice
 
-squares = (number**2 for number in range(100))
-even_squares = filter(lambda value: value % 2 == 0, squares)
-list(islice(even_squares, 5))</code></pre>
+squares <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>number<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span> <span class="syntax-keyword">for</span> number <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+even_squares <span class="syntax-operator">=</span> <span class="syntax-builtin">filter</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">%</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> squares<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>islice<span class="syntax-punctuation">(</span>even_squares<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -423,16 +471,16 @@ list(islice(even_squares, 5))</code></pre>
 <li><strong>Adjacent grouping:</strong> runs of equal keys, not global aggregation.</li>
 </ul>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from functools import lru_cache
-from itertools import chain, islice
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> lru_cache
+<span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> chain<span class="syntax-punctuation">,</span> islice
 
-@lru_cache(maxsize=128)
-def expensive_label(code: int) -&gt; str:
-    return f&quot;item-{code:04d}&quot;
+<span class="syntax-decorator">@lru_cache</span><span class="syntax-punctuation">(</span>maxsize<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">expensive_label</span><span class="syntax-punctuation">(</span>code<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">item-</span><span class="syntax-string">{</span>code<span class="syntax-string">:</span><span class="syntax-string">04d</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 
-pages = [[1, 2], [3, 4], [5]]
-first_three = list(islice(chain.from_iterable(pages), 3))
-labels = [expensive_label(code) for code in first_three]</code></pre>
+pages <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+first_three <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>islice<span class="syntax-punctuation">(</span>chain<span class="syntax-operator">.</span>from_iterable<span class="syntax-punctuation">(</span>pages<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+labels <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>expensive_label<span class="syntax-punctuation">(</span>code<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> code <span class="syntax-operator">in</span> first_three<span class="syntax-punctuation">]</span></code></pre>
 <p><code>chain.from_iterable</code> flattens lazily. The bounded cache is useful only because the function is deterministic for a given integer.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -477,7 +525,7 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-13`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-13`
 (Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
 I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
 Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
@@ -551,22 +599,22 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>map(normalize, names)</code> receives the function object <code>normalize</code>—without parentheses—and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
 <h5 id="learner--cell-4--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1 — Pass a named function into a lazy transformation<a class="heading-anchor" href="#learner--cell-4--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
 <p>Keep the operation testable on its own. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>def normalize_name(text: str) -&gt; str:</span>
-<span>    return &quot; &quot;.join(text.strip().title().split())</span>
-<span> </span>
-<span>raw_names = [&quot;  ada lovelace&quot;, &quot;GRACE   HOPPER  &quot;]</span>
-<span>normalized_iter = map(normalize_name, raw_names)</span>
-<span>list(normalized_iter)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">normalize_name</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">raw_names <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">  ada lovelace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GRACE   HOPPER  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">normalized_iter <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span>normalize_name<span class="syntax-punctuation">,</span> raw_names<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>normalized_iter<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]</code>. <code>map</code> is lazy; <code>list</code> consumes it.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2 — Compose lazy filtering and slicing<a class="heading-anchor" href="#learner--cell-6--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
 <p>Generate only as many values as the consumer requests. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from itertools import islice</span>
-<span> </span>
-<span>squares = (number**2 for number in range(100))</span>
-<span>even_squares = filter(lambda value: value % 2 == 0, squares)</span>
-<span>list(islice(even_squares, 5))</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> islice</span>
+<span class="source-line"></span>
+<span class="source-line">squares <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>number<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span> <span class="syntax-keyword">for</span> number <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">even_squares <span class="syntax-operator">=</span> <span class="syntax-builtin">filter</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">%</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> squares<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>islice<span class="syntax-punctuation">(</span>even_squares<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[0, 4, 16, 36, 64]</code>. <code>islice</code> stops after five accepted values rather than consuming all 100 squares.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -580,17 +628,17 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> Use a comprehension for a clear transform/filter, <code>itertools</code> for lazy composition, and an explicit loop when stateful branching matters.</p>
 <p><strong>Boundary to test:</strong> One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import itertools as it</span>
-<span>from functools import lru_cache, partial</span>
-<span> </span>
-<span>list(it.accumulate([1,2,3,4]))</span>
-<span> </span>
-<span>@lru_cache(maxsize=None)</span>
-<span>def fib(n:int)-&gt;int:</span>
-<span>    return n if n&lt;2 else fib(n-1)+fib(n-2)</span>
-<span> </span>
-<span>fib(30)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> itertools <span class="syntax-keyword">as</span> it</span>
+<span class="source-line"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> lru_cache<span class="syntax-punctuation">,</span> partial</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>it<span class="syntax-operator">.</span>accumulate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@lru_cache</span><span class="syntax-punctuation">(</span>maxsize<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fib</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> n <span class="syntax-keyword">if</span> n<span class="syntax-operator">&lt;</span><span class="syntax-number">2</span> <span class="syntax-keyword">else</span> fib<span class="syntax-punctuation">(</span>n<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>fib<span class="syntax-punctuation">(</span>n<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">fib<span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -614,86 +662,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Use `itertools.groupby` to group records that are already sorted by a category key. include the same category in separated positions before sorting. after explicit sorting, each...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Use `itertools.groupby` to group records that are already sorted by a category key. include the same category in separated positions before sorting. after explicit sorting, each...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Use `functools.reduce` to compute a product for `[2, 3, 4]`, giving an explicit identity so empty input returns `1`. implement the same result with a named loop and compare read...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Use `functools.reduce` to compute a product for `[2, 3, 4]`, giving an explicit identity so empty input returns `1`. implement the same result with a named loop and compare read...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Predict what remains after calling `next` on a `map` object and then converting it to a list. `map` is a lazy one-shot iterator in Python 3. Assert the first mapped value and ex...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict what remains after calling `next` on a `map` object and then converting it to a list. `map` is a lazy one-shot iterator in Python 3. Assert the first mapped value and ex...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace `sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))` and explain the tuple key. Tuple components are compared left to right. Compute each tuple key beside its r...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace `sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))` and explain the tuple key. Tuple components are compared left to right. Compute each tuple key beside its r...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity. Apply the reversed function sequence to the current value. Asser...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity. Apply the reversed function sequence to the current value. Asser...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair lambdas created in a loop that all use the final loop value. Bind the current value as a default argument or use a factory function. Call every produced function and show...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair lambdas created in a loop that all use the final loop value. Bind the current value as a default argument or use a factory function. Call every produced function and show...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step. Pure stages are easier to test and reuse. Assert transformed values are id...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step. Pure stages are easier to test and reuse. Assert transformed values are id...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -747,38 +795,38 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>itertools.groupby</code> to group records that are already sorted by a category key. Inputs: include the same category in separated positions before sorting. Expected behavior: after explicit sorting, each category appears once with all of its records. Constraint: explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record. That connects the answer to functions as values and composable iterable tools.</p>
-<pre><code class="language-python">from itertools import groupby
-from operator import itemgetter
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> groupby
+<span class="syntax-keyword">from</span> operator <span class="syntax-keyword">import</span> itemgetter
 
-pairs = [(&quot;b&quot;, 2), (&quot;a&quot;, 1), (&quot;b&quot;, 3)]
-ordered = sorted(pairs, key=itemgetter(0))
-grouped = {
-    key: [value for _, value in rows]
-    for key, rows in groupby(ordered, key=itemgetter(0))
-}
-assert grouped == {&quot;a&quot;: [1], &quot;b&quot;: [2, 3]}</code></pre>
+pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>itemgetter<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+grouped <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    key<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>value <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> rows <span class="syntax-operator">in</span> groupby<span class="syntax-punctuation">(</span>ordered<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>itemgetter<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> grouped <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Sorting is part of the contract because <code>groupby</code> collects adjacent runs rather than searching the entire iterable.</p>
 <p><strong>Verification evidence:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. Then: implement the same result with a named loop and compare readability. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code. That connects the answer to functions as values and composable iterable tools.</p>
-<pre><code class="language-python">from functools import reduce
-from operator import mul
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> reduce
+<span class="syntax-keyword">from</span> operator <span class="syntax-keyword">import</span> mul
 
 
-def product(values: list[int]) -&gt; int:
-    return reduce(mul, values, 1)
+<span class="syntax-keyword">def</span> <span class="syntax-function">product</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> reduce<span class="syntax-punctuation">(</span>mul<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 
 
-def loop_product(values: list[int]) -&gt; int:
-    result = 1
-    for value in values:
-        result *= value
-    return result
+<span class="syntax-keyword">def</span> <span class="syntax-function">loop_product</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    result <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
+        result <span class="syntax-operator">*</span><span class="syntax-operator">=</span> value
+    <span class="syntax-keyword">return</span> result
 
 
-assert product([2, 3, 4]) == loop_product([2, 3, 4]) == 24
-assert product([]) == loop_product([]) == 1</code></pre>
+<span class="syntax-keyword">assert</span> product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> loop_product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">24</span>
+<span class="syntax-keyword">assert</span> product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> loop_product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></code></pre>
 <p><code>math.prod(values)</code> is the clearest production alternative; the explicit reduction here makes identity behavior visible.</p>
 <p><strong>Verification evidence:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -805,46 +853,46 @@ assert product([]) == loop_product([]) == 1</code></pre>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering">Shared implementation for Exercises 3–4 — Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">doubled = map(lambda value: value * 2, [1, 2, 3])
-assert next(doubled) == 2
-assert list(doubled) == [4, 6]
+<pre class="highlighted-code"><code class="language-python">doubled <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span>
 
-records = [
-    {&quot;team&quot;: &quot;B&quot;, &quot;score&quot;: 8},
-    {&quot;team&quot;: &quot;A&quot;, &quot;score&quot;: 7},
-    {&quot;team&quot;: &quot;A&quot;, &quot;score&quot;: 9},
-]
-ordered = sorted(records, key=lambda row: (row[&quot;team&quot;], -row[&quot;score&quot;]))
-assert [row[&quot;score&quot;] for row in ordered] == [9, 7, 8]</code></pre>
+records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> ordered<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span></code></pre>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages">Shared implementation for Exercises 5–7 — Composition, binding, and pure stages<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from collections.abc import Callable
-from typing import Any
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable
+<span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any
 
 
-def compose(*functions: Callable[[Any], Any]) -&gt; Callable[[Any], Any]:
-    &quot;&quot;&quot;Compose right-to-left; no functions produce the identity operation.&quot;&quot;&quot;
+<span class="syntax-keyword">def</span> <span class="syntax-function">compose</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>functions<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Compose right-to-left; no functions produce the identity operation.&quot;&quot;&quot;</span>
 
-    def composed(value: Any) -&gt; Any:
-        current = value
-        for function in reversed(functions):
-            current = function(current)
-        return current
+    <span class="syntax-keyword">def</span> <span class="syntax-function">composed</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any<span class="syntax-punctuation">:</span>
+        current <span class="syntax-operator">=</span> value
+        <span class="syntax-keyword">for</span> function <span class="syntax-operator">in</span> <span class="syntax-builtin">reversed</span><span class="syntax-punctuation">(</span>functions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            current <span class="syntax-operator">=</span> function<span class="syntax-punctuation">(</span>current<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> current
 
-    return composed
+    <span class="syntax-keyword">return</span> composed
 
 
-pipeline = compose(str.upper, str.strip)
-assert pipeline(&quot;  data &quot;) == &quot;DATA&quot;
-assert compose()(42) == 42
+pipeline <span class="syntax-operator">=</span> compose<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-operator">.</span>upper<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">  data </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">DATA</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">assert</span> compose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">42</span>
 
-# Bind each loop value now, rather than looking it up later.
-multipliers = [lambda value, factor=factor: value * factor for factor in range(3)]
-assert [function(10) for function in multipliers] == [0, 10, 20]
+<span class="syntax-comment"># Bind each loop value now, rather than looking it up later.</span>
+multipliers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">,</span> factor<span class="syntax-operator">=</span>factor<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> factor <span class="syntax-keyword">for</span> factor <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>function<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> function <span class="syntax-operator">in</span> multipliers<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">]</span>
 
-normalize = lambda text: text.strip().casefold()
-normalized = list(map(normalize, [&quot; A &quot;, &quot; B &quot;]))  # Pure transformation.
-rendered = &quot;, &quot;.join(normalized)                    # Presentation boundary.
-assert rendered == &quot;a, b&quot;</code></pre></div>
+normalize <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> text<span class="syntax-punctuation">:</span> text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+normalized <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span>normalize<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string"> A </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> B </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># Pure transformation.</span>
+rendered <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">)</span>                    <span class="syntax-comment"># Presentation boundary.</span>
+<span class="syntax-keyword">assert</span> rendered <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a, b</span><span class="syntax-string">&quot;</span></code></pre></div>
       </section>
 
 
@@ -880,26 +928,26 @@ assert rendered == &quot;a, b&quot;</code></pre></div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-13-solutions-functional-tools">Day 13 — Solutions: Functional Tools<a class="heading-anchor" href="#solution-2--cell-1--day-13-solutions-functional-tools" aria-label="Link to this section">#</a></h3>
 <p>Group with itertools.groupby and specialize with functools.partial.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import itertools as it</span>
-<span>from operator import itemgetter</span>
-<span>from typing import Iterable, Tuple, Hashable</span>
-<span> </span>
-<span>Pair = Tuple[Hashable, int]</span>
-<span>def group_pairs(pairs: Iterable[Pair]) -&gt; dict[Hashable, list[int]]:</span>
-<span>    pairs_sorted = sorted(pairs, key=itemgetter(0))</span>
-<span>    out: dict[Hashable, list[int]] = {}</span>
-<span>    for k, group in it.groupby(pairs_sorted, key=itemgetter(0)):</span>
-<span>        out[k] = [v for _, v in group]</span>
-<span>    return out</span>
-<span> </span>
-<span>pairs = [(&#x27;b&#x27;,2),(&#x27;a&#x27;,1),(&#x27;a&#x27;,3),(&#x27;b&#x27;,4)]</span>
-<span>group_pairs(pairs)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> itertools <span class="syntax-keyword">as</span> it</span>
+<span class="source-line"><span class="syntax-keyword">from</span> operator <span class="syntax-keyword">import</span> itemgetter</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Tuple<span class="syntax-punctuation">,</span> Hashable</span>
+<span class="source-line"></span>
+<span class="source-line">Pair <span class="syntax-operator">=</span> Tuple<span class="syntax-punctuation">[</span>Hashable<span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">group_pairs</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span>Pair<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span>Hashable<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    pairs_sorted <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>itemgetter<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    out<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span>Hashable<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> k<span class="syntax-punctuation">,</span> group <span class="syntax-operator">in</span> it<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span>pairs_sorted<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>itemgetter<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        out<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>v <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> v <span class="syntax-operator">in</span> group<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> out</span>
+<span class="source-line"></span>
+<span class="source-line">pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">group_pairs<span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from functools import partial</span>
-<span>def power(base: float, exp: float) -&gt; float: return base ** exp</span>
-<span>square = partial(power, exp=2)</span>
-<span>cube   = partial(power, exp=3)</span>
-<span>square(5), cube(2)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> partial</span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">power</span><span class="syntax-punctuation">(</span>base<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> exp<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> base <span class="syntax-operator">*</span><span class="syntax-operator">*</span> exp</span>
+<span class="source-line">square <span class="syntax-operator">=</span> partial<span class="syntax-punctuation">(</span>power<span class="syntax-punctuation">,</span> exp<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cube   <span class="syntax-operator">=</span> partial<span class="syntax-punctuation">(</span>power<span class="syntax-punctuation">,</span> exp<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">square<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cube<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -929,49 +977,49 @@ assert rendered == &quot;a, b&quot;</code></pre></div>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
 <p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
 <h5 id="solution-2--cell-4--practices-1-2-lazy-iterators-and-tuple-ordering">Practices 1–2 — Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>doubled = map(lambda value: value * 2, [1, 2, 3])</span>
-<span>assert next(doubled) == 2</span>
-<span>assert list(doubled) == [4, 6]</span>
-<span> </span>
-<span>records = [</span>
-<span>    {&quot;team&quot;: &quot;B&quot;, &quot;score&quot;: 8},</span>
-<span>    {&quot;team&quot;: &quot;A&quot;, &quot;score&quot;: 7},</span>
-<span>    {&quot;team&quot;: &quot;A&quot;, &quot;score&quot;: 9},</span>
-<span>]</span>
-<span>ordered = sorted(records, key=lambda row: (row[&quot;team&quot;], -row[&quot;score&quot;]))</span>
-<span>assert [row[&quot;score&quot;] for row in ordered] == [9, 7, 8]</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">doubled <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line">ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> ordered<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="solution-2--cell-6--practices-3-5-composition-binding-and-pure-stages">Practices 3–5 — Composition, binding, and pure stages<a class="heading-anchor" href="#solution-2--cell-6--practices-3-5-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>from collections.abc import Callable</span>
-<span>from typing import Any</span>
-<span> </span>
-<span> </span>
-<span>def compose(*functions: Callable[[Any], Any]) -&gt; Callable[[Any], Any]:</span>
-<span>    &quot;&quot;&quot;Compose right-to-left; no functions produce the identity operation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    def composed(value: Any) -&gt; Any:</span>
-<span>        current = value</span>
-<span>        for function in reversed(functions):</span>
-<span>            current = function(current)</span>
-<span>        return current</span>
-<span> </span>
-<span>    return composed</span>
-<span> </span>
-<span> </span>
-<span>pipeline = compose(str.upper, str.strip)</span>
-<span>assert pipeline(&quot;  data &quot;) == &quot;DATA&quot;</span>
-<span>assert compose()(42) == 42</span>
-<span> </span>
-<span># Bind each loop value now, rather than looking it up later.</span>
-<span>multipliers = [lambda value, factor=factor: value * factor for factor in range(3)]</span>
-<span>assert [function(10) for function in multipliers] == [0, 10, 20]</span>
-<span> </span>
-<span>normalize = lambda text: text.strip().casefold()</span>
-<span>normalized = list(map(normalize, [&quot; A &quot;, &quot; B &quot;]))  # Pure transformation.</span>
-<span>rendered = &quot;, &quot;.join(normalized)                    # Presentation boundary.</span>
-<span>assert rendered == &quot;a, b&quot;</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compose</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>functions<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Compose right-to-left; no functions produce the identity operation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">composed</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        current <span class="syntax-operator">=</span> value</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> function <span class="syntax-operator">in</span> <span class="syntax-builtin">reversed</span><span class="syntax-punctuation">(</span>functions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            current <span class="syntax-operator">=</span> function<span class="syntax-punctuation">(</span>current<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> current</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> composed</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">pipeline <span class="syntax-operator">=</span> compose<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-operator">.</span>upper<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">  data </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">DATA</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> compose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">42</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Bind each loop value now, rather than looking it up later.</span></span>
+<span class="source-line">multipliers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">,</span> factor<span class="syntax-operator">=</span>factor<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> factor <span class="syntax-keyword">for</span> factor <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>function<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> function <span class="syntax-operator">in</span> multipliers<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">normalize <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> text<span class="syntax-punctuation">:</span> text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">normalized <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span>normalize<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string"> A </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> B </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># Pure transformation.</span></span>
+<span class="source-line">rendered <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">)</span>                    <span class="syntax-comment"># Presentation boundary.</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> rendered <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a, b</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 

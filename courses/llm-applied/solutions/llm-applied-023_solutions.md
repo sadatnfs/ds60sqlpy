@@ -46,7 +46,7 @@ Authorization and freshness are independent gates. The final example combines an
 
 ## Exercise 1: Check evidence freshness
 
-The question is: Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.
+The question is: Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.
 
 The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.
 
@@ -55,9 +55,9 @@ now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
 assert fresh(published,now,timedelta(days=2))
 ```
 
-**Expected:** freshTrue.
+**Expected:** fresh True.
 
-**Verify:** Compare the computed values or written argument with freshTrue.
+**Verify:** Compare the computed values or written argument with fresh True.
 
 ## Exercise 2: Reject stale and future evidence
 
@@ -97,7 +97,7 @@ assert budget.used==3
 
 The question is: Pass a datetime without timezone information.
 
-A local wall-clock value cannot be safely compared with aUTCinstant without an explicit zone policy. Silent assumptions can shift freshness boundaries.
+A local wall-clock value cannot be safely compared with a UTC instant without an explicit zone policy. Silent assumptions can shift freshness boundaries.
 
 ```python
 try: fresh(datetime(2026,10,21),now,timedelta(days=2))
@@ -137,9 +137,9 @@ assert not answer_allowed
 result={'status':'unknown','reason':'stale evidence'}; assert result['reason']=='stale evidence'
 ```
 
-**Expected:** answer admissionFalse; reasonstale evidence.
+**Expected:** answer admission False; reason stale evidence.
 
-**Verify:** Compare the computed values or written argument with answer admissionFalse; reasonstale evidence.
+**Verify:** Compare the computed values or written argument with answer admission False; reason stale evidence.
 
 ## Review after comparison
 

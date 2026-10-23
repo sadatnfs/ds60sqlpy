@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals orlisteners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.
+The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals or listeners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.
 
-System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection andimplementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.
+System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection and implementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.
 
 **Reachability:** Whether an object can be reached through active reference paths.
 
@@ -18,13 +18,13 @@ System.gc is a request rather than proof that a particular object was reclaimed.
 
 ## Reading the reference
 
-A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent ornull depending on reachability andcollection. Runtime memory values describe the current process andshould not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicitclose forfiles,sockets andexecutors.
+A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent or null depending on reachability and collection. Runtime memory values describe the current process and should not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicit close for files,sockets and executors.
 
 ## Exercise 1: Expose a strong retention path
 
-Task: Store a small byte array in a list anddrop the local variable reference.
+Task: Store a small byte array in a list and drop the local variable reference.
 
-The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache orlistener retention.
+The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache or listener retention.
 
 ```java
 List<byte[]> retained=new ArrayList<>();byte[] payload=new byte[1024];payload[0]=7;retained.add(payload);payload=null;
@@ -37,7 +37,7 @@ assert retained.get(0)[0]==7 && retained.get(0).length==1024;
 
 ## Exercise 2: Remove one ownership path deliberately
 
-Task: Keep a separate reference,clear the list,andinspect the separate reference.
+Task: Keep a separate reference,clear the list,and inspect the separate reference.
 
 Clearing a container removes its references,but another strong reference can keep the object reachable. Reachability is a graph property.
 
@@ -46,13 +46,13 @@ byte[] separate=retained.get(0);retained.clear();
 assert retained.isEmpty() && separate[0]==7;
 ```
 
-**Expected:** list empty;separate array stillvalid.
+**Expected:** list empty;separate array still valid.
 
-**Verify:** Compare the program values or named exception with list empty;separate array stillvalid. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with list empty;separate array still valid. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Inspect a weak reference without timing assumptions
 
-Task: Create aWeakReference to the still-strongly-referenced array.
+Task: Create a WeakReference to the still-strongly-referenced array.
 
 The reachability fence makes the intended lifetime explicit for this observation. The exercise does not assert when collection occurs after strong references disappear.
 
@@ -67,9 +67,9 @@ assert weak.get()==separate;java.lang.ref.Reference.reachabilityFence(separate);
 
 ## Exercise 4: Separate value size from allocation count
 
-Task: Create ten arrays of128bytes andcount logical payload bytes.
+Task: Create ten arrays of 128 bytes and count logical payload bytes.
 
-Array headers,alignment,references andcontainer overhead are additional. Logical payload arithmetic is not a measured object-layout receipt.
+Array headers,alignment,references and container overhead are additional. Logical payload arithmetic is not a measured object-layout receipt.
 
 ```java
 List<byte[]> blocks=new ArrayList<>();for(int i=0;i<10;i++)blocks.add(new byte[128]);
@@ -98,18 +98,18 @@ assert System.identityHashCode(buffer)==identity && buffer[0]==9;
 
 ## Exercise 6: Record process memory cautiously
 
-Task: ReadRuntime total/free/max memory andcheck only valid ordering relationships.
+Task: ReadRuntime total/free/max memory and check only valid ordering relationships.
 
-Counters can change between reads andinclude runtime behavior outside this fixture. Profiling andcontrolled measurement are needed for a memory diagnosis.
+Counters can change between reads and include runtime behavior outside this fixture. Profiling and controlled measurement are needed for a memory diagnosis.
 
 ```java
 Runtime runtime=Runtime.getRuntime();long total=runtime.totalMemory(),free=runtime.freeMemory(),maximum=runtime.maxMemory();
 assert total>=0 && free>=0 && maximum>=total;
 ```
 
-**Expected:** nonnegative counters;max at leasttotal;no claim of exact object size.
+**Expected:** nonnegative counters; max at least total; no claim of exact object size.
 
-**Verify:** Compare the program values or named exception with nonnegative counters;max at leasttotal;no claim of exact object size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with nonnegative counters; max at least total; no claim of exact object size. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

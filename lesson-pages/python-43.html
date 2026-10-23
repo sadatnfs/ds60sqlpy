@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -377,30 +423,32 @@
 </tbody></table></div>
 <p>Attributions divide a prediction among inputs under an explainer. Correlated features can share or substitute attribution in ways that do not match a human causal story.</p>
 <h4 id="guide--worked-example-handle-shap-classifier-shapes">Worked example: handle SHAP classifier shapes<a class="heading-anchor" href="#guide--worked-example-handle-shap-classifier-shapes" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import shap
-from sklearn.datasets import load_breast_cancer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> shap
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
-model = RandomForestClassifier(
-    n_estimators=200,
-    random_state=42,
-).fit(X_train, y_train)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_test <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span>
+<span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>
+    n_estimators<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span>
+    random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
 
-sample = X_test[:200]  # bounded for CPU and memory
-values = shap.TreeExplainer(model).shap_values(sample)
-if isinstance(values, list):          # older SHAP: one array per class
-    positive_values = values[1]
-elif values.ndim == 3:                # newer SHAP: rows × features × classes
-    positive_values = values[:, :, 1]
-else:
-    positive_values = values</code></pre>
+sample <span class="syntax-operator">=</span> X_test<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">200</span><span class="syntax-punctuation">]</span>  <span class="syntax-comment"># bounded for CPU and memory</span>
+values <span class="syntax-operator">=</span> shap<span class="syntax-operator">.</span>TreeExplainer<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shap_values<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>          <span class="syntax-comment"># older SHAP: one array per class</span>
+    positive_values <span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">elif</span> values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span>                <span class="syntax-comment"># newer SHAP: rows × features × classes</span>
+    positive_values <span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    positive_values <span class="syntax-operator">=</span> values</code></pre>
 <p>The lesson is fully offline after packages are installed. It uses package-bundled data and a small sample because SHAP can be computationally heavy.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 43 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -408,9 +456,9 @@ else:
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits">Concept deep dive — global versus local explanations, perturbation assumptions, and causal limits<a class="heading-anchor" href="#guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -425,41 +473,41 @@ else:
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-measure-one-local-prediction-s-sensitivity">Focused example A — measure one local prediction&#x27;s sensitivity<a class="heading-anchor" href="#guide--focused-example-a-measure-one-local-prediction-s-sensitivity" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.datasets import load_breast_cancer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=4301
-)
-model = RandomForestClassifier(n_estimators=80, random_state=4301, n_jobs=1)
-model.fit(X_train, y_train)
-row = X_valid[[0]].copy()
-baseline = model.predict_proba(row)[0, 1]
-changed = row.copy()
-changed[0, 0] = np.median(X_train[:, 0])
-perturbed = model.predict_proba(changed)[0, 1]
-print({&quot;baseline&quot;: baseline, &quot;one_feature_changed&quot;: perturbed,
-       &quot;difference&quot;: perturbed - baseline})</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4301</span>
+<span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4301</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+model<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+row <span class="syntax-operator">=</span> X_valid<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+baseline <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+changed <span class="syntax-operator">=</span> row<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+perturbed <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> baseline<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one_feature_changed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perturbed<span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perturbed <span class="syntax-operator">-</span> baseline<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Changing one feature can move the prediction, but the difference is a model sensitivity under an artificial intervention.</p>
 <p><strong>Assumption to name:</strong> The changed feature value combined with all unchanged values represents a plausible input.</p>
 <h5 id="guide--focused-example-b-give-permutation-importance-an-uncertainty-interval">Focused example B — give permutation importance an uncertainty interval<a class="heading-anchor" href="#guide--focused-example-b-give-permutation-importance-an-uncertainty-interval" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">from sklearn.inspection import permutation_importance
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
 
-result = permutation_importance(
-    model, X_valid, y_valid, scoring=&quot;roc_auc&quot;,
-    n_repeats=8, random_state=4302, n_jobs=1
-)
-order = result.importances_mean.argsort()[::-1][:3]
-summary = [
-    (int(i), float(result.importances_mean[i]), float(result.importances_std[i]))
-    for i in order
-]
-print(summary)
-assert all(mean &gt;= -3 * std for _, mean, std in summary)</code></pre>
+result <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>
+    model<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    n_repeats<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4302</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span>
+order <span class="syntax-operator">=</span> result<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
+summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>importances_std<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> order
+<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>summary<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>mean <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">3</span> <span class="syntax-operator">*</span> std <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> std <span class="syntax-operator">in</span> summary<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Importance is a distribution across shuffles, not one exact ranking; close features may be indistinguishable.</p>
 <p><strong>Assumption to name:</strong> Held-out ROC AUC is a valid model-quality measure and the model performs well enough to explain.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -583,7 +631,7 @@ assert all(mean &gt;= -3 * std for _, mean, std in summary)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize global versus local explanations, perturbation assumptions, and causal limits. Use exactly these maintained learner materials:
@@ -651,35 +699,35 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Partial Dependence Plots (PDP).</li>
 <li>LIME overview (optional). Note: SHAP can be heavy; use small datasets.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import shap</span>
-<span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>X,y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y,random_state=42)</span>
-<span>rf = RandomForestClassifier(n_estimators=200, random_state=42).fit(Xtr,ytr)</span>
-<span>rf.score(Xte,yte)</span>
-<span>explainer = shap.TreeExplainer(rf)</span>
-<span>X_sample = Xte[:200]</span>
-<span>shap_values = explainer.shap_values(X_sample)</span>
-<span># SHAP &lt;0.45 returned a list per class; newer SHAP returns a 3-D array.</span>
-<span>if isinstance(shap_values, list):</span>
-<span>    positive_class_values = shap_values[1]</span>
-<span>elif shap_values.ndim == 3:</span>
-<span>    positive_class_values = shap_values[:, :, 1]</span>
-<span>else:</span>
-<span>    positive_class_values = shap_values</span>
-<span>shap.summary_plot(positive_class_values, X_sample, show=False)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> shap</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line">explainer <span class="syntax-operator">=</span> shap<span class="syntax-operator">.</span>TreeExplainer<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_sample <span class="syntax-operator">=</span> Xte<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">200</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">shap_values <span class="syntax-operator">=</span> explainer<span class="syntax-operator">.</span>shap_values<span class="syntax-punctuation">(</span>X_sample<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment"># SHAP &lt;0.45 returned a list per class; newer SHAP returns a 3-D array.</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    positive_class_values <span class="syntax-operator">=</span> shap_values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">elif</span> shap_values<span class="syntax-operator">.</span>ndim <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    positive_class_values <span class="syntax-operator">=</span> shap_values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    positive_class_values <span class="syntax-operator">=</span> shap_values</span>
+<span class="source-line">shap<span class="syntax-operator">.</span>summary_plot<span class="syntax-punctuation">(</span>positive_class_values<span class="syntax-punctuation">,</span> X_sample<span class="syntax-punctuation">,</span> show<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--partial-dependence">Partial Dependence<a class="heading-anchor" href="#learner--cell-3--partial-dependence" aria-label="Link to this section">#</a></h4>
 <p>Understand marginal effect of features.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from sklearn.inspection import PartialDependenceDisplay</span>
-<span>import matplotlib.pyplot as plt</span>
-<span>fig, ax = plt.subplots(figsize=(6,4))</span>
-<span>PartialDependenceDisplay.from_estimator(rf, Xtr, [0, (0,1)], ax=ax)</span>
-<span>plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> PartialDependenceDisplay</span>
+<span class="source-line"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line">fig<span class="syntax-punctuation">,</span> ax <span class="syntax-operator">=</span> plt<span class="syntax-operator">.</span>subplots<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">PartialDependenceDisplay<span class="syntax-operator">.</span>from_estimator<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xtr<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-5--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-5--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -697,43 +745,43 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h5 id="learner--cell-6--focused-example-a-measure-one-local-prediction-s-sensitivity">Focused example A — measure one local prediction&#x27;s sensitivity<a class="heading-anchor" href="#learner--cell-6--focused-example-a-measure-one-local-prediction-s-sensitivity" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The changed feature value combined with all unchanged values represents a plausible input.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>X_train, X_valid, y_train, y_valid = train_test_split(</span>
-<span>    X, y, stratify=y, random_state=4301</span>
-<span>)</span>
-<span>model = RandomForestClassifier(n_estimators=80, random_state=4301, n_jobs=1)</span>
-<span>model.fit(X_train, y_train)</span>
-<span>row = X_valid[[0]].copy()</span>
-<span>baseline = model.predict_proba(row)[0, 1]</span>
-<span>changed = row.copy()</span>
-<span>changed[0, 0] = np.median(X_train[:, 0])</span>
-<span>perturbed = model.predict_proba(changed)[0, 1]</span>
-<span>print({&quot;baseline&quot;: baseline, &quot;one_feature_changed&quot;: perturbed,</span>
-<span>       &quot;difference&quot;: perturbed - baseline})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4301</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4301</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span></span>
+<span class="source-line">row <span class="syntax-operator">=</span> X_valid<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">baseline <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">changed <span class="syntax-operator">=</span> row<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">changed<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">perturbed <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> baseline<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one_feature_changed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perturbed<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perturbed <span class="syntax-operator">-</span> baseline<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> Changing one feature can move the prediction, but the difference is a model sensitivity under an artificial intervention.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-9--focused-example-b-give-permutation-importance-an-uncertainty-interval">Focused example B — give permutation importance an uncertainty interval<a class="heading-anchor" href="#learner--cell-9--focused-example-b-give-permutation-importance-an-uncertainty-interval" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Held-out ROC AUC is a valid model-quality measure and the model performs well enough to explain.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>from sklearn.inspection import permutation_importance</span>
-<span> </span>
-<span>result = permutation_importance(</span>
-<span>    model, X_valid, y_valid, scoring=&quot;roc_auc&quot;,</span>
-<span>    n_repeats=8, random_state=4302, n_jobs=1</span>
-<span>)</span>
-<span>order = result.importances_mean.argsort()[::-1][:3]</span>
-<span>summary = [</span>
-<span>    (int(i), float(result.importances_mean[i]), float(result.importances_std[i]))</span>
-<span>    for i in order</span>
-<span>]</span>
-<span>print(summary)</span>
-<span>assert all(mean &gt;= -3 * std for _, mean, std in summary)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance</span>
+<span class="source-line"></span>
+<span class="source-line">result <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    model<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    n_repeats<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4302</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">order <span class="syntax-operator">=</span> result<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>importances_std<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> order</span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>summary<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>mean <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">3</span> <span class="syntax-operator">*</span> std <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> std <span class="syntax-operator">in</span> summary<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> Importance is a distribution across shuffles, not one exact ranking; close features may be indistinguishable.</p>
 <h5 id="learner--cell-11--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-11--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -810,19 +858,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Local-versus-global diagnosis</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Explanation leakage</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Correlated-feature and causality check</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Local-versus-global diagnosis</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Explanation leakage</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Correlated-feature and causality check</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -866,79 +914,79 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
-from sklearn.model_selection import train_test_split
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-dataset = load_breast_cancer()
-X, y = dataset.data, dataset.target
-feature_names = np.asarray(dataset.feature_names)
-Xtr, Xte, ytr, yte = train_test_split(
-    X,
-    y,
-    stratify=y,
-    random_state=42,
-)
-rf = RandomForestClassifier(n_estimators=80, random_state=42).fit(Xtr, ytr)
-X_explain, y_explain = Xte[:50], yte[:50]
-permutation = permutation_importance(
-    rf,
-    X_explain,
-    y_explain,
-    scoring=&quot;roc_auc&quot;,
-    n_repeats=5,
-    random_state=43,
-    n_jobs=1,
-)
-permutation_order = np.argsort(permutation.importances_mean)[::-1]
-most_important = int(permutation_order[0])
-print(
-    {
-        &quot;held_out_accuracy&quot;: rf.score(Xte, yte),
-        &quot;pdp_feature&quot;: feature_names[most_important],
-        &quot;permutation_mean&quot;: permutation.importances_mean[most_important],
-    }
-)</code></pre>
+dataset <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> dataset<span class="syntax-operator">.</span>data<span class="syntax-punctuation">,</span> dataset<span class="syntax-operator">.</span>target
+feature_names <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>dataset<span class="syntax-operator">.</span>feature_names<span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span>
+    y<span class="syntax-punctuation">,</span>
+    stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span>
+    random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+X_explain<span class="syntax-punctuation">,</span> y_explain <span class="syntax-operator">=</span> Xte<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">50</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">50</span><span class="syntax-punctuation">]</span>
+permutation <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>
+    rf<span class="syntax-punctuation">,</span>
+    X_explain<span class="syntax-punctuation">,</span>
+    y_explain<span class="syntax-punctuation">,</span>
+    scoring<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    n_repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+    random_state<span class="syntax-operator">=</span><span class="syntax-number">43</span><span class="syntax-punctuation">,</span>
+    n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+permutation_order <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>permutation<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+most_important <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>permutation_order<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">held_out_accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">pdp_feature</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> feature_names<span class="syntax-punctuation">[</span>most_important<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">permutation_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> permutation<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span>most_important<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — SHAP summary (tree model)</p>
-<pre><code class="language-python"># Missing SHAP is a disclosed capability boundary. Any failure after a
-# successful import is a real defect and must remain visible.
-try:
-    import shap
-except ModuleNotFoundError:
-    print(&quot;SHAP is not installed; complete the permutation/PDP work first.&quot;)
-else:
-    shap_explainer = shap.TreeExplainer(rf)
-    shap_values = shap_explainer.shap_values(X_explain)
-    # SHAP &lt;0.45 returned one array per class; newer SHAP returns a 3-D array.
-    if isinstance(shap_values, list):
-        positive_class_values = np.asarray(shap_values[1])
-    elif np.asarray(shap_values).ndim == 3:
-        positive_class_values = np.asarray(shap_values)[:, :, 1]
-    else:
-        positive_class_values = np.asarray(shap_values)
-    assert positive_class_values.shape == X_explain.shape
-    mean_absolute_shap = np.abs(positive_class_values).mean(axis=0)
-    shap_order = np.argsort(mean_absolute_shap)[::-1]
-    shap_top_five = feature_names[shap_order[:5]].tolist()
-    permutation_top_five = feature_names[permutation_order[:5]].tolist()
-    print(
-        {
-            &quot;shap_top_five&quot;: shap_top_five,
-            &quot;permutation_top_five&quot;: permutation_top_five,
-            &quot;top_five_overlap&quot;: sorted(
-                set(shap_top_five) &amp; set(permutation_top_five)
-            ),
-        }
-    )
-    shap.summary_plot(
-        positive_class_values,
-        X_explain,
-        feature_names=feature_names,
-        max_display=5,
-        show=False,
-    )</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Missing SHAP is a disclosed capability boundary. Any failure after a</span>
+<span class="syntax-comment"># successful import is a real defect and must remain visible.</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">import</span> shap
+<span class="syntax-keyword">except</span> ModuleNotFoundError<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SHAP is not installed; complete the permutation/PDP work first.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    shap_explainer <span class="syntax-operator">=</span> shap<span class="syntax-operator">.</span>TreeExplainer<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">)</span>
+    shap_values <span class="syntax-operator">=</span> shap_explainer<span class="syntax-operator">.</span>shap_values<span class="syntax-punctuation">(</span>X_explain<span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># SHAP &lt;0.45 returned one array per class; newer SHAP returns a 3-D array.</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        positive_class_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">elif</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ndim <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span>
+        positive_class_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        positive_class_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>shap_values<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> positive_class_values<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> X_explain<span class="syntax-operator">.</span>shape
+    mean_absolute_shap <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>positive_class_values<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    shap_order <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>mean_absolute_shap<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    shap_top_five <span class="syntax-operator">=</span> feature_names<span class="syntax-punctuation">[</span>shap_order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    permutation_top_five <span class="syntax-operator">=</span> feature_names<span class="syntax-punctuation">[</span>permutation_order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">shap_top_five</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> shap_top_five<span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">permutation_top_five</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> permutation_top_five<span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">top_five_overlap</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>
+                <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>shap_top_five<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>permutation_top_five<span class="syntax-punctuation">)</span>
+            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">)</span>
+    shap<span class="syntax-operator">.</span>summary_plot<span class="syntax-punctuation">(</span>
+        positive_class_values<span class="syntax-punctuation">,</span>
+        X_explain<span class="syntax-punctuation">,</span>
+        feature_names<span class="syntax-operator">=</span>feature_names<span class="syntax-punctuation">,</span>
+        max_display<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+        show<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>TreeExplainer supports tree-based models efficiently</li>
@@ -947,23 +995,23 @@ else:
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Partial Dependence Plots (PDP)</p>
-<pre><code class="language-python">from sklearn.inspection import PartialDependenceDisplay
-import matplotlib.pyplot as plt
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> PartialDependenceDisplay
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
-fig, ax = plt.subplots(figsize=(6, 4))
-PartialDependenceDisplay.from_estimator(
-    rf,
-    Xtr,
-    [most_important],
-    feature_names=feature_names,
-    ax=ax,
-    grid_resolution=20,
-)
-ax.set_title(
-    f&quot;PDP for held-out permutation rank 1: {feature_names[most_important]}&quot;
-)
-plt.tight_layout()
-plt.show()</code></pre>
+fig<span class="syntax-punctuation">,</span> ax <span class="syntax-operator">=</span> plt<span class="syntax-operator">.</span>subplots<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+PartialDependenceDisplay<span class="syntax-operator">.</span>from_estimator<span class="syntax-punctuation">(</span>
+    rf<span class="syntax-punctuation">,</span>
+    Xtr<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">[</span>most_important<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    feature_names<span class="syntax-operator">=</span>feature_names<span class="syntax-punctuation">,</span>
+    ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">,</span>
+    grid_resolution<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+ax<span class="syntax-operator">.</span>set_title<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">PDP for held-out permutation rank 1: </span><span class="syntax-string">{</span>feature_names<span class="syntax-punctuation">[</span>most_important<span class="syntax-punctuation">]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Interpretation</p>
 <ul>
 <li>PDP shows the marginal effect of a feature on predictions</li>
@@ -971,28 +1019,28 @@ plt.show()</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 (optional) — LIME on a single prediction</p>
-<pre><code class="language-python">try:
-    from lime.lime_tabular import LimeTabularExplainer
-except ModuleNotFoundError:
-    print(&quot;LIME is not installed; this optional comparison is skipped.&quot;)
-else:
-    lime_results = []
-    for seed in (43, 44, 45):
-        explainer = LimeTabularExplainer(
-            Xtr,
-            feature_names=feature_names,
-            class_names=[&quot;negative&quot;, &quot;positive&quot;],
-            discretize_continuous=True,
-            random_state=seed,
-        )
-        explanation = explainer.explain_instance(
-            Xte[0],
-            rf.predict_proba,
-            labels=(1,),
-            num_features=5,
-        )
-        lime_results.append(explanation.as_list(label=1))
-    print(lime_results)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">from</span> lime.lime_tabular <span class="syntax-keyword">import</span> LimeTabularExplainer
+<span class="syntax-keyword">except</span> ModuleNotFoundError<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">LIME is not installed; this optional comparison is skipped.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    lime_results <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> seed <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">43</span><span class="syntax-punctuation">,</span> <span class="syntax-number">44</span><span class="syntax-punctuation">,</span> <span class="syntax-number">45</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        explainer <span class="syntax-operator">=</span> LimeTabularExplainer<span class="syntax-punctuation">(</span>
+            Xtr<span class="syntax-punctuation">,</span>
+            feature_names<span class="syntax-operator">=</span>feature_names<span class="syntax-punctuation">,</span>
+            class_names<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+            discretize_continuous<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+            random_state<span class="syntax-operator">=</span>seed<span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">)</span>
+        explanation <span class="syntax-operator">=</span> explainer<span class="syntax-operator">.</span>explain_instance<span class="syntax-punctuation">(</span>
+            Xte<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+            rf<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">,</span>
+            labels<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            num_features<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">)</span>
+        lime_results<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>explanation<span class="syntax-operator">.</span>as_list<span class="syntax-punctuation">(</span>label<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>lime_results<span class="syntax-punctuation">)</span></code></pre>
 <p>Caveats</p>
 <ul>
 <li>SHAP is model-aware for trees; kernel SHAP works for general models but is slower</li>
@@ -1087,40 +1135,40 @@ else:
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-43-solutions-model-interpretation-shap-pdp-lime">Day 43 — Solutions: Model Interpretation (SHAP, PDP, LIME)<a class="heading-anchor" href="#solution-2--cell-1--day-43-solutions-model-interpretation-shap-pdp-lime" aria-label="Link to this section">#</a></h3>
 <p>SHAP summary for trees, PDP plots, and optional LIME example.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>import numpy as np, matplotlib.pyplot as plt</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</span>
-<span>rf = RandomForestClassifier(n_estimators=200, random_state=42).fit(Xtr, ytr)</span>
-<span>rf.score(Xte, yte)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-shap-summary-tree-model">Exercise 1 — SHAP summary (tree model)<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-shap-summary-tree-model" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>try:</span>
-<span>    import shap</span>
-<span>    explainer = shap.TreeExplainer(rf)</span>
-<span>    Xs = Xte[:200]</span>
-<span>    shap_vals = explainer.shap_values(Xs)</span>
-<span>    shap.summary_plot(shap_vals[1], Xs, show=False)</span>
-<span>except Exception as e:</span>
-<span>    print(&#x27;SHAP unavailable or failed:&#x27;, e)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> shap</span>
+<span class="source-line">    explainer <span class="syntax-operator">=</span> shap<span class="syntax-operator">.</span>TreeExplainer<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    Xs <span class="syntax-operator">=</span> Xte<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">200</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    shap_vals <span class="syntax-operator">=</span> explainer<span class="syntax-operator">.</span>shap_values<span class="syntax-punctuation">(</span>Xs<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    shap<span class="syntax-operator">.</span>summary_plot<span class="syntax-punctuation">(</span>shap_vals<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Xs<span class="syntax-punctuation">,</span> show<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">SHAP unavailable or failed:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--exercise-2-partial-dependence-plots-pdp">Exercise 2 — Partial Dependence Plots (PDP)<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-partial-dependence-plots-pdp" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from sklearn.inspection import PartialDependenceDisplay</span>
-<span>fig, ax = plt.subplots(figsize=(6,4))</span>
-<span>PartialDependenceDisplay.from_estimator(rf, Xtr, [0, (0,1)], ax=ax)</span>
-<span>plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> PartialDependenceDisplay</span>
+<span class="source-line">fig<span class="syntax-punctuation">,</span> ax <span class="syntax-operator">=</span> plt<span class="syntax-operator">.</span>subplots<span class="syntax-punctuation">(</span>figsize<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">PartialDependenceDisplay<span class="syntax-operator">.</span>from_estimator<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xtr<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> ax<span class="syntax-operator">=</span>ax<span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-3-optional-lime-single-prediction">Exercise 3 (optional) — LIME single prediction<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-optional-lime-single-prediction" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>try:</span>
-<span>    from lime.lime_tabular import LimeTabularExplainer</span>
-<span>    expl = LimeTabularExplainer(Xtr, feature_names=[f&#x27;f{i}&#x27; for i in range(X.shape[1])], class_names=[&#x27;neg&#x27;,&#x27;pos&#x27;], discretize_continuous=True)</span>
-<span>    exp = expl.explain_instance(Xte[0], rf.predict_proba, num_features=5)</span>
-<span>    exp.as_list()</span>
-<span>except Exception as e:</span>
-<span>    print(&#x27;LIME unavailable; pip install lime to enable.\n&#x27;, e)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">from</span> lime.lime_tabular <span class="syntax-keyword">import</span> LimeTabularExplainer</span>
+<span class="source-line">    expl <span class="syntax-operator">=</span> LimeTabularExplainer<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> feature_names<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">f</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>X<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> class_names<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">neg</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">pos</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> discretize_continuous<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    exp <span class="syntax-operator">=</span> expl<span class="syntax-operator">.</span>explain_instance<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> rf<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">,</span> num_features<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    exp<span class="syntax-operator">.</span>as_list<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LIME unavailable; pip install lime to enable.</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>

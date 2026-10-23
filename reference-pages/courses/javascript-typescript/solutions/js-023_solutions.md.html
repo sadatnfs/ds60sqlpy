@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,79 +176,79 @@
 <h3 id="exercise-1-map-a-record-into-field-flags">Exercise 1: Map a record into field flags<a class="heading-anchor" href="#exercise-1-map-a-record-into-field-flags" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a boolean flag type from id and count fields.</p>
 <p>The mapped type follows the source keys, so adding a field to Row creates a new required flag. The actual object still needs to be constructed by ordinary code.</p>
-<pre><code class="language-typescript">type Row = { id: string; count: number };
-type Flags&lt;T&gt; = { [K in keyof T]: boolean };
-const flags: Flags&lt;Row&gt; = { id: true, count: false };
-assert.deepEqual(flags, { id: true, count: false });
-function negativeTypeCheck(): void {
-  // @ts-expect-error Every Row key must have a flag.
-  const incomplete: Flags&lt;Row&gt; = { id: true };
-  void incomplete;
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> Row <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">type</span> Flags<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">[</span>K <span class="syntax-operator">in</span> keyof T<span class="syntax-punctuation">]</span><span class="syntax-operator">:</span> <span class="syntax-keyword">boolean</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> flags<span class="syntax-operator">:</span> <span class="syntax-keyword">Flags</span><span class="syntax-operator">&lt;</span>Row<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>flags<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error Every Row key must have a flag.</span>
+  <span class="syntax-keyword">const</span> incomplete<span class="syntax-operator">:</span> <span class="syntax-keyword">Flags</span><span class="syntax-operator">&lt;</span>Row<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">void</span> incomplete<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> id true and count false; a missing flag is a compile error.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-prove-omit-does-not-remove-runtime-secrets">Exercise 2: Prove Omit does not remove runtime secrets<a class="heading-anchor" href="#exercise-2-prove-omit-does-not-remove-runtime-secrets" aria-label="Link to this section">#</a></h3>
 <p>Task: Assign a wider record to an Omit type, then compare with an explicit public projection.</p>
 <p>Type erasure makes this a concrete data-exposure risk. The public object must be constructed with an explicit field allowlist before serialization.</p>
-<pre><code class="language-typescript">type RecordWithSecret = { id: string; secret: string };
-const full: RecordWithSecret = { id: &#x27;A&#x27;, secret: &#x27;fixture-only&#x27; };
-const view: Omit&lt;RecordWithSecret, &#x27;secret&#x27;&gt; = full;
-assert.equal(Object.hasOwn(view, &#x27;secret&#x27;), true);
-const publicRecord: Pick&lt;RecordWithSecret, &#x27;id&#x27;&gt; = { id: full.id };
-assert.equal(Object.hasOwn(publicRecord, &#x27;secret&#x27;), false);
-assert.equal(JSON.stringify(publicRecord), &#x27;{&quot;id&quot;:&quot;A&quot;}&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> RecordWithSecret <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> secret<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> full<span class="syntax-operator">:</span> <span class="syntax-keyword">RecordWithSecret</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> secret<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;fixture-only&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> view<span class="syntax-operator">:</span> <span class="syntax-keyword">Omit</span><span class="syntax-operator">&lt;</span>RecordWithSecret<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;secret&#x27;</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> full<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>view<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;secret&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> publicRecord<span class="syntax-operator">:</span> <span class="syntax-keyword">Pick</span><span class="syntax-operator">&lt;</span>RecordWithSecret<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">full.id</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>publicRecord<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;secret&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>publicRecord<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;id&quot;:&quot;A&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> typed view still has secret at runtime; explicit projection does not.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-compare-distributed-and-whole-union-array-types">Exercise 3: Compare distributed and whole-union array types<a class="heading-anchor" href="#exercise-3-compare-distributed-and-whole-union-array-types" aria-label="Link to this section">#</a></h3>
 <p>Task: Define both conditional utilities and demonstrate their different assignment behavior.</p>
 <p>The tuple wrapper prevents the naked parameter from distributing. The difference is between choosing one homogeneous array alternative and allowing a union at each element position.</p>
-<pre><code class="language-typescript">type Distributed&lt;T&gt; = T extends unknown ? T[] : never;
-type Whole&lt;T&gt; = [T] extends [unknown] ? T[] : never;
-const mixed: Whole&lt;string | number&gt; = [&#x27;A&#x27;, 2];
-assert.deepEqual(mixed, [&#x27;A&#x27;, 2]);
-function negativeTypeCheck(): void {
-  // @ts-expect-error Distributed&lt;string|number&gt; is string[] | number[].
-  const invalid: Distributed&lt;string | number&gt; = [&#x27;A&#x27;, 2];
-  void invalid;
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> Distributed<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> T <span class="syntax-keyword">extends</span> unknown <span class="syntax-operator">?</span> T<span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">:</span> never<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">type</span> Whole<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>T<span class="syntax-punctuation">]</span> <span class="syntax-keyword">extends</span> <span class="syntax-punctuation">[</span>unknown<span class="syntax-punctuation">]</span> <span class="syntax-operator">?</span> T<span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">:</span> never<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> mixed<span class="syntax-operator">:</span> <span class="syntax-keyword">Whole</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">number</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>mixed<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error Distributed&lt;string|number&gt; is string[] | number[].</span>
+  <span class="syntax-keyword">const</span> invalid<span class="syntax-operator">:</span> <span class="syntax-keyword">Distributed</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">string</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">number</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">void</span> invalid<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> whole-union array accepts mixed values; distributed array rejects them.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-infer-an-array-element-type">Exercise 4: Infer an array element type<a class="heading-anchor" href="#exercise-4-infer-an-array-element-type" aria-label="Link to this section">#</a></h3>
 <p>Task: Extract the element type of a readonly array and use it in a checked value.</p>
 <p>infer binds the matched component in the true branch. A non-array type would produce never under this utility, making unsupported use explicit.</p>
-<pre><code class="language-typescript">type ElementOf&lt;T&gt; = T extends readonly (infer Item)[] ? Item : never;
-const value: ElementOf&lt;readonly number[]&gt; = 7;
-assert.equal(value, 7);
-function negativeTypeCheck(): void {
-  // @ts-expect-error The extracted element type is number.
-  const invalid: ElementOf&lt;readonly number[]&gt; = &#x27;seven&#x27;;
-  void invalid;
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">type</span> ElementOf<span class="syntax-operator">&lt;</span>T<span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> T <span class="syntax-keyword">extends</span> <span class="syntax-keyword">readonly</span> <span class="syntax-punctuation">(</span>infer Item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">?</span> Item <span class="syntax-operator">:</span> <span class="syntax-keyword">never</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">ElementOf</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">readonly</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error The extracted element type is number.</span>
+  <span class="syntax-keyword">const</span> invalid<span class="syntax-operator">:</span> <span class="syntax-keyword">ElementOf</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">readonly</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;seven&#x27;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">void</span> invalid<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> element type permits number 7 and rejects text.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-derive-an-asynchronous-result-type-without-executing-it">Exercise 5: Derive an asynchronous result type without executing it<a class="heading-anchor" href="#exercise-5-derive-an-asynchronous-result-type-without-executing-it" aria-label="Link to this section">#</a></h3>
 <p>Task: Use ReturnType and Awaited for a small async function, then actually call it separately.</p>
 <p>The type aliases perform no I/O and no waiting. The await expression is the actual runtime operation, and the assertion compares its observed result.</p>
-<pre><code class="language-typescript">async function load(): Promise&lt;{ count: number }&gt; { return { count: 3 }; }
-type Loaded = Awaited&lt;ReturnType&lt;typeof load&gt;&gt;;
-const expected: Loaded = { count: 3 };
-assert.deepEqual(await load(), expected);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">type</span> Loaded <span class="syntax-operator">=</span> Awaited<span class="syntax-operator">&lt;</span>ReturnType<span class="syntax-operator">&lt;</span><span class="syntax-operator">typeof</span> load<span class="syntax-operator">&gt;&gt;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> expected<span class="syntax-operator">:</span> <span class="syntax-keyword">Loaded</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> declared resolved shape and actual result both have count 3.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-check-a-configuration-with-satisfies">Exercise 6: Check a configuration with satisfies<a class="heading-anchor" href="#exercise-6-check-a-configuration-with-satisfies" aria-label="Link to this section">#</a></h3>
 <p>Task: Require exactly the literal success/failure keys on a label table.</p>
 <p>satisfies checks the expression against the required relation without functioning as a runtime parser. Dynamic external keys still need validation before they become trusted configuration.</p>
-<pre><code class="language-typescript">const labels = { success: &#x27;Ready&#x27;, failure: &#x27;Retry&#x27; } satisfies Record&lt;&#x27;success&#x27; | &#x27;failure&#x27;, string&gt;;
-assert.equal(labels.success, &#x27;Ready&#x27;);
-function negativeTypeCheck(): void {
-  // @ts-expect-error typo is not a permitted literal key and failure is absent.
-  const invalid = { success: &#x27;Ready&#x27;, typo: &#x27;Retry&#x27; } satisfies Record&lt;&#x27;success&#x27; | &#x27;failure&#x27;, string&gt;;
-  void invalid;
-}
-void negativeTypeCheck;</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> labels <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> success<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Ready&#x27;</span><span class="syntax-punctuation">,</span> failure<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Retry&#x27;</span> <span class="syntax-punctuation">}</span> satisfies Record<span class="syntax-operator">&lt;</span><span class="syntax-string">&#x27;success&#x27;</span> <span class="syntax-operator">|</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">.</span>success<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error typo is not a permitted literal key and failure is absent.</span>
+  <span class="syntax-keyword">const</span> invalid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> success<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Ready&#x27;</span><span class="syntax-punctuation">,</span> typo<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;Retry&#x27;</span> <span class="syntax-punctuation">}</span> satisfies Record<span class="syntax-operator">&lt;</span><span class="syntax-string">&#x27;success&#x27;</span> <span class="syntax-operator">|</span> <span class="syntax-string">&#x27;failure&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">void</span> invalid<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> valid table remains usable; misspelled literal key is a compiler error.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

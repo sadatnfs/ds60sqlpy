@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -337,16 +383,18 @@
 <li>Reproduce a result from a fresh process and explain what it proves.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-foundations-04.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python\professional\lessons\py_foundations_04_first_investigation.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_foundations_04_first_investigation<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_04_first_investigation.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_04_first_investigation.py</code></pre>
 <p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-foundations-04.html#solution-1">explanatory solutions</a> and <a href="python-foundations-04.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <p>An investigation connects a question to evidence that another person can inspect. Our question is: how many accepted units are recorded for each region in this small source file? This is deliberately narrower than estimating true regional demand. Invalid records, duplicate policy, and absent regions limit what the result can claim. Treat the pipeline like a chain of receipts: each stage names its input, output, and the check that connects them.</p>
@@ -362,28 +410,28 @@
 <p>Do not write a single giant function that reads, cleans, prints, and saves. Start with <code>load_rows(path)</code>, <code>analyze_rows(rows)</code>, and <code>write_report(report, path)</code>. The middle function should depend on data values, not a terminal or current directory. That makes boundary tests possible without repeatedly creating files. The I/O functions can then be tested using temporary paths.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-a-total-after-validation-including-a-real-zero">Example A: total after validation, including a real zero<a class="heading-anchor" href="#guide--example-a-total-after-validation-including-a-real-zero" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">records = [
-    {&quot;id&quot;: &quot;A&quot;, &quot;region&quot;: &quot;north&quot;, &quot;quantity&quot;: 2},
-    {&quot;id&quot;: &quot;B&quot;, &quot;region&quot;: &quot;south&quot;, &quot;quantity&quot;: 0},
-    {&quot;id&quot;: &quot;C&quot;, &quot;region&quot;: &quot;north&quot;, &quot;quantity&quot;: 5},
-]
-by_region = {}
-for record in records:
-    region = record[&quot;region&quot;]
-    by_region[region] = by_region.get(region, 0) + record[&quot;quantity&quot;]
-assert by_region == {&quot;north&quot;: 7, &quot;south&quot;: 0}</code></pre>
+<pre class="highlighted-code"><code class="language-python">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+by_region <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> record <span class="syntax-operator">in</span> records<span class="syntax-punctuation">:</span>
+    region <span class="syntax-operator">=</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    by_region<span class="syntax-punctuation">[</span>region<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> by_region<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> by_region <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">}</span></code></pre>
 <p>The dictionary key is the region; the value is its accumulated integer units. <code>get(region, 0)</code> uses zero only for a group not previously encountered. It does not replace invalid input with zero. A valid south record creates the south entry even though adding its quantity does not increase the total. Expected observation: two regions, with north seven and south zero.</p>
 <h5 id="guide--example-b-verify-a-report-independently">Example B: verify a report independently<a class="heading-anchor" href="#guide--example-b-verify-a-report-independently" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">report = {
-    &quot;input_count&quot;: 7,
-    &quot;accepted_count&quot;: 4,
-    &quot;rejected_count&quot;: 3,
-    &quot;total_quantity&quot;: 11,
-    &quot;by_region&quot;: {&quot;north&quot;: 7, &quot;south&quot;: 0, &quot;west&quot;: 4},
-}
-assert report[&quot;input_count&quot;] == report[&quot;accepted_count&quot;] + report[&quot;rejected_count&quot;]
-assert report[&quot;total_quantity&quot;] == sum(report[&quot;by_region&quot;].values())
-print(report[&quot;total_quantity&quot;])</code></pre>
+<pre class="highlighted-code"><code class="language-python">report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">input_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">accepted_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rejected_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">by_region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">input_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rejected_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">by_region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected output is 11. The first assertion checks row conservation; the second checks aggregation conservation. Neither alone proves the input is truthful. Add a manual calculation for this tiny fixture: two plus zero plus five plus four equals eleven. Different checks should challenge different defects. If every check simply calls the same summarizing helper, a bug in that helper could make all checks agree with the same wrong answer.</p>
 <h5 id="guide--reproduction-is-a-feature-of-the-project">Reproduction is a feature of the project<a class="heading-anchor" href="#guide--reproduction-is-a-feature-of-the-project" aria-label="Link to this section">#</a></h5>
 <p>Use <code>Path</code> for file names and an explicit UTF-8 encoding. Resolve the tracked fixture from the documented repository root. When running from another folder, pass its explicit path to <code>load_rows</code>; a copied learner script can still use the same repository-root command. Open CSV with <code>newline=&quot;&quot;</code> so the csv module controls newline handling on Windows as well as POSIX systems. JSON output should contain only plain values, sorted keys, and a trailing newline for inspectable diffs.</p>
@@ -437,7 +485,7 @@ print(report[&quot;total_quantity&quot;])</code></pre>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Keep this small project as a reference for the CLI project and the later pandas EDA project. Add packages only when they solve a named limitation; preserve the plain-data tests and policy explanations when changing the implementation.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-04.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-04.
 Read python/professional/companion-guides/py_foundations_04_first_investigation.md and python/professional/lessons/py_foundations_04_first_investigation.py.
 Check my direct prerequisites: python-foundations-03, python-10.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -477,90 +525,90 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-foundations-04: Build Your First Auditable Data Investigation.</span>
-<span> </span>
-<span>Read ../companion-guides/py_foundations_04_first_investigation.md before attempting the exercises.</span>
-<span>The example runs; unfinished exercise functions raise NotImplementedError.</span>
-<span>Keep solutions separate until you have attempted and checked the contract.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>FIXTURE = Path(&quot;python&quot;) / &quot;professional&quot; / &quot;fixtures&quot; / &quot;data&quot; / &quot;beginner_orders.csv&quot;</span>
-<span> </span>
-<span> </span>
-<span>def load_rows(path: Path) -&gt; list[dict[str, str]]:</span>
-<span>    &quot;&quot;&quot;TODO: validate the exact CSV header and return raw dictionaries.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete load_rows&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def analyze_rows(rows: list[dict[str, str]]) -&gt; dict[str, object]:</span>
-<span>    &quot;&quot;&quot;TODO: return counts, grouped quantities, total, and rejected evidence.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete analyze_rows&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def write_report(report: dict[str, object], path: Path) -&gt; None:</span>
-<span>    &quot;&quot;&quot;TODO: save inspectable UTF-8 JSON beneath a chosen learner-local path.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete write_report&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    with FIXTURE.open(encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        worked_rows = list(csv.DictReader(handle))</span>
-<span>    print(&quot;Worked source-row count:&quot;, len(worked_rows))</span>
-<span>    print(&quot;TODO: complete three functions and eight project checkpoints&quot;)</span>
-<span> </span>
-<span># Exercise 1. Write a project charter</span>
-<span># Prompt: Write five sentences naming the regional-units question, tracked input,</span>
-<span># first-valid-id policy, output fields, and a limitation about rejected records.</span>
-<span># Verify: The charter names the three columns and explicitly avoids claiming that accepted units</span>
-<span># equal true demand or that absent regions had zero demand.</span>
-<span> </span>
-<span># Exercise 2. Load the tracked CSV</span>
-<span># Prompt: Implement `load_rows(path)` using DictReader, UTF-8, and newline handling. Require</span>
-<span># the header sequence id, region, quantity.</span>
-<span># Verify: The tracked file loads seven dictionaries in source order; a header lacking region</span>
-<span># raises ValueError before analysis.</span>
-<span> </span>
-<span># Exercise 3. Validate and retain rejection evidence</span>
-<span># Prompt: Implement `analyze_rows` with nonempty id/region text, nonnegative integer quantity,</span>
-<span># and first-valid-id wins. Preserve inputs.</span>
-<span># Verify: The fixture has four accepted rows and rejects source rows 4, 5, and 6. Raw records</span>
-<span># remain byte-for-byte equivalent as string values.</span>
-<span> </span>
-<span># Exercise 4. Aggregate to one result per region</span>
-<span># Prompt: Add by_region and total_quantity to the report. Keep valid zero-quantity regions and</span>
-<span># sort region keys for display.</span>
-<span># Verify: The mapping equals north 7, south 0, west 4; the total is 11. No duplicate record</span>
-<span># contributes three extra units.</span>
-<span> </span>
-<span># Exercise 5. Add independent checks</span>
-<span># Prompt: Write tests for count reconciliation, sum-of-groups reconciliation, and the tiny</span>
-<span># fixture manual total. Add empty input and one all-invalid batch.</span>
-<span># Verify: The fixture checks are 7 = 4 + 3 and 11 = 7 + 0 + 4; empty input has all counts zero</span>
-<span># and an empty mapping.</span>
-<span> </span>
-<span># Exercise 6. Write and read a local report</span>
-<span># Prompt: Implement `write_report` to UTF-8 JSON at a supplied learner-local path, then load</span>
-<span># it and compare content with the in-memory report.</span>
-<span># Verify: The JSON round trip preserves counts, grouped totals, and rejected row numbers; no</span>
-<span># tracked source file changes.</span>
-<span> </span>
-<span># Exercise 7. Challenge the duplicate policy</span>
-<span># Prompt: Analyze two valid rows with the same id but different quantities, then reverse them.</span>
-<span># Explain the effect without claiming a bug in summation.</span>
-<span># Verify: For duplicate id A with quantities 2 then 5, assert total_quantity 2; reversal yields</span>
-<span># 5. Both results report rejected_count 1, proving the order-sensitive policy.</span>
-<span> </span>
-<span># Exercise 8. Present a reproducible conclusion</span>
-<span># Prompt: Run your own script from a new process, record its command and checks, and write a</span>
-<span># short conclusion with result, quality counts, and one unanswered question.</span>
-<span># Verify: The conclusion states 11 accepted units, four accepted rows, three rejected rows, and</span>
-<span># the inability to establish actual demand from this source alone.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-foundations-04: Build Your First Auditable Data Investigation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_foundations_04_first_investigation.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs; unfinished exercise functions raise NotImplementedError.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">professional</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beginner_orders.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate the exact CSV header and return raw dictionaries.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete load_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">analyze_rows</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: return counts, grouped quantities, total, and rejected evidence.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete analyze_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_report</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: save inspectable UTF-8 JSON beneath a chosen learner-local path.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete write_report</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> FIXTURE<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        worked_rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked source-row count:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>worked_rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: complete three functions and eight project checkpoints</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Write a project charter</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write five sentences naming the regional-units question, tracked input,</span></span>
+<span class="source-line"><span class="syntax-comment"># first-valid-id policy, output fields, and a limitation about rejected records.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The charter names the three columns and explicitly avoids claiming that accepted units</span></span>
+<span class="source-line"><span class="syntax-comment"># equal true demand or that absent regions had zero demand.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Load the tracked CSV</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `load_rows(path)` using DictReader, UTF-8, and newline handling. Require</span></span>
+<span class="source-line"><span class="syntax-comment"># the header sequence id, region, quantity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The tracked file loads seven dictionaries in source order; a header lacking region</span></span>
+<span class="source-line"><span class="syntax-comment"># raises ValueError before analysis.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Validate and retain rejection evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `analyze_rows` with nonempty id/region text, nonnegative integer quantity,</span></span>
+<span class="source-line"><span class="syntax-comment"># and first-valid-id wins. Preserve inputs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The fixture has four accepted rows and rejects source rows 4, 5, and 6. Raw records</span></span>
+<span class="source-line"><span class="syntax-comment"># remain byte-for-byte equivalent as string values.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Aggregate to one result per region</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add by_region and total_quantity to the report. Keep valid zero-quantity regions and</span></span>
+<span class="source-line"><span class="syntax-comment"># sort region keys for display.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The mapping equals north 7, south 0, west 4; the total is 11. No duplicate record</span></span>
+<span class="source-line"><span class="syntax-comment"># contributes three extra units.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Add independent checks</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write tests for count reconciliation, sum-of-groups reconciliation, and the tiny</span></span>
+<span class="source-line"><span class="syntax-comment"># fixture manual total. Add empty input and one all-invalid batch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The fixture checks are 7 = 4 + 3 and 11 = 7 + 0 + 4; empty input has all counts zero</span></span>
+<span class="source-line"><span class="syntax-comment"># and an empty mapping.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Write and read a local report</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `write_report` to UTF-8 JSON at a supplied learner-local path, then load</span></span>
+<span class="source-line"><span class="syntax-comment"># it and compare content with the in-memory report.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The JSON round trip preserves counts, grouped totals, and rejected row numbers; no</span></span>
+<span class="source-line"><span class="syntax-comment"># tracked source file changes.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Challenge the duplicate policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Analyze two valid rows with the same id but different quantities, then reverse them.</span></span>
+<span class="source-line"><span class="syntax-comment"># Explain the effect without claiming a bug in summation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: For duplicate id A with quantities 2 then 5, assert total_quantity 2; reversal yields</span></span>
+<span class="source-line"><span class="syntax-comment"># 5. Both results report rejected_count 1, proving the order-sensitive policy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Present a reproducible conclusion</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run your own script from a new process, record its command and checks, and write a</span></span>
+<span class="source-line"><span class="syntax-comment"># short conclusion with result, quality counts, and one unanswered question.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The conclusion states 11 accepted units, four accepted rows, three rejected rows, and</span></span>
+<span class="source-line"><span class="syntax-comment"># the inability to establish actual demand from this source alone.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -597,8 +645,8 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <p>Stable ID: <code>python-foundations-04</code>.</p>
 <p>Read the <a href="python-foundations-04.html#guide">guide</a> and attempt the <a href="python-foundations-04.html#learner">learner artifact</a> first. The <a href="python-foundations-04.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
 <p>The reference uses a pure analysis function between two small file boundaries. Loading validates the exact header rather than guessing at column names. Analysis rejects declared input defects and makes row accounting visible. Report writing is tested through a temporary JSON file and readback. The demonstration does not write learner progress or modify the fixture.</p>
-<pre><code class="language-python">assert 7 == 4 + 3
-assert 11 == 7 + 0 + 4</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-number">7</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-number">11</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span> <span class="syntax-operator">+</span> <span class="syntax-number">0</span> <span class="syntax-operator">+</span> <span class="syntax-number">4</span></code></pre>
 <p>These arithmetic observations are intentionally independent of the helper implementation. They give a small human-checkable oracle. For a large source, the oracle would need a carefully sampled manual audit and broader invariants, not a claim that agreement among two copies of the same calculation proves every input record correct.</p>
 <h4 id="solution-1--exercise-1-write-a-project-charter">Exercise 1. Write a project charter<a class="heading-anchor" href="#solution-1--exercise-1-write-a-project-charter" aria-label="Link to this section">#</a></h4>
 <p>The charter asks for recorded accepted units by region, using the three tracked columns and the declared validation and duplicate rules. It promises grouped integer totals, source/accepted/rejected counts, and specific rejection evidence. It does not promise complete demand measurement or correct missing source records. Writing those boundaries first prevents a later chart title from claiming more than the input can establish. A useful unanswered question is why records contain invalid quantities and whether the duplicate id represents a correction, a replay, or an upstream defect.</p>
@@ -650,87 +698,87 @@ assert 11 == 7 + 0 + 4</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Small auditable CSV investigation for python-foundations-04.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>import json</span>
-<span>from pathlib import Path</span>
-<span>from tempfile import TemporaryDirectory</span>
-<span> </span>
-<span>FIXTURE = Path(&quot;python&quot;) / &quot;professional&quot; / &quot;fixtures&quot; / &quot;data&quot; / &quot;beginner_orders.csv&quot;</span>
-<span> </span>
-<span> </span>
-<span>def load_rows(path: Path) -&gt; list[dict[str, str]]:</span>
-<span>    with path.open(encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        reader = csv.DictReader(handle)</span>
-<span>        if reader.fieldnames != [&quot;id&quot;, &quot;region&quot;, &quot;quantity&quot;]:</span>
-<span>            raise ValueError(&quot;expected header: id,region,quantity&quot;)</span>
-<span>        rows = list(reader)</span>
-<span>    if any(</span>
-<span>        set(row) != {&quot;id&quot;, &quot;region&quot;, &quot;quantity&quot;}</span>
-<span>        or any(not isinstance(v, str) for v in row.values())</span>
-<span>        for row in rows</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;CSV row does not match the three-field header&quot;)</span>
-<span>    return rows</span>
-<span> </span>
-<span> </span>
-<span>def analyze_rows(rows: list[dict[str, str]]) -&gt; dict[str, object]:</span>
-<span>    seen: set[str] = set()</span>
-<span>    totals: dict[str, int] = {}</span>
-<span>    accepted_count = 0</span>
-<span>    rejected: list[dict[str, object]] = []</span>
-<span>    for row_number, raw in enumerate(rows, start=1):</span>
-<span>        try:</span>
-<span>            if not all(</span>
-<span>                isinstance(raw.get(key), str) and raw[key].strip()</span>
-<span>                for key in (&quot;id&quot;, &quot;region&quot;, &quot;quantity&quot;)</span>
-<span>            ):</span>
-<span>                raise ValueError(&quot;missing or non-text field&quot;)</span>
-<span>            identifier = raw[&quot;id&quot;].strip()</span>
-<span>            region = raw[&quot;region&quot;].strip()</span>
-<span>            try:</span>
-<span>                quantity = int(raw[&quot;quantity&quot;].strip())</span>
-<span>            except ValueError as exc:</span>
-<span>                raise ValueError(&quot;quantity is not an integer&quot;) from exc</span>
-<span>            if quantity &lt; 0:</span>
-<span>                raise ValueError(&quot;quantity is negative&quot;)</span>
-<span>            if identifier in seen:</span>
-<span>                raise ValueError(&quot;duplicate id&quot;)</span>
-<span>            seen.add(identifier)</span>
-<span>            accepted_count += 1</span>
-<span>            totals[region] = totals.get(region, 0) + quantity</span>
-<span>        except ValueError as exc:</span>
-<span>            rejected.append({&quot;row_number&quot;: row_number, &quot;reason&quot;: str(exc), &quot;raw&quot;: raw.copy()})</span>
-<span>    return {</span>
-<span>        &quot;input_count&quot;: len(rows),</span>
-<span>        &quot;accepted_count&quot;: accepted_count,</span>
-<span>        &quot;rejected_count&quot;: len(rejected),</span>
-<span>        &quot;rejected&quot;: rejected,</span>
-<span>        &quot;total_quantity&quot;: sum(totals.values()),</span>
-<span>        &quot;by_region&quot;: dict(sorted(totals.items())),</span>
-<span>        &quot;contract&quot;: &quot;nonnegative integer units; case-sensitive id/region; first valid id wins&quot;,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def write_report(report: dict[str, object], path: Path) -&gt; None:</span>
-<span>    path.parent.mkdir(parents=True, exist_ok=True)</span>
-<span>    path.write_text(json.dumps(report, sort_keys=True, indent=2) + &quot;\n&quot;, encoding=&quot;utf-8&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    result = analyze_rows(load_rows(FIXTURE))</span>
-<span>    assert (result[&quot;input_count&quot;], result[&quot;accepted_count&quot;], result[&quot;rejected_count&quot;]) == (7, 4, 3)</span>
-<span>    assert result[&quot;total_quantity&quot;] == 11</span>
-<span>    assert result[&quot;by_region&quot;] == {&quot;north&quot;: 7, &quot;south&quot;: 0, &quot;west&quot;: 4}</span>
-<span>    with TemporaryDirectory() as directory:</span>
-<span>        target = Path(directory) / &quot;report.json&quot;</span>
-<span>        write_report(result, target)</span>
-<span>        assert json.loads(target.read_text(encoding=&quot;utf-8&quot;)) == result</span>
-<span>    print(json.dumps(result, sort_keys=True))</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Small auditable CSV investigation for python-foundations-04.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">professional</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beginner_orders.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reader <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> reader<span class="syntax-operator">.</span>fieldnames <span class="syntax-operator">!=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected header: id,region,quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>reader<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> row<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows</span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CSV row does not match the three-field header</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> rows</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">analyze_rows</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    seen<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    totals<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    accepted_count <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    rejected<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> row_number<span class="syntax-punctuation">,</span> raw <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> start<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">                <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> raw<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">                <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing or non-text field</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            identifier <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            region <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity is not an integer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">            <span class="syntax-keyword">if</span> quantity <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">quantity is negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> identifier <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>identifier<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            accepted_count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">            totals<span class="syntax-punctuation">[</span>region<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> totals<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> quantity</span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            rejected<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">row_number</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> row_number<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reason</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>exc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">raw</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> raw<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">input_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">accepted_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accepted_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">rejected_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rejected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rejected<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>totals<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">by_region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>totals<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">contract</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">nonnegative integer units; case-sensitive id/region; first valid id wins</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_report</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> analyze_rows<span class="syntax-punctuation">(</span>load_rows<span class="syntax-punctuation">(</span>FIXTURE<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">input_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rejected_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">11</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">by_region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        target <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">report.json</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        write_report<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>target<span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> result</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,39 +161,39 @@
       <h1>Tf 026</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/lessons/tf-026.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-026: Custom layers, residuals and trainable state.</span>
-<span> </span>
-<span>Answer-free learner worksheet. See the companion guide for worked examples.</span>
-<span>Copy to .learning before editing. Six independent attempts belong below.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Exercise 1: Create an identity residual</span>
-<span># Call a width2 residual with zero kernel on[[1,2],[3,4]].</span>
-<span># Expected: output equals input; one tracked kernel.</span>
-<span> </span>
-<span># Exercise 2: Reuse the state</span>
-<span># Call the layer on another batch of the same width and compare variable object identity.</span>
-<span># Expected: same variable object and variable count1.</span>
-<span> </span>
-<span># Exercise 3: Assign a known transform</span>
-<span># Set the kernel to identity and inspect the residual output.</span>
-<span># Expected: output2*x.</span>
-<span> </span>
-<span># Exercise 4: Reject an incompatible width</span>
-<span># Call the built width2 layer with a width3 input.</span>
-<span># Expected: ValueError naming feature width.</span>
-<span> </span>
-<span># Exercise 5: Check branch gradients</span>
-<span># Differentiate the sum of output entries with respect to the kernel.</span>
-<span># Expected: gradient matrix[[4,4],[6,6]].</span>
-<span> </span>
-<span># Exercise 6: Count parameters by width</span>
-<span># Build a separate width3 layer and count its square kernel entries.</span>
-<span># Expected: 9 parameters; width2 layer remains4.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-026: Custom layers, residuals and trainable state.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Answer-free learner worksheet. See the companion guide for worked examples.</span></span>
+<span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Create an identity residual</span></span>
+<span class="source-line"><span class="syntax-comment"># Call a width2 residual with zero kernel on[[1,2],[3,4]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output equals input; one tracked kernel.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Reuse the state</span></span>
+<span class="source-line"><span class="syntax-comment"># Call the layer on another batch of the same width and compare variable object identity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: same variable object and variable count1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Assign a known transform</span></span>
+<span class="source-line"><span class="syntax-comment"># Set the kernel to identity and inspect the residual output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output2*x.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Reject an incompatible width</span></span>
+<span class="source-line"><span class="syntax-comment"># Call the built width2 layer with a width3 input.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: ValueError naming feature width.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Check branch gradients</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate the sum of output entries with respect to the kernel.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient matrix[[4,4],[6,6]].</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Count parameters by width</span></span>
+<span class="source-line"><span class="syntax-comment"># Build a separate width3 layer and count its square kernel entries.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 9 parameters; width2 layer remains4.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -68,7 +68,7 @@ Return row_id, value for candidates having a blocklist value that is not distinc
 
 **Inputs/evidence:** For sql-deep-01 Exercise 4, Return row_id, value for candidates having a blocklist value that is not distinct from the candidate, using EXISTS and IS NOT DISTINCT FROM. Keep one row per row_id and order by row_id. Explain that this is value reconciliation, not an identity join.
 
-**Expected result/shape:** For sql-deep-01 Exercise 4, Rows 2 and 3 remain, with values 2 andNULL. The NULL candidate matches the NULL blocklist value under this explicit value-comparison rule.
+**Expected result/shape:** For sql-deep-01 Exercise 4, Rows 2 and 3 remain, with values 2 and NULL. The NULL candidate matches the NULL blocklist value under this explicit value-comparison rule.
 
 **Verify:** For sql-deep-01 Exercise 4, count all input reconciliation rows and inspect the missing-to-known and missing-to-missing cases independently, using IS DISTINCT FROM as a total Boolean comparison.
 

@@ -6,7 +6,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-026`. The prer
 
 ## Learning objectives
 
-Transfer learning reuses a representation while adapting a task-specific head. The central investigation is concrete: Create a bias-free 2-to-2identity Linear base and disable its parameter gradients. The finish condition is base output equals input; all base parameters frozen. base weight now changes. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Transfer learning reuses a representation while adapting a task-specific head. The central investigation is concrete: Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients. The finish condition is base output equals input; all base parameters frozen. base weight now changes. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -117,7 +117,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Freeze a known base.** Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.
+1. **Freeze a known base.** Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.
    **Expected:** base output equals input; all base parameters frozen.
    **Verify:** Save the assertion results for exercise 1, including base output equals input; all base parameters frozen.
 

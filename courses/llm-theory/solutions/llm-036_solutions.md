@@ -43,9 +43,9 @@ assert len(set(rank('red square',docs,1))&relevant)/len(relevant)==.5
 assert len(set(ranked)&relevant)/len(relevant)==1
 ```
 
-**Expected:** recall.5 and1.
+**Expected:** recall.5 and 1.
 
-**Verify:** Compare the computed values or written argument with recall.5 and1.
+**Verify:** Compare the computed values or written argument with recall.5 and 1.
 
 ## Exercise 3: Handle missing evidence
 

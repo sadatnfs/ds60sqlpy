@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-algo-02.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_algo_02.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_algo_02<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_algo_02.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_algo_02.py</code></pre>
 <p>Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-algo-02.html#solution-1">explanatory solutions</a> and <a href="python-algo-02.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -359,23 +407,23 @@
 <p>Binary search relies on sorted input. The lesson&#x27;s search functions assume the caller already established that precondition. Checking sortedness on every call would take linear work and erase the benefit of repeated logarithmic searches. A production boundary can validate once, store an immutable sorted sequence, then perform many queries. If the data changes, the ordering guarantee must be renewed.</p>
 <p>For a lower-bound search, maintain a half-open candidate interval[lo, hi). Everything before lo is less than the target, and everything at or after hi is not less. At the midpoint, a value smaller than target moves lo to mid+1; otherwise hi moves to mid. Each step shrinks the interval, and when lo equals hi that position is the first valid insertion point. The result can be zero or len(values), so indexing it without checking bounds is unsafe.</p>
 <p>Upper bound changes the comparison to move past values equal to the target. Together the two boundaries count duplicates or values inside a closed numeric interval without scanning every match. Equality handling is not a cosmetic operator choice; it determines which side owns an endpoint.</p>
-<p>Merge algorithms combine two sorted runs by repeatedly taking the smaller front item. On equal keys, choosing from the left run first preserves stability if each run was already stable. Each item is consumed once, so merging costs linear work in total run length. Repeatedly merging runs doubles their size each round and gives merge sort its O(n log n) time bound.</p>
+<p>Merge algorithms combine two sorted runs by repeatedly taking the smaller front item. On equal keys, choosing from the left run first preserves stability if each run was already stable. Each item is consumed once, so merging costs linear work in total run length. Repeatedly merging runs doubles their size each round and gives merge sort its <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>log</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n\log n)</annotation></semantics></math> time bound.</p>
 <p>The exercises use records(score, label) to keep identity visible when scores tie. Search fixtures include empty arrays, all-equal runs and targets outside the range. Reference checks compare manual binary-search results with standard-library bisect on deterministic cases, and compare the handwritten merge sort with Python&#x27;s stable sorted result. Correctness is established by values, identity order and preserved inputs, not one happy-path printout.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">records = [(2, &quot;z&quot;), (1, &quot;b&quot;), (2, &quot;a&quot;)]
-ordered = sorted(records, key=lambda record: record[0])
-assert ordered == [(1, &quot;b&quot;), (2, &quot;z&quot;), (2, &quot;a&quot;)]
-assert sorted(records) != ordered
-print(&quot;Stable score order:&quot;, ordered)</code></pre>
+<pre class="highlighted-code"><code class="language-python">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> record<span class="syntax-punctuation">:</span> record<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> ordered <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> ordered
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stable score order:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ordered<span class="syntax-punctuation">)</span></code></pre>
 <p>Sorting by the whole tuple uses label as a second key and puts a before z. Sorting only by score preserves z before a because that was their input order. The tuple labels make a stability requirement observable even when tied score values are identical.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">values = [1, 2, 2, 2, 5]
-start = bisect_left(values, 2)
-stop = bisect_right(values, 2)
-assert (start, stop) == (1, 4) and stop - start == 3
-assert bisect_left(values, 9) == len(values)
-print(&quot;Equal-value half-open range:&quot;, start, stop)</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+start <span class="syntax-operator">=</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+stop <span class="syntax-operator">=</span> bisect_right<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> stop <span class="syntax-operator">-</span> start <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Equal-value half-open range:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">)</span></code></pre>
 <p>The equal run occupies positions 1,2,3, represented by the half-open interval[1,4). An insertion point at the end is valid even though it cannot be indexed as an existing element. This distinction prevents common off-by-one and IndexError failures.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -403,7 +451,7 @@ print(&quot;Equal-value half-open range:&quot;, start, stop)</code></pre>
 </ol>
 <p><strong>Expected:</strong> [(3, a),(1, b),(2, c),(1, d),(0, e)] becomes[(0, e),(1, b),(1, d),(2, c),(3, a)]. Empty and singleton inputs work; results match stable_score_order.</p>
 <h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
-<p>If binary search loops forever, inspect whether every branch strictly shrinks[lo, hi). If the result points past the end, treat it as an insertion boundary rather than indexing immediately. If duplicate counts are off by one, compare lower and upper equality rules. If sorted output reverses equal-key labels, inspect a secondary tuple key or the merge tie condition. If odd-length merge sort loses a record, trace the final unpaired run. Validate sortedness once at the data boundary for repeated searches rather than hiding an O(n) scan inside a supposedly O(log n) query.</p>
+<p>If binary search loops forever, inspect whether every branch strictly shrinks[lo, hi). If the result points past the end, treat it as an insertion boundary rather than indexing immediately. If duplicate counts are off by one, compare lower and upper equality rules. If sorted output reverses equal-key labels, inspect a secondary tuple key or the merge tie condition. If odd-length merge sort loses a record, trace the final unpaired run. Validate sortedness once at the data boundary for repeated searches rather than hiding an <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math> scan inside a supposedly <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math> query.</p>
 <h4 id="guide--self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#guide--self-check-and-retrieval" aria-label="Link to this section">#</a></h4>
 <p>Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.</p>
 <h4 id="guide--next-steps">Next steps<a class="heading-anchor" href="#guide--next-steps" aria-label="Link to this section">#</a></h4>
@@ -416,7 +464,7 @@ print(&quot;Equal-value half-open range:&quot;, start, stop)</code></pre>
 <li><a href="https://docs.python.org/3/library/bisect.html">Python bisect boundary semantics</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-algo-02: Stable Ordering, Binary-Search Boundaries, and Merge Algorithms.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-algo-02: Stable Ordering, Binary-Search Boundaries, and Merge Algorithms.
 Read python/professional/companion-guides/py_algo_02.md and python/professional/lessons/py_algo_02.py. Direct prerequisites: python-algo-01.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -452,128 +500,128 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-algo-02: Stable Ordering, Binary-Search Boundaries, and Merge Algorithms.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from bisect import bisect_left, bisect_right</span>
-<span> </span>
-<span> </span>
-<span>def stable_score_order(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a new list ordered by integer score ascending while preserving input order among</span>
-<span>    equal scores. Do not use the label as a secondary key and do not mutate records.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement stable_score_order&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def lower_bound(values: list[int], target: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement a manual logarithmic lower-bound search on an already sorted integer list.</span>
-<span>    Return the first index with value&gt;=target, or len(values). Do not linearly scan or call</span>
-<span>    bisect inside the implementation. Sortedness is an explicit caller precondition.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement lower_bound&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def upper_bound(values: list[int], target: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement a manual logarithmic upper-bound search on an already sorted integer list.</span>
-<span>    Return the first index with value&gt;target, or len(values). Preserve input and avoid a</span>
-<span>    linear duplicate scan.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement upper_bound&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def count_closed_range(values: list[int], lower: int, upper: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Count values in the closed numeric interval[lower, upper] using the manual lower_bound</span>
-<span>    and upper_bound functions. Assume sorted integer input and reject lower&gt;upper with</span>
-<span>    ValueError. Do not scan the full list.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement count_closed_range&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def merge_runs(left: list[tuple[int, str]], right: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Merge two score-sorted record lists in linear work, selecting the left record first on</span>
-<span>    equal scores. Preserve input lists and reject a run whose scores decrease with</span>
-<span>    ValueError. Empty runs are valid.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement merge_runs&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def merge_sort(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Implement bottom-up merge sort by starting with singleton runs and repeatedly merging</span>
-<span>    adjacent pairs using merge_runs. Do not call sorted or list.sort in this function.</span>
-<span>    Preserve input, stability and an odd final run at each level.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement merge_sort&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    records = [(2, &quot;z&quot;), (1, &quot;b&quot;), (2, &quot;a&quot;)]</span>
-<span>    ordered = sorted(records, key=lambda record: record[0])</span>
-<span>    assert ordered == [(1, &quot;b&quot;), (2, &quot;z&quot;), (2, &quot;a&quot;)]</span>
-<span>    assert sorted(records) != ordered</span>
-<span>    print(&quot;Stable score order:&quot;, ordered)</span>
-<span> </span>
-<span>    values = [1, 2, 2, 2, 5]</span>
-<span>    start = bisect_left(values, 2)</span>
-<span>    stop = bisect_right(values, 2)</span>
-<span>    assert (start, stop) == (1, 4) and stop - start == 3</span>
-<span>    assert bisect_left(values, 9) == len(values)</span>
-<span>    print(&quot;Equal-value half-open range:&quot;, start, stop)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Keep identities stable on ties</span>
-<span># Prompt: Return a new list ordered by integer score ascending while preserving input order among</span>
-<span># equal scores. Do not use the label as a secondary key and do not mutate records.</span>
-<span># Expected: [(2, z),(1, b),(2, a)] becomes[(1, b),(2, z),(2, a)], not alphabetical tie order.</span>
-<span># Empty input returns a new empty list.</span>
-<span> </span>
-<span># Exercise 2: Find the first not-less boundary</span>
-<span># Prompt: Implement a manual logarithmic lower-bound search on an already sorted integer list.</span>
-<span># Return the first index with value&gt;=target, or len(values). Do not linearly scan or call bisect</span>
-<span># inside the implementation. Sortedness is an explicit caller precondition.</span>
-<span># Expected: [1,2,2,5] at target 2 returns 1; target 0 returns 0; target 9 returns 4. Empty input</span>
-<span># returns 0. Compare every target 0..6 against bisect_left.</span>
-<span> </span>
-<span># Exercise 3: Move past all equal values</span>
-<span># Prompt: Implement a manual logarithmic upper-bound search on an already sorted integer list.</span>
-<span># Return the first index with value&gt;target, or len(values). Preserve input and avoid a linear</span>
-<span># duplicate scan.</span>
-<span># Expected: [1,2,2,5] at target 2 returns 3; an all-two list of length 3 returns 3; empty returns</span>
-<span># Continued: 0. Results match bisect_right across several targets.</span>
-<span> </span>
-<span># Exercise 4: Count an inclusive interval using boundaries</span>
-<span># Prompt: Count values in the closed numeric interval[lower, upper] using the manual lower_bound</span>
-<span># and upper_bound functions. Assume sorted integer input and reject lower&gt;upper with ValueError.</span>
-<span># Do not scan the full list.</span>
-<span># Expected: [1,2,2,5,7] over [2,5] returns 3; [3,4] returns 0; [2,2] returns 2. Empty input</span>
-<span># returns 0 and reversed bounds fail.</span>
-<span> </span>
-<span># Exercise 5: Merge sorted runs stably</span>
-<span># Prompt: Merge two score-sorted record lists in linear work, selecting the left record first on</span>
-<span># equal scores. Preserve input lists and reject a run whose scores decrease with ValueError. Empty</span>
-<span># runs are valid.</span>
-<span># Expected: Left[(1, L1),(2, L2)] and right[(1, R1),(3, R3)] yield [(1, L1),(1, R1),(2, L2),(3,</span>
-<span># R3)]. A reversed-score run fails.</span>
-<span> </span>
-<span># Exercise 6: Build stable sorting from repeated merges</span>
-<span># Prompt: Implement bottom-up merge sort by starting with singleton runs and repeatedly merging</span>
-<span># adjacent pairs using merge_runs. Do not call sorted or list.sort in this function. Preserve</span>
-<span># input, stability and an odd final run at each level.</span>
-<span># Expected: [(3, a),(1, b),(2, c),(1, d),(0, e)] becomes[(0, e),(1, b),(1, d),(2, c),(3, a)].</span>
-<span># Empty and singleton inputs work; results match stable_score_order.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-algo-02: Stable Ordering, Binary-Search Boundaries, and Merge Algorithms.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> bisect <span class="syntax-keyword">import</span> bisect_left<span class="syntax-punctuation">,</span> bisect_right</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_score_order</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a new list ordered by integer score ascending while preserving input order among</span></span>
+<span class="source-line"><span class="syntax-string">    equal scores. Do not use the label as a secondary key and do not mutate records.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement stable_score_order</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">lower_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement a manual logarithmic lower-bound search on an already sorted integer list.</span></span>
+<span class="source-line"><span class="syntax-string">    Return the first index with value&gt;=target, or len(values). Do not linearly scan or call</span></span>
+<span class="source-line"><span class="syntax-string">    bisect inside the implementation. Sortedness is an explicit caller precondition.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement lower_bound</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">upper_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement a manual logarithmic upper-bound search on an already sorted integer list.</span></span>
+<span class="source-line"><span class="syntax-string">    Return the first index with value&gt;target, or len(values). Preserve input and avoid a</span></span>
+<span class="source-line"><span class="syntax-string">    linear duplicate scan.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement upper_bound</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">count_closed_range</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Count values in the closed numeric interval[lower, upper] using the manual lower_bound</span></span>
+<span class="source-line"><span class="syntax-string">    and upper_bound functions. Assume sorted integer input and reject lower&gt;upper with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError. Do not scan the full list.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement count_closed_range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_runs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Merge two score-sorted record lists in linear work, selecting the left record first on</span></span>
+<span class="source-line"><span class="syntax-string">    equal scores. Preserve input lists and reject a run whose scores decrease with</span></span>
+<span class="source-line"><span class="syntax-string">    ValueError. Empty runs are valid.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement merge_runs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_sort</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Implement bottom-up merge sort by starting with singleton runs and repeatedly merging</span></span>
+<span class="source-line"><span class="syntax-string">    adjacent pairs using merge_runs. Do not call sorted or list.sort in this function.</span></span>
+<span class="source-line"><span class="syntax-string">    Preserve input, stability and an odd final run at each level.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement merge_sort</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> record<span class="syntax-punctuation">:</span> record<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> ordered <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> ordered</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stable score order:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ordered<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    start <span class="syntax-operator">=</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    stop <span class="syntax-operator">=</span> bisect_right<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> stop <span class="syntax-operator">-</span> start <span class="syntax-operator">==</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Equal-value half-open range:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> stop<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Keep identities stable on ties</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a new list ordered by integer score ascending while preserving input order among</span></span>
+<span class="source-line"><span class="syntax-comment"># equal scores. Do not use the label as a secondary key and do not mutate records.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [(2, z),(1, b),(2, a)] becomes[(1, b),(2, z),(2, a)], not alphabetical tie order.</span></span>
+<span class="source-line"><span class="syntax-comment"># Empty input returns a new empty list.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Find the first not-less boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement a manual logarithmic lower-bound search on an already sorted integer list.</span></span>
+<span class="source-line"><span class="syntax-comment"># Return the first index with value&gt;=target, or len(values). Do not linearly scan or call bisect</span></span>
+<span class="source-line"><span class="syntax-comment"># inside the implementation. Sortedness is an explicit caller precondition.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1,2,2,5] at target 2 returns 1; target 0 returns 0; target 9 returns 4. Empty input</span></span>
+<span class="source-line"><span class="syntax-comment"># returns 0. Compare every target 0..6 against bisect_left.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Move past all equal values</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement a manual logarithmic upper-bound search on an already sorted integer list.</span></span>
+<span class="source-line"><span class="syntax-comment"># Return the first index with value&gt;target, or len(values). Preserve input and avoid a linear</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicate scan.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1,2,2,5] at target 2 returns 3; an all-two list of length 3 returns 3; empty returns</span></span>
+<span class="source-line"><span class="syntax-comment"># Continued: 0. Results match bisect_right across several targets.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Count an inclusive interval using boundaries</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Count values in the closed numeric interval[lower, upper] using the manual lower_bound</span></span>
+<span class="source-line"><span class="syntax-comment"># and upper_bound functions. Assume sorted integer input and reject lower&gt;upper with ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Do not scan the full list.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [1,2,2,5,7] over [2,5] returns 3; [3,4] returns 0; [2,2] returns 2. Empty input</span></span>
+<span class="source-line"><span class="syntax-comment"># returns 0 and reversed bounds fail.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Merge sorted runs stably</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Merge two score-sorted record lists in linear work, selecting the left record first on</span></span>
+<span class="source-line"><span class="syntax-comment"># equal scores. Preserve input lists and reject a run whose scores decrease with ValueError. Empty</span></span>
+<span class="source-line"><span class="syntax-comment"># runs are valid.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Left[(1, L1),(2, L2)] and right[(1, R1),(3, R3)] yield [(1, L1),(1, R1),(2, L2),(3,</span></span>
+<span class="source-line"><span class="syntax-comment"># R3)]. A reversed-score run fails.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Build stable sorting from repeated merges</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement bottom-up merge sort by starting with singleton runs and repeatedly merging</span></span>
+<span class="source-line"><span class="syntax-comment"># adjacent pairs using merge_runs. Do not call sorted or list.sort in this function. Preserve</span></span>
+<span class="source-line"><span class="syntax-comment"># input, stability and an odd final run at each level.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [(3, a),(1, b),(2, c),(1, d),(0, e)] becomes[(0, e),(1, b),(1, d),(2, c),(3, a)].</span></span>
+<span class="source-line"><span class="syntax-comment"># Empty and singleton inputs work; results match stable_score_order.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -612,109 +660,109 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-keep-identities-stable-on-ties">Exercise 1: Keep identities stable on ties<a class="heading-anchor" href="#solution-1--exercise-1-keep-identities-stable-on-ties" aria-label="Link to this section">#</a></h5>
 <p>Return a new list ordered by integer score ascending while preserving input order among equal scores. Do not use the label as a secondary key and do not mutate records.</p>
 <p><strong>Expected:</strong> [(2, z),(1, b),(2, a)] becomes[(1, b),(2, z),(2, a)], not alphabetical tie order. Empty input returns a new empty list.</p>
-<pre><code class="language-python">def stable_score_order(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:
-    return sorted(records, key=lambda record: record[0])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_score_order</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> record<span class="syntax-punctuation">:</span> record<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The key function exposes only the intended comparison field. Python&#x27;s stable sort then preserves equal-key encounter order without inventing a label-based policy. sorted constructs a new list, so callers retain their original ordering. The test checks both tie identities and source preservation, since comparing only the sequence of scores would miss an unstable but numerically sorted output.</p>
-<pre><code class="language-python">records = [(2, &quot;z&quot;), (1, &quot;b&quot;), (2, &quot;a&quot;)]
-original = records.copy()
-assert stable_score_order(records) == [(1, &quot;b&quot;), (2, &quot;z&quot;), (2, &quot;a&quot;)] and records == original
-empty: list[tuple[int, str]] = []
-assert stable_score_order(empty) == [] and stable_score_order(empty) is not empty</code></pre>
+<pre class="highlighted-code"><code class="language-python">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+original <span class="syntax-operator">=</span> records<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> stable_score_order<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> records <span class="syntax-operator">==</span> original
+empty<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> stable_score_order<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> stable_score_order<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> empty</code></pre>
 <h5 id="solution-1--exercise-2-find-the-first-not-less-boundary">Exercise 2: Find the first not-less boundary<a class="heading-anchor" href="#solution-1--exercise-2-find-the-first-not-less-boundary" aria-label="Link to this section">#</a></h5>
 <p>Implement a manual logarithmic lower-bound search on an already sorted integer list. Return the first index with value&gt;=target, or len(values). Do not linearly scan or call bisect inside the implementation. Sortedness is an explicit caller precondition.</p>
 <p><strong>Expected:</strong> [1,2,2,5] at target 2 returns 1; target 0 returns 0; target 9 returns 4. Empty input returns 0. Compare every target 0..6 against bisect_left.</p>
-<pre><code class="language-python">def lower_bound(values: list[int], target: int) -&gt; int:
-    lo, hi = 0, len(values)
-    while lo &lt; hi:
-        mid = (lo + hi) // 2
-        if values[mid] &lt; target:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">lower_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    lo<span class="syntax-punctuation">,</span> hi <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">while</span> lo <span class="syntax-operator">&lt;</span> hi<span class="syntax-punctuation">:</span>
+        mid <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>lo <span class="syntax-operator">+</span> hi<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">if</span> values<span class="syntax-punctuation">[</span>mid<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> target<span class="syntax-punctuation">:</span>
+            lo <span class="syntax-operator">=</span> mid <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            hi <span class="syntax-operator">=</span> mid
+    <span class="syntax-keyword">return</span> lo</code></pre>
 <p>The half-open interval never requires reading position len(values). Moving lo past a smaller midpoint proves that every removed position is too small; moving hi to the midpoint retains a possible first qualifying position. Equal values therefore move the upper boundary left, finding the first duplicate. The standard-library comparison is an independent oracle across below-range, inside-range and above-range targets.</p>
-<pre><code class="language-python">values = [1, 2, 2, 5]
-assert lower_bound(values, 2) == 1 and lower_bound(values, 0) == 0 and lower_bound(values, 9) == 4
-assert lower_bound([], 2) == 0
-for target in range(7):
-    assert lower_bound(values, target) == bisect_left(values, target)</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> lower_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">for</span> target <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-move-past-all-equal-values">Exercise 3: Move past all equal values<a class="heading-anchor" href="#solution-1--exercise-3-move-past-all-equal-values" aria-label="Link to this section">#</a></h5>
 <p>Implement a manual logarithmic upper-bound search on an already sorted integer list. Return the first index with value&gt;target, or len(values). Preserve input and avoid a linear duplicate scan.</p>
 <p><strong>Expected:</strong> [1,2,2,5] at target 2 returns 3; an all-two list of length 3 returns 3; empty returns 0. Results match bisect_right across several targets.</p>
-<pre><code class="language-python">def upper_bound(values: list[int], target: int) -&gt; int:
-    lo, hi = 0, len(values)
-    while lo &lt; hi:
-        mid = (lo + hi) // 2
-        if values[mid] &lt;= target:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">upper_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    lo<span class="syntax-punctuation">,</span> hi <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">while</span> lo <span class="syntax-operator">&lt;</span> hi<span class="syntax-punctuation">:</span>
+        mid <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>lo <span class="syntax-operator">+</span> hi<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">if</span> values<span class="syntax-punctuation">[</span>mid<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> target<span class="syntax-punctuation">:</span>
+            lo <span class="syntax-operator">=</span> mid <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            hi <span class="syntax-operator">=</span> mid
+    <span class="syntax-keyword">return</span> lo</code></pre>
 <p>The only changed comparison is equality ownership. Values equal to target now belong before lo, so the search advances beyond the entire equal run. A separate scan after finding one duplicate could degrade to linear time for an all-equal list; binary upper bound retains logarithmic search work. The empty-list result follows the same invariant without a special indexing branch.</p>
-<pre><code class="language-python">values = [1, 2, 2, 5]
-assert upper_bound(values, 2) == 3 and upper_bound([2, 2, 2], 2) == 3 and upper_bound([], 2) == 0
-for target in range(7):
-    assert upper_bound(values, target) == bisect_right(values, target)</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> upper_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> upper_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">for</span> target <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> bisect_right<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-count-an-inclusive-interval-using-boundaries">Exercise 4: Count an inclusive interval using boundaries<a class="heading-anchor" href="#solution-1--exercise-4-count-an-inclusive-interval-using-boundaries" aria-label="Link to this section">#</a></h5>
 <p>Count values in the closed numeric interval[lower, upper] using the manual lower_bound and upper_bound functions. Assume sorted integer input and reject lower&gt;upper with ValueError. Do not scan the full list.</p>
 <p><strong>Expected:</strong> [1,2,2,5,7] over [2,5] returns 3; [3,4] returns 0; [2,2] returns 2. Empty input returns 0 and reversed bounds fail.</p>
-<pre><code class="language-python">def count_closed_range(values: list[int], lower: int, upper: int) -&gt; int:
-    if lower &gt; upper:
-        raise ValueError(&quot;Range lower bound must not exceed upper bound&quot;)
-    return upper_bound(values, upper) - lower_bound(values, lower)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">count_closed_range</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> lower <span class="syntax-operator">&gt;</span> upper<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Range lower bound must not exceed upper bound</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">)</span></code></pre>
 <p>The first boundary excludes everything below lower, while the second includes all values equal to upper before stopping. Their difference counts the interval without examining each matching element. Using lower_bound for both endpoints would incorrectly exclude the upper endpoint. The equal-endpoint case is therefore an important independent check, especially when many duplicate values lie on that boundary.</p>
-<pre><code class="language-python">values = [1, 2, 2, 5, 7]
-assert count_closed_range(values, 2, 5) == 3 and count_closed_range(values, 3, 4) == 0
-assert count_closed_range(values, 2, 2) == 2 and count_closed_range([], 0, 9) == 0
-expect_value_error(lambda: count_closed_range(values, 5, 2))</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> count_closed_range<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-5-merge-sorted-runs-stably">Exercise 5: Merge sorted runs stably<a class="heading-anchor" href="#solution-1--exercise-5-merge-sorted-runs-stably" aria-label="Link to this section">#</a></h5>
 <p>Merge two score-sorted record lists in linear work, selecting the left record first on equal scores. Preserve input lists and reject a run whose scores decrease with ValueError. Empty runs are valid.</p>
 <p><strong>Expected:</strong> Left[(1, L1),(2, L2)] and right[(1, R1),(3, R3)] yield [(1, L1),(1, R1),(2, L2),(3, R3)]. A reversed-score run fails.</p>
-<pre><code class="language-python">def merge_runs(left: list[tuple[int, str]], right: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:
-    for run in [left, right]:
-        if any(run[index][0] &gt; run[index + 1][0] for index in range(len(run) - 1)):
-            raise ValueError(&quot;Each input run must be sorted by score&quot;)
-    i = j = 0
-    result = []
-    while i &lt; len(left) and j &lt; len(right):
-        if left[i][0] &lt;= right[j][0]:
-            result.append(left[i])
-            i += 1
-        else:
-            result.append(right[j])
-            j += 1
-    result.extend(left[i:])
-    result.extend(right[j:])
-    return result</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_runs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">for</span> run <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> run<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Each input run must be sorted by score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    i <span class="syntax-operator">=</span> j <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">while</span> i <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> j <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            i <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            j <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    result<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    result<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result</code></pre>
 <p>Each comparison advances exactly one cursor, so no item is repeatedly searched. The &lt;= tie rule takes left-run records before equal right-run records and preserves their earlier global order when the runs came from adjacent input slices. Extending the remaining suffix is safe because it is already sorted. Checking each run adds only linear work and catches a broken precondition before producing a misleading combined order.</p>
-<pre><code class="language-python">left = [(1, &quot;L1&quot;), (2, &quot;L2&quot;)]
-right = [(1, &quot;R1&quot;), (3, &quot;R3&quot;)]
-assert merge_runs(left, right) == [(1, &quot;L1&quot;), (1, &quot;R1&quot;), (2, &quot;L2&quot;), (3, &quot;R3&quot;)]
-assert left == [(1, &quot;L1&quot;), (2, &quot;L2&quot;)] and merge_runs([], right) == right
-expect_value_error(lambda: merge_runs([(2, &quot;a&quot;), (1, &quot;b&quot;)], []))</code></pre>
+<pre class="highlighted-code"><code class="language-python">left <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+right <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> merge_runs<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> left <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> merge_runs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> right
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> merge_runs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-build-stable-sorting-from-repeated-merges">Exercise 6: Build stable sorting from repeated merges<a class="heading-anchor" href="#solution-1--exercise-6-build-stable-sorting-from-repeated-merges" aria-label="Link to this section">#</a></h5>
 <p>Implement bottom-up merge sort by starting with singleton runs and repeatedly merging adjacent pairs using merge_runs. Do not call sorted or list.sort in this function. Preserve input, stability and an odd final run at each level.</p>
 <p><strong>Expected:</strong> [(3, a),(1, b),(2, c),(1, d),(0, e)] becomes[(0, e),(1, b),(1, d),(2, c),(3, a)]. Empty and singleton inputs work; results match stable_score_order.</p>
-<pre><code class="language-python">def merge_sort(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:
-    runs = [[record] for record in records]
-    if not runs:
-        return []
-    while len(runs) &gt; 1:
-        next_runs = []
-        for index in range(0, len(runs), 2):
-            next_runs.append(
-                merge_runs(runs[index], runs[index + 1]) if index + 1 &lt; len(runs) else runs[index]
-            )
-        runs = next_runs
-    return runs[0]</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_sort</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    runs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>record<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> record <span class="syntax-operator">in</span> records<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> runs<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">while</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
+        next_runs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            next_runs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>
+                merge_runs<span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> runs<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> runs<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span>
+            <span class="syntax-punctuation">)</span>
+        runs <span class="syntax-operator">=</span> next_runs
+    <span class="syntax-keyword">return</span> runs<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Singleton runs are sorted by definition. Each merge preserves sortedness and stability, so induction over the rounds establishes the final result. Runs approximately double in length per round, producing logarithmically many rounds with linear total work per round. Carrying an unpaired final run prevents odd-length inputs from losing records. The generated deterministic fixtures vary both length and repeated-key structure, exposing mistakes that a single already-sorted list would hide.</p>
-<pre><code class="language-python">records = [(3, &quot;a&quot;), (1, &quot;b&quot;), (2, &quot;c&quot;), (1, &quot;d&quot;), (0, &quot;e&quot;)]
-assert merge_sort(records) == [(0, &quot;e&quot;), (1, &quot;b&quot;), (1, &quot;d&quot;), (2, &quot;c&quot;), (3, &quot;a&quot;)]
-assert merge_sort(records) == stable_score_order(records) and records[0] == (3, &quot;a&quot;)
-assert merge_sort([]) == [] and merge_sort([(1, &quot;x&quot;)]) == [(1, &quot;x&quot;)]
-for size in range(12):
-    sample = [(index % 3, str(index)) for index in range(size - 1, -1, -1)]
-    assert merge_sort(sample) == stable_score_order(sample)</code></pre>
+<pre class="highlighted-code"><code class="language-python">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">e</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">e</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> stable_score_order<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> records<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> merge_sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> size <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    sample <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>index <span class="syntax-operator">%</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> stable_score_order<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_algo_02_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -749,131 +797,131 @@ for size in range(12):
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-02.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from bisect import bisect_left, bisect_right</span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span> </span>
-<span>def stable_score_order(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    return sorted(records, key=lambda record: record[0])</span>
-<span> </span>
-<span> </span>
-<span>def lower_bound(values: list[int], target: int) -&gt; int:</span>
-<span>    lo, hi = 0, len(values)</span>
-<span>    while lo &lt; hi:</span>
-<span>        mid = (lo + hi) // 2</span>
-<span>        if values[mid] &lt; target:</span>
-<span>            lo = mid + 1</span>
-<span>        else:</span>
-<span>            hi = mid</span>
-<span>    return lo</span>
-<span> </span>
-<span> </span>
-<span>def upper_bound(values: list[int], target: int) -&gt; int:</span>
-<span>    lo, hi = 0, len(values)</span>
-<span>    while lo &lt; hi:</span>
-<span>        mid = (lo + hi) // 2</span>
-<span>        if values[mid] &lt;= target:</span>
-<span>            lo = mid + 1</span>
-<span>        else:</span>
-<span>            hi = mid</span>
-<span>    return lo</span>
-<span> </span>
-<span> </span>
-<span>def count_closed_range(values: list[int], lower: int, upper: int) -&gt; int:</span>
-<span>    if lower &gt; upper:</span>
-<span>        raise ValueError(&quot;Range lower bound must not exceed upper bound&quot;)</span>
-<span>    return upper_bound(values, upper) - lower_bound(values, lower)</span>
-<span> </span>
-<span> </span>
-<span>def merge_runs(left: list[tuple[int, str]], right: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    for run in [left, right]:</span>
-<span>        if any(run[index][0] &gt; run[index + 1][0] for index in range(len(run) - 1)):</span>
-<span>            raise ValueError(&quot;Each input run must be sorted by score&quot;)</span>
-<span>    i = j = 0</span>
-<span>    result = []</span>
-<span>    while i &lt; len(left) and j &lt; len(right):</span>
-<span>        if left[i][0] &lt;= right[j][0]:</span>
-<span>            result.append(left[i])</span>
-<span>            i += 1</span>
-<span>        else:</span>
-<span>            result.append(right[j])</span>
-<span>            j += 1</span>
-<span>    result.extend(left[i:])</span>
-<span>    result.extend(right[j:])</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def merge_sort(records: list[tuple[int, str]]) -&gt; list[tuple[int, str]]:</span>
-<span>    runs = [[record] for record in records]</span>
-<span>    if not runs:</span>
-<span>        return []</span>
-<span>    while len(runs) &gt; 1:</span>
-<span>        next_runs = []</span>
-<span>        for index in range(0, len(runs), 2):</span>
-<span>            next_runs.append(</span>
-<span>                merge_runs(runs[index], runs[index + 1]) if index + 1 &lt; len(runs) else runs[index]</span>
-<span>            )</span>
-<span>        runs = next_runs</span>
-<span>    return runs[0]</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Keep identities stable on ties</span>
-<span>    records = [(2, &quot;z&quot;), (1, &quot;b&quot;), (2, &quot;a&quot;)]</span>
-<span>    original = records.copy()</span>
-<span>    assert stable_score_order(records) == [(1, &quot;b&quot;), (2, &quot;z&quot;), (2, &quot;a&quot;)] and records == original</span>
-<span>    empty: list[tuple[int, str]] = []</span>
-<span>    assert stable_score_order(empty) == [] and stable_score_order(empty) is not empty</span>
-<span>    # Exercise 2: Find the first not-less boundary</span>
-<span>    values = [1, 2, 2, 5]</span>
-<span>    assert (</span>
-<span>        lower_bound(values, 2) == 1 and lower_bound(values, 0) == 0 and lower_bound(values, 9) == 4</span>
-<span>    )</span>
-<span>    assert lower_bound([], 2) == 0</span>
-<span>    for target in range(7):</span>
-<span>        assert lower_bound(values, target) == bisect_left(values, target)</span>
-<span>    # Exercise 3: Move past all equal values</span>
-<span>    values = [1, 2, 2, 5]</span>
-<span>    assert (</span>
-<span>        upper_bound(values, 2) == 3 and upper_bound([2, 2, 2], 2) == 3 and upper_bound([], 2) == 0</span>
-<span>    )</span>
-<span>    for target in range(7):</span>
-<span>        assert upper_bound(values, target) == bisect_right(values, target)</span>
-<span>    # Exercise 4: Count an inclusive interval using boundaries</span>
-<span>    values = [1, 2, 2, 5, 7]</span>
-<span>    assert count_closed_range(values, 2, 5) == 3 and count_closed_range(values, 3, 4) == 0</span>
-<span>    assert count_closed_range(values, 2, 2) == 2 and count_closed_range([], 0, 9) == 0</span>
-<span>    expect_value_error(lambda: count_closed_range(values, 5, 2))</span>
-<span>    # Exercise 5: Merge sorted runs stably</span>
-<span>    left = [(1, &quot;L1&quot;), (2, &quot;L2&quot;)]</span>
-<span>    right = [(1, &quot;R1&quot;), (3, &quot;R3&quot;)]</span>
-<span>    assert merge_runs(left, right) == [(1, &quot;L1&quot;), (1, &quot;R1&quot;), (2, &quot;L2&quot;), (3, &quot;R3&quot;)]</span>
-<span>    assert left == [(1, &quot;L1&quot;), (2, &quot;L2&quot;)] and merge_runs([], right) == right</span>
-<span>    expect_value_error(lambda: merge_runs([(2, &quot;a&quot;), (1, &quot;b&quot;)], []))</span>
-<span>    # Exercise 6: Build stable sorting from repeated merges</span>
-<span>    records = [(3, &quot;a&quot;), (1, &quot;b&quot;), (2, &quot;c&quot;), (1, &quot;d&quot;), (0, &quot;e&quot;)]</span>
-<span>    assert merge_sort(records) == [(0, &quot;e&quot;), (1, &quot;b&quot;), (1, &quot;d&quot;), (2, &quot;c&quot;), (3, &quot;a&quot;)]</span>
-<span>    assert merge_sort(records) == stable_score_order(records) and records[0] == (3, &quot;a&quot;)</span>
-<span>    assert merge_sort([]) == [] and merge_sort([(1, &quot;x&quot;)]) == [(1, &quot;x&quot;)]</span>
-<span>    for size in range(12):</span>
-<span>        sample = [(index % 3, str(index)) for index in range(size - 1, -1, -1)]</span>
-<span>        assert merge_sort(sample) == stable_score_order(sample)</span>
-<span>    print(&quot;python-algo-02: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-02.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> bisect <span class="syntax-keyword">import</span> bisect_left<span class="syntax-punctuation">,</span> bisect_right</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stable_score_order</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> record<span class="syntax-punctuation">:</span> record<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">lower_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    lo<span class="syntax-punctuation">,</span> hi <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> lo <span class="syntax-operator">&lt;</span> hi<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        mid <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>lo <span class="syntax-operator">+</span> hi<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> values<span class="syntax-punctuation">[</span>mid<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> target<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            lo <span class="syntax-operator">=</span> mid <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            hi <span class="syntax-operator">=</span> mid</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> lo</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">upper_bound</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    lo<span class="syntax-punctuation">,</span> hi <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> lo <span class="syntax-operator">&lt;</span> hi<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        mid <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>lo <span class="syntax-operator">+</span> hi<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> values<span class="syntax-punctuation">[</span>mid<span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> target<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            lo <span class="syntax-operator">=</span> mid <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            hi <span class="syntax-operator">=</span> mid</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> lo</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">count_closed_range</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> lower <span class="syntax-operator">&gt;</span> upper<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Range lower bound must not exceed upper bound</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> lower<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_runs</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> run <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> run<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Each input run must be sorted by score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    i <span class="syntax-operator">=</span> j <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> i <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> j <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            i <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            j <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    result<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result<span class="syntax-operator">.</span>extend<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">[</span>j<span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_sort</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    runs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>record<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> record <span class="syntax-operator">in</span> records<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> runs<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        next_runs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            next_runs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                merge_runs<span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> runs<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>runs<span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> runs<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        runs <span class="syntax-operator">=</span> next_runs</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> runs<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Keep identities stable on ties</span></span>
+<span class="source-line">    records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    original <span class="syntax-operator">=</span> records<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> stable_score_order<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">z</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> records <span class="syntax-operator">==</span> original</span>
+<span class="source-line">    empty<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> stable_score_order<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> stable_score_order<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> empty</span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Find the first not-less boundary</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> lower_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> target <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> lower_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> bisect_left<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Move past all equal values</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> upper_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> upper_bound<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> target <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> upper_bound<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> bisect_right<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Count an inclusive interval using boundaries</span></span>
+<span class="source-line">    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> count_closed_range<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> count_closed_range<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Merge sorted runs stably</span></span>
+<span class="source-line">    left <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    right <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> merge_runs<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">R3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> left <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">L2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> merge_runs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> right</span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> merge_runs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Build stable sorting from repeated merges</span></span>
+<span class="source-line">    records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">e</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">e</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> stable_score_order<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> records<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> merge_sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> size <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        sample <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>index <span class="syntax-operator">%</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>size <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> merge_sort<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> stable_score_order<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-algo-02: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

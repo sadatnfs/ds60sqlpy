@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-009`
 
 ## Learning objectives
 
-Explain interface, dynamic dispatch, composition using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is UsePricing references to identity andhalf-price implementations on100 cents. The final exercise transfers the mechanism to reject an invalid wrapper.
+Explain interface, dynamic dispatch, composition using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use Pricing references to identity and half-price implementations on 100 cents. The final exercise transfers the mechanism to reject an invalid wrapper.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ An interface describes behavior a caller can rely on without depending on one im
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-010/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -64,7 +64,7 @@ public class Main {
 
 ```
 
-**Expected:** 100 and50.
+**Expected:** 100 and 50.
 
 ### Example B: Compose a fee policy
 
@@ -100,19 +100,19 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Call through an interface.** UsePricing references to identity andhalf-price implementations on100 cents.
-   **Expected:** 100 and50.
-   **Verify:** Compare your assertion values or captured diagnostic with 100 and50.
+1. **Call through an interface.** Use Pricing references to identity and half-price implementations on 100 cents.
+   **Expected:** 100 and 50.
+   **Verify:** Compare your assertion values or captured diagnostic with 100 and 50.
 
 2. **Compose a fee policy.** Wrap the half-price policy with a10-cent fee.
    **Expected:** price100 becomes60.
    **Verify:** Compare your assertion values or captured diagnostic with price100 becomes60.
 
 3. **Inspect rounding semantics.** Apply integer half-price to101 cents under truncation-toward-zero.
-   **Expected:** 50 cents beforefee.
-   **Verify:** Compare your assertion values or captured diagnostic with 50 cents beforefee.
+   **Expected:** 50 cents before fee.
+   **Verify:** Compare your assertion values or captured diagnostic with 50 cents before fee.
 
-4. **Validate every implementation.** Call regular,half andfee policy with-1.
+4. **Validate every implementation.** Call regular,half and fee policy with-1.
    **Expected:** all throwIllegalArgumentException.
    **Verify:** Compare your assertion values or captured diagnostic with all throwIllegalArgumentException.
 
@@ -120,9 +120,9 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** results100,50,60.
    **Verify:** Compare your assertion values or captured diagnostic with results100,50,60.
 
-6. **Reject an invalid wrapper.** Construct a fee wrapper with a negative fee ornull delegate.
-   **Expected:** negative feeIllegalArgumentException;null delegateNullPointerException.
-   **Verify:** Compare your assertion values or captured diagnostic with negative feeIllegalArgumentException;null delegateNullPointerException.
+6. **Reject an invalid wrapper.** Construct a fee wrapper with a negative fee or null delegate.
+   **Expected:** negative fee IllegalArgumentException;null delegate NullPointerException.
+   **Verify:** Compare your assertion values or captured diagnostic with negative fee IllegalArgumentException;null delegate NullPointerException.
 
 ## Common pitfalls and diagnosis
 

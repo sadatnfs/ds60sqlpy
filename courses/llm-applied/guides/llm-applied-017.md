@@ -164,7 +164,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Quantize a fixed matrix.** QuantizeW[[.1, -.9], [1.7, -.2]] withscale \(\frac{1.7}{7}\) andnearest-even rounding.
+1. **Quantize a fixed matrix.** QuantizeW[[.1, -.9], [1.7, -.2]] with scale \(\frac{1.7}{7}\) andnearest-even rounding.
    **Expected:** codes[[0, -4], [7, -1]].
    **Verify:** Save the assertion results for exercise 1, including codes[[0, -4], [7, -1]].
 
@@ -176,13 +176,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** reference[1.9, 2.1]; finite nonzero approximation error.
    **Verify:** Save the assertion results for exercise 3, including reference[1.9, 2.1]; finite nonzero approximation error.
 
-4. **Train only a small adapter.** Use frozen dequantizedW, rank 1 A/B and 10SGD updates towardzero output.
+4. **Train only a small adapter.** Use frozen dequantizedW, rank 1 A/B and 10SGD updates toward zero output.
    **Expected:** adapter loss decreases; packed base bytes unchanged.
    **Verify:** Save the assertion results for exercise 4, including adapter loss decreases; packed base bytes unchanged.
 
 5. **Account for storage honestly.** Count 2 packed bytes plus one float32 scale, and separately count the dequantized 2x2float32buffer.
-   **Expected:** packed representation 6 bytes; dequantized buffer 16 bytes; overheadexcluded.
-   **Verify:** Save the assertion results for exercise 5, including packed representation 6 bytes; dequantized buffer 16 bytes; overheadexcluded.
+   **Expected:** packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
+   **Verify:** Save the assertion results for exercise 5, including packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
 
 6. **State what was not measured.** Write a receipt distinguishing uniform 4-bitCPU packing from NF4, double quantization, paged optimizers and GPU memory.
    **Expected:** all four unimplemented claims explicitly False.

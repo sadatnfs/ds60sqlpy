@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,51 +161,51 @@
       <h1>Tf 024 Solution</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-024_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;tf-024: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span>import tensorflow as tf</span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Freeze geometry and groups</span>
-<span>    x=np.array([[-2.],[-1.],[1.],[2.]],dtype=&#x27;float32&#x27;); y=np.array([[0.],[0.],[1.],[1.]],dtype=&#x27;float32&#x27;)</span>
-<span>    test_x=np.array([[-3.],[3.]],dtype=&#x27;float32&#x27;); test_y=np.array([0,1]); train_ids={&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;,&#x27;d&#x27;}; test_ids={&#x27;e&#x27;,&#x27;f&#x27;}</span>
-<span>    assert not train_ids&amp;test_ids and len(test_ids)==2</span>
-<span> </span>
-<span>    # Exercise 2: Fit training preprocessing</span>
-<span>    mean=x.mean(0); scale=x.std(0); tx=(x-mean)/scale; vx=(test_x-mean)/scale</span>
-<span>    np.testing.assert_allclose(scale,[np.sqrt(2.5)],atol=1e-6,rtol=0)</span>
-<span>    assert mean[0]==0 and vx[0,0]==-vx[1,0]</span>
-<span> </span>
-<span>    # Exercise 3: Train within a fixed budget</span>
-<span>    w=tf.Variable([[0.]],dtype=tf.float32)</span>
-<span>    for step in range(40):</span>
-<span>        with tf.GradientTape() as tape: loss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y,logits=tf.constant(tx)@w))</span>
-<span>        w.assign_sub(.1*tape.gradient(loss,w))</span>
-<span>    assert step+1==40 and float(w[0,0])&gt;0 and np.isfinite(w.numpy()).all()</span>
-<span> </span>
-<span>    # Exercise 4: Account for every test row</span>
-<span>    pred=(vx@w.numpy()).ravel()&gt;=0; truth=test_y.astype(bool)</span>
-<span>    counts={&#x27;tp&#x27;:int(np.sum(pred&amp;truth)),&#x27;tn&#x27;:int(np.sum(~pred&amp;~truth)),&#x27;fp&#x27;:int(np.sum(pred&amp;~truth)),&#x27;fn&#x27;:int(np.sum(~pred&amp;truth))}</span>
-<span>    assert counts=={&#x27;tp&#x27;:1,&#x27;tn&#x27;:1,&#x27;fp&#x27;:0,&#x27;fn&#x27;:0} and sum(counts.values())==2</span>
-<span> </span>
-<span>    # Exercise 5: Compare a baseline</span>
-<span>    baseline=np.zeros(2,dtype=bool)</span>
-<span>    assert np.count_nonzero(baseline!=truth)==1 and np.count_nonzero(pred!=truth)==0</span>
-<span> </span>
-<span>    # Exercise 6: Expose a subgroup failure</span>
-<span>    broken=pred.copy(); broken[1]=False</span>
-<span>    report={g:(int(broken[i]!=truth[i]),1) for i,g in enumerate([&#x27;negative&#x27;,&#x27;positive&#x27;])}</span>
-<span>    assert report=={&#x27;negative&#x27;:(0,1),&#x27;positive&#x27;:(1,1)}</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;tf-024: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Freeze geometry and groups</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    test_x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">float32</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> test_y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> train_ids<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> test_ids<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">e</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> train_ids<span class="syntax-operator">&amp;</span>test_ids <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>test_ids<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Fit training preprocessing</span></span>
+<span class="source-line">    mean<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> scale<span class="syntax-operator">=</span>x<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> tx<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">-</span>mean<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>scale<span class="syntax-punctuation">;</span> vx<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>test_x<span class="syntax-operator">-</span>mean<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>scale</span>
+<span class="source-line">    np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>scale<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> mean<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> vx<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span>vx<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Train within a fixed budget</span></span>
+<span class="source-line">    w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> step <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sigmoid_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span>tx<span class="syntax-punctuation">)</span><span class="syntax-decorator">@w</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.1</span><span class="syntax-operator">*</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> step<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">==</span><span class="syntax-number">40</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Account for every test row</span></span>
+<span class="source-line">    pred<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>vx<span class="syntax-decorator">@w</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span> truth<span class="syntax-operator">=</span>test_y<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    counts<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tp</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>pred<span class="syntax-operator">&amp;</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tn</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-operator">~</span>pred<span class="syntax-operator">&amp;</span><span class="syntax-operator">~</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fp</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>pred<span class="syntax-operator">&amp;</span><span class="syntax-operator">~</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fn</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-operator">~</span>pred<span class="syntax-operator">&amp;</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> counts<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tp</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tn</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fp</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fn</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Compare a baseline</span></span>
+<span class="source-line">    baseline<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>baseline<span class="syntax-operator">!=</span>truth<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>pred<span class="syntax-operator">!=</span>truth<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Expose a subgroup failure</span></span>
+<span class="source-line">    broken<span class="syntax-operator">=</span>pred<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> broken<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-keyword">False</span></span>
+<span class="source-line">    report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>g<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>broken<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span>truth<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>g <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">negative</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">positive</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> report<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">negative</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">positive</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

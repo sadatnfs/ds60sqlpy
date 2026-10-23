@@ -24,7 +24,7 @@ Prefer ordinary differentiable PyTorch operations when they express the computat
 
 Compare [tf-026](../../deep-learning-tensorflow/guides/tf-026.md) after deriving the shared numerical contract.
 
-Keras custom layers often create weights in build and define call; PyTorch modules usually registerstate in __init__ and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.
+Keras custom layers often create weights in build and define call; PyTorch modules usually register state in __init__ and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.
 
 ## Vocabulary and concepts
 

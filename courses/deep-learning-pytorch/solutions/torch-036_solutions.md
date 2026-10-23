@@ -56,7 +56,7 @@ The final record can therefore say local_contracts_pass=True and production_go=F
 
 ## Exercise 1: Freeze the scalar experiment
 
-The question is: Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.
+The question is: Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.
 
 The data identity is fixed before training. The tiny holdout is useful for local mechanics but not sufficient for a broad quality claim.
 
@@ -65,9 +65,9 @@ x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([
 split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2
 ```
 
-**Expected:** 3training and 2 holdout records.
+**Expected:** 3 training and 2 holdout records.
 
-**Verify:** Compare the computed values or written argument with 3training and 2 holdout records.
+**Verify:** Compare the computed values or written argument with 3 training and 2 holdout records.
 
 ## Exercise 2: Train within a declared budget
 

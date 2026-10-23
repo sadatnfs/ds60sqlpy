@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -182,20 +228,20 @@
 <li>Run repository validation.</li>
 </ol>
 <p>Windows:</p>
-<pre><code class="language-powershell"># Recommended: double-click START_DS60.cmd and approve the connected setup.
-# Manual equivalent:
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-&amp; .\scripts\bootstrap_windows.ps1
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor
-&amp; $CoursePython scripts\course.py catalog
-&amp; $CoursePython scripts\course.py validate</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Recommended: double-click START_DS60.cmd and approve the connected setup.</span>
+<span class="syntax-comment"># Manual equivalent:</span>
+<span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py catalog
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py validate</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog
 .venv/bin/python scripts/course.py validate</code></pre>
@@ -203,24 +249,24 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <h3 id="confirm-offline-readiness">Confirm offline readiness<a class="heading-anchor" href="#confirm-offline-readiness" aria-label="Link to this section">#</a></h3>
 <p>Disconnect from the network or disable Wi-Fi and start a fresh terminal.</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor
-&amp; $CoursePython scripts\course.py validate</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py validate</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python scripts/course.py doctor
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py validate</code></pre>
 <p>Then open the planned lesson from a fresh notebook kernel. A cached lesson should not attempt a network request.</p>
 <p>For Hugging Face tooling, these environment variables make accidental online fallback fail fast:</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:HF_HUB_OFFLINE = &quot;1&quot;
-$env:TRANSFORMERS_OFFLINE = &quot;1&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:HF_HUB_OFFLINE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+$env:TRANSFORMERS_OFFLINE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">export HF_HUB_OFFLINE=1
-export TRANSFORMERS_OFFLINE=1</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> HF_HUB_OFFLINE<span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-builtin">export</span> TRANSFORMERS_OFFLINE<span class="syntax-operator">=</span><span class="syntax-number">1</span></code></pre>
 <p>These variables do not create a cache; they only require tools to use one.</p>
 <h3 id="cache-notes">Cache notes<a class="heading-anchor" href="#cache-notes" aria-label="Link to this section">#</a></h3>
 <p>Common default locations include:</p>
@@ -231,11 +277,11 @@ export TRANSFORMERS_OFFLINE=1</code></pre>
 </ul>
 <p>Locations can vary by operating system and environment configuration. Do not commit machine caches to the repository.</p>
 <p>Prepare the Seaborn datasets currently used by the historical lessons in a scratch notebook while connected:</p>
-<pre><code class="language-python">import seaborn as sns
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns
 
-for name in (&quot;tips&quot;, &quot;titanic&quot;, &quot;penguins&quot;):
-    frame = sns.load_dataset(name)
-    print(name, frame.shape)</code></pre>
+<span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tips</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">titanic</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">penguins</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    frame <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span></code></pre>
 <p>Expect three nonempty shapes. Then disconnect, restart the kernel, and repeat the cell. A successful connected load alone does not prove the second run avoids a network lookup. <code>HF_HUB_OFFLINE</code> only controls Hugging Face libraries; it does not disable Seaborn, pip, Docker pulls, or arbitrary HTTP requests. For downloaded model weights, exercise the exact model identifier and revision that the lesson uses, or choose its documented local fallback.</p>
 <h3 id="fully-disconnected-installation">Fully disconnected installation<a class="heading-anchor" href="#fully-disconnected-installation" aria-label="Link to this section">#</a></h3>
 <p>A completely offline fresh-machine installation requires a separately prepared bundle containing, at minimum:</p>
@@ -251,21 +297,21 @@ for name in (&quot;tips&quot;, &quot;titanic&quot;, &quot;penguins&quot;):
 <p>The Git repository alone is not that bundle. If you build one, generate it on a connected machine for a specific operating system, CPU architecture, and Python version, then install wheels with <code>--no-index --find-links</code>. Do not claim another platform is supported until that bundle is tested there.</p>
 <h3 id="optional-package-only-offline-bundle">Optional package-only offline bundle<a class="heading-anchor" href="#optional-package-only-offline-bundle" aria-label="Link to this section">#</a></h3>
 <p>On a connected machine matching the target OS, CPU, and Python version, create a course wheel and Core dependency wheels in an ignored folder:</p>
-<pre><code class="language-powershell"># Windows, after resolving $CoursePython as above
-&amp; $CoursePython -m pip wheel --wheel-dir artifacts\wheelhouse &quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-.venv/bin/python -m pip wheel --wheel-dir artifacts/wheelhouse &quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows, after resolving $CoursePython as above</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip wheel <span class="syntax-punctuation">-</span>-wheel-dir artifacts<span class="syntax-punctuation">\</span>wheelhouse <span class="syntax-string">&quot;</span><span class="syntax-string">.[notebooks,data,quality,bridge,professional,sql-notebooks]</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+.venv/bin/python -m pip wheel --wheel-dir artifacts/wheelhouse <span class="syntax-string">&quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</span></code></pre>
 <p>On the offline machine, install Python first, copy the repository and matching wheelhouse, then create <code>.venv</code> and install the built course wheel:</p>
-<pre><code class="language-powershell"># Native Windows Python.org route
-py -3.12 -m venv .venv
-$CoursePython = (Resolve-Path .\.venv\Scripts\python.exe).Path
-&amp; $CoursePython -m pip install --no-index --find-links artifacts\wheelhouse &quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;
-&amp; $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;
-&amp; $CoursePython scripts\course.py doctor --no-database</code></pre>
-<pre><code class="language-bash"># macOS/Linux; use python3.11 if that is the bundle&#x27;s interpreter
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Native Windows Python.org route</span>
+py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv <span class="syntax-punctuation">.</span>venv
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install <span class="syntax-punctuation">-</span>-no-index <span class="syntax-punctuation">-</span>-find-links artifacts<span class="syntax-punctuation">\</span>wheelhouse <span class="syntax-string">&quot;</span><span class="syntax-string">ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m ipykernel install <span class="syntax-punctuation">-</span>-user <span class="syntax-punctuation">-</span>-name ds60sqlpy <span class="syntax-punctuation">-</span>-display-name <span class="syntax-string">&quot;</span><span class="syntax-string">Python (ds60sqlpy)</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor <span class="syntax-punctuation">-</span>-no-database</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux; use python3.11 if that is the bundle&#x27;s interpreter</span>
 python3.12 -m venv .venv
-.venv/bin/python -m pip install --no-index --find-links artifacts/wheelhouse &quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;
-.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;
+.venv/bin/python -m pip install --no-index --find-links artifacts/wheelhouse <span class="syntax-string">&quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</span>
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span>
 .venv/bin/python scripts/course.py doctor --no-database</code></pre>
 <p>Installing the wheel avoids an offline source build. Keep the repository and installed package versions in sync. This is a package-only bundle, separate from a standalone application: it omits Python, PostgreSQL, VS Code, extensions, datasets, and models. Default setup scripts perform a connected installation; they are not offline bundle installers. Verify the intended workflow on the actual target OS before distributing it. See <a href="https://pip.pypa.io/en/stable/cli/pip_wheel/">pip wheel</a> and <a href="https://pip.pypa.io/en/stable/user_guide/#installing-from-local-packages">installing local packages</a>.</p>
 <h3 id="adding-a-lesson">Adding a lesson<a class="heading-anchor" href="#adding-a-lesson" aria-label="Link to this section">#</a></h3>

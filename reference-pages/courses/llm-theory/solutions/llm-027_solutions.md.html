@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,43 +173,43 @@
 <h3 id="exercise-1-weight-token-losses">Exercise 1: Weight token losses<a class="heading-anchor" href="#exercise-1-weight-token-losses" aria-label="Link to this section">#</a></h3>
 <p>The question is: Combine document mean losses1 and3 with token counts1 and3.</p>
 <p>The two statistics answer different questions. Neither should be labelled average loss without naming its weighting unit.</p>
-<pre><code class="language-python">means=np.array([1.,3.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==2.5 and means.mean()==2</code></pre>
-<p><strong>Expected:</strong> token mean2.5; document mean2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with token mean2.5; document mean2.</p>
+<pre class="highlighted-code"><code class="language-python">means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
+<p><strong>Expected:</strong> token mean 2.5; document mean 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with token mean 2.5; document mean 2.</p>
 <h3 id="exercise-2-build-a-calibration-bin">Exercise 2: Build a calibration bin<a class="heading-anchor" href="#exercise-2-build-a-calibration-bin" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single bin.</p>
 <p>The gap between confidence and frequency is observable for this small sample. Its sampling uncertainty remains large, so the bin is not a population guarantee.</p>
-<pre><code class="language-python">confidence=np.array([.6,.8,.8,1.]); correct=np.array([1,1,0,1])
-assert len(confidence)==4; np.testing.assert_allclose(confidence.mean(),.8,atol=1e-12,rtol=0); assert correct.mean()==.75</code></pre>
+<pre class="highlighted-code"><code class="language-python">confidence<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> correct<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> correct<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.75</span></code></pre>
 <p><strong>Expected:</strong> count4,mean confidence.8,accuracy.75.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with count4,mean confidence.8,accuracy.75.</p>
 <h3 id="exercise-3-represent-an-empty-bin">Exercise 3: Represent an empty bin<a class="heading-anchor" href="#exercise-3-represent-an-empty-bin" aria-label="Link to this section">#</a></h3>
 <p>The question is: Select confidence values below.5 and summarize without fabricating a rate.</p>
 <p>Zero accuracy would imply observed failures, while perfect accuracy would imply observed successes. An empty bin supports neither statement.</p>
-<pre><code class="language-python">mask=confidence&lt;.5; summary={&#x27;count&#x27;:int(mask.sum()),&#x27;accuracy&#x27;:None if not mask.any() else float(correct[mask].mean())}
-assert summary=={&#x27;count&#x27;:0,&#x27;accuracy&#x27;:None}</code></pre>
+<pre class="highlighted-code"><code class="language-python">mask<span class="syntax-operator">=</span>confidence<span class="syntax-operator">&lt;</span><span class="syntax-number">.5</span><span class="syntax-punctuation">;</span> summary<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>mask<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">None</span> <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> mask<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">else</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">[</span>mask<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> summary<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> count0 and accuracyNone.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with count0 and accuracyNone.</p>
 <h3 id="exercise-4-check-boundary-membership">Exercise 4: Check boundary membership<a class="heading-anchor" href="#exercise-4-check-boundary-membership" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use bins[.5,.8) and[.8,1] on the fixture.</p>
 <p>A value exactly on a boundary must enter only one bin. Double inclusion or omission changes denominators and can distort calibration plots.</p>
-<pre><code class="language-python">low=(confidence&gt;=.5)&amp;(confidence&lt;.8); high=(confidence&gt;=.8)&amp;(confidence&lt;=1)
-assert (int(low.sum()),int(high.sum()))==(1,3) and int((low|high).sum())==4</code></pre>
+<pre class="highlighted-code"><code class="language-python">low<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">&lt;</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> high<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>low<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>high<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>low<span class="syntax-operator">|</span>high<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> counts1 and3, total4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with counts1 and3, total4.</p>
 <h3 id="exercise-5-align-paired-errors">Exercise 5: Align paired errors<a class="heading-anchor" href="#exercise-5-align-paired-errors" aria-label="Link to this section">#</a></h3>
-<p>The question is: Compare dictionariesA q1=0,q2=1 andB q2=0,q1=1 by IDs.</p>
+<p>The question is: Compare dictionariesA q1=0,q2=1 and B q2=0,q1=1 by IDs.</p>
 <p>A zero mean can hide opposite per-question outcomes. Pairing preserves which system fails on which case.</p>
-<pre><code class="language-python">a={&#x27;q1&#x27;:0,&#x27;q2&#x27;:1}; b={&#x27;q2&#x27;:0,&#x27;q1&#x27;:1}; ids=sorted(a)
-diff=np.array([a[i]-b[i] for i in ids]); np.testing.assert_array_equal(diff,[-1,1]); assert diff.mean()==0</code></pre>
+<pre class="highlighted-code"><code class="language-python">a<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> b<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> ids<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span>
+diff<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>b<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> ids<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>diff<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> diff<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> differences[-1,1], mean0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with differences[-1,1], mean0.</p>
 <h3 id="exercise-6-reject-incompatible-tokenizer-scores">Exercise 6: Reject incompatible tokenizer scores<a class="heading-anchor" href="#exercise-6-reject-incompatible-tokenizer-scores" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare evaluation metadata with tokenizer hashv1 versusv2.</p>
 <p>The same text can be divided into different numbers and identities of tokens. A new common evaluation unit is needed before treating the scores as directly comparable.</p>
-<pre><code class="language-python">left={&#x27;tokenizer&#x27;:&#x27;v1&#x27;,&#x27;unit&#x27;:&#x27;token&#x27;}; right={&#x27;tokenizer&#x27;:&#x27;v2&#x27;,&#x27;unit&#x27;:&#x27;token&#x27;}
-assert left!=right</code></pre>
+<pre class="highlighted-code"><code class="language-python">left<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tokenizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">token</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> right<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tokenizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">token</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> left<span class="syntax-operator">!=</span>right</code></pre>
 <p><strong>Expected:</strong> direct token-loss comparison marked incompatible.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with direct token-loss comparison marked incompatible.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

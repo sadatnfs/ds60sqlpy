@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A causal question compares interventions, not merely rows with different labels. Let Y(1) and Y(0) be the outcome the same unit would have under treatment and control. Only one is observed. The average treatment effect is E[Y(1)-Y(0)], so missing counterfactual outcomes are built into the question, even in a perfectly logged dataset.</p>
 <h4 id="derive-backdoor-standardization">Derive backdoor standardization<a class="heading-anchor" href="#derive-backdoor-standardization" aria-label="Link to this section">#</a></h4>
-<p>Suppose X contains a sufficient set of pretreatment common causes. Under consistency, conditional exchangeability Y(a) independent of A given X, and positivity P(A=a|X=x)&gt;0, the intervention mean is E[Y(a)]=sum_x E[Y|A=a,X=x]P(X=x). Consistency connects observed outcomes to potential outcomes, exchangeability permits using comparable observed groups, and positivity ensures each required conditional mean is supported. The formula averages both interventions over the same target covariate distribution.</p>
+<p>Suppose X contains a sufficient set of pretreatment common causes. Under consistency, conditional exchangeability Y(a) independent of A given X, and positivity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>∣</mo><mi>X</mi><mo>=</mo><mi>x</mi><mo stretchy="false">)</mo><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\Pr(A=a\mid X=x)&gt;0</annotation></semantics></math>, the intervention mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><mi>Y</mi><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo><mo>=</mo><msub><mo>∑</mo><mi>x</mi></msub><mi>𝔼</mi><mo stretchy="false">[</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>X</mi><mo>=</mo><mi>x</mi><mo stretchy="false">]</mo><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>X</mi><mo>=</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[Y(a)]=\sum_x\mathbb{E}[Y\mid A=a,X=x]\Pr(X=x)</annotation></semantics></math>. Consistency connects observed outcomes to potential outcomes, exchangeability permits using comparable observed groups, and positivity ensures each required conditional mean is supported. The formula averages both interventions over the same target covariate distribution.</p>
 <h4 id="read-a-graph-before-adjusting">Read a graph before adjusting<a class="heading-anchor" href="#read-a-graph-before-adjusting" aria-label="Link to this section">#</a></h4>
 <p>A common cause X with arrows to A and Y creates a backdoor path, which conditioning on X can block. A mediator M on A-&gt;M-&gt;Y carries part of the treatment effect; conditioning on M changes a total-effect question. A collider C on A-&gt;C&lt;-U-&gt;Y blocks a path until conditioning on C opens it. These are different roles. Including every available predictor is not a safe causal-adjustment strategy.</p>
 <p>The graph is a record of assumptions, not a picture discovered with certainty from correlations. Ask what causes selection, measurement and follow-up. Then identify the target before selecting an estimator. Predictive model accuracy evaluates a different property from identification.</p>
@@ -189,7 +235,7 @@
 <p>A defensible report states which assumptions are design-supported, which are model-based and which remain untestable. Partial identification or sensitivity analysis can communicate limits honestly when a point effect is not recoverable. That is useful decision evidence, not an analytical failure.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_15.py.html">chapter_15.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_15.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_15.py</code></pre>
 <h4 id="the-same-outcome-models-give-a-reversed-naive-contrast">The same outcome models give a reversed naive contrast<a class="heading-anchor" href="#the-same-outcome-models-give-a-reversed-naive-contrast" aria-label="Link to this section">#</a></h4>
 <p>Treatment improves both strata by one. Treated units are concentrated in the low-baseline stratum, while controls are mostly in the high-baseline stratum. Their raw mean difference is minus 5.4. Standardizing each intervention to the same population gives plus one, provided the strata are a valid adjustment set.</p>
 <h4 id="selection-opens-an-association">Selection opens an association<a class="heading-anchor" href="#selection-opens-an-association" aria-label="Link to this section">#</a></h4>
@@ -197,37 +243,37 @@
 <h4 id="ate-and-att-can-both-be-correct">ATE and ATT can both be correct<a class="heading-anchor" href="#ate-and-att-can-both-be-correct" aria-label="Link to this section">#</a></h4>
 <p>Conditional effects one and five average to 1.8 in a population mostly in the first stratum, but to 4.2 among treated units mostly in the second. The difference is target weighting, not estimator disagreement. State which population owns the decision.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def standardization():
-    treated_mean=np.array([2.,10.]);control_mean=np.array([1.,9.])
-    target=np.array([.5,.5])
-    treated_composition=np.array([.9,.1]);control_composition=np.array([.1,.9])
-    naive=treated_mean@treated_composition-control_mean@control_composition
-    ate=(treated_mean-control_mean)@target
-    assert np.isclose(naive,-5.4) and np.isclose(ate,1.)
-    print(&quot;Naive difference:&quot;,naive,&quot;standardized causal contrast under assumptions:&quot;,ate)
+<span class="syntax-keyword">def</span> <span class="syntax-function">standardization</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    treated_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">10.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>control_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    target<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    treated_composition<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>control_composition<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    naive<span class="syntax-operator">=</span>treated_mean<span class="syntax-decorator">@treated_composition</span><span class="syntax-operator">-</span>control_mean<span class="syntax-decorator">@control_composition</span>
+    ate<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>treated_mean<span class="syntax-operator">-</span>control_mean<span class="syntax-punctuation">)</span><span class="syntax-decorator">@target</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>naive<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">5.4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ate<span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Naive difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>naive<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">standardized causal contrast under assumptions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ate<span class="syntax-punctuation">)</span>
 
-def collider_selection():
-    a=np.array([0,0,1,1]);u=np.array([0,1,0,1]);y=u.copy()
-    assert np.isclose(np.corrcoef(a,y)[0,1],0)
-    selected=(a+u)&gt;0
-    selected_correlation=np.corrcoef(a[selected],y[selected])[0,1]
-    assert selected_correlation &lt; 0
-    print(&quot;Unconditional correlation: 0; after selection:&quot;,selected_correlation)
+<span class="syntax-keyword">def</span> <span class="syntax-function">collider_selection</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>u<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>u<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>corrcoef<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    selected<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">+</span>u<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span>
+    selected_correlation<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>corrcoef<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span>selected<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">[</span>selected<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> selected_correlation <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Unconditional correlation: 0; after selection:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>selected_correlation<span class="syntax-punctuation">)</span>
 
-def effect_targets():
-    conditional=np.array([1.,5.])
-    population=np.array([.8,.2]);treated=np.array([.2,.8])
-    ate=conditional@population;att=conditional@treated
-    assert np.isclose(ate,1.8) and np.isclose(att,4.2)
-    print(&quot;ATE:&quot;,ate,&quot;ATT:&quot;,att)
+<span class="syntax-keyword">def</span> <span class="syntax-function">effect_targets</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    conditional<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    population<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>treated<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    ate<span class="syntax-operator">=</span>conditional<span class="syntax-decorator">@population</span><span class="syntax-punctuation">;</span>att<span class="syntax-operator">=</span>conditional<span class="syntax-decorator">@treated</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ate<span class="syntax-punctuation">,</span><span class="syntax-number">1.8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>att<span class="syntax-punctuation">,</span><span class="syntax-number">4.2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ATE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ate<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ATT:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>att<span class="syntax-punctuation">)</span>
 
-def main():
-    standardization();collider_selection();effect_targets()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    standardization<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>collider_selection<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>effect_targets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does adding more controls improve causal validity?</strong> Only if their causal roles justify adjustment. Pretreatment common causes can block bias paths; colliders can open them, and mediators can remove part of the total effect. Use the estimand and a defensible causal model to choose controls.</p>
 <p><strong>Interview: How can two accurate models disagree about an intervention?</strong> Prediction learns the observational distribution. Different causal mechanisms can produce that same distribution yet imply different responses to intervention. Identification assumptions supply information that predictive fit cannot.</p>

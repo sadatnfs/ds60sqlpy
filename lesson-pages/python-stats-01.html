@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -367,17 +413,19 @@
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run the learner file and predict the treatment-minus-control mean difference.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_stats_01_resampling_experiments.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_stats_01_resampling_experiments<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
 <p>The fixture has eight completed units per arm, identical baseline score distributions, and treatment outcomes shifted upward by two. It is deliberately small enough for all <code>C(16, 8) = 12,870</code> assignments to be enumerated.</p>
 <p>The solution reports the estimate, standardized effect, bootstrap interval, exact permutation p-value, approximate sample plan, and adjusted p-values. None alone establishes that a real-world causal design was implemented.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_stats_01_resampling_experiments.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_stats_01_resampling_experiments<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -389,33 +437,33 @@
 <li><strong>estimand + assignment mechanism:</strong> defines which causal contrast is identified and which assumptions support it.</li>
 </ul>
 <h5 id="guide--micro-example-a-bootstrap-a-mean-difference-with-a-seeded-generator">Micro-example A — bootstrap a mean difference with a seeded generator<a class="heading-anchor" href="#guide--micro-example-a-bootstrap-a-mean-difference-with-a-seeded-generator" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
-treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
-rng = np.random.default_rng(6101)
-draws = np.empty(5_000)
-for index in range(draws.size):
-    c = rng.choice(control, size=control.size, replace=True)
-    t = rng.choice(treatment, size=treatment.size, replace=True)
-    draws[index] = t.mean() - c.mean()
-interval = np.quantile(draws, [0.025, 0.975])
-print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</code></pre>
+control <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+treatment <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">6101</span><span class="syntax-punctuation">)</span>
+draws <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>draws<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    c <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>control<span class="syntax-operator">.</span>size<span class="syntax-punctuation">,</span> replace<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    t <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>treatment<span class="syntax-operator">.</span>size<span class="syntax-punctuation">,</span> replace<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    draws<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> t<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> c<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+interval <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>quantile<span class="syntax-punctuation">(</span>draws<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.025</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.975</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">estimate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> treatment<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> control<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">interval</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> interval<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.</p>
 <p><strong>Why it matters:</strong> Rows are independent units and each group&#x27;s empirical distribution is a useful population proxy.</p>
 <h5 id="guide--micro-example-b-build-a-randomization-style-null-distribution">Micro-example B — build a randomization-style null distribution<a class="heading-anchor" href="#guide--micro-example-b-build-a-randomization-style-null-distribution" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)
-assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)
-observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()
-rng = np.random.default_rng(6102)
-null = []
-for _ in range(5_000):
-    shuffled = rng.permutation(assigned)
-    null.append(outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean())
-p_value = np.mean(np.abs(null) &gt;= abs(observed))
-print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</code></pre>
+outcomes <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+assigned <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+observed <span class="syntax-operator">=</span> outcomes<span class="syntax-punctuation">[</span>assigned <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> outcomes<span class="syntax-punctuation">[</span>assigned <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">6102</span><span class="syntax-punctuation">)</span>
+null <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    shuffled <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>permutation<span class="syntax-punctuation">(</span>assigned<span class="syntax-punctuation">)</span>
+    null<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>outcomes<span class="syntax-punctuation">[</span>shuffled <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> outcomes<span class="syntax-punctuation">[</span>shuffled <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+p_value <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>null<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> observed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">two_sided_p</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> p_value<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The null distribution comes from assignments consistent with the shuffle rule, not from a parametric t formula.</p>
 <p><strong>Why it matters:</strong> Treatment labels are exchangeable under the sharp null and the design had no cluster/strata restrictions.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -511,10 +559,10 @@ print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</code>
 <li>The causal claim changes when randomization or attrition assumptions fail.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_stats_01_resampling_experiments -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_stats_01_resampling_experiments -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_stats_01_resampling_experiments -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_stats_01_resampling_experiments -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Bootstrap is said to remove bias:</strong> it quantifies uncertainty under its resampling assumptions; it does not repair confounding.</li>
@@ -530,7 +578,7 @@ print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</code>
 <p>Carry the experiment plan into Python Days 35 and 45. Use <code>python-ml-01</code> to bind the resulting data snapshot, feature schema, evaluation evidence, and promoted artifact into a reproducible delivery record.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize bootstrap and permutation resampling, experimental estimands, and causal boundaries. Use exactly these maintained learner materials:
@@ -589,260 +637,260 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-stats-01 learner lab: resampling and experiment decisions.</span>
-<span> </span>
-<span>Professional learner deep dive (python-stats-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Resampling approximates repeated sampling under an explicit scheme. A bootstrap samples</span>
-<span>observational units with replacement to estimate an estimator&#x27;s sampling variability. A</span>
-<span>permutation test shuffles labels under an exchangeability/null assumption to build a reference</span>
-<span>distribution. Clustered or temporal data needs cluster/block schemes.  In an experiment, the</span>
-<span>estimand states the effect being targeted, such as difference in means under assigned treatment.</span>
-<span>Random assignment supports causal interpretation when assignment, interference, attrition,</span>
-<span>compliance, and measurement assumptions are credible. Observational adjustment does not recreate</span>
-<span>randomization automatically.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* resampling unit: matches the independent assignment/observation grain rather than blindly</span>
-<span>  sampling rows.</span>
-<span>* seeded bootstrap/permutation loop: produces a reproducible distribution of a declared</span>
-<span>  statistic with Monte Carlo error.</span>
-<span>* estimand + assignment mechanism: defines which causal contrast is identified and which</span>
-<span>  assumptions support it.</span>
-<span> </span>
-<span>Micro-example A — bootstrap a mean difference with a seeded generator::</span>
-<span> </span>
-<span>    import numpy as np</span>
-<span> </span>
-<span>    control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])</span>
-<span>    treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])</span>
-<span>    rng = np.random.default_rng(6101)</span>
-<span>    draws = np.empty(5_000)</span>
-<span>    for index in range(draws.size):</span>
-<span>        c = rng.choice(control, size=control.size, replace=True)</span>
-<span>        t = rng.choice(treatment, size=treatment.size, replace=True)</span>
-<span>        draws[index] = t.mean() - c.mean()</span>
-<span>    interval = np.quantile(draws, [0.025, 0.975])</span>
-<span>    print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</span>
-<span> </span>
-<span>Expected: The resampled interval describes uncertainty under independent within-group</span>
-<span>          resampling; the small sample makes it wide/discrete.</span>
-<span> </span>
-<span>Micro-example B — build a randomization-style null distribution::</span>
-<span> </span>
-<span>    import numpy as np</span>
-<span> </span>
-<span>    outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)</span>
-<span>    assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)</span>
-<span>    observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()</span>
-<span>    rng = np.random.default_rng(6102)</span>
-<span>    null = []</span>
-<span>    for _ in range(5_000):</span>
-<span>        shuffled = rng.permutation(assigned)</span>
-<span>        null.append(</span>
-<span>            outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean()</span>
-<span>        )</span>
-<span>    p_value = np.mean(np.abs(null) &gt;= abs(observed))</span>
-<span>    print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</span>
-<span> </span>
-<span>Expected: The null distribution comes from assignments consistent with the shuffle rule, not</span>
-<span>          from a parametric t formula.</span>
-<span> </span>
-<span>Debugging rule: Write the estimand, unit, assignment/sampling mechanism, statistic, resampling</span>
-<span>                rule, seed/runs, interval/test convention, and assumption violations.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from collections.abc import Callable, Sequence</span>
-<span>from statistics import mean</span>
-<span>from typing import Literal</span>
-<span> </span>
-<span> </span>
-<span>def difference_in_means(control: Sequence[float], treatment: Sequence[float]) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Worked example: treatment mean minus control mean.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if not control or not treatment:</span>
-<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
-<span>    return mean(treatment) - mean(control)</span>
-<span> </span>
-<span> </span>
-<span>def standardized_mean_difference(</span>
-<span>    control: Sequence[float],</span>
-<span>    treatment: Sequence[float],</span>
-<span>) -&gt; float:</span>
-<span>    &quot;&quot;&quot;TODO: divide the mean difference by the pooled sample standard deviation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete standardized_mean_difference&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def holm_adjust(p_values: Sequence[float]) -&gt; list[float]:</span>
-<span>    &quot;&quot;&quot;TODO: control family-wise error with Holm&#x27;s step-down procedure.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete holm_adjust&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def claim_scope(</span>
-<span>    *,</span>
-<span>    randomized: bool,</span>
-<span>    allocation_intact: bool,</span>
-<span>    severe_attrition: bool,</span>
-<span>) -&gt; Literal[&quot;causal&quot;, &quot;associational&quot;]:</span>
-<span>    &quot;&quot;&quot;TODO: permit a causal claim only when all design protections hold.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete claim_scope&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    control = [10.0, 11.0, 9.0]</span>
-<span>    treatment = [12.0, 13.0, 11.0]</span>
-<span>    print(&quot;Worked mean difference:&quot;, difference_in_means(control, treatment))</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;effect size&quot;, lambda: standardized_mean_difference(control, treatment)),</span>
-<span>        (&quot;multiple comparisons&quot;, lambda: holm_adjust([0.01, 0.04, 0.03])),</span>
-<span>        (</span>
-<span>            &quot;claim boundary&quot;,</span>
-<span>            lambda: claim_scope(</span>
-<span>                randomized=True,</span>
-<span>                allocation_intact=True,</span>
-<span>                severe_attrition=False,</span>
-<span>            ),</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_stats_01_resampling_experiments.md</span>
-<span>#</span>
-<span># Exercise 1 — Define the experiment before analysis</span>
-<span># Prompt: Write an `ExperimentPlan` containing: - assignment unit, - one primary metric</span>
-<span># and window, - minimum sample per arm, - alpha, - intended analysis, - planned</span>
-<span># stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Complete standardized effect</span>
-<span># Prompt: Use the pooled sample standard deviation. Reject groups smaller than two and</span>
-<span># zero pooled variance. Explain raw units and standardized units side by side.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Bootstrap the difference</span>
-<span># Prompt: Resample each arm independently with replacement, compute 2,000 differences,</span>
-<span># sort them, and select percentile endpoints. Repeat with the same seed and verify</span>
-<span># equality. Change the seed and expect small endpoint variation, not a different</span>
-<span># conclusion guaranteed by design.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Permute assignments</span>
-<span># Prompt: Pool outcomes and enumerate treatment-index combinations when feasible. Use a</span>
-<span># two-sided comparison to the observed absolute difference. For large data, use seeded</span>
-<span># Monte Carlo assignments and the plus-one p-value correction. State why permuting</span>
-<span># individual rows is invalid if assignment occurred by account or site.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Plan sample size</span>
-<span># Prompt: Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain</span>
-<span># why variance uncertainty, clustering, attrition, noncompliance, and a binary metric</span>
-<span># require a more specific planner.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Control a comparison family</span>
-<span># Prompt: Complete `holm_adjust` for three p-values. Preserve original order and enforce</span>
-<span># monotonic adjusted values after sorting. Identify the family before viewing results;</span>
-<span># splitting an inconvenient family after analysis defeats control.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — Check assignment and attrition</span>
-<span># Prompt: Compute baseline standardized difference by arm. Then remove outcomes</span>
-<span># selectively from one arm and explain how that affects causal credibility even if the</span>
-<span># remaining p-value is small.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — Simulate peeking policy</span>
-<span># Prompt: Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s</span>
-<span># simple Bonferroni per-look split illustrates the budget. Compare it with a single final</span>
-<span># look and research group-sequential designs before production use.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — Bound the claim</span>
-<span># Prompt: Complete `claim_scope`. Randomization, intact allocation, and no severe</span>
-<span># attrition permit a causal interpretation under additional assumptions. Observational</span>
-<span># grouping, compromised randomization, or severe differential attrition returns an</span>
-<span># associational scope.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — bootstrap clustered assignments</span>
-<span># Prompt: Extend the experiment fixture with multiple rows per account. Bootstrap</span>
-<span># accounts—not rows—within each arm and compare interval width with the incorrect row</span>
-<span># bootstrap.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — bootstrap a ratio metric</span>
-<span># Prompt: Estimate treatment lift for revenue per active user, preserving each user&#x27;s</span>
-<span># numerator and denominator. Handle a resample with zero denominator and compare ratio-of-</span>
-<span># sums with mean-of-user-ratios.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — apply covariate adjustment without leakage</span>
-<span># Prompt: Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment</span>
-<span># coefficient without post-treatment information and compare unadjusted/adjusted variance</span>
-<span># and mean effect.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — separate intention-to-treat from treatment-on-treated</span>
-<span># Prompt: Simulate assigned treatment with imperfect compliance. Compute the intention-to-</span>
-<span># treat effect by assignment and explain why comparing actual takers with non-takers is</span>
-<span># generally confounded.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — perform missing-outcome sensitivity</span>
-<span># Prompt: Create differential attrition by arm. Report complete-case results and bounded</span>
-<span># best/worst-case outcomes under a declared feasible outcome range.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 15 — simulate sequential false positives</span>
-<span># Prompt: Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate</span>
-<span># ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a</span>
-<span># clearly labeled exploratory monitor.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 16 — pre-specify heterogeneous effects</span>
-<span># Prompt: Choose two domain-motivated subgroups before analysis, estimate effects with</span>
-<span># uncertainty and support, and adjust the planned comparison family. Contrast this with</span>
-<span># mining many cuts for the largest lift.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 17 — run clustered randomization inference</span>
-<span># Prompt: For a site-randomized experiment, permute site assignments while keeping all</span>
-<span># rows within a site together. Compare with invalid row-level permutation and state the</span>
-<span># sharp-null interpretation.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 18 — produce an auditable analysis packet</span>
-<span># Prompt: Write a deterministic JSON/Markdown packet containing plan hash, data</span>
-<span># fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval,</span>
-<span># adjusted p-values, claim scope, code version, and limitations.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-stats-01 learner lab: resampling and experiment decisions.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-stats-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Resampling approximates repeated sampling under an explicit scheme. A bootstrap samples</span></span>
+<span class="source-line"><span class="syntax-string">observational units with replacement to estimate an estimator&#x27;s sampling variability. A</span></span>
+<span class="source-line"><span class="syntax-string">permutation test shuffles labels under an exchangeability/null assumption to build a reference</span></span>
+<span class="source-line"><span class="syntax-string">distribution. Clustered or temporal data needs cluster/block schemes.  In an experiment, the</span></span>
+<span class="source-line"><span class="syntax-string">estimand states the effect being targeted, such as difference in means under assigned treatment.</span></span>
+<span class="source-line"><span class="syntax-string">Random assignment supports causal interpretation when assignment, interference, attrition,</span></span>
+<span class="source-line"><span class="syntax-string">compliance, and measurement assumptions are credible. Observational adjustment does not recreate</span></span>
+<span class="source-line"><span class="syntax-string">randomization automatically.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* resampling unit: matches the independent assignment/observation grain rather than blindly</span></span>
+<span class="source-line"><span class="syntax-string">  sampling rows.</span></span>
+<span class="source-line"><span class="syntax-string">* seeded bootstrap/permutation loop: produces a reproducible distribution of a declared</span></span>
+<span class="source-line"><span class="syntax-string">  statistic with Monte Carlo error.</span></span>
+<span class="source-line"><span class="syntax-string">* estimand + assignment mechanism: defines which causal contrast is identified and which</span></span>
+<span class="source-line"><span class="syntax-string">  assumptions support it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — bootstrap a mean difference with a seeded generator::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import numpy as np</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])</span></span>
+<span class="source-line"><span class="syntax-string">    treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])</span></span>
+<span class="source-line"><span class="syntax-string">    rng = np.random.default_rng(6101)</span></span>
+<span class="source-line"><span class="syntax-string">    draws = np.empty(5_000)</span></span>
+<span class="source-line"><span class="syntax-string">    for index in range(draws.size):</span></span>
+<span class="source-line"><span class="syntax-string">        c = rng.choice(control, size=control.size, replace=True)</span></span>
+<span class="source-line"><span class="syntax-string">        t = rng.choice(treatment, size=treatment.size, replace=True)</span></span>
+<span class="source-line"><span class="syntax-string">        draws[index] = t.mean() - c.mean()</span></span>
+<span class="source-line"><span class="syntax-string">    interval = np.quantile(draws, [0.025, 0.975])</span></span>
+<span class="source-line"><span class="syntax-string">    print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The resampled interval describes uncertainty under independent within-group</span></span>
+<span class="source-line"><span class="syntax-string">          resampling; the small sample makes it wide/discrete.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — build a randomization-style null distribution::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import numpy as np</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)</span></span>
+<span class="source-line"><span class="syntax-string">    assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)</span></span>
+<span class="source-line"><span class="syntax-string">    observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()</span></span>
+<span class="source-line"><span class="syntax-string">    rng = np.random.default_rng(6102)</span></span>
+<span class="source-line"><span class="syntax-string">    null = []</span></span>
+<span class="source-line"><span class="syntax-string">    for _ in range(5_000):</span></span>
+<span class="source-line"><span class="syntax-string">        shuffled = rng.permutation(assigned)</span></span>
+<span class="source-line"><span class="syntax-string">        null.append(</span></span>
+<span class="source-line"><span class="syntax-string">            outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean()</span></span>
+<span class="source-line"><span class="syntax-string">        )</span></span>
+<span class="source-line"><span class="syntax-string">    p_value = np.mean(np.abs(null) &gt;= abs(observed))</span></span>
+<span class="source-line"><span class="syntax-string">    print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The null distribution comes from assignments consistent with the shuffle rule, not</span></span>
+<span class="source-line"><span class="syntax-string">          from a parametric t formula.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Write the estimand, unit, assignment/sampling mechanism, statistic, resampling</span></span>
+<span class="source-line"><span class="syntax-string">                rule, seed/runs, interval/test convention, and assumption violations.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statistics <span class="syntax-keyword">import</span> mean</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">difference_in_means</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked example: treatment mean minus control mean.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> control <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> treatment<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">both groups need observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> mean<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> mean<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">standardized_mean_difference</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: divide the mean difference by the pooled sample standard deviation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete standardized_mean_difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">holm_adjust</span><span class="syntax-punctuation">(</span>p_values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: control family-wise error with Holm&#x27;s step-down procedure.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete holm_adjust</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">claim_scope</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    randomized<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    allocation_intact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    severe_attrition<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">causal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">associational</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: permit a causal claim only when all design protections hold.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete claim_scope</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    control <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    treatment <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11.0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked mean difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> difference_in_means<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">effect size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> standardized_mean_difference<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">multiple comparisons</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> holm_adjust<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.04</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.03</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">claim boundary</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> claim_scope<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                randomized<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                allocation_intact<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                severe_attrition<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_stats_01_resampling_experiments.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Define the experiment before analysis</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write an `ExperimentPlan` containing: - assignment unit, - one primary metric</span></span>
+<span class="source-line"><span class="syntax-comment"># and window, - minimum sample per arm, - alpha, - intended analysis, - planned</span></span>
+<span class="source-line"><span class="syntax-comment"># stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete standardized effect</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use the pooled sample standard deviation. Reject groups smaller than two and</span></span>
+<span class="source-line"><span class="syntax-comment"># zero pooled variance. Explain raw units and standardized units side by side.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Bootstrap the difference</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Resample each arm independently with replacement, compute 2,000 differences,</span></span>
+<span class="source-line"><span class="syntax-comment"># sort them, and select percentile endpoints. Repeat with the same seed and verify</span></span>
+<span class="source-line"><span class="syntax-comment"># equality. Change the seed and expect small endpoint variation, not a different</span></span>
+<span class="source-line"><span class="syntax-comment"># conclusion guaranteed by design.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Permute assignments</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Pool outcomes and enumerate treatment-index combinations when feasible. Use a</span></span>
+<span class="source-line"><span class="syntax-comment"># two-sided comparison to the observed absolute difference. For large data, use seeded</span></span>
+<span class="source-line"><span class="syntax-comment"># Monte Carlo assignments and the plus-one p-value correction. State why permuting</span></span>
+<span class="source-line"><span class="syntax-comment"># individual rows is invalid if assignment occurred by account or site.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Plan sample size</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain</span></span>
+<span class="source-line"><span class="syntax-comment"># why variance uncertainty, clustering, attrition, noncompliance, and a binary metric</span></span>
+<span class="source-line"><span class="syntax-comment"># require a more specific planner.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Control a comparison family</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Complete `holm_adjust` for three p-values. Preserve original order and enforce</span></span>
+<span class="source-line"><span class="syntax-comment"># monotonic adjusted values after sorting. Identify the family before viewing results;</span></span>
+<span class="source-line"><span class="syntax-comment"># splitting an inconvenient family after analysis defeats control.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — Check assignment and attrition</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compute baseline standardized difference by arm. Then remove outcomes</span></span>
+<span class="source-line"><span class="syntax-comment"># selectively from one arm and explain how that affects causal credibility even if the</span></span>
+<span class="source-line"><span class="syntax-comment"># remaining p-value is small.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — Simulate peeking policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s</span></span>
+<span class="source-line"><span class="syntax-comment"># simple Bonferroni per-look split illustrates the budget. Compare it with a single final</span></span>
+<span class="source-line"><span class="syntax-comment"># look and research group-sequential designs before production use.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — Bound the claim</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Complete `claim_scope`. Randomization, intact allocation, and no severe</span></span>
+<span class="source-line"><span class="syntax-comment"># attrition permit a causal interpretation under additional assumptions. Observational</span></span>
+<span class="source-line"><span class="syntax-comment"># grouping, compromised randomization, or severe differential attrition returns an</span></span>
+<span class="source-line"><span class="syntax-comment"># associational scope.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — bootstrap clustered assignments</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Extend the experiment fixture with multiple rows per account. Bootstrap</span></span>
+<span class="source-line"><span class="syntax-comment"># accounts—not rows—within each arm and compare interval width with the incorrect row</span></span>
+<span class="source-line"><span class="syntax-comment"># bootstrap.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — bootstrap a ratio metric</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Estimate treatment lift for revenue per active user, preserving each user&#x27;s</span></span>
+<span class="source-line"><span class="syntax-comment"># numerator and denominator. Handle a resample with zero denominator and compare ratio-of-</span></span>
+<span class="source-line"><span class="syntax-comment"># sums with mean-of-user-ratios.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — apply covariate adjustment without leakage</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment</span></span>
+<span class="source-line"><span class="syntax-comment"># coefficient without post-treatment information and compare unadjusted/adjusted variance</span></span>
+<span class="source-line"><span class="syntax-comment"># and mean effect.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — separate intention-to-treat from treatment-on-treated</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Simulate assigned treatment with imperfect compliance. Compute the intention-to-</span></span>
+<span class="source-line"><span class="syntax-comment"># treat effect by assignment and explain why comparing actual takers with non-takers is</span></span>
+<span class="source-line"><span class="syntax-comment"># generally confounded.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — perform missing-outcome sensitivity</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create differential attrition by arm. Report complete-case results and bounded</span></span>
+<span class="source-line"><span class="syntax-comment"># best/worst-case outcomes under a declared feasible outcome range.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15 — simulate sequential false positives</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate</span></span>
+<span class="source-line"><span class="syntax-comment"># ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a</span></span>
+<span class="source-line"><span class="syntax-comment"># clearly labeled exploratory monitor.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16 — pre-specify heterogeneous effects</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Choose two domain-motivated subgroups before analysis, estimate effects with</span></span>
+<span class="source-line"><span class="syntax-comment"># uncertainty and support, and adjust the planned comparison family. Contrast this with</span></span>
+<span class="source-line"><span class="syntax-comment"># mining many cuts for the largest lift.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 17 — run clustered randomization inference</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For a site-randomized experiment, permute site assignments while keeping all</span></span>
+<span class="source-line"><span class="syntax-comment"># rows within a site together. Compare with invalid row-level permutation and state the</span></span>
+<span class="source-line"><span class="syntax-comment"># sharp-null interpretation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 18 — produce an auditable analysis packet</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write a deterministic JSON/Markdown packet containing plan hash, data</span></span>
+<span class="source-line"><span class="syntax-comment"># fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval,</span></span>
+<span class="source-line"><span class="syntax-comment"># adjusted p-values, claim scope, code version, and limitations.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -897,18 +945,18 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Compare seeded resampling with a hand/analytic check, report Monte Carlo error and units, reproduce assignment constraints, and state which causal claims remain unsupported.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
-treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
-rng = np.random.default_rng(6101)
-draws = np.empty(5_000)
-for index in range(draws.size):
-    c = rng.choice(control, size=control.size, replace=True)
-    t = rng.choice(treatment, size=treatment.size, replace=True)
-    draws[index] = t.mean() - c.mean()
-interval = np.quantile(draws, [0.025, 0.975])
-print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</code></pre>
+control <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+treatment <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">6101</span><span class="syntax-punctuation">)</span>
+draws <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-number">5_000</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>draws<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    c <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>control<span class="syntax-operator">.</span>size<span class="syntax-punctuation">,</span> replace<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    t <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>treatment<span class="syntax-operator">.</span>size<span class="syntax-punctuation">,</span> replace<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    draws<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> t<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> c<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+interval <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>quantile<span class="syntax-punctuation">(</span>draws<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.025</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.975</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">estimate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> treatment<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> control<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">interval</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> interval<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1071,277 +1119,277 @@ print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&q
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-stats-01 using deterministic local data.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>import itertools</span>
-<span>import math</span>
-<span>import random</span>
-<span>from collections.abc import Sequence</span>
-<span>from dataclasses import dataclass</span>
-<span>from pathlib import Path</span>
-<span>from statistics import NormalDist, mean, stdev</span>
-<span>from typing import Literal, cast</span>
-<span> </span>
-<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;data&quot; / (&quot;experiment_outcomes.csv&quot;)</span>
-<span>Variant = Literal[&quot;control&quot;, &quot;treatment&quot;]</span>
-<span>ClaimScope = Literal[&quot;causal&quot;, &quot;associational&quot;]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Observation:</span>
-<span>    participant_id: str</span>
-<span>    variant: Variant</span>
-<span>    pre_score: float</span>
-<span>    outcome: float</span>
-<span>    completed: bool</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Interval:</span>
-<span>    lower: float</span>
-<span>    estimate: float</span>
-<span>    upper: float</span>
-<span>    confidence: float</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class PermutationResult:</span>
-<span>    observed_difference: float</span>
-<span>    p_value: float</span>
-<span>    permutations: int</span>
-<span>    exact: bool</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class ExperimentPlan:</span>
-<span>    assignment_unit: str</span>
-<span>    primary_metric: str</span>
-<span>    minimum_sample_per_arm: int</span>
-<span>    alpha: float = 0.05</span>
-<span> </span>
-<span>    def __post_init__(self) -&gt; None:</span>
-<span>        if not self.assignment_unit.strip() or not self.primary_metric.strip():</span>
-<span>            raise ValueError(&quot;assignment unit and primary metric are required&quot;)</span>
-<span>        if self.minimum_sample_per_arm &lt; 2:</span>
-<span>            raise ValueError(&quot;each arm needs at least two planned observations&quot;)</span>
-<span>        if not 0 &lt; self.alpha &lt; 1:</span>
-<span>            raise ValueError(&quot;alpha must be between zero and one&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def load_observations(path: Path = FIXTURE) -&gt; list[Observation]:</span>
-<span>    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        rows = list(csv.DictReader(handle))</span>
-<span>    observations: list[Observation] = []</span>
-<span>    for row in rows:</span>
-<span>        variant_text = row[&quot;variant&quot;]</span>
-<span>        if variant_text not in {&quot;control&quot;, &quot;treatment&quot;}:</span>
-<span>            raise ValueError(f&quot;unknown variant: {variant_text}&quot;)</span>
-<span>        variant = cast(Variant, variant_text)</span>
-<span>        completed = row[&quot;completed&quot;].lower()</span>
-<span>        if completed not in {&quot;true&quot;, &quot;false&quot;}:</span>
-<span>            raise ValueError(&quot;completed must be true or false&quot;)</span>
-<span>        observations.append(</span>
-<span>            Observation(</span>
-<span>                participant_id=row[&quot;participant_id&quot;],</span>
-<span>                variant=variant,</span>
-<span>                pre_score=float(row[&quot;pre_score&quot;]),</span>
-<span>                outcome=float(row[&quot;outcome&quot;]),</span>
-<span>                completed=completed == &quot;true&quot;,</span>
-<span>            )</span>
-<span>        )</span>
-<span>    return observations</span>
-<span> </span>
-<span> </span>
-<span>def split_outcomes(</span>
-<span>    observations: Sequence[Observation],</span>
-<span>) -&gt; tuple[list[float], list[float]]:</span>
-<span>    control = [</span>
-<span>        observation.outcome</span>
-<span>        for observation in observations</span>
-<span>        if observation.completed and observation.variant == &quot;control&quot;</span>
-<span>    ]</span>
-<span>    treatment = [</span>
-<span>        observation.outcome</span>
-<span>        for observation in observations</span>
-<span>        if observation.completed and observation.variant == &quot;treatment&quot;</span>
-<span>    ]</span>
-<span>    if len(control) &lt; 2 or len(treatment) &lt; 2:</span>
-<span>        raise ValueError(&quot;each completed group needs at least two observations&quot;)</span>
-<span>    return control, treatment</span>
-<span> </span>
-<span> </span>
-<span>def difference_in_means(control: Sequence[float], treatment: Sequence[float]) -&gt; float:</span>
-<span>    if not control or not treatment:</span>
-<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
-<span>    return mean(treatment) - mean(control)</span>
-<span> </span>
-<span> </span>
-<span>def standardized_mean_difference(</span>
-<span>    control: Sequence[float],</span>
-<span>    treatment: Sequence[float],</span>
-<span>) -&gt; float:</span>
-<span>    if len(control) &lt; 2 or len(treatment) &lt; 2:</span>
-<span>        raise ValueError(&quot;effect size needs at least two observations per group&quot;)</span>
-<span>    pooled_variance = (</span>
-<span>        (len(control) - 1) * stdev(control) ** 2 + (len(treatment) - 1) * stdev(treatment) ** 2</span>
-<span>    ) / (len(control) + len(treatment) - 2)</span>
-<span>    if pooled_variance == 0:</span>
-<span>        raise ValueError(&quot;standardized effect is undefined at zero variance&quot;)</span>
-<span>    return difference_in_means(control, treatment) / math.sqrt(pooled_variance)</span>
-<span> </span>
-<span> </span>
-<span>def bootstrap_difference_interval(</span>
-<span>    control: Sequence[float],</span>
-<span>    treatment: Sequence[float],</span>
-<span>    *,</span>
-<span>    resamples: int = 2_000,</span>
-<span>    confidence: float = 0.95,</span>
-<span>    seed: int = 20260730,</span>
-<span>) -&gt; Interval:</span>
-<span>    if not control or not treatment:</span>
-<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
-<span>    if resamples &lt; 100:</span>
-<span>        raise ValueError(&quot;use at least 100 bootstrap resamples&quot;)</span>
-<span>    if not 0 &lt; confidence &lt; 1:</span>
-<span>        raise ValueError(&quot;confidence must be between zero and one&quot;)</span>
-<span>    generator = random.Random(seed)</span>
-<span>    estimates: list[float] = []</span>
-<span>    for _ in range(resamples):</span>
-<span>        sampled_control = [generator.choice(control) for _ in control]</span>
-<span>        sampled_treatment = [generator.choice(treatment) for _ in treatment]</span>
-<span>        estimates.append(difference_in_means(sampled_control, sampled_treatment))</span>
-<span>    estimates.sort()</span>
-<span>    tail = (1.0 - confidence) / 2.0</span>
-<span>    lower_index = max(0, math.floor(tail * resamples))</span>
-<span>    upper_index = min(resamples - 1, math.ceil((1.0 - tail) * resamples) - 1)</span>
-<span>    return Interval(</span>
-<span>        lower=estimates[lower_index],</span>
-<span>        estimate=difference_in_means(control, treatment),</span>
-<span>        upper=estimates[upper_index],</span>
-<span>        confidence=confidence,</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def permutation_test(</span>
-<span>    control: Sequence[float],</span>
-<span>    treatment: Sequence[float],</span>
-<span>    *,</span>
-<span>    maximum_exact: int = 100_000,</span>
-<span>    monte_carlo_resamples: int = 10_000,</span>
-<span>    seed: int = 20260730,</span>
-<span>) -&gt; PermutationResult:</span>
-<span>    if not control or not treatment:</span>
-<span>        raise ValueError(&quot;both groups need observations&quot;)</span>
-<span>    pooled = tuple(control) + tuple(treatment)</span>
-<span>    treatment_size = len(treatment)</span>
-<span>    observed = difference_in_means(control, treatment)</span>
-<span>    combination_count = math.comb(len(pooled), treatment_size)</span>
-<span> </span>
-<span>    def permuted_difference(treatment_indices: set[int]) -&gt; float:</span>
-<span>        permuted_treatment = [</span>
-<span>            value for index, value in enumerate(pooled) if index in treatment_indices</span>
-<span>        ]</span>
-<span>        permuted_control = [</span>
-<span>            value for index, value in enumerate(pooled) if index not in treatment_indices</span>
-<span>        ]</span>
-<span>        return difference_in_means(permuted_control, permuted_treatment)</span>
-<span> </span>
-<span>    if combination_count &lt;= maximum_exact:</span>
-<span>        extreme = 0</span>
-<span>        total = 0</span>
-<span>        for indices in itertools.combinations(range(len(pooled)), treatment_size):</span>
-<span>            total += 1</span>
-<span>            if abs(permuted_difference(set(indices))) &gt;= abs(observed) - 1e-12:</span>
-<span>                extreme += 1</span>
-<span>        return PermutationResult(observed, extreme / total, total, True)</span>
-<span> </span>
-<span>    generator = random.Random(seed)</span>
-<span>    extreme = 0</span>
-<span>    shuffled_indices = list(range(len(pooled)))</span>
-<span>    for _ in range(monte_carlo_resamples):</span>
-<span>        generator.shuffle(shuffled_indices)</span>
-<span>        treatment_indices = set(shuffled_indices[:treatment_size])</span>
-<span>        if abs(permuted_difference(treatment_indices)) &gt;= abs(observed) - 1e-12:</span>
-<span>            extreme += 1</span>
-<span>    p_value = (extreme + 1) / (monte_carlo_resamples + 1)</span>
-<span>    return PermutationResult(observed, p_value, monte_carlo_resamples, False)</span>
-<span> </span>
-<span> </span>
-<span>def minimum_sample_per_arm(</span>
-<span>    standardized_effect: float,</span>
-<span>    *,</span>
-<span>    alpha: float = 0.05,</span>
-<span>    power: float = 0.80,</span>
-<span>) -&gt; int:</span>
-<span>    if standardized_effect &lt;= 0:</span>
-<span>        raise ValueError(&quot;standardized_effect must be positive&quot;)</span>
-<span>    if not 0 &lt; alpha &lt; 1 or not 0 &lt; power &lt; 1:</span>
-<span>        raise ValueError(&quot;alpha and power must be between zero and one&quot;)</span>
-<span>    normal = NormalDist()</span>
-<span>    z_alpha = normal.inv_cdf(1 - alpha / 2)</span>
-<span>    z_power = normal.inv_cdf(power)</span>
-<span>    approximate = 2 * ((z_alpha + z_power) / standardized_effect) ** 2</span>
-<span>    return math.ceil(approximate)</span>
-<span> </span>
-<span> </span>
-<span>def holm_adjust(p_values: Sequence[float]) -&gt; list[float]:</span>
-<span>    if any(not 0 &lt;= value &lt;= 1 for value in p_values):</span>
-<span>        raise ValueError(&quot;p-values must be between zero and one&quot;)</span>
-<span>    count = len(p_values)</span>
-<span>    ordered = sorted(enumerate(p_values), key=lambda item: item[1])</span>
-<span>    adjusted = [0.0] * count</span>
-<span>    running = 0.0</span>
-<span>    for rank, (original_index, value) in enumerate(ordered):</span>
-<span>        candidate = min(1.0, (count - rank) * value)</span>
-<span>        running = max(running, candidate)</span>
-<span>        adjusted[original_index] = running</span>
-<span>    return adjusted</span>
-<span> </span>
-<span> </span>
-<span>def standardized_balance_difference(</span>
-<span>    control: Sequence[float],</span>
-<span>    treatment: Sequence[float],</span>
-<span>) -&gt; float:</span>
-<span>    return standardized_mean_difference(control, treatment)</span>
-<span> </span>
-<span> </span>
-<span>def per_look_alpha(alpha: float, planned_looks: int) -&gt; float:</span>
-<span>    if not 0 &lt; alpha &lt; 1 or planned_looks &lt; 1:</span>
-<span>        raise ValueError(&quot;alpha and planned_looks must be valid&quot;)</span>
-<span>    return alpha / planned_looks</span>
-<span> </span>
-<span> </span>
-<span>def claim_scope(</span>
-<span>    *,</span>
-<span>    randomized: bool,</span>
-<span>    allocation_intact: bool,</span>
-<span>    severe_attrition: bool,</span>
-<span>) -&gt; ClaimScope:</span>
-<span>    if randomized and allocation_intact and not severe_attrition:</span>
-<span>        return &quot;causal&quot;</span>
-<span>    return &quot;associational&quot;</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    observations = load_observations()</span>
-<span>    control, treatment = split_outcomes(observations)</span>
-<span>    interval = bootstrap_difference_interval(control, treatment)</span>
-<span>    test = permutation_test(control, treatment)</span>
-<span>    print(&quot;difference:&quot;, difference_in_means(control, treatment))</span>
-<span>    print(&quot;standardized effect:&quot;, round(standardized_mean_difference(control, treatment), 3))</span>
-<span>    print(&quot;bootstrap interval:&quot;, interval)</span>
-<span>    print(&quot;permutation:&quot;, test)</span>
-<span>    print(&quot;sample per arm for d=0.5:&quot;, minimum_sample_per_arm(0.5))</span>
-<span>    print(&quot;Holm:&quot;, holm_adjust([0.01, 0.04, 0.03]))</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-stats-01 using deterministic local data.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> itertools</span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
+<span class="source-line"><span class="syntax-keyword">import</span> random</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statistics <span class="syntax-keyword">import</span> NormalDist<span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> stdev</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal<span class="syntax-punctuation">,</span> cast</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">experiment_outcomes.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Variant <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">control</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">ClaimScope <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">causal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">associational</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Observation</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    participant_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    variant<span class="syntax-punctuation">:</span> Variant</span>
+<span class="source-line">    pre_score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    outcome<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    completed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Interval</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    lower<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    estimate<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    upper<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    confidence<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">PermutationResult</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    observed_difference<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    p_value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    permutations<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    exact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ExperimentPlan</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    assignment_unit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    primary_metric<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    minimum_sample_per_arm<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    alpha<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.05</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__post_init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>assignment_unit<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>primary_metric<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">assignment unit and primary metric are required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>minimum_sample_per_arm <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">each arm needs at least two planned observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>alpha <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_observations</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        rows <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    observations<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        variant_text <span class="syntax-operator">=</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">variant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> variant_text <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">control</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown variant: </span><span class="syntax-string">{</span>variant_text<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        variant <span class="syntax-operator">=</span> cast<span class="syntax-punctuation">(</span>Variant<span class="syntax-punctuation">,</span> variant_text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        completed <span class="syntax-operator">=</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">completed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> completed <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">completed must be true or false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        observations<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            Observation<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                participant_id<span class="syntax-operator">=</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">participant_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                variant<span class="syntax-operator">=</span>variant<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                pre_score<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">pre_score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                outcome<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">outcome</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                completed<span class="syntax-operator">=</span>completed <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> observations</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">split_outcomes</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    observations<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Observation<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    control <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        observation<span class="syntax-operator">.</span>outcome</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> observation <span class="syntax-operator">in</span> observations</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> observation<span class="syntax-operator">.</span>completed <span class="syntax-operator">and</span> observation<span class="syntax-operator">.</span>variant <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">control</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    treatment <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        observation<span class="syntax-operator">.</span>outcome</span>
+<span class="source-line">        <span class="syntax-keyword">for</span> observation <span class="syntax-operator">in</span> observations</span>
+<span class="source-line">        <span class="syntax-keyword">if</span> observation<span class="syntax-operator">.</span>completed <span class="syntax-operator">and</span> observation<span class="syntax-operator">.</span>variant <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">treatment</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">each completed group needs at least two observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> control<span class="syntax-punctuation">,</span> treatment</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">difference_in_means</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> control <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> treatment<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">both groups need observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> mean<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> mean<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">standardized_mean_difference</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">effect size needs at least two observations per group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    pooled_variance <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> stdev<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> stdev<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> pooled_variance <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">standardized effect is undefined at zero variance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> difference_in_means<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> math<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>pooled_variance<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">bootstrap_difference_interval</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    resamples<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">2_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    confidence<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    seed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">20260730</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Interval<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> control <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> treatment<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">both groups need observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> resamples <span class="syntax-operator">&lt;</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">use at least 100 bootstrap resamples</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> confidence <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">confidence must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    generator <span class="syntax-operator">=</span> random<span class="syntax-operator">.</span>Random<span class="syntax-punctuation">(</span>seed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    estimates<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>resamples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        sampled_control <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>generator<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> control<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        sampled_treatment <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>generator<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> treatment<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        estimates<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>difference_in_means<span class="syntax-punctuation">(</span>sampled_control<span class="syntax-punctuation">,</span> sampled_treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    estimates<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tail <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span> <span class="syntax-operator">-</span> confidence<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span></span>
+<span class="source-line">    lower_index <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>floor<span class="syntax-punctuation">(</span>tail <span class="syntax-operator">*</span> resamples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    upper_index <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>resamples <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span> <span class="syntax-operator">-</span> tail<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> resamples<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> Interval<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        lower<span class="syntax-operator">=</span>estimates<span class="syntax-punctuation">[</span>lower_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        estimate<span class="syntax-operator">=</span>difference_in_means<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        upper<span class="syntax-operator">=</span>estimates<span class="syntax-punctuation">[</span>upper_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        confidence<span class="syntax-operator">=</span>confidence<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">permutation_test</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    maximum_exact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">100_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    monte_carlo_resamples<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">10_000</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    seed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">20260730</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> PermutationResult<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> control <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> treatment<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">both groups need observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    pooled <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    treatment_size <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    observed <span class="syntax-operator">=</span> difference_in_means<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    combination_count <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>comb<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> treatment_size<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">permuted_difference</span><span class="syntax-punctuation">(</span>treatment_indices<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        permuted_treatment <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            value <span class="syntax-keyword">for</span> index<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> index <span class="syntax-operator">in</span> treatment_indices</span>
+<span class="source-line">        <span class="syntax-punctuation">]</span></span>
+<span class="source-line">        permuted_control <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            value <span class="syntax-keyword">for</span> index<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> index <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> treatment_indices</span>
+<span class="source-line">        <span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> difference_in_means<span class="syntax-punctuation">(</span>permuted_control<span class="syntax-punctuation">,</span> permuted_treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> combination_count <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> maximum_exact<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        extreme <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        total <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> indices <span class="syntax-operator">in</span> itertools<span class="syntax-operator">.</span>combinations<span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> treatment_size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>permuted_difference<span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>indices<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                extreme <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> PermutationResult<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span> extreme <span class="syntax-operator">/</span> total<span class="syntax-punctuation">,</span> total<span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    generator <span class="syntax-operator">=</span> random<span class="syntax-operator">.</span>Random<span class="syntax-punctuation">(</span>seed<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    extreme <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    shuffled_indices <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>monte_carlo_resamples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        generator<span class="syntax-operator">.</span>shuffle<span class="syntax-punctuation">(</span>shuffled_indices<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        treatment_indices <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>shuffled_indices<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>treatment_size<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>permuted_difference<span class="syntax-punctuation">(</span>treatment_indices<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            extreme <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    p_value <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>extreme <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>monte_carlo_resamples <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> PermutationResult<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span> p_value<span class="syntax-punctuation">,</span> monte_carlo_resamples<span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">minimum_sample_per_arm</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    standardized_effect<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    alpha<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.05</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    power<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.80</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> standardized_effect <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">standardized_effect must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> alpha <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> power <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha and power must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    normal <span class="syntax-operator">=</span> NormalDist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    z_alpha <span class="syntax-operator">=</span> normal<span class="syntax-operator">.</span>inv_cdf<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> alpha <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    z_power <span class="syntax-operator">=</span> normal<span class="syntax-operator">.</span>inv_cdf<span class="syntax-punctuation">(</span>power<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    approximate <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>z_alpha <span class="syntax-operator">+</span> z_power<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> standardized_effect<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> math<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span>approximate<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">holm_adjust</span><span class="syntax-punctuation">(</span>p_values<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> value <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> p_values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">p-values must be between zero and one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    count <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>p_values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>p_values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> item<span class="syntax-punctuation">:</span> item<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    adjusted <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> count</span>
+<span class="source-line">    running <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> rank<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>original_index<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>ordered<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        candidate <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>count <span class="syntax-operator">-</span> rank<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        running <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>running<span class="syntax-punctuation">,</span> candidate<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        adjusted<span class="syntax-punctuation">[</span>original_index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> running</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> adjusted</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">standardized_balance_difference</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    treatment<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> standardized_mean_difference<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">per_look_alpha</span><span class="syntax-punctuation">(</span>alpha<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> planned_looks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> alpha <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> planned_looks <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha and planned_looks must be valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> alpha <span class="syntax-operator">/</span> planned_looks</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">claim_scope</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    randomized<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    allocation_intact<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    severe_attrition<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ClaimScope<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> randomized <span class="syntax-operator">and</span> allocation_intact <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> severe_attrition<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">causal</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">associational</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    observations <span class="syntax-operator">=</span> load_observations<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    control<span class="syntax-punctuation">,</span> treatment <span class="syntax-operator">=</span> split_outcomes<span class="syntax-punctuation">(</span>observations<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    interval <span class="syntax-operator">=</span> bootstrap_difference_interval<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    test <span class="syntax-operator">=</span> permutation_test<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> difference_in_means<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">standardized effect:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>standardized_mean_difference<span class="syntax-punctuation">(</span>control<span class="syntax-punctuation">,</span> treatment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bootstrap interval:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> interval<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">permutation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> test<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sample per arm for d=0.5:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> minimum_sample_per_arm<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Holm:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> holm_adjust<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.04</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.03</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

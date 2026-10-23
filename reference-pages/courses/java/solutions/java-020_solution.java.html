@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,46 +161,46 @@
       <h1>Java 020 Solution</h1>
       <p class="source-path">Generated from <code>courses/java/solutions/java-020_solution.java</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-java"><code><span>import java.util.*;</span>
-<span> </span>
-<span>public class Main {</span>
-<span>    record Item(String id,int key){}</span>
-<span>    static int lowerBound(int[] values,int target){int low=0,high=values.length;while(low&lt;high){int mid=low+(high-low)/2;if(values[mid]&lt;target)low=mid+1;else high=mid;}return low;}</span>
-<span>    static int minimumCoins(int amount,int[] coins){</span>
-<span>        if(amount&lt;0||amount&gt;1000)throw new IllegalArgumentException(&quot;amount0..1000 required&quot;);</span>
-<span>        for(int coin:coins)if(coin&lt;=0)throw new IllegalArgumentException(&quot;positive coins required&quot;);</span>
-<span>        int[] dp=new int[amount+1];Arrays.fill(dp,amount+1);dp[0]=0;</span>
-<span>        for(int current=1;current&lt;=amount;current++)for(int coin:coins)if(coin&lt;=current)dp[current]=Math.min(dp[current],dp[current-coin]+1);</span>
-<span>        return dp[amount]&gt;amount?-1:dp[amount];</span>
-<span>    }</span>
-<span>    public static void main(String[] args) throws Exception {</span>
-<span>        // Exercise 1: Find the first duplicate boundary</span>
-<span>        int[] sorted={1,2,2,5};assert lowerBound(sorted,2)==1 &amp;&amp; lowerBound(sorted,6)==4;</span>
-<span> </span>
-<span>        // Exercise 2: Handle empty and outside searches</span>
-<span>        assert lowerBound(new int[0],7)==0;</span>
-<span>        assert lowerBound(sorted,0)==0;</span>
-<span> </span>
-<span>        // Exercise 3: Preserve stable ties</span>
-<span>        List&lt;Item&gt; items=new ArrayList&lt;&gt;(List.of(new Item(&quot;a&quot;,2),new Item(&quot;b&quot;,1),new Item(&quot;c&quot;,2)));</span>
-<span>        items.sort(Comparator.comparingInt(Item::key));</span>
-<span>        assert items.stream().map(Item::id).toList().equals(List.of(&quot;b&quot;,&quot;a&quot;,&quot;c&quot;));</span>
-<span> </span>
-<span>        // Exercise 4: Solve a greedy counterexample</span>
-<span>        assert minimumCoins(6,new int[]{1,3,4})==2;</span>
-<span> </span>
-<span>        // Exercise 5: Represent an unreachable amount</span>
-<span>        assert minimumCoins(3,new int[]{2})==-1;</span>
-<span>        assert minimumCoins(0,new int[]{2,5})==0;</span>
-<span> </span>
-<span>        // Exercise 6: Reject invalid recurrence inputs</span>
-<span>        boolean negative=false,zeroCoin=false;</span>
-<span>        try{minimumCoins(-1,new int[]{1});}catch(IllegalArgumentException expected){negative=true;}</span>
-<span>        try{minimumCoins(3,new int[]{0,1});}catch(IllegalArgumentException expected){zeroCoin=true;}</span>
-<span>        assert negative&amp;&amp;zeroCoin;</span>
-<span>    }</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-java"><code><span class="source-line"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">record</span> <span class="syntax-class">Item</span><span class="syntax-punctuation">(</span>String id<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">lowerBound</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> values<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">int</span> low<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>high<span class="syntax-operator">=</span>values<span class="syntax-punctuation">.</span><span class="syntax-attribute">length</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">while</span><span class="syntax-punctuation">(</span>low<span class="syntax-operator">&lt;</span>high<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">int</span> mid<span class="syntax-operator">=</span>low<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span>high<span class="syntax-operator">-</span>low<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">[</span>mid<span class="syntax-operator">]</span><span class="syntax-operator">&lt;</span>target<span class="syntax-punctuation">)</span>low<span class="syntax-operator">=</span>mid<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">else</span> high<span class="syntax-operator">=</span>mid<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">return</span> low<span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">minimumCoins</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> amount<span class="syntax-punctuation">,</span><span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> coins<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>amount<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span>amount<span class="syntax-operator">&gt;</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> IllegalArgumentException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount0..1000 required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> coin<span class="syntax-punctuation">:</span>coins<span class="syntax-punctuation">)</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>coin<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> IllegalArgumentException<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">positive coins required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> dp<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span>amount<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-operator">]</span><span class="syntax-punctuation">;</span>Arrays<span class="syntax-punctuation">.</span><span class="syntax-attribute">fill</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">,</span>amount<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>dp<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> current<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span>current<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>amount<span class="syntax-punctuation">;</span>current<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> coin<span class="syntax-punctuation">:</span>coins<span class="syntax-punctuation">)</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>coin<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>current<span class="syntax-punctuation">)</span>dp<span class="syntax-operator">[</span>current<span class="syntax-operator">]</span><span class="syntax-operator">=</span>Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">min</span><span class="syntax-punctuation">(</span>dp<span class="syntax-operator">[</span>current<span class="syntax-operator">]</span><span class="syntax-punctuation">,</span>dp<span class="syntax-operator">[</span>current<span class="syntax-operator">-</span>coin<span class="syntax-operator">]</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> dp<span class="syntax-operator">[</span>amount<span class="syntax-operator">]</span><span class="syntax-operator">&gt;</span>amount<span class="syntax-operator">?</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span>dp<span class="syntax-operator">[</span>amount<span class="syntax-operator">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 1: Find the first duplicate boundary</span></span>
+<span class="source-line">        <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> sorted<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">assert</span> lowerBound<span class="syntax-punctuation">(</span>sorted<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> lowerBound<span class="syntax-punctuation">(</span>sorted<span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 2: Handle empty and outside searches</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> lowerBound<span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> lowerBound<span class="syntax-punctuation">(</span>sorted<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 3: Preserve stable ties</span></span>
+<span class="source-line">        List<span class="syntax-operator">&lt;</span>Item<span class="syntax-operator">&gt;</span> items<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> Item<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> Item<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> Item<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        items<span class="syntax-punctuation">.</span><span class="syntax-attribute">sort</span><span class="syntax-punctuation">(</span>Comparator<span class="syntax-punctuation">.</span><span class="syntax-attribute">comparingInt</span><span class="syntax-punctuation">(</span>Item<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> items<span class="syntax-punctuation">.</span><span class="syntax-attribute">stream</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">map</span><span class="syntax-punctuation">(</span>Item<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">toList</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 4: Solve a greedy counterexample</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> minimumCoins<span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 5: Represent an unreachable amount</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> minimumCoins<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> minimumCoins<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 6: Reject invalid recurrence inputs</span></span>
+<span class="source-line">        <span class="syntax-keyword">boolean</span> negative<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span>zeroCoin<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>minimumCoins<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>IllegalArgumentException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>negative<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">{</span>minimumCoins<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">new</span> <span class="syntax-keyword">int</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span><span class="syntax-punctuation">{</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span><span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>IllegalArgumentException expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span>zeroCoin<span class="syntax-operator">=</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> negative<span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span>zeroCoin<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

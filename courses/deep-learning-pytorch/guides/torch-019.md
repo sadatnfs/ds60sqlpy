@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-018`. The 
 
 ## Learning objectives
 
-Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout. The finish condition is output shape 1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout. The finish condition is output shape 1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -118,7 +118,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Compute the fixed spatial filter.** Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.
+1. **Compute the fixed spatial filter.** Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.
    **Expected:** output shape 1, 1, 2, 2; all values-4.
    **Verify:** Save the assertion results for exercise 1, including output shape 1, 1, 2, 2; all values-4.
 

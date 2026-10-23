@@ -2,28 +2,28 @@
 
 A NULL-aware aggregate lesson in Scala, PySpark and Spark SQL.
 
-Status: **authored beta pilot**. This document is a complete teaching sample for the
-[Scala/Spark design](../../../docs/expansion/tracks/scala-spark.md), not an activated course lesson.
-The optional module application uses explicitly prepared Scala/Spark workers; readiness is reported by the actual worker probe. Do not run this code through
-the ordinary Python runner or install a JVM as a side effect of opening it.
-The proposed `spark-local-scala` and `spark-local-python` profiles require their
-own implementation and acceptance tests. The
-[solutions](../solutions/spark-013_solutions.md) are separate so you can predict and
-attempt the work first.
+Open this lesson from the Scala and Apache Spark path in the unified
+`/classroom`. Its Scala and PySpark variants use the separately prepared
+`spark-local-scala` and `spark-local-python` workers. The classroom capability
+notice reports actual runtime readiness. Reading a guide does not install a
+JVM or prove that a worker is ready. Keep the
+[solutions](../solutions/spark-013_solutions.md) separate while you predict
+and attempt the work.
 
 ## Level and prerequisites
 
-Beginner, about 90 minutes after a local profile is available. Complete planned
+Beginner, about 90 minutes after a local profile is available. Complete
 `spark-012` and demonstrate either the Scala foundations through `spark-010`,
 or the PySpark bridge `spark-011` with existing `python-10` skills. Neither path
 requires the historical SQL course: the small amount of SQL below is explained
 here. Existing `sql-02` offers optional extra aggregate practice.
 
-The proposed tuple is Spark 4.2.0, Scala 2.13.18, JDK 21 and Python 3.12. It is a
-compatibility-informed design, not a tested image. Apache documents the
-supported language/runtime lines, and its tagged build identifies the Scala
-patch. [Spark environments](https://spark.apache.org/docs/4.2.0/),
-[tagged build](https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml).
+The classroom worker configuration uses Spark 4.0.1, the Scala 2.13 binary
+line, Java 17 and Python 3.12. Read the actual worker version report when
+reproducing a run, especially after an explicit image override. Apache's
+[versioned environment requirements](https://spark.apache.org/docs/4.0.1/)
+explain the compatible language lines. The earlier expansion design discussed
+a newer candidate tuple; that historical plan is not the installed image.
 
 ## Learning objectives
 

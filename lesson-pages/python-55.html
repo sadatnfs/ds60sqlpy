@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,33 +427,35 @@
 </tbody></table></div>
 <p>Install dependencies before copying frequently changing source so Docker can reuse the dependency layer. Never copy <code>.env</code>, <code>.git</code>, local caches, or training data into the build context.</p>
 <h4 id="guide--worked-example-minimal-service-image">Worked example: minimal service image<a class="heading-anchor" href="#guide--worked-example-minimal-service-image" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
-FROM python:3.12-slim
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># syntax=docker/dockerfile:1</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span>
 
-WORKDIR /app
-COPY requirements-api.txt ./
-RUN python -m pip install --no-cache-dir -r requirements-api.txt
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">COPY</span> requirements-api.txt ./
+<span class="syntax-keyword">RUN</span> python -m pip install --no-cache-dir -r requirements-api.txt
 
-COPY app.py model.joblib ./
-EXPOSE 8000
-CMD [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
+<span class="syntax-keyword">COPY</span> app.py model.joblib ./
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;-m&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Pin and review dependencies through project tooling for a durable image. The unpinned learner snippet keeps the first Dockerfile readable; it is not a release supply-chain policy.</p>
 <h4 id="guide--build-and-run">Build and run<a class="heading-anchor" href="#guide--build-and-run" aria-label="Link to this section">#</a></h4>
 <p>These Docker commands are the same in PowerShell and POSIX shells:</p>
-<pre><code class="language-text">docker build -t ds60-api:local .
+<pre class="highlighted-code"><code class="language-text">docker build -t ds60-api:local .
 docker run --rm --name ds60-api -p 8000:8000 ds60-api:local</code></pre>
 <p>Test from another terminal.</p>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">curl http://127.0.0.1:8000/health
-curl -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;:[5.1,3.5,1.4,0.2]}&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-bash">curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;:[5.1,3.5,1.4,0.2]}&#x27;</span></code></pre>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">Invoke-RestMethod -Uri &#x27;http://127.0.0.1:8000/health&#x27;
-$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
-  -ContentType &#x27;application/json&#x27; -Body $body</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Invoke-RestMethod</span> -Uri <span class="syntax-string">&#x27;http://127.0.0.1:8000/health&#x27;</span>
+$body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">{</span> features <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span>5<span class="syntax-punctuation">.</span>1<span class="syntax-punctuation">,</span> 3<span class="syntax-punctuation">.</span>5<span class="syntax-punctuation">,</span> 1<span class="syntax-punctuation">.</span>4<span class="syntax-punctuation">,</span> 0<span class="syntax-punctuation">.</span>2<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">|</span> <span class="syntax-builtin">ConvertTo-Json</span>
+<span class="syntax-builtin">Invoke-RestMethod</span> -Method Post -Uri <span class="syntax-string">&#x27;http://127.0.0.1:8000/predict&#x27;</span> <span class="syntax-punctuation">`</span>
+  -ContentType <span class="syntax-string">&#x27;application/json&#x27;</span> -Body $body</code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 55 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -415,9 +463,9 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics">Concept deep dive — container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -432,45 +480,45 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A — audit build-context inclusion before Docker runs<a class="heading-anchor" href="#guide--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">from fnmatch import fnmatch
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> fnmatch <span class="syntax-keyword">import</span> fnmatch
 
-files = [
-    &quot;app.py&quot;,
-    &quot;requirements.txt&quot;,
-    &quot;.env&quot;,
-    &quot;.venv/lib/package.py&quot;,
-    &quot;artifacts/model.joblib&quot;,
-]
-ignore_patterns = [&quot;.env&quot;, &quot;.venv/*&quot;]
-included = [
-    path for path in files
-    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)
-]
-print(included)
-assert &quot;.env&quot; not in included and not any(p.startswith(&quot;.venv/&quot;) for p in included)</code></pre>
+files <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">app.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">requirements.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">.venv/lib/package.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/model.joblib</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+ignore_patterns <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.venv/*</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+included <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>fnmatch<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> pattern<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> pattern <span class="syntax-operator">in</span> ignore_patterns<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>included<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> included <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.venv/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> included<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The environment file and local virtual environment are excluded while explicit runtime assets remain.</p>
 <p><strong>Assumption to name:</strong> This simplified matcher demonstrates review logic; Docker&#x27;s complete ignore semantics and the real context still need inspection.</p>
 <h5 id="guide--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B — distinguish process health from traffic readiness<a class="heading-anchor" href="#guide--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">def probe(*, process_running, model_loaded, dependency_ready, draining):
-    return {
-        &quot;healthy&quot;: process_running,
-        &quot;ready&quot;: (
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">probe</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> process_running<span class="syntax-punctuation">,</span> model_loaded<span class="syntax-punctuation">,</span> dependency_ready<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> process_running<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
             process_running
-            and model_loaded
-            and dependency_ready
-            and not draining
-        ),
-    }
+            <span class="syntax-operator">and</span> model_loaded
+            <span class="syntax-operator">and</span> dependency_ready
+            <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining
+        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
-during_dependency_outage = probe(
-    process_running=True,
-    model_loaded=True,
-    dependency_ready=False,
-    draining=False,
-)
-print(during_dependency_outage)
-assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></pre>
+during_dependency_outage <span class="syntax-operator">=</span> probe<span class="syntax-punctuation">(</span>
+    process_running<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+    model_loaded<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+    dependency_ready<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+    draining<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>during_dependency_outage<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> during_dependency_outage <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> A running process can remain live while correctly refusing new traffic during a dependency outage.</p>
 <p><strong>Assumption to name:</strong> Restarting the healthy process would not repair the external dependency and could amplify the incident.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -593,7 +641,7 @@ assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:
@@ -661,37 +709,37 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Build and run locally; test with curl. Note: You need Docker Desktop or a Docker runtime installed to build images.</li>
 </ul></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--project-layout">Project layout<a class="heading-anchor" href="#learner--cell-2--project-layout" aria-label="Link to this section">#</a></h4>
-<pre><code>ds-60day/
+<pre class="highlighted-code"><code class="language-text">ds-60day/
   app.py               # from Day 44 (FastAPI)
   model.joblib         # saved model
   requirements-api.txt # smaller requirements for API runtime
   Dockerfile</code></pre></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--example-requirements-api-txt">Example requirements-api.txt<a class="heading-anchor" href="#learner--cell-3--example-requirements-api-txt" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">fastapi
+<pre class="highlighted-code"><code class="language-text">fastapi
 uvicorn
 joblib
 numpy
 scikit-learn
 pydantic</code></pre></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--example-dockerfile">Example Dockerfile<a class="heading-anchor" href="#learner--cell-4--example-dockerfile" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-Dockerfile"># syntax=docker/dockerfile:1
-FROM python:3.12-slim
-WORKDIR /app
-COPY requirements-api.txt ./
-RUN python -m pip install --no-cache-dir -r requirements-api.txt
-COPY app.py model.joblib ./
-EXPOSE 8000
-CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># syntax=docker/dockerfile:1</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span>
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">COPY</span> requirements-api.txt ./
+<span class="syntax-keyword">RUN</span> python -m pip install --no-cache-dir -r requirements-api.txt
+<span class="syntax-keyword">COPY</span> app.py model.joblib ./
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Build &amp; run:</p>
-<pre><code class="language-bash">docker build -t ds-60day-api .
-docker run --rm -p 8000:8000 ds-60day-api</code></pre>
+<pre class="highlighted-code"><code class="language-bash">docker build -t ds-60day-api .
+docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</code></pre>
 <p>Test:</p>
-<pre><code class="language-bash">curl -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-bash">curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;</span></code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -ContentType &#x27;application/json&#x27; -Body $body</code></pre></article>
+<pre class="highlighted-code"><code class="language-powershell">$body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">{</span> features <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span>5<span class="syntax-punctuation">.</span>1<span class="syntax-punctuation">,</span> 3<span class="syntax-punctuation">.</span>5<span class="syntax-punctuation">,</span> 1<span class="syntax-punctuation">.</span>4<span class="syntax-punctuation">,</span> 0<span class="syntax-punctuation">.</span>2<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">|</span> <span class="syntax-builtin">ConvertTo-Json</span>
+<span class="syntax-builtin">Invoke-RestMethod</span> -Method Post -Uri <span class="syntax-string">&#x27;http://127.0.0.1:8000/predict&#x27;</span> -ContentType <span class="syntax-string">&#x27;application/json&#x27;</span> -Body $body</code></pre></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="learner--cell-5--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-5--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
 <h4 id="learner--cell-5--concept-lab-container-build-boundaries-minimal-images-and-health-semantics">Concept lab — container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#learner--cell-5--concept-lab-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
@@ -708,47 +756,47 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -C
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-6--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A — audit build-context inclusion before Docker runs<a class="heading-anchor" href="#learner--cell-6--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> This simplified matcher demonstrates review logic; Docker&#x27;s complete ignore semantics and the real context still need inspection.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from fnmatch import fnmatch</span>
-<span> </span>
-<span>files = [</span>
-<span>    &quot;app.py&quot;,</span>
-<span>    &quot;requirements.txt&quot;,</span>
-<span>    &quot;.env&quot;,</span>
-<span>    &quot;.venv/lib/package.py&quot;,</span>
-<span>    &quot;artifacts/model.joblib&quot;,</span>
-<span>]</span>
-<span>ignore_patterns = [&quot;.env&quot;, &quot;.venv/*&quot;]</span>
-<span>included = [</span>
-<span>    path for path in files</span>
-<span>    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)</span>
-<span>]</span>
-<span>print(included)</span>
-<span>assert &quot;.env&quot; not in included and not any(p.startswith(&quot;.venv/&quot;) for p in included)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> fnmatch <span class="syntax-keyword">import</span> fnmatch</span>
+<span class="source-line"></span>
+<span class="source-line">files <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">app.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">requirements.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">.venv/lib/package.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/model.joblib</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line">ignore_patterns <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.venv/*</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">included <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files</span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>fnmatch<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> pattern<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> pattern <span class="syntax-operator">in</span> ignore_patterns<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>included<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> included <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.venv/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> included<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> The environment file and local virtual environment are excluded while explicit runtime assets remain.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-9--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B — distinguish process health from traffic readiness<a class="heading-anchor" href="#learner--cell-9--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Restarting the healthy process would not repair the external dependency and could amplify the incident.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def probe(*, process_running, model_loaded, dependency_ready, draining):</span>
-<span>    return {</span>
-<span>        &quot;healthy&quot;: process_running,</span>
-<span>        &quot;ready&quot;: (</span>
-<span>            process_running</span>
-<span>            and model_loaded</span>
-<span>            and dependency_ready</span>
-<span>            and not draining</span>
-<span>        ),</span>
-<span>    }</span>
-<span> </span>
-<span>during_dependency_outage = probe(</span>
-<span>    process_running=True,</span>
-<span>    model_loaded=True,</span>
-<span>    dependency_ready=False,</span>
-<span>    draining=False,</span>
-<span>)</span>
-<span>print(during_dependency_outage)</span>
-<span>assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">probe</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> process_running<span class="syntax-punctuation">,</span> model_loaded<span class="syntax-punctuation">,</span> dependency_ready<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> process_running<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            process_running</span>
+<span class="source-line">            <span class="syntax-operator">and</span> model_loaded</span>
+<span class="source-line">            <span class="syntax-operator">and</span> dependency_ready</span>
+<span class="source-line">            <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining</span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">during_dependency_outage <span class="syntax-operator">=</span> probe<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    process_running<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    model_loaded<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    dependency_ready<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    draining<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>during_dependency_outage<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> during_dependency_outage <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><p><strong>Expected observation:</strong> A running process can remain live while correctly refusing new traffic during a dependency outage.</p>
 <h5 id="learner--cell-11--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-11--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -822,19 +870,19 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -C
 </ol>
 <p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Layer and secret audit</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Least-privilege runtime</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Health semantics</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Layer and secret audit</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Least-privilege runtime</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Health semantics</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -878,44 +926,44 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -C
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile</p>
-<pre><code class="language-python"># app.py
-from fastapi import FastAPI
-from pydantic import BaseModel
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># app.py</span>
+<span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI
+<span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel
 
-app = FastAPI()
+app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-class Payload(BaseModel):
-    x: float
-    y: float
+<span class="syntax-keyword">class</span> <span class="syntax-class">Payload</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
+    y<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
 
-@app.post(&#x27;/predict&#x27;)
-def predict(payload: Payload) -&gt; dict[str, float]:
-    # placeholder: sum as a toy &#x27;model&#x27;
-    return {&quot;pred&quot;: payload.x + payload.y}</code></pre>
-<pre><code class="language-dockerfile"># Dockerfile
-FROM python:3.12-slim AS base
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
-EXPOSE 8000
-CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
-<pre><code class="language-text"># requirements.txt
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">:</span> Payload<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># placeholder: sum as a toy &#x27;model&#x27;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">pred</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> payload<span class="syntax-operator">.</span>x <span class="syntax-operator">+</span> payload<span class="syntax-operator">.</span>y<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Dockerfile</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">base</span>
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">COPY</span> requirements.txt .
+<span class="syntax-keyword">RUN</span> pip install --no-cache-dir -r requirements.txt
+<span class="syntax-keyword">COPY</span> app.py .
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
+<pre class="highlighted-code"><code class="language-text"># requirements.txt
 fastapi&gt;=0.115,&lt;1
 uvicorn&gt;=0.30,&lt;1</code></pre>
 <p>Build and run (the same one-line commands work in Bash, zsh, PowerShell, and Command Prompt):</p>
-<pre><code class="language-bash">docker build -t ds-fastapi:latest .
-docker run -p 8000:8000 ds-fastapi:latest</code></pre>
+<pre class="highlighted-code"><code class="language-bash">docker build -t ds-fastapi:latest .
+docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</code></pre>
 <hr>
 <p>Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK</p>
-<pre><code class="language-python"># app.py addition
-@app.get(&quot;/health&quot;)
-def health() -&gt; dict[str, str]:
-    return {&quot;status&quot;: &quot;ok&quot;}</code></pre>
-<pre><code class="language-dockerfile"># Add this before CMD. Python is already present in python:3.12-slim, so the
-# check needs no curl package and uses no shell-specific operators.
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD [&quot;python&quot;, &quot;-c&quot;, &quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;]</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># app.py addition</span>
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/health</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">health</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ok</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Add this before CMD. Python is already present in python:3.12-slim, so the</span>
+<span class="syntax-comment"># check needs no curl package and uses no shell-specific operators.</span>
+<span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
+  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>During the start period, failed probes do not count toward the retry threshold</li>
@@ -926,28 +974,28 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — Multi‑stage build</p>
-<pre><code class="language-dockerfile"># Stage 1: build dependencies in an isolated virtual environment.
-FROM python:3.12-slim AS builder
-ENV VIRTUAL_ENV=/opt/venv
-RUN python -m venv &quot;$VIRTUAL_ENV&quot;
-ENV PATH=&quot;$VIRTUAL_ENV/bin:$PATH&quot;
-WORKDIR /build
-COPY requirements.txt .
-RUN python -m pip install --no-cache-dir -r requirements.txt
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Stage 1: build dependencies in an isolated virtual environment.</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">builder</span>
+<span class="syntax-keyword">ENV</span> VIRTUAL_ENV<span class="syntax-operator">=</span>/opt/venv
+<span class="syntax-keyword">RUN</span> python -m venv <span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">ENV</span> PATH<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">/bin:</span>$PATH<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/build</span>
+<span class="syntax-keyword">COPY</span> requirements.txt .
+<span class="syntax-keyword">RUN</span> python -m pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: use the matching Python base so the copied environment is compatible.
-FROM python:3.12-slim AS runtime
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH=&quot;$VIRTUAL_ENV/bin:$PATH&quot;
-COPY --from=builder /opt/venv /opt/venv
-WORKDIR /app
-RUN useradd --create-home --uid 10001 appuser
-COPY --chown=appuser:appuser app.py .
-USER appuser
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD [&quot;python&quot;, &quot;-c&quot;, &quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;]
-CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
+<span class="syntax-comment"># Stage 2: use the matching Python base so the copied environment is compatible.</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">runtime</span>
+<span class="syntax-keyword">ENV</span> VIRTUAL_ENV<span class="syntax-operator">=</span>/opt/venv
+<span class="syntax-keyword">ENV</span> PATH<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">/bin:</span>$PATH<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">COPY</span> --from<span class="syntax-operator">=</span>builder /opt/venv /opt/venv
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">RUN</span> useradd --create-home --uid <span class="syntax-number">10001</span> appuser
+<span class="syntax-keyword">COPY</span> --chown<span class="syntax-operator">=</span>appuser:appuser app.py .
+<span class="syntax-keyword">USER</span> <span class="syntax-string">appuser</span>
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
+  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>The final image contains neither <code>requirements.txt</code> nor build-stage caches</li>
@@ -1052,48 +1100,48 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <hr>
 <p>Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day55_apis_containerization_docker/day55_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># app.py</span>
-<span>from fastapi import FastAPI</span>
-<span>from pydantic import BaseModel</span>
-<span> </span>
-<span>app = FastAPI()</span>
-<span> </span>
-<span>class Payload(BaseModel):</span>
-<span>    x: float</span>
-<span>    y: float</span>
-<span> </span>
-<span>@app.post(&#x27;/predict&#x27;)</span>
-<span>def predict(payload: Payload) -&gt; dict[str, float]:</span>
-<span>    # placeholder: sum as a toy &#x27;model&#x27;</span>
-<span>    return {&quot;pred&quot;: payload.x + payload.y}</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># app.py</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel</span>
+<span class="source-line"></span>
+<span class="source-line">app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Payload</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    y<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">:</span> Payload<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># placeholder: sum as a toy &#x27;model&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">pred</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> payload<span class="syntax-operator">.</span>x <span class="syntax-operator">+</span> payload<span class="syntax-operator">.</span>y<span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><pre><code class="language-dockerfile"># Dockerfile
-FROM python:3.12-slim AS base
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
-EXPOSE 8000
-CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
-<pre><code class="language-text"># requirements.txt
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Dockerfile</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">base</span>
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">COPY</span> requirements.txt .
+<span class="syntax-keyword">RUN</span> pip install --no-cache-dir -r requirements.txt
+<span class="syntax-keyword">COPY</span> app.py .
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
+<pre class="highlighted-code"><code class="language-text"># requirements.txt
 fastapi&gt;=0.115,&lt;1
 uvicorn&gt;=0.30,&lt;1</code></pre>
 <p>Build and run (the same one-line commands work in Bash, zsh, PowerShell, and Command Prompt):</p>
-<pre><code class="language-bash">docker build -t ds-fastapi:latest .
-docker run -p 8000:8000 ds-fastapi:latest</code></pre>
+<pre class="highlighted-code"><code class="language-bash">docker build -t ds-fastapi:latest .
+docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</code></pre>
 <hr>
 <p>Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># app.py addition</span>
-<span>@app.get(&quot;/health&quot;)</span>
-<span>def health() -&gt; dict[str, str]:</span>
-<span>    return {&quot;status&quot;: &quot;ok&quot;}</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># app.py addition</span></span>
+<span class="source-line"><span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/health</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">health</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ok</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><pre><code class="language-dockerfile"># Add this before CMD. Python is already present in python:3.12-slim, so the
-# check needs no curl package and uses no shell-specific operators.
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD [&quot;python&quot;, &quot;-c&quot;, &quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;]</code></pre>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Add this before CMD. Python is already present in python:3.12-slim, so the</span>
+<span class="syntax-comment"># check needs no curl package and uses no shell-specific operators.</span>
+<span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
+  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>During the start period, failed probes do not count toward the retry threshold</li>
@@ -1104,28 +1152,28 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — Multi‑stage build</p>
-<pre><code class="language-dockerfile"># Stage 1: build dependencies in an isolated virtual environment.
-FROM python:3.12-slim AS builder
-ENV VIRTUAL_ENV=/opt/venv
-RUN python -m venv &quot;$VIRTUAL_ENV&quot;
-ENV PATH=&quot;$VIRTUAL_ENV/bin:$PATH&quot;
-WORKDIR /build
-COPY requirements.txt .
-RUN python -m pip install --no-cache-dir -r requirements.txt
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Stage 1: build dependencies in an isolated virtual environment.</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">builder</span>
+<span class="syntax-keyword">ENV</span> VIRTUAL_ENV<span class="syntax-operator">=</span>/opt/venv
+<span class="syntax-keyword">RUN</span> python -m venv <span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">ENV</span> PATH<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">/bin:</span>$PATH<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/build</span>
+<span class="syntax-keyword">COPY</span> requirements.txt .
+<span class="syntax-keyword">RUN</span> python -m pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: use the matching Python base so the copied environment is compatible.
-FROM python:3.12-slim AS runtime
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH=&quot;$VIRTUAL_ENV/bin:$PATH&quot;
-COPY --from=builder /opt/venv /opt/venv
-WORKDIR /app
-RUN useradd --create-home --uid 10001 appuser
-COPY --chown=appuser:appuser app.py .
-USER appuser
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD [&quot;python&quot;, &quot;-c&quot;, &quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;]
-CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</code></pre>
+<span class="syntax-comment"># Stage 2: use the matching Python base so the copied environment is compatible.</span>
+<span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">runtime</span>
+<span class="syntax-keyword">ENV</span> VIRTUAL_ENV<span class="syntax-operator">=</span>/opt/venv
+<span class="syntax-keyword">ENV</span> PATH<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$VIRTUAL_ENV<span class="syntax-string">/bin:</span>$PATH<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">COPY</span> --from<span class="syntax-operator">=</span>builder /opt/venv /opt/venv
+<span class="syntax-keyword">WORKDIR</span> <span class="syntax-string">/app</span>
+<span class="syntax-keyword">RUN</span> useradd --create-home --uid <span class="syntax-number">10001</span> appuser
+<span class="syntax-keyword">COPY</span> --chown<span class="syntax-operator">=</span>appuser:appuser app.py .
+<span class="syntax-keyword">USER</span> <span class="syntax-string">appuser</span>
+<span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
+<span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
+  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
+<span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>The final image contains neither <code>requirements.txt</code> nor build-stage caches</li>

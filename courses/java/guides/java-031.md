@@ -6,17 +6,17 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-030`
 
 ## Learning objectives
 
-Explain reflection, runtime annotation, service provider, binary class name using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is ReadVersion on the knownFriendly provider. The final exercise transfers the mechanism to treat provider metadata as a policy input.
+Explain reflection, runtime annotation, service provider, binary class name using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Read Version on the known Friendly provider. The final exercise transfers the mechanism to treat provider metadata as a policy input.
 
 ## Purpose and mental model
 
-Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks andtooling,but it moves some errors from compilation to runtime andcan obscure dependencies. An annotation is metadata;it doesnot enforce behavior until code reads it andapplies a policy. Runtime retention is required when reflection should see an annotation after compilation.
+Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks and tooling,but it moves some errors from compilation to runtime and can obscure dependencies. An annotation is metadata;it does not enforce behavior until code reads it and applies a policy. Runtime retention is required when reflection should see an annotation after compilation.
 
-ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract,and provider metadata names implementations. The provider still needs a compatible constructor,module/classpath visibility andbehavior. This lesson creates an owned temporary service descriptor for a known local nested provider,loads it through a scopedURLClassLoader,andvalidates its annotation andmethod behavior. It doesnot load remote code oraccept arbitrary class names from untrusted input.
+ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract,and provider metadata names implementations. The provider still needs a compatible constructor,module/classpath visibility and behavior. This lesson creates an owned temporary service descriptor for a known local nested provider,loads it through a scoped URLClassLoader,and validates its annotation and method behavior. It does not load remote code or accept arbitrary class names from untrusted input.
 
 ## Vocabulary and concepts
 
-**Reflection:** Runtime inspection orinvocation through class metadata.
+**Reflection:** Runtime inspection or invocation through class metadata.
 
 **Runtime annotation:** Metadata retained so reflection can inspect it after compilation.
 
@@ -26,7 +26,7 @@ ServiceLoader provides a structured provider-discovery mechanism. A service inte
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-031/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -41,7 +41,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Use getAnnotation for a runtime-retained annotation andgetMethod for a publicmethod signature. Method.invoke wraps an exception thrown by the target inInvocationTargetException. Class.forName reports missing classes explicitly. Aclasspath service descriptor is namedMETA-INF/services/<service-interface-binary-name> andcontains provider binary names. Close the ownedURLClassLoader andtemporary directory after discovery.
+Use getAnnotation for a runtime-retained annotation andgetMethod for a public method signature. Method.invoke wraps an exception thrown by the target in InvocationTargetException. Class.forName reports missing classes explicitly. Aclasspath service descriptor is namedMETA-INF/services/<service-interface-binary-name> and contains provider binary names. Close the owned URLClassLoader and temporary directory after discovery.
 
 ## Worked example / walkthrough
 
@@ -74,11 +74,11 @@ public class Main {
 
 ```
 
-**Expected:** version2.
+**Expected:** version 2.
 
 ### Example B: Invoke a known public method reflectively
 
-The method name andparameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
+The method name and parameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
 
 ```java
 import java.util.*;
@@ -116,29 +116,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Inspect a retained annotation.** ReadVersion on the knownFriendly provider.
-   **Expected:** version2.
-   **Verify:** Compare your assertion values or captured diagnostic with version2.
+1. **Inspect a retained annotation.** Read Version on the known Friendly provider.
+   **Expected:** version 2.
+   **Verify:** Compare your assertion values or captured diagnostic with version 2.
 
-2. **Invoke a known public method reflectively.** Findgreet(String) andinvoke it withAda.
+2. **Invoke a known public method reflectively.** Findgreet(String) and invoke it with Ada.
    **Expected:** Hello, Ada.
    **Verify:** Compare your assertion values or captured diagnostic with Hello, Ada.
 
-3. **Load a real local service descriptor.** Create the temporaryMETA-INF/services entry anddiscoverGreeting providers.
-   **Expected:** oneFriendly provider withversion2 andworkinggreet.
-   **Verify:** Compare your assertion values or captured diagnostic with oneFriendly provider withversion2 andworkinggreet.
+3. **Load a real local service descriptor.** Create the temporaryMETA-INF/services entry and discover Greeting providers.
+   **Expected:** oneFriendly provider with version 2 andworkinggreet.
+   **Verify:** Compare your assertion values or captured diagnostic with oneFriendly provider with version 2 andworkinggreet.
 
-4. **Preserve a reflected target failure.** Invokegreet withblanktext andinspectInvocationTargetException cause.
+4. **Preserve a reflected target failure.** Invokegreet with blank text and inspect InvocationTargetException cause.
    **Expected:** causeIllegalArgumentException.
    **Verify:** Compare your assertion values or captured diagnostic with causeIllegalArgumentException.
 
-5. **Reject missing class andmethod contracts.** Look up an absent class andan unsupportedgreet(int)signature.
-   **Expected:** ClassNotFoundException andNoSuchMethodException.
-   **Verify:** Compare your assertion values or captured diagnostic with ClassNotFoundException andNoSuchMethodException.
+5. **Reject missing class and method contracts.** Look up an absent class and an unsupportedgreet(int)signature.
+   **Expected:** ClassNotFoundException and NoSuchMethodException.
+   **Verify:** Compare your assertion values or captured diagnostic with ClassNotFoundException and NoSuchMethodException.
 
-6. **Treat provider metadata as a policy input.** Accept provider versions1..2 andreject a hypotheticalversion3 under the currentconsumer contract.
-   **Expected:** version2accepted;version3rejected.
-   **Verify:** Compare your assertion values or captured diagnostic with version2accepted;version3rejected.
+6. **Treat provider metadata as a policy input.** Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer contract.
+   **Expected:** version 2 accepted;version 3 rejected.
+   **Verify:** Compare your assertion values or captured diagnostic with version 2 accepted;version 3 rejected.
 
 ## Common pitfalls and diagnosis
 

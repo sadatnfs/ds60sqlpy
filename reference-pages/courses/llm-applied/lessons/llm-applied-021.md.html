@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <p>Read the guide, record a prediction, then answer the six cases without opening solutions.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Inspect the pinned artifact contract.</strong> Read the supplied model manifest and identify model ID, revision and license note before any download. <strong>Expected:</strong> exact40-character revision and Apache-2.0 card note are present. <strong>Verify:</strong> Save the reasoning table for exercise 1, including exact40-character revision and Apache-2.0 card note are present.</li>
+<li><strong>Inspect the pinned artifact contract.</strong> Read the supplied model manifest and identify model ID, revision and license note before any download. <strong>Expected:</strong> exact 40-character revision and Apache-2.0 card note are present. <strong>Verify:</strong> Save the reasoning table for exercise 1, including exact 40-character revision and Apache-2.0 card note are present.</li>
 </ol>
 <ol>
 <li><strong>Separate acquisition from execution.</strong> Trace the optional workflow from dependency preparation to snapshot acquisition to offline training. <strong>Expected:</strong> training requires existing local assets and never falls back to a remote model ID. <strong>Verify:</strong> Save the reasoning table for exercise 2, including training requires existing local assets and never falls back to a remote model ID.</li>
@@ -131,10 +177,10 @@
 <li><strong>Inspect trainer labels before training.</strong> Read one collated batch and compare labels with the prompt/completion boundary. <strong>Expected:</strong> prompt labels-100; active completion labels match their input token IDs. <strong>Verify:</strong> Save the reasoning table for exercise 4, including prompt labels-100; active completion labels match their input token IDs.</li>
 </ol>
 <ol>
-<li><strong>Compare full and adapter configuration.</strong> Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and10-step cap. <strong>Expected:</strong> mode and trainable-parameter count recorded; no automatic quality winner. <strong>Verify:</strong> Save the reasoning table for exercise 5, including mode and trainable-parameter count recorded; no automatic quality winner.</li>
+<li><strong>Compare full and adapter configuration.</strong> Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and 10-step cap. <strong>Expected:</strong> mode and trainable-parameter count recorded; no automatic quality winner. <strong>Verify:</strong> Save the reasoning table for exercise 5, including mode and trainable-parameter count recorded; no automatic quality winner.</li>
 </ol>
 <ol>
-<li><strong>Distinguish an unexecuted learner scenario.</strong> For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe. <strong>Expected:</strong> pretrained executionunverified; no generated success receipt. <strong>Verify:</strong> Save the reasoning table for exercise 6, including pretrained executionunverified; no generated success receipt.</li>
+<li><strong>Distinguish an unexecuted learner scenario.</strong> For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe. <strong>Expected:</strong> pretrained execution unverified; no generated success receipt. <strong>Verify:</strong> Save the reasoning table for exercise 6, including pretrained execution unverified; no generated success receipt.</li>
 </ol></article>
   </main>
 </body>

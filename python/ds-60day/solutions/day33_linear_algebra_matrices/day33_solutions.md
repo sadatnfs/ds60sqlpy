@@ -49,7 +49,7 @@ w0, w
 ```
 Notes
 - LinearRegression with fit_intercept=True estimates intercept internally
-- Expect close agreement between (w0, w) and the closed-form solution above
+- Expect close agreement between (w = 0, w) and the closed-form solution above
 
 ---
 

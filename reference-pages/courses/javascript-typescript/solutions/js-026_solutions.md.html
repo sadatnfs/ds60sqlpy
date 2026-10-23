@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,56 +176,56 @@
 <h3 id="exercise-1-maintain-balance-through-methods">Exercise 1: Maintain balance through methods<a class="heading-anchor" href="#exercise-1-maintain-balance-through-methods" aria-label="Link to this section">#</a></h3>
 <p>Task: Start with 100 cents, deposit 50 and withdraw 30.</p>
 <p>The public API exposes observations and controlled mutations. A caller cannot directly assign the private field by an ordinary property name.</p>
-<pre><code class="language-typescript">const wallet = new Wallet(100);
-wallet.deposit(50);
-wallet.withdraw(30);
-assert.equal(wallet.cents, 120);
-assert.equal(Object.hasOwn(wallet, &#x27;balance&#x27;), false);
-assert.deepEqual(Object.keys(wallet), []);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+wallet<span class="syntax-punctuation">.</span>withdraw<span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>hasOwn<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;balance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> balance 120; no enumerable balance field.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-inject-a-deterministic-clock">Exercise 2: Inject a deterministic clock<a class="heading-anchor" href="#exercise-2-inject-a-deterministic-clock" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a receipt service using a fixed clock.</p>
 <p>The time dependency is explicit and replaceable. The test does not mutate global time or rely on a fragile elapsed-time tolerance.</p>
-<pre><code class="language-typescript">const service = new ReceiptService({ now: () =&gt; new Date(&#x27;2026-01-01T00:00:00.000Z&#x27;) });
-assert.deepEqual(service.create(&#x27;A&#x27;), { id: &#x27;A&#x27;, createdAt: &#x27;2026-01-01T00:00:00.000Z&#x27; });</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> service <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-01-01T00:00:00.000Z&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>service<span class="syntax-punctuation">.</span>create<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> createdAt<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;2026-01-01T00:00:00.000Z&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> timestamp 2026-01-01T00:00:00.000Z.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-reject-invalid-transitions-without-mutation">Exercise 3: Reject invalid transitions without mutation<a class="heading-anchor" href="#exercise-3-reject-invalid-transitions-without-mutation" aria-label="Link to this section">#</a></h3>
 <p>Task: Try a negative deposit and an overdraw.</p>
 <p>Checking after mutation would leave invalid state when the method throws. Validation must precede assignment for this failure-atomic contract.</p>
-<pre><code class="language-typescript">const wallet = new Wallet(100);
-assert.throws(() =&gt; wallet.deposit(-1), RangeError);
-assert.throws(() =&gt; wallet.withdraw(101), RangeError);
-assert.equal(wallet.cents, 100);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>withdraw<span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both throw; balance stays 100.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-guard-derived-overflow">Exercise 4: Guard derived overflow<a class="heading-anchor" href="#exercise-4-guard-derived-overflow" aria-label="Link to this section">#</a></h3>
 <p>Task: Deposit one cent into the maximum safe balance.</p>
 <p>Valid individual inputs do not guarantee a representable sum. The invariant applies to the resulting state as well as the method argument.</p>
-<pre><code class="language-typescript">const wallet = new Wallet(Number.MAX_SAFE_INTEGER);
-assert.throws(() =&gt; wallet.deposit(1), RangeError);
-assert.equal(wallet.cents, Number.MAX_SAFE_INTEGER);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> wallet<span class="syntax-punctuation">.</span>deposit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> RangeError; original balance preserved.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-reject-an-incompatible-collaborator">Exercise 5: Reject an incompatible collaborator<a class="heading-anchor" href="#exercise-5-reject-an-incompatible-collaborator" aria-label="Link to this section">#</a></h3>
 <p>Task: Pass a clock returning text in an uncalled negative type check.</p>
 <p>The small interface catches a concrete mismatch without requiring the collaborator to inherit from a particular class.</p>
-<pre><code class="language-typescript">function negativeTypeCheck(): void {
-  // @ts-expect-error Clock.now must return Date.
-  new ReceiptService({ now: () =&gt; &#x27;today&#x27; });
-}
-void negativeTypeCheck;
-assert.equal(new ReceiptService({ now: () =&gt; new Date(0) }).create(&#x27;B&#x27;).createdAt, &#x27;1970-01-01T00:00:00.000Z&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">function</span> negativeTypeCheck<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-operator">void</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// @ts-expect-error Clock.now must return Date.</span>
+  <span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-string">&#x27;today&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> ReceiptService<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> now<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Date</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>create<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>createdAt<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1970-01-01T00:00:00.000Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> expected compiler error; valid Date clock works.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-distinguish-private-storage-from-a-lookalike-property">Exercise 6: Distinguish private storage from a lookalike property<a class="heading-anchor" href="#exercise-6-distinguish-private-storage-from-a-lookalike-property" aria-label="Link to this section">#</a></h3>
 <p>Task: Add an ordinary balance property to the wallet.</p>
 <p>The string property and private name refer to separate storage. This observation demonstrates a runtime guarantee rather than only a compiler diagnostic.</p>
-<pre><code class="language-typescript">const wallet = new Wallet(2);
-Object.assign(wallet, { balance: 999 });
-assert.equal(Reflect.get(wallet, &#x27;balance&#x27;), 999);
-assert.equal(wallet.cents, 2);</code></pre>
+<pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> wallet <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Wallet<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> balance<span class="syntax-operator">:</span> <span class="syntax-keyword">999</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Reflect</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;balance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wallet<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ordinary property 999; private cents remain 2.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

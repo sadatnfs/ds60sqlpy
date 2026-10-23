@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -144,66 +190,66 @@
 <p><strong>Verify:</strong> Assert token byte contents and strict decoded equality without changing the learned rules.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-from collections import Counter
-import hashlib
-import json
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
+<span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> json
 
-END = (256,)
-
-
-def byte_tokens(word):
-    if not isinstance(word, str):
-        raise TypeError(&quot;training words must be text&quot;)
-    return [(value,) for value in word.encode(&quot;utf-8&quot;)] + [END]
+END <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
 
 
-def merge_pair(tokens, pair):
-    output = []
-    index = 0
-    while index &lt; len(tokens):
-        if index + 1 &lt; len(tokens) and (tokens[index], tokens[index + 1]) == pair:
-            output.append(tokens[index] + tokens[index + 1])
-            index += 2
-        else:
-            output.append(tokens[index])
-            index += 1
-    return output
+<span class="syntax-keyword">def</span> <span class="syntax-function">byte_tokens</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">training words must be text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> word<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">[</span>END<span class="syntax-punctuation">]</span>
 
 
-def fit_bpe(words, limit):
-    words = list(words)
-    if not words or type(limit) is not int or limit &lt; 0:
-        raise ValueError(&quot;nonempty training collection and nonnegative integer limit required&quot;)
-    corpus = [byte_tokens(word) for word in words]
-    rules = []
-    for _ in range(limit):
-        counts = Counter(pair for word in corpus for pair in zip(word, word[1:]))
-        if not counts:
-            break
-        maximum = max(counts.values())
-        pair = min(pair for pair, count in counts.items() if count == maximum)
-        rules.append(pair)
-        corpus = [merge_pair(word, pair) for word in corpus]
-    return rules
+<span class="syntax-keyword">def</span> <span class="syntax-function">merge_pair</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    output <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    index <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">while</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> pair<span class="syntax-punctuation">:</span>
+            output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> output
 
 
-def encode_word(word, rules):
-    tokens = byte_tokens(word)
-    for pair in rules:
-        tokens = merge_pair(tokens, pair)
-    return tokens
+<span class="syntax-keyword">def</span> <span class="syntax-function">fit_bpe</span><span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    words <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> words <span class="syntax-operator">or</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty training collection and nonnegative integer limit required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    corpus <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>byte_tokens<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> words<span class="syntax-punctuation">]</span>
+    rules <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        counts <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> corpus <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> word<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> counts<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">break</span>
+        maximum <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        pair <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> pair<span class="syntax-punctuation">,</span> count <span class="syntax-operator">in</span> counts<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> count <span class="syntax-operator">==</span> maximum<span class="syntax-punctuation">)</span>
+        rules<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>pair<span class="syntax-punctuation">)</span>
+        corpus <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>merge_pair<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> corpus<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> rules
 
 
-def decode_tokens(tokens):
-    values = [value for token in tokens for value in token]
-    if not values or values[-1] != 256 or 256 in values[:-1]:
-        raise ValueError(&quot;exactly one final end marker required&quot;)
-    return bytes(values[:-1]).decode(&quot;utf-8&quot;)
+<span class="syntax-keyword">def</span> <span class="syntax-function">encode_word</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> rules<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tokens <span class="syntax-operator">=</span> byte_tokens<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> rules<span class="syntax-punctuation">:</span>
+        tokens <span class="syntax-operator">=</span> merge_pair<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> tokens
 
 
-def merge_hash(rules):
-    return hashlib.sha256(json.dumps(rules, separators=(&quot;,&quot;, &quot;:&quot;)).encode()).hexdigest()</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">decode_tokens</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>value <span class="syntax-keyword">for</span> token <span class="syntax-operator">in</span> tokens <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> token<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> values <span class="syntax-operator">or</span> values<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> <span class="syntax-number">256</span> <span class="syntax-operator">or</span> <span class="syntax-number">256</span> <span class="syntax-operator">in</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exactly one final end marker required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">merge_hash</span><span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without the reference, explain why a merge list must be ordered and why a left-to-right scan cannot reuse one byte in two overlapping matches. Then propose a fresh tied training fixture and state its deterministic first choice.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

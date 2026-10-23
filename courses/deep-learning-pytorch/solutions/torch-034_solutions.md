@@ -60,7 +60,7 @@ assert report=={'A':(1,2),'B':(0,1)}
 
 ## Exercise 2: Expose repeated identities
 
-The question is: Repeatcorrectrecordc five times and compare row count with unique IDs.
+The question is: Repeat correct record c five times and compare row count with unique IDs.
 
 Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.
 

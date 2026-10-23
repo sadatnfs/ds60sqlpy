@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,11 +165,11 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-003.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="tf-003_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-trace-the-product">Exercise 1: Trace the product<a class="heading-anchor" href="#exercise-1-trace-the-product" aria-label="Link to this section">#</a></h3>
-<p>The original feature matrix has two observations and three input features. W has three feature rows and one output column, so the contracted feature dimension is valid. The first output is 1-3+2=0 and the second is 0+2=2. Preserve the (2,1) result shape because this helper represents an explicit output axis. A rank-one residual helper may choose a different layout later, but that conversion must be deliberate.</p>
+<p>The original feature matrix has two observations and three input features. W has three feature rows and one output column, so the contracted feature dimension is valid. The first output is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mn>3</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">1-3+2=0</annotation></semantics></math> and the second is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">0+2=2</annotation></semantics></math>. Preserve the (2,1) result shape because this helper represents an explicit output axis. A rank-one residual helper may choose a different layout later, but that conversion must be deliberate.</p>
 <p><strong>Expected:</strong> Result [[0],[2]] with shape (2,1).</p>
 <p><strong>Verify:</strong> Assert both output values and recover the first zero from four written terms.</p>
 <h3 id="exercise-2-add-an-observation">Exercise 2: Add an observation<a class="heading-anchor" href="#exercise-2-add-an-observation" aria-label="Link to this section">#</a></h3>
-<p>A batch row changes the number of observations, not the feature width or the parameter count. Appending [3,0,0] adds prediction 3<em>1 + 0</em>0 + 0*(-1) + 2 = 5. The original rows remain 0 and 2. Comparing that unchanged prefix is useful evidence that a batching operation did not accidentally normalize across records or change a parameter. It does not imply an arbitrary future training pipeline has the same invariant.</p>
+<p>A batch row changes the number of observations, not the feature width or the parameter count. Appending [3,0,0] adds prediction <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">3\cdot 1</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">0\cdot 0</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">0\cdot (-1)</annotation></semantics></math> + 2 = 5. The original rows remain 0 and 2. Comparing that unchanged prefix is useful evidence that a batching operation did not accidentally normalize across records or change a parameter. It does not imply an arbitrary future training pipeline has the same invariant.</p>
 <p><strong>Expected:</strong> The result is [[0],[2],[5]] with shape (3,1).</p>
 <p><strong>Verify:</strong> Compare the original two output rows unchanged and assert the new scalar is 5.</p>
 <h3 id="exercise-3-reject-incompatible-features">Exercise 3: Reject incompatible features<a class="heading-anchor" href="#exercise-3-reject-incompatible-features" aria-label="Link to this section">#</a></h3>
@@ -135,30 +181,30 @@
 <p><strong>Expected:</strong> Scalar and length-one vector biases give the same [[0],[2]]; feature-length bias raises ValueError.</p>
 <p><strong>Verify:</strong> Assert equality of the two accepted outputs and capture the rejected bias case independently.</p>
 <h3 id="exercise-5-extend-to-two-outputs">Exercise 5: Extend to two outputs<a class="heading-anchor" href="#exercise-5-extend-to-two-outputs" aria-label="Link to this section">#</a></h3>
-<p>The two-output weight maps each input row to two sums. First output weights [1,0,-1] with bias 2 reproduce [0,2]. Second output weights [0,1,1] with bias -1 give 2+3-1=4 for the first record and 1-1=0 for the second. Assemble these as [[0,4],[2,0]]. Looking only at the (2,2) shape could miss an incorrect column order, sign or bias, so inspect values as well.</p>
+<p>The two-output weight maps each input row to two sums. First output weights [1,0,-1] with bias 2 reproduce [0,2]. Second output weights [0,1,1] with bias -1 give <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>+</mo><mn>3</mn><mo>−</mo><mn>1</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">2+3-1=4</annotation></semantics></math> for the first record and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mn>1</mn><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">1-1=0</annotation></semantics></math> for the second. Assemble these as [[0,4],[2,0]]. Looking only at the (2,2) shape could miss an incorrect column order, sign or bias, so inspect values as well.</p>
 <p><strong>Expected:</strong> The result is [[0,4],[2,0]] with shape (2,2).</p>
 <p><strong>Verify:</strong> Check each output column by hand and assert the complete matrix, not just its shape.</p>
 <h3 id="exercise-6-preserve-a-prediction-under-unit-conversion">Exercise 6: Preserve a prediction under unit conversion<a class="heading-anchor" href="#exercise-6-preserve-a-prediction-under-unit-conversion" aria-label="Link to this section">#</a></h3>
 <p>The centimeter inputs are 100 times the meter values. To preserve the same weighted contribution when inputs are divided by 100, multiply the corresponding weight by 100: 0.02 becomes 2. The shared bias remains 1. Both models therefore produce 3 and 5. Retaining weight 0.02 on the meter inputs would yield 1.02 and 1.04, a valid-shaped but different computation. Feature-unit metadata must travel with model preprocessing and inference contracts.</p>
-<p><strong>Expected:</strong> The centimeter model and meter model with W=[[2]] both predict [[3],[5]].</p>
+<p><strong>Expected:</strong> The centimeter model and meter model with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[2]]</annotation></semantics></math> both predict [[3],[5]].</p>
 <p><strong>Verify:</strong> Assert both predictions agree and explain why changing X alone while retaining 0.02 would alter the model.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
 
-def affine(x, weight, bias):
-    x, weight, bias = (np.asarray(v, dtype=np.float64) for v in (x, weight, bias))
-    if x.ndim != 2 or weight.ndim != 2 or not all(x.shape) or not all(weight.shape):
-        raise ValueError(&quot;nonempty feature and weight matrices required&quot;)
-    if x.shape[1] != weight.shape[0]:
-        raise ValueError(&quot;input-feature dimensions do not match&quot;)
-    if bias.ndim &gt; 1 or (bias.ndim == 1 and bias.shape != (weight.shape[1],)):
-        raise ValueError(&quot;bias must be scalar or output-length vector&quot;)
-    if not all(np.isfinite(v).all() for v in (x, weight, bias)):
-        raise ValueError(&quot;finite affine inputs required&quot;)
-    return x @ weight + bias</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">affine</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> bias<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> bias <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> bias<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> weight<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>weight<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty feature and weight matrices required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> weight<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">input-feature dimensions do not match</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> bias<span class="syntax-operator">.</span>ndim <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> <span class="syntax-punctuation">(</span>bias<span class="syntax-operator">.</span>ndim <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> bias<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> <span class="syntax-punctuation">(</span>weight<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bias must be scalar or output-length vector</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> v <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> bias<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite affine inputs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> x <span class="syntax-operator">@</span> weight <span class="syntax-operator">+</span> bias</code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Close the code and state the three matrix dimensions in words. Then choose a two-feature, two-output fixture of your own and derive its first row. Explain why a correctly shaped matrix can still use the wrong feature order.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

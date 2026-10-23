@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Days 1–14, especially packages (<code>python-09</code>), pytest (<code>python-10</code>), logging (<code>python-11</code>), and quality tooling (<code>python-14</code>).</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day15_cli_project.md</code>, then open <code>python/ds-60day/notebooks/day15_cli_project.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,29 +423,29 @@
 <p><code>parser.add_argument(&quot;--limit&quot;, type=int, default=10)</code> declares the spelling, conversion, and fallback. <code>parser.parse_args(argv)</code> returns a namespace of parsed values. Supplying <code>argv</code> makes tests deterministic; <code>None</code> tells argparse to read the real process command line.</p>
 <h5 id="guide--worked-example-1-parse-an-explicit-argument-list">Worked example 1 — Parse an explicit argument list<a class="heading-anchor" href="#guide--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
 <p>Exercise the CLI contract without touching the notebook process arguments. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import argparse
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> argparse
 
-def build_parser() -&gt; argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog=&quot;rowtool&quot;)
-    parser.add_argument(&quot;--limit&quot;, type=int, default=10)
-    parser.add_argument(&quot;names&quot;, nargs=&quot;+&quot;)
-    return parser
+<span class="syntax-keyword">def</span> <span class="syntax-function">build_parser</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">:</span>
+    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>prog<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">rowtool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> default<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">names</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> nargs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">+</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> parser
 
-args = build_parser().parse_args([&quot;--limit&quot;, &quot;2&quot;, &quot;Ada&quot;, &quot;Lin&quot;, &quot;Grace&quot;])
-(args.limit, args.names)</code></pre>
+args <span class="syntax-operator">=</span> build_parser<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Lin</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Grace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>limit<span class="syntax-punctuation">,</span> args<span class="syntax-operator">.</span>names<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])`. Argparse converted `2` to an integer and collected positional names.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])`. Argparse converted `2` to an integer and collected positional names.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-keep-core-work-independent-of-printing">Worked example 2 — Keep core work independent of printing<a class="heading-anchor" href="#guide--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
 <p>A plain function can be tested and reused by the CLI. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">def select_names(names: list[str], *, limit: int) -&gt; list[str]:
-    if limit &lt; 0:
-        raise ValueError(&quot;limit must be non-negative&quot;)
-    return [name.strip().title() for name in names[:limit]]
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">select_names</span><span class="syntax-punctuation">(</span>names<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>name<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> names<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>limit<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 
-select_names(args.names, limit=args.limit)</code></pre>
+select_names<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>names<span class="syntax-punctuation">,</span> limit<span class="syntax-operator">=</span>args<span class="syntax-operator">.</span>limit<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`[&#x27;Ada&#x27;, &#x27;Lin&#x27;]`. Parsing and presentation remain outside the core transformation.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`[&#x27;Ada&#x27;, &#x27;Lin&#x27;]`. Parsing and presentation remain outside the core transformation.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -427,17 +475,17 @@ select_names(args.names, limit=args.limit)</code></pre>
 <li><strong>Exit code:</strong> <code>0</code> for success and nonzero for a reported failure.</li>
 </ul>
 <p>Keep a thin shell around a testable core:</p>
-<pre><code class="language-text">arguments -&gt; read -&gt; clean -&gt; summarize -&gt; write
+<pre class="highlighted-code"><code class="language-text">arguments -&gt; read -&gt; clean -&gt; summarize -&gt; write
                boundaries | pure work | boundary</code></pre>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <p>This tiny parser demonstrates the interface without solving the data project:</p>
-<pre><code class="language-python">import argparse
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> argparse
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
-    parser = argparse.ArgumentParser(description=&quot;Inspect an input path&quot;)
-    parser.add_argument(&quot;--input&quot;, required=True, type=Path)
-    return parser.parse_args(argv)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">parse_args</span><span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>Namespace<span class="syntax-punctuation">:</span>
+    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>description<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Inspect an input path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> required<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> parser<span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">)</span></code></pre>
 <p>Passing <code>argv</code> makes parser behavior testable without changing global process arguments.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -451,7 +499,7 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 <li>Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</li>
 </ol>
 <ol>
-<li>Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
+<li>Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
 </ol>
 <ol>
 <li>Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</li>
@@ -463,16 +511,16 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 <li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</li>
 <li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</li>
 <li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</li>
-<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
 <li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--run-the-project">Run the project<a class="heading-anchor" href="#guide--run-the-project" aria-label="Link to this section">#</a></h4>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe tool.py --input data.csv --out artifacts\out.csv
-.\.venv\Scripts\python.exe -m pytest</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe tool<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-input data<span class="syntax-punctuation">.</span>csv <span class="syntax-punctuation">-</span>-out artifacts<span class="syntax-punctuation">\</span>out<span class="syntax-punctuation">.</span>csv
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
 .venv/bin/python -m pytest</code></pre>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -484,7 +532,7 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 <p>Expected behavior: valid input produces deterministic cleaned/summary output, invalid input fails clearly, and all quality gates pass.</p>
 <h4 id="guide--common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#guide--common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><strong>The CLI runs during import:</strong> put execution in <code>main()</code> and guard it with <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;</code>.</li>
+<li><strong>The CLI runs during import:</strong> put execution in <code>main()</code> and guard it with <code>if __name__ == &quot;__main__&quot;</code>.</li>
 <li><strong>Tests need subprocesses for every case:</strong> move logic behind pure functions and test the parser with an explicit <code>argv</code>.</li>
 <li><strong>Pandas mutates caller data:</strong> call <code>.copy()</code> at the transform boundary.</li>
 <li><strong>A traceback is shown for an ordinary user error:</strong> catch the narrow boundary exception in <code>main</code>, log a concise message, and return nonzero.</li>
@@ -498,7 +546,7 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-15`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-15`
 (Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
 I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
 Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
@@ -567,27 +615,27 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>parser.add_argument(&quot;--limit&quot;, type=int, default=10)</code> declares the spelling, conversion, and fallback. <code>parser.parse_args(argv)</code> returns a namespace of parsed values. Supplying <code>argv</code> makes tests deterministic; <code>None</code> tells argparse to read the real process command line.</p>
 <h5 id="learner--cell-4--worked-example-1-parse-an-explicit-argument-list">Worked example 1 — Parse an explicit argument list<a class="heading-anchor" href="#learner--cell-4--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
 <p>Exercise the CLI contract without touching the notebook process arguments. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import argparse</span>
-<span> </span>
-<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
-<span>    parser = argparse.ArgumentParser(prog=&quot;rowtool&quot;)</span>
-<span>    parser.add_argument(&quot;--limit&quot;, type=int, default=10)</span>
-<span>    parser.add_argument(&quot;names&quot;, nargs=&quot;+&quot;)</span>
-<span>    return parser</span>
-<span> </span>
-<span>args = build_parser().parse_args([&quot;--limit&quot;, &quot;2&quot;, &quot;Ada&quot;, &quot;Lin&quot;, &quot;Grace&quot;])</span>
-<span>(args.limit, args.names)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> argparse</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_parser</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>prog<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">rowtool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> default<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">names</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> nargs<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">+</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> parser</span>
+<span class="source-line"></span>
+<span class="source-line">args <span class="syntax-operator">=</span> build_parser<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Lin</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Grace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>limit<span class="syntax-punctuation">,</span> args<span class="syntax-operator">.</span>names<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])</code>. Argparse converted <code>2</code> to an integer and collected positional names.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-keep-core-work-independent-of-printing">Worked example 2 — Keep core work independent of printing<a class="heading-anchor" href="#learner--cell-6--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
 <p>A plain function can be tested and reused by the CLI. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def select_names(names: list[str], *, limit: int) -&gt; list[str]:</span>
-<span>    if limit &lt; 0:</span>
-<span>        raise ValueError(&quot;limit must be non-negative&quot;)</span>
-<span>    return [name.strip().title() for name in names[:limit]]</span>
-<span> </span>
-<span>select_names(args.names, limit=args.limit)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">select_names</span><span class="syntax-punctuation">(</span>names<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>name<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> names<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>limit<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">select_names<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>names<span class="syntax-punctuation">,</span> limit<span class="syntax-operator">=</span>args<span class="syntax-operator">.</span>limit<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[&#x27;Ada&#x27;, &#x27;Lin&#x27;]</code>. Parsing and presentation remain outside the core transformation.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -627,7 +675,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</li>
 </ol>
 <ol>
-<li>Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
+<li>Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
 </ol>
 <ol>
 <li>Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</li>
@@ -639,136 +687,136 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</li>
 <li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</li>
 <li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</li>
-<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
 <li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="learner--cell-11--run-the-project">Run the project<a class="heading-anchor" href="#learner--cell-11--run-the-project" aria-label="Link to this section">#</a></h4>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe tool.py --input data.csv --out artifacts\out.csv
-.\.venv\Scripts\python.exe -m pytest</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe tool<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-input data<span class="syntax-punctuation">.</span>csv <span class="syntax-punctuation">-</span>-out artifacts<span class="syntax-punctuation">\</span>out<span class="syntax-punctuation">.</span>csv
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
 .venv/bin/python -m pytest</code></pre></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-12--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-12--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. `build_parser()`, pu...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. `build_parser()`, pu...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-14--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-14--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Add options for input path, output path, and a typed transformation parameter such as `--limit`. argparse rejects invalid numeric text and the application returns a nonzero stat...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Add options for input path, output path, and a typed transformation parameter such as `--limit`. argparse rejects invalid numeric text and the application returns a nonzero stat...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-16--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-16--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Write pytest tests that call core logic directly and call `main([...])` with temporary files. happy path, empty input, missing path, invalid parameter, and output overwrite poli...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Write pytest tests that call core logic directly and call `main([...])` with temporary files. happy path, empty input, missing path, invalid parameter, and output overwrite poli...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-18--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-18--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
-<p><strong>Contract reminder:</strong> Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
+<p><strong>Contract reminder:</strong> Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Package the CLI invocation behind `if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())`. importing the module produces no output or process exit; `python -m ... --help` works fr...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Package the CLI invocation behind `if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())`. importing the module produces no output or process exit; `python -m ... --help` works fr...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-20--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-20--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. do not mix Bash sy...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. do not mix Bash sy...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-22--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-22--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`. The parser performs declared conversions before `main` receives va...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`. The parser performs declared conversions before `main` receives va...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-24--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-24--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. A pure transform accepts and returns data without reading glo...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. A pure transform accepts and returns data without reading glo...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-26--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-26--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
-<span># Short contract: Add `--overwrite` and refuse to replace an existing output unless the flag is present. Check the destination before performing the write. Use a temporary existing destination: a...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 8 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Add `--overwrite` and refuse to replace an existing output unless the flag is present. Check the destination before performing the write. Use a temporary existing destination: a...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 18</div><h5 id="learner--cell-28--practice-9-prediction-attempt-and-evidence">Practice 9 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-28--practice-9-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
-<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 9 — your work</span>
-<span># Short contract: Repair a module that parses arguments and writes files during import. Move behavior into `main(argv)` and use the `__main__` guard. Import the module while capturing output/file...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 9 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair a module that parses arguments and writes files during import. Move behavior into `main(argv)` and use the `__main__` guard. Import the module while capturing output/file...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 19</div><h5 id="learner--cell-30--practice-10-prediction-attempt-and-evidence">Practice 10 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-30--practice-10-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 10 — your work</span>
-<span># Short contract: Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. Translate expected boundary failures onc...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 10 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. Translate expected boundary failures onc...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -822,96 +870,96 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. Architecture: <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. Constraints: use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message. That connects the answer to a small command-line application with separated boundaries.</p>
-<pre><code class="language-python">from pathlib import Path
-import json
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> json
 
 
-def read_records(path: Path) -&gt; list[dict[str, object]]:
-    with path.open(encoding=&quot;utf-8&quot;) as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError(&quot;input JSON must be a list&quot;)
-    return payload
+<span class="syntax-keyword">def</span> <span class="syntax-function">read_records</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+        payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">input JSON must be a list</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> payload
 
 
-def select_records(
-    records: list[dict[str, object]], *, limit: int
-) -&gt; list[dict[str, object]]:
-    if limit &lt; 0:
-        raise ValueError(&quot;limit must be non-negative&quot;)
-    return records[:limit]</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">select_records</span><span class="syntax-punctuation">(</span>
+    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> records<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>limit<span class="syntax-punctuation">]</span></code></pre>
 <p>These functions separate the file boundary from the deterministic transformation; <code>main</code> coordinates them.</p>
 <p><strong>Verification evidence:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. Expected behavior: argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. Constraint: do not catch programming errors broadly. Record the named value, shape, label, or iterator position needed to establish: Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message. The trace exposes a small command-line application with separated boundaries directly.</p>
-<pre><code class="language-python">import argparse
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> argparse
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
 
-def build_parser() -&gt; argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog=&quot;record-tool&quot;)
-    parser.add_argument(&quot;input&quot;, type=Path)
-    parser.add_argument(&quot;--output&quot;, type=Path)
-    parser.add_argument(&quot;--limit&quot;, type=int, default=10)
-    return parser
+<span class="syntax-keyword">def</span> <span class="syntax-function">build_parser</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">:</span>
+    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>prog<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">record-tool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> default<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> parser
 
 
-parsed = build_parser().parse_args([&quot;input.json&quot;, &quot;--limit&quot;, &quot;3&quot;])
-assert isinstance(parsed.input, Path)
-assert parsed.limit == 3</code></pre>
+parsed <span class="syntax-operator">=</span> build_parser<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">input.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>parsed<span class="syntax-operator">.</span>input<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> parsed<span class="syntax-operator">.</span>limit <span class="syntax-operator">==</span> <span class="syntax-number">3</span></code></pre>
 <p>Argparse owns text conversion and produces its own friendly error for an invalid integer.</p>
 <p><strong>Verification evidence:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
 <h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. Coverage: happy path, empty input, missing path, invalid parameter, and output overwrite policy. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert return status, captured output, and exact file content without spawning a shell. That connects the answer to a small command-line application with separated boundaries.</p>
-<pre><code class="language-python">import json
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
 
-def write_records(
-    records: list[dict[str, object]],
-    path: Path,
-    *,
-    overwrite: bool,
-) -&gt; None:
-    if path.exists() and not overwrite:
-        raise FileExistsError(f&quot;refusing to overwrite {path}&quot;)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(records, indent=2), encoding=&quot;utf-8&quot;)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">write_records</span><span class="syntax-punctuation">(</span>
+    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span>
+    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    overwrite<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> overwrite<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> FileExistsError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">refusing to overwrite </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A pytest test should create an existing temporary file, prove refusal preserves it, then pass <code>overwrite=True</code> and compare the new JSON.</p>
 <p><strong>Verification evidence:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
 <h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
-<p><strong>Reasoning:</strong> Implement this exact contract as written: Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. Expected behavior: importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test both import and module execution. That connects the answer to a small command-line application with separated boundaries.</p>
-<pre><code class="language-python">import sys
+<p><strong>Learner contract:</strong> Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. Expected behavior: importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test both import and module execution. That connects the answer to a small command-line application with separated boundaries.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> sys
 
 
-def main(arguments: list[str] | None = None) -&gt; int:
-    args = build_parser().parse_args(arguments)
-    try:
-        records = read_records(args.input)
-        selected = select_records(records, limit=args.limit)
-        if args.output is None:
-            print(json.dumps(selected, indent=2))
-        else:
-            write_records(selected, args.output, overwrite=False)
-    except (FileNotFoundError, FileExistsError, ValueError) as error:
-        print(f&quot;error: {error}&quot;, file=sys.stderr)
-        return 2
-    return 0
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>arguments<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    args <span class="syntax-operator">=</span> build_parser<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span>arguments<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        records <span class="syntax-operator">=</span> read_records<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>input<span class="syntax-punctuation">)</span>
+        selected <span class="syntax-operator">=</span> select_records<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> limit<span class="syntax-operator">=</span>args<span class="syntax-operator">.</span>limit<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> args<span class="syntax-operator">.</span>output <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>selected<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            write_records<span class="syntax-punctuation">(</span>selected<span class="syntax-punctuation">,</span> args<span class="syntax-operator">.</span>output<span class="syntax-punctuation">,</span> overwrite<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> <span class="syntax-punctuation">(</span>FileNotFoundError<span class="syntax-punctuation">,</span> FileExistsError<span class="syntax-punctuation">,</span> ValueError<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">error: </span><span class="syntax-string">{</span>error<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> file<span class="syntax-operator">=</span>sys<span class="syntax-operator">.</span>stderr<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">2</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span>
 
 
-if __name__ == &quot;__main__&quot;:
-    raise SystemExit(main())</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Import defines functions only; the guard owns process execution.</p>
 <p><strong>Verification evidence:</strong> test both import and module execution.</p>
 <h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. Constraint: do not mix Bash syntax into PowerShell. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument. That connects the answer to a small command-line application with separated boundaries.</p>
 <p>Copy-ready invocations keep platform syntax separate:</p>
-<pre><code class="language-powershell">&amp; $CoursePython -m your_package.record_tool &quot;data\input records.json&quot; --limit 3</code></pre>
-<pre><code class="language-bash">.venv/bin/python -m your_package.record_tool &quot;data/input records.json&quot; --limit 3</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython -m your_package<span class="syntax-punctuation">.</span>record_tool <span class="syntax-string">&quot;</span><span class="syntax-string">data\input records.json</span><span class="syntax-string">&quot;</span> <span class="syntax-punctuation">-</span>-limit 3</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m your_package.record_tool <span class="syntax-string">&quot;data/input records.json&quot;</span> --limit <span class="syntax-number">3</span></code></pre>
 <p>Both run from the repository root and quote the path containing spaces.</p>
 <p><strong>Verification evidence:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
 <h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -928,8 +976,8 @@ if __name__ == &quot;__main__&quot;:
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. Progressive hint: Check the destination before performing the write. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag. That connects the answer to a small command-line application with separated boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
 <h5 id="solution-1--exercise-9-answer-contract">Exercise 9 — answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
-<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a module that parses arguments and writes files during import. Progressive hint: Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation. The diagnosis depends on a small command-line application with separated boundaries.</p>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a module that parses arguments and writes files during import. Progressive hint: Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation. The diagnosis depends on a small command-line application with separated boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
 <h5 id="solution-1--exercise-10-answer-contract">Exercise 10 — answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
@@ -940,48 +988,48 @@ if __name__ == &quot;__main__&quot;:
 <h5 id="solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries">Shared implementation for Exercises 6–7 — Parsed types and boundaries<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point">Shared implementation for Exercises 8–10 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-import argparse
-from pathlib import Path
-
-
-def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
-    parser = argparse.ArgumentParser(description=&quot;Clean a course CSV&quot;)
-    parser.add_argument(&quot;--input&quot;, type=Path, required=True)
-    parser.add_argument(&quot;--out&quot;, type=Path, required=True)
-    parser.add_argument(&quot;--limit&quot;, type=int)
-    parser.add_argument(&quot;--overwrite&quot;, action=&quot;store_true&quot;)
-    return parser.parse_args(argv)
+<span class="syntax-keyword">import</span> argparse
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
 
-def ensure_writable_output(path: Path, *, overwrite: bool) -&gt; None:
-    &quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;
-
-    if path.exists() and not overwrite:
-        raise FileExistsError(f&quot;output already exists: {path}&quot;)
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-
-def main(argv: list[str] | None = None) -&gt; int:
-    args = parse_args(argv)
-    try:
-        if not args.input.is_file():
-            raise FileNotFoundError(f&quot;input not found: {args.input}&quot;)
-        ensure_writable_output(args.out, overwrite=args.overwrite)
-        # read -&gt; clean -&gt; summarize -&gt; write belongs here.
-    except (FileNotFoundError, FileExistsError, ValueError) as error:
-        print(f&quot;error: {error}&quot;)   # One user-facing boundary translation.
-        return 2
-    return 0
+<span class="syntax-keyword">def</span> <span class="syntax-function">parse_args</span><span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>Namespace<span class="syntax-punctuation">:</span>
+    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>description<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Clean a course CSV</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">,</span> required<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--out</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">,</span> required<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--overwrite</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">store_true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> parser<span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">)</span>
 
 
-parsed = parse_args([&quot;--input&quot;, &quot;in.csv&quot;, &quot;--out&quot;, &quot;out.csv&quot;, &quot;--limit&quot;, &quot;10&quot;])
-assert isinstance(parsed.input, Path) and parsed.limit == 10
+<span class="syntax-keyword">def</span> <span class="syntax-function">ensure_writable_output</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> overwrite<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;</span>
 
-# Production module only:
-# if __name__ == &quot;__main__&quot;:
-#     raise SystemExit(main())</code></pre>
+    <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> overwrite<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> FileExistsError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">output already exists: </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    args <span class="syntax-operator">=</span> parse_args<span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> args<span class="syntax-operator">.</span>input<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> FileNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">input not found: </span><span class="syntax-string">{</span>args<span class="syntax-operator">.</span>input<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        ensure_writable_output<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>out<span class="syntax-punctuation">,</span> overwrite<span class="syntax-operator">=</span>args<span class="syntax-operator">.</span>overwrite<span class="syntax-punctuation">)</span>
+        <span class="syntax-comment"># read -&gt; clean -&gt; summarize -&gt; write belongs here.</span>
+    <span class="syntax-keyword">except</span> <span class="syntax-punctuation">(</span>FileNotFoundError<span class="syntax-punctuation">,</span> FileExistsError<span class="syntax-punctuation">,</span> ValueError<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">error: </span><span class="syntax-string">{</span>error<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>   <span class="syntax-comment"># One user-facing boundary translation.</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">2</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span>
+
+
+parsed <span class="syntax-operator">=</span> parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">--input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">in.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--out</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">out.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>parsed<span class="syntax-operator">.</span>input<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> parsed<span class="syntax-operator">.</span>limit <span class="syntax-operator">==</span> <span class="syntax-number">10</span>
+
+<span class="syntax-comment"># Production module only:</span>
+<span class="syntax-comment"># if __name__ == &quot;__main__&quot;:</span>
+<span class="syntax-comment">#     raise SystemExit(main())</span></code></pre>
 <p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></div>
       </section>
 
@@ -1018,26 +1066,26 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-2--cell-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
 <p>Core transform functions and simple test in-notebook.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
-<span> </span>
-<span>def clean(df: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    d = df.rename(columns=str.lower).copy()</span>
-<span>    if &#x27;date&#x27; in d: d[&#x27;date&#x27;] = pd.to_datetime(d[&#x27;date&#x27;], errors=&#x27;coerce&#x27;, utc=True)</span>
-<span>    for c in (&#x27;price&#x27;,&#x27;qty&#x27;):</span>
-<span>        if c in d: d[c] = pd.to_numeric(d[c], errors=&#x27;coerce&#x27;)</span>
-<span>    d = d.dropna(subset=[c for c in (&#x27;price&#x27;,&#x27;qty&#x27;) if c in d.columns])</span>
-<span>    return d</span>
-<span> </span>
-<span>def summarize(d: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    if {&#x27;price&#x27;,&#x27;qty&#x27;}.issubset(d.columns):</span>
-<span>        d = d.assign(revenue=d[&#x27;price&#x27;]*d[&#x27;qty&#x27;])</span>
-<span>    if &#x27;date&#x27; in d:</span>
-<span>        return d.groupby(d[&#x27;date&#x27;].dt.date).agg(revenue=(&#x27;revenue&#x27;,&#x27;sum&#x27;))</span>
-<span>    return d.agg(revenue=(&#x27;revenue&#x27;,&#x27;sum&#x27;)).to_frame().T</span>
-<span> </span>
-<span>df = pd.DataFrame({&#x27;date&#x27;:[&#x27;2025-01-01&#x27;,&#x27;bad&#x27;], &#x27;price&#x27;:[&#x27;10&#x27;,&#x27;x&#x27;], &#x27;qty&#x27;:[2,3]})</span>
-<span>tidy = clean(df); summ = summarize(tidy)</span>
-<span>tidy.dtypes, summ</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">clean</span><span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    d <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>rename<span class="syntax-punctuation">(</span>columns<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-operator">.</span>lower<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">in</span> d<span class="syntax-punctuation">:</span> d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_datetime<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">coerce</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> utc<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">price</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">qty</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> c <span class="syntax-operator">in</span> d<span class="syntax-punctuation">:</span> d<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>to_numeric<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">coerce</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    d <span class="syntax-operator">=</span> d<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span>subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>c <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">price</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">qty</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> c <span class="syntax-operator">in</span> d<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> d</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">summarize</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">price</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">qty</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-operator">.</span>issubset<span class="syntax-punctuation">(</span>d<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        d <span class="syntax-operator">=</span> d<span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">=</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">price</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">*</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">qty</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">in</span> d<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> d<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>dt<span class="syntax-operator">.</span>date<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">revenue</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sum</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> d<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">revenue</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sum</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_frame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>T</span>
+<span class="source-line"></span>
+<span class="source-line">df <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">date</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">2025-01-01</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">bad</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">price</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">10</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">x</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">qty</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">tidy <span class="syntax-operator">=</span> clean<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> summ <span class="syntax-operator">=</span> summarize<span class="syntax-punctuation">(</span>tidy<span class="syntax-punctuation">)</span></span>
+<span class="source-line">tidy<span class="syntax-operator">.</span>dtypes<span class="syntax-punctuation">,</span> summ</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1068,7 +1116,7 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
 <p><strong>Reasoning checkpoint:</strong> Check the destination before performing the write. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
 <h5 id="solution-2--cell-3--exercise-9-debugging">Exercise 9 — Debugging<a class="heading-anchor" href="#solution-2--cell-3--exercise-9-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Repair a module that parses arguments and writes files during import.</p>
-<p><strong>Reasoning checkpoint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<p><strong>Reasoning checkpoint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
 <h5 id="solution-2--cell-3--exercise-10-edge-case-and-explanation">Exercise 10 — Edge case and explanation<a class="heading-anchor" href="#solution-2--cell-3--exercise-10-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.</p>
 <p><strong>Reasoning checkpoint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
@@ -1078,49 +1126,49 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
 <h5 id="solution-2--cell-3--practices-1-2-parsed-types-and-boundaries">Practices 1–2 — Parsed types and boundaries<a class="heading-anchor" href="#solution-2--cell-3--practices-1-2-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
 <h5 id="solution-2--cell-3--practices-3-5-safe-overwrite-and-importable-entry-point">Practices 3–5 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-2--cell-3--practices-3-5-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>import argparse</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span> </span>
-<span>def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:</span>
-<span>    parser = argparse.ArgumentParser(description=&quot;Clean a course CSV&quot;)</span>
-<span>    parser.add_argument(&quot;--input&quot;, type=Path, required=True)</span>
-<span>    parser.add_argument(&quot;--out&quot;, type=Path, required=True)</span>
-<span>    parser.add_argument(&quot;--limit&quot;, type=int)</span>
-<span>    parser.add_argument(&quot;--overwrite&quot;, action=&quot;store_true&quot;)</span>
-<span>    return parser.parse_args(argv)</span>
-<span> </span>
-<span> </span>
-<span>def ensure_writable_output(path: Path, *, overwrite: bool) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if path.exists() and not overwrite:</span>
-<span>        raise FileExistsError(f&quot;output already exists: {path}&quot;)</span>
-<span>    path.parent.mkdir(parents=True, exist_ok=True)</span>
-<span> </span>
-<span> </span>
-<span>def main(argv: list[str] | None = None) -&gt; int:</span>
-<span>    args = parse_args(argv)</span>
-<span>    try:</span>
-<span>        if not args.input.is_file():</span>
-<span>            raise FileNotFoundError(f&quot;input not found: {args.input}&quot;)</span>
-<span>        ensure_writable_output(args.out, overwrite=args.overwrite)</span>
-<span>        # read -&gt; clean -&gt; summarize -&gt; write belongs here.</span>
-<span>    except (FileNotFoundError, FileExistsError, ValueError) as error:</span>
-<span>        print(f&quot;error: {error}&quot;)   # One user-facing boundary translation.</span>
-<span>        return 2</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>parsed = parse_args([&quot;--input&quot;, &quot;in.csv&quot;, &quot;--out&quot;, &quot;out.csv&quot;, &quot;--limit&quot;, &quot;10&quot;])</span>
-<span>assert isinstance(parsed.input, Path) and parsed.limit == 10</span>
-<span> </span>
-<span># Production module only:</span>
-<span># if __name__ == &quot;__main__&quot;:</span>
-<span>#     raise SystemExit(main())</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> argparse</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_args</span><span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> argparse<span class="syntax-operator">.</span>Namespace<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    parser <span class="syntax-operator">=</span> argparse<span class="syntax-operator">.</span>ArgumentParser<span class="syntax-punctuation">(</span>description<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Clean a course CSV</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">,</span> required<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--out</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span>Path<span class="syntax-punctuation">,</span> required<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">type</span><span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parser<span class="syntax-operator">.</span>add_argument<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--overwrite</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> action<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">store_true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> parser<span class="syntax-operator">.</span>parse_args<span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">ensure_writable_output</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> overwrite<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Reject accidental replacement before any output is opened.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> overwrite<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> FileExistsError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">output already exists: </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    args <span class="syntax-operator">=</span> parse_args<span class="syntax-punctuation">(</span>argv<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> args<span class="syntax-operator">.</span>input<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> FileNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">input not found: </span><span class="syntax-string">{</span>args<span class="syntax-operator">.</span>input<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        ensure_writable_output<span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>out<span class="syntax-punctuation">,</span> overwrite<span class="syntax-operator">=</span>args<span class="syntax-operator">.</span>overwrite<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># read -&gt; clean -&gt; summarize -&gt; write belongs here.</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> <span class="syntax-punctuation">(</span>FileNotFoundError<span class="syntax-punctuation">,</span> FileExistsError<span class="syntax-punctuation">,</span> ValueError<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">error: </span><span class="syntax-string">{</span>error<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>   <span class="syntax-comment"># One user-facing boundary translation.</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">parsed <span class="syntax-operator">=</span> parse_args<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">--input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">in.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--out</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">out.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>parsed<span class="syntax-operator">.</span>input<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> parsed<span class="syntax-operator">.</span>limit <span class="syntax-operator">==</span> <span class="syntax-number">10</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Production module only:</span></span>
+<span class="source-line"><span class="syntax-comment"># if __name__ == &quot;__main__&quot;:</span></span>
+<span class="source-line"><span class="syntax-comment">#     raise SystemExit(main())</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></article></div>
       </section>

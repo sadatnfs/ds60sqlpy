@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,57 +161,57 @@
       <h1>Spark 005</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-005.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span> </span>
-<span> </span>
-<span>object Main {</span>
-<span> </span>
-<span> </span>
-<span>  def parseAmount(raw: Option[String]): Option[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete parseAmount&quot;)</span>
-<span> </span>
-<span>  def classify(raw: Option[String]): String =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete classify&quot;)</span>
-<span> </span>
-<span>  def observed(tokens: Seq[Option[String]]): Seq[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete observed&quot;)</span>
-<span> </span>
-<span>  def ledger(tokens: Seq[Option[String]]): Map[String, Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete ledger&quot;)</span>
-<span> </span>
-<span>  def displayAmount(raw: Option[String]): String =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete displayAmount&quot;)</span>
-<span> </span>
-<span>  def feeOption(raw: Option[String]): Option[Long] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete feeOption&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    locally {</span>
-<span>      val present = Some(0L)</span>
-<span>      val absent = Option.empty[Long]</span>
-<span>      assert(present.contains(0L) &amp;&amp; absent.isEmpty)</span>
-<span>      assert(present.map(_ + 5L).contains(5L))</span>
-<span>      assert(absent.map(_ + 5L).isEmpty)</span>
-<span>      println(s&quot;present=$present absent=$absent&quot;)</span>
-<span>    }</span>
-<span>    locally {</span>
-<span>      val safe = Option(null: String)</span>
-<span>      val suppliedNull = Some(null: String)</span>
-<span>      assert(safe.isEmpty)</span>
-<span>      assert(suppliedNull.isDefined)</span>
-<span>      assert(suppliedNull.flatMap(text =&gt; Option(text)).isEmpty)</span>
-<span>      println(&quot;Option(null) and Some(null) are distinct constructions&quot;)</span>
-<span>    }</span>
-<span>    println(&quot;spark-005: worked examples passed; six task implementations remain&quot;)</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Parse a strict optional amount. Inputs/task: Accept trimmed ASCII digits representing 0 through 1000000 cents. Return None for absent, blank, signed, decimal, overflowing or supplied-null tokens. Do not convert invalid input to zero or call unchecked Option.get. Expected: Some(&quot;0&quot;) gives Some(0L), Some(&quot; 25 &quot;) gives Some(25L), None and Some(&quot;bad&quot;) give None. Some(null), Some(&quot;-1&quot;), Some(&quot;1.0&quot;) and values above the bound are rejected. Verify: Assert accepted zero and 25 independently, then test each invalid token and absence without an exception.</span>
-<span>// Exercise 2: Separate absence from invalid supplied content. Inputs/task: Return observed for a valid supplied amount, missing for None, and rejected for any invalid Some token including Some(null). Keep the original input state available when classifying. Expected: Some(&quot;0&quot;), Some(&quot;25&quot;), None, Some(&quot;bad&quot;), Some(null) map to observed, observed, missing, rejected, rejected. Verify: Assert the five classifications in order and show that parseAmount alone returns None for both missing and rejected cases.</span>
-<span>// Exercise 3: Collect only observed numerical values. Inputs/task: Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens. Expected: The five-token fixture yields Seq(0L,25L). Adding another Some(&quot;25&quot;) yields two 25-cent occurrences. Verify: Assert exact observed sequences and an all-missing/rejected fixture returning empty.</span>
-<span>// Exercise 4: Reconcile all input states. Inputs/task: Return counts for all three keys observed, missing, rejected, including zero counts. Classify every original token and require the counts to sum to input size. Expected: The five-token fixture yields observed 2, missing 1, rejected 2. Empty input retains all three keys with count 0. Verify: Assert the full map, its summed count, and the explicit empty-ledger keys.</span>
-<span>// Exercise 5: Keep presentation distinct from measurement. Inputs/task: Return a valid amount as decimal text, or the literal missing/rejected classification for unavailable values. Do not display every unavailable value as 0. Expected: Some(&quot;0&quot;) displays&quot;0&quot;, None displays&quot;missing&quot;, and Some(&quot;bad&quot;) displays&quot;rejected&quot;. Whitespace around a valid 25 is normalized to&quot;25&quot;. Verify: Assert all four display strings and verify that missing is not numerically indistinguishable from observed zero.</span>
-<span>// Exercise 6: Compose a downstream calculation without losing absence. Inputs/task: Return the five-percent integer-cent fee for a valid parsed amount and None otherwise. Compose the calculation through Option rather than using getOrElse(0L) before the fee calculation. Expected: Some(&quot;100&quot;) gives Some(5L), Some(&quot;0&quot;) gives Some(0L), and None or Some(&quot;bad&quot;) remain None. Verify: Assert presence and exact fee for valid zero and 100, then absence for both invalid and missing inputs.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">parseAmount</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete parseAmount&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">classify</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete classify&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">observed</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete observed&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">ledger</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Map</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete ledger&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">displayAmount</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete displayAmount&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">feeOption</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete feeOption&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> present <span class="syntax-operator">=</span> <span class="syntax-class">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> absent <span class="syntax-operator">=</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>present<span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> absent<span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>present<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">+</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>contains<span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>absent<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">+</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">s&quot;</span><span class="syntax-string">present=</span><span class="syntax-string">$</span>present<span class="syntax-string"> absent=</span><span class="syntax-string">$</span>absent<span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> safe <span class="syntax-operator">=</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> suppliedNull <span class="syntax-operator">=</span> <span class="syntax-class">Some</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>safe<span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>suppliedNull<span class="syntax-punctuation">.</span>isDefined<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>suppliedNull<span class="syntax-punctuation">.</span>flatMap<span class="syntax-punctuation">(</span>text <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Option</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Option(null) and Some(null) are distinct constructions&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-005: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Parse a strict optional amount. Inputs/task: Accept trimmed ASCII digits representing 0 through 1000000 cents. Return None for absent, blank, signed, decimal, overflowing or supplied-null tokens. Do not convert invalid input to zero or call unchecked Option.get. Expected: Some(&quot;0&quot;) gives Some(0L), Some(&quot; 25 &quot;) gives Some(25L), None and Some(&quot;bad&quot;) give None. Some(null), Some(&quot;-1&quot;), Some(&quot;1.0&quot;) and values above the bound are rejected. Verify: Assert accepted zero and 25 independently, then test each invalid token and absence without an exception.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Separate absence from invalid supplied content. Inputs/task: Return observed for a valid supplied amount, missing for None, and rejected for any invalid Some token including Some(null). Keep the original input state available when classifying. Expected: Some(&quot;0&quot;), Some(&quot;25&quot;), None, Some(&quot;bad&quot;), Some(null) map to observed, observed, missing, rejected, rejected. Verify: Assert the five classifications in order and show that parseAmount alone returns None for both missing and rejected cases.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Collect only observed numerical values. Inputs/task: Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens. Expected: The five-token fixture yields Seq(0L,25L). Adding another Some(&quot;25&quot;) yields two 25-cent occurrences. Verify: Assert exact observed sequences and an all-missing/rejected fixture returning empty.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Reconcile all input states. Inputs/task: Return counts for all three keys observed, missing, rejected, including zero counts. Classify every original token and require the counts to sum to input size. Expected: The five-token fixture yields observed 2, missing 1, rejected 2. Empty input retains all three keys with count 0. Verify: Assert the full map, its summed count, and the explicit empty-ledger keys.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Keep presentation distinct from measurement. Inputs/task: Return a valid amount as decimal text, or the literal missing/rejected classification for unavailable values. Do not display every unavailable value as 0. Expected: Some(&quot;0&quot;) displays&quot;0&quot;, None displays&quot;missing&quot;, and Some(&quot;bad&quot;) displays&quot;rejected&quot;. Whitespace around a valid 25 is normalized to&quot;25&quot;. Verify: Assert all four display strings and verify that missing is not numerically indistinguishable from observed zero.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Compose a downstream calculation without losing absence. Inputs/task: Return the five-percent integer-cent fee for a valid parsed amount and None otherwise. Compose the calculation through Option rather than using getOrElse(0L) before the fee calculation. Expected: Some(&quot;100&quot;) gives Some(5L), Some(&quot;0&quot;) gives Some(0L), and None or Some(&quot;bad&quot;) remain None. Verify: Assert presence and exact fee for valid zero and 100, then absence for both invalid and missing inputs.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

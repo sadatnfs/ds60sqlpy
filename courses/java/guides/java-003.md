@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-002`
 
 ## Learning objectives
 
-Explain short circuit, loop invariant, boundary case using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use textnull and testtext!=null before callingisEmpty. The final exercise transfers the mechanism to expose a wrong boundary.
+Explain short circuit, loop invariant, boundary case using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use text null and test text!=null before calling isEmpty. The final exercise transfers the mechanism to expose a wrong boundary.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ Control flow chooses which statements run and how often. A boolean expression ha
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-003/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-if selects a branch. && evaluates the right operand only when the left istrue;|| evaluates it only when needed. A for loop has initialization,condition andupdate. Use index<length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.
+if selects a branch. && evaluates the right operand only when the left is true;|| evaluates it only when needed. A for loop has initialization,condition and update. Use index<length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.
 
 ## Worked example / walkthrough
 
 ### Example A: Guard a nullable value
 
-The right operand is not evaluated when the left isfalse. Reversing the operands would attempt the method call before the guard.
+The right operand is not evaluated when the left is false. Reversing the operands would attempt the method call before the guard.
 
 ```java
 import java.util.*;
@@ -59,7 +59,7 @@ public class Main {
 
 ```
 
-**Expected:** conditionfalse with noNullPointerException.
+**Expected:** condition false with no NullPointerException.
 
 ### Example B: Trace a prefix sum
 
@@ -92,11 +92,11 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Guard a nullable value.** Use textnull and testtext!=null before callingisEmpty.
-   **Expected:** conditionfalse with noNullPointerException.
-   **Verify:** Compare your assertion values or captured diagnostic with conditionfalse with noNullPointerException.
+1. **Guard a nullable value.** Use text null and test text!=null before calling isEmpty.
+   **Expected:** condition false with no NullPointerException.
+   **Verify:** Compare your assertion values or captured diagnostic with condition false with no NullPointerException.
 
-2. **Trace a prefix sum.** Sum array2,4,6 while retaining the invariant thatsum covers indices belowi.
+2. **Trace a prefix sum.** Sum array2,4,6 while retaining the invariant that sum covers indices belowi.
    **Expected:** prefix sums2,6,12;final12.
    **Verify:** Compare your assertion values or captured diagnostic with prefix sums2,6,12;final12.
 
@@ -113,8 +113,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with index1.
 
 6. **Expose a wrong boundary.** Compare a loop usingi<=length with the validi<length contract on a one-element array.
-   **Expected:** wrong loop raisesArrayIndexOutOfBoundsException.
-   **Verify:** Compare your assertion values or captured diagnostic with wrong loop raisesArrayIndexOutOfBoundsException.
+   **Expected:** wrong loop raises ArrayIndexOutOfBoundsException.
+   **Verify:** Compare your assertion values or captured diagnostic with wrong loop raises ArrayIndexOutOfBoundsException.
 
 ## Common pitfalls and diagnosis
 

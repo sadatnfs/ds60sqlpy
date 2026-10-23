@@ -10,7 +10,7 @@ The fixture READMEs use the prepared Docker image with --pull never, read-only m
 
 Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
 `\[ ... \]` delimiters. Tag every fenced code example with its actual language.
-After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+After regenerating older prose sources, run `python scripts/normalize_lesson_prose.py --write`
 from the repository root before rebuilding HTML readers. The reviewed
 `curriculum/math-prose.json` registry preserves this migration across regeneration;
 it does not change executable fences, notebook code or the supplied statistics

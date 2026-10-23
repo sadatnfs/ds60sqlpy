@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -117,7 +163,7 @@
     </header>
     <article class="document"><h2 id="java026-inspect-a-real-two-module-source-tree">Java026: inspect a real two-module source tree<a class="heading-anchor" href="#java026-inspect-a-real-two-module-source-tree" aria-label="Link to this section">#</a></h2>
 <p>The classroom pad remains one <code>Main.java</code>. Its reference creates andcompiles an equivalent owned temporary fixture so the default run exercises real modules. These files let you study the source layout directly andcompile it manually with an already prepared JDK21. No package download orshared environment change is required.</p>
-<pre><code class="language-text">src/
+<pre class="highlighted-code"><code class="language-text">src/
   course.greeting/
     module-info.java
     edu/example/greeting/Greeter.java
@@ -127,7 +173,7 @@
 <p>The directory directly under <code>src/</code> names the module. Package directories below it follow the package declaration. <code>course.greeting</code> exports <code>edu.example.greeting</code>; <code>course.app</code> requires <code>course.greeting</code>. The application package doesnot need to be exported merely to launch its declared main class. Exporting a package is a publicAPI decision,not a way to fix every class-loading problem.</p>
 <p>From the repository root,use a new learner-owned output directory. The example <code>.learning/java026-run1</code> must be absent oryou should choose another run name. Do not overwrite a prior experiment merely to make a command pass.</p>
 <p>The compiler andlauncher arguments are the same in PowerShell andPOSIX once the prepared JDK is on the selected process path:</p>
-<pre><code class="language-text">javac --release 21 --module-source-path courses/java/fixtures/java-026/src -d .learning/java026-run1/out -m course.greeting,course.app
+<pre class="highlighted-code"><code class="language-text">javac --release 21 --module-source-path courses/java/fixtures/java-026/src -d .learning/java026-run1/out -m course.greeting,course.app
 java -ea --module-path .learning/java026-run1/out -m course.app/edu.example.app.Main</code></pre>
 <p>Expected output is <code>Hello, modules!</code>. The compiler should create separate output directories for both modules,each containing <code>module-info.class</code>. If a dependency is missing,read the first compiler diagnostic andcheck the <code>requires</code> name against the actual module directory anddescriptor. Changing a classpath doesnot automatically satisfy a named-module dependency.</p>
 <p>For a deliberate negative experiment,copy the source tree into your own ignored working directory andchange the application descriptor to require <code>course.missing</code>. Compilation should fail. Preserve the failure andthen restore the correct descriptor in your copy. Do not edit the checked-in fixture orrelax the compiler flags to hide the problem.</p>

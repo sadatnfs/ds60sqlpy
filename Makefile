@@ -16,7 +16,7 @@ setup:
 	bash scripts/setup.sh
 
 generate:
-	$(PYTHON) scripts/normalize_math_prose.py --write
+	$(PYTHON) scripts/normalize_lesson_prose.py --write
 	$(PYTHON) scripts/build_catalog.py
 	$(PYTHON) scripts/build_journey_preview.py
 	$(PYTHON) scripts/audit_practice.py --write-report
@@ -28,6 +28,8 @@ journey-preview:
 	$(PYTHON) scripts/build_journey_preview.py
 
 check:
+	$(PYTHON) scripts/normalize_lesson_prose.py
+	$(PYTHON) scripts/check_content_rendering.py
 	$(PYTHON) scripts/course.py validate
 	$(MAKE) test
 

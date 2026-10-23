@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,58 +161,58 @@
       <h1>Spark 010</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-010.scala</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import scala.collection.mutable.ArrayBuffer</span>
-<span> </span>
-<span>object Main {</span>
-<span> </span>
-<span> </span>
-<span>  def strictPipeline(values: Seq[Int]): Seq[Int] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete strictPipeline&quot;)</span>
-<span> </span>
-<span>  def tracedIterator(values: Seq[Int], trace: ArrayBuffer[String]): Iterator[Int] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete tracedIterator&quot;)</span>
-<span> </span>
-<span>  def consumeTwice(values: Iterator[Int]): (Vector[Int], Vector[Int]) =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete consumeTwice&quot;)</span>
-<span> </span>
-<span>  def freshFactory(values: Seq[Int]): () =&gt; Iterator[Int] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete freshFactory&quot;)</span>
-<span> </span>
-<span>  def retryTotals(records: Seq[(String, Long)], attempts: Int): (Long, Long) =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete retryTotals&quot;)</span>
-<span> </span>
-<span>  def boundedTake(values: Iterator[Int], limit: Int): Vector[Int] =</span>
-<span>    throw new UnsupportedOperationException(&quot;Complete boundedTake&quot;)</span>
-<span> </span>
-<span>  def main(args: Array[String]): Unit = {</span>
-<span>    locally {</span>
-<span>      var visits = 0</span>
-<span>      val pipeline = Seq(1,2,3).iterator.map { value =&gt; visits += 1; value * 2 }</span>
-<span>      assert(visits == 0)</span>
-<span>      assert(pipeline.next() == 2 &amp;&amp; visits == 1)</span>
-<span>      assert(pipeline.toVector == Vector(4,6) &amp;&amp; visits == 3)</span>
-<span>      assert(pipeline.toVector.isEmpty)</span>
-<span>      println(s&quot;visits=$visits after complete consumption&quot;)</span>
-<span>    }</span>
-<span>    locally {</span>
-<span>      val source = Seq(1,2,3,4)</span>
-<span>      def fresh(): Iterator[Int] = source.iterator.filter(_ % 2 == 0).map(_ * 2)</span>
-<span>      assert(fresh().toVector == Vector(4,8))</span>
-<span>      assert(fresh().toVector == Vector(4,8))</span>
-<span>      assert(source == Seq(1,2,3,4))</span>
-<span>      println(&quot;A factory creates a new traversal each time&quot;)</span>
-<span>    }</span>
-<span>    println(&quot;spark-010: worked examples passed; six task implementations remain&quot;)</span>
-<span>  }</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Establish a pure strict result. Inputs/task: For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe. Expected: Seq(1,2,3,4) becomes Seq(4,8);Seq(0,2,2) becomes Seq(0,4,4);empty remains empty. Verify: Assert the exact results, input preservation and the out-of-domain rejection.</span>
-<span>// Exercise 2: Locate the evaluation boundary. Inputs/task: Return a lazy even-filter/double-map iterator with local trace messages filter:value and map:value. Validate the same numeric domain before construction. The trace should remain empty until consumption. Expected: Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4. Verify: Assert the empty initial trace, both exact output pieces and all six messages in order.</span>
-<span>// Exercise 3: Expose one-shot traversal state. Inputs/task: Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal. Expected: A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors. Verify: Assert both tuple components and the already-exhausted case.</span>
-<span>// Exercise 4: Provide repeatability deliberately. Inputs/task: Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly. Expected: Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted. Verify: Consume two independently obtained iterators and assert both exact results;verify the immutable source remains unchanged.</span>
-<span>// Exercise 5: Separate repeated delivery from logical identity. Inputs/task: For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts&gt;0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink. Expected: Records(a,100),(b,50),(a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0);same ID with 100 and 101 is rejected. Verify: Assert both totals, the zero-attempt identity and a conflicting-payload failure.</span>
-<span>// Exercise 6: Consume only a declared bounded prefix. Inputs/task: Return at most limit values from an iterator, requiring 0&lt;=limit&lt;=1000. Support infinite iterators without collecting the whole source. Limit 0 must leave the next source value unconsumed. Expected: Taking three values from Iterator.from(1) yields 1,2,3 and leaves 4 next. Limit 0 yields empty and leaves 1 next;limit 1001 is rejected. Verify: Use a local next-value counter to assert three produced values, and test zero consumption and the upper-budget failure.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span class="source-line"><span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>collection<span class="syntax-punctuation">.</span>mutable<span class="syntax-punctuation">.</span><span class="syntax-class">ArrayBuffer</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">object</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">strictPipeline</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete strictPipeline&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">tracedIterator</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">:</span> <span class="syntax-class">ArrayBuffer</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Iterator</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete tracedIterator&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">consumeTwice</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Iterator</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Vector</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Vector</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete consumeTwice&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">freshFactory</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-class">Iterator</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete freshFactory&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">retryTotals</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-class">String</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> attempts<span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete retryTotals&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">boundedTake</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-class">Iterator</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Vector</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-class">UnsupportedOperationException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Complete boundedTake&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">:</span> <span class="syntax-class">Array</span><span class="syntax-punctuation">[</span><span class="syntax-class">String</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Unit</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">var</span> visits <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> pipeline <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>iterator<span class="syntax-punctuation">.</span>map <span class="syntax-punctuation">{</span> value <span class="syntax-operator">=&gt;</span> visits <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>visits <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>pipeline<span class="syntax-punctuation">.</span>next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> visits <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>pipeline<span class="syntax-punctuation">.</span>toVector <span class="syntax-operator">==</span> <span class="syntax-class">Vector</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> visits <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>pipeline<span class="syntax-punctuation">.</span>toVector<span class="syntax-punctuation">.</span>isEmpty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">s&quot;</span><span class="syntax-string">visits=</span><span class="syntax-string">$</span>visits<span class="syntax-string"> after complete consumption</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    locally <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-keyword">val</span> source <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">def</span> <span class="syntax-function">fresh</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Iterator</span><span class="syntax-punctuation">[</span><span class="syntax-class">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> source<span class="syntax-punctuation">.</span>iterator<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">%</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>fresh<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toVector <span class="syntax-operator">==</span> <span class="syntax-class">Vector</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>fresh<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toVector <span class="syntax-operator">==</span> <span class="syntax-class">Vector</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      assert<span class="syntax-punctuation">(</span>source <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A factory creates a new traversal each time&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark-010: worked examples passed; six task implementations remain&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Establish a pure strict result. Inputs/task: For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe. Expected: Seq(1,2,3,4) becomes Seq(4,8);Seq(0,2,2) becomes Seq(0,4,4);empty remains empty. Verify: Assert the exact results, input preservation and the out-of-domain rejection.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Locate the evaluation boundary. Inputs/task: Return a lazy even-filter/double-map iterator with local trace messages filter:value and map:value. Validate the same numeric domain before construction. The trace should remain empty until consumption. Expected: Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4. Verify: Assert the empty initial trace, both exact output pieces and all six messages in order.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Expose one-shot traversal state. Inputs/task: Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal. Expected: A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors. Verify: Assert both tuple components and the already-exhausted case.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Provide repeatability deliberately. Inputs/task: Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly. Expected: Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted. Verify: Consume two independently obtained iterators and assert both exact results;verify the immutable source remains unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Separate repeated delivery from logical identity. Inputs/task: For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts&gt;0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink. Expected: Records(a,100),(b,50),(a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0);same ID with 100 and 101 is rejected. Verify: Assert both totals, the zero-attempt identity and a conflicting-payload failure.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Consume only a declared bounded prefix. Inputs/task: Return at most limit values from an iterator, requiring 0&lt;=limit&lt;=1000. Support infinite iterators without collecting the whole source. Limit 0 must leave the next source value unconsumed. Expected: Taking three values from Iterator.from(1) yields 1,2,3 and leaves 4 next. Limit 0 yields empty and leaves 1 next;limit 1001 is rejected. Verify: Use a local next-value counter to assert three produced values, and test zero consumption and the upper-budget failure.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

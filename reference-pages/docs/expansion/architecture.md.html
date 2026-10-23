@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <p>Status: historical design contract, 22 October 2026. The original five-course preview has since become an implemented classroom with private workers, async jobs and saved module state. Use <a href="../implementation/ADDING_A_MODULE.md.html">the current module contract</a>, <a href="../docker-classroom.md.html">Docker classroom instructions</a> and <a href="../implementation/CHECKPOINT.md.html">the implementation checkpoint</a> for current behavior. Proposed endpoints and artifact/progress-v2 features described below are design history, not promises that those exact interfaces exist. The active browser protocol uses authenticated <code>/api/modules</code> actions. Returned logs, source and job receipts are implemented; arbitrary output-artifact export is not implied by this design.</p>
 <h3 id="system-boundaries">System boundaries<a class="heading-anchor" href="#system-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Keep the base browser app, existing Python pads, PostgreSQL lessons, progress storage, and offline documentation small. Add optional, independently versioned workers for C++, TensorFlow, PyTorch, Scala/Spark, and Kubernetes. A learner preparing one course should not need every compiler or machine-learning library.</p>
-<pre><code class="language-mermaid">flowchart LR
+<pre class="highlighted-code"><code class="language-mermaid">flowchart LR
     UI[Browser journey and teacher] --&gt; APP[Local DS60 application]
     APP --&gt; STATE[Host learning workspace]
     APP --&gt; JOBS[Typed job controller]
@@ -184,7 +230,7 @@
 </tr>
 </tbody></table></div>
 <p>The existing <code>deep-learning</code> Python extra means PyTorch. Do not silently redefine it as TensorFlow or install incompatible TensorFlow requirements into the core environment. Current core NumPy constraints and any framework-specific Python/wheel limits must be resolved in the relevant isolated lock, then verified on each target architecture. A documentation version tuple is a proposal until its lock and image execute successfully.</p>
-<p>Default supported targets for future worker images are Linux amd64 and arm64. Windows uses a Linux-container engine with WSL2; macOS uses the engine&#x27;s Linux VM. Native Windows, Apple Clang, GPU acceleration, distributed multi-node Spark, and externally managed Kubernetes are separate compatibility rows. An amd64 image working under emulation does not establish native arm64 support. See each track&#x27;s primary references and qualification gates.</p>
+<p>Default supported targets for future worker images are Linux amd64 and arm64. Windows uses a Linux-container engine with WSL 2; macOS uses the engine&#x27;s Linux VM. Native Windows, Apple Clang, GPU acceleration, distributed multi-node Spark, and externally managed Kubernetes are separate compatibility rows. An amd64 image working under emulation does not establish native arm64 support. See each track&#x27;s primary references and qualification gates.</p>
 <h3 id="how-the-application-reaches-a-worker">How the application reaches a worker<a class="heading-anchor" href="#how-the-application-reaches-a-worker" aria-label="Link to this section">#</a></h3>
 <p>For the Docker route, the host launcher prepares and starts optional worker services through fixed Compose profiles. The application talks to an enabled worker over a private engine network using a bounded, authenticated job protocol. Worker ports are not published to the host. Workers have their own locked toolchain images and no engine socket. The host launcher, not application code or lesson content, owns image builds, service creation, networks, and teardown. This avoids relying on <code>host.docker.internal</code>, which is not a universal engine contract.</p>
 <p>Initially a worker accepts one job at a time under its container resource limit. It receives bounded UTF-8 source files and immutable fixture references through typed messages, with normalized relative paths, size limits, a job nonce, and an allowlisted operation. It never mounts the whole repository or learner home. Output artifacts return through size-limited, hash-checked messages and are saved by the application to its host-mounted learning workspace. Worker authentication material lives in private runtime-session mounts, outside portable progress. A future multi-user service would require a stronger per-job isolation design.</p>

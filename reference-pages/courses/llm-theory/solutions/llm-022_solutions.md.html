@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,55 +173,55 @@
 <h3 id="exercise-1-create-adam-history">Exercise 1: Create Adam history<a class="heading-anchor" href="#exercise-1-create-adam-history" aria-label="Link to this section">#</a></h3>
 <p>The question is: Take two float32 Adam updates of(w-2)² fromw0.</p>
 <p>The checkpoint must contain nontrivial history. Saving before the first update would not distinguish a full optimizer restore from a fresh optimizer.</p>
-<pre><code class="language-python">w=nn.Parameter(torch.tensor(0.)); opt=torch.optim.Adam([w],lr=.1)
-for _ in range(2): opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
-assert w.item()&gt;0 and opt.state[w][&#x27;step&#x27;].item()==2</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> positive weight and optimizer step2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with positive weight and optimizer step2.</p>
 <h3 id="exercise-2-save-a-trusted-local-checkpoint">Exercise 2: Save a trusted local checkpoint<a class="heading-anchor" href="#exercise-2-save-a-trusted-local-checkpoint" aria-label="Link to this section">#</a></h3>
 <p>The question is: Write the scalar weight and optimizer state into an owned temporary file.</p>
 <p>The file is created by this lesson and loaded only for this local test. Loading arbitrary untrusted serialized objects is outside the fixture.</p>
-<pre><code class="language-python">temporary=tempfile.TemporaryDirectory(); path=Path(temporary.name)/&#x27;state.pt&#x27;
-torch.save({&#x27;weight&#x27;:w.detach().clone(),&#x27;optimizer&#x27;:opt.state_dict()},path)
-assert path.is_file(); saved=w.item()</code></pre>
+<pre class="highlighted-code"><code class="language-python">temporary<span class="syntax-operator">=</span>tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> path<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">state.pt</span><span class="syntax-string">&#x27;</span>
+torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weight</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>w<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>opt<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> path<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> saved<span class="syntax-operator">=</span>w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> checkpoint file exists.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with checkpoint file exists.</p>
 <h3 id="exercise-3-calculate-the-uninterrupted-next-step">Exercise 3: Calculate the uninterrupted next step<a class="heading-anchor" href="#exercise-3-calculate-the-uninterrupted-next-step" aria-label="Link to this section">#</a></h3>
 <p>The question is: Take one more update and save the expected weight.</p>
 <p>The control uses the same objective and optimizer settings. A different batch or learning-rate schedule would make the comparison uninterpretable.</p>
-<pre><code class="language-python">opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step(); expected=w.item()
-assert opt.state[w][&#x27;step&#x27;].item()==3 and expected!=saved</code></pre>
+<pre class="highlighted-code"><code class="language-python">opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> expected<span class="syntax-operator">=</span>w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> expected<span class="syntax-operator">!=</span>saved</code></pre>
 <p><strong>Expected:</strong> step3 and changed weight.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with step3 and changed weight.</p>
 <h3 id="exercise-4-restore-in-a-new-interpreter">Exercise 4: Restore in a new interpreter<a class="heading-anchor" href="#exercise-4-restore-in-a-new-interpreter" aria-label="Link to this section">#</a></h3>
 <p>The question is: Load the trusted checkpoint into fresh weight and Adam objects, then take one step.</p>
 <p>The child has no live parent optimizer. Agreement therefore depends on reconstructing saved state, rather than on an accidental in-memory reference.</p>
-<pre><code class="language-python">program=textwrap.dedent(&quot;&quot;&quot;
-import torch,json,sys
-from torch import nn
-state=torch.load(sys.argv[1],map_location=&#x27;cpu&#x27;,weights_only=True)
-w=nn.Parameter(state[&#x27;weight&#x27;].clone()); opt=torch.optim.Adam([w],lr=.1); opt.load_state_dict(state[&#x27;optimizer&#x27;])
-opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
-print(json.dumps({&#x27;weight&#x27;:w.item()}))
-&quot;&quot;&quot;)
-compile(program, &quot;checkpoint-child&quot;, &quot;exec&quot;)
-result=subprocess.run([sys.executable,&#x27;-c&#x27;,program,str(path)],check=False,capture_output=True,text=True,timeout=60)
-if result.returncode: raise RuntimeError(&#x27;child process failed: &#x27;+result.stderr)
-restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored[&#x27;weight&#x27;],expected,atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> child weight agrees within1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with child weight agrees within1e-6.</p>
+<pre class="highlighted-code"><code class="language-python">program<span class="syntax-operator">=</span>textwrap<span class="syntax-operator">.</span>dedent<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;</span>
+<span class="syntax-string">import torch,json,sys</span>
+<span class="syntax-string">from torch import nn</span>
+<span class="syntax-string">state=torch.load(sys.argv[1],map_location=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cpu</span><span class="syntax-string">&#x27;</span><span class="syntax-string">,weights_only=True)</span>
+<span class="syntax-string">w=nn.Parameter(state[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weight</span><span class="syntax-string">&#x27;</span><span class="syntax-string">].clone()); opt=torch.optim.Adam([w],lr=.1); opt.load_state_dict(state[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-string">])</span>
+<span class="syntax-string">opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()</span>
+<span class="syntax-string">print(json.dumps(</span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weight</span><span class="syntax-string">&#x27;</span><span class="syntax-string">:w.item()}))</span>
+<span class="syntax-string">&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">compile</span><span class="syntax-punctuation">(</span>program<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoint-child</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">exec</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+result<span class="syntax-operator">=</span>subprocess<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>program<span class="syntax-punctuation">,</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>check<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>capture_output<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>text<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>timeout<span class="syntax-operator">=</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> result<span class="syntax-operator">.</span>returncode<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">child process failed: </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">+</span>result<span class="syntax-operator">.</span>stderr<span class="syntax-punctuation">)</span>
+restored<span class="syntax-operator">=</span>json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>stdout<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>restored<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weight</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>expected<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> child weight agrees within 1e-6.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with child weight agrees within 1e-6.</p>
 <h3 id="exercise-5-expose-weights-only-continuation">Exercise 5: Expose weights-only continuation<a class="heading-anchor" href="#exercise-5-expose-weights-only-continuation" aria-label="Link to this section">#</a></h3>
 <p>The question is: Initialize a fresh optimizer at the saved weight and compare its next update.</p>
 <p>The weight alone gives the same immediate scalar prediction but a different future training trajectory. Prediction parity and restart parity are distinct tests.</p>
-<pre><code class="language-python">fresh_w=nn.Parameter(torch.tensor(saved)); fresh_opt=torch.optim.Adam([fresh_w],lr=.1)
-(fresh_w-2).square().backward(); fresh_opt.step(); assert abs(fresh_w.item()-expected)&gt;1e-6</code></pre>
+<pre class="highlighted-code"><code class="language-python">fresh_w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span>saved<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> fresh_opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>fresh_w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>fresh_w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> fresh_opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>fresh_w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1e-6</span></code></pre>
 <p><strong>Expected:</strong> weight differs from full-state continuation.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with weight differs from full-state continuation.</p>
 <h3 id="exercise-6-verify-evaluation-and-cleanup">Exercise 6: Verify evaluation and cleanup<a class="heading-anchor" href="#exercise-6-verify-evaluation-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use Dropout(.5) in eval mode on ones and remove only the owned temporary checkpoint.</p>
 <p>Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.</p>
-<pre><code class="language-python">drop=nn.Dropout(.5); drop.eval(); ones=torch.ones(8)
-assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists()</code></pre>
+<pre class="highlighted-code"><code class="language-python">drop<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Dropout<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> drop<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> ones<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>drop<span class="syntax-punctuation">(</span>ones<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>ones<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> temporary<span class="syntax-operator">.</span>cleanup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> dropout returns ones; temporary path absent.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with dropout returns ones; temporary path absent.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

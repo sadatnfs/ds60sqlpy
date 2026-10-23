@@ -18,33 +18,100 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "curriculum/math-prose.json"
-PROTECTED = re.compile(
-    r"(?P<fence>^[ \t]*(?P<marker>`{3,}|~{3,})[^\n]*\n.*?^[ \t]*(?P=marker)[ \t]*(?:\n|$))"
-    r"|(?P<display>\\\[.*?\\\]|\$\$.*?\$\$)"
-    r"|(?P<inline>\\\(.*?\\\)|(?<!\$)\$(?!\$)[^\n$]+\$(?!\$))"
-    r"|(?P<code>`+[^`\n]*`+)"
-    r"|(?P<link>!?\[[^\]\n]*\]\([^\n)]*\))"
-    r"|(?P<html><!--.*?-->)",
-    re.MULTILINE | re.DOTALL,
-)
-FENCE = re.compile(
-    r"^[ \t]*(?P<marker>`{3,}|~{3,})[^\n]*\n.*?^[ \t]*(?P=marker)[ \t]*(?:\n|$)",
-    re.MULTILINE | re.DOTALL,
+INLINE_PROTECTED = re.compile(
+    r"\\\[.*?\\\]|\$\$.*?\$\$|\\\(.*?\\\)"
+    r"|(?<!\$)\$(?!\$)[^\n$]+\$(?!\$)"
+    r"|!?\[[^\]\n]*\]\([^\n)]*\)|<!--.*?-->",
+    re.DOTALL,
 )
 CANDIDATE = re.compile(
-    r"\b(?:sqrt|softmax|sigmoid|log|exp|Var|Cov)\s*\(|[A-Za-z0-9)]\^[A-Za-z0-9(]|[∑∂∇]|\bsum_(?!view\b)[A-Za-z]|\bproduct_(?!id\b)[A-Za-z]"
+    r"\b(?:sqrt|softmax|sigmoid|log|exp|Var|Cov)\s*\("
+    r"|[A-Za-z0-9)]\^[A-Za-z0-9(]|[∑∂∇]"
+    r"|\bsum_(?!view\b)[A-Za-z]|\bproduct_(?!id\b)[A-Za-z]"
 )
+
+
+def block_ranges(text: str) -> list[tuple[int, int]]:
+    """Conservatively protect fenced and indented Markdown code through EOF."""
+    lines = text.splitlines(keepends=True)
+    starts = [0]
+    for line in lines:
+        starts.append(starts[-1] + len(line))
+    result: list[tuple[int, int]] = []
+    index = 0
+    while index < len(lines):
+        opening = re.match(r"^[ \t]*(`{3,}|~{3,})(.*)$", lines[index].rstrip("\r\n"))
+        if opening:
+            marker = opening.group(1)
+            end = index + 1
+            while end < len(lines):
+                closing = re.fullmatch(
+                    r"[ \t]*" + re.escape(marker[0]) + "{" + str(len(marker)) + r",}[ \t]*",
+                    lines[end].rstrip("\r\n"),
+                )
+                if closing:
+                    end += 1
+                    break
+                end += 1
+            result.append((starts[index], starts[end]))
+            index = end
+        elif lines[index].startswith(("    ", "\t")):
+            end = index + 1
+            while end < len(lines) and (
+                not lines[end].strip() or lines[end].startswith(("    ", "\t"))
+            ):
+                end += 1
+            result.append((starts[index], starts[end]))
+            index = end
+        else:
+            index += 1
+    return result
+
+
+def inline_parts(text: str) -> list[tuple[bool, str]]:
+    ranges: list[tuple[int, int]] = []
+    position = 0
+    # CommonMark code spans may contain newlines and shorter backtick runs.
+    # Only a run of exactly the opening length closes the span.
+    while position < len(text):
+        opening = re.search(r"(?<![\\`])`+", text[position:])
+        if not opening:
+            break
+        start = position + opening.start()
+        marker = opening.group()
+        content_start = position + opening.end()
+        closing = re.search(r"(?<!`)" + re.escape(marker) + r"(?!`)", text[content_start:])
+        end = content_start + closing.end() if closing else len(text)
+        ranges.append((start, end))
+        position = end
+    for match in INLINE_PROTECTED.finditer(text):
+        if not any(start < match.end() and end > match.start() for start, end in ranges):
+            ranges.append((match.start(), match.end()))
+    result: list[tuple[bool, str]] = []
+    position = 0
+    for start, end in sorted(ranges):
+        if start < position:
+            continue
+        result.extend(((False, text[position:start]), (True, text[start:end])))
+        position = end
+    result.append((False, text[position:]))
+    return result
 
 
 def prose_parts(text: str) -> list[tuple[bool, str]]:
     result: list[tuple[bool, str]] = []
-    pos = 0
-    for match in PROTECTED.finditer(text):
-        result.append((False, text[pos : match.start()]))
-        result.append((True, match.group()))
-        pos = match.end()
-    result.append((False, text[pos:]))
+    position = 0
+    for start, end in block_ranges(text):
+        result.extend(inline_parts(text[position:start]))
+        result.append((True, text[start:end]))
+        position = end
+    result.extend(inline_parts(text[position:]))
     return result
+
+
+def protected_code(text: str) -> list[str]:
+    """Exact block-code bytes used by preservation receipts and assertions."""
+    return [text[start:end] for start, end in block_ranges(text)]
 
 
 def normalize(text: str, relative: str, rules: list[dict[str, Any]]) -> tuple[str, Counter[str]]:
@@ -76,10 +143,8 @@ def normalize(text: str, relative: str, rules: list[dict[str, Any]]) -> tuple[st
         value if protected else pattern.sub(replace, value)
         for protected, value in prose_parts(text)
     )
-    if FENCE.findall(output) != FENCE.findall(text):
-        raise ValueError(f"Fence delimiter drift: {relative}")
-    if [m.group() for m in FENCE.finditer(output)] != [m.group() for m in FENCE.finditer(text)]:
-        raise ValueError(f"Executable or prompt fence changed: {relative}")
+    if protected_code(output) != protected_code(text):
+        raise ValueError(f"Executable or prompt block changed: {relative}")
     return output, hits
 
 
@@ -140,9 +205,9 @@ def run(root: Path, write: bool) -> dict[str, Any]:
                 "".join(c["source"]) for c in notebook["cells"] if c.get("cell_type") == "markdown"
             ]
         else:
-            protected_before[rel] = digest([m.group() for m in FENCE.finditer(original)])
+            protected_before[rel] = digest(protected_code(original))
             updated, file_hits = normalize(original, rel, rules)
-            protected_after[rel] = digest([m.group() for m in FENCE.finditer(updated)])
+            protected_after[rel] = digest(protected_code(updated))
             texts = [updated]
         total += sum(file_hits.values())
         if updated != original:

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,50 +173,50 @@
 <h3 id="exercise-1-uniform-class-uncertainty">Exercise 1: Uniform class uncertainty<a class="heading-anchor" href="#exercise-1-uniform-class-uncertainty" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute sparse cross entropy for target1 and three zero logits.</p>
 <p>Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log3, independent of which class index is chosen.</p>
-<pre><code class="language-python">logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1],logits=logits)
-np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> loss log(3).</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with loss log(3).</p>
+<pre class="highlighted-code"><code class="language-python">logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sparse_softmax_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>logits<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</p>
 <h3 id="exercise-2-independent-labels">Exercise 2: Independent labels<a class="heading-anchor" href="#exercise-2-independent-labels" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate sigmoid probabilities for three zero logits and labels[1,0,1].</p>
 <p>Independent binary probabilities do not need to sum to one. Forcing a softmax here would make the two present labels compete for probability mass.</p>
-<pre><code class="language-python">probs=tf.math.sigmoid(logits).numpy()
-np.testing.assert_array_equal(probs,[[.5,.5,.5]])
-assert probs.sum()==1.5</code></pre>
+<pre class="highlighted-code"><code class="language-python">probs<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>probs<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> probs<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1.5</span></code></pre>
 <p><strong>Expected:</strong> three probabilities.5 with total1.5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with three probabilities.5 with total1.5.</p>
 <h3 id="exercise-3-contrast-target-shapes">Exercise 3: Contrast target shapes<a class="heading-anchor" href="#exercise-3-contrast-target-shapes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Build sparse targets[2,0] and multilabel targets[[1,0,1],[0,1,0]].</p>
 <p>A class index is a category identity, not a magnitude. The multilabel row contains three observations of presence. Keeping these shapes explicit prevents unintended broadcasting.</p>
-<pre><code class="language-python">sparse=np.array([2,0],dtype=np.int32); multi=np.array([[1,0,1],[0,1,0]],dtype=np.float32)
-assert sparse.shape==(2,) and multi.shape==(2,3)</code></pre>
+<pre class="highlighted-code"><code class="language-python">sparse<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int32<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> multi<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> sparse<span class="syntax-operator">.</span>shape<span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> multi<span class="syntax-operator">.</span>shape<span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> shapes(2,) and(2,3).</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with shapes(2,) and(2,3).</p>
 <h3 id="exercise-4-verify-softmax-mass">Exercise 4: Verify softmax mass<a class="heading-anchor" href="#exercise-4-verify-softmax-mass" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply softmax to[[2,0,-2]] and compare its sum with sigmoid output.</p>
 <p>The normalizer in softmax couples categories. Sigmoids do not share a normalizer, which is why changing one logit has different consequences in the two tasks.</p>
-<pre><code class="language-python">z=tf.constant([[2.,0.,-2.]])
-np.testing.assert_allclose(tf.nn.softmax(z).numpy().sum(),1,atol=1e-6,rtol=0)
-np.testing.assert_allclose(tf.math.sigmoid(z).numpy().sum(),1.5,atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">z<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>softmax<span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> softmax sum1; sigmoid sum1.5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with softmax sum1; sigmoid sum1.5.</p>
 <h3 id="exercise-5-choose-the-denominator">Exercise 5: Choose the denominator<a class="heading-anchor" href="#exercise-5-choose-the-denominator" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute binary cross entropy for two three-label rows of zero logits; compare sum with entry mean.</p>
 <p>There are six binary entries but only two records. A mean per record of summed labels differs from a mean per binary entry by three. State the intended objective instead of comparing unlabelled loss numbers.</p>
-<pre><code class="language-python">losses=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(multi),logits=tf.zeros((2,3))).numpy()
-np.testing.assert_allclose([losses.sum(),losses.mean()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">losses<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sigmoid_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span>multi<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>losses<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>losses<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> sum6log2; meanlog2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with sum6log2; meanlog2.</p>
 <h3 id="exercise-6-reject-an-impossible-class">Exercise 6: Reject an impossible class<a class="heading-anchor" href="#exercise-6-reject-an-impossible-class" aria-label="Link to this section">#</a></h3>
 <p>The question is: Validate a sparse class index before lookup in a three-class vocabulary.</p>
 <p>A target index equal to the vocabulary size is out of range. Early validation keeps a category-definition failure distinct from an optimizer failure.</p>
-<pre><code class="language-python">def validate_class(value):
-    if not isinstance(value,int) or isinstance(value,bool) or not 0&lt;=value&lt;3: raise ValueError(&#x27;class index&#x27;)
-    return value
-assert validate_class(2)==2
-try: validate_class(3)
-except ValueError: pass
-else: raise AssertionError(&#x27;accepted unknown class&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_class</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>value<span class="syntax-operator">&lt;</span><span class="syntax-number">3</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">class index</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> value
+<span class="syntax-keyword">assert</span> validate_class<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate_class<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">accepted unknown class</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> index3 is outside legal indices0,1,2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with index3 is outside legal indices0,1,2.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

@@ -49,7 +49,7 @@ else: raise AssertionError('unknown tool accepted')
 
 ## Exercise 3: Reject extra fields
 
-The question is: Add command orpath to an otherwise valid object.
+The question is: Add command or path to an otherwise valid object.
 
 Ignoring unexpected fields can conceal a mismatch between the proposer and executor. Exact-key validation makes unsupported intent visible.
 

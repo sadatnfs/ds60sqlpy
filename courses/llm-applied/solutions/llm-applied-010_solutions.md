@@ -91,9 +91,9 @@ graph={'metric':['exclusions'],'exclusions':['test_accounts'],'test_accounts':[]
 assert walk('metric',graph,2)==['metric','exclusions','test_accounts']
 ```
 
-**Expected:** visitedmetric, exclusions, test_accounts.
+**Expected:** visited metric, exclusions, test_accounts.
 
-**Verify:** Compare the computed values or written argument with visitedmetric, exclusions, test_accounts.
+**Verify:** Compare the computed values or written argument with visited metric, exclusions, test_accounts.
 
 ## Exercise 4: Stop at the declared depth
 

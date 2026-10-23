@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,25 +427,27 @@
 </tbody></table></div>
 <p>Inertia always decreases as <code>k</code> increases, so its minimum cannot select <code>k</code>. Look for diminishing improvement, stability, and usefulness.</p>
 <h4 id="guide--worked-example-compare-candidate-cluster-counts">Worked example: compare candidate cluster counts<a class="heading-anchor" href="#guide--worked-example-compare-candidate-cluster-counts" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from sklearn.cluster import KMeans
-from sklearn.datasets import make_blobs
-from sklearn.metrics import silhouette_score
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_blobs
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> silhouette_score
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-X, _ = make_blobs(
-    n_samples=600,
-    centers=3,
-    cluster_std=1.2,
-    random_state=42,
-)
-X_scaled = StandardScaler().fit_transform(X)
+X<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> make_blobs<span class="syntax-punctuation">(</span>
+    n_samples<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">,</span>
+    centers<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>
+    cluster_std<span class="syntax-operator">=</span><span class="syntax-number">1.2</span><span class="syntax-punctuation">,</span>
+    random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+X_scaled <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
 
-for k in range(2, 7):
-    model = KMeans(n_clusters=k, n_init=&quot;auto&quot;, random_state=42)
-    labels = model.fit_predict(X_scaled)
-    print(k, model.inertia_, silhouette_score(X_scaled, labels))</code></pre>
+<span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">auto</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    labels <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>X_scaled<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> model<span class="syntax-operator">.</span>inertia_<span class="syntax-punctuation">,</span> silhouette_score<span class="syntax-punctuation">(</span>X_scaled<span class="syntax-punctuation">,</span> labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Scaling is appropriate when each numeric dimension should contribute comparably to Euclidean distance. Do not scale mechanically when original distances have a meaningful common unit.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 42 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -407,9 +455,9 @@ for k in range(2, 7):
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking">Concept deep dive — unsupervised geometry, cluster stability, and anomaly ranking<a class="heading-anchor" href="#guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -424,38 +472,38 @@ for k in range(2, 7):
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry">Focused example A — show that feature scale changes K-Means geometry<a class="heading-anchor" href="#guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans
+<span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
 
-rng = np.random.default_rng(4201)
-left = np.column_stack([rng.normal(-2, 0.4, 80), rng.normal(0, 100, 80)])
-right = np.column_stack([rng.normal(2, 0.4, 80), rng.normal(0, 100, 80)])
-X = np.vstack([left, right])
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span>
+left <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+right <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>vstack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-raw_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(X)
-scaled_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(
-    StandardScaler().fit_transform(X)
-)
-print({&quot;raw_agreement_with_x_sign&quot;: np.mean(raw_labels == (X[:, 0] &gt; 0)),
-       &quot;scaled_unique_labels&quot;: np.unique(scaled_labels).size})</code></pre>
+raw_labels <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+scaled_labels <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>
+    StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw_agreement_with_x_sign</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>raw_labels <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">scaled_unique_labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>scaled_labels<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The large-unit noise dimension can dominate raw Euclidean distance; scaling changes assignments.</p>
 <p><strong>Assumption to name:</strong> Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.</p>
 <h5 id="guide--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict">Focused example B — treat anomaly output as a ranking, not a verdict<a class="heading-anchor" href="#guide--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.ensemble import IsolationForest
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> IsolationForest
 
-rng = np.random.default_rng(4202)
-ordinary = rng.normal(size=(200, 2))
-obvious = np.array([[8.0, 8.0], [-8.0, -8.0]])
-X = np.vstack([ordinary, obvious])
-detector = IsolationForest(contamination=0.02, random_state=4202).fit(X)
-scores = detector.decision_function(X)
-most_unusual = np.argsort(scores)[:5]
-print({&quot;lowest_score_indices&quot;: most_unusual.tolist(),
-       &quot;injected_indices&quot;: [200, 201]})
-assert {200, 201}.issubset(set(most_unusual))</code></pre>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">4202</span><span class="syntax-punctuation">)</span>
+ordinary <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+obvious <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>vstack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>ordinary<span class="syntax-punctuation">,</span> obvious<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+detector <span class="syntax-operator">=</span> IsolationForest<span class="syntax-punctuation">(</span>contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4202</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+scores <span class="syntax-operator">=</span> detector<span class="syntax-operator">.</span>decision_function<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">lowest_score_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> most_unusual<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">injected_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">201</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">201</span><span class="syntax-punctuation">}</span><span class="syntax-operator">.</span>issubset<span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>most_unusual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The injected extremes rank among the lowest scores, but the threshold also labels a configured fraction of ordinary data.</p>
 <p><strong>Assumption to name:</strong> The synthetic extremes are only a control; domain review determines whether a real unusual case is harmful or valuable.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -578,7 +626,7 @@ assert {200, 201}.issubset(set(most_unusual))</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize unsupervised geometry, cluster stability, and anomaly ranking. Use exactly these maintained learner materials:
@@ -645,25 +693,25 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Evaluate with inertia/silhouette (caveats).</li>
 <li>Simple anomaly detection (IsolationForest/LocalOutlierFactor).</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import make_blobs</span>
-<span>from sklearn.cluster import KMeans</span>
-<span>from sklearn.metrics import silhouette_score</span>
-<span>import matplotlib.pyplot as plt</span>
-<span>X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)</span>
-<span>km = KMeans(n_clusters=3, n_init=&#x27;auto&#x27;, random_state=42).fit(X)</span>
-<span>sil = silhouette_score(X, km.labels_)</span>
-<span>sil</span>
-<span>plt.scatter(X[:,0], X[:,1], c=km.labels_, cmap=&#x27;viridis&#x27;, s=15)</span>
-<span>plt.title(&#x27;KMeans clusters&#x27;); plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_blobs</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> silhouette_score</span>
+<span class="source-line"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y_true <span class="syntax-operator">=</span> make_blobs<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">,</span> centers<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> cluster_std<span class="syntax-operator">=</span><span class="syntax-number">1.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">sil <span class="syntax-operator">=</span> silhouette_score<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> km<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">)</span></span>
+<span class="source-line">sil</span>
+<span class="source-line">plt<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> c<span class="syntax-operator">=</span>km<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">,</span> cmap<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">viridis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> s<span class="syntax-operator">=</span><span class="syntax-number">15</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">KMeans clusters</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Anomaly detection</span>
-<span>from sklearn.ensemble import IsolationForest</span>
-<span>iso = IsolationForest(contamination=0.02, random_state=42).fit(X)</span>
-<span>scores = iso.decision_function(X)</span>
-<span>pred = iso.predict(X)  # -1 outlier, 1 inlier</span>
-<span>(pred==-1).mean()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Anomaly detection</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> IsolationForest</span>
+<span class="source-line">iso <span class="syntax-operator">=</span> IsolationForest<span class="syntax-punctuation">(</span>contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores <span class="syntax-operator">=</span> iso<span class="syntax-operator">.</span>decision_function<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">pred <span class="syntax-operator">=</span> iso<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># -1 outlier, 1 inlier</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>pred<span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -681,40 +729,40 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-5--focused-example-a-show-that-feature-scale-changes-k-means-geometry">Focused example A — show that feature scale changes K-Means geometry<a class="heading-anchor" href="#learner--cell-5--focused-example-a-show-that-feature-scale-changes-k-means-geometry" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.cluster import KMeans</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span> </span>
-<span>rng = np.random.default_rng(4201)</span>
-<span>left = np.column_stack([rng.normal(-2, 0.4, 80), rng.normal(0, 100, 80)])</span>
-<span>right = np.column_stack([rng.normal(2, 0.4, 80), rng.normal(0, 100, 80)])</span>
-<span>X = np.vstack([left, right])</span>
-<span> </span>
-<span>raw_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(X)</span>
-<span>scaled_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(</span>
-<span>    StandardScaler().fit_transform(X)</span>
-<span>)</span>
-<span>print({&quot;raw_agreement_with_x_sign&quot;: np.mean(raw_labels == (X[:, 0] &gt; 0)),</span>
-<span>       &quot;scaled_unique_labels&quot;: np.unique(scaled_labels).size})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"></span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">left <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">right <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>vstack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">raw_labels <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">scaled_labels <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4201</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw_agreement_with_x_sign</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>raw_labels <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">scaled_unique_labels</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>scaled_labels<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>size<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> The large-unit noise dimension can dominate raw Euclidean distance; scaling changes assignments.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict">Focused example B — treat anomaly output as a ranking, not a verdict<a class="heading-anchor" href="#learner--cell-8--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The synthetic extremes are only a control; domain review determines whether a real unusual case is harmful or valuable.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.ensemble import IsolationForest</span>
-<span> </span>
-<span>rng = np.random.default_rng(4202)</span>
-<span>ordinary = rng.normal(size=(200, 2))</span>
-<span>obvious = np.array([[8.0, 8.0], [-8.0, -8.0]])</span>
-<span>X = np.vstack([ordinary, obvious])</span>
-<span>detector = IsolationForest(contamination=0.02, random_state=4202).fit(X)</span>
-<span>scores = detector.decision_function(X)</span>
-<span>most_unusual = np.argsort(scores)[:5]</span>
-<span>print({&quot;lowest_score_indices&quot;: most_unusual.tolist(),</span>
-<span>       &quot;injected_indices&quot;: [200, 201]})</span>
-<span>assert {200, 201}.issubset(set(most_unusual))</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> IsolationForest</span>
+<span class="source-line"></span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">4202</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">ordinary <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">obvious <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>vstack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>ordinary<span class="syntax-punctuation">,</span> obvious<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">detector <span class="syntax-operator">=</span> IsolationForest<span class="syntax-punctuation">(</span>contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">4202</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">scores <span class="syntax-operator">=</span> detector<span class="syntax-operator">.</span>decision_function<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">lowest_score_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> most_unusual<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">injected_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">201</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">201</span><span class="syntax-punctuation">}</span><span class="syntax-operator">.</span>issubset<span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>most_unusual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The injected extremes rank among the lowest scores, but the threshold also labels a configured fraction of ordinary data.</p>
 <h5 id="learner--cell-10--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-10--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -788,19 +836,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Scaling sensitivity</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Cluster stability</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Anomaly validation without labels</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Scaling sensitivity</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Cluster stability</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Anomaly validation without labels</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -844,24 +892,24 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">from sklearn.datasets import make_blobs
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
-import numpy as np
-import matplotlib.pyplot as plt
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_blobs
+<span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> silhouette_score
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
-X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)</code></pre>
+X<span class="syntax-punctuation">,</span> y_true <span class="syntax-operator">=</span> make_blobs<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">,</span> centers<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> cluster_std<span class="syntax-operator">=</span><span class="syntax-number">1.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — Elbow (inertia vs K)</p>
-<pre><code class="language-python">Ks = range(1, 10)
-inertias = []
-for k in Ks:
-    km = KMeans(n_clusters=k, n_init=&#x27;auto&#x27;, random_state=42).fit(X)
-    inertias.append(km.inertia_)
+<pre class="highlighted-code"><code class="language-python">Ks <span class="syntax-operator">=</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+inertias <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> Ks<span class="syntax-punctuation">:</span>
+    km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+    inertias<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>km<span class="syntax-operator">.</span>inertia_<span class="syntax-punctuation">)</span>
 
-plt.plot(list(Ks), inertias, marker=&#x27;o&#x27;)
-plt.xlabel(&#x27;K (clusters)&#x27;); plt.ylabel(&#x27;Inertia (within-cluster SSE)&#x27;)
-plt.title(&#x27;Elbow method&#x27;)
-plt.tight_layout(); plt.show()</code></pre>
+plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>Ks<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> inertias<span class="syntax-punctuation">,</span> marker<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">o</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">K (clusters)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Inertia (within-cluster SSE)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Elbow method</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Interpretation</p>
 <ul>
 <li>Look for a knee where inertia reduction starts diminishing; that K is a candidate</li>
@@ -869,11 +917,11 @@ plt.tight_layout(); plt.show()</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Silhouette for K in [2..6]</p>
-<pre><code class="language-python">sil_scores = {}
-for k in range(2, 7):
-    km = KMeans(n_clusters=k, n_init=&#x27;auto&#x27;, random_state=42).fit(X)
-    sil = silhouette_score(X, km.labels_)
-    sil_scores[k] = sil
+<pre class="highlighted-code"><code class="language-python">sil_scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+    sil <span class="syntax-operator">=</span> silhouette_score<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> km<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">)</span>
+    sil_scores<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> sil
 sil_scores</code></pre>
 <p>Notes</p>
 <ul>
@@ -881,28 +929,28 @@ sil_scores</code></pre>
 <li>Caveats: silhouette assumes convex clusters; non-spherical shapes may mislead</li>
 </ul>
 <p>Optional visualization</p>
-<pre><code class="language-python">k_best = max(sil_scores, key=sil_scores.get)
-km = KMeans(n_clusters=k_best, n_init=&#x27;auto&#x27;, random_state=42).fit(X)
-X2 = X  # in 2D already
-plt.scatter(X2[:,0], X2[:,1], c=km.labels_, cmap=&#x27;viridis&#x27;, s=15)
-plt.title(f&#x27;KMeans clusters (K={k_best}, silhouette={sil_scores[k_best]:.3f})&#x27;)
-plt.tight_layout(); plt.show()</code></pre>
+<pre class="highlighted-code"><code class="language-python">k_best <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>sil_scores<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>sil_scores<span class="syntax-operator">.</span>get<span class="syntax-punctuation">)</span>
+km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k_best<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+X2 <span class="syntax-operator">=</span> X  <span class="syntax-comment"># in 2D already</span>
+plt<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>X2<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> X2<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> c<span class="syntax-operator">=</span>km<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">,</span> cmap<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">viridis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> s<span class="syntax-operator">=</span><span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">KMeans clusters (K=</span><span class="syntax-string">{</span>k_best<span class="syntax-string">}</span><span class="syntax-string">, silhouette=</span><span class="syntax-string">{</span>sil_scores<span class="syntax-punctuation">[</span>k_best<span class="syntax-punctuation">]</span><span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <hr>
 <p>Worked reference for Exercise 3 — Anomaly detection: IsolationForest vs LOF</p>
-<pre><code class="language-python">from sklearn.ensemble import IsolationForest
-from sklearn.neighbors import LocalOutlierFactor
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> IsolationForest
+<span class="syntax-keyword">from</span> sklearn.neighbors <span class="syntax-keyword">import</span> LocalOutlierFactor
 
-# IsolationForest: -1 outlier, 1 inlier
-iso = IsolationForest(contamination=0.02, random_state=42).fit(X)
-pred_iso = iso.predict(X)
-iso_rate = (pred_iso == -1).mean()
+<span class="syntax-comment"># IsolationForest: -1 outlier, 1 inlier</span>
+iso <span class="syntax-operator">=</span> IsolationForest<span class="syntax-punctuation">(</span>contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+pred_iso <span class="syntax-operator">=</span> iso<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+iso_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>pred_iso <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-# LOF: -1 outlier, 1 inlier (fit_predict required)
-lof = LocalOutlierFactor(n_neighbors=20, contamination=0.02)
-pred_lof = lof.fit_predict(X)
-lof_rate = (pred_lof == -1).mean()
+<span class="syntax-comment"># LOF: -1 outlier, 1 inlier (fit_predict required)</span>
+lof <span class="syntax-operator">=</span> LocalOutlierFactor<span class="syntax-punctuation">(</span>n_neighbors<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">)</span>
+pred_lof <span class="syntax-operator">=</span> lof<span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+lof_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>pred_lof <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-{&#x27;iso_outlier_rate&#x27;: float(iso_rate), &#x27;lof_outlier_rate&#x27;: float(lof_rate)}</code></pre>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">iso_outlier_rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>iso_rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lof_outlier_rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>lof_rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Discussion</p>
 <ul>
 <li>IsolationForest works well for high-dimensional data and is model-based</li>
@@ -997,47 +1045,47 @@ lof_rate = (pred_lof == -1).mean()
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-42-solutions-unsupervised-kmeans-anomaly-detection">Day 42 — Solutions: Unsupervised (KMeans &amp; Anomaly Detection)<a class="heading-anchor" href="#solution-2--cell-1--day-42-solutions-unsupervised-kmeans-anomaly-detection" aria-label="Link to this section">#</a></h3>
 <p>Elbow and silhouette for KMeans; IsolationForest vs LOF for anomalies.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import make_blobs</span>
-<span>from sklearn.cluster import KMeans</span>
-<span>from sklearn.metrics import silhouette_score</span>
-<span>from sklearn.ensemble import IsolationForest</span>
-<span>from sklearn.neighbors import LocalOutlierFactor</span>
-<span>import numpy as np, matplotlib.pyplot as plt</span>
-<span> </span>
-<span>X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_blobs</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> silhouette_score</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> IsolationForest</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.neighbors <span class="syntax-keyword">import</span> LocalOutlierFactor</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y_true <span class="syntax-operator">=</span> make_blobs<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">600</span><span class="syntax-punctuation">,</span> centers<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> cluster_std<span class="syntax-operator">=</span><span class="syntax-number">1.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-elbow-inertia-vs-k">Exercise 1 — Elbow (inertia vs K)<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-elbow-inertia-vs-k" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>Ks = range(1, 10)</span>
-<span>inertias = []</span>
-<span>for k in Ks:</span>
-<span>    km = KMeans(n_clusters=k, n_init=&#x27;auto&#x27;, random_state=42).fit(X)</span>
-<span>    inertias.append(km.inertia_)</span>
-<span>plt.plot(list(Ks), inertias, marker=&#x27;o&#x27;)</span>
-<span>plt.xlabel(&#x27;K&#x27;); plt.ylabel(&#x27;Inertia (SSE)&#x27;); plt.title(&#x27;Elbow method&#x27;)</span>
-<span>plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">Ks <span class="syntax-operator">=</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">inertias <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> Ks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    inertias<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>km<span class="syntax-operator">.</span>inertia_<span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>Ks<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> inertias<span class="syntax-punctuation">,</span> marker<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">o</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>xlabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">K</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>ylabel<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Inertia (SSE)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Elbow method</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--exercise-2-silhouette-for-k-2-6-and-cluster-plot-for-best-k">Exercise 2 — Silhouette for K=2..6 and cluster plot for best K<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-silhouette-for-k-2-6-and-cluster-plot-for-best-k" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>sil_scores = {}</span>
-<span>for k in range(2, 7):</span>
-<span>    km = KMeans(n_clusters=k, n_init=&#x27;auto&#x27;, random_state=42).fit(X)</span>
-<span>    sil_scores[k] = silhouette_score(X, km.labels_)</span>
-<span>sil_scores</span>
-<span> </span>
-<span>k_best = max(sil_scores, key=sil_scores.get)</span>
-<span>km_best = KMeans(n_clusters=k_best, n_init=&#x27;auto&#x27;, random_state=42).fit(X)</span>
-<span>plt.scatter(X[:,0], X[:,1], c=km_best.labels_, cmap=&#x27;viridis&#x27;, s=15)</span>
-<span>plt.title(f&#x27;KMeans clusters (K={k_best}, silhouette={sil_scores[k_best]:.3f})&#x27;)</span>
-<span>plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">sil_scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    km <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    sil_scores<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> silhouette_score<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> km<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">)</span></span>
+<span class="source-line">sil_scores</span>
+<span class="source-line"></span>
+<span class="source-line">k_best <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>sil_scores<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span>sil_scores<span class="syntax-operator">.</span>get<span class="syntax-punctuation">)</span></span>
+<span class="source-line">km_best <span class="syntax-operator">=</span> KMeans<span class="syntax-punctuation">(</span>n_clusters<span class="syntax-operator">=</span>k_best<span class="syntax-punctuation">,</span> n_init<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">auto</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>scatter<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> c<span class="syntax-operator">=</span>km_best<span class="syntax-operator">.</span>labels_<span class="syntax-punctuation">,</span> cmap<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">viridis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> s<span class="syntax-operator">=</span><span class="syntax-number">15</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">KMeans clusters (K=</span><span class="syntax-string">{</span>k_best<span class="syntax-string">}</span><span class="syntax-string">, silhouette=</span><span class="syntax-string">{</span>sil_scores<span class="syntax-punctuation">[</span>k_best<span class="syntax-punctuation">]</span><span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-3-anomaly-detection-isolationforest-vs-lof">Exercise 3 — Anomaly detection: IsolationForest vs LOF<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-anomaly-detection-isolationforest-vs-lof" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>iso = IsolationForest(contamination=0.02, random_state=42).fit(X)</span>
-<span>pred_iso = iso.predict(X)  # -1 outlier, 1 inlier</span>
-<span>iso_rate = (pred_iso == -1).mean()</span>
-<span> </span>
-<span>lof = LocalOutlierFactor(n_neighbors=20, contamination=0.02)</span>
-<span>pred_lof = lof.fit_predict(X)  # -1 outlier, 1 inlier</span>
-<span>lof_rate = (pred_lof == -1).mean()</span>
-<span>{&#x27;iso_outlier_rate&#x27;: float(iso_rate), &#x27;lof_outlier_rate&#x27;: float(lof_rate)}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">iso <span class="syntax-operator">=</span> IsolationForest<span class="syntax-punctuation">(</span>contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">pred_iso <span class="syntax-operator">=</span> iso<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># -1 outlier, 1 inlier</span></span>
+<span class="source-line">iso_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>pred_iso <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">lof <span class="syntax-operator">=</span> LocalOutlierFactor<span class="syntax-punctuation">(</span>n_neighbors<span class="syntax-operator">=</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> contamination<span class="syntax-operator">=</span><span class="syntax-number">0.02</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">pred_lof <span class="syntax-operator">=</span> lof<span class="syntax-operator">.</span>fit_predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># -1 outlier, 1 inlier</span></span>
+<span class="source-line">lof_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>pred_lof <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">iso_outlier_rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>iso_rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">lof_outlier_rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>lof_rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -369,29 +415,31 @@
 <h5 id="guide--observe-csv-s-boundary">Observe CSV&#x27;s boundary<a class="heading-anchor" href="#guide--observe-csv-s-boundary" aria-label="Link to this section">#</a></h5>
 <p>Before running the learner file, predict the Python type of <code>units</code>, <code>unit_price</code>, and an empty <code>note</code>.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_data_01_arrow_duckdb.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_data_01_arrow_duckdb<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_01_arrow_duckdb.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_01_arrow_duckdb.py</code></pre>
 <p><code>csv.DictReader</code> returns strings. The empty note is <code>&quot;&quot;</code>, not <code>None</code>. This is why the solution defines <code>Sale</code> and converts every field at one controlled boundary.</p>
 <h5 id="guide--follow-the-local-columnar-path">Follow the local columnar path<a class="heading-anchor" href="#guide--follow-the-local-columnar-path" aria-label="Link to this section">#</a></h5>
 <p>The executable reference performs this flow in a temporary directory:</p>
-<pre><code class="language-text">tracked CSV -&gt; typed Sale values -&gt; Arrow table -&gt; Parquet file
+<pre class="highlighted-code"><code class="language-text">tracked CSV -&gt; typed Sale values -&gt; Arrow table -&gt; Parquet file
                                       |
                                       +-&gt; schema/null round-trip check
                                       |
                                       +-&gt; DuckDB SELECT + EXPLAIN</code></pre>
 <p>Run it with the optional packages installed:</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\solutions\py_data_01_arrow_duckdb_solution.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>py_data_01_arrow_duckdb_solution<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_data_01_arrow_duckdb_solution.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/solutions/py_data_01_arrow_duckdb_solution.py</code></pre>
 <p>If PyArrow or DuckDB is absent, the program says so and still completes the CSV and partition exercises. It never tries to install a package.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_data_01_arrow_duckdb.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_data_01_arrow_duckdb<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_01_arrow_duckdb.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_01_arrow_duckdb.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -403,25 +451,25 @@
 <li><strong>DuckDB projection/filter:</strong> pushes required columns and supported predicates near the scan; inspect plan and profile.</li>
 </ul>
 <h5 id="guide--micro-example-a-observe-csv-s-string-only-boundary">Micro-example A — observe CSV&#x27;s string-only boundary<a class="heading-anchor" href="#guide--micro-example-a-observe-csv-s-string-only-boundary" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import csv
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-path = Path(&quot;python/professional/fixtures/data/sales.csv&quot;)
-with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
-    row = next(csv.DictReader(handle))
-types = {name: type(value).__name__ for name, value in row.items()}
-print(row, types)
-assert set(types.values()) == {&quot;str&quot;}</code></pre>
+path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python/professional/fixtures/data/sales.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+    row <span class="syntax-operator">=</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__ <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> row<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> types<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>types<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">str</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.</p>
 <p><strong>Why it matters:</strong> The tracked fixture encoding, delimiter, header, decimal/date meanings, and blank-value policy are known.</p>
 <h5 id="guide--micro-example-b-show-why-projection-changes-analytical-work">Micro-example B — show why projection changes analytical work<a class="heading-anchor" href="#guide--micro-example-b-show-why-projection-changes-analytical-work" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">rows = [
-    {&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2, &quot;note&quot;: &quot;large free text&quot;},
-    {&quot;region&quot;: &quot;south&quot;, &quot;units&quot;: 1, &quot;note&quot;: &quot;another free text&quot;},
-]
-projected = [{&quot;region&quot;: row[&quot;region&quot;], &quot;units&quot;: row[&quot;units&quot;]} for row in rows if row[&quot;units&quot;] &gt;= 2]
-print(projected)
-assert projected == [{&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2}]</code></pre>
+<pre class="highlighted-code"><code class="language-python">rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">large free text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">another free text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+projected <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows <span class="syntax-keyword">if</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>projected<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> projected <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> The query&#x27;s logical result needs only two fields; a columnar engine may avoid reading the unrelated note column.</p>
 <p><strong>Why it matters:</strong> Physical pushdown still requires supported file metadata, expression, layout, and engine evidence.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -479,7 +527,7 @@ assert projected == [{&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 
 <p><strong>Verify:</strong> build an Arrow schema — with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.</p>
 <h5 id="guide--exercise-4-make-partitions-deliberate">Exercise 4 — make partitions deliberate<a class="heading-anchor" href="#guide--exercise-4-make-partitions-deliberate" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>partition_directory</code>. Reject <code>../north</code>, slashes, empty strings, and unexpected case. Write one file per region under:</p>
-<pre><code class="language-text">region=north/part-000.csv
+<pre class="highlighted-code"><code class="language-text">region=north/part-000.csv
 region=south/part-000.csv
 region=west/part-000.csv</code></pre>
 <p>Partitioning every high-cardinality value can create millions of tiny files. Choose stable, commonly filtered dimensions and plan file sizes.</p>
@@ -553,10 +601,10 @@ region=west/part-000.csv</code></pre>
 </ul>
 <p>Run the focused tests:</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_data_01_arrow_duckdb -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_data_01_arrow_duckdb -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_data_01_arrow_duckdb -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_data_01_arrow_duckdb -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Dates or integers become generic objects:</strong> schema inference saw mixed or missing values. Declare and validate the schema at ingestion.</li>
@@ -575,7 +623,7 @@ region=west/part-000.csv</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown evidence. Use exactly these maintained learner materials:
@@ -634,244 +682,244 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-data-01 learner lab: CSV, Arrow, Parquet, and DuckDB.</span>
-<span> </span>
-<span>The worked example uses only ``csv`` from the standard library. Optional</span>
-<span>PyArrow, DuckDB, and pandas exercises remain local and are explained in the</span>
-<span>companion guide.</span>
-<span> </span>
-<span>Professional learner deep dive (python-data-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>CSV records text and delimiters but carries no authoritative type or nullability contract. Arrow</span>
-<span>is a language-independent columnar memory representation; Parquet is a columnar file format with</span>
-<span>schema, row groups, encodings, and statistics. DuckDB is an embedded engine that can query these</span>
-<span>files without loading every column into pandas first.  Columnar performance depends on selecting</span>
-<span>columns, filtering using supported predicates, row-group statistics, file sizes, and partition</span>
-<span>layout. An `EXPLAIN` plan shows intended operations; bytes read and elapsed profiles establish</span>
-<span>what was actually skipped.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* explicit parse/schema: turns untrusted text into typed dates, decimals, integers, and nullable</span>
-<span>  fields at one controlled boundary.</span>
-<span>* Parquet row groups/partitions: organize data for selective scans without creating unsafe</span>
-<span>  values or millions of tiny files.</span>
-<span>* DuckDB projection/filter: pushes required columns and supported predicates near the scan;</span>
-<span>  inspect plan and profile.</span>
-<span> </span>
-<span>Micro-example A — observe CSV&#x27;s string-only boundary::</span>
-<span> </span>
-<span>    import csv</span>
-<span>    from pathlib import Path</span>
-<span> </span>
-<span>    path = Path(&quot;python/professional/fixtures/data/sales.csv&quot;)</span>
-<span>    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        row = next(csv.DictReader(handle))</span>
-<span>    types = {name: type(value).__name__ for name, value in row.items()}</span>
-<span>    print(row, types)</span>
-<span>    assert set(types.values()) == {&quot;str&quot;}</span>
-<span> </span>
-<span>Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an</span>
-<span>          explicit contract.</span>
-<span> </span>
-<span>Micro-example B — show why projection changes analytical work::</span>
-<span> </span>
-<span>    rows = [</span>
-<span>        {&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2, &quot;note&quot;: &quot;large free text&quot;},</span>
-<span>        {&quot;region&quot;: &quot;south&quot;, &quot;units&quot;: 1, &quot;note&quot;: &quot;another free text&quot;},</span>
-<span>    ]</span>
-<span>    projected = [</span>
-<span>        {&quot;region&quot;: row[&quot;region&quot;], &quot;units&quot;: row[&quot;units&quot;]}</span>
-<span>        for row in rows if row[&quot;units&quot;] &gt;= 2</span>
-<span>    ]</span>
-<span>    print(projected)</span>
-<span>    assert projected == [{&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2}]</span>
-<span> </span>
-<span>Expected: The query&#x27;s logical result needs only two fields; a columnar engine may avoid reading</span>
-<span>          the unrelated note column.</span>
-<span> </span>
-<span>Debugging rule: Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan,</span>
-<span>                then profile a bounded query against a CSV/pandas fallback.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>from collections.abc import Callable, Iterable</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;data&quot; / &quot;sales.csv&quot;</span>
-<span> </span>
-<span> </span>
-<span>def read_raw_rows(path: Path = FIXTURE) -&gt; list[dict[str, str]]:</span>
-<span>    &quot;&quot;&quot;Worked example: read CSV&#x27;s string-oriented representation.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        return list(csv.DictReader(handle))</span>
-<span> </span>
-<span> </span>
-<span>def parse_nullable_text(value: str) -&gt; str | None:</span>
-<span>    &quot;&quot;&quot;Convert CSV&#x27;s empty-field convention into an explicit nullable value.</span>
-<span> </span>
-<span>    TODO: trim surrounding whitespace and return ``None`` for an empty value.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete parse_nullable_text&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def total_revenue(rows: Iterable[dict[str, str]]) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Calculate ``units * unit_price`` across raw CSV rows.</span>
-<span> </span>
-<span>    TODO: parse each field explicitly. Round only the final display value;</span>
-<span>    discuss in the guide why Decimal or integer minor units are safer for real</span>
-<span>    money.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete total_revenue&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def partition_directory(region: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Return a Hive-style partition directory such as ``region=north``.</span>
-<span> </span>
-<span>    TODO: accept only lower-case letters, digits, and hyphens. Reject empty or</span>
-<span>    unsafe values rather than inserting arbitrary text into a path.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete partition_directory&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    rows = read_raw_rows()</span>
-<span>    print(f&quot;Worked example: {len(rows)} raw rows&quot;)</span>
-<span>    print(</span>
-<span>        &quot;Raw Python types:&quot;,</span>
-<span>        {key: type(value).__name__ for key, value in rows[0].items()},</span>
-<span>    )</span>
-<span>    print(f&quot;Blank note from CSV is represented as {rows[1][&#x27;note&#x27;]!r}&quot;)</span>
-<span> </span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (&quot;nullable text&quot;, lambda: parse_nullable_text(&quot;  &quot;)),</span>
-<span>        (&quot;revenue&quot;, lambda: total_revenue(rows)),</span>
-<span>        (&quot;partition path&quot;, lambda: partition_directory(&quot;north&quot;)),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            value = call()</span>
-<span>        except NotImplementedError:</span>
-<span>            print(f&quot;TODO: {label}&quot;)</span>
-<span>        else:</span>
-<span>            print(f&quot;Completed: {label} -&gt; {value!r}&quot;)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_data_01_arrow_duckdb.md</span>
-<span>#</span>
-<span># Exercise 1 — define the CSV contract</span>
-<span># Prompt: Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and</span>
-<span># prices in one place rather than scattering conversion across analysis code. Test blank</span>
-<span># notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A</span>
-<span># binary `float` is used in the learner exercise only to keep its first step small.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — compare storage contracts</span>
-<span># Prompt: Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | |</span>
-<span># Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan</span>
-<span># select columns efficiently? | | | | Does Python need an extra engine? | | | | Is</span>
-<span># append/stream exchange simple? | | | Choose a format for a five-row configuration export</span>
-<span># and for a repeated 50-million-row analytical scan. Explain each answer.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — build an Arrow schema</span>
-<span># Prompt: With PyArrow installed, define non-null integer, date, region, category, units,</span>
-<span># and decimal fields plus a nullable note. Create the table with this schema, write</span>
-<span># Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do</span>
-<span># not infer the schema first and then claim it was guaranteed.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — make partitions deliberate</span>
-<span># Prompt: Implement `partition_directory`. Reject `../north`, slashes, empty strings, and</span>
-<span># unexpected case. Write one stable file per region at</span>
-<span># `region=&lt;validated-value&gt;/part-000.csv`. Partitioning every high-cardinality value can</span>
-<span># create millions of tiny files, so choose commonly filtered dimensions and plan sizes.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — query Parquet with DuckDB</span>
-<span># Prompt: Use an in-memory connection and `read_parquet(?)`. Group revenue by region for</span>
-<span># rows with at least two units. Bind path and threshold values as parameters. Then run</span>
-<span># `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected</span>
-<span># columns that exclude `note`. Record the plan from your installed DuckDB version. Plan</span>
-<span># formatting changes, so look for semantics rather than copying one exact rendering.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — explain pushdown honestly</span>
-<span># Prompt: Pushdown does not mean every query reads zero irrelevant bytes. Row-group</span>
-<span># statistics, file organization, filter selectivity, expression support, and engine</span>
-<span># version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and</span>
-<span># 3. what would require profiling or scan metrics to prove.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — exercise the fallback</span>
-<span># Prompt: Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If</span>
-<span># pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm</span>
-<span># the same row count, null count, region set, and revenue across engines. Verify optional</span>
-<span># package detection neither installs dependencies nor contacts the network.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — plan schema evolution</span>
-<span># Prompt: Create version 2 of the sales schema with one nullable additive column and one</span>
-<span># proposed type change. Define which readers remain compatible and write a</span>
-<span># migration/rejection policy.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — control file and row-group size</span>
-<span># Prompt: Generate a larger local deterministic dataset and compare many tiny Parquet</span>
-<span># files with fewer bounded files/row groups. Record metadata count, scan planning, file</span>
-<span># sizes, and filtered query behavior.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — validate a dataset before querying</span>
-<span># Prompt: Build a local validation report for schema equality, required/null counts,</span>
-<span># unique row IDs, accepted regions, positive units, decimal range, date range, partition-</span>
-<span># to-column agreement, and total row count.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — reconcile a local analytical join</span>
-<span># Prompt: Create a small region lookup fixture, join it to sales in DuckDB, and reproduce</span>
-<span># the result with standard-library or pandas logic. Include an unknown region and</span>
-<span># duplicate lookup key.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — find a non-pushdown filter</span>
-<span># Prompt: Compare `units &gt;= ?` with a transformed predicate such as a function of units.</span>
-<span># Inspect plans and scan evidence, then rewrite only when semantics remain identical.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — publish a dataset atomically</span>
-<span># Prompt: Write partitioned output to a temporary version directory, validate it, create a</span>
-<span># manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a</span>
-<span># local current-version pointer.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — reconcile decimals and timestamps across engines</span>
-<span># Prompt: Add boundary decimal values and timezone-aware timestamps to a local round trip.</span>
-<span># Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit</span>
-<span># normalization.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-data-01 learner lab: CSV, Arrow, Parquet, and DuckDB.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The worked example uses only ``csv`` from the standard library. Optional</span></span>
+<span class="source-line"><span class="syntax-string">PyArrow, DuckDB, and pandas exercises remain local and are explained in the</span></span>
+<span class="source-line"><span class="syntax-string">companion guide.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-data-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">CSV records text and delimiters but carries no authoritative type or nullability contract. Arrow</span></span>
+<span class="source-line"><span class="syntax-string">is a language-independent columnar memory representation; Parquet is a columnar file format with</span></span>
+<span class="source-line"><span class="syntax-string">schema, row groups, encodings, and statistics. DuckDB is an embedded engine that can query these</span></span>
+<span class="source-line"><span class="syntax-string">files without loading every column into pandas first.  Columnar performance depends on selecting</span></span>
+<span class="source-line"><span class="syntax-string">columns, filtering using supported predicates, row-group statistics, file sizes, and partition</span></span>
+<span class="source-line"><span class="syntax-string">layout. An `EXPLAIN` plan shows intended operations; bytes read and elapsed profiles establish</span></span>
+<span class="source-line"><span class="syntax-string">what was actually skipped.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* explicit parse/schema: turns untrusted text into typed dates, decimals, integers, and nullable</span></span>
+<span class="source-line"><span class="syntax-string">  fields at one controlled boundary.</span></span>
+<span class="source-line"><span class="syntax-string">* Parquet row groups/partitions: organize data for selective scans without creating unsafe</span></span>
+<span class="source-line"><span class="syntax-string">  values or millions of tiny files.</span></span>
+<span class="source-line"><span class="syntax-string">* DuckDB projection/filter: pushes required columns and supported predicates near the scan;</span></span>
+<span class="source-line"><span class="syntax-string">  inspect plan and profile.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — observe CSV&#x27;s string-only boundary::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import csv</span></span>
+<span class="source-line"><span class="syntax-string">    from pathlib import Path</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    path = Path(&quot;python/professional/fixtures/data/sales.csv&quot;)</span></span>
+<span class="source-line"><span class="syntax-string">    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span></span>
+<span class="source-line"><span class="syntax-string">        row = next(csv.DictReader(handle))</span></span>
+<span class="source-line"><span class="syntax-string">    types = {name: type(value).__name__ for name, value in row.items()}</span></span>
+<span class="source-line"><span class="syntax-string">    print(row, types)</span></span>
+<span class="source-line"><span class="syntax-string">    assert set(types.values()) == {&quot;str&quot;}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an</span></span>
+<span class="source-line"><span class="syntax-string">          explicit contract.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — show why projection changes analytical work::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    rows = [</span></span>
+<span class="source-line"><span class="syntax-string">        {&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2, &quot;note&quot;: &quot;large free text&quot;},</span></span>
+<span class="source-line"><span class="syntax-string">        {&quot;region&quot;: &quot;south&quot;, &quot;units&quot;: 1, &quot;note&quot;: &quot;another free text&quot;},</span></span>
+<span class="source-line"><span class="syntax-string">    ]</span></span>
+<span class="source-line"><span class="syntax-string">    projected = [</span></span>
+<span class="source-line"><span class="syntax-string">        {&quot;region&quot;: row[&quot;region&quot;], &quot;units&quot;: row[&quot;units&quot;]}</span></span>
+<span class="source-line"><span class="syntax-string">        for row in rows if row[&quot;units&quot;] &gt;= 2</span></span>
+<span class="source-line"><span class="syntax-string">    ]</span></span>
+<span class="source-line"><span class="syntax-string">    print(projected)</span></span>
+<span class="source-line"><span class="syntax-string">    assert projected == [{&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2}]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: The query&#x27;s logical result needs only two fields; a columnar engine may avoid reading</span></span>
+<span class="source-line"><span class="syntax-string">          the unrelated note column.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan,</span></span>
+<span class="source-line"><span class="syntax-string">                then profile a bounded query against a CSV/pandas fallback.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Iterable</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sales.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_raw_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked example: read CSV&#x27;s string-oriented representation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_nullable_text</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Convert CSV&#x27;s empty-field convention into an explicit nullable value.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: trim surrounding whitespace and return ``None`` for an empty value.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete parse_nullable_text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">total_revenue</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Calculate ``units * unit_price`` across raw CSV rows.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: parse each field explicitly. Round only the final display value;</span></span>
+<span class="source-line"><span class="syntax-string">    discuss in the guide why Decimal or integer minor units are safer for real</span></span>
+<span class="source-line"><span class="syntax-string">    money.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete total_revenue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">partition_directory</span><span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a Hive-style partition directory such as ``region=north``.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: accept only lower-case letters, digits, and hyphens. Reject empty or</span></span>
+<span class="source-line"><span class="syntax-string">    unsafe values rather than inserting arbitrary text into a path.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete partition_directory</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    rows <span class="syntax-operator">=</span> read_raw_rows<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example: </span><span class="syntax-string">{</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string"> raw rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Raw Python types:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__ <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Blank note from CSV is represented as </span><span class="syntax-string">{</span>rows<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">note</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nullable text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> parse_nullable_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">revenue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> total_revenue<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">partition path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> partition_directory<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            value <span class="syntax-operator">=</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Completed: </span><span class="syntax-string">{</span>label<span class="syntax-string">}</span><span class="syntax-string"> -&gt; </span><span class="syntax-string">{</span>value<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_data_01_arrow_duckdb.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — define the CSV contract</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and</span></span>
+<span class="source-line"><span class="syntax-comment"># prices in one place rather than scattering conversion across analysis code. Test blank</span></span>
+<span class="source-line"><span class="syntax-comment"># notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A</span></span>
+<span class="source-line"><span class="syntax-comment"># binary `float` is used in the learner exercise only to keep its first step small.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — compare storage contracts</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | |</span></span>
+<span class="source-line"><span class="syntax-comment"># Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan</span></span>
+<span class="source-line"><span class="syntax-comment"># select columns efficiently? | | | | Does Python need an extra engine? | | | | Is</span></span>
+<span class="source-line"><span class="syntax-comment"># append/stream exchange simple? | | | Choose a format for a five-row configuration export</span></span>
+<span class="source-line"><span class="syntax-comment"># and for a repeated 50-million-row analytical scan. Explain each answer.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — build an Arrow schema</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: With PyArrow installed, define non-null integer, date, region, category, units,</span></span>
+<span class="source-line"><span class="syntax-comment"># and decimal fields plus a nullable note. Create the table with this schema, write</span></span>
+<span class="source-line"><span class="syntax-comment"># Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do</span></span>
+<span class="source-line"><span class="syntax-comment"># not infer the schema first and then claim it was guaranteed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — make partitions deliberate</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `partition_directory`. Reject `../north`, slashes, empty strings, and</span></span>
+<span class="source-line"><span class="syntax-comment"># unexpected case. Write one stable file per region at</span></span>
+<span class="source-line"><span class="syntax-comment"># `region=&lt;validated-value&gt;/part-000.csv`. Partitioning every high-cardinality value can</span></span>
+<span class="source-line"><span class="syntax-comment"># create millions of tiny files, so choose commonly filtered dimensions and plan sizes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — query Parquet with DuckDB</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Use an in-memory connection and `read_parquet(?)`. Group revenue by region for</span></span>
+<span class="source-line"><span class="syntax-comment"># rows with at least two units. Bind path and threshold values as parameters. Then run</span></span>
+<span class="source-line"><span class="syntax-comment"># `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected</span></span>
+<span class="source-line"><span class="syntax-comment"># columns that exclude `note`. Record the plan from your installed DuckDB version. Plan</span></span>
+<span class="source-line"><span class="syntax-comment"># formatting changes, so look for semantics rather than copying one exact rendering.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — explain pushdown honestly</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Pushdown does not mean every query reads zero irrelevant bytes. Row-group</span></span>
+<span class="source-line"><span class="syntax-comment"># statistics, file organization, filter selectivity, expression support, and engine</span></span>
+<span class="source-line"><span class="syntax-comment"># version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and</span></span>
+<span class="source-line"><span class="syntax-comment"># 3. what would require profiling or scan metrics to prove.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — exercise the fallback</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If</span></span>
+<span class="source-line"><span class="syntax-comment"># pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm</span></span>
+<span class="source-line"><span class="syntax-comment"># the same row count, null count, region set, and revenue across engines. Verify optional</span></span>
+<span class="source-line"><span class="syntax-comment"># package detection neither installs dependencies nor contacts the network.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — plan schema evolution</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create version 2 of the sales schema with one nullable additive column and one</span></span>
+<span class="source-line"><span class="syntax-comment"># proposed type change. Define which readers remain compatible and write a</span></span>
+<span class="source-line"><span class="syntax-comment"># migration/rejection policy.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — control file and row-group size</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Generate a larger local deterministic dataset and compare many tiny Parquet</span></span>
+<span class="source-line"><span class="syntax-comment"># files with fewer bounded files/row groups. Record metadata count, scan planning, file</span></span>
+<span class="source-line"><span class="syntax-comment"># sizes, and filtered query behavior.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — validate a dataset before querying</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build a local validation report for schema equality, required/null counts,</span></span>
+<span class="source-line"><span class="syntax-comment"># unique row IDs, accepted regions, positive units, decimal range, date range, partition-</span></span>
+<span class="source-line"><span class="syntax-comment"># to-column agreement, and total row count.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — reconcile a local analytical join</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a small region lookup fixture, join it to sales in DuckDB, and reproduce</span></span>
+<span class="source-line"><span class="syntax-comment"># the result with standard-library or pandas logic. Include an unknown region and</span></span>
+<span class="source-line"><span class="syntax-comment"># duplicate lookup key.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — find a non-pushdown filter</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Compare `units &gt;= ?` with a transformed predicate such as a function of units.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inspect plans and scan evidence, then rewrite only when semantics remain identical.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — publish a dataset atomically</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write partitioned output to a temporary version directory, validate it, create a</span></span>
+<span class="source-line"><span class="syntax-comment"># manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a</span></span>
+<span class="source-line"><span class="syntax-comment"># local current-version pointer.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — reconcile decimals and timestamps across engines</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add boundary decimal values and timezone-aware timestamps to a local round trip.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit</span></span>
+<span class="source-line"><span class="syntax-comment"># normalization.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -945,15 +993,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Reconcile typed values/nulls/totals across engines, assert schema round-trip, reject unsafe partitions, inspect plan plus scan metrics, and exercise the CSV fallback.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">import csv
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-path = Path(&quot;python/professional/fixtures/data/sales.csv&quot;)
-with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
-    row = next(csv.DictReader(handle))
-types = {name: type(value).__name__ for name, value in row.items()}
-print(row, types)
-assert set(types.values()) == {&quot;str&quot;}</code></pre>
+path <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python/professional/fixtures/data/sales.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span>
+    row <span class="syntax-operator">=</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__ <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> row<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> types<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>types<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">str</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1088,368 +1136,368 @@ assert set(types.values()) == {&quot;str&quot;}</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-data-01.</span>
-<span> </span>
-<span>The default path parses the tracked CSV with the standard library. pandas is an</span>
-<span>optional convenience fallback; PyArrow and DuckDB unlock the columnar lab.</span>
-<span>Nothing downloads data or contacts a server.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import csv</span>
-<span>import importlib.util</span>
-<span>import re</span>
-<span>import tempfile</span>
-<span>from collections import defaultdict</span>
-<span>from collections.abc import Iterable, Sequence</span>
-<span>from dataclasses import dataclass</span>
-<span>from datetime import date</span>
-<span>from decimal import Decimal</span>
-<span>from pathlib import Path</span>
-<span>from typing import Literal</span>
-<span> </span>
-<span>FIXTURE = Path(__file__).resolve().parents[1] / &quot;fixtures&quot; / &quot;data&quot; / &quot;sales.csv&quot;</span>
-<span>PARTITION_VALUE = re.compile(r&quot;^[a-z0-9-]+$&quot;)</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Sale:</span>
-<span>    &quot;&quot;&quot;Typed interpretation of one CSV record.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    order_id: int</span>
-<span>    event_date: date</span>
-<span>    region: str</span>
-<span>    category: str</span>
-<span>    units: int</span>
-<span>    unit_price: Decimal</span>
-<span>    note: str | None</span>
-<span> </span>
-<span>    @property</span>
-<span>    def revenue(self) -&gt; Decimal:</span>
-<span>        return self.units * self.unit_price</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class SalesSummary:</span>
-<span>    &quot;&quot;&quot;Portable aggregate result with the engine made visible.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    engine: Literal[&quot;stdlib-csv&quot;, &quot;pandas-csv&quot;]</span>
-<span>    row_count: int</span>
-<span>    total_revenue: Decimal</span>
-<span>    null_note_count: int</span>
-<span>    regions: tuple[str, ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class SchemaRoundTrip:</span>
-<span>    &quot;&quot;&quot;Evidence preserved through a PyArrow Parquet round trip.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    path: Path</span>
-<span>    schema_before: str</span>
-<span>    schema_after: str</span>
-<span>    row_count: int</span>
-<span>    null_note_count: int</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class QueryObservation:</span>
-<span>    &quot;&quot;&quot;DuckDB results plus visible plan evidence.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    rows: tuple[tuple[str, Decimal], ...]</span>
-<span>    plan: str</span>
-<span>    filter_visible: bool</span>
-<span>    projections_visible: bool</span>
-<span> </span>
-<span> </span>
-<span>def read_csv_rows(path: Path = FIXTURE) -&gt; list[dict[str, str]]:</span>
-<span>    &quot;&quot;&quot;Read raw CSV values; all fields remain text at this boundary.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>        return list(csv.DictReader(handle))</span>
-<span> </span>
-<span> </span>
-<span>def parse_nullable_text(value: str) -&gt; str | None:</span>
-<span>    &quot;&quot;&quot;Interpret an empty or whitespace-only CSV field as NULL.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    stripped = value.strip()</span>
-<span>    return stripped if stripped else None</span>
-<span> </span>
-<span> </span>
-<span>def parse_sale(row: dict[str, str]) -&gt; Sale:</span>
-<span>    &quot;&quot;&quot;Apply one explicit schema to a raw CSV record.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    required = {</span>
-<span>        &quot;order_id&quot;,</span>
-<span>        &quot;event_date&quot;,</span>
-<span>        &quot;region&quot;,</span>
-<span>        &quot;category&quot;,</span>
-<span>        &quot;units&quot;,</span>
-<span>        &quot;unit_price&quot;,</span>
-<span>        &quot;note&quot;,</span>
-<span>    }</span>
-<span>    missing = required.difference(row)</span>
-<span>    if missing:</span>
-<span>        raise ValueError(f&quot;CSV row is missing columns: {sorted(missing)}&quot;)</span>
-<span>    units = int(row[&quot;units&quot;])</span>
-<span>    price = Decimal(row[&quot;unit_price&quot;])</span>
-<span>    if units &lt; 0:</span>
-<span>        raise ValueError(&quot;units must be non-negative&quot;)</span>
-<span>    if price &lt; 0:</span>
-<span>        raise ValueError(&quot;unit_price must be non-negative&quot;)</span>
-<span>    return Sale(</span>
-<span>        order_id=int(row[&quot;order_id&quot;]),</span>
-<span>        event_date=date.fromisoformat(row[&quot;event_date&quot;]),</span>
-<span>        region=row[&quot;region&quot;].strip(),</span>
-<span>        category=row[&quot;category&quot;].strip(),</span>
-<span>        units=units,</span>
-<span>        unit_price=price,</span>
-<span>        note=parse_nullable_text(row[&quot;note&quot;]),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def load_sales(path: Path = FIXTURE) -&gt; list[Sale]:</span>
-<span>    &quot;&quot;&quot;Load typed records through the portable CSV path.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    return [parse_sale(row) for row in read_csv_rows(path)]</span>
-<span> </span>
-<span> </span>
-<span>def summarize_stdlib(path: Path = FIXTURE) -&gt; SalesSummary:</span>
-<span>    &quot;&quot;&quot;Summarize CSV without a third-party dependency.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    sales = load_sales(path)</span>
-<span>    return SalesSummary(</span>
-<span>        engine=&quot;stdlib-csv&quot;,</span>
-<span>        row_count=len(sales),</span>
-<span>        total_revenue=sum((sale.revenue for sale in sales), start=Decimal(&quot;0&quot;)),</span>
-<span>        null_note_count=sum(sale.note is None for sale in sales),</span>
-<span>        regions=tuple(sorted({sale.region for sale in sales})),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def summarize_with_csv_fallback(path: Path = FIXTURE) -&gt; SalesSummary:</span>
-<span>    &quot;&quot;&quot;Use pandas when present, otherwise retain a stdlib CSV path.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if importlib.util.find_spec(&quot;pandas&quot;) is None:</span>
-<span>        return summarize_stdlib(path)</span>
-<span> </span>
-<span>    import pandas as pd  # type: ignore[import-untyped]</span>
-<span> </span>
-<span>    frame = pd.read_csv(</span>
-<span>        path,</span>
-<span>        dtype={</span>
-<span>            &quot;order_id&quot;: &quot;int64&quot;,</span>
-<span>            &quot;region&quot;: &quot;string&quot;,</span>
-<span>            &quot;category&quot;: &quot;string&quot;,</span>
-<span>            &quot;units&quot;: &quot;int64&quot;,</span>
-<span>            &quot;unit_price&quot;: &quot;string&quot;,</span>
-<span>            &quot;note&quot;: &quot;string&quot;,</span>
-<span>        },</span>
-<span>        parse_dates=[&quot;event_date&quot;],</span>
-<span>    )</span>
-<span>    prices = [Decimal(value) for value in frame[&quot;unit_price&quot;].tolist()]</span>
-<span>    units = [int(value) for value in frame[&quot;units&quot;].tolist()]</span>
-<span>    total = sum(</span>
-<span>        (price * unit for price, unit in zip(prices, units, strict=True)),</span>
-<span>        start=Decimal(&quot;0&quot;),</span>
-<span>    )</span>
-<span>    return SalesSummary(</span>
-<span>        engine=&quot;pandas-csv&quot;,</span>
-<span>        row_count=len(frame),</span>
-<span>        total_revenue=total,</span>
-<span>        null_note_count=int(frame[&quot;note&quot;].isna().sum()),</span>
-<span>        regions=tuple(sorted(str(value) for value in frame[&quot;region&quot;].unique())),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def partition_directory(region: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Return a validated Hive-style partition segment.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    if not PARTITION_VALUE.fullmatch(region):</span>
-<span>        raise ValueError(&quot;region must use lower-case letters, digits, or hyphens&quot;)</span>
-<span>    return f&quot;region={region}&quot;</span>
-<span> </span>
-<span> </span>
-<span>def write_partitioned_csv(</span>
-<span>    sales: Iterable[Sale],</span>
-<span>    root: Path,</span>
-<span>) -&gt; tuple[Path, ...]:</span>
-<span>    &quot;&quot;&quot;Write deterministic region partitions using portable CSV files.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    by_region: dict[str, list[Sale]] = defaultdict(list)</span>
-<span>    for sale in sales:</span>
-<span>        by_region[sale.region].append(sale)</span>
-<span> </span>
-<span>    paths: list[Path] = []</span>
-<span>    fieldnames = [</span>
-<span>        &quot;order_id&quot;,</span>
-<span>        &quot;event_date&quot;,</span>
-<span>        &quot;category&quot;,</span>
-<span>        &quot;units&quot;,</span>
-<span>        &quot;unit_price&quot;,</span>
-<span>        &quot;note&quot;,</span>
-<span>    ]</span>
-<span>    for region in sorted(by_region):</span>
-<span>        directory = root / partition_directory(region)</span>
-<span>        directory.mkdir(parents=True, exist_ok=True)</span>
-<span>        path = directory / &quot;part-000.csv&quot;</span>
-<span>        with path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:</span>
-<span>            writer = csv.DictWriter(handle, fieldnames=fieldnames)</span>
-<span>            writer.writeheader()</span>
-<span>            for sale in by_region[region]:</span>
-<span>                writer.writerow(</span>
-<span>                    {</span>
-<span>                        &quot;order_id&quot;: sale.order_id,</span>
-<span>                        &quot;event_date&quot;: sale.event_date.isoformat(),</span>
-<span>                        &quot;category&quot;: sale.category,</span>
-<span>                        &quot;units&quot;: sale.units,</span>
-<span>                        &quot;unit_price&quot;: str(sale.unit_price),</span>
-<span>                        &quot;note&quot;: sale.note or &quot;&quot;,</span>
-<span>                    }</span>
-<span>                )</span>
-<span>        paths.append(path)</span>
-<span>    return tuple(paths)</span>
-<span> </span>
-<span> </span>
-<span>def _require_modules(names: Sequence[str]) -&gt; None:</span>
-<span>    missing = [name for name in names if importlib.util.find_spec(name) is None]</span>
-<span>    if missing:</span>
-<span>        raise ModuleNotFoundError(f&quot;optional local packages not installed: {&#x27;, &#x27;.join(missing)}&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def write_parquet_round_trip(</span>
-<span>    sales: Sequence[Sale],</span>
-<span>    path: Path,</span>
-<span>) -&gt; SchemaRoundTrip:</span>
-<span>    &quot;&quot;&quot;Write typed Arrow data to Parquet and validate the read schema.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    _require_modules((&quot;pyarrow&quot;,))</span>
-<span>    import pyarrow as pa</span>
-<span>    import pyarrow.parquet as pq</span>
-<span> </span>
-<span>    schema = pa.schema(</span>
-<span>        [</span>
-<span>            pa.field(&quot;order_id&quot;, pa.int64(), nullable=False),</span>
-<span>            pa.field(&quot;event_date&quot;, pa.date32(), nullable=False),</span>
-<span>            pa.field(&quot;region&quot;, pa.string(), nullable=False),</span>
-<span>            pa.field(&quot;category&quot;, pa.string(), nullable=False),</span>
-<span>            pa.field(&quot;units&quot;, pa.int64(), nullable=False),</span>
-<span>            pa.field(&quot;unit_price&quot;, pa.decimal128(10, 2), nullable=False),</span>
-<span>            pa.field(&quot;note&quot;, pa.string(), nullable=True),</span>
-<span>        ]</span>
-<span>    )</span>
-<span>    table = pa.Table.from_pylist(</span>
-<span>        [</span>
-<span>            {</span>
-<span>                &quot;order_id&quot;: sale.order_id,</span>
-<span>                &quot;event_date&quot;: sale.event_date,</span>
-<span>                &quot;region&quot;: sale.region,</span>
-<span>                &quot;category&quot;: sale.category,</span>
-<span>                &quot;units&quot;: sale.units,</span>
-<span>                &quot;unit_price&quot;: sale.unit_price,</span>
-<span>                &quot;note&quot;: sale.note,</span>
-<span>            }</span>
-<span>            for sale in sales</span>
-<span>        ],</span>
-<span>        schema=schema,</span>
-<span>    )</span>
-<span>    path.parent.mkdir(parents=True, exist_ok=True)</span>
-<span>    pq.write_table(table, path, compression=&quot;snappy&quot;)  # type: ignore[no-untyped-call]</span>
-<span>    restored = pq.read_table(path)  # type: ignore[no-untyped-call]</span>
-<span>    if restored.schema != schema:</span>
-<span>        raise AssertionError(</span>
-<span>            f&quot;schema changed across Parquet round trip:\n{schema}\n{restored.schema}&quot;</span>
-<span>        )</span>
-<span>    return SchemaRoundTrip(</span>
-<span>        path=path,</span>
-<span>        schema_before=str(schema),</span>
-<span>        schema_after=str(restored.schema),</span>
-<span>        row_count=restored.num_rows,</span>
-<span>        null_note_count=restored.column(&quot;note&quot;).null_count,</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def query_parquet_with_duckdb(</span>
-<span>    path: Path,</span>
-<span>    *,</span>
-<span>    minimum_units: int,</span>
-<span>) -&gt; QueryObservation:</span>
-<span>    &quot;&quot;&quot;Query Parquet locally and return the physical-plan evidence.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    _require_modules((&quot;duckdb&quot;,))</span>
-<span>    import duckdb</span>
-<span> </span>
-<span>    sql = &quot;&quot;&quot;</span>
-<span>        SELECT region, sum(units * unit_price) AS revenue</span>
-<span>        FROM read_parquet(?)</span>
-<span>        WHERE units &gt;= ?</span>
-<span>        GROUP BY region</span>
-<span>        ORDER BY region</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    with duckdb.connect(database=&quot;:memory:&quot;) as connection:</span>
-<span>        raw_rows = connection.execute(</span>
-<span>            sql,</span>
-<span>            [str(path), minimum_units],</span>
-<span>        ).fetchall()</span>
-<span>        plan_rows = connection.execute(</span>
-<span>            f&quot;EXPLAIN {sql}&quot;,</span>
-<span>            [str(path), minimum_units],</span>
-<span>        ).fetchall()</span>
-<span>    plan = &quot;\n&quot;.join(&quot; | &quot;.join(str(value) for value in row) for row in plan_rows)</span>
-<span>    normalized = plan.lower()</span>
-<span>    rows = tuple((str(region), Decimal(str(revenue))) for region, revenue in raw_rows)</span>
-<span>    return QueryObservation(</span>
-<span>        rows=rows,</span>
-<span>        plan=plan,</span>
-<span>        filter_visible=&quot;filter&quot; in normalized and &quot;units&quot; in normalized,</span>
-<span>        projections_visible=&quot;projection&quot; in normalized and &quot;region&quot; in normalized,</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def optional_columnar_demo(sales: Sequence[Sale], workspace: Path) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Run or clearly skip the optional columnar path.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    missing = [name for name in (&quot;pyarrow&quot;, &quot;duckdb&quot;) if importlib.util.find_spec(name) is None]</span>
-<span>    if missing:</span>
-<span>        print(</span>
-<span>            &quot;Columnar demo not run; optional local packages missing:&quot;,</span>
-<span>            &quot;, &quot;.join(missing),</span>
-<span>        )</span>
-<span>        return</span>
-<span>    proof = write_parquet_round_trip(sales, workspace / &quot;sales.parquet&quot;)</span>
-<span>    observation = query_parquet_with_duckdb(proof.path, minimum_units=2)</span>
-<span>    print(</span>
-<span>        f&quot;Parquet rows={proof.row_count}, null notes={proof.null_note_count}, &quot;</span>
-<span>        f&quot;schema preserved={proof.schema_before == proof.schema_after}&quot;</span>
-<span>    )</span>
-<span>    print(&quot;DuckDB rows:&quot;, observation.rows)</span>
-<span>    print(</span>
-<span>        &quot;Plan evidence:&quot;,</span>
-<span>        f&quot;filter={observation.filter_visible}&quot;,</span>
-<span>        f&quot;projections={observation.projections_visible}&quot;,</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    &quot;&quot;&quot;Run portable and optional paths in a disposable directory.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    sales = load_sales()</span>
-<span>    summary = summarize_with_csv_fallback()</span>
-<span>    print(</span>
-<span>        f&quot;{summary.engine}: rows={summary.row_count}, &quot;</span>
-<span>        f&quot;revenue={summary.total_revenue}, null notes={summary.null_note_count}&quot;</span>
-<span>    )</span>
-<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-columnar-&quot;) as directory:</span>
-<span>        workspace = Path(directory)</span>
-<span>        partitions = write_partitioned_csv(sales, workspace / &quot;partitions&quot;)</span>
-<span>        print(&quot;partition files:&quot;, *(path.parent.name for path in partitions))</span>
-<span>        optional_columnar_demo(sales, workspace)</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-data-01.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The default path parses the tracked CSV with the standard library. pandas is an</span></span>
+<span class="source-line"><span class="syntax-string">optional convenience fallback; PyArrow and DuckDB unlock the columnar lab.</span></span>
+<span class="source-line"><span class="syntax-string">Nothing downloads data or contacts a server.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> csv</span>
+<span class="source-line"><span class="syntax-keyword">import</span> importlib.util</span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> defaultdict</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
+<span class="source-line"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> date</span>
+<span class="source-line"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sales.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">PARTITION_VALUE <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">^[a-z0-9-]+$</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Sale</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Typed interpretation of one CSV record.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    event_date<span class="syntax-punctuation">:</span> date</span>
+<span class="source-line">    region<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    units<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    unit_price<span class="syntax-punctuation">:</span> Decimal</span>
+<span class="source-line">    note<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">revenue</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Decimal<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>units <span class="syntax-operator">*</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>unit_price</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">SalesSummary</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Portable aggregate result with the engine made visible.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    engine<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">stdlib-csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pandas-csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    row_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    total_revenue<span class="syntax-punctuation">:</span> Decimal</span>
+<span class="source-line">    null_note_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    regions<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">SchemaRoundTrip</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Evidence preserved through a PyArrow Parquet round trip.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path</span>
+<span class="source-line">    schema_before<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    schema_after<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    row_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    null_note_count<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">QueryObservation</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;DuckDB results plus visible plan evidence.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    plan<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    filter_visible<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    projections_visible<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_csv_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Read raw CSV values; all fields remain text at this boundary.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>csv<span class="syntax-operator">.</span>DictReader<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_nullable_text</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Interpret an empty or whitespace-only CSV field as NULL.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    stripped <span class="syntax-operator">=</span> value<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> stripped <span class="syntax-keyword">if</span> stripped <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_sale</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Sale<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Apply one explicit schema to a raw CSV record.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    required <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    missing <span class="syntax-operator">=</span> required<span class="syntax-operator">.</span>difference<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">CSV row is missing columns: </span><span class="syntax-string">{</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    units <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    price <span class="syntax-operator">=</span> Decimal<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> units <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">units must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> price <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unit_price must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> Sale<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        order_id<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        event_date<span class="syntax-operator">=</span>date<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        region<span class="syntax-operator">=</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        category<span class="syntax-operator">=</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        units<span class="syntax-operator">=</span>units<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        unit_price<span class="syntax-operator">=</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        note<span class="syntax-operator">=</span>parse_nullable_text<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_sales</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Sale<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Load typed records through the portable CSV path.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>parse_sale<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> read_csv_rows<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">summarize_stdlib</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> SalesSummary<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Summarize CSV without a third-party dependency.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    sales <span class="syntax-operator">=</span> load_sales<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> SalesSummary<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        engine<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">stdlib-csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        row_count<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sales<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        total_revenue<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>sale<span class="syntax-operator">.</span>revenue <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> sales<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> start<span class="syntax-operator">=</span>Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        null_note_count<span class="syntax-operator">=</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>sale<span class="syntax-operator">.</span>note <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> sales<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        regions<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>sale<span class="syntax-operator">.</span>region <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> sales<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">summarize_with_csv_fallback</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path <span class="syntax-operator">=</span> FIXTURE<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> SalesSummary<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Use pandas when present, otherwise retain a stdlib CSV path.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pandas</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> summarize_stdlib<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd  <span class="syntax-comment"># type: ignore[import-untyped]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>read_csv<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        dtype<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">int64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">string</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        parse_dates<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    prices <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>Decimal<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> frame<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    units <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> frame<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    total <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span>price <span class="syntax-operator">*</span> unit <span class="syntax-keyword">for</span> price<span class="syntax-punctuation">,</span> unit <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>prices<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        start<span class="syntax-operator">=</span>Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> SalesSummary<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        engine<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">pandas-csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        row_count<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        total_revenue<span class="syntax-operator">=</span>total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        null_note_count<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        regions<span class="syntax-operator">=</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> frame<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">partition_directory</span><span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a validated Hive-style partition segment.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> PARTITION_VALUE<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">region must use lower-case letters, digits, or hyphens</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">region=</span><span class="syntax-string">{</span>region<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_partitioned_csv</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    sales<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span>Sale<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    root<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Write deterministic region partitions using portable CSV files.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    by_region<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Sale<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> defaultdict<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> sales<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        by_region<span class="syntax-punctuation">[</span>sale<span class="syntax-operator">.</span>region<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>sale<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    paths<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    fieldnames <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> region <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>by_region<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        directory <span class="syntax-operator">=</span> root <span class="syntax-operator">/</span> partition_directory<span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        directory<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        path <span class="syntax-operator">=</span> directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">part-000.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">with</span> path<span class="syntax-operator">.</span>open<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> newline<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> handle<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            writer <span class="syntax-operator">=</span> csv<span class="syntax-operator">.</span>DictWriter<span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">,</span> fieldnames<span class="syntax-operator">=</span>fieldnames<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            writer<span class="syntax-operator">.</span>writeheader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> by_region<span class="syntax-punctuation">[</span>region<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                writer<span class="syntax-operator">.</span>writerow<span class="syntax-punctuation">(</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>event_date<span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>units<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>sale<span class="syntax-operator">.</span>unit_price<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>note <span class="syntax-operator">or</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">                <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        paths<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>paths<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_require_modules</span><span class="syntax-punctuation">(</span>names<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> names <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ModuleNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">optional local packages not installed: </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_parquet_round_trip</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    sales<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Sale<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> SchemaRoundTrip<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Write typed Arrow data to Parquet and validate the read schema.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    _require_modules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pyarrow</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> pyarrow <span class="syntax-keyword">as</span> pa</span>
+<span class="source-line">    <span class="syntax-keyword">import</span> pyarrow.parquet <span class="syntax-keyword">as</span> pq</span>
+<span class="source-line"></span>
+<span class="source-line">    schema <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>schema<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>date32<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>string<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>string<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>decimal128<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            pa<span class="syntax-operator">.</span>field<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>string<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> nullable<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    table <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>Table<span class="syntax-operator">.</span>from_pylist<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">event_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>event_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>region<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>units<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">unit_price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>unit_price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sale<span class="syntax-operator">.</span>note<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> sale <span class="syntax-operator">in</span> sales</span>
+<span class="source-line">        <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    pq<span class="syntax-operator">.</span>write_table<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">,</span> compression<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">snappy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[no-untyped-call]</span></span>
+<span class="source-line">    restored <span class="syntax-operator">=</span> pq<span class="syntax-operator">.</span>read_table<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[no-untyped-call]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> restored<span class="syntax-operator">.</span>schema <span class="syntax-operator">!=</span> schema<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema changed across Parquet round trip:</span><span class="syntax-string">\n</span><span class="syntax-string">{</span>schema<span class="syntax-string">}</span><span class="syntax-string">\n</span><span class="syntax-string">{</span>restored<span class="syntax-operator">.</span>schema<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> SchemaRoundTrip<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        path<span class="syntax-operator">=</span>path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        schema_before<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>schema<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        schema_after<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>restored<span class="syntax-operator">.</span>schema<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        row_count<span class="syntax-operator">=</span>restored<span class="syntax-operator">.</span>num_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        null_note_count<span class="syntax-operator">=</span>restored<span class="syntax-operator">.</span>column<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>null_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">query_parquet_with_duckdb</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    minimum_units<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> QueryObservation<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Query Parquet locally and return the physical-plan evidence.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    _require_modules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duckdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">import</span> duckdb</span>
+<span class="source-line"></span>
+<span class="source-line">    sql <span class="syntax-operator">=</span> <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">        SELECT region, sum(units * unit_price) AS revenue</span></span>
+<span class="source-line"><span class="syntax-string">        FROM read_parquet(?)</span></span>
+<span class="source-line"><span class="syntax-string">        WHERE units &gt;= ?</span></span>
+<span class="source-line"><span class="syntax-string">        GROUP BY region</span></span>
+<span class="source-line"><span class="syntax-string">        ORDER BY region</span></span>
+<span class="source-line"><span class="syntax-string">    </span><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> duckdb<span class="syntax-operator">.</span>connect<span class="syntax-punctuation">(</span>database<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">:memory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> connection<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        raw_rows <span class="syntax-operator">=</span> connection<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            sql<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> minimum_units<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fetchall<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        plan_rows <span class="syntax-operator">=</span> connection<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">EXPLAIN </span><span class="syntax-string">{</span>sql<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> minimum_units<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fetchall<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    plan <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string"> | </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> row<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> plan_rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    normalized <span class="syntax-operator">=</span> plan<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    rows <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>region<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> region<span class="syntax-punctuation">,</span> revenue <span class="syntax-operator">in</span> raw_rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> QueryObservation<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        rows<span class="syntax-operator">=</span>rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        plan<span class="syntax-operator">=</span>plan<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        filter_visible<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">filter</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> normalized <span class="syntax-operator">and</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> normalized<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        projections_visible<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">projection</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> normalized <span class="syntax-operator">and</span> <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> normalized<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">optional_columnar_demo</span><span class="syntax-punctuation">(</span>sales<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Sale<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> workspace<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run or clearly skip the optional columnar path.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pyarrow</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duckdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> importlib<span class="syntax-operator">.</span>util<span class="syntax-operator">.</span>find_spec<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> missing<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">Columnar demo not run; optional local packages missing:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    proof <span class="syntax-operator">=</span> write_parquet_round_trip<span class="syntax-punctuation">(</span>sales<span class="syntax-punctuation">,</span> workspace <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sales.parquet</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    observation <span class="syntax-operator">=</span> query_parquet_with_duckdb<span class="syntax-punctuation">(</span>proof<span class="syntax-operator">.</span>path<span class="syntax-punctuation">,</span> minimum_units<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Parquet rows=</span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>row_count<span class="syntax-string">}</span><span class="syntax-string">, null notes=</span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>null_note_count<span class="syntax-string">}</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">schema preserved=</span><span class="syntax-string">{</span>proof<span class="syntax-operator">.</span>schema_before <span class="syntax-operator">==</span> proof<span class="syntax-operator">.</span>schema_after<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DuckDB rows:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> observation<span class="syntax-operator">.</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Plan evidence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">filter=</span><span class="syntax-string">{</span>observation<span class="syntax-operator">.</span>filter_visible<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">projections=</span><span class="syntax-string">{</span>observation<span class="syntax-operator">.</span>projections_visible<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Run portable and optional paths in a disposable directory.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    sales <span class="syntax-operator">=</span> load_sales<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    summary <span class="syntax-operator">=</span> summarize_with_csv_fallback<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>engine<span class="syntax-string">}</span><span class="syntax-string">: rows=</span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>row_count<span class="syntax-string">}</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">revenue=</span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>total_revenue<span class="syntax-string">}</span><span class="syntax-string">, null notes=</span><span class="syntax-string">{</span>summary<span class="syntax-operator">.</span>null_note_count<span class="syntax-string">}</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-columnar-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        workspace <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        partitions <span class="syntax-operator">=</span> write_partitioned_csv<span class="syntax-punctuation">(</span>sales<span class="syntax-punctuation">,</span> workspace <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">partition files:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.</span>name <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> partitions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        optional_columnar_demo<span class="syntax-punctuation">(</span>sales<span class="syntax-punctuation">,</span> workspace<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

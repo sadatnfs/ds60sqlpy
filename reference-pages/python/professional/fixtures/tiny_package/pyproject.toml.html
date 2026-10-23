@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,37 +161,37 @@
       <h1>Pyproject</h1>
       <p class="source-path">Generated from <code>python/professional/fixtures/tiny_package/pyproject.toml</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-toml"><code><span>[build-system]</span>
-<span>requires = [&quot;setuptools&gt;=77&quot;, &quot;wheel&quot;]</span>
-<span>build-backend = &quot;setuptools.build_meta&quot;</span>
-<span> </span>
-<span>[project]</span>
-<span>name = &quot;ds60-tiny-greeter&quot;</span>
-<span>version = &quot;0.1.0&quot;</span>
-<span>description = &quot;Offline fixture package for the DS60 packaging lesson&quot;</span>
-<span>readme = &quot;README.md&quot;</span>
-<span>requires-python = &quot;&gt;=3.11&quot;</span>
-<span>license = &quot;MIT&quot;</span>
-<span>authors = [{name = &quot;DS60 curriculum&quot;}]</span>
-<span>dependencies = []</span>
-<span> </span>
-<span>[project.scripts]</span>
-<span>ds60-greet = &quot;ds60_tiny_greeter.cli:main&quot;</span>
-<span> </span>
-<span>[project.optional-dependencies]</span>
-<span>pretty = [&quot;colorama&gt;=0.4.6; sys_platform == &#x27;win32&#x27;&quot;]</span>
-<span> </span>
-<span>[dependency-groups]</span>
-<span>test = [&quot;pytest&gt;=8; python_version &gt;= &#x27;3.11&#x27;&quot;]</span>
-<span>quality = [&quot;ruff&gt;=0.5; python_version &gt;= &#x27;3.11&#x27;&quot;]</span>
-<span> </span>
-<span>[tool.setuptools.packages.find]</span>
-<span>where = [&quot;src&quot;]</span>
-<span> </span>
-<span>[tool.pytest.ini_options]</span>
-<span>addopts = &quot;-ra&quot;</span>
-<span>testpaths = [&quot;tests&quot;]</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-toml"><code><span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">build-system</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">requires <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">setuptools&gt;=77</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wheel</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">build-backend <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">setuptools.build_meta</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">project</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">name <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-tiny-greeter</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">version <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">0.1.0</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">description <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Offline fixture package for the DS60 packaging lesson</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">readme <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">README.md</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">requires-python <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=3.11</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">license <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">MIT</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">authors <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span>name <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">DS60 curriculum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">dependencies <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">project</span><span class="syntax-keyword">.</span><span class="syntax-keyword">scripts</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">ds60-greet <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60_tiny_greeter.cli:main</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">project</span><span class="syntax-keyword">.</span><span class="syntax-keyword">optional-dependencies</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">pretty <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">colorama&gt;=0.4.6; sys_platform == &#x27;win32&#x27;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">dependency-groups</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">test <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">pytest&gt;=8; python_version &gt;= &#x27;3.11&#x27;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">quality <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">ruff&gt;=0.5; python_version &gt;= &#x27;3.11&#x27;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">tool</span><span class="syntax-keyword">.</span><span class="syntax-keyword">setuptools</span><span class="syntax-keyword">.</span><span class="syntax-keyword">packages</span><span class="syntax-keyword">.</span><span class="syntax-keyword">find</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">where <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">src</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">[</span><span class="syntax-keyword">tool</span><span class="syntax-keyword">.</span><span class="syntax-keyword">pytest</span><span class="syntax-keyword">.</span><span class="syntax-keyword">ini_options</span><span class="syntax-keyword">]</span></span>
+<span class="source-line">addopts <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-ra</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">testpaths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tests</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

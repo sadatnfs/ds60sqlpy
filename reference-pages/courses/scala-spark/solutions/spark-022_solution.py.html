@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,136 +161,136 @@
       <h1>Spark 022 Solution</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-022_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
-<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
-<span> </span>
-<span> </span>
-<span>def run_grouped(frame, group):</span>
-<span>    sc = frame.sparkSession.sparkContext</span>
-<span>    sc.setJobGroup(group,&quot;Bounded shuffle evidence&quot;,interruptOnCancel=True)</span>
-<span>    try:</span>
-<span>        return sorted((r[0],r[1]) for r in frame.collect())</span>
-<span>    finally:</span>
-<span>        sc.setLocalProperty(&quot;spark.jobGroup.id&quot;,None)</span>
-<span>        sc.setLocalProperty(&quot;spark.job.description&quot;,None)</span>
-<span>        sc.setLocalProperty(&quot;spark.job.interruptOnCancel&quot;,None)</span>
-<span> </span>
-<span>def source_metrics(source):</span>
-<span>    return tuple(source.agg(F.count(F.lit(1)),F.countDistinct(&quot;key&quot;),F.sum(&quot;id&quot;)).first())</span>
-<span> </span>
-<span>def build_grouped(source, partitions):</span>
-<span>    if isinstance(partitions,bool) or not isinstance(partitions,int) or not 1 &lt;= partitions &lt;= 16:</span>
-<span>        raise ValueError(&quot;Partition budget is1..16&quot;)</span>
-<span>    source.sparkSession.conf.set(&quot;spark.sql.shuffle.partitions&quot;,str(partitions))</span>
-<span>    return source.groupBy(&quot;key&quot;).agg(F.count(F.lit(1)).alias(&quot;n&quot;))</span>
-<span> </span>
-<span>def exchange_metrics(frame):</span>
-<span>    result = []</span>
-<span>    pending = [frame._jdf.queryExecution().executedPlan()]</span>
-<span>    while pending:</span>
-<span>        node = pending.pop()</span>
-<span>        if node.nodeName() == &quot;Exchange&quot;:</span>
-<span>            metrics = {}</span>
-<span>            iterator = node.metrics().iterator()</span>
-<span>            while iterator.hasNext():</span>
-<span>                entry = iterator.next()</span>
-<span>                metrics[str(entry._1())] = int(entry._2().value())</span>
-<span>            result.append(metrics)</span>
-<span>        children = node.children().iterator()</span>
-<span>        while children.hasNext():</span>
-<span>            pending.append(children.next())</span>
-<span>    return result</span>
-<span> </span>
-<span>def stage_evidence(spark, group):</span>
-<span>    tracker = spark.sparkContext.statusTracker()</span>
-<span>    stages = set()</span>
-<span>    for job_id in tracker.getJobIdsForGroup(group):</span>
-<span>        job = tracker.getJobInfo(job_id)</span>
-<span>        if job is not None:</span>
-<span>            stages.update(job.stageIds)</span>
-<span>    result = []</span>
-<span>    for stage_id in sorted(stages):</span>
-<span>        info = tracker.getStageInfo(stage_id)</span>
-<span>        if info is not None:</span>
-<span>            result.append((stage_id,info.numTasks,info.numCompletedTasks,info.numFailedTasks))</span>
-<span>    return result</span>
-<span> </span>
-<span>def compare_results(left, right):</span>
-<span>    if left != right or len(left) != 1000 or sum(n for _,n in left) != 20000:</span>
-<span>        raise ValueError(&quot;Grouped result contract changed&quot;)</span>
-<span> </span>
-<span>def work_model(reducers):</span>
-<span>    if isinstance(reducers,bool) or not isinstance(reducers,int) or reducers &lt;= 0:</span>
-<span>        raise ValueError(&quot;Positive reducer count required&quot;)</span>
-<span>    return 20000//4,4*1000,1000/reducers</span>
-<span> </span>
-<span>def main():</span>
-<span> </span>
-<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-022&quot;).master(&quot;local[2]&quot;)</span>
-<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
-<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
-<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
-<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
-<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
-<span>    try:</span>
-<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
-<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
-<span>        source = spark.range(0,20000,1,4).withColumn(&quot;key&quot;,F.col(&quot;id&quot;)%1000)</span>
-<span>        original_shuffle = spark.conf.get(&quot;spark.sql.shuffle.partitions&quot;)</span>
-<span>        # Exercise 1: Establish the high-cardinality fixture oracle</span>
-<span>        assert source_metrics(source) == (20000,1000,199990000)</span>
-<span>        assert 20000*19999//2 == 199990000</span>
-<span>        # Exercise 2: Build and execute a controlled grouped query</span>
-<span>        two = build_grouped(source,2)</span>
-<span>        two_rows = run_grouped(two,&quot;ds60-spark-022-p2&quot;)</span>
-<span>        expected = [(key,20) for key in range(1000)]</span>
-<span>        assert two_rows == expected and sum(n for _,n in two_rows) == 20000</span>
-<span>        assert &quot;Exchange&quot; in two._jdf.queryExecution().executedPlan().toString()</span>
-<span>        try:</span>
-<span>            build_grouped(source,0)</span>
-<span>        except ValueError:</span>
-<span>            pass</span>
-<span>        else:</span>
-<span>            raise AssertionError(&quot;Invalid partition budget accepted&quot;)</span>
-<span>        # Exercise 3: Read actual exchange metrics after the action</span>
-<span>        two_exchange = exchange_metrics(two)</span>
-<span>        assert len(two_exchange) == 1 and two_exchange[0][&quot;numPartitions&quot;] == 2 and two_exchange[0][&quot;dataSize&quot;] &gt; 0</span>
-<span>        print(&quot;p2_exchange=&quot;,two_exchange)</span>
-<span>        # Exercise 4: Attach stage and task evidence to the named action</span>
-<span>        two_stages = stage_evidence(spark,&quot;ds60-spark-022-p2&quot;)</span>
-<span>        assert two_stages and any(row[1] == 2 for row in two_stages) and all(all(n &gt;= 0 for n in row[1:]) for row in two_stages)</span>
-<span>        print(&quot;p2_stages=&quot;,two_stages)</span>
-<span>        # Exercise 5: Change reduce parallelism while preserving the complete result</span>
-<span>        five = build_grouped(source,5)</span>
-<span>        five_rows = run_grouped(five,&quot;ds60-spark-022-p5&quot;)</span>
-<span>        compare_results(two_rows,five_rows);assert five_rows == expected</span>
-<span>        five_exchange = exchange_metrics(five);five_stages = stage_evidence(spark,&quot;ds60-spark-022-p5&quot;)</span>
-<span>        assert len(five_exchange) == 1 and five_exchange[0][&quot;numPartitions&quot;] == 5 and five_exchange[0][&quot;dataSize&quot;] &gt; 0</span>
-<span>        assert any(row[1] == 5 for row in five_stages)</span>
-<span>        print(&quot;p5_exchange=&quot;,five_exchange,&quot;p5_stages=&quot;,five_stages)</span>
-<span>        # Exercise 6: Separate a workload model from measured evidence</span>
-<span>        assert work_model(2) == (5000,4000,500) and work_model(5) == (5000,4000,200)</span>
-<span>        print(&quot;version=&quot;,spark.version,&quot;aqe=&quot;,spark.conf.get(&quot;spark.sql.adaptive.enabled&quot;),&quot;master=&quot;,spark.sparkContext.master,&quot;model_only=&quot;,[work_model(2),work_model(5)])</span>
-<span>        spark.conf.set(&quot;spark.sql.shuffle.partitions&quot;,original_shuffle)</span>
-<span>        print(&quot;spark-022: six PySpark reference contracts passed; Spark=&quot; + spark.version)</span>
-<span>    finally:</span>
-<span>        try:</span>
-<span>            pass</span>
-<span>        finally:</span>
-<span>            spark.stop()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span>
-<span># Exercise 1: Establish the high-cardinality fixture oracle. Inputs/task: Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key. Expected: Metrics(20000,1000,199990000);keys 0..999 each occur 20 times by construction. Verify: Assert the aggregate tuple and independent arithmetic sum 0+...+19999.</span>
-<span># Exercise 2: Build and execute a controlled grouped query. Inputs/task: Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group. Expected: Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan. Verify: Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.</span>
-<span># Exercise 3: Read actual exchange metrics after the action. Inputs/task: Traverse the executed classic Spark plan, collecting each Exchange metric map. Use the version-pinned internal diagnostic API only for evidence after collection. Expected: One exchange map for this aggregate, with numPartitions 2 and dataSize&gt;0. Record other available metrics without inventing units or missing values. Verify: Assert one observed exchange, its partition metric and positive serialized data size;print the complete available map.</span>
-<span># Exercise 4: Attach stage and task evidence to the named action. Inputs/task: Use the status tracker to find jobs for a supplied group and their retained stages. Return stage_id, num_tasks, completed_tasks, failed_tasks ordered by stage identity. Expected: Nonempty retained stage evidence for the p2 action, including a stage with 2 tasks. All task counters are nonnegative. Verify: Assert nonempty stage rows and a two-task stage, and print the actual counters rather than asserting a universal stage count.</span>
-<span># Exercise 5: Change reduce parallelism while preserving the complete result. Inputs/task: Run the same source aggregation with 5 shuffle partitions under its own job group. Compare all 1000 group tuples, then report exchange and stage evidence tied to p5. Expected: Exact output matches p2 and the literal oracle. Exchange numPartitions 5 and positive dataSize;retained task evidence includes a five-task stage. Verify: Assert result parity before inspecting the 5-partition metric and corresponding action-group stages.</span>
-<span># Exercise 6: Separate a workload model from measured evidence. Inputs/task: For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics. Expected: For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes. Verify: Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">run_grouped</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> group<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    sc <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>sparkSession<span class="syntax-operator">.</span>sparkContext</span>
+<span class="source-line">    sc<span class="syntax-operator">.</span>setJobGroup<span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">Bounded shuffle evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>interruptOnCancel<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> r <span class="syntax-operator">in</span> frame<span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        sc<span class="syntax-operator">.</span>setLocalProperty<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.jobGroup.id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        sc<span class="syntax-operator">.</span>setLocalProperty<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.job.description</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        sc<span class="syntax-operator">.</span>setLocalProperty<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.job.interruptOnCancel</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">source_metrics</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>source<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">build_grouped</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span> partitions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>partitions<span class="syntax-punctuation">,</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>partitions<span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> partitions <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">16</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Partition budget is1..16</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    source<span class="syntax-operator">.</span>sparkSession<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>partitions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> source<span class="syntax-operator">.</span>groupBy<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">exchange_metrics</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    pending <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>frame<span class="syntax-operator">.</span>_jdf<span class="syntax-operator">.</span>queryExecution<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>executedPlan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> pending<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        node <span class="syntax-operator">=</span> pending<span class="syntax-operator">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> node<span class="syntax-operator">.</span>nodeName<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Exchange</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            metrics <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">            iterator <span class="syntax-operator">=</span> node<span class="syntax-operator">.</span>metrics<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>iterator<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">while</span> iterator<span class="syntax-operator">.</span>hasNext<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                entry <span class="syntax-operator">=</span> iterator<span class="syntax-operator">.</span>next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">                metrics<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>entry<span class="syntax-operator">.</span>_1<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>entry<span class="syntax-operator">.</span>_2<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>metrics<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        children <span class="syntax-operator">=</span> node<span class="syntax-operator">.</span>children<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>iterator<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">while</span> children<span class="syntax-operator">.</span>hasNext<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            pending<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>children<span class="syntax-operator">.</span>next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">stage_evidence</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span> group<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tracker <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>statusTracker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    stages <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> job_id <span class="syntax-operator">in</span> tracker<span class="syntax-operator">.</span>getJobIdsForGroup<span class="syntax-punctuation">(</span>group<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        job <span class="syntax-operator">=</span> tracker<span class="syntax-operator">.</span>getJobInfo<span class="syntax-punctuation">(</span>job_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> job <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            stages<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span>job<span class="syntax-operator">.</span>stageIds<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> stage_id <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        info <span class="syntax-operator">=</span> tracker<span class="syntax-operator">.</span>getStageInfo<span class="syntax-punctuation">(</span>stage_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> info <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>stage_id<span class="syntax-punctuation">,</span>info<span class="syntax-operator">.</span>numTasks<span class="syntax-punctuation">,</span>info<span class="syntax-operator">.</span>numCompletedTasks<span class="syntax-punctuation">,</span>info<span class="syntax-operator">.</span>numFailedTasks<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compare_results</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> left <span class="syntax-operator">!=</span> right <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">1000</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>n <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span>n <span class="syntax-operator">in</span> left<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-number">20000</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Grouped result contract changed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">work_model</span><span class="syntax-punctuation">(</span>reducers<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>reducers<span class="syntax-punctuation">,</span><span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>reducers<span class="syntax-punctuation">,</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> reducers <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Positive reducer count required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">20000</span><span class="syntax-operator">/</span><span class="syntax-operator">/</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-operator">*</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">1000</span><span class="syntax-operator">/</span>reducers</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line"></span>
+<span class="source-line">    spark <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>SparkSession<span class="syntax-operator">.</span>builder<span class="syntax-operator">.</span>appName<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-022</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>master<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.ui.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.host</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.bindAddress</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.adaptive.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">false</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.ansi.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.session.timeZone</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>master <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local[2]</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ERROR</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        source <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        original_shuffle <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 1: Establish the high-cardinality fixture oracle</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> source_metrics<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">20000</span><span class="syntax-punctuation">,</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">199990000</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-number">20000</span><span class="syntax-operator">*</span><span class="syntax-number">19999</span><span class="syntax-operator">/</span><span class="syntax-operator">/</span><span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">199990000</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 2: Build and execute a controlled grouped query</span></span>
+<span class="source-line">        two <span class="syntax-operator">=</span> build_grouped<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        two_rows <span class="syntax-operator">=</span> run_grouped<span class="syntax-punctuation">(</span>two<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-022-p2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        expected <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> two_rows <span class="syntax-operator">==</span> expected <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>n <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span>n <span class="syntax-operator">in</span> two_rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20000</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Exchange</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> two<span class="syntax-operator">.</span>_jdf<span class="syntax-operator">.</span>queryExecution<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>executedPlan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>toString<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            build_grouped<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Invalid partition budget accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 3: Read actual exchange metrics after the action</span></span>
+<span class="source-line">        two_exchange <span class="syntax-operator">=</span> exchange_metrics<span class="syntax-punctuation">(</span>two<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>two_exchange<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> two_exchange<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">numPartitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> two_exchange<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">dataSize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">p2_exchange=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>two_exchange<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 4: Attach stage and task evidence to the named action</span></span>
+<span class="source-line">        two_stages <span class="syntax-operator">=</span> stage_evidence<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-022-p2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> two_stages <span class="syntax-operator">and</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> two_stages<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> two_stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">p2_stages=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>two_stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 5: Change reduce parallelism while preserving the complete result</span></span>
+<span class="source-line">        five <span class="syntax-operator">=</span> build_grouped<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        five_rows <span class="syntax-operator">=</span> run_grouped<span class="syntax-punctuation">(</span>five<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-022-p5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        compare_results<span class="syntax-punctuation">(</span>two_rows<span class="syntax-punctuation">,</span>five_rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">assert</span> five_rows <span class="syntax-operator">==</span> expected</span>
+<span class="source-line">        five_exchange <span class="syntax-operator">=</span> exchange_metrics<span class="syntax-punctuation">(</span>five<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>five_stages <span class="syntax-operator">=</span> stage_evidence<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-spark-022-p5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>five_exchange<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> five_exchange<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">numPartitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">and</span> five_exchange<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">dataSize</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> five_stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">p5_exchange=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>five_exchange<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">p5_stages=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>five_stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-comment"># Exercise 6: Separate a workload model from measured evidence</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> work_model<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span><span class="syntax-number">4000</span><span class="syntax-punctuation">,</span><span class="syntax-number">500</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> work_model<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span><span class="syntax-number">4000</span><span class="syntax-punctuation">,</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">version=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>spark<span class="syntax-operator">.</span>version<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">aqe=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.adaptive.enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">master=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>master<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">model_only=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>work_model<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>work_model<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.shuffle.partitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>original_shuffle<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-022: six PySpark reference contracts passed; Spark=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> spark<span class="syntax-operator">.</span>version<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Establish the high-cardinality fixture oracle. Inputs/task: Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key. Expected: Metrics(20000,1000,199990000);keys 0..999 each occur 20 times by construction. Verify: Assert the aggregate tuple and independent arithmetic sum 0+...+19999.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Build and execute a controlled grouped query. Inputs/task: Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group. Expected: Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan. Verify: Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Read actual exchange metrics after the action. Inputs/task: Traverse the executed classic Spark plan, collecting each Exchange metric map. Use the version-pinned internal diagnostic API only for evidence after collection. Expected: One exchange map for this aggregate, with numPartitions 2 and dataSize&gt;0. Record other available metrics without inventing units or missing values. Verify: Assert one observed exchange, its partition metric and positive serialized data size;print the complete available map.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Attach stage and task evidence to the named action. Inputs/task: Use the status tracker to find jobs for a supplied group and their retained stages. Return stage_id, num_tasks, completed_tasks, failed_tasks ordered by stage identity. Expected: Nonempty retained stage evidence for the p2 action, including a stage with 2 tasks. All task counters are nonnegative. Verify: Assert nonempty stage rows and a two-task stage, and print the actual counters rather than asserting a universal stage count.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Change reduce parallelism while preserving the complete result. Inputs/task: Run the same source aggregation with 5 shuffle partitions under its own job group. Compare all 1000 group tuples, then report exchange and stage evidence tied to p5. Expected: Exact output matches p2 and the literal oracle. Exchange numPartitions 5 and positive dataSize;retained task evidence includes a five-task stage. Verify: Assert result parity before inspecting the 5-partition metric and corresponding action-group stages.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Separate a workload model from measured evidence. Inputs/task: For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics. Expected: For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes. Verify: Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

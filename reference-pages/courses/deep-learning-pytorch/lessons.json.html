@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,480 +161,480 @@
       <h1>Lessons</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/lessons.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;schema_version&quot;: 1,</span>
-<span>  &quot;track_id&quot;: &quot;deep-learning-pytorch&quot;,</span>
-<span>  &quot;lessons&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-001&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;markdown&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;reading&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-001.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-001.md&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-001_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-002&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-002.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-002.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-002_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-002_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-003&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-003.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-003.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-003_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-003_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-004&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-004.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-004.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-004_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-004_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-005&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-005.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-005.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-005_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-005_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-006&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-006.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-006.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-006_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-006_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-007&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-007.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-007.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-007_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-007_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-008&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-008.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-008.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-008_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-008_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-009&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-009.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-009.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-009_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-009_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-010&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-010.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-010.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-010_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-010_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-011&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-011.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-011.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-011_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-011_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-012&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-012.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-012.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-012_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-012_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-013&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-013.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-013.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-013_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-013_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-014&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-014.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-014.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-014_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-014_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-015&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-015.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-015.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-015_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-015_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-016&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-016.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-016.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-016_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-016_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-017&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-017.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-017.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-017_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-017_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-018&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-018.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-018.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-018_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-018_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-019&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-019.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-019.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-019_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-019_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-020&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-020.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-020.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-020_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-020_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-021&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-021.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-021.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-021_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-021_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-022&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-022.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-022.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-022_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-022_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-023&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-023.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-023.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-023_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-023_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-024&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-024.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-024.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-024_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-024_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-025&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-025.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-025.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-025_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-025_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-026&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-026.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-026.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-026_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-026_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-027&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-027.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-027.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-027_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-027_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-028&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-028.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-028.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-028_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-028_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-029&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-029.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-029.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-029_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-029_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-030&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-030.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-030.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-030_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-030_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-031&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-031.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-031.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-031_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-031_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-032&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-032.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-032.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-032_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-032_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-033&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-033.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-033.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-033_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-033_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-034&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-034.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-034.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-034_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-034_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-035&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-035.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-035.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-035_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-035_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-036&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/deep-learning-pytorch/guides/torch-036.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/deep-learning-pytorch/lessons/torch-036.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-036_solution.py&quot;,</span>
-<span>        &quot;courses/deep-learning-pytorch/solutions/torch-036_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;track_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;deep-learning-pytorch&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lessons&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;markdown&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reading&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-001.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-001.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-001_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-002.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-002.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-002_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-002_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-003.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-003.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-003_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-003_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-004.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-004.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-004_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-004_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-005.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-005.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-005_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-005_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-006.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-006.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-006_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-006_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-007.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-007.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-007_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-007_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-008.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-008.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-008_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-008_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-009.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-009.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-009_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-009_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-010.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-010.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-010_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-010_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-011.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-011.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-011_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-011_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-012.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-012.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-012_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-012_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-013.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-013.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-013_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-013_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-014.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-014.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-014_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-014_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-015.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-015.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-015_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-015_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-016.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-016.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-016_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-016_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-017.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-017.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-017_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-017_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-018.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-018.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-018_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-018_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-019.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-019.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-019_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-019_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-020.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-020.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-020_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-020_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-021.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-021.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-021_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-021_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-022.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-022.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-022_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-022_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-023.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-023.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-023_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-023_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-024.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-024.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-024_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-024_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-025&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-025.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-025.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-025_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-025_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-026&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-026.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-026.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-026_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-026_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-027&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-027.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-027.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-027_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-027_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-028&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-028.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-028.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-028_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-028_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-029&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-029.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-029.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-029_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-029_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-030.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-030.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-030_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-030_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-031&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-031.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-031.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-031_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-031_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-032&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-032.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-032.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-032_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-032_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-033&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-033.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-033.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-033_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-033_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-034&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-034.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-034.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-034_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-034_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-035&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-035.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-035.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-035_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-035_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-036&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/guides/torch-036.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/deep-learning-pytorch/lessons/torch-036.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-036_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/deep-learning-pytorch/solutions/torch-036_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

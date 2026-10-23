@@ -77,7 +77,7 @@ The UDF declaration describes how Spark should represent the returned value but 
 
 Return the physical plan strings for the built-in and language-specific UDF relations. Identify Python evaluation only where it is actually present.
 
-**Expected:** Python UDF plan contains BatchEvalPython; built-in contains no Python evaluator. Scala UDF expression is present without BatchEvalPython orArrowEvalPython.
+**Expected:** Python UDF plan contains BatchEvalPython; built-in contains no Python evaluator. Scala UDF expression is present without BatchEvalPython or ArrowEvalPython.
 
 ```scala
 def planEvidence(frame: DataFrame): String = {
@@ -98,7 +98,7 @@ The plan records an actual execution boundary instead of treating every UDF as t
 
 Classify normalized values as missing, empty or text and count each category. Separately select the identity whose normalized text equals the literal null.
 
-**Expected:** Missing 1, empty 2, text 9. Literal null text belongs only toID 12; unknown value belongs only toID 1.
+**Expected:** Missing 1, empty 2, text 9. Literal null text belongs only to ID 12; unknown value belongs only to ID 1.
 
 ```scala
 def labelCategories(frame: DataFrame): Seq[(String,Long)] = {
@@ -119,7 +119,7 @@ The population checks catch a normalizer that turns unknown input into empty tex
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected:** The wrong implementation disagrees at least onIDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
+**Expected:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
 
 ```scala
 def validateGolden(actual: Seq[(Long,Option[String])], expected: Seq[(Long,Option[String])]): Unit = {

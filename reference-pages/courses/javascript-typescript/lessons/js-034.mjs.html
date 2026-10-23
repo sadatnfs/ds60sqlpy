@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,33 +161,33 @@
       <h1>Js 034</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-034.mjs</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span>// Answer-free learner source. Save your own copy before editing.</span>
-<span>// Exercise 1: Measure only a checked computation</span>
-<span>// Sum a fixed numeric range and record elapsed duration.</span>
-<span>// Expected: correct sum 50005000; finite nonnegative elapsed time.</span>
-<span> </span>
-<span>// Exercise 2: Preserve repeated samples and summarize them</span>
-<span>// Measure five checked runs and compute their median.</span>
-<span>// Expected: five finite samples; median lies between minimum and maximum.</span>
-<span> </span>
-<span>// Exercise 3: Release owned references without claiming immediate RSS change</span>
-<span>// Populate and clear a Map while recording memory counters.</span>
-<span>// Expected: entry count 100 then 0; valid counters, with no asserted memory drop.</span>
-<span> </span>
-<span>// Exercise 4: Use and clear only owned performance entries</span>
-<span>// Create named marks and one measure around a checked operation.</span>
-<span>// Expected: one nonnegative duration; owned entries removed afterward.</span>
-<span> </span>
-<span>// Exercise 5: Inspect event-loop utilization as a bounded observation</span>
-<span>// Take a baseline, yield through a timer, then inspect the interval delta.</span>
-<span>// Expected: finite utilization between 0 and 1; no speed or CPU-percentage claim.</span>
-<span> </span>
-<span>// Exercise 6: Enable and disable a real delay monitor</span>
-<span>// Collect a short delay-monitor interval and report whether samples exist.</span>
-<span>// Expected: monitor disabled afterward; sample count reported honestly.</span>
-<span> </span>
-<span>console.log(&quot;Implement the six exercises in your saved copy.&quot;);</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Measure only a checked computation</span></span>
+<span class="source-line"><span class="syntax-comment">// Sum a fixed numeric range and record elapsed duration.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: correct sum 50005000; finite nonnegative elapsed time.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve repeated samples and summarize them</span></span>
+<span class="source-line"><span class="syntax-comment">// Measure five checked runs and compute their median.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: five finite samples; median lies between minimum and maximum.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Release owned references without claiming immediate RSS change</span></span>
+<span class="source-line"><span class="syntax-comment">// Populate and clear a Map while recording memory counters.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: entry count 100 then 0; valid counters, with no asserted memory drop.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Use and clear only owned performance entries</span></span>
+<span class="source-line"><span class="syntax-comment">// Create named marks and one measure around a checked operation.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: one nonnegative duration; owned entries removed afterward.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Inspect event-loop utilization as a bounded observation</span></span>
+<span class="source-line"><span class="syntax-comment">// Take a baseline, yield through a timer, then inspect the interval delta.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: finite utilization between 0 and 1; no speed or CPU-percentage claim.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Enable and disable a real delay monitor</span></span>
+<span class="source-line"><span class="syntax-comment">// Collect a short delay-monitor interval and report whether samples exist.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: monitor disabled afterward; sample count reported honestly.</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six exercises in your saved copy.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

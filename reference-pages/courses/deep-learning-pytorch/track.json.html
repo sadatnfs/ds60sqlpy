@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,729 +161,729 @@
       <h1>Track</h1>
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/track.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;schema_version&quot;: 1,</span>
-<span>  &quot;id&quot;: &quot;deep-learning-pytorch&quot;,</span>
-<span>  &quot;title&quot;: &quot;Deep Learning with PyTorch: tensors to reliable model releases&quot;,</span>
-<span>  &quot;summary&quot;: &quot;A full36lesson PyTorch journey with depth comparable to the TensorFlow route. The sequence teaches idiomatic autograd, data loading, training, CNNs, sequences, transformers, diagnosis, checkpoints, performance and deployment with paired framework comparisons.&quot;,</span>
-<span>  &quot;lessons&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-001&quot;,</span>
-<span>      &quot;title&quot;: &quot;A bounded PyTorch investigation and framework comparison&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [],</span>
-<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Prediction unit&quot;,</span>
-<span>        &quot;Training&quot;,</span>
-<span>        &quot;Holdout&quot;,</span>
-<span>        &quot;Baseline&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-001&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-002&quot;,</span>
-<span>      &quot;title&quot;: &quot;Tensors, devices, dtypes, strides and views&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-001&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Stride&quot;,</span>
-<span>        &quot;View&quot;,</span>
-<span>        &quot;Device&quot;,</span>
-<span>        &quot;Broadcasting&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a2x3 float64 CPU tensor from values 0..5.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-002&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-003&quot;,</span>
-<span>      &quot;title&quot;: &quot;Linear modules, parameters and matrix contracts&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-002&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Affine map&quot;,</span>
-<span>        &quot;Parameter registration&quot;,</span>
-<span>        &quot;Weight layout&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A linear layer computes an affine transformation from input features to output features.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-003&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-004&quot;,</span>
-<span>      &quot;title&quot;: &quot;Loss functions, reductions and gradient scale&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-003&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Reduction&quot;,</span>
-<span>        &quot;Loss unit&quot;,</span>
-<span>        &quot;Gradient scale&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A loss is a numerical objective with a declared unit and denominator.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use residuals[1, -1, 2] against zero targets.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;squared entries 1, 1, 4; sum 6; mean 2. MAE 4/3; MSE 2.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-004&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-005&quot;,</span>
-<span>      &quot;title&quot;: &quot;Derivatives, requires_grad and finite-difference checks&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-004&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Derivative&quot;,</span>
-<span>        &quot;Finite difference&quot;,</span>
-<span>        &quot;Learning rate&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A derivative measures local sensitivity: how much a function changes for a small input change.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Differentiate (w-2)**2 at w=0 using autograd.grad.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;derivative -4; loss 4. all raise ValueError.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-005&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-006&quot;,</span>
-<span>      &quot;title&quot;: &quot;Autograd graphs, the chain rule and in-place hazards&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-005&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Autograd graph&quot;,</span>
-<span>        &quot;Saved tensor&quot;,</span>
-<span>        &quot;In-place hazard&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Autograd follows the chain of tensor operations from a scalar objective back to its inputs.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use w=1, z=2*w, a=z*z and loss=(a-1)**2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-006&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-007&quot;,</span>
-<span>      &quot;title&quot;: &quot;Leaf tensors, detach, no_grad and gradient accumulation&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-006&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Leaf tensor&quot;,</span>
-<span>        &quot;Detach&quot;,</span>
-<span>        &quot;Gradient accumulation&quot;,</span>
-<span>        &quot;Gradient mode&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;PyTorch distinguishes graph tracking from gradient storage.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-007&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-008&quot;,</span>
-<span>      &quot;title&quot;: &quot;One optimizer step you can audit&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-007&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Optimizer membership&quot;,</span>
-<span>        &quot;SGD step&quot;,</span>
-<span>        &quot;Independent oracle&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;One optimizer step is the smallest complete training experiment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use float64 x1, 2, 3, y2x and scalar w0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;mean squared loss 56/3. w.grad None; updated weight unchanged.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-008&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-009&quot;,</span>
-<span>      &quot;title&quot;: &quot;Batches, zero_grad and repeated updates&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-008&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Epoch&quot;,</span>
-<span>        &quot;Batch&quot;,</span>
-<span>        &quot;Gradient reset&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Partition IDs 1..6 into batches of 2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-009&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-010&quot;,</span>
-<span>      &quot;title&quot;: &quot;Datasets, held-out families and leakage controls&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-009&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Map-style Dataset&quot;,</span>
-<span>        &quot;Subset&quot;,</span>
-<span>        &quot;Split unit&quot;,</span>
-<span>        &quot;Training-only fit&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-010&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-011&quot;,</span>
-<span>      &quot;title&quot;: &quot;nn.Module, registered parameters and explicit training loops&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-010&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Module&quot;,</span>
-<span>        &quot;Buffer&quot;,</span>
-<span>        &quot;Optimizer membership&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Annn.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Build Scalar Model with weight 0 and buffer offset 0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-011&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-012&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: an auditable tiny PyTorch regressor&quot;,</span>
-<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
-<span>      &quot;minutes&quot;: 180,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-011&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Experiment manifest&quot;,</span>
-<span>        &quot;Training baseline&quot;,</span>
-<span>        &quot;Frozen assessment&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;targets 0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-012&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-013&quot;,</span>
-<span>      &quot;title&quot;: &quot;Binary logits, BCEWithLogitsLoss and thresholds&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-012&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Logit&quot;,</span>
-<span>        &quot;BCEWithLogitsLoss&quot;,</span>
-<span>        &quot;Decision threshold&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A binary logit is an unrestricted score.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Apply sigmoid to-2, 0, 2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-013&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-014&quot;,</span>
-<span>      &quot;title&quot;: &quot;CrossEntropyLoss, multiclass and multilabel contracts&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-013&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Multiclass target&quot;,</span>
-<span>        &quot;Multilabel target&quot;,</span>
-<span>        &quot;Class axis&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Multiclass classification chooses exactly one outcome among mutually exclusive classes.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use one row of three zero logits and target class 1.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;cross entropy log 3. IndexError or RuntimeError identifying an invalid target.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-014&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-015&quot;,</span>
-<span>      &quot;title&quot;: &quot;Dataset, DataLoader, collation and reproducible sampling&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-014&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;DataLoader&quot;,</span>
-<span>        &quot;Collation&quot;,</span>
-<span>        &quot;Sampler generator&quot;,</span>
-<span>        &quot;Worker count&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Load five paired ID/value records with batch size 2 and no shuffle.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;sizes 2, 2, 1 and IDs 0..4 exactly once. ValueError before padding; token IDs must be nonnegative int64 integers.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-015&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-016&quot;,</span>
-<span>      &quot;title&quot;: &quot;Initialization, nonlinearities and gradient diagnostics&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-015&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Nonlinearity&quot;,</span>
-<span>        &quot;Initialization&quot;,</span>
-<span>        &quot;Capacity&quot;,</span>
-<span>        &quot;Symmetry&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Nonlinearity changes which functions a network can represent.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use inputs 00, 01, 10, 11 and two rectified differences.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs 0, 1, 1, 0. both.6; the function is absolute difference.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-016&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-017&quot;,</span>
-<span>      &quot;title&quot;: &quot;Dropout, regularization, train and eval modes&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-016&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Regularization penalty&quot;,</span>
-<span>        &quot;Dropout mode&quot;,</span>
-<span>        &quot;Weight decay&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Regularization and training mode affect different parts of the experiment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use weights 1, -2 and compute L1and squared L2sums.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;L1=3; squared L2=5. output still requires grad; backward gives ones.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-017&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-018&quot;,</span>
-<span>      &quot;title&quot;: &quot;BatchNorm, LayerNorm and stateful normalization&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-017&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Running statistic&quot;,</span>
-<span>        &quot;Momentum convention&quot;,</span>
-<span>        &quot;Batch coupling&quot;,</span>
-<span>        &quot;LayerNorm axis&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Normalization can introduce both state and cross-observation dependencies.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;running mean 1, 2; batch counter 1. finite zeros with default affine initialization.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-018&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-019&quot;,</span>
-<span>      &quot;title&quot;: &quot;Convolutions, channel layouts and shared computation&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-018&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;NCHW&quot;,</span>
-<span>        &quot;Shared kernel&quot;,</span>
-<span>        &quot;Receptive field&quot;,</span>
-<span>        &quot;Cross-correlation&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Convolution applies a shared local kernel across spatial positions.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;output shape 1, 1, 2, 2; all values-4. 8trainable scalars.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-019&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-020&quot;,</span>
-<span>      &quot;title&quot;: &quot;Pooling, local augmentation and label invariants&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-019&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Pooling&quot;,</span>
-<span>        &quot;Augmentation&quot;,</span>
-<span>        &quot;Label invariance&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Pooling reduces local spatial information.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Pool patch 1, 3; 2, 4 with a2x2window.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;max 4; average 2.5. left-&gt;right-&gt;left.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-020&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-021&quot;,</span>
-<span>      &quot;title&quot;: &quot;Embeddings, padded sequences and recurrent models&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-020&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Padding index&quot;,</span>
-<span>        &quot;Packed sequence&quot;,</span>
-<span>        &quot;Final valid state&quot;,</span>
-<span>        &quot;Valid-target denominator&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A padded sequence contains real positions and artificial storage positions.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-021&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-022&quot;,</span>
-<span>      &quot;title&quot;: &quot;Attention, transformer masks and information boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-021&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;SDPA&quot;,</span>
-<span>        &quot;Mask polarity&quot;,</span>
-<span>        &quot;Prefix invariance&quot;,</span>
-<span>        &quot;Dropout argument&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Attention forms weighted combinations of value vectors using query-key comparisons.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs 2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-022&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-023&quot;,</span>
-<span>      &quot;title&quot;: &quot;Debugging custom loops, accumulation and clipping&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-022&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Disconnected loss&quot;,</span>
-<span>        &quot;Gradient clipping&quot;,</span>
-<span>        &quot;Update trace&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Detach (w-2)**2 before backward and inspect tracking.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-023&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-024&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: a small classifier with honest evaluation&quot;,</span>
-<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
-<span>      &quot;minutes&quot;: 210,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-023&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Confusion matrix&quot;,</span>
-<span>        &quot;Frozen threshold&quot;,</span>
-<span>        &quot;Population standard deviation&quot;,</span>
-<span>        &quot;Subgroup evidence&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A classifier capstone must connect the task definition to training and evaluation evidence.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;4training records, 2test records. negative 0/1errors; positive 1/1.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-024&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-025&quot;,</span>
-<span>      &quot;title&quot;: &quot;Contrastive embeddings and negative sampling&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-024&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Contrastive objective&quot;,</span>
-<span>        &quot;Cosine similarity&quot;,</span>
-<span>        &quot;False negative&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Embedding objectives teach a representation to preserve selected relationships.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use anchor[1, 0], positive[1, 1], negative[0, 1].&quot;,</span>
-<span>      &quot;verification&quot;: &quot;dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-025&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-026&quot;,</span>
-<span>      &quot;title&quot;: &quot;Custom modules, residual paths, buffers and autograd checks&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-025&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Custom module&quot;,</span>
-<span>        &quot;Buffer&quot;,</span>
-<span>        &quot;Grad check&quot;,</span>
-<span>        &quot;Incoming gradient&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Custom modules should make state ownership and differentiation explicit.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a width 2 residual with zero kernel and scale buffer 1.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;output equals input; one parameter and one buffer. gradient 24.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-026&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-027&quot;,</span>
-<span>      &quot;title&quot;: &quot;Transfer learning, frozen layers and optimizer membership&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-026&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Frozen base&quot;,</span>
-<span>        &quot;Optimizer membership&quot;,</span>
-<span>        &quot;Mode-dependent buffer&quot;,</span>
-<span>        &quot;Unfreeze phase&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Transfer learning reuses a representation while adapting a task-specific head.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;base output equals input; all base parameters frozen. base weight now changes.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-027&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-028&quot;,</span>
-<span>      &quot;title&quot;: &quot;Restartable training, optimizer state and RNG evidence&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 135,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-027&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Training checkpoint&quot;,</span>
-<span>        &quot;RNG state&quot;,</span>
-<span>        &quot;Data position&quot;,</span>
-<span>        &quot;Next-step parity&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;optimizer step 2 and positive weight. directory absent; no distributed-loader claim.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-028&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-029&quot;,</span>
-<span>      &quot;title&quot;: &quot;Stable objectives, precision and mixed-precision boundaries&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-028&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Overflow&quot;,</span>
-<span>        &quot;Log-sum-exp&quot;,</span>
-<span>        &quot;Mixed precision&quot;,</span>
-<span>        &quot;Gradient scaling&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Exponentiate float32 logits1000, 999 directly.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;both exponentials infinite. ValueError before loss evaluation.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-029&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-030&quot;,</span>
-<span>      &quot;title&quot;: &quot;Distributed gradients and accumulation semantics on CPU&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-029&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Global objective&quot;,</span>
-<span>        &quot;Microbatch accumulation&quot;,</span>
-<span>        &quot;Sha rd weighting&quot;,</span>
-<span>        &quot;Distributed acceptance&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Distributed and accumulated gradients should represent a declared global objective.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Combine means 2, 6 with counts 1, 3.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-030&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-031&quot;,</span>
-<span>      &quot;title&quot;: &quot;Profiling, torch.compile and honest performance measurement&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-030&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Graph capture&quot;,</span>
-<span>        &quot;Backend&quot;,</span>
-<span>        &quot;Warmup&quot;,</span>
-<span>        &quot;Profiler overhead&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Compilation and profiling answer different questions.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Evaluatef(x)=x*x+1 at float32[1, 2].&quot;,</span>
-<span>      &quot;verification&quot;: &quot;output[2, 5]. receipt does not claim universal speedup.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-031&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-032&quot;,</span>
-<span>      &quot;title&quot;: &quot;state_dict, torch.export and inference parity&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 135,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-031&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;state_dict&quot;,</span>
-<span>        &quot;Exported program&quot;,</span>
-<span>        &quot;Dynamic dimension&quot;,</span>
-<span>        &quot;Inference parity&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A state dictionary stores named parameters and buffers, not the complete Python architecture.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs 0, 2. three-row parity passes; temporary directory absent.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-032&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-033&quot;,</span>
-<span>      &quot;title&quot;: &quot;Inference mode, model contracts and bounded batching&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-032&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Inference mode&quot;,</span>
-<span>        &quot;Input contract&quot;,</span>
-<span>        &quot;Batch independence&quot;,</span>
-<span>        &quot;Owned output&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Inference is a bounded function with an input and output contract.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use float32 CPU rows 1, 2 and 3, 4.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs 0, 2 with shape(2, ). input unchanged.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-033&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-034&quot;,</span>
-<span>      &quot;title&quot;: &quot;Robustness, privacy and evidence beyond a score&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 120,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-033&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Subgroup denominator&quot;,</span>
-<span>        &quot;Robustness condition&quot;,</span>
-<span>        &quot;Finite safety evidence&quot;,</span>
-<span>        &quot;Model card&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A reliability report should preserve the conditions and denominators behind a score.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;A1/2errors; B0/1. card explicitly has no privacy guarantee.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-034&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-035&quot;,</span>
-<span>      &quot;title&quot;: &quot;Paired model comparisons and uncertainty&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 135,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-034&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Paired difference&quot;,</span>
-<span>        &quot;Resampling unit&quot;,</span>
-<span>        &quot;Selection bias&quot;,</span>
-<span>        &quot;Local generator&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Model comparisons should preserve the pairing between predictions on the same held-out identities.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-035&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;torch-036&quot;,</span>
-<span>      &quot;title&quot;: &quot;Capstone: release a small reproducible PyTorch model&quot;,</span>
-<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
-<span>      &quot;minutes&quot;: 240,</span>
-<span>      &quot;prerequisites&quot;: [</span>
-<span>        &quot;torch-035&quot;</span>
-<span>      ],</span>
-<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Release bundle&quot;,</span>
-<span>        &quot;Integrity gate&quot;,</span>
-<span>        &quot;Fresh-process inference&quot;,</span>
-<span>        &quot;Rollback identity&quot;</span>
-<span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;3training and 2 holdout records. local checks True; production no-go; directory absent.&quot;,</span>
-<span>      &quot;paired_lesson_id&quot;: &quot;tf-036&quot;</span>
-<span>    }</span>
-<span>  ],</span>
-<span>  &quot;sources&quot;: [</span>
-<span>    {</span>
-<span>      &quot;url&quot;: &quot;https://docs.pytorch.org/docs/2.9/index.html&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;url&quot;: &quot;https://docs.pytorch.org/tutorials/beginner/basics/intro.html&quot;,</span>
-<span>      &quot;checked&quot;: &quot;2026-10-22&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;deep-learning-pytorch&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Deep Learning with PyTorch: tensors to reliable model releases&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;summary&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;36 lessons in PyTorch, from tensors and autograd to training, neural architectures, diagnosis, checkpoints and deployment. Paired TensorFlow examples help explain where the frameworks differ.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lessons&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A bounded PyTorch investigation and framework comparison&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reading&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Prediction unit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Training&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Holdout&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Baseline&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-001&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Tensors, devices, dtypes, strides and views&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-001&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Stride&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;View&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Device&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Broadcasting&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a 2-by-3 float64 CPU tensor from values 0..5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-002&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Linear modules, parameters and matrix contracts&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-002&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Affine map&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Parameter registration&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Weight layout&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A linear layer computes an affine transformation from input features to output features.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-003&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Loss functions, reductions and gradient scale&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-003&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Reduction&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Loss unit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient scale&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A loss is a numerical objective with a declared unit and denominator.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use residuals[1, -1, 2] against zero targets.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;squared entries 1, 1, 4; sum 6; mean 2. MAE 4/3; MSE 2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-004&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Derivatives, requires_grad and finite-difference checks&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-004&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Derivative&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Finite difference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Learning rate&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A derivative measures local sensitivity: how much a function changes for a small input change.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Differentiate (w-2)**2 at w=0 using autograd.grad.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;derivative -4; loss 4. all raise ValueError.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-005&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Autograd graphs, the chain rule and in-place hazards&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-005&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Autograd graph&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Saved tensor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;In-place hazard&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Autograd follows the chain of tensor operations from a scalar objective back to its inputs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use w=1, z=2*w, a=z*z and loss=(a-1)**2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-006&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Leaf tensors, detach, no_grad and gradient accumulation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-006&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Leaf tensor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Detach&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient accumulation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient mode&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;PyTorch distinguishes graph tracking from gradient storage.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-007&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One optimizer step you can audit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-007&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Optimizer membership&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;SGD step&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Independent oracle&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One optimizer step is the smallest complete training experiment.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;mean squared loss 56/3. w.grad None; updated weight unchanged.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-008&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Batches, zero_grad and repeated updates&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-008&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Epoch&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Batch&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient reset&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Partition IDs 1..6 into batches of 2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-009&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Datasets, held-out families and leakage controls&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-009&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Map-style Dataset&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Subset&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Split unit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Training-only fit&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-010&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nn.Module, registered parameters and explicit training loops&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-010&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Module&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Buffer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Optimizer membership&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Annn.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build Scalar Model with weight 0 and buffer offset 0.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-011&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: an auditable tiny PyTorch regressor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;beginner&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">180</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-011&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Experiment manifest&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Training baseline&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Frozen assessment&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;targets 0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-012&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Binary logits, BCEWithLogitsLoss and thresholds&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-012&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Logit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;BCEWithLogitsLoss&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Decision threshold&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A binary logit is an unrestricted score.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apply sigmoid to-2, 0, 2.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-013&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;CrossEntropyLoss, multiclass and multilabel contracts&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-013&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Multiclass target&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Multilabel target&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Class axis&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Multiclass classification chooses exactly one outcome among mutually exclusive classes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use one row of three zero logits and target class 1.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cross entropy log 3. IndexError or RuntimeError identifying an invalid target.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-014&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dataset, DataLoader, collation and reproducible sampling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-014&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;DataLoader&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Collation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Sampler generator&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Worker count&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Load five paired ID/value records with batch size 2 and no shuffle.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sizes 2, 2, 1 and IDs 0..4 exactly once. ValueError before padding; token IDs must be nonnegative int64 integers.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-015&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Initialization, nonlinearities and gradient diagnostics&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-015&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Nonlinearity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Initialization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Capacity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Symmetry&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Nonlinearity changes which functions a network can represent.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use inputs 00, 01, 10, 11 and two rectified differences.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs 0, 1, 1, 0. both.6; the function is absolute difference.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-016&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dropout, regularization, train and eval modes&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-016&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Regularization penalty&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Dropout mode&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Weight decay&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Regularization and training mode affect different parts of the experiment.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use weights 1, -2 and compute L1 and squared L2 sums.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;L1=3; squared L2=5. output still requires grad; backward gives ones.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-017&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BatchNorm, LayerNorm and stateful normalization&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-017&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Running statistic&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Momentum convention&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Batch coupling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;LayerNorm axis&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Normalization can introduce both state and cross-observation dependencies.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;running mean 1, 2; batch counter 1. finite zeros with default affine initialization.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-018&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Convolutions, channel layouts and shared computation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-018&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;NCHW&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Shared kernel&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Receptive field&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Cross-correlation&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Convolution applies a shared local kernel across spatial positions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;output shape 1, 1, 2, 2; all values-4. 8trainable scalars.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-019&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pooling, local augmentation and label invariants&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-019&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Pooling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Augmentation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Label invariance&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pooling reduces local spatial information.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pool patch 1, 3; 2, 4 with a 2-by-2 window.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;max 4; average 2.5. left-&gt;right-&gt;left.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-020&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Embeddings, padded sequences and recurrent models&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-020&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Padding index&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Packed sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Final valid state&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Valid-target denominator&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A padded sequence contains real positions and artificial storage positions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-021&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Attention, transformer masks and information boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-021&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;SDPA&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Mask polarity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Prefix invariance&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Dropout argument&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Attention forms weighted combinations of value vectors using query-key comparisons.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs 2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-022&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Debugging custom loops, accumulation and clipping&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-022&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Disconnected loss&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient clipping&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Update trace&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Detach (w-2)**2 before backward and inspect tracking.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-023&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: a small classifier with honest evaluation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;intermediate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">210</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-023&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Confusion matrix&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Frozen threshold&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Population standard deviation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Subgroup evidence&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A classifier capstone must connect the task definition to training and evaluation evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4training records, 2test records. negative 0/1errors; positive 1/1.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-024&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-025&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Contrastive embeddings and negative sampling&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-024&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Contrastive objective&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Cosine similarity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;False negative&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Embedding objectives teach a representation to preserve selected relationships.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use anchor[1, 0], positive[1, 1], negative[0, 1].&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-025&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-026&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Custom modules, residual paths, buffers and autograd checks&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-025&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Custom module&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Buffer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Grad check&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Incoming gradient&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Custom modules should make state ownership and differentiation explicit.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a width 2 residual with zero kernel and scale buffer 1.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;output equals input; one parameter and one buffer. gradient 24.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-026&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-027&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Transfer learning, frozen layers and optimizer membership&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-026&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Frozen base&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Optimizer membership&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Mode-dependent buffer&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Unfreeze phase&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Transfer learning reuses a representation while adapting a task-specific head.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;base output equals input; all base parameters frozen. base weight now changes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-027&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-028&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Restartable training, optimizer state and RNG evidence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">135</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-027&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Training checkpoint&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;RNG state&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Data position&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Next-step parity&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;optimizer step 2 and positive weight. directory absent; no distributed-loader claim.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-028&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-029&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Stable objectives, precision and mixed-precision boundaries&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-028&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Overflow&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Log-sum-exp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Mixed precision&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Gradient scaling&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Exponentiate float32 logits 1000, 999 directly.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;both exponentials infinite. ValueError before loss evaluation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-029&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-030&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Distributed gradients and accumulation semantics on CPU&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-029&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Global objective&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Microbatch accumulation&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Sha rd weighting&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Distributed acceptance&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Distributed and accumulated gradients should represent a declared global objective.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Combine means 2, 6 with counts 1, 3.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-030&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-031&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Profiling, torch.compile and honest performance measurement&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-030&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Graph capture&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Backend&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Warmup&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Profiler overhead&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compilation and profiling answer different questions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Evaluatef(x)=x*x+1 at float32[1, 2].&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;output[2, 5]. receipt does not claim universal speedup.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-031&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-032&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;state_dict, torch.export and inference parity&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">135</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-031&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;state_dict&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Exported program&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Dynamic dimension&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Inference parity&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A state dictionary stores named parameters and buffers, not the complete Python architecture.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs 0, 2. three-row parity passes; temporary directory absent.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-032&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-033&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inference mode, model contracts and bounded batching&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-032&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Inference mode&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Input contract&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Batch independence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Owned output&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inference is a bounded function with an input and output contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use float32 CPU rows 1, 2 and 3, 4.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;outputs 0, 2 with shape(2, ). input unchanged.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-033&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-034&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Robustness, privacy and evidence beyond a score&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-033&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Subgroup denominator&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Robustness condition&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Finite safety evidence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Model card&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A reliability report should preserve the conditions and denominators behind a score.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A1/2errors; B0/1. card explicitly has no privacy guarantee.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-034&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-035&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Paired model comparisons and uncertainty&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">135</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-034&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Paired difference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Resampling unit&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Selection bias&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Local generator&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model comparisons should preserve the pairing between predictions on the same held-out identities.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-035&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;torch-036&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: release a small reproducible PyTorch model&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">240</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;torch-035&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Release bundle&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Integrity gate&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Fresh-process inference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Rollback identity&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;3 training and 2 holdout records. local checks True; production no-go; directory absent.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;paired_lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;tf-036&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">],</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;sources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://docs.pytorch.org/docs/2.9/index.html&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://docs.pytorch.org/tutorials/beginner/basics/intro.html&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;checked&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-22&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

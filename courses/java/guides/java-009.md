@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-008`
 
 ## Learning objectives
 
-Explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open a Probe resource,recordbody,then inspect closure order. The final exercise transfers the mechanism to retain a translated cause.
+Explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open a Probe resource, record body, then inspect closure order. The final exercise transfers the mechanism to retain a translated cause.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ Exceptions separate normal return values from failure. A checked exception is de
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-009/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing fromfinally can replace an important earlier failure.
+A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
 
 ## Worked example / walkthrough
 
@@ -63,7 +63,7 @@ public class Main {
 
 ```
 
-**Expected:** eventsbody,closeA.
+**Expected:** events body, close A.
 
 ### Example B: Close in reverse order
 
@@ -99,29 +99,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Close on normal completion.** Open a Probe resource,recordbody,then inspect closure order.
-   **Expected:** eventsbody,closeA.
-   **Verify:** Compare your assertion values or captured diagnostic with eventsbody,closeA.
+1. **Close on normal completion.** Open a Probe resource, record body, then inspect closure order.
+   **Expected:** events body, close A.
+   **Verify:** Compare your assertion values or captured diagnostic with events body, close A.
 
 2. **Close in reverse order.** Declare resourcesA thenB and leave the block.
    **Expected:** closeB beforecloseA.
    **Verify:** Compare your assertion values or captured diagnostic with closeB beforecloseA.
 
-3. **Close after body failure.** ThrowIllegalStateException in the body and inspect events after catching it.
-   **Expected:** closeA stillrecorded.
-   **Verify:** Compare your assertion values or captured diagnostic with closeA stillrecorded.
+3. **Close after body failure.** Throw IllegalStateException in the body and inspect events after catching it.
+   **Expected:** close A still recorded.
+   **Verify:** Compare your assertion values or captured diagnostic with close A still recorded.
 
 4. **Preserve suppressed close failure.** Make the body throw and the resource close throw too.
-   **Expected:** primary messagebody;one suppressed exceptioncloseA.
-   **Verify:** Compare your assertion values or captured diagnostic with primary messagebody;one suppressed exceptioncloseA.
+   **Expected:** primary message body;one suppressed exceptioncloseA.
+   **Verify:** Compare your assertion values or captured diagnostic with primary message body;one suppressed exceptioncloseA.
 
-5. **Observe close-only failure.** Let the body succeed butclose throwIOException.
+5. **Observe close-only failure.** Let the body succeed but close throwIOException.
    **Expected:** IOExceptioncloseA is primary.
    **Verify:** Compare your assertion values or captured diagnostic with IOExceptioncloseA is primary.
 
-6. **Retain a translated cause.** Wrap anIOException inIllegalStateException with a domain message and inspectcause.
-   **Expected:** cause remains the originalIOException.
-   **Verify:** Compare your assertion values or captured diagnostic with cause remains the originalIOException.
+6. **Retain a translated cause.** Wrap an IOException in IllegalStateException with a domain message and inspect cause.
+   **Expected:** cause remains the original IOException.
+   **Verify:** Compare your assertion values or captured diagnostic with cause remains the original IOException.
 
 ## Common pitfalls and diagnosis
 

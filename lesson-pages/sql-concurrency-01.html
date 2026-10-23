@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -385,12 +431,14 @@
 
         <div class="artifact-content"><h3 id="guide--sql-concurrency-01-isolation-traces-and-optimistic-concurrency">SQL-CONCURRENCY-01: Isolation Traces and Optimistic Concurrency<a class="heading-anchor" href="#guide--sql-concurrency-01-isolation-traces-and-optimistic-concurrency" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use only the local disposable <code>advanced_sql_training</code> database on PostgreSQL 16 or newer. The lesson page is a readable preview. In the private course portal, choose <strong>Create/open guided SQL notebook</strong>, run readiness, acknowledge only the explicitly offered course reset if needed, and edit the notebook&#x27;s ignored <code>.learning/sql/sql-concurrency-01/</code> SQL copy. Its exact path is <code>.learning/sql/sql-concurrency-01/lesson/workspace/sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</code>. Save the copy and run its complete-script cell. Output appears below that cell as a full <code>psql</code> transcript. A successful run ends in <code>ROLLBACK</code>, exits 0, and has the example identities stated below. The setup uses temporary tables and no external data or extension.</p>
 <p>If using VS Code directly, run from the repository root. These fallbacks work in terminals after PostgreSQL setup:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</code></pre>
 <p>Keep <code>-X</code> to ignore personal client startup changes and <code>ON_ERROR_STOP</code> to stop at the first unexpected error. If <code>psql</code> is missing, return to the operating-system setup and <code>scripts/course.py doctor</code>. An authentication failure needs the local setup workflow, never a password pasted into a lesson. If the database-name guard rejects the run, inspect your target instead of removing the guard. After an unexpected transaction error, fix that first error and rerun the whole file in a fresh connection. To try an exercise, put its SQL before the final <code>ROLLBACK</code> in your private copy; temporary tables exist only in that connection and transaction. Running this official learner file demonstrates the examples; exercises remain answer-free until you add an attempt. Do not edit the separate official solutions while studying.</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -433,21 +481,21 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-guard-an-update-and-inspect-its-result">Example 1: Guard an update and inspect its result<a class="heading-anchor" href="#guide--example-1-guard-an-update-and-inspect-its-result" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SAVEPOINT worked_success;
-UPDATE concurrency_stock
-SET available=available-2,version=version+1
-WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2
-RETURNING sku,available,version;
-ROLLBACK TO SAVEPOINT worked_success;
-RELEASE SAVEPOINT worked_success;</code></pre>
+<pre class="highlighted-code"><code class="language-sql">SAVEPOINT worked_success<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">UPDATE</span> concurrency_stock
+<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span>
+RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT worked_success<span class="syntax-punctuation">;</span>
+RELEASE SAVEPOINT worked_success<span class="syntax-punctuation">;</span></code></pre>
 <p>The returned row is A with stock 3 and version 2. The savepoint is a local experiment boundary; rolling back to it restores A to stock 5 and version 1 for later examples. The output grain is one successfully updated SKU. No returned row means no row met all preconditions. This demonstration is deterministic and does not involve another connection.</p>
 <p><strong>Expected:</strong> One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).</p>
 <h5 id="guide--example-2-a-stale-expectation-does-not-write">Example 2: A stale expectation does not write<a class="heading-anchor" href="#guide--example-2-a-stale-expectation-does-not-write" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">UPDATE concurrency_stock
-SET available=available-1,version=version+1
-WHERE sku=&#x27;A&#x27; AND version=99 AND available&gt;=1
-RETURNING sku,available,version;
-SELECT sku,available,version FROM concurrency_stock WHERE sku=&#x27;A&#x27;;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock
+<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>No row matches version 99, so PostgreSQL reports UPDATE 0 and RETURNING contains no rows. The following SELECT proves the stock and version stayed unchanged. An application that reports success merely because the statement raised no exception would mislead the user. Do not immediately remove the version condition to make the update succeed; that deletes the protection instead of handling the conflict.</p>
 <p><strong>Expected:</strong> Zero updated rows, then one inspected row (A,5,1), columns sku, available, version.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -497,28 +545,28 @@ SELECT sku,available,version FROM concurrency_stock WHERE sku=&#x27;A&#x27;;</co
 <h4 id="guide--optional-observed-two-session-lab">Optional observed two-session lab<a class="heading-anchor" href="#guide--optional-observed-two-session-lab" aria-label="Link to this section">#</a></h4>
 <p>The default file above is a model. To observe visibility, this optional lab commits exactly one table in the course-owned <code>sql_concurrency_live</code> schema. It uses two terminals connected to the same local disposable database, needs no extension or superuser role, and must finish with the explicit cleanup. The preparation refuses to replace an existing schema. Stop if another learner is already using that schema; do not erase their work.</p>
 <p>Run from the repository root, in PowerShell or a macOS/Linux terminal:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/prepare.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/prepare.sql</code></pre>
 <p>Open <strong>Terminal A</strong> and <strong>Terminal B</strong>, each with:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training</code></pre>
 <p>In A, establish a view and leave the transaction open:</p>
-<pre><code class="language-sql">BEGIN ISOLATION LEVEL READ COMMITTED;
-SET LOCAL statement_timeout = &#x27;10s&#x27;;
-SELECT sku,available,version FROM sql_concurrency_live.stock WHERE sku=&#x27;A&#x27;;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span> <span class="syntax-keyword">ISOLATION</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">READ</span> <span class="syntax-keyword">COMMITTED</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;10s&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expect <code>(A,5,1)</code>. In B, make and commit one guarded write:</p>
-<pre><code class="language-sql">BEGIN;
-SET LOCAL lock_timeout = &#x27;2s&#x27;;
-SET LOCAL statement_timeout = &#x27;10s&#x27;;
-UPDATE sql_concurrency_live.stock
-SET available=available-1,version=version+1
-WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=1
-RETURNING sku,available,version;
-COMMIT;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> lock_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2s&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;10s&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">UPDATE</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock
+<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">COMMIT</span><span class="syntax-punctuation">;</span></code></pre>
 <p>B returns <code>(A,4,2)</code>. In A, run the same SELECT again, then <code>ROLLBACK</code>. The second READ COMMITTED statement now shows <code>(A,4,2)</code>. Record session, isolation, action order, both A results, and B&#x27;s commit. This transcript is visibility evidence; the single-session default script is not.</p>
 <p>For a contrasting run, reset only the fixture row in B using the following statement when both previous transactions have ended:</p>
-<pre><code class="language-sql">UPDATE sql_concurrency_live.stock SET available=5,version=1 WHERE sku=&#x27;A&#x27;;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>This reset is fixture preparation only. It deliberately resets the version and must never be copied into an application write path. Repeat A&#x27;s sequence with <code>BEGIN ISOLATION LEVEL REPEATABLE READ;</code>. Run A&#x27;s first SELECT before B updates and commits. A&#x27;s second SELECT remains <code>(A,5,1)</code> within that transaction; after A rolls back, a new SELECT shows <code>(A,4,2)</code>. If A had not established its first snapshot before B&#x27;s commit, it could instead establish the later view, which is why action order belongs in the evidence. This lab observes reads; it does not reproduce a serialization failure or deadlock. Do not add timing sleeps to substitute for the explicit checkpoints.</p>
 <p>Finally issue <code>ROLLBACK;</code> in both terminals to release any forgotten transaction, quit both with <code>\q</code>, and run:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/cleanup.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/cleanup.sql</code></pre>
 <p>Cleanup drops the known table and then its empty course schema without CASCADE; unexpected extra objects cause a visible failure instead of silent deletion. <code>verify_cleanup.sql</code> can confirm the schema is absent. If a client disconnects mid-experiment, its uncommitted transaction is rolled back, but the explicitly committed fixture still needs this cleanup. Nothing here changes server configuration, roles, extensions, replication, or another database.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -547,7 +595,7 @@ COMMIT;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>
-<pre><code class="language-text">Tutor me through sql-concurrency-01: Isolation Traces and Optimistic Concurrency using the checked-in $guide-ds60sqlpy-learning skill.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-concurrency-01: Isolation Traces and Optimistic Concurrency using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md
 Answer-free learner: sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql
 Direct prerequisite boundary: sql-39, sql-test-01.
@@ -595,94 +643,94 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-CONCURRENCY-01: Isolation Traces and Optimistic Concurrency</span>
-<span> </span>
-<span>-- Guide: sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md</span>
-<span> </span>
-<span>-- Use Create/open guided SQL notebook and the ignored learner copy.</span>
-<span> </span>
-<span>-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span>
-<span> </span>
-<span>-- Only the local disposable advanced_sql_training database is permitted.</span>
-<span> </span>
-<span>-- Setup is supplied. Write attempts before the final ROLLBACK.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE concurrency_stock (</span>
-<span>  sku text PRIMARY KEY, available integer NOT NULL CHECK(available&gt;=0),</span>
-<span>  version integer NOT NULL CHECK(version&gt;0)</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO concurrency_stock VALUES (&#x27;A&#x27;,5,1),(&#x27;B&#x27;,1,1);</span>
-<span> </span>
-<span>-- Example 1: Guard an update and inspect its result</span>
-<span>-- Expected: One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).</span>
-<span>SAVEPOINT worked_success;</span>
-<span>UPDATE concurrency_stock</span>
-<span>SET available=available-2,version=version+1</span>
-<span>WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2</span>
-<span>RETURNING sku,available,version;</span>
-<span>ROLLBACK TO SAVEPOINT worked_success;</span>
-<span>RELEASE SAVEPOINT worked_success;</span>
-<span> </span>
-<span>-- Example 2: A stale expectation does not write</span>
-<span>-- Expected: Zero updated rows, then one inspected row (A,5,1), columns sku, available, version.</span>
-<span>UPDATE concurrency_stock</span>
-<span>SET available=available-1,version=version+1</span>
-<span>WHERE sku=&#x27;A&#x27; AND version=99 AND available&gt;=1</span>
-<span>RETURNING sku,available,version;</span>
-<span>SELECT sku,available,version FROM concurrency_stock WHERE sku=&#x27;A&#x27;;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Keep predictions and attempts in your own working copy.</span>
-<span> </span>
-<span>-- 1. Perform a guarded reservation.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 1, Inside a savepoint, reserve two A units using expected version 1 and a nonnegative-capacity predicate. Return sku, available, version, then roll back the attempt.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 1, One updated SKU row, columns sku, available, version: (A,3,2). After savepoint rollback, A is (A,5,1). No final ORDER BY is needed for the unique sku update.</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 1, Inspect RETURNING (A,3,2), then inspect restored A state (5,1) after savepoint rollback. A successful command tag alone does not establish the version and capacity outcome.</span>
-<span>-- Hint: Put version and capacity conditions in WHERE, not only in an earlier SELECT.</span>
-<span> </span>
-<span>-- 2. Reject a stale expected version.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.</span>
-<span>-- Hint: A failed precondition is an ordinary zero-row outcome.</span>
-<span> </span>
-<span>-- 3. Reject insufficient capacity independently.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.</span>
-<span>-- Hint: Use a boundary that differs from the stale-version example.</span>
-<span> </span>
-<span>-- 4. Model two callers sharing an old version.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 4, Two model-trace rows keyed by caller, columns caller, affected_rows; final ORDER BY caller: One affects 1, Two affects 0. A is temporarily (A,3,2), then rollback restores the fixture. This is a sequential model, not a concurrent trace.</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 4, Inspect trace One=1 affected row and Two=0, plus temporary A state (3,2). Rollback restores (5,1). Label the result a sequential model rather than a concurrent execution trace.</span>
-<span>-- Hint: Execute the two writes in distinct statements and save their actual returned counts.</span>
-<span> </span>
-<span>-- 5. Verify a no-change read result.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 5, Return sku, available, version for both initial stock rows, ordered by sku. State what a single-session read proves and what a two-session isolation claim additionally needs.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 5, Two SKU rows, columns sku, available, version; final ORDER BY sku: (A,5,1),(B,1,1). A genuine isolation trace also needs session names, isolation level, ordered statements, commit boundary, and observations.</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 5, Inspect initial rows (A,5,1),(B,1,1). A separate isolation claim requires actual A-session reads, B-session write/commit order, and the selected isolation level from the optional lab.</span>
-<span>-- Hint: The SELECT verifies current fixture state, not the visibility of another transaction.</span>
-<span> </span>
-<span>-- 6. Transfer the guard to an atomic replenishment.</span>
-<span>-- Inputs/evidence: For sql-concurrency-01 Exercise 6, Inside a savepoint, add three B units using expected version 1, increment version, and return sku, available, version. Then retry the same old expectation and prove it affects zero rows.</span>
-<span>-- Expected result/shape: For sql-concurrency-01 Exercise 6, One initial updated SKU row, columns sku, available, version: (B,4,2). A second attempt using version 1 returns zero rows. Rollback leaves B at (B,1,1).</span>
-<span>-- Verify: For sql-concurrency-01 Exercise 6, Inspect initial RETURNING (B,4,2), then require zero rows for repeating old version 1, and inspect restored (B,1,1) after rollback. This tests stale-write protection, not unknown-commit recovery.</span>
-<span>-- Hint: Every mutation path must advance the same version contract, including replenishment.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-CONCURRENCY-01: Isolation Traces and Optimistic Concurrency</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> concurrency_stock <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  sku <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> available <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span>available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> concurrency_stock <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 1: Guard an update and inspect its result</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).</span></span>
+<span class="source-line">SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock</span>
+<span class="source-line"><span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span></span>
+<span class="source-line">RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 2: A stale expectation does not write</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Zero updated rows, then one inspected row (A,5,1), columns sku, available, version.</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock</span>
+<span class="source-line"><span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span></span>
+<span class="source-line">RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Perform a guarded reservation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 1, Inside a savepoint, reserve two A units using expected version 1 and a nonnegative-capacity predicate. Return sku, available, version, then roll back the attempt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 1, One updated SKU row, columns sku, available, version: (A,3,2). After savepoint rollback, A is (A,5,1). No final ORDER BY is needed for the unique sku update.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 1, Inspect RETURNING (A,3,2), then inspect restored A state (5,1) after savepoint rollback. A successful command tag alone does not establish the version and capacity outcome.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Put version and capacity conditions in WHERE, not only in an earlier SELECT.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Reject a stale expected version.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: A failed precondition is an ordinary zero-row outcome.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Reject insufficient capacity independently.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Use a boundary that differs from the stale-version example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Model two callers sharing an old version.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 4, Two model-trace rows keyed by caller, columns caller, affected_rows; final ORDER BY caller: One affects 1, Two affects 0. A is temporarily (A,3,2), then rollback restores the fixture. This is a sequential model, not a concurrent trace.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 4, Inspect trace One=1 affected row and Two=0, plus temporary A state (3,2). Rollback restores (5,1). Label the result a sequential model rather than a concurrent execution trace.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Execute the two writes in distinct statements and save their actual returned counts.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Verify a no-change read result.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 5, Return sku, available, version for both initial stock rows, ordered by sku. State what a single-session read proves and what a two-session isolation claim additionally needs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 5, Two SKU rows, columns sku, available, version; final ORDER BY sku: (A,5,1),(B,1,1). A genuine isolation trace also needs session names, isolation level, ordered statements, commit boundary, and observations.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 5, Inspect initial rows (A,5,1),(B,1,1). A separate isolation claim requires actual A-session reads, B-session write/commit order, and the selected isolation level from the optional lab.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: The SELECT verifies current fixture state, not the visibility of another transaction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Transfer the guard to an atomic replenishment.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-concurrency-01 Exercise 6, Inside a savepoint, add three B units using expected version 1, increment version, and return sku, available, version. Then retry the same old expectation and prove it affects zero rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-concurrency-01 Exercise 6, One initial updated SKU row, columns sku, available, version: (B,4,2). A second attempt using version 1 returns zero rows. Rollback leaves B at (B,1,1).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-concurrency-01 Exercise 6, Inspect initial RETURNING (B,4,2), then require zero rows for repeating old version 1, and inspect restored (B,1,1) after rollback. This tests stale-write protection, not unknown-commit recovery.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Every mutation path must advance the same version contract, including replenishment.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -720,50 +768,50 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-perform-a-guarded-reservation">Exercise 1: Perform a guarded reservation<a class="heading-anchor" href="#solution-1--exercise-1-perform-a-guarded-reservation" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">UPDATE concurrency_stock SET available=available-2,version=version+1
-WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2 RETURNING sku,available,version;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The UPDATE selects a unique SKU and checks both expectations in the same statement that changes the values. It increments the version so an earlier reader cannot reuse version 1 after this reservation succeeds. RETURNING supplies direct evidence of the row that changed. The exercise wrapper uses a savepoint so subsequent independent questions start from the same fixture. The assertion checks the returned state and the script separately confirms rollback restoration. A preceding SELECT without a guarded write would leave a time gap during which its observation could become stale. No timing claim follows here because this is still a single-session operation.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 1, Inside a savepoint, reserve two A units using expected version 1 and a nonnegative-capacity predicate. Return sku, available, version, then roll back the attempt.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 1, One updated SKU row, columns sku, available, version: (A,3,2). After savepoint rollback, A is (A,5,1). No final ORDER BY is needed for the unique sku update.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 1, Inspect RETURNING (A,3,2), then inspect restored A state (5,1) after savepoint rollback. A successful command tag alone does not establish the version and capacity outcome.</p>
 <h4 id="solution-1--exercise-2-reject-a-stale-expected-version">Exercise 2: Reject a stale expected version<a class="heading-anchor" href="#solution-1--exercise-2-reject-a-stale-expected-version" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">UPDATE concurrency_stock SET available=available-1,version=version+1
-WHERE sku=&#x27;A&#x27; AND version=99 AND available&gt;=1 RETURNING sku,available,version;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Version 99 does not match the current row, so no mutation occurs. This is intentionally a successful SQL statement with an unsuccessful business precondition. Keep those two outcomes distinct in application code and learner evidence. The assertion checks both the empty RETURNING relation and the unchanged stored state. Removing the version condition would make the statement affect a row while destroying the protection the caller requested. A caller can reread to investigate, but must decide whether the original business intent remains valid before retrying. Under actual concurrent stronger-isolation execution an exception may be another possible outcome; this deterministic stale-version example makes no claim that all conflicts are reported as zero rows.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.</p>
 <h4 id="solution-1--exercise-3-reject-insufficient-capacity-independently">Exercise 3: Reject insufficient capacity independently<a class="heading-anchor" href="#solution-1--exercise-3-reject-insufficient-capacity-independently" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">UPDATE concurrency_stock SET available=available-2,version=version+1
-WHERE sku=&#x27;B&#x27; AND version=1 AND available&gt;=2 RETURNING sku,available,version;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The version precondition is satisfied, but available &gt;= 2 is false for B&#x27;s one unit. Both predicates belong to the atomic update condition, so stock never becomes negative and the version does not advance. The CHECK constraint is an additional invariant guard; the ordinary business shortage should be handled without intentionally violating it. The assertion verifies an empty result and the unchanged B row. A zero-row outcome alone does not identify which precondition failed, so the caller may need an explicit follow-up read and a conflict policy. Keep that diagnostic read separate from a claim that the earlier attempt succeeded.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.</p>
 <h4 id="solution-1--exercise-4-model-two-callers-sharing-an-old-version">Exercise 4: Model two callers sharing an old version<a class="heading-anchor" href="#solution-1--exercise-4-model-two-callers-sharing-an-old-version" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">CREATE TEMP TABLE model_trace(caller text PRIMARY KEY,affected_rows bigint) ON COMMIT DROP;
-WITH changed AS (
-  UPDATE concurrency_stock SET available=available-2,version=version+1
-  WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2 RETURNING sku
-) INSERT INTO model_trace SELECT &#x27;One&#x27;,count(*) FROM changed;
-WITH changed AS (
-  UPDATE concurrency_stock SET available=available-1,version=version+1
-  WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=1 RETURNING sku
-) INSERT INTO model_trace SELECT &#x27;Two&#x27;,count(*) FROM changed;
-SELECT caller,affected_rows FROM model_trace ORDER BY caller;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> model_trace<span class="syntax-punctuation">(</span>caller <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>affected_rows <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span> caller<span class="syntax-punctuation">,</span>affected_rows <span class="syntax-keyword">FROM</span> model_trace <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> caller<span class="syntax-punctuation">;</span></code></pre>
 <p>The first caller&#x27;s successful write advances version 1 to 2. A distinct second statement with the old version then finds no matching row. The solution executes two statements and captures their RETURNING counts into a temporary trace table, avoiding ambiguous attempts to update the same row twice inside one SQL statement. The assertion expects One to affect one row and Two none. This models the conflict contract but does not reproduce simultaneous transactions or show how long a writer waits. The optional lab is the source of actual multi-session evidence. Rollback to the surrounding savepoint removes both the modeled mutation and trace objects before the next exercise.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 4, Two model-trace rows keyed by caller, columns caller, affected_rows; final ORDER BY caller: One affects 1, Two affects 0. A is temporarily (A,3,2), then rollback restores the fixture. This is a sequential model, not a concurrent trace.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 4, Inspect trace One=1 affected row and Two=0, plus temporary A state (3,2). Rollback restores (5,1). Label the result a sequential model rather than a concurrent execution trace.</p>
 <h4 id="solution-1--exercise-5-verify-a-no-change-read-result">Exercise 5: Verify a no-change read result<a class="heading-anchor" href="#solution-1--exercise-5-verify-a-no-change-read-result" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT sku,available,version FROM concurrency_stock ORDER BY sku;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></code></pre>
 <p>This read confirms that the independent exercise wrappers restored the local fixture to its initial state. It does not show whether another session could see the row before or after a commit. The assertion checks both rows and their versions so accidental persistence from a previous exercise becomes visible. To make an isolation claim, run the optional two-session sequence and preserve the actual SELECT output before and after the other session commits. Merely selecting current_setting for an isolation level would show a configuration, not an observed anomaly or consistency guarantee. Keep those evidence tiers separate when explaining your result to another engineer.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 5, Return sku, available, version for both initial stock rows, ordered by sku. State what a single-session read proves and what a two-session isolation claim additionally needs.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 5, Two SKU rows, columns sku, available, version; final ORDER BY sku: (A,5,1),(B,1,1). A genuine isolation trace also needs session names, isolation level, ordered statements, commit boundary, and observations.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 5, Inspect initial rows (A,5,1),(B,1,1). A separate isolation claim requires actual A-session reads, B-session write/commit order, and the selected isolation level from the optional lab.</p>
 <h4 id="solution-1--exercise-6-transfer-the-guard-to-an-atomic-replenishment">Exercise 6: Transfer the guard to an atomic replenishment<a class="heading-anchor" href="#solution-1--exercise-6-transfer-the-guard-to-an-atomic-replenishment" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">UPDATE concurrency_stock SET available=available+3,version=version+1
-WHERE sku=&#x27;B&#x27; AND version=1 RETURNING sku,available,version;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Replenishment changes the state just as reservation does, so it must advance the version. Otherwise an old reader could still act on the former version while using outdated capacity information. The first update returns B with four units and version 2. Repeating the old version precondition affects no rows. The solution captures that second RETURNING count as a negative control before rolling back the exercise. This does not make arbitrary retries idempotent after an unknown commit result: a retried caller needs a durable operation identity to know whether the first intent already committed. The version guard prevents a stale conditional write, while idempotency solves a related but different recovery question.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 6, Inside a savepoint, add three B units using expected version 1, increment version, and return sku, available, version. Then retry the same old expectation and prove it affects zero rows.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 6, One initial updated SKU row, columns sku, available, version: (B,4,2). A second attempt using version 1 returns zero rows. Rollback leaves B at (B,1,1).</p>
@@ -802,123 +850,123 @@ WHERE sku=&#x27;B&#x27; AND version=1 RETURNING sku,available,version;</code></p
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-CONCURRENCY-01: executable solutions and fail-fast checks</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE concurrency_stock (</span>
-<span>  sku text PRIMARY KEY, available integer NOT NULL CHECK(available&gt;=0),</span>
-<span>  version integer NOT NULL CHECK(version&gt;0)</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO concurrency_stock VALUES (&#x27;A&#x27;,5,1),(&#x27;B&#x27;,1,1);</span>
-<span> </span>
-<span>CREATE FUNCTION pg_temp.assert_true(ok boolean, message text)</span>
-<span>RETURNS void LANGUAGE plpgsql AS $assert$</span>
-<span>BEGIN</span>
-<span>  IF ok IS DISTINCT FROM true THEN</span>
-<span>    RAISE EXCEPTION &#x27;Contract failed: %&#x27;, message;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$assert$;</span>
-<span> </span>
-<span>-- Exercises: one isolated answer and verification per prompt.</span>
-<span> </span>
-<span>-- 1. Perform a guarded reservation</span>
-<span>SAVEPOINT exercise_1;</span>
-<span>CREATE TEMP TABLE solution_answer_1(sku text,available integer,version integer) ON COMMIT DROP;</span>
-<span>WITH changed AS (</span>
-<span>UPDATE concurrency_stock SET available=available-2,version=version+1</span>
-<span>WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2 RETURNING sku,available,version</span>
-<span>) INSERT INTO solution_answer_1 SELECT sku,available,version FROM changed;</span>
-<span>SELECT sku,available,version FROM solution_answer_1 ORDER BY sku;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*)=1 AND min(sku)=&#x27;A&#x27; AND min(available)=3 AND min(version)=2 FROM solution_answer_1), &#x27;sql-concurrency-01 exercise 1&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
-<span>RELEASE SAVEPOINT exercise_1;</span>
-<span> </span>
-<span>-- 2. Reject a stale expected version</span>
-<span>SAVEPOINT exercise_2;</span>
-<span>CREATE TEMP TABLE solution_answer_2(sku text,available integer,version integer) ON COMMIT DROP;</span>
-<span>WITH changed AS (</span>
-<span>UPDATE concurrency_stock SET available=available-1,version=version+1</span>
-<span>WHERE sku=&#x27;A&#x27; AND version=99 AND available&gt;=1 RETURNING sku,available,version</span>
-<span>) INSERT INTO solution_answer_2 SELECT sku,available,version FROM changed;</span>
-<span>SELECT sku,available,version FROM solution_answer_2 ORDER BY sku;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*) FROM solution_answer_2)=0 AND (SELECT available=5 AND version=1 FROM concurrency_stock WHERE sku=&#x27;A&#x27;), &#x27;sql-concurrency-01 exercise 2&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
-<span>RELEASE SAVEPOINT exercise_2;</span>
-<span> </span>
-<span>-- 3. Reject insufficient capacity independently</span>
-<span>SAVEPOINT exercise_3;</span>
-<span>CREATE TEMP TABLE solution_answer_3(sku text,available integer,version integer) ON COMMIT DROP;</span>
-<span>WITH changed AS (</span>
-<span>UPDATE concurrency_stock SET available=available-2,version=version+1</span>
-<span>WHERE sku=&#x27;B&#x27; AND version=1 AND available&gt;=2 RETURNING sku,available,version</span>
-<span>) INSERT INTO solution_answer_3 SELECT sku,available,version FROM changed;</span>
-<span>SELECT sku,available,version FROM solution_answer_3 ORDER BY sku;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*) FROM solution_answer_3)=0 AND (SELECT available=1 AND version=1 FROM concurrency_stock WHERE sku=&#x27;B&#x27;), &#x27;sql-concurrency-01 exercise 3&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
-<span>RELEASE SAVEPOINT exercise_3;</span>
-<span> </span>
-<span>-- 4. Model two callers sharing an old version</span>
-<span>SAVEPOINT exercise_4;</span>
-<span>CREATE TEMP TABLE model_trace(caller text PRIMARY KEY,affected_rows bigint) ON COMMIT DROP;</span>
-<span>WITH changed AS (</span>
-<span>  UPDATE concurrency_stock SET available=available-2,version=version+1</span>
-<span>  WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=2 RETURNING sku</span>
-<span>) INSERT INTO model_trace SELECT &#x27;One&#x27;,count(*) FROM changed;</span>
-<span>WITH changed AS (</span>
-<span>  UPDATE concurrency_stock SET available=available-1,version=version+1</span>
-<span>  WHERE sku=&#x27;A&#x27; AND version=1 AND available&gt;=1 RETURNING sku</span>
-<span>) INSERT INTO model_trace SELECT &#x27;Two&#x27;,count(*) FROM changed;</span>
-<span>SELECT caller,affected_rows FROM model_trace ORDER BY caller;</span>
-<span>CREATE TEMP TABLE solution_answer_4 ON COMMIT DROP AS SELECT caller,affected_rows FROM model_trace;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*)=2 AND sum(affected_rows)=1 FROM solution_answer_4) AND (SELECT affected_rows FROM solution_answer_4 WHERE caller=&#x27;One&#x27;)=1 AND (SELECT affected_rows FROM solution_answer_4 WHERE caller=&#x27;Two&#x27;)=0, &#x27;sql-concurrency-01 exercise 4&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
-<span>RELEASE SAVEPOINT exercise_4;</span>
-<span> </span>
-<span>-- 5. Verify a no-change read result</span>
-<span>SAVEPOINT exercise_5;</span>
-<span>SELECT sku,available,version FROM concurrency_stock ORDER BY sku;</span>
-<span>CREATE TEMP TABLE solution_answer_5 ON COMMIT DROP AS</span>
-<span>SELECT sku,available,version FROM concurrency_stock ORDER BY sku;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(sku ORDER BY sku)=ARRAY[&#x27;A&#x27;,&#x27;B&#x27;] AND array_agg(available ORDER BY sku)=ARRAY[5,1] AND array_agg(version ORDER BY sku)=ARRAY[1,1] FROM solution_answer_5), &#x27;sql-concurrency-01 exercise 5&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
-<span>RELEASE SAVEPOINT exercise_5;</span>
-<span> </span>
-<span>-- 6. Transfer the guard to an atomic replenishment</span>
-<span>SAVEPOINT exercise_6;</span>
-<span>CREATE TEMP TABLE solution_answer_6(sku text,available integer,version integer) ON COMMIT DROP;</span>
-<span>WITH changed AS (</span>
-<span>UPDATE concurrency_stock SET available=available+3,version=version+1</span>
-<span>WHERE sku=&#x27;B&#x27; AND version=1 RETURNING sku,available,version</span>
-<span>) INSERT INTO solution_answer_6 SELECT sku,available,version FROM changed;</span>
-<span>SELECT sku,available,version FROM solution_answer_6 ORDER BY sku;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*)=1 AND min(sku)=&#x27;B&#x27; AND min(available)=4 AND min(version)=2 FROM solution_answer_6), &#x27;sql-concurrency-01 exercise 6&#x27;);</span>
-<span> </span>
-<span>WITH repeated AS (</span>
-<span>  UPDATE concurrency_stock SET available=available+3,version=version+1</span>
-<span>  WHERE sku=&#x27;B&#x27; AND version=1 RETURNING sku</span>
-<span>) SELECT pg_temp.assert_true((SELECT count(*) FROM repeated)=0,&#x27;old replenishment version rejected&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
-<span>RELEASE SAVEPOINT exercise_6;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-CONCURRENCY-01: executable solutions and fail-fast checks</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> concurrency_stock <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  sku <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> available <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span>available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> concurrency_stock <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Perform a guarded reservation</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1<span class="syntax-punctuation">(</span>sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_1 <span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> solution_answer_1 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Reject a stale expected version</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2<span class="syntax-punctuation">(</span>sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_2 <span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> solution_answer_2 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> available<span class="syntax-operator">=</span><span class="syntax-number">5</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Reject insufficient capacity independently</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3<span class="syntax-punctuation">(</span>sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_3 <span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> solution_answer_3 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> available<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Model two callers sharing an old version</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> model_trace<span class="syntax-punctuation">(</span>caller <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>affected_rows <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> caller<span class="syntax-punctuation">,</span>affected_rows <span class="syntax-keyword">FROM</span> model_trace <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> caller<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">SELECT</span> caller<span class="syntax-punctuation">,</span>affected_rows <span class="syntax-keyword">FROM</span> model_trace<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>affected_rows<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> affected_rows <span class="syntax-keyword">FROM</span> solution_answer_4 <span class="syntax-keyword">WHERE</span> caller<span class="syntax-operator">=</span><span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> affected_rows <span class="syntax-keyword">FROM</span> solution_answer_4 <span class="syntax-keyword">WHERE</span> caller<span class="syntax-operator">=</span><span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Verify a no-change read result</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>sku <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>available <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Transfer the guard to an atomic replenishment</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6<span class="syntax-punctuation">(</span>sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_6 <span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> solution_answer_6 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">4</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> repeated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> repeated<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;old replenishment version rejected&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

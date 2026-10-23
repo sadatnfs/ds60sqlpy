@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,60 +176,60 @@
 <h3 id="exercise-1-observe-a-live-binding">Exercise 1: Observe a live binding<a class="heading-anchor" href="#exercise-1-observe-a-live-binding" aria-label="Link to this section">#</a></h3>
 <p>Task: Import a mutable counter and its increment function, then inspect the count before and after incrementing.</p>
 <p>The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;counter.mjs&#x27;: &#x27;export let count = 0; export function increment() { count += 1; }&#x27; }, async directory =&gt; {
-  const module = await import(pathToFileURL(join(directory, &#x27;counter.mjs&#x27;)).href);
-  assert.equal(module.count, 0);
-  module.increment();
-  assert.equal(module.count, 1);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;counter.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export let count = 0; export function increment() { count += 1; }&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;counter.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  module<span class="syntax-punctuation">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> count changes from 0 to 1 through the imported namespace.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-resolve-a-relative-dependency">Exercise 2: Resolve a relative dependency<a class="heading-anchor" href="#exercise-2-resolve-a-relative-dependency" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a main module importing twice from ./math.mjs, then call its export.</p>
 <p>The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;math.mjs&#x27;: &#x27;export const twice = value =&gt; 2 * value;&#x27;, &#x27;main.mjs&#x27;: &quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot; }, async directory =&gt; {
-  const module = await import(pathToFileURL(join(directory, &#x27;main.mjs&#x27;)).href);
-  assert.equal(module.answer, 8);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;math.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const twice = value =&gt; 2 * value;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>answer<span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> answer equals 8.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-prove-cached-module-identity">Exercise 3: Prove cached module identity<a class="heading-anchor" href="#exercise-3-prove-cached-module-identity" aria-label="Link to this section">#</a></h3>
 <p>Task: Import one URL twice and compare the namespace and exported object.</p>
 <p>A module is not a factory that automatically resets on each import. For independent instances, export a factory function and call it explicitly.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;state.mjs&#x27;: &#x27;export const state = { visits: 0 };&#x27; }, async directory =&gt; {
-  const url = pathToFileURL(join(directory, &#x27;state.mjs&#x27;)).href;
-  const first = await import(url);
-  const second = await import(url);
-  assert.equal(first, second);
-  assert.equal(first.state, second.state);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;state.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const state = { visits: 0 };&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> url <span class="syntax-operator">=</span> pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;state.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> second <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>state<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">.</span>state<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both namespace and object identities are shared.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-inspect-commonjs-interoperability">Exercise 4: Inspect CommonJS interoperability<a class="heading-anchor" href="#exercise-4-inspect-commonjs-interoperability" aria-label="Link to this section">#</a></h3>
 <p>Task: Import a .cjs file exporting an object through its default binding.</p>
 <p>The default binding is the intentional CommonJS export-object boundary here. This example does not depend on heuristic named-export detection.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;legacy.cjs&#x27;: &quot;module.exports = { label: &#x27;legacy&#x27; };&quot; }, async directory =&gt; {
-  const module = await import(pathToFileURL(join(directory, &#x27;legacy.cjs&#x27;)).href);
-  assert.equal(module.default.label, &#x27;legacy&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;legacy.cjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&quot;module.exports = { label: &#x27;legacy&#x27; };&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;legacy.cjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span><span class="syntax-keyword">default</span><span class="syntax-punctuation">.</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;legacy&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> default.label equals legacy.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-reject-a-missing-dependency">Exercise 5: Reject a missing dependency<a class="heading-anchor" href="#exercise-5-reject-a-missing-dependency" aria-label="Link to this section">#</a></h3>
 <p>Task: Import a module with a nonexistent relative dependency and preserve the loader error code.</p>
 <p>Missing dependency resolution is a loader failure before useful module evaluation. Catching every import error and returning an empty object would disguise a broken dependency graph.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;&quot; }, async directory =&gt; {
-  await assert.rejects(import(pathToFileURL(join(directory, &#x27;broken.mjs&#x27;)).href), error =&gt; error.code === &#x27;ERR_MODULE_NOT_FOUND&#x27;);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;broken.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&quot;import &#x27;./missing.mjs&#x27;;&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span><span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;broken.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>code <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;ERR_MODULE_NOT_FOUND&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ERR_MODULE_NOT_FOUND.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-respect-namespace-ownership">Exercise 6: Respect namespace ownership<a class="heading-anchor" href="#exercise-6-respect-namespace-ownership" aria-label="Link to this section">#</a></h3>
 <p>Task: Attempt to assign an exported binding from the importer.</p>
 <p>Live does not mean writable from every importer. The exporter owns assignment to its binding. Expose a deliberate operation when mutation is part of the public contract.</p>
-<pre><code class="language-javascript">await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 3;&#x27; }, async directory =&gt; {
-  const module = await import(pathToFileURL(join(directory, &#x27;fixed.mjs&#x27;)).href);
-  assert.throws(() =&gt; { module.value = 9; }, TypeError);
-  assert.equal(module.value, 3);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;fixed.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export let value = 3;&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;fixed.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> module<span class="syntax-punctuation">.</span>value <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TypeError; exported value remains 3.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

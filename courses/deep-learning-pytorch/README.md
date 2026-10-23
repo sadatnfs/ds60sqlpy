@@ -8,7 +8,7 @@
 > work. Native terminal/editor commands below are optional alternatives.
 
 
-This complete36-lesson authored route gives PyTorch the same broad subject coverage as the [36-lesson TensorFlow course](../deep-learning-tensorflow/README.md). It progresses from tensor storage and gradients through data loading,training,classifiers,convolutions,recurrent sequences,attention,custom autograd,transfer,checkpointing,numerics,profiling,export and a model-release capstone. Each topic is paired with its TensorFlow counterpart so you can compare the mathematical contract and the framework-specific implementation separately.
+This complete 36-lesson authored route gives PyTorch the same broad subject coverage as the [36-lesson TensorFlow course](../deep-learning-tensorflow/README.md). It progresses from tensor storage and gradients through data loading,training,classifiers,convolutions,recurrent sequences,attention,custom autograd,transfer,checkpointing,numerics,profiling,export and a model-release capstone. Each topic is paired with its TensorFlow counterpart so you can compare the mathematical contract and the framework-specific implementation separately.
 
 The [authored manifest](lessons.json) lists real guide,learner and separate solution artifacts. The [track plan](track.json) preserves prerequisites and paired IDs. Every guide has three worked examples,six concrete exercises,progressive hints,answered interview reasoning and a copy-ready Codex prompt. Read the [comparison guide](COMPARISON.md) for layout,reduction,state and mode differences. Source completion does not imply runtime acceptance;the [execution checkpoint](../../docs/implementation/pytorch-content-status.md) records actual receipts.
 
@@ -20,7 +20,7 @@ The first lesson is a reading worksheet;the other35 have executable Python refer
 
 ## Study both frameworks by contract
 
-Match data identities,shapes,dtypes,initial state,loss reduction and optimizer policy before comparing numbers. PyTorchLinear andKerasDense store weight axes differently. BatchNorm momentum conventions differ. PyTorchbackward accumulates leaf gradients unless cleared,andtrain/eval is separate from gradient mode. Checkpoint and inference artifacts have different state and lifetime contracts. The paired lessons expose these differences with controlled failures rather than treating similarly named APIs as interchangeable.
+Match data identities,shapes,dtypes,initial state,loss reduction and optimizer policy before comparing numbers. PyTorchLinear and Keras Dense store weight axes differently. BatchNorm momentum conventions differ. PyTorchbackward accumulates leaf gradients unless cleared,andtrain/eval is separate from gradient mode. Checkpoint and inference artifacts have different state and lifetime contracts. The paired lessons expose these differences with controlled failures rather than treating similarly named APIs as interchangeable.
 
 | PyTorch lesson | Topic | TensorFlow pair |
 | --- | --- | --- |

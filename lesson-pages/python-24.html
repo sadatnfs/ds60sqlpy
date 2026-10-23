@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -338,18 +384,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 23 (<code>python-23</code>) and pandas cleaning/grouping through Day 22.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day24_eda_best_practices.md</code>, then open <code>python/ds-60day/notebooks/day24_eda_best_practices.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -375,29 +423,29 @@
 <p>A useful EDA paragraph follows <strong>question → method → observation → limitation → next check</strong>. <code>frame.describe(include=&quot;all&quot;)</code> can orient you but is not a conclusion. A correlation matrix measures selected pairwise associations under assumptions; it does not explain cause, handle every nonlinear relationship, or protect against leakage.</p>
 <h5 id="guide--worked-example-1-create-a-bounded-quality-profile">Worked example 1 — Create a bounded quality profile<a class="heading-anchor" href="#guide--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
 <p>Make basic risks visible before plotting relationships. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
-sample = pd.DataFrame({
-    &quot;customer_id&quot;: [1, 2, 2, 3],
-    &quot;amount&quot;: [10.0, 12.0, 12.0, None],
-    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;],
-})
-profile = {
-    &quot;shape&quot;: sample.shape,
-    &quot;duplicate_rows&quot;: int(sample.duplicated().sum()),
-    &quot;missing_rate&quot;: sample.isna().mean().round(2).to_dict(),
-    &quot;unique&quot;: sample.nunique(dropna=False).to_dict(),
-}
+sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">customer_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+profile <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span>dropna<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
 profile</code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.</code></pre>
+<pre class="highlighted-code"><code class="language-text">The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-compare-robust-and-non-robust-center">Worked example 2 — Compare robust and non-robust center<a class="heading-anchor" href="#guide--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
 <p>One extreme value affects the mean more than the median. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">values = pd.Series([10, 11, 12, 13, 200])
-{&quot;mean&quot;: values.mean(), &quot;median&quot;: values.median(), &quot;max&quot;: values.max()}</code></pre>
+<pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`{&#x27;mean&#x27;: 49.2, &#x27;median&#x27;: 12.0, &#x27;max&#x27;: 200}`. The difference motivates inspection; it does not automatically justify deleting 200.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`{&#x27;mean&#x27;: 49.2, &#x27;median&#x27;: 12.0, &#x27;max&#x27;: 200}`. The difference motivates inspection; it does not automatically justify deleting 200.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -428,25 +476,25 @@ profile</code></pre>
 <li><strong>Hypothesis:</strong> testable explanation prompted by evidence, not yet a fact.</li>
 </ul>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
-frame = pd.DataFrame(
-    {
-        &quot;segment&quot;: [&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;b&quot;],
-        &quot;amount&quot;: [10.0, None, 8.0, 30.0],
-    }
-)
-profile = {
-    &quot;shape&quot;: frame.shape,
-    &quot;dtypes&quot;: frame.dtypes.astype(str).to_dict(),
-    &quot;missing_rate&quot;: frame.isna().mean().to_dict(),
-    &quot;duplicates&quot;: int(frame.duplicated().sum()),
-}
-segment_summary = frame.groupby(&quot;segment&quot;).agg(
-    rows=(&quot;amount&quot;, &quot;size&quot;),
-    observed=(&quot;amount&quot;, &quot;count&quot;),
-    median_amount=(&quot;amount&quot;, &quot;median&quot;),
-)</code></pre>
+frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+profile <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">dtypes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">duplicates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+segment_summary <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>
+    rows<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    observed<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    median_amount<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p>The row count and non-missing count answer different questions and should both be visible.</p>
 <h4 id="guide--dataset-note">Dataset note<a class="heading-anchor" href="#guide--dataset-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook uses Seaborn&#x27;s <code>penguins</code> sample, which downloads on first uncached use and is then cached. Constructed/local data is the fully offline route.</p>
@@ -493,7 +541,7 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-24`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-24`
 (Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
 I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
 Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
@@ -567,27 +615,27 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p>A useful EDA paragraph follows <strong>question → method → observation → limitation → next check</strong>. <code>frame.describe(include=&quot;all&quot;)</code> can orient you but is not a conclusion. A correlation matrix measures selected pairwise associations under assumptions; it does not explain cause, handle every nonlinear relationship, or protect against leakage.</p>
 <h5 id="learner--cell-4--worked-example-1-create-a-bounded-quality-profile">Worked example 1 — Create a bounded quality profile<a class="heading-anchor" href="#learner--cell-4--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
 <p>Make basic risks visible before plotting relationships. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
-<span> </span>
-<span>sample = pd.DataFrame({</span>
-<span>    &quot;customer_id&quot;: [1, 2, 2, 3],</span>
-<span>    &quot;amount&quot;: [10.0, 12.0, 12.0, None],</span>
-<span>    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;],</span>
-<span>})</span>
-<span>profile = {</span>
-<span>    &quot;shape&quot;: sample.shape,</span>
-<span>    &quot;duplicate_rows&quot;: int(sample.duplicated().sum()),</span>
-<span>    &quot;missing_rate&quot;: sample.isna().mean().round(2).to_dict(),</span>
-<span>    &quot;unique&quot;: sample.nunique(dropna=False).to_dict(),</span>
-<span>}</span>
-<span>profile</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line">sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">customer_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">profile <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sample<span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span>dropna<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line">profile</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The profile reports four rows, one duplicate row, and a 0.25 missing rate for <code>amount</code>.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-compare-robust-and-non-robust-center">Worked example 2 — Compare robust and non-robust center<a class="heading-anchor" href="#learner--cell-6--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
 <p>One extreme value affects the mean more than the median. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>values = pd.Series([10, 11, 12, 13, 200])</span>
-<span>{&quot;mean&quot;: values.mean(), &quot;median&quot;: values.median(), &quot;max&quot;: values.max()}</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>{&#x27;mean&#x27;: 49.2, &#x27;median&#x27;: 12.0, &#x27;max&#x27;: 200}</code>. The difference motivates inspection; it does not automatically justify deleting 200.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -601,14 +649,14 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> Use a compact reusable profile for orientation, then write question-specific code rather than relying on a one-click profiling report.</p>
 <p><strong>Boundary to test:</strong> Constant/all-missing columns, tiny groups, extreme values, duplicated entities, Simpson&#x27;s paradox, and time drift can invalidate naive summaries.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import pandas as pd, seaborn as sns, matplotlib.pyplot as plt</span>
-<span>df = sns.load_dataset(&#x27;penguins&#x27;).dropna()</span>
-<span>df.describe(include=&#x27;all&#x27;)</span>
-<span>sns.pairplot(df.select_dtypes(&#x27;number&#x27;))</span>
-<span>plt.show()</span>
-<span>sns.heatmap(df.corr(numeric_only=True), annot=False, cmap=&#x27;viridis&#x27;)</span>
-<span>plt.show()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd<span class="syntax-operator">,</span> seaborn <span class="syntax-keyword">as</span> sns<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">penguins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df<span class="syntax-operator">.</span>describe<span class="syntax-punctuation">(</span>include<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">all</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">sns<span class="syntax-operator">.</span>pairplot<span class="syntax-punctuation">(</span>df<span class="syntax-operator">.</span>select_dtypes<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">number</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">sns<span class="syntax-operator">.</span>heatmap<span class="syntax-punctuation">(</span>df<span class="syntax-operator">.</span>corr<span class="syntax-punctuation">(</span>numeric_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> annot<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> cmap<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">viridis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -632,86 +680,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → fin...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → fin...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. missingness, duplicates/key uni...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. missingness, duplicates/key uni...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. Robust and non-robust summaries respond differently to outliers. Compute statistics...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. Robust and non-robust summaries respond differently to outliers. Compute statistics...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. Aggregation discards within-customer event det...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. Aggregation discards within-customer event det...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. Bound the result rather than dumping every row/value. Run the pro...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. Bound the result rather than dumping every row/value. Run the pro...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. Remove leakage and label correlations as associ...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. Remove leakage and label correlations as associ...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. A calculation returning a number does not guarantee interpr...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. A calculation returning a number does not guarantee interpr...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -765,126 +813,126 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. Expected behavior: every table/plot answers a written question and has an observation plus limitation. Constraint: avoid causal language and full-data dumps. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: restart and reproduce all results top to bottom. That connects the answer to question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 
-def compact_profile(frame: pd.DataFrame) -&gt; dict[str, object]:
-    numeric = frame.select_dtypes(&quot;number&quot;)
-    return {
-        &quot;shape&quot;: frame.shape,
-        &quot;duplicate_rows&quot;: int(frame.duplicated().sum()),
-        &quot;missing_rate&quot;: frame.isna().mean().round(3).to_dict(),
-        &quot;numeric_min&quot;: numeric.min().to_dict(),
-        &quot;numeric_max&quot;: numeric.max().to_dict(),
-        &quot;unique&quot;: frame.nunique(dropna=False).to_dict(),
-    }
+<span class="syntax-keyword">def</span> <span class="syntax-function">compact_profile</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    numeric <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>select_dtypes<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">number</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">numeric_min</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> numeric<span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">numeric_max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> numeric<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">unique</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span>dropna<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
 
-sample = pd.DataFrame({
-    &quot;customer&quot;: [1, 2, 2, 3, 4],
-    &quot;amount&quot;: [10.0, 20.0, 20.0, None, 200.0],
-    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;, &quot;unknown&quot;],
-})
-profile = compact_profile(sample)
-scope = {
-    &quot;question&quot;: &quot;How does known amount differ by customer segment?&quot;,
-    &quot;provenance&quot;: &quot;constructed offline Day 24 fixture&quot;,
-    &quot;grain&quot;: &quot;one customer observation per row before duplicate review&quot;,
-    &quot;rows&quot;: len(sample),
-}
-amount_distribution = sample[&quot;amount&quot;].describe()
-segment_summary = (
-    sample.groupby(&quot;segment&quot;, dropna=False, as_index=False)
-    .agg(
-        rows=(&quot;customer&quot;, &quot;size&quot;),
-        known_amounts=(&quot;amount&quot;, &quot;count&quot;),
-        total_amount=(&quot;amount&quot;, &quot;sum&quot;),
-        median_amount=(&quot;amount&quot;, &quot;median&quot;),
-    )
-)
-observations = [
-    {
-        &quot;evidence&quot;: &quot;1/5 rows has missing amount&quot;,
-        &quot;limitation&quot;: &quot;the missingness cause is unknown&quot;,
-    },
-    {
-        &quot;evidence&quot;: &quot;unknown segment contains one 200-unit observation&quot;,
-        &quot;limitation&quot;: &quot;one row cannot describe a population pattern&quot;,
-    },
-]
+sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">customer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">returning</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unknown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+profile <span class="syntax-operator">=</span> compact_profile<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span>
+scope <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">question</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">How does known amount differ by customer segment?</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">provenance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">constructed offline Day 24 fixture</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">grain</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one customer observation per row before duplicate review</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+amount_distribution <span class="syntax-operator">=</span> sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>describe<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+segment_summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    sample<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> dropna<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> as_index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>
+        rows<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">customer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        known_amounts<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        total_amount<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        median_amount<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+observations <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1/5 rows has missing amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">limitation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">the missingness cause is unknown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unknown segment contains one 200-unit observation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">limitation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one row cannot describe a population pattern</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
 
-assert profile[&quot;shape&quot;] == (5, 3)
-assert profile[&quot;duplicate_rows&quot;] == 1
-assert amount_distribution[&quot;count&quot;] == 4
-assert segment_summary[&quot;rows&quot;].sum() == len(sample)
-assert segment_summary[&quot;total_amount&quot;].sum() == sample[&quot;amount&quot;].sum()
-assert all({&quot;evidence&quot;, &quot;limitation&quot;} &lt;= item.keys() for item in observations)</code></pre>
+<span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> amount_distribution<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> segment_summary<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> segment_summary<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">limitation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> item<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> observations<span class="syntax-punctuation">)</span></code></pre>
 <p>The sequence is explicit: question and provenance, row grain, quality profile, univariate distribution, segment relationship, then bounded observations with limitations. The 200-unit row is an observed outlier, not proof that its segment causes higher amounts.</p>
 <p><strong>Verification evidence:</strong> restart and reproduce all results top to bottom.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. Coverage: missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. Record the named value, shape, label, or iterator position needed to establish: trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.</p>
-<pre><code class="language-python">quality_issues = pd.DataFrame([
-    {
-        &quot;issue&quot;: &quot;duplicate business key&quot;,
-        &quot;evidence&quot;: 1,
-        &quot;possible_impact&quot;: &quot;double-counted amount&quot;,
-        &quot;proposed_treatment&quot;: &quot;remove the exact repeated row&quot;,
-        &quot;validation&quot;: &quot;customer key uniqueness and total reconciliation&quot;,
-        &quot;status&quot;: &quot;accepted&quot;,
-    },
-    {
-        &quot;issue&quot;: &quot;missing amount&quot;,
-        &quot;evidence&quot;: int(sample[&quot;amount&quot;].isna().sum()),
-        &quot;possible_impact&quot;: &quot;incomplete totals&quot;,
-        &quot;proposed_treatment&quot;: &quot;retain until source policy is known&quot;,
-        &quot;validation&quot;: &quot;missing count remains visible&quot;,
-        &quot;status&quot;: &quot;open&quot;,
-    },
-    {
-        &quot;issue&quot;: &quot;amount range&quot;,
-        &quot;evidence&quot;: int(sample[&quot;amount&quot;].gt(100).sum()),
-        &quot;possible_impact&quot;: &quot;extreme values dominate totals&quot;,
-        &quot;proposed_treatment&quot;: &quot;retain and report robust summaries&quot;,
-        &quot;validation&quot;: &quot;median and maximum both reported&quot;,
-        &quot;status&quot;: &quot;accepted&quot;,
-    },
-    {
-        &quot;issue&quot;: &quot;unexpected category&quot;,
-        &quot;evidence&quot;: int(sample[&quot;segment&quot;].eq(&quot;unknown&quot;).sum()),
-        &quot;possible_impact&quot;: &quot;segment comparison is incomplete&quot;,
-        &quot;proposed_treatment&quot;: &quot;preserve as explicit unknown&quot;,
-        &quot;validation&quot;: &quot;unknown remains a visible group&quot;,
-        &quot;status&quot;: &quot;open&quot;,
-    },
-    {
-        &quot;issue&quot;: &quot;customer-specific nonnegative amount rule&quot;,
-        &quot;evidence&quot;: int(sample[&quot;amount&quot;].lt(0).sum()),
-        &quot;possible_impact&quot;: &quot;negative amount would invert totals&quot;,
-        &quot;proposed_treatment&quot;: &quot;quarantine negatives if observed&quot;,
-        &quot;validation&quot;: &quot;accepted known amounts are nonnegative&quot;,
-        &quot;status&quot;: &quot;accepted&quot;,
-    },
-])
-assert set(quality_issues.columns) == {
-    &quot;issue&quot;, &quot;evidence&quot;, &quot;possible_impact&quot;,
-    &quot;proposed_treatment&quot;, &quot;validation&quot;, &quot;status&quot;
-}
+<pre class="highlighted-code"><code class="language-python">quality_issues <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate business key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">double-counted amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">remove the exact repeated row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">customer key uniqueness and total reconciliation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">incomplete totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">retain until source policy is known</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing count remains visible</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>gt<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">extreme values dominate totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">retain and report robust summaries</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median and maximum both reported</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unexpected category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">segment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>eq<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">segment comparison is incomplete</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">preserve as explicit unknown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unknown remains a visible group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">customer-specific nonnegative amount rule</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>lt<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative amount would invert totals</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quarantine negatives if observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted known amounts are nonnegative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>quality_issues<span class="syntax-operator">.</span>columns<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">possible_impact</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">proposed_treatment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">validation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">}</span>
 
-before_rows = len(sample)
-before_total = sample[&quot;amount&quot;].sum()
-treated = sample.drop_duplicates([&quot;customer&quot;], keep=&quot;first&quot;)
-treatment_impact = {
-    &quot;rows_removed&quot;: before_rows - len(treated),
-    &quot;known_amount_removed&quot;: float(before_total - treated[&quot;amount&quot;].sum()),
-}
-assert treatment_impact == {
-    &quot;rows_removed&quot;: 1,
-    &quot;known_amount_removed&quot;: 20.0,
-}
-assert quality_issues.loc[
-    quality_issues[&quot;status&quot;].eq(&quot;open&quot;), &quot;issue&quot;
-].tolist() == [&quot;missing amount&quot;, &quot;unexpected category&quot;]</code></pre>
+before_rows <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span>
+before_total <span class="syntax-operator">=</span> sample<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+treated <span class="syntax-operator">=</span> sample<span class="syntax-operator">.</span>drop_duplicates<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">customer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+treatment_impact <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rows_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> before_rows <span class="syntax-operator">-</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>treated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>before_total <span class="syntax-operator">-</span> treated<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> treatment_impact <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">rows_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">known_amount_removed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> quality_issues<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>
+    quality_issues<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>eq<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unexpected category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Only the accepted exact-duplicate treatment changes data here, and its row/amount impact is reconciled. Missingness and the unknown category remain unresolved caveats instead of being silently removed.</p>
 <p><strong>Verification evidence:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -913,39 +961,39 @@ assert quality_issues.loc[
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain">Shared implementation for Exercises 3–4 — Robust summaries and grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
 <p>An extreme value can move the mean and standard deviation substantially, while the median is usually more stable. Aggregating transactions to one row per customer supports customer questions but loses event order and transaction variation.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards">Shared implementation for Exercises 5–7 — A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import pandas as pd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 
-def compact_profile(frame: pd.DataFrame) -&gt; dict[str, object]:
-    &quot;&quot;&quot;Return bounded structural and quality evidence for an EDA.&quot;&quot;&quot;
+<span class="syntax-keyword">def</span> <span class="syntax-function">compact_profile</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return bounded structural and quality evidence for an EDA.&quot;&quot;&quot;</span>
 
-    numeric = frame.select_dtypes(include=&quot;number&quot;)
-    ranges = {
-        column: {
-            &quot;min&quot;: None if values.dropna().empty else float(values.min()),
-            &quot;max&quot;: None if values.dropna().empty else float(values.max()),
-        }
-        for column, values in numeric.items()
-    }
-    return {
-        &quot;shape&quot;: tuple(frame.shape),
-        &quot;duplicates&quot;: int(frame.duplicated().sum()),
-        &quot;missing_rate&quot;: frame.isna().mean().round(4).to_dict(),
-        &quot;unique_count&quot;: frame.nunique(dropna=True).to_dict(),
-        &quot;numeric_ranges&quot;: ranges,
-    }
+    numeric <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>select_dtypes<span class="syntax-punctuation">(</span>include<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">number</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    ranges <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+        column<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">min</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>empty <span class="syntax-keyword">else</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>empty <span class="syntax-keyword">else</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">for</span> column<span class="syntax-punctuation">,</span> values <span class="syntax-operator">in</span> numeric<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">duplicates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">unique_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span>dropna<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">numeric_ranges</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> ranges<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
 
 
-sample = pd.DataFrame(
-    {&quot;group&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;B&quot;], &quot;value&quot;: [1.0, 1.0, None], &quot;constant&quot;: [7, 7, 7]}
-)
-profile = compact_profile(sample)
-assert profile[&quot;shape&quot;] == (3, 3)
-assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
+sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">constant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+profile <span class="syntax-operator">=</span> compact_profile<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unique_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">constant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
 
-# Constant columns have no variance and cannot support a correlation.
-# All-missing columns have no observed distribution.
-# Tiny groups may be shown as raw points but should not receive stable trend claims.</code></pre>
+<span class="syntax-comment"># Constant columns have no variance and cannot support a correlation.</span>
+<span class="syntax-comment"># All-missing columns have no observed distribution.</span>
+<span class="syntax-comment"># Tiny groups may be shown as raw points but should not receive stable trend claims.</span></code></pre>
 <p>Target-derived columns must be excluded from pre-model EDA of predictors. Correlation is descriptive evidence of association; a causal claim needs design assumptions and additional evidence.</p></div>
       </section>
 
@@ -982,25 +1030,25 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-24-solutions-eda-best-practices">Day 24 — Solutions: EDA Best Practices<a class="heading-anchor" href="#solution-2--cell-1--day-24-solutions-eda-best-practices" aria-label="Link to this section">#</a></h3>
 <p>Checklist-driven EDA with visuals and notes.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import matplotlib.pyplot as plt</span>
-<span>import pandas as pd</span>
-<span>import seaborn as sns</span>
-<span> </span>
-<span>sns.set_theme(style=&#x27;whitegrid&#x27;)</span>
-<span>df = sns.load_dataset(&#x27;penguins&#x27;)</span>
-<span>df.info(), df.describe(include=&#x27;number&#x27;).T.head()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns</span>
+<span class="source-line"></span>
+<span class="source-line">sns<span class="syntax-operator">.</span>set_theme<span class="syntax-punctuation">(</span>style<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">whitegrid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">penguins</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> df<span class="syntax-operator">.</span>describe<span class="syntax-punctuation">(</span>include<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">number</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>T<span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>df.isna().mean().sort_values(ascending=False).head()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">df<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sort_values<span class="syntax-punctuation">(</span>ascending<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>sns.histplot(data=df, x=&#x27;body_mass_g&#x27;, hue=&#x27;sex&#x27;, kde=True, element=&#x27;step&#x27;)</span>
-<span>plt.title(&#x27;Body mass by Sex&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">sns<span class="syntax-operator">.</span>histplot<span class="syntax-punctuation">(</span>data<span class="syntax-operator">=</span>df<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">body_mass_g</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> hue<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sex</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> kde<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> element<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Body mass by Sex</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>sns.scatterplot(data=df, x=&#x27;bill_length_mm&#x27;, y=&#x27;bill_depth_mm&#x27;, hue=&#x27;species&#x27;)</span>
-<span>plt.title(&#x27;Bill length vs depth by species&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">sns<span class="syntax-operator">.</span>scatterplot<span class="syntax-punctuation">(</span>data<span class="syntax-operator">=</span>df<span class="syntax-punctuation">,</span> x<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">bill_length_mm</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">bill_depth_mm</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> hue<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">species</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Bill length vs depth by species</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>sns.heatmap(df.corr(numeric_only=True), annot=False, cmap=&#x27;viridis&#x27;)</span>
-<span>plt.title(&#x27;Correlation (numeric)&#x27;); plt.tight_layout(); plt.show()</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line">sns<span class="syntax-operator">.</span>heatmap<span class="syntax-punctuation">(</span>df<span class="syntax-operator">.</span>corr<span class="syntax-punctuation">(</span>numeric_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> annot<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> cmap<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">viridis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">plt<span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Correlation (numeric)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1032,40 +1080,40 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
 <h5 id="solution-2--cell-7--practices-1-2-robust-summaries-and-grain">Practices 1–2 — Robust summaries and grain<a class="heading-anchor" href="#solution-2--cell-7--practices-1-2-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
 <p>An extreme value can move the mean and standard deviation substantially, while the median is usually more stable. Aggregating transactions to one row per customer supports customer questions but loses event order and transaction variation.</p>
 <h5 id="solution-2--cell-7--practices-3-5-a-bounded-profile-with-interpretation-guards">Practices 3–5 — A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-2--cell-7--practices-3-5-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
-<span> </span>
-<span> </span>
-<span>def compact_profile(frame: pd.DataFrame) -&gt; dict[str, object]:</span>
-<span>    &quot;&quot;&quot;Return bounded structural and quality evidence for an EDA.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    numeric = frame.select_dtypes(include=&quot;number&quot;)</span>
-<span>    ranges = {</span>
-<span>        column: {</span>
-<span>            &quot;min&quot;: None if values.dropna().empty else float(values.min()),</span>
-<span>            &quot;max&quot;: None if values.dropna().empty else float(values.max()),</span>
-<span>        }</span>
-<span>        for column, values in numeric.items()</span>
-<span>    }</span>
-<span>    return {</span>
-<span>        &quot;shape&quot;: tuple(frame.shape),</span>
-<span>        &quot;duplicates&quot;: int(frame.duplicated().sum()),</span>
-<span>        &quot;missing_rate&quot;: frame.isna().mean().round(4).to_dict(),</span>
-<span>        &quot;unique_count&quot;: frame.nunique(dropna=True).to_dict(),</span>
-<span>        &quot;numeric_ranges&quot;: ranges,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>sample = pd.DataFrame(</span>
-<span>    {&quot;group&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;B&quot;], &quot;value&quot;: [1.0, 1.0, None], &quot;constant&quot;: [7, 7, 7]}</span>
-<span>)</span>
-<span>profile = compact_profile(sample)</span>
-<span>assert profile[&quot;shape&quot;] == (3, 3)</span>
-<span>assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1</span>
-<span> </span>
-<span># Constant columns have no variance and cannot support a correlation.</span>
-<span># All-missing columns have no observed distribution.</span>
-<span># Tiny groups may be shown as raw points but should not receive stable trend claims.</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compact_profile</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return bounded structural and quality evidence for an EDA.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    numeric <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>select_dtypes<span class="syntax-punctuation">(</span>include<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">number</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ranges <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        column<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">min</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>empty <span class="syntax-keyword">else</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">None</span> <span class="syntax-keyword">if</span> values<span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>empty <span class="syntax-keyword">else</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>values<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> column<span class="syntax-punctuation">,</span> values <span class="syntax-operator">in</span> numeric<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">duplicates</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>duplicated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">missing_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>round<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">unique_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>nunique<span class="syntax-punctuation">(</span>dropna<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">numeric_ranges</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> ranges<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line">sample <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">constant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">profile <span class="syntax-operator">=</span> compact_profile<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> profile<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unique_count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">constant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Constant columns have no variance and cannot support a correlation.</span></span>
+<span class="source-line"><span class="syntax-comment"># All-missing columns have no observed distribution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Tiny groups may be shown as raw points but should not receive stable trend claims.</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Target-derived columns must be excluded from pre-model EDA of predictors. Correlation is descriptive evidence of association; a causal claim needs design assumptions and additional evidence.</p></article></div>
       </section>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,22 +427,24 @@
 </tbody></table></div>
 <p>Dask does not make memory limits disappear. A final <code>compute()</code> that produces a huge pandas DataFrame still needs enough memory on the client.</p>
 <h4 id="guide--worked-example-generated-deterministic-scope-data">Worked example: generated, deterministic-scope data<a class="heading-anchor" href="#guide--worked-example-generated-deterministic-scope-data" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import dask.dataframe as dd
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> dask.dataframe <span class="syntax-keyword">as</span> dd
 
-frame = dd.demo.make_timeseries(
-    start=&quot;2000-01-01&quot;,
-    end=&quot;2000-02-01&quot;,
-    freq=&quot;1min&quot;,
-    dtypes={&quot;name&quot;: str, &quot;id&quot;: int, &quot;x&quot;: float, &quot;y&quot;: float},
-    partition_freq=&quot;7D&quot;,
-)
-lazy_mean = frame.groupby(&quot;name&quot;)[&quot;x&quot;].mean()
-print(frame.npartitions, lazy_mean)
+frame <span class="syntax-operator">=</span> dd<span class="syntax-operator">.</span>demo<span class="syntax-operator">.</span>make_timeseries<span class="syntax-punctuation">(</span>
+    start<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">2000-01-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    end<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">2000-02-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    freq<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1min</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    dtypes<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    partition_freq<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">7D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+lazy_mean <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>npartitions<span class="syntax-punctuation">,</span> lazy_mean<span class="syntax-punctuation">)</span>
 
-result = lazy_mean.compute()
-print(type(result), result.head())</code></pre>
+result <span class="syntax-operator">=</span> lazy_mean<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> result<span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Nothing expensive happens until an execution trigger such as <code>compute</code>, <code>persist</code>, or a write. Inspect the task and expected output size before triggering it.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 52 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -404,9 +452,9 @@ print(type(result), result.head())</code></pre>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-lazy-task-graphs-partitions-bounded-reducers-and-scale-evidence">Concept deep dive — lazy task graphs, partitions, bounded reducers, and scale evidence<a class="heading-anchor" href="#guide--concept-deep-dive-lazy-task-graphs-partitions-bounded-reducers-and-scale-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -421,37 +469,37 @@ print(type(result), result.head())</code></pre>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-combine-chunk-sums-and-counts-correctly">Focused example A — combine chunk sums and counts correctly<a class="heading-anchor" href="#guide--focused-example-a-combine-chunk-sums-and-counts-correctly" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">chunks = [[1.0, 2.0, 3.0], [100.0]]
-states = [
-    {&quot;sum&quot;: sum(chunk), &quot;count&quot;: len(chunk)}
-    for chunk in chunks
-]
-total_sum = sum(state[&quot;sum&quot;] for state in states)
-total_count = sum(state[&quot;count&quot;] for state in states)
-correct_mean = total_sum / total_count
-wrong_mean_of_means = sum(
-    state[&quot;sum&quot;] / state[&quot;count&quot;] for state in states
-) / len(states)
-print({&quot;correct&quot;: correct_mean, &quot;wrong&quot;: wrong_mean_of_means})
-assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean</code></pre>
+<pre class="highlighted-code"><code class="language-python">chunks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+states <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">for</span> chunk <span class="syntax-operator">in</span> chunks
+<span class="syntax-punctuation">]</span>
+total_sum <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states<span class="syntax-punctuation">)</span>
+total_count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states<span class="syntax-punctuation">)</span>
+correct_mean <span class="syntax-operator">=</span> total_sum <span class="syntax-operator">/</span> total_count
+wrong_mean_of_means <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>
+    state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states
+<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>states<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> correct_mean<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wrong</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> wrong_mean_of_means<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> correct_mean <span class="syntax-operator">==</span> <span class="syntax-number">26.5</span> <span class="syntax-operator">and</span> wrong_mean_of_means <span class="syntax-operator">!=</span> correct_mean</code></pre>
 <p><strong>Expected observation:</strong> Unequal chunk sizes make an unweighted mean of chunk means wrong; sum and count compose exactly.</p>
 <p><strong>Assumption to name:</strong> Every valid value contributes once and missing-value rules are the same in every chunk.</p>
 <h5 id="guide--focused-example-b-see-a-lazy-dask-computation-remain-unevaluated">Focused example B — see a lazy Dask computation remain unevaluated<a class="heading-anchor" href="#guide--focused-example-b-see-a-lazy-dask-computation-remain-unevaluated" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">from dask import delayed
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dask <span class="syntax-keyword">import</span> delayed
 
-calls = []
+calls <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 
-@delayed
-def record(value):
-    calls.append(value)
-    return value * 2
+<span class="syntax-decorator">@delayed</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">record</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    calls<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span>
 
-planned = record(21)
-print({&quot;before_compute_calls&quot;: list(calls), &quot;planned_type&quot;: type(planned).__name__})
-result = planned.compute(scheduler=&quot;single-threaded&quot;)
-print({&quot;after_compute_calls&quot;: list(calls), &quot;result&quot;: result})
-assert result == 42 and calls == [21]</code></pre>
+planned <span class="syntax-operator">=</span> record<span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">before_compute_calls</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">planned_type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>planned<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+result <span class="syntax-operator">=</span> planned<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span>scheduler<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">single-threaded</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">after_compute_calls</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">result</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> result<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-number">42</span> <span class="syntax-operator">and</span> calls <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">21</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Constructing the delayed object performs no work; <code>compute</code> executes the task exactly once.</p>
 <p><strong>Assumption to name:</strong> The single-threaded scheduler is chosen so this mechanics demonstration has deterministic local ordering.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -575,7 +623,7 @@ assert result == 42 and calls == [21]</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-52` — Day 52 — Scalability with Dask and Chunked pandas.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-52` — Day 52 — Scalability with Dask and Chunked pandas.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize lazy task graphs, partitions, bounded reducers, and scale evidence. Use exactly these maintained learner materials:
@@ -642,44 +690,44 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Use partitions, lazy computations, and persist.</li>
 <li>Alternative: manual chunked processing with pandas. Note: Requires <code>pip install dask[dataframe]</code>.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import dask.dataframe as dd</span>
-<span>import pandas as pd</span>
-<span> </span>
-<span># Replace this generated frame with your own large-file read later.</span>
-<span>df = dd.demo.make_timeseries(</span>
-<span>    start=&#x27;2000-01-01&#x27;,</span>
-<span>    end=&#x27;2000-02-01&#x27;,</span>
-<span>    freq=&#x27;1min&#x27;,</span>
-<span>    dtypes={&#x27;name&#x27;: str, &#x27;id&#x27;: int, &#x27;x&#x27;: float, &#x27;y&#x27;: float},</span>
-<span>    partition_freq=&#x27;7D&#x27;,</span>
-<span>)</span>
-<span>df</span>
-<span># Lazy computation: nothing executed yet</span>
-<span>agg = df.groupby(&#x27;name&#x27;)[&#x27;x&#x27;].mean()</span>
-<span>result = agg.compute()</span>
-<span>result.head()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> dask.dataframe <span class="syntax-keyword">as</span> dd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Replace this generated frame with your own large-file read later.</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> dd<span class="syntax-operator">.</span>demo<span class="syntax-operator">.</span>make_timeseries<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    start<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">2000-01-01</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    end<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">2000-02-01</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    freq<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">1min</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    dtypes<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">name</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">x</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">y</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    partition_freq<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">7D</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df</span>
+<span class="source-line"><span class="syntax-comment"># Lazy computation: nothing executed yet</span></span>
+<span class="source-line">agg <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">name</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">x</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">result <span class="syntax-operator">=</span> agg<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">result<span class="syntax-operator">.</span>head<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--partitions-persist">Partitions &amp; persist<a class="heading-anchor" href="#learner--cell-3--partitions-persist" aria-label="Link to this section">#</a></h4>
 <p>Persist keeps data cached in memory cluster-wide (local or distributed scheduler). For large-scale, run a Dask scheduler/cluster.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>before = df.npartitions</span>
-<span>df = df.repartition(npartitions=4)</span>
-<span># This small demo is safe to persist; do not persist data larger than memory.</span>
-<span>df = df.persist()</span>
-<span>before, df.npartitions</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">before <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>npartitions</span>
+<span class="source-line">df <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>repartition<span class="syntax-punctuation">(</span>npartitions<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment"># This small demo is safe to persist; do not persist data larger than memory.</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">before<span class="syntax-punctuation">,</span> df<span class="syntax-operator">.</span>npartitions</span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-5--alternative-chunked-pandas">Alternative: chunked pandas<a class="heading-anchor" href="#learner--cell-5--alternative-chunked-pandas" aria-label="Link to this section">#</a></h4>
 <p>Use <code>pd.read_csv(..., chunksize=...)</code> and process per chunk to limit memory.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Example pattern</span>
-<span># it = pd.read_csv(&#x27;large.csv&#x27;, chunksize=100_000)</span>
-<span># total = 0; count = 0</span>
-<span># for chunk in it:</span>
-<span>#     total += chunk[&#x27;value&#x27;].sum()</span>
-<span>#     count += chunk[&#x27;value&#x27;].count()</span>
-<span># mean_value = total / count</span>
-<span># mean_value</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Example pattern</span></span>
+<span class="source-line"><span class="syntax-comment"># it = pd.read_csv(&#x27;large.csv&#x27;, chunksize=100_000)</span></span>
+<span class="source-line"><span class="syntax-comment"># total = 0; count = 0</span></span>
+<span class="source-line"><span class="syntax-comment"># for chunk in it:</span></span>
+<span class="source-line"><span class="syntax-comment">#     total += chunk[&#x27;value&#x27;].sum()</span></span>
+<span class="source-line"><span class="syntax-comment">#     count += chunk[&#x27;value&#x27;].count()</span></span>
+<span class="source-line"><span class="syntax-comment"># mean_value = total / count</span></span>
+<span class="source-line"><span class="syntax-comment"># mean_value</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-7--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-7--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -697,39 +745,39 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-a-combine-chunk-sums-and-counts-correctly">Focused example A — combine chunk sums and counts correctly<a class="heading-anchor" href="#learner--cell-8--focused-example-a-combine-chunk-sums-and-counts-correctly" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Every valid value contributes once and missing-value rules are the same in every chunk.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>chunks = [[1.0, 2.0, 3.0], [100.0]]</span>
-<span>states = [</span>
-<span>    {&quot;sum&quot;: sum(chunk), &quot;count&quot;: len(chunk)}</span>
-<span>    for chunk in chunks</span>
-<span>]</span>
-<span>total_sum = sum(state[&quot;sum&quot;] for state in states)</span>
-<span>total_count = sum(state[&quot;count&quot;] for state in states)</span>
-<span>correct_mean = total_sum / total_count</span>
-<span>wrong_mean_of_means = sum(</span>
-<span>    state[&quot;sum&quot;] / state[&quot;count&quot;] for state in states</span>
-<span>) / len(states)</span>
-<span>print({&quot;correct&quot;: correct_mean, &quot;wrong&quot;: wrong_mean_of_means})</span>
-<span>assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">chunks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">states <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> chunk <span class="syntax-operator">in</span> chunks</span>
+<span class="source-line"><span class="syntax-punctuation">]</span></span>
+<span class="source-line">total_sum <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states<span class="syntax-punctuation">)</span></span>
+<span class="source-line">total_count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states<span class="syntax-punctuation">)</span></span>
+<span class="source-line">correct_mean <span class="syntax-operator">=</span> total_sum <span class="syntax-operator">/</span> total_count</span>
+<span class="source-line">wrong_mean_of_means <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>states<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">correct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> correct_mean<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wrong</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> wrong_mean_of_means<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> correct_mean <span class="syntax-operator">==</span> <span class="syntax-number">26.5</span> <span class="syntax-operator">and</span> wrong_mean_of_means <span class="syntax-operator">!=</span> correct_mean</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Unequal chunk sizes make an unweighted mean of chunk means wrong; sum and count compose exactly.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-11--focused-example-b-see-a-lazy-dask-computation-remain-unevaluated">Focused example B — see a lazy Dask computation remain unevaluated<a class="heading-anchor" href="#learner--cell-11--focused-example-b-see-a-lazy-dask-computation-remain-unevaluated" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The single-threaded scheduler is chosen so this mechanics demonstration has deterministic local ordering.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>from dask import delayed</span>
-<span> </span>
-<span>calls = []</span>
-<span> </span>
-<span>@delayed</span>
-<span>def record(value):</span>
-<span>    calls.append(value)</span>
-<span>    return value * 2</span>
-<span> </span>
-<span>planned = record(21)</span>
-<span>print({&quot;before_compute_calls&quot;: list(calls), &quot;planned_type&quot;: type(planned).__name__})</span>
-<span>result = planned.compute(scheduler=&quot;single-threaded&quot;)</span>
-<span>print({&quot;after_compute_calls&quot;: list(calls), &quot;result&quot;: result})</span>
-<span>assert result == 42 and calls == [21]</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> dask <span class="syntax-keyword">import</span> delayed</span>
+<span class="source-line"></span>
+<span class="source-line">calls <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@delayed</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">record</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    calls<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span></span>
+<span class="source-line"></span>
+<span class="source-line">planned <span class="syntax-operator">=</span> record<span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">before_compute_calls</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">planned_type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>planned<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">result <span class="syntax-operator">=</span> planned<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span>scheduler<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">single-threaded</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">after_compute_calls</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>calls<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">result</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> result<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-number">42</span> <span class="syntax-operator">and</span> calls <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">21</span><span class="syntax-punctuation">]</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><p><strong>Expected observation:</strong> Constructing the delayed object performs no work; <code>compute</code> executes the task exactly once.</p>
 <h5 id="learner--cell-13--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-13--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -804,19 +852,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Reducer correctness — test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Task-graph tracing</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Partition-skew diagnosis</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Reducer correctness</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Task-graph tracing</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Partition-skew diagnosis</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Reducer correctness</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -860,48 +908,48 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Port pandas to Dask</p>
-<pre><code class="language-python">from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-import dask.dataframe as dd
-import numpy as np
-import pandas as pd
-from dask.diagnostics import ProgressBar
+<span class="syntax-keyword">import</span> dask.dataframe <span class="syntax-keyword">as</span> dd
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">from</span> dask.diagnostics <span class="syntax-keyword">import</span> ProgressBar
 
-artifact_dir = Path(&quot;artifacts/day52&quot;)
-artifact_dir.mkdir(parents=True, exist_ok=True)
-csv_path = artifact_dir / &quot;sales.csv&quot;
-rng = np.random.default_rng(52)
-source = pd.DataFrame(
-    {
-        &quot;store&quot;: rng.choice([&quot;north&quot;, &quot;south&quot;, &quot;west&quot;], size=20_000),
-        &quot;amount&quot;: rng.uniform(1, 100, size=20_000),
-        &quot;qty&quot;: rng.integers(1, 8, size=20_000),
-    }
-)
-source.to_csv(csv_path, index=False)
+artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day52</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+csv_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sales.csv</span><span class="syntax-string">&quot;</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">52</span><span class="syntax-punctuation">)</span>
+source <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>uniform<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>integers<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+source<span class="syntax-operator">.</span>to_csv<span class="syntax-punctuation">(</span>csv_path<span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
 
-ddf = dd.read_csv(str(csv_path), blocksize=&quot;64KB&quot;)
-pipe = (
-    ddf[ddf.amount &gt; 0]
-    .assign(unit=lambda frame: frame.amount / frame.qty)
-    .groupby(&quot;store&quot;)
-    .unit.mean()
-)
-with ProgressBar():
-    result = pipe.compute().sort_index()
+ddf <span class="syntax-operator">=</span> dd<span class="syntax-operator">.</span>read_csv<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>csv_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> blocksize<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">64KB</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+pipe <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    ddf<span class="syntax-punctuation">[</span>ddf<span class="syntax-operator">.</span>amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>unit<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> frame<span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>amount <span class="syntax-operator">/</span> frame<span class="syntax-operator">.</span>qty<span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>unit<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> ProgressBar<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    result <span class="syntax-operator">=</span> pipe<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sort_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-expected = (
-    source[source.amount &gt; 0]
-    .assign(unit=lambda frame: frame.amount / frame.qty)
-    .groupby(&quot;store&quot;)
-    .unit.mean()
-    .sort_index()
-)
-assert result.index.tolist() == expected.index.tolist()
-np.testing.assert_allclose(
-    result.to_numpy(), expected.to_numpy(), rtol=1e-12
-)
-print(result)</code></pre>
+expected <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    source<span class="syntax-punctuation">[</span>source<span class="syntax-operator">.</span>amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>unit<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> frame<span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>amount <span class="syntax-operator">/</span> frame<span class="syntax-operator">.</span>qty<span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>unit<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-operator">.</span>sort_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> expected<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>
+    result<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li><code>dd.read_csv</code> constructs a lazy graph over a concrete local fixture</li>
@@ -910,26 +958,26 @@ print(result)</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Persisted reuse timing</p>
-<pre><code class="language-python">import time
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> time
 
-def timed_mean(frame) -&gt; tuple[float, float]:
-    started = time.perf_counter()
-    value = float(frame.amount.mean().compute())
-    return value, time.perf_counter() - started
+<span class="syntax-keyword">def</span> <span class="syntax-function">timed_mean</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    started <span class="syntax-operator">=</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    value <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>amount<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">,</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started
 
-uncached_value, uncached_seconds = timed_mean(ddf)
-persisted = ddf.persist(scheduler=&quot;threads&quot;)
-cached_value, cached_seconds = timed_mean(persisted)
-repeat_value, repeat_seconds = timed_mean(persisted)
+uncached_value<span class="syntax-punctuation">,</span> uncached_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>ddf<span class="syntax-punctuation">)</span>
+persisted <span class="syntax-operator">=</span> ddf<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>scheduler<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+cached_value<span class="syntax-punctuation">,</span> cached_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>persisted<span class="syntax-punctuation">)</span>
+repeat_value<span class="syntax-punctuation">,</span> repeat_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>persisted<span class="syntax-punctuation">)</span>
 
-assert uncached_value == cached_value == repeat_value
-print(
-    {
-        &quot;first_uncached_seconds&quot;: round(uncached_seconds, 4),
-        &quot;first_persisted_seconds&quot;: round(cached_seconds, 4),
-        &quot;repeat_persisted_seconds&quot;: round(repeat_seconds, 4),
-    }
-)</code></pre>
+<span class="syntax-keyword">assert</span> uncached_value <span class="syntax-operator">==</span> cached_value <span class="syntax-operator">==</span> repeat_value
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">first_uncached_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>uncached_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">first_persisted_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>cached_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">repeat_persisted_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>repeat_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>Include the first persistence cost when comparing one-off work</li>
@@ -938,18 +986,18 @@ print(
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — Dashboard</p>
-<pre><code class="language-python">from dask.distributed import Client
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dask.distributed <span class="syntax-keyword">import</span> Client
 
-# Threads avoid Windows process-spawn boilerplate in a notebook. Enable the
-# dashboard intentionally after confirming that the configured port is free.
-client = Client(processes=False, dashboard_address=None, n_workers=2)
-try:
-    cached = client.persist(ddf)
-    row_count = int(cached.shape[0].compute())
-    assert row_count == len(source)
-    print(client)
-finally:
-    client.close()</code></pre>
+<span class="syntax-comment"># Threads avoid Windows process-spawn boilerplate in a notebook. Enable the</span>
+<span class="syntax-comment"># dashboard intentionally after confirming that the configured port is free.</span>
+client <span class="syntax-operator">=</span> Client<span class="syntax-punctuation">(</span>processes<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> dashboard_address<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> n_workers<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    cached <span class="syntax-operator">=</span> client<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>ddf<span class="syntax-punctuation">)</span>
+    row_count <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>cached<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> row_count <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>client<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+    client<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Guidance</p>
 <ul>
 <li>This smoke run disables the dashboard. Recreate the client with <code>dashboard_address=&quot;:8787&quot;</code> only when you intentionally want the UI</li>
@@ -1054,49 +1102,49 @@ finally:
 <hr>
 <p>Worked reference for Exercise 1 — Port pandas to Dask</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day52_scalability_dask/day52_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>import dask.dataframe as dd</span>
-<span>import numpy as np</span>
-<span>import pandas as pd</span>
-<span>from dask.diagnostics import ProgressBar</span>
-<span> </span>
-<span>artifact_dir = Path(&quot;artifacts/day52&quot;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>csv_path = artifact_dir / &quot;sales.csv&quot;</span>
-<span>rng = np.random.default_rng(52)</span>
-<span>source = pd.DataFrame(</span>
-<span>    {</span>
-<span>        &quot;store&quot;: rng.choice([&quot;north&quot;, &quot;south&quot;, &quot;west&quot;], size=20_000),</span>
-<span>        &quot;amount&quot;: rng.uniform(1, 100, size=20_000),</span>
-<span>        &quot;qty&quot;: rng.integers(1, 8, size=20_000),</span>
-<span>    }</span>
-<span>)</span>
-<span>source.to_csv(csv_path, index=False)</span>
-<span> </span>
-<span>ddf = dd.read_csv(str(csv_path), blocksize=&quot;64KB&quot;)</span>
-<span>pipe = (</span>
-<span>    ddf[ddf.amount &gt; 0]</span>
-<span>    .assign(unit=lambda frame: frame.amount / frame.qty)</span>
-<span>    .groupby(&quot;store&quot;)</span>
-<span>    .unit.mean()</span>
-<span>)</span>
-<span>with ProgressBar():</span>
-<span>    result = pipe.compute().sort_index()</span>
-<span> </span>
-<span>expected = (</span>
-<span>    source[source.amount &gt; 0]</span>
-<span>    .assign(unit=lambda frame: frame.amount / frame.qty)</span>
-<span>    .groupby(&quot;store&quot;)</span>
-<span>    .unit.mean()</span>
-<span>    .sort_index()</span>
-<span>)</span>
-<span>assert result.index.tolist() == expected.index.tolist()</span>
-<span>np.testing.assert_allclose(</span>
-<span>    result.to_numpy(), expected.to_numpy(), rtol=1e-12</span>
-<span>)</span>
-<span>print(result)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> dask.dataframe <span class="syntax-keyword">as</span> dd</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dask.diagnostics <span class="syntax-keyword">import</span> ProgressBar</span>
+<span class="source-line"></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day52</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">csv_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sales.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">52</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">source <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>choice<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>uniform<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rng<span class="syntax-operator">.</span>integers<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">20_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">source<span class="syntax-operator">.</span>to_csv<span class="syntax-punctuation">(</span>csv_path<span class="syntax-punctuation">,</span> index<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">ddf <span class="syntax-operator">=</span> dd<span class="syntax-operator">.</span>read_csv<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>csv_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> blocksize<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">64KB</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">pipe <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    ddf<span class="syntax-punctuation">[</span>ddf<span class="syntax-operator">.</span>amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>unit<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> frame<span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>amount <span class="syntax-operator">/</span> frame<span class="syntax-operator">.</span>qty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>unit<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> ProgressBar<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> pipe<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sort_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">expected <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    source<span class="syntax-punctuation">[</span>source<span class="syntax-operator">.</span>amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>unit<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> frame<span class="syntax-punctuation">:</span> frame<span class="syntax-operator">.</span>amount <span class="syntax-operator">/</span> frame<span class="syntax-operator">.</span>qty<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">store</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>unit<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span>sort_index<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> expected<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    result<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-operator">.</span>to_numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Explanation</p>
 <ul>
@@ -1106,27 +1154,27 @@ finally:
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Persisted reuse timing</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import time</span>
-<span> </span>
-<span>def timed_mean(frame) -&gt; tuple[float, float]:</span>
-<span>    started = time.perf_counter()</span>
-<span>    value = float(frame.amount.mean().compute())</span>
-<span>    return value, time.perf_counter() - started</span>
-<span> </span>
-<span>uncached_value, uncached_seconds = timed_mean(ddf)</span>
-<span>persisted = ddf.persist(scheduler=&quot;threads&quot;)</span>
-<span>cached_value, cached_seconds = timed_mean(persisted)</span>
-<span>repeat_value, repeat_seconds = timed_mean(persisted)</span>
-<span> </span>
-<span>assert uncached_value == cached_value == repeat_value</span>
-<span>print(</span>
-<span>    {</span>
-<span>        &quot;first_uncached_seconds&quot;: round(uncached_seconds, 4),</span>
-<span>        &quot;first_persisted_seconds&quot;: round(cached_seconds, 4),</span>
-<span>        &quot;repeat_persisted_seconds&quot;: round(repeat_seconds, 4),</span>
-<span>    }</span>
-<span>)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> time</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">timed_mean</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    started <span class="syntax-operator">=</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    value <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>frame<span class="syntax-operator">.</span>amount<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">,</span> time<span class="syntax-operator">.</span>perf_counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> started</span>
+<span class="source-line"></span>
+<span class="source-line">uncached_value<span class="syntax-punctuation">,</span> uncached_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>ddf<span class="syntax-punctuation">)</span></span>
+<span class="source-line">persisted <span class="syntax-operator">=</span> ddf<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>scheduler<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">threads</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cached_value<span class="syntax-punctuation">,</span> cached_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>persisted<span class="syntax-punctuation">)</span></span>
+<span class="source-line">repeat_value<span class="syntax-punctuation">,</span> repeat_seconds <span class="syntax-operator">=</span> timed_mean<span class="syntax-punctuation">(</span>persisted<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> uncached_value <span class="syntax-operator">==</span> cached_value <span class="syntax-operator">==</span> repeat_value</span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">first_uncached_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>uncached_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">first_persisted_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>cached_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">repeat_persisted_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>repeat_seconds<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Notes</p>
 <ul>
@@ -1136,19 +1184,19 @@ finally:
 </ul>
 <hr>
 <p>Worked reference for Exercise 3 — Dashboard</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from dask.distributed import Client</span>
-<span> </span>
-<span># Threads avoid Windows process-spawn boilerplate in a notebook. Enable the</span>
-<span># dashboard intentionally after confirming that the configured port is free.</span>
-<span>client = Client(processes=False, dashboard_address=None, n_workers=2)</span>
-<span>try:</span>
-<span>    cached = client.persist(ddf)</span>
-<span>    row_count = int(cached.shape[0].compute())</span>
-<span>    assert row_count == len(source)</span>
-<span>    print(client)</span>
-<span>finally:</span>
-<span>    client.close()</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> dask.distributed <span class="syntax-keyword">import</span> Client</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Threads avoid Windows process-spawn boilerplate in a notebook. Enable the</span></span>
+<span class="source-line"><span class="syntax-comment"># dashboard intentionally after confirming that the configured port is free.</span></span>
+<span class="source-line">client <span class="syntax-operator">=</span> Client<span class="syntax-punctuation">(</span>processes<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> dashboard_address<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> n_workers<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    cached <span class="syntax-operator">=</span> client<span class="syntax-operator">.</span>persist<span class="syntax-punctuation">(</span>ddf<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    row_count <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>cached<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> row_count <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>client<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    client<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Guidance</p>
 <ul>

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -364,12 +410,12 @@
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run the learner hash example.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_ml_01_reproducible_delivery.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_ml_01_reproducible_delivery<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
 <p>Ordinary JSON object key order changes raw bytes. Canonical JSON sorts keys and uses stable separators. Dataset rows are sorted by unique <code>record_id</code> so an incidental read order does not create a new snapshot identity.</p>
 <p>The reference delivery flow is:</p>
-<pre><code class="language-text">rows -&gt; snapshot hash
+<pre class="highlighted-code"><code class="language-text">rows -&gt; snapshot hash
 model -&gt; model.json -&gt; artifact hash
 schema -&gt; schema.json -&gt; schema hash
 all hashes + runtime -&gt; manifest.json
@@ -378,11 +424,13 @@ all hashes + runtime -&gt; manifest.json
                                                    -&gt; registry stage</code></pre>
 <p>Every generated file stays in a temporary directory.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_ml_01_reproducible_delivery.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_ml_01_reproducible_delivery<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
 <h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
@@ -394,33 +442,33 @@ all hashes + runtime -&gt; manifest.json
 <li><strong>manifest verification before load:</strong> checks every relative path, byte hash, format, and expected metadata before trusting content.</li>
 </ul>
 <h5 id="guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible">Micro-example A — make record order irrelevant but value changes visible<a class="heading-anchor" href="#guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import hashlib
-import json
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> json
 
 
-def snapshot(records):
-    ordered = sorted(records, key=lambda row: row[&quot;record_id&quot;])
-    payload = json.dumps(ordered, sort_keys=True, separators=(&quot;,&quot;, &quot;:&quot;), allow_nan=False)
-    return hashlib.sha256(payload.encode(&quot;utf-8&quot;)).hexdigest()
+<span class="syntax-keyword">def</span> <span class="syntax-function">snapshot</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>ordered<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> allow_nan<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
 
-records = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]
-assert snapshot(records) == snapshot(list(reversed(records)))
-changed = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 3}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]
-assert snapshot(records) != snapshot(changed)</code></pre>
+records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> snapshot<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> snapshot<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">reversed</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> snapshot<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> snapshot<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Declared row ordering does not change the identity, while one semantic value change does.</p>
 <p><strong>Why it matters:</strong> Record IDs are unique/nonempty and sorting them is semantically irrelevant for this dataset.</p>
 <h5 id="guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes">Micro-example B — fail a bundle when one artifact byte changes<a class="heading-anchor" href="#guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import hashlib
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 
-files = {&quot;model.json&quot;: b&#x27;{&quot;coefficient&quot;:2.0}&#x27;, &quot;schema.json&quot;: b&#x27;{&quot;x&quot;:&quot;float&quot;}&#x27;}
-manifest = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
-files[&quot;model.json&quot;] = b&quot;{}&quot;  # tampering/corruption
-mismatches = [
-    name for name, data in files.items() if hashlib.sha256(data).hexdigest() != manifest[name]
-]
-print(mismatches)
-assert mismatches == [&quot;model.json&quot;]</code></pre>
+files <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">coefficient</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2.0}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">schema.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+manifest <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> data <span class="syntax-operator">in</span> files<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+files<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">{}</span><span class="syntax-string">&quot;</span>  <span class="syntax-comment"># tampering/corruption</span>
+mismatches <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    name <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> data <span class="syntax-operator">in</span> files<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> manifest<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>mismatches<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> mismatches <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Verification catches the changed artifact before code attempts to interpret it.</p>
 <p><strong>Why it matters:</strong> The expected manifest came from a trusted release channel and itself is authenticated/governed.</p>
 <h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
@@ -512,10 +560,10 @@ assert mismatches == [&quot;model.json&quot;]</code></pre>
 <li>No pickle, hosted account, or network access is used.</li>
 </ul>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE = &quot;1&quot;
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_ml_01_reproducible_delivery -v</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$env:PYTHONDONTWRITEBYTECODE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m unittest python<span class="syntax-punctuation">.</span>professional<span class="syntax-punctuation">.</span>tests<span class="syntax-punctuation">.</span>test_py_ml_01_reproducible_delivery -v</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_ml_01_reproducible_delivery -v</code></pre>
+<pre class="highlighted-code"><code class="language-bash">PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-number">1</span> .venv/bin/python -m unittest python.professional.tests.test_py_ml_01_reproducible_delivery -v</code></pre>
 <h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>A filename is called lineage:</strong> names are mutable and do not identify content.</li>
@@ -531,7 +579,7 @@ assert mismatches == [&quot;model.json&quot;]</code></pre>
 <p>Use this verified bundle in <code>python-svc-02</code>. Day 53 can record the same evidence in local MLflow, while Day 54 supplies monitoring and governance decisions.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-ml-01` — Reproducible data and model delivery.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-ml-01` — Reproducible data and model delivery.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize data/model identity, schema compatibility, safe bundles, and promotion evidence. Use exactly these maintained learner materials:
@@ -590,237 +638,237 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-ml-01 learner lab: reproducible local model delivery.</span>
-<span> </span>
-<span>Professional learner deep dive (python-ml-01)</span>
-<span>------------------------------------------------</span>
-<span> </span>
-<span>Mental model:</span>
-<span>Reproducible model delivery links exact data records, feature schema, training configuration,</span>
-<span>environment, metrics, and artifact bytes. A canonical hash is stable only after row</span>
-<span>identity/order, field order, numeric special values, encoding, and serialization are defined.  A</span>
-<span>delivery bundle contains a safe model representation, schema, and manifest of</span>
-<span>hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction.</span>
-<span>Promotion is a policy decision based on tests, thresholds, limitations, ownership, and</span>
-<span>rollback—not the existence of a model file.</span>
-<span> </span>
-<span>API/boundary anatomy:</span>
-<span>* canonical data hash: normalizes only declared non-semantic ordering and rejects</span>
-<span>  duplicate/missing identity or unsupported values.</span>
-<span>* feature/runtime compatibility: checks ordered names, types, required fields, schema version,</span>
-<span>  Python and direct package ranges.</span>
-<span>* manifest verification before load: checks every relative path, byte hash, format, and expected</span>
-<span>  metadata before trusting content.</span>
-<span> </span>
-<span>Micro-example A — make record order irrelevant but value changes visible::</span>
-<span> </span>
-<span>    import hashlib</span>
-<span>    import json</span>
-<span> </span>
-<span>    def snapshot(records):</span>
-<span>        ordered = sorted(records, key=lambda row: row[&quot;record_id&quot;])</span>
-<span>        payload = json.dumps(</span>
-<span>            ordered, sort_keys=True, separators=(&quot;,&quot;, &quot;:&quot;), allow_nan=False</span>
-<span>        )</span>
-<span>        return hashlib.sha256(payload.encode(&quot;utf-8&quot;)).hexdigest()</span>
-<span> </span>
-<span>    records = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]</span>
-<span>    assert snapshot(records) == snapshot(list(reversed(records)))</span>
-<span>    changed = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 3}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]</span>
-<span>    assert snapshot(records) != snapshot(changed)</span>
-<span> </span>
-<span>Expected: Declared row ordering does not change the identity, while one semantic value change</span>
-<span>          does.</span>
-<span> </span>
-<span>Micro-example B — fail a bundle when one artifact byte changes::</span>
-<span> </span>
-<span>    import hashlib</span>
-<span> </span>
-<span>    files = {&quot;model.json&quot;: b&#x27;{&quot;coefficient&quot;:2.0}&#x27;, &quot;schema.json&quot;: b&#x27;{&quot;x&quot;:&quot;float&quot;}&#x27;}</span>
-<span>    manifest = {name: hashlib.sha256(data).hexdigest()</span>
-<span>                for name, data in files.items()}</span>
-<span>    files[&quot;model.json&quot;] = b&quot;{}&quot;  # tampering/corruption</span>
-<span>    mismatches = [</span>
-<span>        name for name, data in files.items()</span>
-<span>        if hashlib.sha256(data).hexdigest() != manifest[name]</span>
-<span>    ]</span>
-<span>    print(mismatches)</span>
-<span>    assert mismatches == [&quot;model.json&quot;]</span>
-<span> </span>
-<span>Expected: Verification catches the changed artifact before code attempts to interpret it.</span>
-<span> </span>
-<span>Debugging rule: Rebuild the canonical bytes, print schema/version differences, verify every</span>
-<span>                manifest path/hash before parse, and reload/predict in a clean process.</span>
-<span> </span>
-<span>The snippets demonstrate mechanics only. They do not complete the</span>
-<span>numbered TODOs below; implement those from their stated contracts and</span>
-<span>prove normal, boundary, and failure behavior.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import hashlib</span>
-<span>import json</span>
-<span>from collections.abc import Callable, Mapping, Sequence</span>
-<span> </span>
-<span>Scalar = str | int | float | bool | None</span>
-<span> </span>
-<span> </span>
-<span>def canonical_record_hash(records: Sequence[Mapping[str, Scalar]]) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Return an order-independent SHA-256 snapshot identifier.</span>
-<span> </span>
-<span>    TODO: require a unique ``record_id``, sort records by that ID, serialize</span>
-<span>    canonical JSON, and hash UTF-8 bytes.</span>
-<span>    &quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete canonical_record_hash&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def hash_text(text: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;Worked example: hashes identify bytes, not semantic equivalence.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
-<span> </span>
-<span> </span>
-<span>def schema_compatible(</span>
-<span>    expected: Sequence[tuple[str, str]],</span>
-<span>    actual: Sequence[tuple[str, str]],</span>
-<span>) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;TODO: require exact ordered names and types for this strict model.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    raise NotImplementedError(&quot;complete schema_compatible&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def self_check() -&gt; None:</span>
-<span>    left = json.dumps({&quot;x&quot;: 1, &quot;y&quot;: 2})</span>
-<span>    right = json.dumps({&quot;y&quot;: 2, &quot;x&quot;: 1})</span>
-<span>    print(&quot;Worked raw hashes differ:&quot;, hash_text(left) != hash_text(right))</span>
-<span>    checks: tuple[tuple[str, Callable[[], object]], ...] = (</span>
-<span>        (</span>
-<span>            &quot;canonical data snapshot&quot;,</span>
-<span>            lambda: canonical_record_hash([{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]),</span>
-<span>        ),</span>
-<span>        (</span>
-<span>            &quot;feature compatibility&quot;,</span>
-<span>            lambda: schema_compatible([(&quot;x&quot;, &quot;float&quot;)], [(&quot;x&quot;, &quot;float&quot;)]),</span>
-<span>        ),</span>
-<span>    )</span>
-<span>    for label, call in checks:</span>
-<span>        try:</span>
-<span>            print(label, &quot;-&gt;&quot;, call())</span>
-<span>        except NotImplementedError:</span>
-<span>            print(&quot;TODO:&quot;, label)</span>
-<span> </span>
-<span> </span>
-<span># === Numbered professional practice ===</span>
-<span>#</span>
-<span># Attempt every exercise before opening solutions. Keep evidence in a copy</span>
-<span># under .learning/ or in tests; do not overwrite the reference solution.</span>
-<span># Full acceptance checks and progressive hints:</span>
-<span># companion-guides/py_ml_01_reproducible_delivery.md</span>
-<span>#</span>
-<span># Exercise 1 — Complete snapshot hashing</span>
-<span># Prompt: Require a nonempty unique `record_id`, sort by it, serialize with sorted keys,</span>
-<span># reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed</span>
-<span># value does not. Explain what the hash does *not* prove: source ownership, legality,</span>
-<span># labeling quality, representativeness, or absence of leakage.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 2 — Fit and serialize the local model</span>
-<span># Prompt: Fit `y = intercept + coefficient*x` on three deterministic points. Store only</span>
-<span># format identifier, feature name, and numeric parameters in JSON. Do not use pickle:</span>
-<span># loading an untrusted pickle can execute code.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 3 — Version the feature schema</span>
-<span># Prompt: Declare feature name, ordered position, dtype, required status, and schema</span>
-<span># version. Test exact compatibility, reordered input, a renamed feature, and a version</span>
-<span># change. Decide which future changes could be safely additive for a different consumer</span>
-<span># contract.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 4 — Define runtime compatibility</span>
-<span># Prompt: Declare Python 3.11 through below 3.13 and required package major versions.</span>
-<span># Inject the observed versions into the check rather than dumping a machine-specific</span>
-<span># environment. Report every incompatibility, not only the first.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 5 — Build and tamper with a bundle</span>
-<span># Prompt: Write model, schema, and manifest into a temporary directory. Verify all hashes.</span>
-<span># Replace `model.json` with `{}` and confirm loading fails before parsing or prediction.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 6 — Promote with evidence</span>
-<span># Prompt: Register a candidate with: - tests passed, - compatibility passed, - named</span>
-<span># metric and threshold, - metric value, and - 64-character manifest hash. Move it to</span>
-<span># staging and production. Reject a version with missing tests even if its metric is high.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 7 — Rehearse rollback</span>
-<span># Prompt: Promote version 1, then version 2. Record a simulated latency regression and</span>
-<span># roll back to archived version 1. Confirm one production version remains and the event</span>
-<span># trail preserves action, target, and reason.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 8 — Relate the lab to MLflow</span>
-<span># Prompt: Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</span>
-<span># 53. MLflow can store evidence; it does not define your compatibility or approval policy</span>
-<span># automatically.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 9 — rebuild a bundle deterministically</span>
-<span># Prompt: Build the JSON model bundle twice from canonical records and the same</span>
-<span># configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field</span>
-<span># such as timestamps, path order, or float serialization.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 10 — write a claim-bounded model card</span>
-<span># Prompt: Create a model card from the manifest and evaluation evidence: intended and</span>
-<span># excluded use, population, metric/threshold, slices/support, data provenance,</span>
-<span># limitations, monitoring, owners, and stop conditions.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 11 — design shadow and canary evidence</span>
-<span># Prompt: Specify a no-side-effect shadow comparison followed by a bounded canary. Define</span>
-<span># routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how</span>
-<span># delayed labels are handled.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 12 — separate drift from compatibility</span>
-<span># Prompt: Create examples of schema incompatibility, valid schema with shifted</span>
-<span># distribution, and stable inputs with performance degradation. Route each to reject,</span>
-<span># monitor/investigate, or rollback/retrain policy.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 13 — test forward and backward compatibility</span>
-<span># Prompt: Build a matrix of producer/consumer schema and model versions. Test an additive</span>
-<span># optional field, required rename, reordered feature, and changed numeric meaning across</span>
-<span># old/new readers.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 14 — capture dependency and supply-chain evidence</span>
-<span># Prompt: Create a local release manifest containing reviewed lock hash, direct runtime</span>
-<span># requirements, Python range, package major versions, artifact hashes, source</span>
-<span># revision/dirty flag, and a generated component inventory.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 15 — verify artifact trust before parsing</span>
-<span># Prompt: Model a trusted local manifest root and verify every bundle file&#x27;s relative</span>
-<span># path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape,</span>
-<span># extra required files, and pickle.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># Exercise 16 — rehearse rollback dependency failure</span>
-<span># Prompt: Archive version 1, promote version 2, then discover that version 1&#x27;s runtime</span>
-<span># dependency is unavailable. Define rollback-target readiness, fallback decision, event</span>
-<span># trail, and prevention.</span>
-<span># Verify: add a boundary check and explain the failure policy.</span>
-<span>#</span>
-<span># === End numbered professional practice ===</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    self_check()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-ml-01 learner lab: reproducible local model delivery.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Professional learner deep dive (python-ml-01)</span></span>
+<span class="source-line"><span class="syntax-string">------------------------------------------------</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Mental model:</span></span>
+<span class="source-line"><span class="syntax-string">Reproducible model delivery links exact data records, feature schema, training configuration,</span></span>
+<span class="source-line"><span class="syntax-string">environment, metrics, and artifact bytes. A canonical hash is stable only after row</span></span>
+<span class="source-line"><span class="syntax-string">identity/order, field order, numeric special values, encoding, and serialization are defined.  A</span></span>
+<span class="source-line"><span class="syntax-string">delivery bundle contains a safe model representation, schema, and manifest of</span></span>
+<span class="source-line"><span class="syntax-string">hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction.</span></span>
+<span class="source-line"><span class="syntax-string">Promotion is a policy decision based on tests, thresholds, limitations, ownership, and</span></span>
+<span class="source-line"><span class="syntax-string">rollback—not the existence of a model file.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
+<span class="source-line"><span class="syntax-string">* canonical data hash: normalizes only declared non-semantic ordering and rejects</span></span>
+<span class="source-line"><span class="syntax-string">  duplicate/missing identity or unsupported values.</span></span>
+<span class="source-line"><span class="syntax-string">* feature/runtime compatibility: checks ordered names, types, required fields, schema version,</span></span>
+<span class="source-line"><span class="syntax-string">  Python and direct package ranges.</span></span>
+<span class="source-line"><span class="syntax-string">* manifest verification before load: checks every relative path, byte hash, format, and expected</span></span>
+<span class="source-line"><span class="syntax-string">  metadata before trusting content.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example A — make record order irrelevant but value changes visible::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import hashlib</span></span>
+<span class="source-line"><span class="syntax-string">    import json</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    def snapshot(records):</span></span>
+<span class="source-line"><span class="syntax-string">        ordered = sorted(records, key=lambda row: row[&quot;record_id&quot;])</span></span>
+<span class="source-line"><span class="syntax-string">        payload = json.dumps(</span></span>
+<span class="source-line"><span class="syntax-string">            ordered, sort_keys=True, separators=(&quot;,&quot;, &quot;:&quot;), allow_nan=False</span></span>
+<span class="source-line"><span class="syntax-string">        )</span></span>
+<span class="source-line"><span class="syntax-string">        return hashlib.sha256(payload.encode(&quot;utf-8&quot;)).hexdigest()</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    records = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]</span></span>
+<span class="source-line"><span class="syntax-string">    assert snapshot(records) == snapshot(list(reversed(records)))</span></span>
+<span class="source-line"><span class="syntax-string">    changed = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 3}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]</span></span>
+<span class="source-line"><span class="syntax-string">    assert snapshot(records) != snapshot(changed)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Declared row ordering does not change the identity, while one semantic value change</span></span>
+<span class="source-line"><span class="syntax-string">          does.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Micro-example B — fail a bundle when one artifact byte changes::</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    import hashlib</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    files = {&quot;model.json&quot;: b&#x27;{&quot;coefficient&quot;:2.0}&#x27;, &quot;schema.json&quot;: b&#x27;{&quot;x&quot;:&quot;float&quot;}&#x27;}</span></span>
+<span class="source-line"><span class="syntax-string">    manifest = {name: hashlib.sha256(data).hexdigest()</span></span>
+<span class="source-line"><span class="syntax-string">                for name, data in files.items()}</span></span>
+<span class="source-line"><span class="syntax-string">    files[&quot;model.json&quot;] = b&quot;{}&quot;  # tampering/corruption</span></span>
+<span class="source-line"><span class="syntax-string">    mismatches = [</span></span>
+<span class="source-line"><span class="syntax-string">        name for name, data in files.items()</span></span>
+<span class="source-line"><span class="syntax-string">        if hashlib.sha256(data).hexdigest() != manifest[name]</span></span>
+<span class="source-line"><span class="syntax-string">    ]</span></span>
+<span class="source-line"><span class="syntax-string">    print(mismatches)</span></span>
+<span class="source-line"><span class="syntax-string">    assert mismatches == [&quot;model.json&quot;]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Expected: Verification catches the changed artifact before code attempts to interpret it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Debugging rule: Rebuild the canonical bytes, print schema/version differences, verify every</span></span>
+<span class="source-line"><span class="syntax-string">                manifest path/hash before parse, and reload/predict in a clean process.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">The snippets demonstrate mechanics only. They do not complete the</span></span>
+<span class="source-line"><span class="syntax-string">numbered TODOs below; implement those from their stated contracts and</span></span>
+<span class="source-line"><span class="syntax-string">prove normal, boundary, and failure behavior.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> hashlib</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Mapping<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"></span>
+<span class="source-line">Scalar <span class="syntax-operator">=</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical_record_hash</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Scalar<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return an order-independent SHA-256 snapshot identifier.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    TODO: require a unique ``record_id``, sort records by that ID, serialize</span></span>
+<span class="source-line"><span class="syntax-string">    canonical JSON, and hash UTF-8 bytes.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete canonical_record_hash</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">hash_text</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Worked example: hashes identify bytes, not semantic equivalence.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">schema_compatible</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    expected<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    actual<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: require exact ordered names and types for this strict model.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete schema_compatible</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">self_check</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    left <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    right <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked raw hashes differ:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> hash_text<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> hash_text<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    checks<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">canonical data snapshot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> canonical_record_hash<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">feature compatibility</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> schema_compatible<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> label<span class="syntax-punctuation">,</span> call <span class="syntax-operator">in</span> checks<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> NotImplementedError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># === Numbered professional practice ===</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt every exercise before opening solutions. Keep evidence in a copy</span></span>
+<span class="source-line"><span class="syntax-comment"># under .learning/ or in tests; do not overwrite the reference solution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
+<span class="source-line"><span class="syntax-comment"># companion-guides/py_ml_01_reproducible_delivery.md</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1 — Complete snapshot hashing</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Require a nonempty unique `record_id`, sort by it, serialize with sorted keys,</span></span>
+<span class="source-line"><span class="syntax-comment"># reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed</span></span>
+<span class="source-line"><span class="syntax-comment"># value does not. Explain what the hash does *not* prove: source ownership, legality,</span></span>
+<span class="source-line"><span class="syntax-comment"># labeling quality, representativeness, or absence of leakage.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2 — Fit and serialize the local model</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Fit `y = intercept + coefficient*x` on three deterministic points. Store only</span></span>
+<span class="source-line"><span class="syntax-comment"># format identifier, feature name, and numeric parameters in JSON. Do not use pickle:</span></span>
+<span class="source-line"><span class="syntax-comment"># loading an untrusted pickle can execute code.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3 — Version the feature schema</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Declare feature name, ordered position, dtype, required status, and schema</span></span>
+<span class="source-line"><span class="syntax-comment"># version. Test exact compatibility, reordered input, a renamed feature, and a version</span></span>
+<span class="source-line"><span class="syntax-comment"># change. Decide which future changes could be safely additive for a different consumer</span></span>
+<span class="source-line"><span class="syntax-comment"># contract.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4 — Define runtime compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Declare Python 3.11 through below 3.13 and required package major versions.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inject the observed versions into the check rather than dumping a machine-specific</span></span>
+<span class="source-line"><span class="syntax-comment"># environment. Report every incompatibility, not only the first.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5 — Build and tamper with a bundle</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write model, schema, and manifest into a temporary directory. Verify all hashes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Replace `model.json` with `{}` and confirm loading fails before parsing or prediction.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6 — Promote with evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Register a candidate with: - tests passed, - compatibility passed, - named</span></span>
+<span class="source-line"><span class="syntax-comment"># metric and threshold, - metric value, and - 64-character manifest hash. Move it to</span></span>
+<span class="source-line"><span class="syntax-comment"># staging and production. Reject a version with missing tests even if its metric is high.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7 — Rehearse rollback</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Promote version 1, then version 2. Record a simulated latency regression and</span></span>
+<span class="source-line"><span class="syntax-comment"># roll back to archived version 1. Confirm one production version remains and the event</span></span>
+<span class="source-line"><span class="syntax-comment"># trail preserves action, target, and reason.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8 — Relate the lab to MLflow</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</span></span>
+<span class="source-line"><span class="syntax-comment"># 53. MLflow can store evidence; it does not define your compatibility or approval policy</span></span>
+<span class="source-line"><span class="syntax-comment"># automatically.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9 — rebuild a bundle deterministically</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build the JSON model bundle twice from canonical records and the same</span></span>
+<span class="source-line"><span class="syntax-comment"># configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field</span></span>
+<span class="source-line"><span class="syntax-comment"># such as timestamps, path order, or float serialization.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10 — write a claim-bounded model card</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a model card from the manifest and evaluation evidence: intended and</span></span>
+<span class="source-line"><span class="syntax-comment"># excluded use, population, metric/threshold, slices/support, data provenance,</span></span>
+<span class="source-line"><span class="syntax-comment"># limitations, monitoring, owners, and stop conditions.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11 — design shadow and canary evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Specify a no-side-effect shadow comparison followed by a bounded canary. Define</span></span>
+<span class="source-line"><span class="syntax-comment"># routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how</span></span>
+<span class="source-line"><span class="syntax-comment"># delayed labels are handled.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12 — separate drift from compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create examples of schema incompatibility, valid schema with shifted</span></span>
+<span class="source-line"><span class="syntax-comment"># distribution, and stable inputs with performance degradation. Route each to reject,</span></span>
+<span class="source-line"><span class="syntax-comment"># monitor/investigate, or rollback/retrain policy.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13 — test forward and backward compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Build a matrix of producer/consumer schema and model versions. Test an additive</span></span>
+<span class="source-line"><span class="syntax-comment"># optional field, required rename, reordered feature, and changed numeric meaning across</span></span>
+<span class="source-line"><span class="syntax-comment"># old/new readers.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14 — capture dependency and supply-chain evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create a local release manifest containing reviewed lock hash, direct runtime</span></span>
+<span class="source-line"><span class="syntax-comment"># requirements, Python range, package major versions, artifact hashes, source</span></span>
+<span class="source-line"><span class="syntax-comment"># revision/dirty flag, and a generated component inventory.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15 — verify artifact trust before parsing</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Model a trusted local manifest root and verify every bundle file&#x27;s relative</span></span>
+<span class="source-line"><span class="syntax-comment"># path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape,</span></span>
+<span class="source-line"><span class="syntax-comment"># extra required files, and pickle.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16 — rehearse rollback dependency failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Archive version 1, promote version 2, then discover that version 1&#x27;s runtime</span></span>
+<span class="source-line"><span class="syntax-comment"># dependency is unavailable. Define rollback-target readiness, fallback decision, event</span></span>
+<span class="source-line"><span class="syntax-comment"># trail, and prevention.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    self_check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -875,20 +923,20 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Verification:</strong> Test order invariance and semantic sensitivity, validate schema/runtime, tamper each artifact, reload/predict in a clean process, and enforce promotion/rollback gates.</p>
 <h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
 <p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
-<pre><code class="language-python">import hashlib
-import json
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> json
 
 
-def snapshot(records):
-    ordered = sorted(records, key=lambda row: row[&quot;record_id&quot;])
-    payload = json.dumps(ordered, sort_keys=True, separators=(&quot;,&quot;, &quot;:&quot;), allow_nan=False)
-    return hashlib.sha256(payload.encode(&quot;utf-8&quot;)).hexdigest()
+<span class="syntax-keyword">def</span> <span class="syntax-function">snapshot</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    payload <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>ordered<span class="syntax-punctuation">,</span> sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> allow_nan<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>payload<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
 
-records = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 2}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]
-assert snapshot(records) == snapshot(list(reversed(records)))
-changed = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 3}, {&quot;record_id&quot;: &quot;a&quot;, &quot;x&quot;: 1}]
-assert snapshot(records) != snapshot(changed)</code></pre>
+records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> snapshot<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> snapshot<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">reversed</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> snapshot<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> snapshot<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Declared row ordering does not change the identity, while one semantic value change does.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1037,353 +1085,353 @@ assert snapshot(records) != snapshot(changed)</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation for python-ml-01.</span>
-<span> </span>
-<span>Artifacts are canonical JSON plus SHA-256 manifests. No pickle, hosted registry,</span>
-<span>network account, or machine-specific environment capture is required.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import hashlib</span>
-<span>import json</span>
-<span>import sys</span>
-<span>import tempfile</span>
-<span>from collections.abc import Mapping, Sequence</span>
-<span>from dataclasses import dataclass, replace</span>
-<span>from pathlib import Path</span>
-<span>from statistics import mean</span>
-<span>from typing import Literal, TypeAlias</span>
-<span> </span>
-<span>Scalar: TypeAlias = str | int | float | bool | None</span>
-<span>Record: TypeAlias = Mapping[str, Scalar]</span>
-<span>Stage = Literal[&quot;candidate&quot;, &quot;staging&quot;, &quot;production&quot;, &quot;archived&quot;]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class FeatureSpec:</span>
-<span>    name: str</span>
-<span>    dtype: Literal[&quot;float&quot;]</span>
-<span>    required: bool = True</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class FeatureSchema:</span>
-<span>    version: int</span>
-<span>    features: tuple[FeatureSpec, ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class LinearModel:</span>
-<span>    feature_name: str</span>
-<span>    coefficient: float</span>
-<span>    intercept: float</span>
-<span> </span>
-<span>    def predict(self, features: Mapping[str, float]) -&gt; float:</span>
-<span>        try:</span>
-<span>            value = features[self.feature_name]</span>
-<span>        except KeyError as exc:</span>
-<span>            raise ValueError(f&quot;missing feature: {self.feature_name}&quot;) from exc</span>
-<span>        return self.intercept + self.coefficient * value</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class RuntimeRequirement:</span>
-<span>    python_min: tuple[int, int]</span>
-<span>    python_max_exclusive: tuple[int, int]</span>
-<span>    packages: tuple[tuple[str, str], ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class Manifest:</span>
-<span>    artifact_sha256: str</span>
-<span>    schema_sha256: str</span>
-<span>    data_snapshot_sha256: str</span>
-<span>    runtime: RuntimeRequirement</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class CompatibilityReport:</span>
-<span>    compatible: bool</span>
-<span>    reasons: tuple[str, ...]</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class PromotionEvidence:</span>
-<span>    tests_passed: bool</span>
-<span>    compatibility_passed: bool</span>
-<span>    metric_name: str</span>
-<span>    metric_value: float</span>
-<span>    minimum_metric: float</span>
-<span>    manifest_sha256: str</span>
-<span> </span>
-<span>    @property</span>
-<span>    def approved(self) -&gt; bool:</span>
-<span>        return (</span>
-<span>            self.tests_passed</span>
-<span>            and self.compatibility_passed</span>
-<span>            and self.metric_value &gt;= self.minimum_metric</span>
-<span>            and len(self.manifest_sha256) == 64</span>
-<span>        )</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class RegistryEntry:</span>
-<span>    version: str</span>
-<span>    stage: Stage</span>
-<span>    evidence: PromotionEvidence</span>
-<span> </span>
-<span> </span>
-<span>@dataclass(frozen=True)</span>
-<span>class RegistryEvent:</span>
-<span>    action: Literal[&quot;registered&quot;, &quot;promoted&quot;, &quot;rollback&quot;]</span>
-<span>    version: str</span>
-<span>    reason: str</span>
-<span> </span>
-<span> </span>
-<span>class LocalRegistry:</span>
-<span>    def __init__(self) -&gt; None:</span>
-<span>        self._entries: dict[str, RegistryEntry] = {}</span>
-<span>        self._events: list[RegistryEvent] = []</span>
-<span> </span>
-<span>    @property</span>
-<span>    def entries(self) -&gt; tuple[RegistryEntry, ...]:</span>
-<span>        return tuple(self._entries[key] for key in sorted(self._entries))</span>
-<span> </span>
-<span>    @property</span>
-<span>    def events(self) -&gt; tuple[RegistryEvent, ...]:</span>
-<span>        return tuple(self._events)</span>
-<span> </span>
-<span>    def register(self, version: str, evidence: PromotionEvidence) -&gt; None:</span>
-<span>        if not version or version in self._entries:</span>
-<span>            raise ValueError(&quot;version must be new and non-empty&quot;)</span>
-<span>        self._entries[version] = RegistryEntry(version, &quot;candidate&quot;, evidence)</span>
-<span>        self._events.append(RegistryEvent(&quot;registered&quot;, version, &quot;candidate created&quot;))</span>
-<span> </span>
-<span>    def stage(self, version: str) -&gt; None:</span>
-<span>        entry = self._entry(version)</span>
-<span>        if entry.stage != &quot;candidate&quot;:</span>
-<span>            raise ValueError(&quot;only a candidate can enter staging&quot;)</span>
-<span>        if not entry.evidence.approved:</span>
-<span>            raise ValueError(&quot;promotion evidence is incomplete&quot;)</span>
-<span>        self._entries[version] = replace(entry, stage=&quot;staging&quot;)</span>
-<span> </span>
-<span>    def promote(self, version: str, *, reason: str) -&gt; None:</span>
-<span>        entry = self._entry(version)</span>
-<span>        if entry.stage != &quot;staging&quot; or not entry.evidence.approved:</span>
-<span>            raise ValueError(&quot;only an approved staging version can reach production&quot;)</span>
-<span>        if not reason.strip():</span>
-<span>            raise ValueError(&quot;promotion reason is required&quot;)</span>
-<span>        for key, current in tuple(self._entries.items()):</span>
-<span>            if current.stage == &quot;production&quot;:</span>
-<span>                self._entries[key] = replace(current, stage=&quot;archived&quot;)</span>
-<span>        self._entries[version] = replace(entry, stage=&quot;production&quot;)</span>
-<span>        self._events.append(RegistryEvent(&quot;promoted&quot;, version, reason))</span>
-<span> </span>
-<span>    def rollback(self, version: str, *, reason: str) -&gt; None:</span>
-<span>        target = self._entry(version)</span>
-<span>        if target.stage != &quot;archived&quot;:</span>
-<span>            raise ValueError(&quot;rollback target must be a previously archived version&quot;)</span>
-<span>        if not reason.strip():</span>
-<span>            raise ValueError(&quot;rollback reason is required&quot;)</span>
-<span>        for key, current in tuple(self._entries.items()):</span>
-<span>            if current.stage == &quot;production&quot;:</span>
-<span>                self._entries[key] = replace(current, stage=&quot;archived&quot;)</span>
-<span>        self._entries[version] = replace(target, stage=&quot;production&quot;)</span>
-<span>        self._events.append(RegistryEvent(&quot;rollback&quot;, version, reason))</span>
-<span> </span>
-<span>    def production(self) -&gt; RegistryEntry | None:</span>
-<span>        return next(</span>
-<span>            (entry for entry in self._entries.values() if entry.stage == &quot;production&quot;),</span>
-<span>            None,</span>
-<span>        )</span>
-<span> </span>
-<span>    def _entry(self, version: str) -&gt; RegistryEntry:</span>
-<span>        try:</span>
-<span>            return self._entries[version]</span>
-<span>        except KeyError as exc:</span>
-<span>            raise ValueError(f&quot;unknown version: {version}&quot;) from exc</span>
-<span> </span>
-<span> </span>
-<span>def canonical_json(value: object) -&gt; str:</span>
-<span>    return json.dumps(</span>
-<span>        value,</span>
-<span>        ensure_ascii=True,</span>
-<span>        allow_nan=False,</span>
-<span>        sort_keys=True,</span>
-<span>        separators=(&quot;,&quot;, &quot;:&quot;),</span>
-<span>    )</span>
-<span> </span>
-<span> </span>
-<span>def sha256_text(text: str) -&gt; str:</span>
-<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
-<span> </span>
-<span> </span>
-<span>def canonical_record_hash(records: Sequence[Record]) -&gt; str:</span>
-<span>    seen: set[str] = set()</span>
-<span>    normalized: list[dict[str, Scalar]] = []</span>
-<span>    for record in records:</span>
-<span>        record_id = record.get(&quot;record_id&quot;)</span>
-<span>        if not isinstance(record_id, str) or not record_id:</span>
-<span>            raise ValueError(&quot;every record needs a non-empty string record_id&quot;)</span>
-<span>        if record_id in seen:</span>
-<span>            raise ValueError(f&quot;duplicate record_id: {record_id}&quot;)</span>
-<span>        seen.add(record_id)</span>
-<span>        normalized.append(dict(record))</span>
-<span>    normalized.sort(key=lambda record: str(record[&quot;record_id&quot;]))</span>
-<span>    return sha256_text(canonical_json(normalized))</span>
-<span> </span>
-<span> </span>
-<span>def fit_linear_model(</span>
-<span>    rows: Sequence[tuple[float, float]],</span>
-<span>    *,</span>
-<span>    feature_name: str = &quot;x&quot;,</span>
-<span>) -&gt; LinearModel:</span>
-<span>    if len(rows) &lt; 2:</span>
-<span>        raise ValueError(&quot;training needs at least two rows&quot;)</span>
-<span>    x_values = [row[0] for row in rows]</span>
-<span>    y_values = [row[1] for row in rows]</span>
-<span>    x_mean = mean(x_values)</span>
-<span>    y_mean = mean(y_values)</span>
-<span>    denominator = sum((value - x_mean) ** 2 for value in x_values)</span>
-<span>    if denominator == 0:</span>
-<span>        raise ValueError(&quot;feature must vary&quot;)</span>
-<span>    coefficient = (</span>
-<span>        sum((x_value - x_mean) * (y_value - y_mean) for x_value, y_value in rows) / denominator</span>
-<span>    )</span>
-<span>    intercept = y_mean - coefficient * x_mean</span>
-<span>    return LinearModel(feature_name, coefficient, intercept)</span>
-<span> </span>
-<span> </span>
-<span>def schema_payload(schema: FeatureSchema) -&gt; dict[str, object]:</span>
-<span>    return {</span>
-<span>        &quot;version&quot;: schema.version,</span>
-<span>        &quot;features&quot;: [</span>
-<span>            {</span>
-<span>                &quot;name&quot;: feature.name,</span>
-<span>                &quot;dtype&quot;: feature.dtype,</span>
-<span>                &quot;required&quot;: feature.required,</span>
-<span>            }</span>
-<span>            for feature in schema.features</span>
-<span>        ],</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def model_payload(model: LinearModel) -&gt; dict[str, object]:</span>
-<span>    return {</span>
-<span>        &quot;format&quot;: &quot;ds60-linear-json-v1&quot;,</span>
-<span>        &quot;feature_name&quot;: model.feature_name,</span>
-<span>        &quot;coefficient&quot;: model.coefficient,</span>
-<span>        &quot;intercept&quot;: model.intercept,</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def manifest_payload(manifest: Manifest) -&gt; dict[str, object]:</span>
-<span>    return {</span>
-<span>        &quot;artifact_sha256&quot;: manifest.artifact_sha256,</span>
-<span>        &quot;schema_sha256&quot;: manifest.schema_sha256,</span>
-<span>        &quot;data_snapshot_sha256&quot;: manifest.data_snapshot_sha256,</span>
-<span>        &quot;runtime&quot;: {</span>
-<span>            &quot;python_min&quot;: list(manifest.runtime.python_min),</span>
-<span>            &quot;python_max_exclusive&quot;: list(manifest.runtime.python_max_exclusive),</span>
-<span>            &quot;packages&quot;: [list(item) for item in manifest.runtime.packages],</span>
-<span>        },</span>
-<span>    }</span>
-<span> </span>
-<span> </span>
-<span>def write_bundle(</span>
-<span>    directory: Path,</span>
-<span>    *,</span>
-<span>    model: LinearModel,</span>
-<span>    schema: FeatureSchema,</span>
-<span>    data_snapshot_sha256: str,</span>
-<span>    runtime: RuntimeRequirement,</span>
-<span>) -&gt; Manifest:</span>
-<span>    directory.mkdir(parents=True, exist_ok=False)</span>
-<span>    artifact_text = canonical_json(model_payload(model))</span>
-<span>    schema_text = canonical_json(schema_payload(schema))</span>
-<span>    artifact_hash = sha256_text(artifact_text)</span>
-<span>    schema_hash = sha256_text(schema_text)</span>
-<span>    manifest = Manifest(artifact_hash, schema_hash, data_snapshot_sha256, runtime)</span>
-<span>    (directory / &quot;model.json&quot;).write_text(artifact_text, encoding=&quot;utf-8&quot;)</span>
-<span>    (directory / &quot;schema.json&quot;).write_text(schema_text, encoding=&quot;utf-8&quot;)</span>
-<span>    (directory / &quot;manifest.json&quot;).write_text(</span>
-<span>        canonical_json(manifest_payload(manifest)),</span>
-<span>        encoding=&quot;utf-8&quot;,</span>
-<span>    )</span>
-<span>    return manifest</span>
-<span> </span>
-<span> </span>
-<span>def verify_bundle(directory: Path, expected: Manifest) -&gt; None:</span>
-<span>    artifact_text = (directory / &quot;model.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
-<span>    schema_text = (directory / &quot;schema.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
-<span>    manifest_text = (directory / &quot;manifest.json&quot;).read_text(encoding=&quot;utf-8&quot;)</span>
-<span>    if sha256_text(artifact_text) != expected.artifact_sha256:</span>
-<span>        raise ValueError(&quot;model artifact hash mismatch&quot;)</span>
-<span>    if sha256_text(schema_text) != expected.schema_sha256:</span>
-<span>        raise ValueError(&quot;feature schema hash mismatch&quot;)</span>
-<span>    if manifest_text != canonical_json(manifest_payload(expected)):</span>
-<span>        raise ValueError(&quot;manifest content mismatch&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def compatibility_report(</span>
-<span>    *,</span>
-<span>    expected_schema: FeatureSchema,</span>
-<span>    actual_schema: FeatureSchema,</span>
-<span>    runtime: RuntimeRequirement,</span>
-<span>    python_version: tuple[int, int],</span>
-<span>    package_versions: Mapping[str, str],</span>
-<span>) -&gt; CompatibilityReport:</span>
-<span>    reasons: list[str] = []</span>
-<span>    if expected_schema != actual_schema:</span>
-<span>        reasons.append(&quot;feature schema differs&quot;)</span>
-<span>    if not runtime.python_min &lt;= python_version &lt; runtime.python_max_exclusive:</span>
-<span>        reasons.append(f&quot;Python {python_version} is outside the declared range&quot;)</span>
-<span>    for package, required_major in runtime.packages:</span>
-<span>        actual = package_versions.get(package)</span>
-<span>        if actual is None:</span>
-<span>            reasons.append(f&quot;missing package {package}&quot;)</span>
-<span>        elif actual.split(&quot;.&quot;, 1)[0] != required_major:</span>
-<span>            reasons.append(f&quot;{package} major {actual.split(&#x27;.&#x27;, 1)[0]} != {required_major}&quot;)</span>
-<span>    return CompatibilityReport(not reasons, tuple(reasons))</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; int:</span>
-<span>    rows = [(0.0, 1.0), (1.0, 3.0), (2.0, 5.0)]</span>
-<span>    records: list[Record] = [</span>
-<span>        {&quot;record_id&quot;: &quot;r1&quot;, &quot;x&quot;: 0.0, &quot;y&quot;: 1.0},</span>
-<span>        {&quot;record_id&quot;: &quot;r2&quot;, &quot;x&quot;: 1.0, &quot;y&quot;: 3.0},</span>
-<span>        {&quot;record_id&quot;: &quot;r3&quot;, &quot;x&quot;: 2.0, &quot;y&quot;: 5.0},</span>
-<span>    ]</span>
-<span>    model = fit_linear_model(rows)</span>
-<span>    schema = FeatureSchema(1, (FeatureSpec(&quot;x&quot;, &quot;float&quot;),))</span>
-<span>    runtime = RuntimeRequirement((3, 11), (3, 13), ((&quot;ds60-runtime&quot;, &quot;1&quot;),))</span>
-<span>    with tempfile.TemporaryDirectory(prefix=&quot;ds60-model-bundle-&quot;) as directory:</span>
-<span>        bundle = Path(directory) / &quot;bundle&quot;</span>
-<span>        manifest = write_bundle(</span>
-<span>            bundle,</span>
-<span>            model=model,</span>
-<span>            schema=schema,</span>
-<span>            data_snapshot_sha256=canonical_record_hash(records),</span>
-<span>            runtime=runtime,</span>
-<span>        )</span>
-<span>        verify_bundle(bundle, manifest)</span>
-<span>        report = compatibility_report(</span>
-<span>            expected_schema=schema,</span>
-<span>            actual_schema=schema,</span>
-<span>            runtime=runtime,</span>
-<span>            python_version=sys.version_info[:2],</span>
-<span>            package_versions={&quot;ds60-runtime&quot;: &quot;1.0&quot;},</span>
-<span>        )</span>
-<span>        print(&quot;prediction:&quot;, model.predict({&quot;x&quot;: 3.0}))</span>
-<span>        print(&quot;manifest:&quot;, sha256_text(canonical_json(manifest_payload(manifest))))</span>
-<span>        print(&quot;compatible:&quot;, report.compatible)</span>
-<span>    return 0</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    raise SystemExit(main())</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation for python-ml-01.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Artifacts are canonical JSON plus SHA-256 manifests. No pickle, hosted registry,</span></span>
+<span class="source-line"><span class="syntax-string">network account, or machine-specific environment capture is required.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> hashlib</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"><span class="syntax-keyword">import</span> sys</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Mapping<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass<span class="syntax-punctuation">,</span> replace</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> statistics <span class="syntax-keyword">import</span> mean</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Literal<span class="syntax-punctuation">,</span> TypeAlias</span>
+<span class="source-line"></span>
+<span class="source-line">Scalar<span class="syntax-punctuation">:</span> TypeAlias <span class="syntax-operator">=</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">Record<span class="syntax-punctuation">:</span> TypeAlias <span class="syntax-operator">=</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Scalar<span class="syntax-punctuation">]</span></span>
+<span class="source-line">Stage <span class="syntax-operator">=</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">candidate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">staging</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">archived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FeatureSpec</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    dtype<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    required<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">FeatureSchema</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span></span>
+<span class="source-line">    features<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>FeatureSpec<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">LinearModel</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    feature_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    coefficient<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    intercept<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> features<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            value <span class="syntax-operator">=</span> features<span class="syntax-punctuation">[</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>feature_name<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> KeyError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing feature: </span><span class="syntax-string">{</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>feature_name<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>intercept <span class="syntax-operator">+</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>coefficient <span class="syntax-operator">*</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">RuntimeRequirement</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    python_min<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    python_max_exclusive<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    packages<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">Manifest</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    artifact_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    schema_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    data_snapshot_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    runtime<span class="syntax-punctuation">:</span> RuntimeRequirement</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">CompatibilityReport</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    compatible<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    reasons<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">PromotionEvidence</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tests_passed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    compatibility_passed<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span></span>
+<span class="source-line">    metric_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    metric_value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    minimum_metric<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span></span>
+<span class="source-line">    manifest_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">approved</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>tests_passed</span>
+<span class="source-line">            <span class="syntax-operator">and</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>compatibility_passed</span>
+<span class="source-line">            <span class="syntax-operator">and</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>metric_value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>minimum_metric</span>
+<span class="source-line">            <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>manifest_sha256<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">64</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">RegistryEntry</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    stage<span class="syntax-punctuation">:</span> Stage</span>
+<span class="source-line">    evidence<span class="syntax-punctuation">:</span> PromotionEvidence</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">RegistryEvent</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    action<span class="syntax-punctuation">:</span> Literal<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">registered</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">promoted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">rollback</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line">    reason<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">LocalRegistry</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> RegistryEntry<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_events<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>RegistryEvent<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">entries</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>RegistryEntry<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@property</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">events</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>RegistryEvent<span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_events<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">register</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> evidence<span class="syntax-punctuation">:</span> PromotionEvidence<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> version <span class="syntax-operator">or</span> version <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">version must be new and non-empty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>version<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> RegistryEntry<span class="syntax-punctuation">(</span>version<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">candidate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> evidence<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>RegistryEvent<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">registered</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">candidate created</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">stage</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        entry <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entry<span class="syntax-punctuation">(</span>version<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> entry<span class="syntax-operator">.</span>stage <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">candidate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">only a candidate can enter staging</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> entry<span class="syntax-operator">.</span>evidence<span class="syntax-operator">.</span>approved<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">promotion evidence is incomplete</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>version<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> replace<span class="syntax-punctuation">(</span>entry<span class="syntax-punctuation">,</span> stage<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">staging</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">promote</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        entry <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entry<span class="syntax-punctuation">(</span>version<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> entry<span class="syntax-operator">.</span>stage <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">staging</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> entry<span class="syntax-operator">.</span>evidence<span class="syntax-operator">.</span>approved<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">only an approved staging version can reach production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> reason<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">promotion reason is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> current <span class="syntax-operator">in</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> current<span class="syntax-operator">.</span>stage <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> replace<span class="syntax-punctuation">(</span>current<span class="syntax-punctuation">,</span> stage<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">archived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>version<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> replace<span class="syntax-punctuation">(</span>entry<span class="syntax-punctuation">,</span> stage<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>RegistryEvent<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">promoted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">rollback</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        target <span class="syntax-operator">=</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entry<span class="syntax-punctuation">(</span>version<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> target<span class="syntax-operator">.</span>stage <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">archived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rollback target must be a previously archived version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> reason<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rollback reason is required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> current <span class="syntax-operator">in</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> current<span class="syntax-operator">.</span>stage <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> replace<span class="syntax-punctuation">(</span>current<span class="syntax-punctuation">,</span> stage<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">archived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>version<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> replace<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">,</span> stage<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>RegistryEvent<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rollback</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">production</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> RegistryEntry <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-punctuation">(</span>entry <span class="syntax-keyword">for</span> entry <span class="syntax-operator">in</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> entry<span class="syntax-operator">.</span>stage <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">production</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">_entry</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> RegistryEntry<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>_entries<span class="syntax-punctuation">[</span>version<span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> KeyError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown version: </span><span class="syntax-string">{</span>version<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical_json</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        ensure_ascii<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        allow_nan<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        sort_keys<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sha256_text</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical_record_hash</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Record<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    seen<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    normalized<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Scalar<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> record <span class="syntax-operator">in</span> records<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        record_id <span class="syntax-operator">=</span> record<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>record_id<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> record_id<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">every record needs a non-empty string record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> record_id <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate record_id: </span><span class="syntax-string">{</span>record_id<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>record_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        normalized<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    normalized<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> record<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> sha256_text<span class="syntax-punctuation">(</span>canonical_json<span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_linear_model</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    rows<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    feature_name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> LinearModel<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">training needs at least two rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    x_values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    y_values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    x_mean <span class="syntax-operator">=</span> mean<span class="syntax-punctuation">(</span>x_values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    y_mean <span class="syntax-operator">=</span> mean<span class="syntax-punctuation">(</span>y_values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    denominator <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>value <span class="syntax-operator">-</span> x_mean<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> x_values<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> denominator <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature must vary</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    coefficient <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>x_value <span class="syntax-operator">-</span> x_mean<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>y_value <span class="syntax-operator">-</span> y_mean<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x_value<span class="syntax-punctuation">,</span> y_value <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> denominator</span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    intercept <span class="syntax-operator">=</span> y_mean <span class="syntax-operator">-</span> coefficient <span class="syntax-operator">*</span> x_mean</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> LinearModel<span class="syntax-punctuation">(</span>feature_name<span class="syntax-punctuation">,</span> coefficient<span class="syntax-punctuation">,</span> intercept<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">schema_payload</span><span class="syntax-punctuation">(</span>schema<span class="syntax-punctuation">:</span> FeatureSchema<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> schema<span class="syntax-operator">.</span>version<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">features</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> feature<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">dtype</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> feature<span class="syntax-operator">.</span>dtype<span class="syntax-punctuation">,</span></span>
+<span class="source-line">                <span class="syntax-string">&quot;</span><span class="syntax-string">required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> feature<span class="syntax-operator">.</span>required<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> feature <span class="syntax-operator">in</span> schema<span class="syntax-operator">.</span>features</span>
+<span class="source-line">        <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">model_payload</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">:</span> LinearModel<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">format</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-linear-json-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">feature_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>feature_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">coefficient</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>coefficient<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">intercept</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>intercept<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">manifest_payload</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">:</span> Manifest<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">artifact_sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> manifest<span class="syntax-operator">.</span>artifact_sha256<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">schema_sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> manifest<span class="syntax-operator">.</span>schema_sha256<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">data_snapshot_sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> manifest<span class="syntax-operator">.</span>data_snapshot_sha256<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">runtime</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">python_min</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-operator">.</span>runtime<span class="syntax-operator">.</span>python_min<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">python_max_exclusive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>manifest<span class="syntax-operator">.</span>runtime<span class="syntax-operator">.</span>python_max_exclusive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">packages</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> manifest<span class="syntax-operator">.</span>runtime<span class="syntax-operator">.</span>packages<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">write_bundle</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    directory<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    model<span class="syntax-punctuation">:</span> LinearModel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    schema<span class="syntax-punctuation">:</span> FeatureSchema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    data_snapshot_sha256<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    runtime<span class="syntax-punctuation">:</span> RuntimeRequirement<span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Manifest<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    directory<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    artifact_text <span class="syntax-operator">=</span> canonical_json<span class="syntax-punctuation">(</span>model_payload<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    schema_text <span class="syntax-operator">=</span> canonical_json<span class="syntax-punctuation">(</span>schema_payload<span class="syntax-punctuation">(</span>schema<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    artifact_hash <span class="syntax-operator">=</span> sha256_text<span class="syntax-punctuation">(</span>artifact_text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    schema_hash <span class="syntax-operator">=</span> sha256_text<span class="syntax-punctuation">(</span>schema_text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    manifest <span class="syntax-operator">=</span> Manifest<span class="syntax-punctuation">(</span>artifact_hash<span class="syntax-punctuation">,</span> schema_hash<span class="syntax-punctuation">,</span> data_snapshot_sha256<span class="syntax-punctuation">,</span> runtime<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>artifact_text<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">schema.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>schema_text<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">manifest.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        canonical_json<span class="syntax-punctuation">(</span>manifest_payload<span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> manifest</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify_bundle</span><span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">:</span> Manifest<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    artifact_text <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    schema_text <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">schema.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    manifest_text <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>directory <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">manifest.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> sha256_text<span class="syntax-punctuation">(</span>artifact_text<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> expected<span class="syntax-operator">.</span>artifact_sha256<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">model artifact hash mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> sha256_text<span class="syntax-punctuation">(</span>schema_text<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> expected<span class="syntax-operator">.</span>schema_sha256<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature schema hash mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> manifest_text <span class="syntax-operator">!=</span> canonical_json<span class="syntax-punctuation">(</span>manifest_payload<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">manifest content mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compatibility_report</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    expected_schema<span class="syntax-punctuation">:</span> FeatureSchema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    actual_schema<span class="syntax-punctuation">:</span> FeatureSchema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    runtime<span class="syntax-punctuation">:</span> RuntimeRequirement<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    python_version<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    package_versions<span class="syntax-punctuation">:</span> Mapping<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> CompatibilityReport<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    reasons<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> expected_schema <span class="syntax-operator">!=</span> actual_schema<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature schema differs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> runtime<span class="syntax-operator">.</span>python_min <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> python_version <span class="syntax-operator">&lt;</span> runtime<span class="syntax-operator">.</span>python_max_exclusive<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Python </span><span class="syntax-string">{</span>python_version<span class="syntax-string">}</span><span class="syntax-string"> is outside the declared range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> package<span class="syntax-punctuation">,</span> required_major <span class="syntax-operator">in</span> runtime<span class="syntax-operator">.</span>packages<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        actual <span class="syntax-operator">=</span> package_versions<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>package<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> actual <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing package </span><span class="syntax-string">{</span>package<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">elif</span> actual<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> required_major<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            reasons<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>package<span class="syntax-string">}</span><span class="syntax-string"> major </span><span class="syntax-string">{</span>actual<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">.</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-string">}</span><span class="syntax-string"> != </span><span class="syntax-string">{</span>required_major<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> CompatibilityReport<span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> reasons<span class="syntax-punctuation">,</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>reasons<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Record<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">r1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">r2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">record_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">r3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> fit_linear_model<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    schema <span class="syntax-operator">=</span> FeatureSchema<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>FeatureSpec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    runtime <span class="syntax-operator">=</span> RuntimeRequirement<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-runtime</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-model-bundle-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        bundle <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bundle</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        manifest <span class="syntax-operator">=</span> write_bundle<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            bundle<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            data_snapshot_sha256<span class="syntax-operator">=</span>canonical_record_hash<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            runtime<span class="syntax-operator">=</span>runtime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        verify_bundle<span class="syntax-punctuation">(</span>bundle<span class="syntax-punctuation">,</span> manifest<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        report <span class="syntax-operator">=</span> compatibility_report<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            expected_schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            actual_schema<span class="syntax-operator">=</span>schema<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            runtime<span class="syntax-operator">=</span>runtime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            python_version<span class="syntax-operator">=</span>sys<span class="syntax-operator">.</span>version_info<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            package_versions<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-runtime</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1.0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">prediction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> model<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">manifest:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> sha256_text<span class="syntax-punctuation">(</span>canonical_json<span class="syntax-punctuation">(</span>manifest_payload<span class="syntax-punctuation">(</span>manifest<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">compatible:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>compatible<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

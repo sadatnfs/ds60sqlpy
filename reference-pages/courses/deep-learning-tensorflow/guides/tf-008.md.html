@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -138,61 +184,61 @@
 <p>The checked-in learner source remains a reusable worksheet. For optional native study, follow the <a href="../../../docs/setup/first-success.md.html">setup guide</a> and save your edited copy under <code>.learning/expansion/tf-008/</code>. The chosen interpreter must provide the lesson&#x27;s declared profile. A missing dependency is a runtime setup issue, not an invitation to install packages inside a lesson.</p>
 <p>The learner exposes <code>gradient_step(rate=0.1, initial_weight=0.0)</code> with numeric fields <code>loss_before</code>, <code>gradient</code>, <code>weight_after</code> and <code>loss_after</code>. The fixed verifier inspects those values rather than printed dictionary formatting. A passing worked implementation verifies its mechanism; the six exercises still require your predictions, diagnoses and a fresh transfer case.</p>
 <h3 id="derive-when-this-learning-rate-contracts-the-error">Derive when this learning rate contracts the error<a class="heading-anchor" href="#derive-when-this-learning-rate-contracts-the-error" aria-label="Link to this section">#</a></h3>
-<p>For this three-point model, L(w) = (14/3)(w-2) squared and its derivative is (28/3)(w-2). Write the parameter error as e = w-2. One gradient update with learning rate eta gives e_next = (1 - 28 eta/3)e. Repeated updates contract this scalar error precisely when the absolute value of that multiplier is less than one, giving 0 &lt; eta &lt; 3/14.</p>
-<p>At eta = 0.1, the multiplier is 1/15, so the squared-loss ratio is 1/225. At eta = 0.25, the multiplier is -4/3: the update crosses the optimum and increases squared error by 16/9. This derives the larger-step failure in the exercise from the objective instead of treating it as mysterious optimizer behavior. A multiplier between -1 and zero would cross the optimum while still contracting the error.</p>
+<p>For this three-point model, L(w) = (14/3)(w-2) squared and its derivative is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>28</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\frac{28}{3}(w-2)</annotation></semantics></math>. Write the parameter error as e = w-2. One gradient update with learning rate eta gives e_next = (1 - 28 eta/3)e. Repeated updates contract this scalar error precisely when the absolute value of that multiplier is less than one, giving 0 &lt; eta &lt; <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>14</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{14}</annotation></semantics></math>.</p>
+<p>At eta = 0.1, the multiplier is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>15</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{15}</annotation></semantics></math>, so the squared-loss ratio is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>225</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{225}</annotation></semantics></math>. At eta = 0.25, the multiplier is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-4}{3}</annotation></semantics></math>: the update crosses the optimum and increases squared error by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>16</mn></mrow><mrow><mn>9</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{16}{9}</annotation></semantics></math>. This derives the larger-step failure in the exercise from the objective instead of treating it as mysterious optimizer behavior. A multiplier between -1 and zero would cross the optimum while still contracting the error.</p>
 <p>This bound belongs to this scalar quadratic and its chosen loss reduction. Changing feature scale, adding a bias, changing from mean to sum, or using a nonlinear network changes the curvature and may change the useful update range. The derivation gives a method of reasoning about one transparent problem, not a universal learning-rate prescription.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-derive-the-result-then-ask-the-tape">Example A: derive the result, then ask the tape<a class="heading-anchor" href="#example-a-derive-the-result-then-ask-the-tape" aria-label="Link to this section">#</a></h4>
 <p>At <code>w=0</code>, the residuals are <code>[-2,-4,-6]</code>. Their squares sum to 56, so the mean loss is <code>56/3</code>. Differentiating each square gives <code>2*x*(w*x-y)</code>. At zero, their mean is <code>-56/3</code>. With learning rate <code>1/10</code>, subtraction moves the weight to <code>28/15</code>. The new residuals are <code>[-2/15,-4/15,-6/15]</code>, giving a new mean loss of <code>56/675</code>. The sign has a concrete interpretation: increasing a weight that is below 2 reduces the loss locally.</p>
-<pre><code class="language-python">import math
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-# A CPU-only arithmetic experiment, not a model-quality benchmark.
-with tf.device(&quot;/CPU:0&quot;):
-    x = tf.constant([1.0, 2.0, 3.0], dtype=tf.float64)
-    y = tf.constant([2.0, 4.0, 6.0], dtype=tf.float64)
-    w = tf.Variable(0.0, dtype=tf.float64)
-    learning_rate = tf.constant(0.1, dtype=tf.float64)
+<span class="syntax-comment"># A CPU-only arithmetic experiment, not a model-quality benchmark.</span>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    y <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    w <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    learning_rate <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
 
-    with tf.GradientTape() as tape:
-        prediction = w * x
-        loss = tf.reduce_mean(tf.square(prediction - y))
-    gradient = tape.gradient(loss, w)
-    if gradient is None:
-        raise ValueError(&quot;The loss is disconnected from w&quot;)
-    before = float(loss.numpy())
-    grad = float(gradient.numpy())
-    w.assign_sub(learning_rate * gradient)
-    after = float(tf.reduce_mean(tf.square(w * x - y)).numpy())
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        prediction <span class="syntax-operator">=</span> w <span class="syntax-operator">*</span> x
+        loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>prediction <span class="syntax-operator">-</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> gradient <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">The loss is disconnected from w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    before <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    grad <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span>learning_rate <span class="syntax-operator">*</span> gradient<span class="syntax-punctuation">)</span>
+    after <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>w <span class="syntax-operator">*</span> x <span class="syntax-operator">-</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-assert math.isclose(before, 56 / 3, rel_tol=0, abs_tol=1e-12)
-assert math.isclose(grad, -56 / 3, rel_tol=0, abs_tol=1e-12)
-assert math.isclose(float(w.numpy()), 28 / 15, rel_tol=0, abs_tol=1e-12)
-assert math.isclose(after, 56 / 675, rel_tol=0, abs_tol=1e-12)
-print(
-    {&quot;loss_before&quot;: before, &quot;gradient&quot;: grad, &quot;weight_after&quot;: float(w.numpy()), &quot;loss_after&quot;: after}
-)</code></pre>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>before<span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>grad<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">28</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>after<span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">675</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">loss_before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> before<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gradient</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> grad<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">weight_after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">loss_after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> after<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> old loss approximately <code>18.666666666666668</code>, gradient approximately <code>-18.666666666666668</code>, new weight approximately <code>1.8666666666666667</code>, and new loss approximately <code>0.08296296296296296</code>. Floating-point text may differ in its last digits. The four absolute-tolerance assertions, rather than the printed formatting, are the checks.</p>
 <p>Running the whole file starts again from zero. Running only the assignment line twice would reuse a stale gradient; it is not two correctly computed training steps.</p>
 <h4 id="example-b-a-shape-bug-with-a-plausible-scalar-loss">Example B: a shape bug with a plausible scalar loss<a class="heading-anchor" href="#example-b-a-shape-bug-with-a-plausible-scalar-loss" aria-label="Link to this section">#</a></h4>
 <p>A column target has shape <code>(3,1)</code>. Subtracting it from a vector prediction of shape <code>(3,)</code> creates all nine combinations, with shape <code>(3,3)</code>. At zero every prediction is zero, so this incorrect objective accidentally has the same initial MSE. Its gradient exposes the changed pairing.</p>
-<pre><code class="language-python">import math
-import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-with tf.device(&quot;/CPU:0&quot;):
-    x = tf.constant([1.0, 2.0, 3.0], dtype=tf.float64)
-    y_column = tf.constant([[2.0], [4.0], [6.0]], dtype=tf.float64)
-    bad_w = tf.Variable(0.0, dtype=tf.float64)
-    with tf.GradientTape() as tape:
-        residual_grid = bad_w * x - y_column
-        bad_loss = tf.reduce_mean(tf.square(residual_grid))
-    bad_gradient = tape.gradient(bad_loss, bad_w)
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    y_column <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    bad_w <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        residual_grid <span class="syntax-operator">=</span> bad_w <span class="syntax-operator">*</span> x <span class="syntax-operator">-</span> y_column
+        bad_loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>residual_grid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    bad_gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>bad_loss<span class="syntax-punctuation">,</span> bad_w<span class="syntax-punctuation">)</span>
 
-assert tuple(residual_grid.shape) == (3, 3)
-assert math.isclose(float(bad_loss.numpy()), 56 / 3, rel_tol=0, abs_tol=1e-12)
-assert math.isclose(float(bad_gradient.numpy()), -16.0, rel_tol=0, abs_tol=1e-12)
-print(residual_grid.shape, float(bad_gradient.numpy()))</code></pre>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>residual_grid<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>bad_loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>bad_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">16.0</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>residual_grid<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>bad_gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> <code>(3, 3)</code> and <code>-16.0</code>. The intended gradient is <code>-56/3</code>, so a matching initial loss was insufficient evidence. The wrong objective uses averages over all input/target combinations instead of paired observations. An appropriate first repair is an explicit equal-vector-shape contract, before optimization.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Without rerunning the examples, predict the sign of the gradient at <code>w=3</code> and whether a rate of <code>0.25</code> at <code>w=0</code> must improve the loss. Save your reasons. Then use Exercises 2 and 5 to investigate. Keep an unexpected result alongside the prediction rather than rewriting the prediction after seeing output.</p>
@@ -228,13 +274,13 @@ print(residual_grid.shape, float(bad_gradient.numpy()))</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Explain why <code>x</code> may be a constant while <code>w</code> is trainable; why <code>None</code> differs from zero; why a scalar loss can hide a shape bug; and why an update must be followed by another forward calculation. Use new points <code>x=[1,2]</code>, <code>y=[3,6]</code> for an oral transfer check rather than quoting the pilot. Name the split and additional evidence needed before saying a trained model is useful on new observations.</p>
 <h3 id="evidence-rubric">Evidence rubric<a class="heading-anchor" href="#evidence-rubric" aria-label="Link to this section">#</a></h3>
-<p>Score each dimension 0 (missing), 1 (partly supported) or 2 (independently supported): shape/dtype/reduction, derivative/update arithmetic, diagnosis of missing/zero/large-step failures, protection against a bad pairing, and honest interpretation of training versus held-out evidence. A recommendation to continue normally needs at least 8/10, with no zero for shape integrity or claim boundaries, plus a successful fresh transfer explanation. This is a human evidence rubric, not automatic grading or certification.</p>
+<p>Score each dimension 0 (missing), 1 (partly supported) or 2 (independently supported): shape/dtype/reduction, derivative/update arithmetic, diagnosis of missing/zero/large-step failures, protection against a bad pairing, and honest interpretation of training versus held-out evidence. A recommendation to continue normally needs at least <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math>, with no zero for shape integrity or claim boundaries, plus a successful fresh transfer explanation. This is a human evidence rubric, not automatic grading or certification.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Proceed to <code>tf-009</code> to distinguish a batch, epoch and update count. Keep the arithmetic helper as a regression oracle before using the Keras training path in <code>tf-011</code>. Review active <code>python-33</code> or <code>python-35</code> as needed; this sample does not record those lessons as completed.</p>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>Reviewed <strong>2026-10-22</strong>: the <a href="https://www.tensorflow.org/guide/autodiff">TensorFlow autodiff guide</a> supports tape/watch semantics. The <a href="https://keras.io/getting_started/">Keras getting-started guide</a> and <a href="https://www.tensorflow.org/install/pip">TensorFlow install guide</a> support the planned profile discussion. The arithmetic oracle was checked independently with rational arithmetic during authoring. TensorFlow code was syntax-checked, not executed in this design phase; no TensorFlow package or model was installed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning teaching workflow for the lesson tf-008, One gradient step you can audit. Read
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning teaching workflow for the lesson tf-008, One gradient step you can audit. Read
  courses/deep-learning-tensorflow/guides/tf-008.md and the learner source
  courses/deep-learning-tensorflow/lessons/tf-008.py.
 These are authored beta artifacts; use the current catalog/readiness state. The learner&#x27;s own copy is

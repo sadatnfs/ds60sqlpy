@@ -26,13 +26,13 @@ The [Scala learner](../lessons/spark-034.scala) and [PySpark learner](../lessons
 
 - **Outer finalization:** Emitting an unmatched row only after progress establishes that no eligible future match is expected under the policy.
 
-- **Multiple-watermark policy:** The rule combining progress from multiple streaming inputs; the conservative minimum can be held back by a slower oridle side.
+- **Multiple-watermark policy:** The rule combining progress from multiple streaming inputs; the conservative minimum can be held back by a slower or idle side.
 
-- **Boundary event:** An event exactly at an interval edge, used to distinguish inclusive fromexclusive matching semantics.
+- **Boundary event:** An event exactly at an interval edge, used to distinguish inclusive from exclusive matching semantics.
 
 - **Retention bound:** A time-based eligibility limit whose actual state size also depends on input rates, key skew and progress; it is not a fixed byte budget.
 
-A stream-stream join cannot decide every match when the first row arrives. It retains records that might match data arriving later on the other side. This lesson joins impression and click streams using both key equality and an explicit interval: click_time is at orafter impression_time and strictly before impression_time plus ten minutes. Watermarks on both event-time columns constrain the retained history under the stated late-data policy.
+A stream-stream join cannot decide every match when the first row arrives. It retains records that might match data arriving later on the other side. This lesson joins impression and click streams using both key equality and an explicit interval: click_time is at or after impression_time and strictly before impression_time plus ten minutes. Watermarks on both event-time columns constrain the retained history under the stated late-data policy.
 
 The first impression file has i1/A at 00:00, i2/B at 00:00 and i3/C at 00:05. The click file has c1/A at 00:03, c2/C at 00:10, c3/A at 00:10 and c4/Z at 00:04. The valid pairs are(i1, c1) and (i3, c2). Clickc 3 is exactly at i1's exclusive upper boundary and must not match. Clickc 4 has no matching identity key. Impressioni 2 is unmatched, but a streaming left outer join cannot immediately conclude that noB click will arrive within its ten-minute interval.
 
@@ -40,11 +40,11 @@ Both streams use a five-minute watermark. The application explicitly keeps the c
 
 The second phase publishes one 00:30 administrative record on each side, using different keys so the advancers cannot match each other. Advancing both sides matters: under the minimum policy, a stalled input can hold back global progress even if the other side races ahead. After the second finite run and its no-data state-cleanup batch, the actual watermark reaches the required boundary and i2 can be emitted with a NULL click ID. The advancer impression itself is still too recent to be finalized as unmatched.
 
-The final inner sink contains the same two matched pairs. The final left outer sink contains those pairs plus(i2, NULL). The reference inspects actual progress watermarks and state-removal metrics alongside the output. It does not infer an outerNULL row from the mere absence of a click in one input file orfrom a wall-clock sleep. The two queries use separate checkpoints and sinks so their source progress and state cannot interfere.
+The final inner sink contains the same two matched pairs. The final left outer sink contains those pairs plus(i2, NULL). The reference inspects actual progress watermarks and state-removal metrics alongside the output. It does not infer an outerNULL row from the mere absence of a click in one input file or from a wall-clock sleep. The two queries use separate checkpoints and sinks so their source progress and state cannot interfere.
 
 The join condition remains part of the business contract. Inclusive BETWEEN would incorrectly include c3 at the ten-minute boundary. Removing the key equality would create unrelated pairs. Removing the temporal bound would leave a left row eligible for an arbitrarily late right match and prevent the same finite outer-finalization reasoning. The final negative control requests a stream-stream left outer join with key equality alone and requires an analysis rejection under this setup.
 
-A time-bounded condition plus watermarks supplies an eviction policy, not a universal fixed-memory guarantee. A high event rate, hot key, large payload orwatermark stalled by an idle side can still produce substantial state. Increasing the delay retains more potential matches and state; reducing it changes late-data tolerance. A production design must connect the chosen delay to business lateness requirements and observed state/memory/task metrics.
+A time-bounded condition plus watermarks supplies an eviction policy, not a universal fixed-memory guarantee. A high event rate, hot key, large payload or watermark stalled by an idle side can still produce substantial state. Increasing the delay retains more potential matches and state; reducing it changes late-data tolerance. A production design must connect the chosen delay to business lateness requirements and observed state/memory/task metrics.
 
 Changing the multiple-watermark policy to a faster-progress rule can cause the slow stream older data to be treated as late earlier. That is a semantic and operational decision, not just a latency knob. The lesson records the policy and keeps it unchanged across compatible checkpoint restarts. It makes no claim that an input watermark configuration automatically proves all expected outer results are already emitted.
 
@@ -139,7 +139,7 @@ The tiny nested-loop oracle checks identity and time predicates without reusing 
 
 Read the owned impression and click file directories with their explicit schemas, maxFilesPerTrigger 1 and five-minute watermarks on their respective event-time columns.
 
-**Expected result/shape:** Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely fromconstruction.
+**Expected result/shape:** Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely from construction.
 
 **Verify:** Assert both streaming flags, the declared timestamp fields and policymin before execution.
 
@@ -149,7 +149,7 @@ Read the owned impression and click file directories with their explicit schemas
 
 Build either an inner orleft_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
 
-**Expected result/shape:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 butnot boundaryclickc 3.
+**Expected result/shape:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 but not boundaryclickc 3.
 
 **Verify:** Assert output shape and reject an unsupported kind value; later exact pair checks validate both predicates.
 
@@ -165,7 +165,7 @@ Execute a named join kind with AvailableNow, Parquet append and its own checkpoi
 
 **Progressive hint:** Each query owns independent state even when it reads the same source directories.
 
-### Exercise 4: Distinguish immediate matches frompending unmatched impressions
+### Exercise 4: Distinguish immediate matches from pending unmatched impressions
 
 Read either owned output as ordered(impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
 
@@ -173,13 +173,13 @@ Read either owned output as ordered(impression_id, click_id) pairs. After phase 
 
 **Verify:** Assert exact pair lists and absence of prematurei 2/NULL; do not rely only on output count 2.
 
-**Progressive hint:** An outer join preserves a future unmatched result only after its event-time eligibility isclosed.
+**Progressive hint:** An outer join preserves a future unmatched result only after its event-time eligibility is closed.
 
 ### Exercise 5: Advance both sides and observe delayed outer finalization
 
-Publish distinct-key 00:30 advancers toboth sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
+Publish distinct-key 00:30 advancers to both sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
 
-**Expected result/shape:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal ispositive; the new advancer impression remains pending.
+**Expected result/shape:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
 
 **Verify:** Assert the complete outer ledger, input 2 for each new run, observed progress boundary and removed-state count.
 

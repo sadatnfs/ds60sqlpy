@@ -30,11 +30,11 @@ Using ideal decimal arithmetic, the reconstructed matrix is[[0, -34/35], [17/10,
 
 Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is(17/140)*3=51/140, about0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
 
-The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape[2, 1] and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are0.1, the first B gradient is 0.1*sum(Y)*X, approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
+The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape[2, 1] and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is 0.1*sum(Y)*X, approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
 
 The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
 
-Two packed bytes plus a chosen float32 scale field would occupy six payload bytes in that logical serialized layout. The fixture's scale variable is a Python float and is not itself a four-byte on-disk record; the counter explicitly excludes object overhead. Computation also materializes a16-byte float32 matrix. Calling six bytes the process's peak memory would combine incompatible accounting levels.
+Two packed bytes plus a chosen float32 scale field would occupy six payload bytes in that logical serialized layout. The fixture's scale variable is a Python float and is not itself a four-byte on-disk record; the counter explicitly excludes object overhead. Computation also materializes a 16-byte float32 matrix. Calling six bytes the process's peak memory would combine incompatible accounting levels.
 
 The original QLoRA method includes NF4, double quantization and paged-optimizer machinery. This lesson implements uniform codes and ordinary CPU adapter gradients instead. Those names identify different mechanisms; the local result does not inherit the paper's GPU measurements. [QLoRA](https://arxiv.org/abs/2305.14314).
 
@@ -48,7 +48,7 @@ The original QLoRA method includes NF4, double quantization and paged-optimizer 
 
 ## Exercise 1: Quantize a fixed matrix
 
-The question is: QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.
+The question is: QuantizeW[[.1, -.9], [1.7, -.2]] with scale 1.7/7 andnearest-even rounding.
 
 The shared scale is set by the largest magnitude. This is a simple uniform quantizer, not the distribution-awareNF4 codebook used in the referenced method.
 
@@ -99,7 +99,7 @@ assert np.isfinite(approximate).all() and np.max(np.abs(approximate-reference))>
 
 ## Exercise 4: Train only a small adapter
 
-The question is: Use frozen dequantizedW, rank 1 A/B and10SGD updates towardzero output.
+The question is: Use frozen dequantizedW, rank 1 A/B and10SGD updates toward zero output.
 
 Gradients reach adapter factors through a computation using fixed approximate weights. The base codes are not being optimized in this example.
 
@@ -127,13 +127,13 @@ storage=packed.nbytes+np.dtype('float32').itemsize; compute_buffer=dequantized.n
 assert storage==6 and compute_buffer==16
 ```
 
-**Expected:** packed representation6 bytes; dequantizedbuffer16 bytes; overheadexcluded.
+**Expected:** packed representation6 bytes; dequantizedbuffer16 bytes; overhead excluded.
 
-**Verify:** Compare the computed values or written argument with packed representation6 bytes; dequantizedbuffer16 bytes; overheadexcluded.
+**Verify:** Compare the computed values or written argument with packed representation6 bytes; dequantizedbuffer16 bytes; overhead excluded.
 
 ## Exercise 6: State what was not measured
 
-The question is: Write a receipt distinguishing uniform4-bitCPU packing fromNF4, double quantization, paged optimizers andGPU memory.
+The question is: Write a receipt distinguishing uniform4-bitCPU packing from NF4, double quantization, paged optimizers and GPU memory.
 
 An accurate partial implementation is more useful than a misleading full-method label. The optional scale recipe must use its actual backend and produce separate measurements before making hardware claims.
 
@@ -142,9 +142,9 @@ receipt={'uniform_4bit_packing':True,'actual_adapter_update':True,'nf4':False,'d
 assert receipt['actual_adapter_update'] and not any(receipt[k] for k in ['nf4','double_quantization','paged_optimizer','gpu_peak_memory_measured'])
 ```
 
-**Expected:** all four unimplemented claims explicitlyFalse.
+**Expected:** all four unimplemented claims explicitly False.
 
-**Verify:** Compare the computed values or written argument with all four unimplemented claims explicitlyFalse.
+**Verify:** Compare the computed values or written argument with all four unimplemented claims explicitly False.
 
 ## Review after comparison
 

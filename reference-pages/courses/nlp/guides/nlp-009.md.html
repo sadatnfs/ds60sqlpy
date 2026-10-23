@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,32 +166,32 @@
 <p>Intermediate; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-008</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A linear text classifier is a useful baseline because its calculation can be inspected from tokens to a score. The input unit here is one short support message and the label indicates whether it belongs to an urgent category. The task is classification under a defined annotation policy, not a claim that a particular word always implies real operational urgency. A customer can quote an urgent message, negate it or use unfamiliar language.</p>
-<p>The representation maps each document to a vector x of token counts. A binary logistic model computes z=w_transpose*x+b and p=1/(1+exp(-z)). The coefficient w_j changes the log odds by w_j for one additional occurrence of feature j, conditional on the other represented features. The bias b shifts the baseline score. The model learns these values by minimizing a classification loss plus a regularization penalty, not by counting how often a coefficient agrees with a causal explanation.</p>
+<p>The representation maps each document to a vector x of token counts. A binary logistic model computes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><msup><mi>w</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mo>·</mo><mi>x</mi><mo>+</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">z=w^{\mathsf T}\cdot x+b</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mi>z</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">p=\frac{1}{1+\exp(-z)}</annotation></semantics></math>. The coefficient w_j changes the log odds by w_j for one additional occurrence of feature j, conditional on the other represented features. The bias b shifts the baseline score. The model learns these values by minimizing a classification loss plus a regularization penalty, not by counting how often a coefficient agrees with a causal explanation.</p>
 <p>Separate three decisions: which features to represent, how to fit a score, and which score threshold triggers an action. A probability of 0.7 and a threshold of 0.8 produce a negative action without changing the probability estimate. Calibration asks whether predictions near 0.7 correspond to roughly 70 percent positives in the relevant population. Good ranking, calibrated probabilities and a useful decision rule are related but distinct properties.</p>
 <h3 id="notation-loss-and-regularization">Notation, loss and regularization<a class="heading-anchor" href="#notation-loss-and-regularization" aria-label="Link to this section">#</a></h3>
-<p>For labels y in {0,1}, binary cross-entropy is -y<em>log(p)-(1-y)</em>log(1-p). It penalizes confident mistakes strongly. An L2 penalty discourages large coefficient magnitudes, reducing variance when many correlated token features have little support. In the scikit-learn interface used here, smaller C means stronger regularization. This parameter is not a probability or a universal complexity scale across datasets.</p>
+<p>For labels y in {0,1}, binary cross-entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>y</mi><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-y\cdot \log(p)-(1-y)\cdot \log(1-p)</annotation></semantics></math>. It penalizes confident mistakes strongly. An L2 penalty discourages large coefficient magnitudes, reducing variance when many correlated token features have little support. In the scikit-learn interface used here, smaller C means stronger regularization. This parameter is not a probability or a universal complexity scale across datasets.</p>
 <p>A separable tiny corpus can tempt an unregularized fit toward extreme coefficients. That would make the training messages look certain without establishing confidence on new language. The fixture therefore checks a qualitative effect of regularization, smaller coefficient norm for smaller C, rather than asserting that one setting is universally optimal. Tune C using a held-out development design with document families kept together.</p>
-<p>Use numerically stable expressions for sigmoid and log loss. Directly evaluating exp(-z) can overflow for a very negative z. The reference sigmoid uses exp(-logaddexp(0,-z)), where logaddexp computes a stable log-sum-exp. This is a numerical implementation detail with a substantive consequence: finite scores should not become NaN probabilities merely because their magnitude is large.</p>
+<p>Use numerically stable expressions for sigmoid and log loss. Directly evaluating <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-z)</annotation></semantics></math> can overflow for a very negative z. The reference sigmoid uses <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">(</mo><mo>−</mo><mo>logaddexp</mo><mo stretchy="false">(</mo><mn>0</mn><mo>,</mo><mo>−</mo><mi>z</mi><mo stretchy="false">)</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">\exp\bigl(-\operatorname{logaddexp}(0,-z)\bigr)</annotation></semantics></math>, where logaddexp computes a stable log-sum-exp. This is a numerical implementation detail with a substantive consequence: finite scores should not become NaN probabilities merely because their magnitude is large.</p>
 <h3 id="syntax-anatomy-and-leakage-boundaries">Syntax anatomy and leakage boundaries<a class="heading-anchor" href="#syntax-anatomy-and-leakage-boundaries" aria-label="Link to this section">#</a></h3>
 <p>make_pipeline chains a CountVectorizer and LogisticRegression so fitting the pipeline fits the vocabulary only on training text. transform applies that frozen vocabulary to held-out text. The unknown token escalation is ignored in this deliberately simple count representation; it must not expand the vocabulary during evaluation. The model&#x27;s feature_names and coefficient positions must remain aligned.</p>
 <p>CountVectorizer produces a sparse document-by-feature matrix. A row is a document, a column is a vocabulary item, and an entry is a count. The toy training corpus has six vocabulary items and six documents. This is enough to trace a mechanism, not estimate deployment accuracy. Real splits should hold out related templates, users and time periods when those relationships create dependence.</p>
 <p>A pipeline does not automatically solve all leakage. If the documents already include post-resolution phrases unavailable at triage time, a correctly implemented split can still evaluate the wrong information set. Write down when each message fragment and label would be known.</p>
 <h3 id="calibration-and-failure-diagnosis">Calibration and failure diagnosis<a class="heading-anchor" href="#calibration-and-failure-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>The Brier score is the mean of (p-y)^2 for binary outcomes. It evaluates probability quality, combining calibration and discrimination effects; it is not a pure calibration-only statistic. The reference compares two fixed probability arrays to explain scoring. It does not fit or claim a calibrated model from four observations. A real calibrator needs separate predictions and labels, usually through a held-out or cross-validated procedure that avoids fitting and judging on the same cases.</p>
+<p>The Brier score is the mean of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>p</mi><mo>−</mo><mi>y</mi><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(p-y\right)}^{2}</annotation></semantics></math> for binary outcomes. It evaluates probability quality, combining calibration and discrimination effects; it is not a pure calibration-only statistic. The reference compares two fixed probability arrays to explain scoring. It does not fit or claim a calibrated model from four observations. A real calibrator needs separate predictions and labels, usually through a held-out or cross-validated procedure that avoids fitting and judging on the same cases.</p>
 <p>A bag-of-words model can ignore negation and word order. Because not is absent from the training vocabulary, urgent and not urgent map to the same vector in this fixture. Adding bigrams creates a feature for not urgent, but a feature name alone does not teach the correct label. You still need representative annotated examples and evaluation. Diagnose the error as a representation/training-data problem before increasing optimizer iterations.</p>
 <p>Inspect false positives, false negatives, unknown-token rates and performance by text family. A good average score can hide failures on short messages, dialects or newly introduced product names. Coefficients describe the learned representation and corpus, not universal linguistic rules.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-compute-a-score-by-hand">Worked example 1: Compute a score by hand<a class="heading-anchor" href="#worked-example-1-compute-a-score-by-hand" aria-label="Link to this section">#</a></h4>
-<p>For feature order [urgent,thanks], counts [2,1], weights [2,-1] and bias -0.5, z=2<em>2+1</em>(-1)-0.5=2.5. The sigmoid is approximately 0.92414. Increasing thanks by one lowers the logit to 1.5; it does not subtract exactly one from the probability because the sigmoid is nonlinear.</p>
-<pre><code class="language-python">import numpy as np
-x=np.array([2.,1.]);w=np.array([2.,-1.]);z=x@w-.5
-p=np.exp(-np.logaddexp(0.,-z))
-print(z,p)</code></pre>
+<p>For feature order [urgent,thanks], counts [2,1], weights [2,-1] and bias -0.5, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn><mo>·</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>−</mo><mn>0.5</mn><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">z=2\cdot 2+1\cdot (-1)-0.5=2.5</annotation></semantics></math>. The sigmoid is approximately 0.92414. Increasing thanks by one lowers the logit to 1.5; it does not subtract exactly one from the probability because the sigmoid is nonlinear.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>w<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>z<span class="syntax-operator">=</span>x<span class="syntax-decorator">@w</span><span class="syntax-operator">-</span><span class="syntax-number">.5</span>
+p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span>z<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: 2.5 and approximately 0.92414. The vector order is part of the contract.</p>
 <h4 id="worked-example-2-compare-decisions-and-probability-loss">Worked example 2: Compare decisions and probability loss<a class="heading-anchor" href="#worked-example-2-compare-decisions-and-probability-loss" aria-label="Link to this section">#</a></h4>
 <p>Probabilities [0.2,0.4,0.8] yield [false,false,true] at threshold 0.5 and [false,true,true] at 0.3. No retraining is needed to change the action threshold. For labels [1,0,1,0], probabilities [0.9,0.9,0.1,0.1] have Brier score 0.41; the less extreme [0.6,0.6,0.4,0.4] score 0.26. The second array is better on these four labels, but this does not establish population calibration.</p>
-<pre><code class="language-python">p=np.array([.9,.9,.1,.1]);y=np.array([1,0,1,0])
-print(np.mean((p-y)**2))</code></pre>
+<pre class="highlighted-code"><code class="language-python">p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: 0.41. Retain labels and probabilities together so the denominator and error units are explicit.</p>
 <h4 id="worked-example-3-fit-a-real-local-baseline">Worked example 3: Fit a real local baseline<a class="heading-anchor" href="#worked-example-3-fit-a-real-local-baseline" aria-label="Link to this section">#</a></h4>
 <p>The executable reference fits an actual scikit-learn logistic classifier to six authored messages. It predicts the two unambiguous probes urgent outage and thanks resolved as classes one and zero, and verifies that held-out escalation never enters the training vocabulary. These checks establish the implementation and fixture behavior. They do not create a meaningful test-set accuracy claim from two easy probes.</p>
@@ -163,9 +209,9 @@ print(np.mean((p-y)**2))</code></pre>
 <p><strong>Verify:</strong> Exactly six learned vocabulary terms; escalation absent; two stated probes predicted [1,0]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Use fit on TRAIN and transform on held-out text through one pipeline.</p>
 <h4 id="exercise-3-compare-regularization">Exercise 3: Compare regularization<a class="heading-anchor" href="#exercise-3-compare-regularization" aria-label="Link to this section">#</a></h4>
-<p>Fit the same corpus with C=0.1 and C=10 using the same solver/settings.</p>
-<p><strong>Expected:</strong> The C=0.1 coefficient norm is smaller; record both norms and do not call either universally best.</p>
-<p><strong>Verify:</strong> The C=0.1 coefficient norm is smaller; record both norms and do not call either universally best. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p>Fit the same corpus with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">C=0.1</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">C=10</annotation></semantics></math> using the same solver/settings.</p>
+<p><strong>Expected:</strong> The <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">C=0.1</annotation></semantics></math> coefficient norm is smaller; record both norms and do not call either universally best.</p>
+<p><strong>Verify:</strong> The <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">C=0.1</annotation></semantics></math> coefficient norm is smaller; record both norms and do not call either universally best. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> C is inverse regularization strength. Keep all other inputs fixed.</p>
 <h4 id="exercise-4-separate-a-threshold">Exercise 4: Separate a threshold<a class="heading-anchor" href="#exercise-4-separate-a-threshold" aria-label="Link to this section">#</a></h4>
 <p>Apply thresholds 0.5 and 0.3 to [0.2,0.4,0.8] with &gt;= semantics.</p>
@@ -196,7 +242,7 @@ print(np.mean((p-y)**2))</code></pre>
 <li><a href="https://scikit-learn.org/stable/modules/calibration.html">scikit-learn probability calibration</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-009.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-009.
 Read courses/nlp/guides/nlp-009.md and courses/nlp/learners/nlp-009.py.
 Direct prerequisites: `nlp-008`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,45 +161,45 @@
       <h1>K8S 041 Cases</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/fixtures/k8s-041-cases.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;lesson_id&quot;: &quot;k8s-041&quot;,</span>
-<span>  &quot;provenance&quot;: &quot;synthetic teaching cases, not runtime observations&quot;,</span>
-<span>  &quot;capability&quot;: &quot;qualified synthetic recovery drill with independent service/data acceptance and source timestamps&quot;,</span>
-<span>  &quot;browser_source&quot;: false,</span>
-<span>  &quot;cases&quot;: [</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 1,</span>
-<span>      &quot;task&quot;: &quot;Write the exact interruption start and required final gates.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;A fixed start definition and application+data finish predicate.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 2,</span>
-<span>      &quot;task&quot;: &quot;Subtract12:00:00Z from12:01:30Z in seconds.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;90seconds,compared with target120seconds.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 3,</span>
-<span>      &quot;task&quot;: &quot;Compare source11:59:50Z with restored11:59:30Z.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;20seconds,compared with target30seconds.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 4,</span>
-<span>      &quot;task&quot;: &quot;Evaluate service_ok true,data_ok false,Pod_ready true.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;Recovery finish remains false.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 5,</span>
-<span>      &quot;task&quot;: &quot;Identify timezone,clock source,backup reference,marker hash and host receipt for each milestone.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;Every measurement is traceable without exporting sensitive backup contents.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 6,</span>
-<span>      &quot;task&quot;: &quot;Report target,observed result,failed controls and untested conditions.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;A bounded drill conclusion with no universal recovery guarantee.&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;k8s-041&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;provenance&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;synthetic teaching cases, not runtime observations&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;capability&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;qualified synthetic recovery drill with independent service/data acceptance and source timestamps&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;browser_source&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;cases&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write the exact interruption start and required final gates.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A fixed start definition and application+data finish predicate.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Subtract12:00:00Z from12:01:30Z in seconds.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;90seconds,compared with target120seconds.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare source11:59:50Z with restored11:59:30Z.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;20seconds,compared with target30seconds.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Evaluate service_ok true,data_ok false,Pod_ready true.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Recovery finish remains false.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Identify timezone,clock source,backup reference,marker hash and host receipt for each milestone.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Every measurement is traceable without exporting sensitive backup contents.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Report target,observed result,failed controls and untested conditions.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A bounded drill conclusion with no universal recovery guarantee.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

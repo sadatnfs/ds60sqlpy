@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -176,10 +222,10 @@
 <h3 id="durable-authoring-and-regeneration-boundaries">Durable authoring and regeneration boundaries<a class="heading-anchor" href="#durable-authoring-and-regeneration-boundaries" aria-label="Link to this section">#</a></h3>
 <p>The first eight TensorFlow and first nine LLM bundles remain independently authored. Edit their Markdown and associated source directly; the completion generator intentionally preserves them.</p>
 <p>The next 61 bundles, <code>tf-009</code> through <code>tf-036</code> and <code>llm-010</code> through <code>llm-042</code>, are maintained under <code>courses/deep-learning-tensorflow/authoring/</code>. <code>tf.py</code> and <code>llm.py</code> register the specifications; dedicated modules retain the detailed rewrites; <code>depth_reviews_tf.py</code> and <code>depth_reviews_llm.py</code> supply topic-specific prose. From a prepared maintainer interpreter:</p>
-<pre><code class="language-text">python courses/deep-learning-tensorflow/authoring/build.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/deep-learning-tensorflow/authoring/build.py</code></pre>
 <p>For a prose-only update, use the renderer&#x27;s <code>write_all(only=selected_ids, guides_only=True)</code> after importing the appropriate specifications. Compare all Python fenced blocks and learner/solution artifacts before and after. The latest Docker-first refresh preserved all those bytes across 35 owned guides, recorded in <code>work/ml-owned-docker-paragraph-parity.json</code>.</p>
 <p>The six expert bundles, <code>llm-043</code> through <code>llm-048</code>, have separate sources under <code>courses/llm-theory/authoring/</code>:</p>
-<pre><code class="language-text">python courses/llm-theory/authoring/build.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/llm-theory/authoring/build.py</code></pre>
 <p>That workflow preserves the earlier 42 bundles and derives the README index from the plan and manifest. <code>authoring/readme.py</code> can refresh that index alone. Neither course authoring workflow changes worker implementations, runtime credentials, learner state, shared catalog registration or the practice baseline. Root integration owns catalog/navigation/reader generation and final browser delivery checks.</p>
 <p>When executable code changes, create a narrow inventory with the current source hashes and obtain a new matching runtime receipt. A prose-only guide hash change does not invalidate unchanged program bytes. Keep current status here coherent rather than appending contradictory historical waiting lists.</p></article>
   </main>

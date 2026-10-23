@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,9 +171,9 @@
 <p><strong>Chat template:</strong> The tokenizer-specific representation of roles and turn boundaries.</p>
 <p><strong>Training denominator:</strong> The number of active answer targets in an objective.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtargets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.</p>
+<p>Concatenate prompt IDs and answer IDs, then create inputs=sequence[:-1] and targets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.</p>
 <h3 id="enumerate-the-target-positions-before-training">Enumerate the target positions before training<a class="heading-anchor" href="#enumerate-the-target-positions-before-training" aria-label="Link to this section">#</a></h3>
-<p>Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when i+1&gt;=P, or equivalently i&gt;=P-1. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.</p>
+<p>Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>≥</mo><mi>P</mi></mrow><annotation encoding="application/x-tex">i+1\ge P</annotation></semantics></math>, or equivalently <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>i</mi><mo>≥</mo><mi>P</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i\ge P-1</annotation></semantics></math>. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.</p>
 <p>For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Input index</th>
@@ -170,48 +216,48 @@
 <p><strong>Does valid training loss imply trustworthy targets?</strong> No. Cross entropy will reward matching any accepted target, including an invented or policy-violating answer. Source support and annotation review must happen before optimization.</p>
 <p><strong>Why report active-token counts?</strong> They define the denominator and reveal empty or destructively truncated examples. They also make comparisons between variable-length batches interpretable.</p>
 <h3 id="exercise-1-align-an-answer-only-record">Exercise 1: Align an answer-only record<a class="heading-anchor" href="#exercise-1-align-an-answer-only-record" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use promptIDs[1, 2] andanswerIDs[5, 6, 3].</p>
+<p>The question is: Use prompt IDs[1, 2] and answer IDs[5, 6, 3].</p>
 <p>The first answer token5 is predicted at the second input position. Masking based on input positions alone would easily exclude this target by mistake.</p>
-<pre><code class="language-python">inputs,labels=prepare([1,2],[5,6,3],10)
-assert inputs==[1,2,5,6] and labels==[-100,5,6,3] and sum(x!=-100 for x in labels)==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">inputs<span class="syntax-punctuation">,</span>labels<span class="syntax-operator">=</span>prepare<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> inputs<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> labels<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> labels<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.</p>
 <h3 id="exercise-2-preserve-prompt-context-without-prompt-loss">Exercise 2: Preserve prompt context without prompt loss<a class="heading-anchor" href="#exercise-2-preserve-prompt-context-without-prompt-loss" aria-label="Link to this section">#</a></h3>
-<p>The question is: Change promptIDs to[8, 9] while retaining the answer; inspect labels.</p>
+<p>The question is: Change prompt IDs to[8, 9] while retaining the answer; inspect labels.</p>
 <p>The model sees the prompt through its forward computation even though prompt-prediction events are excluded from the supervised objective.</p>
-<pre><code class="language-python">other_inputs,other_labels=prepare([8,9],[5,6,3],10)
-assert other_inputs[:2]==[8,9] and other_labels==labels</code></pre>
+<pre class="highlighted-code"><code class="language-python">other_inputs<span class="syntax-punctuation">,</span>other_labels<span class="syntax-operator">=</span>prepare<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> other_inputs<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">9</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> other_labels<span class="syntax-operator">==</span>labels</code></pre>
 <p><strong>Expected:</strong> prompt inputs change; answer labels remain5, 6, 3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with prompt inputs change; answer labels remain5, 6, 3.</p>
 <h3 id="exercise-3-reject-an-empty-answer">Exercise 3: Reject an empty answer<a class="heading-anchor" href="#exercise-3-reject-an-empty-answer" aria-label="Link to this section">#</a></h3>
 <p>The question is: Prepare a record with prompt[1, 2] and no answer tokens.</p>
 <p>A mean loss over no supervised events is undefined. Silently retaining such rows can make a data pipeline appear larger without providing learning signal.</p>
-<pre><code class="language-python">try: prepare([1,2],[],10)
-except ValueError: pass
-else: raise AssertionError(&#x27;empty supervised answer accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> prepare<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">empty supervised answer accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError for no answer targets.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for no answer targets.</p>
 <h3 id="exercise-4-detect-destructive-truncation">Exercise 4: Detect destructive truncation<a class="heading-anchor" href="#exercise-4-detect-destructive-truncation" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use a context limit2 for a prompt oflength2 and answerlength3.</p>
 <p>Truncation policy must be checked after constructing the aligned labels. A record can remain syntactically nonempty while losing all supervised content.</p>
-<pre><code class="language-python">try: prepare([1,2],[5,6,3],2)
-except ValueError: pass
-else: raise AssertionError(&#x27;answer removed by truncation&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> prepare<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">answer removed by truncation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError because truncation removes every answer target.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError because truncation removes every answer target.</p>
 <h3 id="exercise-5-keep-family-splits-disjoint">Exercise 5: Keep family splits disjoint<a class="heading-anchor" href="#exercise-5-keep-family-splits-disjoint" aria-label="Link to this section">#</a></h3>
 <p>The question is: Assign two formatting variants tofamilyF and test that they cannot cross train/test.</p>
 <p>A model can memorize a template or answer pattern. Grouped evaluation measures transfer beyond the exact family used to construct training examples.</p>
-<pre><code class="language-python">train_families={&#x27;F&#x27;}; test_families={&#x27;F&#x27;,&#x27;G&#x27;}
-assert train_families&amp;test_families=={&#x27;F&#x27;}</code></pre>
+<pre class="highlighted-code"><code class="language-python">train_families<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> test_families<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> train_families<span class="syntax-operator">&amp;</span>test_families<span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> family intersectionF is a leak.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with family intersectionF is a leak.</p>
 <h3 id="exercise-6-reject-unsupported-targets-before-training">Exercise 6: Reject unsupported targets before training<a class="heading-anchor" href="#exercise-6-reject-unsupported-targets-before-training" aria-label="Link to this section">#</a></h3>
 <p>The question is: Mark a target answer as unsupported by its cited source and apply an admission gate.</p>
 <p>A correct tensor mask cannot make a fabricated target trustworthy. Data governance and numerical correctness are independent prerequisites for adaptation.</p>
-<pre><code class="language-python">record={&#x27;inputs&#x27;:inputs,&#x27;labels&#x27;:labels,&#x27;source_supported&#x27;:False,&#x27;annotation_reviewed&#x27;:True}
-accepted=record[&#x27;source_supported&#x27;] and record[&#x27;annotation_reviewed&#x27;]
-assert not accepted</code></pre>
+<pre class="highlighted-code"><code class="language-python">record<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">inputs</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>inputs<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">labels</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>labels<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">source_supported</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">annotation_reviewed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span>
+accepted<span class="syntax-operator">=</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">source_supported</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">annotation_reviewed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> accepted</code></pre>
 <p><strong>Expected:</strong> record excluded despite valid token arrays.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with record excluded despite valid token arrays.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

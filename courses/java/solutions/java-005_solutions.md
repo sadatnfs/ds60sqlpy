@@ -14,22 +14,22 @@ An array is a fixed-length indexed container. A String is immutable text represe
 
 ## Reading the reference
 
-Array indices start at0 and stop beforelength. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
+Array indices start at0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
 
 ## Exercise 1: Copy array storage
 
-Task: Copy array1,2,3,mutate the copy and compare the original.
+Task: Copy array 1,2,3,mutate the copy and compare the original.
 
-The new array owns its storage. A simple assignmentcopy=original would alias the same array and make the mutation visible through both variables.
+The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.
 
 ```java
 int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
 assert original[0] == 1 && copy[0] == 9;
 ```
 
-**Expected:** original starts1;copy starts9.
+**Expected:** original starts 1; copy starts 9.
 
-**Verify:** Compare the program values or named exception with original starts1;copy starts9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with original starts 1; copy starts 9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Count text units
 
@@ -51,7 +51,7 @@ assert text.codePointCount(0, text.length()) == 2;
 
 Task: Convert lowercasered to uppercase and retain both references.
 
-The method returns a new value rather than changinglower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.
+The method returns a new value rather than changing lower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.
 
 ```java
 String lower = "red"; String upper = lower.toUpperCase(Locale.ROOT);

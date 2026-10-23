@@ -74,9 +74,9 @@ assert sum(passed)/len(passed)==.9
 assert sum(s=='severe' and not p for s,p in zip(severity,passed))==1
 ```
 
-**Expected:** 90percent passes and1 severe failure.
+**Expected:** 90percent passes and 1 severe failure.
 
-**Verify:** Compare the computed values or written argument with 90percent passes and1 severe failure.
+**Verify:** Compare the computed values or written argument with 90percent passes and 1 severe failure.
 
 ## Exercise 5: Write bounded claims
 

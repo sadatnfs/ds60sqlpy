@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -337,16 +383,18 @@
 <li>Use half-open windows and independent integer-cent reconciliation.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-data-02.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python\professional\lessons\py_data_02_exact_values_time_text.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_data_02_exact_values_time_text<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_02_exact_values_time_text.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_02_exact_values_time_text.py</code></pre>
 <p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-data-02.html#solution-1">explanatory solutions</a> and <a href="python-data-02.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <p>A schema can say decimal, string, and timestamp while still leaving critical meaning undecided. What rounding is allowed? Do two visually identical labels denote one identity? Which side owns an event exactly at midnight? These are boundary policies, not formatting preferences. Think of the boundary as a translator that must declare which representations it accepts and how it preserves meaning. Reject ambiguity before calculating a polished result.</p>
@@ -363,22 +411,22 @@
 <p>For labels, NFC addresses canonical character equivalence. Casefold is a separate, explicit caseless-matching choice. Neither is a complete identity solution: normalization can reveal collisions that need review. Keep every raw spelling in the collision report. Do not claim that this eliminates homoglyphs, resolves languages, or makes untrusted paths safe.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-a-preserve-source-decimal-meaning">Example A: preserve source decimal meaning<a class="heading-anchor" href="#guide--example-a-preserve-source-decimal-meaning" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from decimal import Decimal
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
 
-assert Decimal(&quot;0.10&quot;) + Decimal(&quot;0.20&quot;) == Decimal(&quot;0.30&quot;)
-assert Decimal(0.1) != Decimal(&quot;0.1&quot;)
-assert int(Decimal(&quot;12.34&quot;) * 100) == 1234</code></pre>
+<span class="syntax-keyword">assert</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.20</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.30</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12.34</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1234</span></code></pre>
 <p><code>Decimal(&quot;0.10&quot;)</code> reads text directly. <code>Decimal(0.1)</code> instead captures the existing binary float value, including its approximation. The integer-cent conversion is safe here because the contract already limits precision to cents. Truncating arbitrary Decimal input first would hide an invalid third fractional digit. Expected observation: all three assertions pass, and the last amount has exactly 1234 cents.</p>
 <h5 id="guide--example-b-compare-instants-then-decide-window-ownership">Example B: compare instants, then decide window ownership<a class="heading-anchor" href="#guide--example-b-compare-instants-then-decide-window-ownership" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from datetime import datetime, timezone
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> datetime<span class="syntax-punctuation">,</span> timezone
 
-local = datetime.fromisoformat(&quot;2026-01-02T00:30:00+02:00&quot;)
-utc = local.astimezone(timezone.utc)
-start = datetime.fromisoformat(&quot;2026-01-01T22:00:00+00:00&quot;)
-end = datetime.fromisoformat(&quot;2026-01-01T23:00:00+00:00&quot;)
-assert utc.isoformat() == &quot;2026-01-01T22:30:00+00:00&quot;
-assert start &lt;= utc &lt; end
-assert not (start &lt;= end &lt; end)</code></pre>
+local <span class="syntax-operator">=</span> datetime<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-02T00:30:00+02:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+utc <span class="syntax-operator">=</span> local<span class="syntax-operator">.</span>astimezone<span class="syntax-punctuation">(</span>timezone<span class="syntax-operator">.</span>utc<span class="syntax-punctuation">)</span>
+start <span class="syntax-operator">=</span> datetime<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-01T22:00:00+00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+end <span class="syntax-operator">=</span> datetime<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-01T23:00:00+00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> utc<span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-01T22:30:00+00:00</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">assert</span> start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> utc <span class="syntax-operator">&lt;</span> end
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span>start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> end <span class="syntax-operator">&lt;</span> end<span class="syntax-punctuation">)</span></code></pre>
 <p><code>fromisoformat</code> parses a supplied offset; <code>astimezone</code> changes representation while preserving the instant. It does not relabel the wall clock. Expected observation: a local January 2 event belongs to the UTC January 1 window. The final assertion excludes the exact end, so adjacent windows cannot both own that instant. Replacing timezone information with <code>replace(tzinfo=...)</code> would assign a meaning rather than convert an already-known instant.</p>
 <h5 id="guide--wall-clock-ambiguity-needs-more-information">Wall-clock ambiguity needs more information<a class="heading-anchor" href="#guide--wall-clock-ambiguity-needs-more-information" aria-label="Link to this section">#</a></h5>
 <p>A timestamp without an offset cannot tell this lab which instant occurred. Reject it instead of assuming the executing machine&#x27;s timezone. A named zone also has historical and seasonal rules; a fixed offset does not teach those rules or resolve repeated daylight-saving clock times. This offline lab uses explicit offsets so Windows, macOS, and Linux agree without an external zone database. In real zoned data, preserve the zone, disambiguation policy, and timezone-data version when they matter to reproduction.</p>
@@ -431,7 +479,7 @@ assert not (start &lt;= end &lt; end)</code></pre>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Use these explicit instants in leakage-resistant evaluation. Bring the same currency, identity, and time policies to dataframe and SQL boundaries rather than assuming a library default matches your intended meaning.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-data-02.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-data-02.
 Read python/professional/companion-guides/py_data_02_exact_values_time_text.md and python/professional/lessons/py_data_02_exact_values_time_text.py.
 Check my direct prerequisites: python-21, python-29.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -471,109 +519,109 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-data-02: Exact Values, Unicode Identity, and Calendar Boundaries.</span>
-<span> </span>
-<span>Read ../companion-guides/py_data_02_exact_values_time_text.md before attempting the exercises.</span>
-<span>The example runs; unfinished exercise functions raise NotImplementedError.</span>
-<span>Keep solutions separate until you have attempted and checked the contract.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>from datetime import UTC, datetime</span>
-<span>from decimal import Decimal</span>
-<span> </span>
-<span> </span>
-<span>def parse_money(raw: object) -&gt; Decimal:</span>
-<span>    &quot;&quot;&quot;TODO: bounded nonnegative ASCII decimal text, at most two fractional digits.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete parse_money&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def canonical_label(raw: str) -&gt; str:</span>
-<span>    &quot;&quot;&quot;TODO: trim, NFC, casefold, NFC; reject empty labels.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete canonical_label&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def collision_groups(labels: list[str]) -&gt; dict[str, list[str]]:</span>
-<span>    &quot;&quot;&quot;TODO: report canonical keys with multiple distinct raw spellings.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete collision_groups&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def parse_instant(raw: str) -&gt; datetime:</span>
-<span>    &quot;&quot;&quot;TODO: parse an offset-aware ISO timestamp and return UTC.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete parse_instant&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def in_window(instant: datetime, start: datetime, end: datetime) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;TODO: validate aware instants and a positive half-open interval.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete in_window&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def window_total(</span>
-<span>    records: list[dict[str, str]], start: datetime, end: datetime</span>
-<span>) -&gt; tuple[int, Decimal]:</span>
-<span>    &quot;&quot;&quot;TODO: validate every source record, then sum selected exact cents.&quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;complete window_total&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Worked exact total:&quot;, Decimal(&quot;0.10&quot;) + Decimal(&quot;0.20&quot;))</span>
-<span>    print(</span>
-<span>        &quot;Worked UTC conversion:&quot;,</span>
-<span>        datetime.fromisoformat(&quot;2026-01-02T00:30:00+02:00&quot;).astimezone(UTC),</span>
-<span>    )</span>
-<span>    print(&quot;TODO: complete six boundaries and eight exercises&quot;)</span>
-<span> </span>
-<span># Exercise 1. Parse exact cents</span>
-<span># Prompt: Implement `parse_money`. Accept `&quot; 12.3 &quot;` as Decimal 12.30 and zero as Decimal</span>
-<span># 0.00. Preserve the two-decimal exponent.</span>
-<span># Verify: The accepted values have exponent -2 and integer-cent values 1230 and 0; `&quot;0.10&quot;` plus</span>
-<span># `&quot;0.20&quot;` totals exactly 0.30.</span>
-<span> </span>
-<span># Exercise 2. Reject ambiguous numeric forms</span>
-<span># Prompt: Probe `&quot;1.005&quot;`, `&quot;NaN&quot;`, `&quot;Infinity&quot;`, `&quot;1e2&quot;`, `&quot;-1&quot;`, an empty string, a float,</span>
-<span># and a thirteen-digit integer string.</span>
-<span># Verify: Every probe raises ValueError. A two-digit fractional amount `&quot;1.00&quot;` still succeeds,</span>
-<span># showing the check is not blanket rejection.</span>
-<span> </span>
-<span># Exercise 3. Expose Unicode collisions</span>
-<span># Prompt: Implement `canonical_label` using trim, NFC, casefold, then NFC. Implement</span>
-<span># collision_groups that retains distinct raw spellings for shared canonical values.</span>
-<span># Verify: Assert equal canonical values for `&quot;Café&quot;` and `&quot;Cafe\u0301&quot;`; collision output maps</span>
-<span># `strasse` to two raw spellings. Identical repeated raw text produces an empty collision</span>
-<span># mapping.</span>
-<span> </span>
-<span># Exercise 4. Parse and convert an instant</span>
-<span># Prompt: Implement `parse_instant` to require an aware parsed timestamp and return UTC.</span>
-<span># Compare `2026-01-02T00:30:00+02:00` with its UTC equivalent.</span>
-<span># Verify: Both representations produce equal datetimes at 2026-01-01 22:30 UTC; a timestamp</span>
-<span># without any offset raises ValueError.</span>
-<span> </span>
-<span># Exercise 5. Own an exact boundary once</span>
-<span># Prompt: Implement a window membership function that requires aware ordered bounds. Test</span>
-<span># start, one middle instant, end, and an empty or reversed window.</span>
-<span># Verify: Membership assertions return True for start/middle and False for end; tests capture</span>
-<span># ValueError for nonpositive windows. Adjacent-window boundary membership sums to exactly 1.</span>
-<span> </span>
-<span># Exercise 6. Reconcile a window total</span>
-<span># Prompt: Implement `window_total` over records with amount and occurred_at text. Include two</span>
-<span># in-window values 0.10 and 0.20 and an exact-end value 9.00.</span>
-<span># Verify: The result is count 2 and Decimal total 0.30; an independent integer sum gives 30</span>
-<span># cents. The 9.00 record is excluded.</span>
-<span> </span>
-<span># Exercise 7. Prevent filter-hidden invalid data</span>
-<span># Prompt: Add an out-of-window record with amount `&quot;bad&quot;`. Explain whether filtering is</span>
-<span># permitted to conceal the malformed source value.</span>
-<span># Verify: A test captures ValueError for the bad amount and confirms that no total is returned,</span>
-<span># even with the malformed record outside the selected window.</span>
-<span> </span>
-<span># Exercise 8. Transfer to local-day reporting</span>
-<span># Prompt: Write a policy note for a source that asks for a city-local business day instead of</span>
-<span># a UTC day. State what additional metadata and tests are needed without inventing a zone</span>
-<span># conversion.</span>
-<span># Verify: The note requires a named zone and rules/version, tests a seasonal offset change and</span>
-<span># ambiguous local time, and distinguishes a local day from a fixed 24-hour UTC window.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-data-02: Exact Values, Unicode Identity, and Calendar Boundaries.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_data_02_exact_values_time_text.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs; unfinished exercise functions raise NotImplementedError.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> UTC<span class="syntax-punctuation">,</span> datetime</span>
+<span class="source-line"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_money</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Decimal<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: bounded nonnegative ASCII decimal text, at most two fractional digits.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete parse_money</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical_label</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: trim, NFC, casefold, NFC; reject empty labels.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete canonical_label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">collision_groups</span><span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: report canonical keys with multiple distinct raw spellings.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete collision_groups</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_instant</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> datetime<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: parse an offset-aware ISO timestamp and return UTC.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete parse_instant</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">in_window</span><span class="syntax-punctuation">(</span>instant<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate aware instants and a positive half-open interval.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete in_window</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">window_total</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;TODO: validate every source record, then sum selected exact cents.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">complete window_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked exact total:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.20</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Worked UTC conversion:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        datetime<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-02T00:30:00+02:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>astimezone<span class="syntax-punctuation">(</span>UTC<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: complete six boundaries and eight exercises</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Parse exact cents</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `parse_money`. Accept `&quot; 12.3 &quot;` as Decimal 12.30 and zero as Decimal</span></span>
+<span class="source-line"><span class="syntax-comment"># 0.00. Preserve the two-decimal exponent.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The accepted values have exponent -2 and integer-cent values 1230 and 0; `&quot;0.10&quot;` plus</span></span>
+<span class="source-line"><span class="syntax-comment"># `&quot;0.20&quot;` totals exactly 0.30.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Reject ambiguous numeric forms</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Probe `&quot;1.005&quot;`, `&quot;NaN&quot;`, `&quot;Infinity&quot;`, `&quot;1e2&quot;`, `&quot;-1&quot;`, an empty string, a float,</span></span>
+<span class="source-line"><span class="syntax-comment"># and a thirteen-digit integer string.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Every probe raises ValueError. A two-digit fractional amount `&quot;1.00&quot;` still succeeds,</span></span>
+<span class="source-line"><span class="syntax-comment"># showing the check is not blanket rejection.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Expose Unicode collisions</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `canonical_label` using trim, NFC, casefold, then NFC. Implement</span></span>
+<span class="source-line"><span class="syntax-comment"># collision_groups that retains distinct raw spellings for shared canonical values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Assert equal canonical values for `&quot;Café&quot;` and `&quot;Cafe\u0301&quot;`; collision output maps</span></span>
+<span class="source-line"><span class="syntax-comment"># `strasse` to two raw spellings. Identical repeated raw text produces an empty collision</span></span>
+<span class="source-line"><span class="syntax-comment"># mapping.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Parse and convert an instant</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `parse_instant` to require an aware parsed timestamp and return UTC.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare `2026-01-02T00:30:00+02:00` with its UTC equivalent.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Both representations produce equal datetimes at 2026-01-01 22:30 UTC; a timestamp</span></span>
+<span class="source-line"><span class="syntax-comment"># without any offset raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Own an exact boundary once</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement a window membership function that requires aware ordered bounds. Test</span></span>
+<span class="source-line"><span class="syntax-comment"># start, one middle instant, end, and an empty or reversed window.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Membership assertions return True for start/middle and False for end; tests capture</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError for nonpositive windows. Adjacent-window boundary membership sums to exactly 1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Reconcile a window total</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Implement `window_total` over records with amount and occurred_at text. Include two</span></span>
+<span class="source-line"><span class="syntax-comment"># in-window values 0.10 and 0.20 and an exact-end value 9.00.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The result is count 2 and Decimal total 0.30; an independent integer sum gives 30</span></span>
+<span class="source-line"><span class="syntax-comment"># cents. The 9.00 record is excluded.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Prevent filter-hidden invalid data</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add an out-of-window record with amount `&quot;bad&quot;`. Explain whether filtering is</span></span>
+<span class="source-line"><span class="syntax-comment"># permitted to conceal the malformed source value.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A test captures ValueError for the bad amount and confirms that no total is returned,</span></span>
+<span class="source-line"><span class="syntax-comment"># even with the malformed record outside the selected window.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Transfer to local-day reporting</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Write a policy note for a source that asks for a city-local business day instead of</span></span>
+<span class="source-line"><span class="syntax-comment"># a UTC day. State what additional metadata and tests are needed without inventing a zone</span></span>
+<span class="source-line"><span class="syntax-comment"># conversion.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The note requires a named zone and rules/version, tests a seasonal offset change and</span></span>
+<span class="source-line"><span class="syntax-comment"># ambiguous local time, and distinguishes a local day from a fixed 24-hour UTC window.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -610,9 +658,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <p>Stable ID: <code>python-data-02</code>.</p>
 <p>Read the <a href="python-data-02.html#guide">guide</a> and attempt the <a href="python-data-02.html#learner">learner artifact</a> first. The <a href="python-data-02.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
 <p>The reference makes representation decisions before arithmetic or selection. A lexical money rule accepts one documented format; a separate Unicode pipeline preserves raw collisions; timestamp parsing requires an offset and normalizes the representation to UTC. The functions reject invalid inputs instead of consulting machine locale or silently rounding.</p>
-<pre><code class="language-python">from decimal import Decimal
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
 
-assert Decimal(&quot;0.10&quot;) + Decimal(&quot;0.20&quot;) == Decimal(&quot;0.30&quot;)</code></pre>
+<span class="syntax-keyword">assert</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.20</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.30</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Whole-batch totals use integer cents, so an unrelated caller changing the Decimal arithmetic context cannot silently round a large sum. The format is intentionally bounded; this is not a general financial ledger, language-aware identity service, or named-timezone resolver. Those broader systems require additional contracts and evidence.</p>
 <h4 id="solution-1--exercise-1-parse-exact-cents">Exercise 1. Parse exact cents<a class="heading-anchor" href="#solution-1--exercise-1-parse-exact-cents" aria-label="Link to this section">#</a></h4>
 <p>The money parser checks type before stripping and matches a small ASCII decimal grammar. It then constructs Decimal from text and quantizes to a cent exponent. Because the grammar already rules out a third fractional digit, quantization only standardizes representation; it never decides a rounding policy. A local Decimal context protects the small conversion from a caller&#x27;s unexpectedly low precision setting. Check both numeric equality and exponent, since Decimal(&quot;12.3&quot;) equals Decimal(&quot;12.30&quot;) numerically while representing different displayed precision. The chosen contract requires the cent exponent explicitly.</p>
@@ -664,101 +712,101 @@ assert Decimal(&quot;0.10&quot;) + Decimal(&quot;0.20&quot;) == Decimal(&quot;0.
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Explicit money, Unicode, and instant boundaries for python-data-02.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from __future__ import annotations</span>
-<span> </span>
-<span>import re</span>
-<span>import unicodedata</span>
-<span>from datetime import UTC, datetime</span>
-<span>from decimal import Decimal, localcontext</span>
-<span> </span>
-<span>MONEY = re.compile(r&quot;[0-9]{1,12}(?:\.[0-9]{1,2})?&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def parse_money(raw: object) -&gt; Decimal:</span>
-<span>    if not isinstance(raw, str) or MONEY.fullmatch(raw.strip()) is None:</span>
-<span>        raise ValueError(</span>
-<span>            &quot;expected nonnegative decimal text with at most &quot;</span>
-<span>            &quot;12 integer digits and 2 fractional digits&quot;</span>
-<span>        )</span>
-<span>    with localcontext() as context:</span>
-<span>        context.prec = 32</span>
-<span>        return Decimal(raw.strip()).quantize(Decimal(&quot;0.01&quot;))</span>
-<span> </span>
-<span> </span>
-<span>def canonical_label(raw: str) -&gt; str:</span>
-<span>    if not isinstance(raw, str) or not raw.strip():</span>
-<span>        raise ValueError(&quot;label must be nonempty text&quot;)</span>
-<span>    return unicodedata.normalize(&quot;NFC&quot;, unicodedata.normalize(&quot;NFC&quot;, raw.strip()).casefold())</span>
-<span> </span>
-<span> </span>
-<span>def collision_groups(labels: list[str]) -&gt; dict[str, list[str]]:</span>
-<span>    groups: dict[str, list[str]] = {}</span>
-<span>    for raw in labels:</span>
-<span>        group = groups.setdefault(canonical_label(raw), [])</span>
-<span>        if raw not in group:</span>
-<span>            group.append(raw)</span>
-<span>    return {key: values for key, values in groups.items() if len(values) &gt; 1}</span>
-<span> </span>
-<span> </span>
-<span>def _as_utc(value: datetime) -&gt; datetime:</span>
-<span>    if not isinstance(value, datetime) or value.utcoffset() is None:</span>
-<span>        raise ValueError(&quot;timestamp must have an explicit UTC offset&quot;)</span>
-<span>    return value.astimezone(UTC)</span>
-<span> </span>
-<span> </span>
-<span>def parse_instant(raw: str) -&gt; datetime:</span>
-<span>    if not isinstance(raw, str):</span>
-<span>        raise ValueError(&quot;timestamp must be text&quot;)</span>
-<span>    try:</span>
-<span>        parsed = datetime.fromisoformat(raw)</span>
-<span>    except ValueError as exc:</span>
-<span>        raise ValueError(&quot;invalid ISO timestamp&quot;) from exc</span>
-<span>    return _as_utc(parsed)</span>
-<span> </span>
-<span> </span>
-<span>def in_window(instant: datetime, start: datetime, end: datetime) -&gt; bool:</span>
-<span>    start, end, instant = _as_utc(start), _as_utc(end), _as_utc(instant)</span>
-<span>    if end &lt;= start:</span>
-<span>        raise ValueError(&quot;window end must follow start&quot;)</span>
-<span>    return start &lt;= instant &lt; end</span>
-<span> </span>
-<span> </span>
-<span>def window_total(</span>
-<span>    records: list[dict[str, str]], start: datetime, end: datetime</span>
-<span>) -&gt; tuple[int, Decimal]:</span>
-<span>    # Validate the bounds even when there are no source records.</span>
-<span>    in_window(start, start, end)</span>
-<span>    parsed = [</span>
-<span>        (parse_money(record[&quot;amount&quot;]), parse_instant(record[&quot;occurred_at&quot;])) for record in records</span>
-<span>    ]</span>
-<span>    cents = 0</span>
-<span>    count = 0</span>
-<span>    with localcontext() as context:</span>
-<span>        context.prec = 32</span>
-<span>        for amount, instant in parsed:</span>
-<span>            if in_window(instant, start, end):</span>
-<span>                cents += int(amount * 100)</span>
-<span>                count += 1</span>
-<span>        context.prec = max(32, len(str(abs(cents))) + 4)</span>
-<span>        total = Decimal(cents).scaleb(-2).quantize(Decimal(&quot;0.01&quot;))</span>
-<span>    return count, total</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    start = parse_instant(&quot;2026-01-01T00:00:00+00:00&quot;)</span>
-<span>    end = parse_instant(&quot;2026-01-02T00:00:00+00:00&quot;)</span>
-<span>    rows = [</span>
-<span>        {&quot;amount&quot;: &quot;0.10&quot;, &quot;occurred_at&quot;: start.isoformat()},</span>
-<span>        {&quot;amount&quot;: &quot;0.20&quot;, &quot;occurred_at&quot;: &quot;2026-01-01T12:00:00+00:00&quot;},</span>
-<span>        {&quot;amount&quot;: &quot;9.00&quot;, &quot;occurred_at&quot;: end.isoformat()},</span>
-<span>    ]</span>
-<span>    assert window_total(rows, start, end) == (2, Decimal(&quot;0.30&quot;))</span>
-<span>    assert canonical_label(&quot;Café&quot;) == canonical_label(&quot;Cafe\u0301&quot;)</span>
-<span>    print(&quot;Exact window total:&quot;, window_total(rows, start, end))</span>
-<span>    print(&quot;Raw collision evidence:&quot;, collision_groups([&quot;Straße&quot;, &quot;STRASSE&quot;]))</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Explicit money, Unicode, and instant boundaries for python-data-02.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"><span class="syntax-keyword">import</span> unicodedata</span>
+<span class="source-line"><span class="syntax-keyword">from</span> datetime <span class="syntax-keyword">import</span> UTC<span class="syntax-punctuation">,</span> datetime</span>
+<span class="source-line"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal<span class="syntax-punctuation">,</span> localcontext</span>
+<span class="source-line"></span>
+<span class="source-line">MONEY <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">[0-9]</span><span class="syntax-string">{</span><span class="syntax-string">1,12}(?:</span><span class="syntax-string">\</span><span class="syntax-string">.[0-9]</span><span class="syntax-string">{</span><span class="syntax-string">1,2})?</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_money</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Decimal<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> MONEY<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">expected nonnegative decimal text with at most </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">12 integer digits and 2 fractional digits</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> localcontext<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> context<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        context<span class="syntax-operator">.</span>prec <span class="syntax-operator">=</span> <span class="syntax-number">32</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> Decimal<span class="syntax-punctuation">(</span>raw<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>quantize<span class="syntax-punctuation">(</span>Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">canonical_label</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> raw<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">label must be nonempty text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> unicodedata<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> unicodedata<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">collision_groups</span><span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    groups<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> raw <span class="syntax-operator">in</span> labels<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        group <span class="syntax-operator">=</span> groups<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span>canonical_label<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> raw <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> group<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            group<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> values <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> values <span class="syntax-operator">in</span> groups<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_as_utc</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> datetime<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> value<span class="syntax-operator">.</span>utcoffset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">timestamp must have an explicit UTC offset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value<span class="syntax-operator">.</span>astimezone<span class="syntax-punctuation">(</span>UTC<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_instant</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> datetime<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">timestamp must be text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        parsed <span class="syntax-operator">=</span> datetime<span class="syntax-operator">.</span>fromisoformat<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid ISO timestamp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc</span>
+<span class="source-line">    <span class="syntax-keyword">return</span> _as_utc<span class="syntax-punctuation">(</span>parsed<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">in_window</span><span class="syntax-punctuation">(</span>instant<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">,</span> instant <span class="syntax-operator">=</span> _as_utc<span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> _as_utc<span class="syntax-punctuation">(</span>end<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> _as_utc<span class="syntax-punctuation">(</span>instant<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> end <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> start<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">window end must follow start</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> start <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> instant <span class="syntax-operator">&lt;</span> end</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">window_total</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    records<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">:</span> datetime<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">:</span> datetime</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Validate the bounds even when there are no source records.</span></span>
+<span class="source-line">    in_window<span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    parsed <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">(</span>parse_money<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> parse_instant<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">occurred_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> record <span class="syntax-operator">in</span> records</span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    cents <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    count <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> localcontext<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> context<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        context<span class="syntax-operator">.</span>prec <span class="syntax-operator">=</span> <span class="syntax-number">32</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> amount<span class="syntax-punctuation">,</span> instant <span class="syntax-operator">in</span> parsed<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> in_window<span class="syntax-punctuation">(</span>instant<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                cents <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>amount <span class="syntax-operator">*</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">                count <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        context<span class="syntax-operator">.</span>prec <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>cents<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        total <span class="syntax-operator">=</span> Decimal<span class="syntax-punctuation">(</span>cents<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>scaleb<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>quantize<span class="syntax-punctuation">(</span>Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> count<span class="syntax-punctuation">,</span> total</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    start <span class="syntax-operator">=</span> parse_instant<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-01T00:00:00+00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    end <span class="syntax-operator">=</span> parse_instant<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-02T00:00:00+00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">0.10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">occurred_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> start<span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">0.20</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">occurred_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-01T12:00:00+00:00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">9.00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">occurred_at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> end<span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> window_total<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.30</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> canonical_label<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> canonical_label<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Cafe</span><span class="syntax-string">\u0301</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exact window total:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> window_total<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Raw collision evidence:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> collision_groups<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">STRASSE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

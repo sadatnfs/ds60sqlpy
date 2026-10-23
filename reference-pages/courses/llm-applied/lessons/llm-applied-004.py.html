@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,40 +161,40 @@
       <h1>Llm Applied 004</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/lessons/llm-applied-004.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-004: Corpus provenance, versions and evaluation isolation.</span>
-<span> </span>
-<span>Answer-free learner worksheet. See the companion guide for worked examples.</span>
-<span>Copy to .learning before editing. Six independent attempts belong below.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Exercise 1: Fingerprint authored sources</span>
-<span># Add source=course-authored, permission=course-fixture and SHA256 to each local document.</span>
-<span># Expected: 6 complete records; all hashes contain64 characters.</span>
-<span> </span>
-<span># Exercise 2: Detect a changed definition</span>
-<span># Create metric-v2 with changed text and compare content hashes to metric-v1.</span>
-<span># Expected: hash differs; family remains metric; version is2.</span>
-<span> </span>
-<span># Exercise 3: Choose an active version explicitly</span>
-<span># Select the highest version per family from metric-v1, metric-v2 and trial-v1.</span>
-<span># Expected: active IDs metric-v2 and trial-v1.</span>
-<span> </span>
-<span># Exercise 4: Detect family leakage</span>
-<span># Place metric-v1 in training and metric-v2 in testing, then compare their families.</span>
-<span># Expected: family intersection contains metric despite different hashes.</span>
-<span> </span>
-<span># Exercise 5: Refuse incomplete admission metadata</span>
-<span># Remove permission from one record and validate admission.</span>
-<span># Expected: ValueError for missing permission.</span>
-<span> </span>
-<span># Exercise 6: Keep instruction-like documents inert</span>
-<span># Inspect attack-v1 and confirm its text does not alter the manifest validator or access</span>
-<span># metadata.</span>
-<span># Expected: attack text remains data; restricted record remains restricted.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-applied-004: Corpus provenance, versions and evaluation isolation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Answer-free learner worksheet. See the companion guide for worked examples.</span></span>
+<span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Fingerprint authored sources</span></span>
+<span class="source-line"><span class="syntax-comment"># Add source=course-authored, permission=course-fixture and SHA256 to each local document.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 6 complete records; all hashes contain64 characters.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Detect a changed definition</span></span>
+<span class="source-line"><span class="syntax-comment"># Create metric-v2 with changed text and compare content hashes to metric-v1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: hash differs; family remains metric; version is2.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Choose an active version explicitly</span></span>
+<span class="source-line"><span class="syntax-comment"># Select the highest version per family from metric-v1, metric-v2 and trial-v1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: active IDs metric-v2 and trial-v1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Detect family leakage</span></span>
+<span class="source-line"><span class="syntax-comment"># Place metric-v1 in training and metric-v2 in testing, then compare their families.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: family intersection contains metric despite different hashes.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Refuse incomplete admission metadata</span></span>
+<span class="source-line"><span class="syntax-comment"># Remove permission from one record and validate admission.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: ValueError for missing permission.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Keep instruction-like documents inert</span></span>
+<span class="source-line"><span class="syntax-comment"># Inspect attack-v1 and confirm its text does not alter the manifest validator or access</span></span>
+<span class="source-line"><span class="syntax-comment"># metadata.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: attack text remains data; restricted record remains restricted.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

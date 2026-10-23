@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-47.html#learner">learner SQL</a> · <a href="sql-47.html#solution-1">solution reasoning</a> · <a href="sql-47.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-47 — Project1 Ecommerce Part2</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day47_project1_ecommerce_part2.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day47_project1_ecommerce_part2.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day47_project1_ecommerce_part2.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,61 +466,61 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day47_project1_ecommerce_part2.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH orders_m AS (
-  SELECT o.customer_id,
-         date_trunc(&#x27;month&#x27;, o.order_date)::date AS order_month
-  FROM orders o
-  GROUP BY o.customer_id, date_trunc(&#x27;month&#x27;, o.order_date)
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month
-  FROM customers c
-), retention AS (
-  SELECT co.cohort_month,
-         om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om
-  JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
-)
-SELECT cohort_month, month_offset, active_customers
-FROM retention
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month DESC, month_offset;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> orders_m <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month
+  <span class="syntax-keyword">FROM</span> orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month
+  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retention <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+         om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>
+           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">YEAR</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span>
+           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> om<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers
+  <span class="syntax-keyword">FROM</span> orders_m om
+  <span class="syntax-keyword">JOIN</span> cohorts co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> om<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> om<span class="syntax-punctuation">.</span>order_month
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">,</span> active_customers
+<span class="syntax-keyword">FROM</span> retention
+<span class="syntax-keyword">WHERE</span> month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, <code>customers</code>, and <code>age</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>cohort_month</code>, <code>month_offset</code>, and <code>active_customers</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, <code>order_month</code>, and <code>cohort_month</code> with columns <code>customer_id</code>, <code>order_month</code>, <code>cohort_month</code>, <code>month_offset</code>, and <code>active_customers</code> from <code>orders</code>, <code>customers</code>, and <code>age</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">-- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH orders_m AS (
-  SELECT o.customer_id,
-         date_trunc(&#x27;month&#x27;, o.order_date)::date AS order_month
-  FROM orders o
-  GROUP BY o.customer_id, date_trunc(&#x27;month&#x27;, o.order_date)
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month
-  FROM customers c
-), retention AS (
-  SELECT co.cohort_month,
-         om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om
-  JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
-)
-SELECT cohort_month, month_offset, active_customers
-FROM retention
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month DESC, month_offset;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-comment">-- The same topic query shown as a plan instead of business rows.</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>COSTS <span class="syntax-keyword">OFF</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WITH</span> orders_m <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month
+  <span class="syntax-keyword">FROM</span> orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month
+  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retention <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+         om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>
+           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">YEAR</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span>
+           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> om<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers
+  <span class="syntax-keyword">FROM</span> orders_m om
+  <span class="syntax-keyword">JOIN</span> cohorts co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> om<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> om<span class="syntax-punctuation">.</span>order_month
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">,</span> active_customers
+<span class="syntax-keyword">FROM</span> retention
+<span class="syntax-keyword">WHERE</span> month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is executed by <code>psql</code> as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>customer_id</code>, <code>order_month</code>, and <code>cohort_month</code> key set and row count over <code>orders</code>, <code>customers</code>, and <code>age</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -542,7 +590,7 @@ ORDER BY cohort_month DESC, month_offset;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-47 — Project1 Ecommerce Part2.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-47 — Project1 Ecommerce Part2.
 
 I have completed the direct catalog prerequisite: `sql-46`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day47_project1_ecommerce_part2.md
@@ -600,92 +648,92 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 47: Project 1 - E-commerce Analytics (Part 2)</span>
-<span>-- BEGINNER WORKFLOW — sql-47: Project1 Ecommerce Part2</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day47_project1_ecommerce_part2.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-47/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: orders, customers.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Topics: Cohort retention analysis</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>WITH orders_m AS (</span>
-<span>  SELECT o.customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, o.order_date)::date AS order_month</span>
-<span>  FROM orders o</span>
-<span>  GROUP BY o.customer_id, date_trunc(&#x27;month&#x27;, o.order_date)</span>
-<span>), cohorts AS (</span>
-<span>  SELECT c.customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month</span>
-<span>  FROM customers c</span>
-<span>), retention AS (</span>
-<span>  SELECT co.cohort_month,</span>
-<span>         om.order_month,</span>
-<span>         (</span>
-<span>           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12</span>
-<span>           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))</span>
-<span>         )::int AS month_offset,</span>
-<span>         COUNT(DISTINCT om.customer_id) AS active_customers</span>
-<span>  FROM orders_m om</span>
-<span>  JOIN cohorts co ON co.customer_id = om.customer_id</span>
-<span>  GROUP BY co.cohort_month, om.order_month</span>
-<span>)</span>
-<span>SELECT cohort_month, month_offset, active_customers</span>
-<span>FROM retention</span>
-<span>WHERE month_offset BETWEEN 0 AND 12</span>
-<span>ORDER BY cohort_month DESC, month_offset;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Convert active_customers to retention_rate by dividing by cohort size.</span>
-<span>--    Inputs: For sql-47 Exercise 1, read from `orders`, `customers`, and `age`. Build the answer toward `cohort_sizes`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 1, expected output: one row per `order_id`. The final columns are `cohort_sizes`.</span>
-<span>--    Verify: For sql-47 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `cohort_sizes` against `orders`, `customers`, and `age`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 1, select `order_id` from `orders`, `customers`, and `age` before adding derived columns.</span>
-<span>-- 2. Chart retention curves for last 6 cohorts (outside SQL).</span>
-<span>--    Inputs: For sql-47 Exercise 2, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 2, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `cohort_month DESC, month_offset`.</span>
-<span>--    Verify: For sql-47 Exercise 2, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Tie two rows on `cohort_month DESC` and give them different `month_offset` values; verify `cohort_month DESC, month_offset` chooses a stable first/last row.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 2, run `cohorts`, `cohort_sizes`, `active_months`, `retained`, `curves`, and `latest_six` one at a time. Record each CTE&#x27;s row count and `cohort_month` uniqueness before the next stage uses it.</span>
-<span>-- 3. Prediction: decide whether signup month or first-order month is the better</span>
-<span>--    cohort anchor for a purchase-retention question; state the metric change.</span>
-<span>--    Inputs: For sql-47 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `signup_cohort`, and `first_order_cohort`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `signup_cohort`, and `first_order_cohort`. The final order is `c.customer_id`.</span>
-<span>--    Verify: For sql-47 Exercise 3, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `first_order_cohort` tuple by tuple. Use one key absent from `orders`; then tie two candidates on `c.customer_id` and verify `c.customer_id` selects the same row on every run.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 3, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span>
-<span>-- 4. Construction: build a complete cohort/month-offset spine so missing</span>
-<span>--    activity appears as zero rather than an absent row.</span>
-<span>--    Inputs: For sql-47 Exercise 4, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 4, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month DESC, x.month_offset`.</span>
-<span>--    Verify: For sql-47 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 4, run `cohorts`, `sizes`, `offsets`, and `activity` one at a time. Record each CTE&#x27;s row count and `cohort_month` uniqueness before the next stage uses it.</span>
-<span>-- 5. Debugging: prevent month_offset &lt; 0 when synthetic orders precede a</span>
-<span>--    customer&#x27;s recorded signup timestamp.</span>
-<span>--    Inputs: For sql-47 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, `created_at`, and `first_order_at`; keep `customer_id`, and `created_at` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 5, expected output: one row per `customer_id`, and `created_at`. The final columns are `customer_id`, `created_at`, and `first_order_at`. The final order is `c.customer_id`.</span>
-<span>--    Verify: For sql-47 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`, and `created_at`; require one output row for every distinct `customer_id`, and `created_at` tuple and compare `first_order_at` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `first_order_at` for the existing `customer_id`, and `created_at` tuple and verify the new tuple appears exactly once.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 5, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `created_at` so the exact fanout or loss is visible.</span>
-<span>-- 6. Edge case: separate not-yet-observable future offsets from observed zero</span>
-<span>--    retention instead of displaying both as zero.</span>
-<span>--    Inputs: For sql-47 Exercise 6, read from `orders`, and `sample`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-47 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.</span>
-<span>--    Verify: For sql-47 Exercise 6, project `order_id` plus the raw source columns from `orders`, and `sample` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-47 Exercise 6, run `latest` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 47: Project 1 - E-commerce Analytics (Part 2)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-47: Project1 Ecommerce Part2</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day47_project1_ecommerce_part2.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-47/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: orders, customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Topics: Cohort retention analysis</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> orders_m <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retention <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">YEAR</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span></span>
+<span class="source-line">           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">MONTH</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>om<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> om<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders_m om</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> cohorts co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> om<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> co<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> om<span class="syntax-punctuation">.</span>order_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">,</span> active_customers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> retention</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Convert active_customers to retention_rate by dividing by cohort size.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 1, read from `orders`, `customers`, and `age`. Build the answer toward `cohort_sizes`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 1, expected output: one row per `order_id`. The final columns are `cohort_sizes`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `cohort_sizes` against `orders`, `customers`, and `age`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 1, select `order_id` from `orders`, `customers`, and `age` before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Chart retention curves for last 6 cohorts (outside SQL).</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 2, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 2, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `cohort_month DESC, month_offset`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 2, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Tie two rows on `cohort_month DESC` and give them different `month_offset` values; verify `cohort_month DESC, month_offset` chooses a stable first/last row.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 2, run `cohorts`, `cohort_sizes`, `active_months`, `retained`, `curves`, and `latest_six` one at a time. Record each CTE&#x27;s row count and `cohort_month` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: decide whether signup month or first-order month is the better</span></span>
+<span class="source-line"><span class="syntax-comment">--    cohort anchor for a purchase-retention question; state the metric change.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `signup_cohort`, and `first_order_cohort`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `signup_cohort`, and `first_order_cohort`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 3, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `first_order_cohort` tuple by tuple. Use one key absent from `orders`; then tie two candidates on `c.customer_id` and verify `c.customer_id` selects the same row on every run.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 3, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: build a complete cohort/month-offset spine so missing</span></span>
+<span class="source-line"><span class="syntax-comment">--    activity appears as zero rather than an absent row.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 4, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 4, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month DESC, x.month_offset`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 4, run `cohorts`, `sizes`, `offsets`, and `activity` one at a time. Record each CTE&#x27;s row count and `cohort_month` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: prevent month_offset &lt; 0 when synthetic orders precede a</span></span>
+<span class="source-line"><span class="syntax-comment">--    customer&#x27;s recorded signup timestamp.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, `created_at`, and `first_order_at`; keep `customer_id`, and `created_at` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 5, expected output: one row per `customer_id`, and `created_at`. The final columns are `customer_id`, `created_at`, and `first_order_at`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`, and `created_at`; require one output row for every distinct `customer_id`, and `created_at` tuple and compare `first_order_at` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `first_order_at` for the existing `customer_id`, and `created_at` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 5, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, and `created_at` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: separate not-yet-observable future offsets from observed zero</span></span>
+<span class="source-line"><span class="syntax-comment">--    retention instead of displaying both as zero.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-47 Exercise 6, read from `orders`, and `sample`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-47 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-47 Exercise 6, project `order_id` plus the raw source columns from `orders`, and `sample` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-47 Exercise 6, run `latest` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -721,10 +769,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-47-solutions-e-commerce-analytics-part-2">Day 47 Solutions — E-commerce Analytics, Part 2<a class="heading-anchor" href="#solution-1--day-47-solutions-e-commerce-analytics-part-2" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day47_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day47_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day47_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -740,55 +788,55 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The deliverables are a true retention rate and a tidy six-cohort result suitable for a line chart. See <a href="sql-47.html#solution-2"><code>day47_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercises-1-and-2-retention-rate-and-chart-ready-curves">Exercises 1 and 2 — Retention rate and chart-ready curves<a class="heading-anchor" href="#solution-1--exercises-1-and-2-retention-rate-and-chart-ready-curves" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-WITH cohorts AS (
-  SELECT customer_id,
-         date_trunc(&#x27;month&#x27;, created_at)::date AS cohort_month
-  FROM customers
-), cohort_sizes AS (
-  SELECT cohort_month, COUNT(*) AS cohort_size
-  FROM cohorts
-  GROUP BY cohort_month
-), active_months AS (
-  SELECT customer_id,
-         date_trunc(&#x27;month&#x27;, order_date)::date AS order_month
-  FROM orders
-  GROUP BY customer_id, date_trunc(&#x27;month&#x27;, order_date)
-), retained AS (
-  SELECT c.cohort_month,
-         a.order_month,
-         (
-           EXTRACT(year FROM age(a.order_month, c.cohort_month)) * 12
-           + EXTRACT(month FROM age(a.order_month, c.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT a.customer_id) AS active_customers
-  FROM cohorts c
-  JOIN active_months a USING (customer_id)
-  GROUP BY c.cohort_month, a.order_month
-), curves AS (
-  SELECT r.cohort_month,
-         r.month_offset,
-         s.cohort_size,
-         r.active_customers,
-         r.active_customers::numeric / NULLIF(s.cohort_size, 0) AS retention_rate
-  FROM retained r
-  JOIN cohort_sizes s USING (cohort_month)
-  WHERE r.month_offset BETWEEN 0 AND 12
-), latest_six AS (
-  SELECT cohort_month
-  FROM cohort_sizes
-  ORDER BY cohort_month DESC
-  LIMIT 6
-)
-SELECT cohort_month,
-       month_offset,
-       cohort_size,
-       active_customers,
-       ROUND(retention_rate, 4) AS retention_rate
-FROM curves
-WHERE cohort_month IN (SELECT cohort_month FROM latest_six)
-ORDER BY cohort_month DESC, month_offset;</code></pre>
+<span class="syntax-keyword">WITH</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month
+  <span class="syntax-keyword">FROM</span> customers
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort_sizes <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cohort_size
+  <span class="syntax-keyword">FROM</span> cohorts
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> active_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retained <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+         a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span>
+         <span class="syntax-punctuation">(</span>
+           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span>
+           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers
+  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">JOIN</span> active_months a <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>order_month
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> curves <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+         r<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">,</span>
+         s<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span>
+         r<span class="syntax-punctuation">.</span>active_customers<span class="syntax-punctuation">,</span>
+         r<span class="syntax-punctuation">.</span>active_customers<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate
+  <span class="syntax-keyword">FROM</span> retained r
+  <span class="syntax-keyword">JOIN</span> cohort_sizes s <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>cohort_month<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">WHERE</span> r<span class="syntax-punctuation">.</span>month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> latest_six <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> cohort_month
+  <span class="syntax-keyword">FROM</span> cohort_sizes
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span>
+  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">6</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span>
+       month_offset<span class="syntax-punctuation">,</span>
+       cohort_size<span class="syntax-punctuation">,</span>
+       active_customers<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>retention_rate<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate
+<span class="syntax-keyword">FROM</span> curves
+<span class="syntax-keyword">WHERE</span> cohort_month <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> cohort_month <span class="syntax-keyword">FROM</span> latest_six<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per <code>(cohort_month, month_offset)</code> for the six newest signup cohorts, with numerator, denominator, and rate. Chart with <code>month_offset</code> on X, <code>retention_rate</code> on Y, and <code>cohort_month</code> as the series. The chart itself is explicitly outside SQL; this answer produces the tidy data to export or pass to a notebook/BI tool.</p>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -902,136 +950,136 @@ ORDER BY cohort_month DESC, month_offset;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 47 solutions: cohort retention</span>
-<span>-- SOLUTION READING MAP — sql-47: Project1 Ecommerce Part2</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day47_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day47_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- Exercise 1: calculate active-customer rate with cohort size retained.</span>
-<span>-- Exercise 2: restrict the final tidy output to the latest six cohorts.</span>
-<span>WITH cohorts AS (</span>
-<span>  SELECT customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, created_at)::date AS cohort_month</span>
-<span>  FROM customers</span>
-<span>), cohort_sizes AS (</span>
-<span>  SELECT cohort_month, COUNT(*) AS cohort_size</span>
-<span>  FROM cohorts</span>
-<span>  GROUP BY cohort_month</span>
-<span>), active_months AS (</span>
-<span>  SELECT customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, order_date)::date AS order_month</span>
-<span>  FROM orders</span>
-<span>  GROUP BY customer_id, date_trunc(&#x27;month&#x27;, order_date)</span>
-<span>), retained AS (</span>
-<span>  SELECT c.cohort_month,</span>
-<span>         a.order_month,</span>
-<span>         (</span>
-<span>           EXTRACT(year FROM age(a.order_month, c.cohort_month)) * 12</span>
-<span>           + EXTRACT(month FROM age(a.order_month, c.cohort_month))</span>
-<span>         )::int AS month_offset,</span>
-<span>         COUNT(DISTINCT a.customer_id) AS active_customers</span>
-<span>  FROM cohorts c</span>
-<span>  JOIN active_months a USING (customer_id)</span>
-<span>  GROUP BY c.cohort_month, a.order_month</span>
-<span>), curves AS (</span>
-<span>  SELECT r.cohort_month,</span>
-<span>         r.month_offset,</span>
-<span>         s.cohort_size,</span>
-<span>         r.active_customers,</span>
-<span>         r.active_customers::numeric / NULLIF(s.cohort_size, 0) AS retention_rate</span>
-<span>  FROM retained r</span>
-<span>  JOIN cohort_sizes s USING (cohort_month)</span>
-<span>  WHERE r.month_offset BETWEEN 0 AND 12</span>
-<span>), latest_six AS (</span>
-<span>  SELECT cohort_month</span>
-<span>  FROM cohort_sizes</span>
-<span>  ORDER BY cohort_month DESC</span>
-<span>  LIMIT 6</span>
-<span>)</span>
-<span>-- Exercises 1 and 2: this tidy result is ready to chart with cohort_month as</span>
-<span>-- series, month_offset on X, and retention_rate on Y.</span>
-<span>SELECT cohort_month,</span>
-<span>       month_offset,</span>
-<span>       cohort_size,</span>
-<span>       active_customers,</span>
-<span>       ROUND(retention_rate, 4) AS retention_rate</span>
-<span>FROM curves</span>
-<span>WHERE cohort_month IN (SELECT cohort_month FROM latest_six)</span>
-<span>ORDER BY cohort_month DESC, month_offset;</span>
-<span> </span>
-<span>-- Exercise 3: expose both anchors. Signup cohorts answer onboarding retention;</span>
-<span>-- first-order cohorts answer repeat-purchase retention.</span>
-<span>SELECT c.customer_id,</span>
-<span>       date_trunc(&#x27;month&#x27;, c.created_at)::date AS signup_cohort,</span>
-<span>       date_trunc(&#x27;month&#x27;, MIN(o.order_date))::date AS first_order_cohort</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN orders o USING (customer_id)</span>
-<span>GROUP BY c.customer_id, date_trunc(&#x27;month&#x27;, c.created_at)</span>
-<span>ORDER BY c.customer_id;</span>
-<span> </span>
-<span>-- Exercise 4: CROSS JOIN builds every requested offset; the LEFT JOIN turns</span>
-<span>-- absent activity into an explicit zero count.</span>
-<span>WITH cohorts AS (</span>
-<span>  SELECT customer_id, date_trunc(&#x27;month&#x27;, created_at)::date AS cohort_month</span>
-<span>  FROM customers</span>
-<span>), sizes AS (</span>
-<span>  SELECT cohort_month, COUNT(*) AS cohort_size</span>
-<span>  FROM cohorts GROUP BY cohort_month</span>
-<span>), offsets AS (</span>
-<span>  SELECT generate_series(0, 12) AS month_offset</span>
-<span>), activity AS (</span>
-<span>  SELECT c.cohort_month,</span>
-<span>         (</span>
-<span>           EXTRACT(year FROM age(date_trunc(&#x27;month&#x27;, o.order_date), c.cohort_month)) * 12</span>
-<span>           + EXTRACT(month FROM age(date_trunc(&#x27;month&#x27;, o.order_date), c.cohort_month))</span>
-<span>         )::int AS month_offset,</span>
-<span>         COUNT(DISTINCT o.customer_id) AS active_customers</span>
-<span>  FROM cohorts c</span>
-<span>  JOIN orders o USING (customer_id)</span>
-<span>  WHERE o.order_date::date &gt;= c.cohort_month</span>
-<span>  GROUP BY c.cohort_month, month_offset</span>
-<span>)</span>
-<span>SELECT s.cohort_month, x.month_offset, s.cohort_size,</span>
-<span>       COALESCE(a.active_customers, 0) AS active_customers</span>
-<span>FROM sizes s</span>
-<span>CROSS JOIN offsets x</span>
-<span>LEFT JOIN activity a</span>
-<span>  ON a.cohort_month = s.cohort_month AND a.month_offset = x.month_offset</span>
-<span>ORDER BY s.cohort_month DESC, x.month_offset;</span>
-<span> </span>
-<span>-- Exercise 5: surface bad chronology instead of letting a negative offset enter</span>
-<span>-- the retention curve.</span>
-<span>SELECT c.customer_id, c.created_at, MIN(o.order_date) AS first_order_at</span>
-<span>FROM customers c</span>
-<span>JOIN orders o USING (customer_id)</span>
-<span>GROUP BY c.customer_id, c.created_at</span>
-<span>HAVING MIN(o.order_date) &lt; c.created_at</span>
-<span>ORDER BY c.customer_id;</span>
-<span> </span>
-<span>-- Exercise 6: the observation flag keeps future offsets NULL rather than zero.</span>
-<span>WITH latest AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, MAX(order_date))::date AS latest_observed_month</span>
-<span>  FROM orders</span>
-<span>), sample(cohort_month, month_offset) AS (</span>
-<span>  VALUES (date_trunc(&#x27;month&#x27;, CURRENT_DATE)::date, 0),</span>
-<span>         (date_trunc(&#x27;month&#x27;, CURRENT_DATE)::date, 6)</span>
-<span>)</span>
-<span>SELECT s.*,</span>
-<span>       (s.cohort_month + make_interval(months =&gt; s.month_offset))</span>
-<span>         &lt;= l.latest_observed_month AS is_observable</span>
-<span>FROM sample s CROSS JOIN latest l;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 47 solutions: cohort retention</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-47: Project1 Ecommerce Part2</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day47_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day47_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: calculate active-customer rate with cohort size retained.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: restrict the final tidy output to the latest six cohorts.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort_sizes <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cohort_size</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> active_months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retained <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span></span>
+<span class="source-line">           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">c</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> active_months a <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>order_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> curves <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         r<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         s<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         r<span class="syntax-punctuation">.</span>active_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         r<span class="syntax-punctuation">.</span>active_customers<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> retained r</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> cohort_sizes s <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>cohort_month<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> r<span class="syntax-punctuation">.</span>month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> latest_six <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohort_sizes</span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">6</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises 1 and 2: this tidy result is ready to chart with cohort_month as</span></span>
+<span class="source-line"><span class="syntax-comment">-- series, month_offset on X, and retention_rate on Y.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       cohort_size<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       active_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>retention_rate<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> curves</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> cohort_month <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> cohort_month <span class="syntax-keyword">FROM</span> latest_six<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: expose both anchors. Signup cohorts answer onboarding retention;</span></span>
+<span class="source-line"><span class="syntax-comment">-- first-order cohorts answer repeat-purchase retention.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> signup_cohort<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> first_order_cohort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: CROSS JOIN builds every requested offset; the LEFT JOIN turns</span></span>
+<span class="source-line"><span class="syntax-comment">-- absent activity into an explicit zero count.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sizes <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cohort_size</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> offsets <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_offset</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> activity <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span></span>
+<span class="source-line">           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">c</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> month_offset</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>active_customers<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> sizes s</span>
+<span class="source-line"><span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> offsets x</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> activity a</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>month_offset <span class="syntax-operator">=</span> x<span class="syntax-punctuation">.</span>month_offset</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: surface bad chronology instead of letting a negative offset enter</span></span>
+<span class="source-line"><span class="syntax-comment">-- the retention curve.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">,</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_order_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at</span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: the observation flag keeps future offsets NULL rather than zero.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> latest <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> latest_observed_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> sample<span class="syntax-punctuation">(</span>cohort_month<span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span>date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span>date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-operator">+</span> make_interval<span class="syntax-punctuation">(</span>months <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> s<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> l<span class="syntax-punctuation">.</span>latest_observed_month <span class="syntax-keyword">AS</span> is_observable</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> sample s <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> latest l<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,21 +427,23 @@
 </tbody></table></div>
 <p>A deep tree can memorize small idiosyncrasies. A forest reduces variance through averaging, but it can still learn leakage, bias, and spurious correlations.</p>
 <h4 id="guide--worked-example-compare-training-and-held-out-behavior">Worked example: compare training and held-out behavior<a class="heading-anchor" href="#guide--worked-example-compare-training-and-held-out-behavior" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
 
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_test <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span>
+<span class="syntax-punctuation">)</span>
 
-for depth in [1, 2, 4, 8, None]:
-    tree = DecisionTreeClassifier(max_depth=depth, random_state=42)
-    tree.fit(X_train, y_train)
-    print(depth, tree.score(X_train, y_train), tree.score(X_test, y_test))</code></pre>
+<span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_test<span class="syntax-punctuation">,</span> y_test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The gap between training and held-out accuracy is one diagnostic, not a complete model-selection procedure. Choose complexity with validation or CV and report a separate test estimate.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 38 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -403,9 +451,9 @@ for depth in [1, 2, 4, 8, None]:
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept deep dive — tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -420,42 +468,42 @@ for depth in [1, 2, 4, 8, None]:
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A — make the depth-versus-generalization gap visible<a class="heading-anchor" href="#guide--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
 
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=3801
-)
-for depth in (1, 3, 8, None):
-    tree = DecisionTreeClassifier(max_depth=depth, random_state=3801)
-    tree.fit(X_train, y_train)
-    print(depth, {&quot;train&quot;: tree.score(X_train, y_train),
-                  &quot;valid&quot;: tree.score(X_valid, y_valid)})</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span><span class="syntax-punctuation">)</span>
+    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+                  <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.</p>
 <p><strong>Assumption to name:</strong> The validation split represents future cases and was not used to choose unlimited alternatives.</p>
 <h5 id="guide--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B — test a deliberately useless noise feature<a class="heading-anchor" href="#guide--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.datasets import load_breast_cancer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
-from sklearn.model_selection import train_test_split
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 
-X, y = load_breast_cancer(return_X_y=True)
-rng = np.random.default_rng(3802)
-X = np.column_stack([X, rng.normal(size=X.shape[0])])
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=3802
-)
-forest = RandomForestClassifier(n_estimators=80, random_state=3802, n_jobs=1)
-forest.fit(X_train, y_train)
-importance = permutation_importance(
-    forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1
-)
-print({&quot;noise_importance&quot;: importance.importances_mean[-1],
-       &quot;best_importance&quot;: importance.importances_mean.max()})</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">3802</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>X<span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span>X<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span>
+<span class="syntax-punctuation">)</span>
+forest <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+forest<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+importance <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>
+    forest<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">noise_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">best_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The random noise feature should have importance near zero, while at least one real feature matters more.</p>
 <p><strong>Assumption to name:</strong> The model&#x27;s held-out score is good enough that score perturbations are interpretable.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -577,7 +625,7 @@ print({&quot;noise_importance&quot;: importance.importances_mean[-1],
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:
@@ -644,16 +692,16 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Feature importances.</li>
 <li>Overfitting control (max_depth, min_samples_*).</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.tree import DecisionTreeClassifier</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>X,y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y,random_state=42)</span>
-<span>dt = DecisionTreeClassifier(max_depth=4, random_state=42).fit(Xtr,ytr)</span>
-<span>rf = RandomForestClassifier(n_estimators=200, random_state=42).fit(Xtr,ytr)</span>
-<span>dt.score(Xte,yte), rf.score(Xte,yte)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -671,44 +719,44 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A — make the depth-versus-generalization gap visible<a class="heading-anchor" href="#learner--cell-4--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The validation split represents future cases and was not used to choose unlimited alternatives.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.tree import DecisionTreeClassifier</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>X_train, X_valid, y_train, y_valid = train_test_split(</span>
-<span>    X, y, stratify=y, random_state=3801</span>
-<span>)</span>
-<span>for depth in (1, 3, 8, None):</span>
-<span>    tree = DecisionTreeClassifier(max_depth=depth, random_state=3801)</span>
-<span>    tree.fit(X_train, y_train)</span>
-<span>    print(depth, {&quot;train&quot;: tree.score(X_train, y_train),</span>
-<span>                  &quot;valid&quot;: tree.score(X_valid, y_valid)})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B — test a deliberately useless noise feature<a class="heading-anchor" href="#learner--cell-7--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The model&#x27;s held-out score is good enough that score perturbations are interpretable.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.inspection import permutation_importance</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>rng = np.random.default_rng(3802)</span>
-<span>X = np.column_stack([X, rng.normal(size=X.shape[0])])</span>
-<span>X_train, X_valid, y_train, y_valid = train_test_split(</span>
-<span>    X, y, stratify=y, random_state=3802</span>
-<span>)</span>
-<span>forest = RandomForestClassifier(n_estimators=80, random_state=3802, n_jobs=1)</span>
-<span>forest.fit(X_train, y_train)</span>
-<span>importance = permutation_importance(</span>
-<span>    forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1</span>
-<span>)</span>
-<span>print({&quot;noise_importance&quot;: importance.importances_mean[-1],</span>
-<span>       &quot;best_importance&quot;: importance.importances_mean.max()})</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">3802</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>X<span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span>X<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">forest <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">forest<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span></span>
+<span class="source-line">importance <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    forest<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">noise_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">best_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The random noise feature should have importance near zero, while at least one real feature matters more.</p>
 <h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -781,22 +829,22 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 3 — Pruning implementation</span>
-<span> </span>
-<span> </span>
-<span># Practice 4 — Out-of-bag reasoning</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Imbalance debugging</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Correlated-importance edge case</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 3 — Pruning implementation</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Out-of-bag reasoning</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Imbalance debugging</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Correlated-importance edge case</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -839,45 +887,45 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-X, y = load_breast_cancer(return_X_y=True)
-Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</code></pre>
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — Depth vs accuracy</p>
-<pre><code class="language-python">depths = [1, 2, 3, 4, 6, 8, None]
-accs = []
-for d in depths:
-    dt = DecisionTreeClassifier(max_depth=d, random_state=42)
-    dt.fit(Xtr, ytr)
-    accs.append(dt.score(Xte, yte))
-list(zip(depths, accs))</code></pre>
+<pre class="highlighted-code"><code class="language-python">depths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span>
+accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> depths<span class="syntax-punctuation">:</span>
+    dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>d<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    dt<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+    accs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>depths<span class="syntax-punctuation">,</span> accs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Interpretation</p>
 <ul>
 <li>Very shallow trees underfit; very deep trees may overfit; pick a sweet spot via validation</li>
 </ul>
 <p>Random forest baseline</p>
-<pre><code class="language-python">rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, random_state=42)
-rf.fit(Xtr, ytr)
-rf_acc = rf.score(Xte, yte)
+<pre class="highlighted-code"><code class="language-python">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">300</span><span class="syntax-punctuation">,</span> min_samples_leaf<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+rf<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+rf_acc <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span>
 rf_acc</code></pre>
 <p>Worked reference for Exercise 2 — Feature importances (impurity vs permutation)</p>
-<pre><code class="language-python"># Impurity-based (built-in)
-impurity_imp = rf.feature_importances_
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Impurity-based (built-in)</span>
+impurity_imp <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>feature_importances_
 
-# Permutation-based (on held-out data)
-perm = permutation_importance(rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=1)
-perm_imp = perm.importances_mean
+<span class="syntax-comment"># Permutation-based (on held-out data)</span>
+perm <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+perm_imp <span class="syntax-operator">=</span> perm<span class="syntax-operator">.</span>importances_mean
 
-# Compare top features
-import numpy as np
-order_imp = np.argsort(impurity_imp)[::-1][:10]
-order_perm = np.argsort(perm_imp)[::-1][:10]
-order_imp, order_perm</code></pre>
+<span class="syntax-comment"># Compare top features</span>
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+order_imp <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>impurity_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+order_perm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>perm_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
 <p>Notes</p>
 <ul>
 <li>Impurity importances can be biased toward high-cardinality/continuous features</li>
@@ -979,38 +1027,38 @@ order_imp, order_perm</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-38-solutions-decision-trees-random-forests">Day 38 — Solutions: Decision Trees &amp; Random Forests<a class="heading-anchor" href="#solution-2--cell-1--day-38-solutions-decision-trees-random-forests" aria-label="Link to this section">#</a></h3>
 <p>Depth vs accuracy and feature importances (impurity vs permutation).</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.tree import DecisionTreeClassifier</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.inspection import permutation_importance</span>
-<span>import numpy as np</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-depth-vs-accuracy-decisiontree">Exercise 1 — Depth vs accuracy (DecisionTree)<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-depth-vs-accuracy-decisiontree" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>depths = [1,2,3,4,6,8,None]</span>
-<span>accs = []</span>
-<span>for d in depths:</span>
-<span>    dt = DecisionTreeClassifier(max_depth=d, random_state=42)</span>
-<span>    dt.fit(Xtr, ytr)</span>
-<span>    accs.append(dt.score(Xte, yte))</span>
-<span>list(zip(depths, accs))</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">depths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> depths<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>d<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    dt<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    accs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>depths<span class="syntax-punctuation">,</span> accs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--randomforest-baseline">RandomForest baseline<a class="heading-anchor" href="#solution-2--cell-5--randomforest-baseline" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=-1, random_state=42)</span>
-<span>rf.fit(Xtr, ytr)</span>
-<span>rf_acc = rf.score(Xte, yte)</span>
-<span>rf_acc</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">300</span><span class="syntax-punctuation">,</span> min_samples_leaf<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf_acc <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf_acc</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-2-feature-importances-impurity-vs-permutation">Exercise 2 — Feature importances (impurity vs permutation)<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-feature-importances-impurity-vs-permutation" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>impurity_imp = rf.feature_importances_</span>
-<span>perm = permutation_importance(rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=-1)</span>
-<span>perm_imp = perm.importances_mean</span>
-<span>order_imp  = np.argsort(impurity_imp)[::-1][:10]</span>
-<span>order_perm = np.argsort(perm_imp)[::-1][:10]</span>
-<span>order_imp, order_perm</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">impurity_imp <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>feature_importances_</span>
+<span class="source-line">perm <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">perm_imp <span class="syntax-operator">=</span> perm<span class="syntax-operator">.</span>importances_mean</span>
+<span class="source-line">order_imp  <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>impurity_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">order_perm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>perm_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">order_imp<span class="syntax-punctuation">,</span> order_perm</span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>

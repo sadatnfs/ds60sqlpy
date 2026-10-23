@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
 
-The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at \(\frac{56}{3}\), the derivative is-\(\frac{56}{3}\), the new weight is \(\frac{28}{15}\), and the new loss is \(\frac{56}{675}\). A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
+The scalar fixture x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 has an exact oracle. Mean squared loss starts at \(\frac{56}{3}\), the derivative is-\(\frac{56}{3}\), the new weight is \(\frac{28}{15}\), and the new loss is \(\frac{56}{675}\). A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
 
 **Optimizer membership:** The exact parameter objects whose gradients an optimizer consumes.
 
@@ -47,7 +47,7 @@ An audit should therefore check the residual shape and per-record identity befor
 
 ## Exercise 1: Calculate the initial loss
 
-The question is: Use float64 x1, 2, 3, y2x and scalar w0.
+The question is: Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.
 
 The three squared residuals are 4, 16, 36. Their sum 56 divided by three defines the objective denominator.
 
@@ -77,7 +77,7 @@ assert w.item()==0
 
 ## Exercise 3: Apply exactly one SGD update
 
-The question is: Use SGD learning rate.1 onw and recompute the objective afterward.
+The question is: Use SGD learning rate 0.1 onw and recompute the objective afterward.
 
 The optimizer consumes the stored gradient. The old loss tensor remains the before-update result, so the new loss requires another forward calculation.
 
@@ -93,7 +93,7 @@ np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)
 
 ## Exercise 4: Expose the broadcast counterexample
 
-The question is: At a fresh w0, compare vector predictions with column targets shaped(3, 1).
+The question is: At a fresh w = 0, compare vector predictions with column targets shaped(3, 1).
 
 The result now contains nine pairwise residuals. Equal initial loss is a coincidence of the zero prediction and does not preserve the intended pairing.
 
@@ -108,7 +108,7 @@ np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.g
 
 ## Exercise 5: Check a finite-difference gradient
 
-The question is: Use a plain NumPy scalar objective around w0 with h.001.
+The question is: Use a plain NumPy scalar objective around w = 0 with h.001.
 
 The checker does not read the PyTorch gradient buffer. It verifies the complete scalar objective through perturbed values.
 

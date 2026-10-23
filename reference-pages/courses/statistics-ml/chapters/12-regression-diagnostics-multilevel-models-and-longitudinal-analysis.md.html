@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-012</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
 <h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Repeated measurements create two kinds of variation: differences between entities and changes within an entity. A customer with high baseline engagement may remain high every week. Treating those weeks as independent customers makes uncertainty too optimistic and can confuse a between-customer association with a within-customer effect.</p>
-<p>A random-intercept model writes y_ij=X_ij beta+b_j+epsilon_ij, with group variance tau^2 and residual variance sigma^2. Two observations in the same group share b_j, creating covariance tau^2 and intraclass correlation tau^2/(tau^2+sigma^2). Partial pooling shrinks a noisy group mean toward the population mean by weight tau^2/(tau^2+sigma^2/n_j). Small groups shrink more because their means contain less information.</p>
+<p>A random-intercept model writes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>X</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>β</mi><mo>+</mo><msub><mi>b</mi><mi>j</mi></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{ij}=X_{ij}\beta+b_j+\epsilon_{ij}</annotation></semantics></math>, with group variance <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\tau}^{2}</annotation></semantics></math> and residual variance <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\sigma}^{2}</annotation></semantics></math>. Two observations in the same group share b_j, creating covariance <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\tau}^{2}</annotation></semantics></math> and intraclass correlation <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msup><mi>τ</mi><mn>2</mn></msup></mrow><mrow><msup><mi>τ</mi><mn>2</mn></msup><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\tau^2}{\tau^2+\sigma^2}</annotation></semantics></math>. Partial pooling shrinks a noisy group mean toward the population mean by weight <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msup><mi>τ</mi><mn>2</mn></msup></mrow><mrow><msup><mi>τ</mi><mn>2</mn></msup><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup><mo>/</mo><msub><mi>n</mi><mi>j</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\tau^2}{\tau^2+\sigma^2/n_j}</annotation></semantics></math>. Small groups shrink more because their means contain less information.</p>
 <p>Fixed-effects panel estimation instead removes each unit&#x27;s mean, identifying coefficients from within-unit changes. Time-invariant predictors disappear under this transformation. Random effects can estimate such associations but ordinarily assumes the random effect is suitably independent of included predictors. Neither method automatically handles treatment-confounder feedback, endogenous timing or short-panel lagged outcomes.</p>
 <h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
 <h4 id="stat-12-01">Residual analysis<a class="heading-anchor" href="#stat-12-01" aria-label="Link to this section">#</a></h4>
@@ -131,7 +177,7 @@
 <h4 id="stat-12-04">Multicollinearity diagnostics<a class="heading-anchor" href="#stat-12-04" aria-label="Link to this section">#</a></h4>
 <p>Near-linear predictor dependencies inflate coefficient uncertainty and instability. Predictions inside the observed design may remain accurate. Distinguish numerical scaling problems from insufficient independent variation for interpreting separate effects.</p>
 <h4 id="stat-12-05">Variance inflation factors<a class="heading-anchor" href="#stat-12-05" aria-label="Link to this section">#</a></h4>
-<p>VIF is 1/(1-R_j^2) from regressing a predictor on the others. It diagnoses linear redundancy conditional on the design. Universal cutoff rules ignore sample size, scientific contrasts and prediction objectives.</p>
+<p>VIF is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>−</mo><msubsup><mi>R</mi><mi>j</mi><mn>2</mn></msubsup></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{1-R_j^2}</annotation></semantics></math> from regressing a predictor on the others. It diagnoses linear redundancy conditional on the design. Universal cutoff rules ignore sample size, scientific contrasts and prediction objectives.</p>
 <h4 id="stat-12-06">Heteroskedasticity diagnostics<a class="heading-anchor" href="#stat-12-06" aria-label="Link to this section">#</a></h4>
 <p>Inspect residual spread and use tests such as Breusch-Pagan with care about mean misspecification. Robust standard errors address uncertainty under heteroskedasticity; variance modeling may also improve prediction intervals.</p>
 <h4 id="stat-12-07">Autocorrelation diagnostics<a class="heading-anchor" href="#stat-12-07" aria-label="Link to this section">#</a></h4>
@@ -172,8 +218,8 @@
 <p>Fit hierarchical outcome models over demographic or geographic cells, then average predictions using population cell counts. MRP depends on model adequacy and accurate target composition, especially for sparsely sampled or empty cells.</p>
 <h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="case-study-repeated-customer-measurements">Case study: repeated customer measurements<a class="heading-anchor" href="#case-study-repeated-customer-measurements" aria-label="Link to this section">#</a></h4>
-<p>Assume a customer contributes four weekly outcomes. A useful decomposition is y_ij=mu+b_j+epsilon_ij, with Var(b_j)=9 and Var(epsilon_ij)=1. A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer&#x27;s four-week mean has variance 9+1/4=9.25, not 10/4=2.5. Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.</p>
-<p>For m equal observations per group, the familiar design-effect expression 1+(m-1)*ICC follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.</p>
+<p>Assume a customer contributes four weekly outcomes. A useful decomposition is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>μ</mi><mo>+</mo><msub><mi>b</mi><mi>j</mi></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{ij}=\mu+b_j+\epsilon_{ij}</annotation></semantics></math>, with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><msub><mi>b</mi><mi>j</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">\operatorname{Var}(b_j)=9</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\operatorname{Var}(\epsilon_{ij})=1</annotation></semantics></math>. A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer&#x27;s four-week mean has variance 9+1/4=9.25, not <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>10</mn></mrow><mrow><mn>4</mn></mrow></mfrac><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">\frac{10}{4}=2.5</annotation></semantics></math>. Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.</p>
+<p>For m equal observations per group, the familiar design-effect expression <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>+</mo><mo stretchy="false">(</mo><mi>m</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>·</mo><mrow><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">C</mi></mrow></mrow><annotation encoding="application/x-tex">1+(m-1)\cdot \mathrm{ICC}</annotation></semantics></math> follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.</p>
 <p>The model also defines what prediction means. For an existing customer with observed history, a random-intercept estimate can adapt to that customer&#x27;s baseline. For a new customer, that baseline is unknown and must be integrated over its population distribution. Evaluating new-customer predictions while allowing the model to use that customer&#x27;s other weeks leaks the very information deployment lacks. Grouped validation distinguishes those questions.</p>
 <h4 id="case-study-pooling-a-small-region-responsibly">Case study: pooling a small region responsibly<a class="heading-anchor" href="#case-study-pooling-a-small-region-responsibly" aria-label="Link to this section">#</a></h4>
 <p>A national rate is .10. A small region has one event in two observations, giving raw rate .50. A large region has 500 events in 1,000 observations, also giving .50. Treating both estimates as equally precise creates unstable rankings and incentives. A hierarchical model combines local likelihood information with a distribution of regional rates, generally shrinking the small region more.</p>
@@ -188,49 +234,49 @@
 <p>Use the simplest covariance structure that captures the decision-relevant dependence with available information. An unstructured repeated-measures covariance grows quickly in parameter count, while compound symmetry assumes equal pairwise correlation. Random slopes allow trajectory heterogeneity but require within-group predictor variation. Explain the tradeoff as a claim about the data-generating process and supported precision, not a contest among increasingly complex formulas.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_12.py.html">chapter_12.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_12.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_12.py</code></pre>
 <h4 id="a-point-can-determine-the-line">A point can determine the line<a class="heading-anchor" href="#a-point-can-determine-the-line" aria-label="Link to this section">#</a></h4>
-<p>The observation at x=20 has leverage above .9 because the other predictors lie between zero and three. The leverage values sum to the model rank, two. This checks the projection geometry and explains why residual size alone can fail to flag influential predictor configurations.</p>
+<p>The observation at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">x=20</annotation></semantics></math> has leverage above .9 because the other predictors lie between zero and three. The leverage values sum to the model rank, two. This checks the projection geometry and explains why residual size alone can fail to flag influential predictor configurations.</p>
 <h4 id="shrink-according-to-information">Shrink according to information<a class="heading-anchor" href="#shrink-according-to-information" aria-label="Link to this section">#</a></h4>
 <p>Three groups share the observed mean nine but have sample sizes 1,4,100. With population mean five and known variance components, their pooling weights are .2,.5 and about .962. The smallest group moves closest to the shared mean. Variance components are fixed here to isolate the mechanism; fitting them adds uncertainty.</p>
 <h4 id="separate-within-and-between-associations">Separate within and between associations<a class="heading-anchor" href="#separate-within-and-between-associations" aria-label="Link to this section">#</a></h4>
 <p>Both units have a true within-unit slope two, but their baselines differ strongly and inversely with their feature levels. The pooled slope is negative. Demeaning within each unit recovers two, illustrating the source of fixed-effects identification and its inability to estimate time-invariant characteristics.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def leverage_and_residuals():
-    x=np.array([0.,1.,2.,3.,20.])
-    design=np.column_stack([np.ones(5),x])
-    hat=design@np.linalg.pinv(design)
-    leverage=np.diag(hat)
-    assert np.isclose(leverage.sum(),2) and leverage[-1]&gt;.9
-    print(&quot;Leverage:&quot;,leverage,&quot;sum equals rank:&quot;,leverage.sum())
+<span class="syntax-keyword">def</span> <span class="syntax-function">leverage_and_residuals</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    design<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    hat<span class="syntax-operator">=</span>design<span class="syntax-decorator">@np</span><span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>pinv<span class="syntax-punctuation">(</span>design<span class="syntax-punctuation">)</span>
+    leverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>diag<span class="syntax-punctuation">(</span>hat<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>leverage<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> leverage<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-number">.9</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Leverage:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>leverage<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum equals rank:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>leverage<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def partial_pooling():
-    grand_mean,tau2,sigma2=5.,1.,4.
-    n=np.array([1.,4.,100.]);group_mean=np.array([9.,9.,9.])
-    weight=tau2/(tau2+sigma2/n)
-    pooled=weight*group_mean+(1-weight)*grand_mean
-    assert np.all(np.diff(weight)&gt;0) and np.all((pooled&gt;5)&amp;(pooled&lt;9))
-    assert np.isclose(tau2/(tau2+sigma2),.2)
-    print(&quot;Pooling weights:&quot;,weight,&quot;group predictions:&quot;,pooled,&quot;ICC:&quot;,.2)
+<span class="syntax-keyword">def</span> <span class="syntax-function">partial_pooling</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    grand_mean<span class="syntax-punctuation">,</span>tau2<span class="syntax-punctuation">,</span>sigma2<span class="syntax-operator">=</span><span class="syntax-number">5.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span>
+    n<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">100.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>group_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    weight<span class="syntax-operator">=</span>tau2<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>tau2<span class="syntax-operator">+</span>sigma2<span class="syntax-operator">/</span>n<span class="syntax-punctuation">)</span>
+    pooled<span class="syntax-operator">=</span>weight<span class="syntax-operator">*</span>group_mean<span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>weight<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>grand_mean
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-operator">&gt;</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>pooled<span class="syntax-operator">&lt;</span><span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>tau2<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>tau2<span class="syntax-operator">+</span>sigma2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Pooling weights:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weight<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">group predictions:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>pooled<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ICC:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">)</span>
 
-def within_estimation():
-    x=np.array([[0.,1.,2.],[10.,11.,12.]])
-    intercept=np.array([100.,-100.])[:,None]
-    y=intercept+2*x
-    xc=x-x.mean(axis=1,keepdims=True)
-    yc=y-y.mean(axis=1,keepdims=True)
-    within=np.sum(xc*yc)/np.sum(xc*xc)
-    pooled=np.polyfit(x.ravel(),y.ravel(),1)[0]
-    assert np.isclose(within,2) and pooled&lt;0
-    print(&quot;Within-unit slope:&quot;,within,&quot;naive pooled slope:&quot;,pooled)
+<span class="syntax-keyword">def</span> <span class="syntax-function">within_estimation</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">11.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    intercept<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">100.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">100.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span>
+    y<span class="syntax-operator">=</span>intercept<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x
+    xc<span class="syntax-operator">=</span>x<span class="syntax-operator">-</span>x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    yc<span class="syntax-operator">=</span>y<span class="syntax-operator">-</span>y<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    within<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>xc<span class="syntax-operator">*</span>yc<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>xc<span class="syntax-operator">*</span>xc<span class="syntax-punctuation">)</span>
+    pooled<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>polyfit<span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>y<span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>within<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> pooled<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Within-unit slope:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>within<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">naive pooled slope:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>pooled<span class="syntax-punctuation">)</span>
 
-def main():
-    leverage_and_residuals();partial_pooling();within_estimation()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    leverage_and_residuals<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>partial_pooling<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>within_estimation<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does a high VIF make a model useless?</strong> It undermines separate coefficient interpretation and can increase uncertainty, but predictions within the observed covariate region may remain stable. Decide whether the task needs individual effects, contrasts, extrapolation or only prediction.</p>
 <p><strong>Interview: When do random intercepts and cluster-robust standard errors answer different needs?</strong> A random-intercept model changes the probability model and can produce group predictions with pooling. Cluster-robust covariance primarily changes uncertainty for a chosen mean estimator. Neither substitutes automatically for the other.</p>

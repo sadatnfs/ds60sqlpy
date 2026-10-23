@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,39 +161,39 @@
       <h1>Cpp 003 Solution</h1>
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-003_solution.cpp</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-cpp"><code><span>#include &lt;cstddef&gt;</span>
-<span>#include &lt;cstdint&gt;</span>
-<span>#include &lt;iostream&gt;</span>
-<span>#include &lt;limits&gt;</span>
-<span> </span>
-<span>int main() {</span>
-<span>    const int whole = 7 / 2;</span>
-<span>    const double fractional = 7.0 / 2.0;</span>
-<span>    const double promoted = static_cast&lt;double&gt;(7) / 2;</span>
-<span>    if (whole != 3 || fractional != 3.5 || promoted != 3.5) return 1;</span>
-<span>    const double truncatedThenConverted = static_cast&lt;double&gt;(7 / 2);</span>
-<span>    if (truncatedThenConverted != 3.0) return 2;</span>
-<span>    const long long external = -1;</span>
-<span>    if (external &gt;= 0) return 3;</span>
-<span>    const std::int64_t wide = 1000000LL * 10000LL;</span>
-<span>    if (wide != 10000000000LL) return 4;</span>
-<span>    const int cents = 125 + 75;</span>
-<span>    if (cents != 200) return 5;</span>
-<span>    const int positive = 3;</span>
-<span>    const std::size_t count = static_cast&lt;std::size_t&gt;(positive);</span>
-<span>    if (count != 3U) return 6;</span>
-<span>    std::cout &lt;&lt; &quot;whole=3 fractional=3.5 promoted=3.5 late=3\n&quot;;</span>
-<span>    std::cout &lt;&lt; &quot;negative rejected; wide=&quot; &lt;&lt; wide &lt;&lt; &quot;; cents=&quot; &lt;&lt; cents &lt;&lt; &#x27;\n&#x27;;</span>
-<span>    return 0;</span>
-<span>}</span>
-<span> </span>
-<span>// Exercise 1: Predict integer division. Inputs: 7/2 and7.0/2.0. Expected: 3 and3.5. Verify: compare both numeric results and explain operand types.</span>
-<span>// Exercise 2: Place the conversion correctly. Inputs: static_cast&lt;double&gt;(7)/2 versus static_cast&lt;double&gt;(7/2). Expected: 3.5 versus3.0. Verify: assert both results and identify the inner expression evaluated first.</span>
-<span>// Exercise 3: Guard a signed count. Inputs: long long external=-1. Expected: rejected; no unsigned index or allocation follows. Verify: inspect the guard-before-cast order and a nonnegative control case3.</span>
-<span>// Exercise 4: Widen operands before multiplication. Inputs: 1000000LL*10000LL. Expected: 10000000000 in a64-bit-capable type. Verify: assert the exact number; explain why casting an overflowing int product afterward is too late.</span>
-<span>// Exercise 5: Use exact cents for this fixture. Inputs: 125 cents and75 cents. Expected: 200 cents. Verify: assert integral result200 and label its unit explicitly.</span>
-<span>// Exercise 6: Transfer a valid small size. Inputs: positive=3, known representable by size_t. Expected: count3; zero would also be valid, while-1 is not. Verify: test3 and0 after validation and explain that arbitrary huge values still need a range check.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-cpp"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cstddef&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cstdint&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;limits&gt;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7.0</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">double</span> promoted <span class="syntax-operator">=</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">double</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>whole <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> fractional <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> promoted <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">double</span> truncatedThenConverted <span class="syntax-operator">=</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">double</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>truncatedThenConverted <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> external <span class="syntax-operator">=</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>external <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">int64_t</span> wide <span class="syntax-operator">=</span> <span class="syntax-number">1000000L</span>L <span class="syntax-operator">*</span> <span class="syntax-number">10000L</span>L<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>wide <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">10000000000L</span>L<span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> cents <span class="syntax-operator">=</span> <span class="syntax-number">125</span> <span class="syntax-operator">+</span> <span class="syntax-number">75</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>cents <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> positive <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span> count <span class="syntax-operator">=</span> <span class="syntax-keyword">static_cast</span><span class="syntax-operator">&lt;</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>positive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>count <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">3U</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">whole=3 fractional=3.5 promoted=3.5 late=3</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative rejected; wide=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> wide <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">; cents=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> cents <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Predict integer division. Inputs: 7/2 and7.0/2.0. Expected: 3 and3.5. Verify: compare both numeric results and explain operand types.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Place the conversion correctly. Inputs: static_cast&lt;double&gt;(7)/2 versus static_cast&lt;double&gt;(7/2). Expected: 3.5 versus3.0. Verify: assert both results and identify the inner expression evaluated first.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Guard a signed count. Inputs: long long external=-1. Expected: rejected; no unsigned index or allocation follows. Verify: inspect the guard-before-cast order and a nonnegative control case3.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Widen operands before multiplication. Inputs: 1000000LL*10000LL. Expected: 10000000000 in a64-bit-capable type. Verify: assert the exact number; explain why casting an overflowing int product afterward is too late.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Use exact cents for this fixture. Inputs: 125 cents and75 cents. Expected: 200 cents. Verify: assert integral result200 and label its unit explicitly.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Transfer a valid small size. Inputs: positive=3, known representable by size_t. Expected: count3; zero would also be valid, while-1 is not. Verify: test3 and0 after validation and explain that arbitrary huge values still need a range check.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

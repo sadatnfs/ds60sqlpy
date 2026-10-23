@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Time has several meanings. Instant identifies a point on theUTCtimeline. LocalDate describes a calendar date without a time zone. LocalDateTime is a wall-clock reading that may be ambiguous or nonexistent in a region because of daylight-saving transitions. ZonedDateTime combines local fields with a zone and resolved offset. A calendar day is not always24 elapsed hours. Store the meaning required by the domain rather than treating every timestamp as interchangeable text. Parse explicit offsets for event instants, and use a region zone when calendar rules matter.
+Time has several meanings. Instant identifies a point on the UTC timeline. LocalDate describes a calendar date without a time zone. LocalDateTime is a wall-clock reading that may be ambiguous or nonexistent in a region because of daylight-saving transitions. ZonedDateTime combines local fields with a zone and resolved offset. A calendar day is not always24 elapsed hours. Store the meaning required by the domain rather than treating every timestamp as interchangeable text. Parse explicit offsets for event instants, and use a region zone when calendar rules matter.
 
-**Instant:** A point on theUTCtimeline.
+**Instant:** A point on the UTC timeline.
 
 **Local date-time:** Calendar and clock fields without a resolved zone offset.
 
@@ -14,11 +14,11 @@ Time has several meanings. Instant identifies a point on theUTCtimeline. LocalDa
 
 ## Reading the reference
 
-Instant.parse acceptsISO8601UTCtext. atZone converts an instant to a regional representation without changing the instant. plusDays follows local calendar arithmetic,while plusHours follows elapsed time forZonedDateTime. ZoneRules.getValidOffsets reveals zero,one or two valid offsets for a local date-time. Use explicit formatters andLocale rather than relying on machine defaults.
+Instant.parse acceptsISO8601UTCtext. atZone converts an instant to a regional representation without changing the instant. plusDays follows local calendar arithmetic,while plusHours follows elapsed time for ZonedDateTime. ZoneRules.getValidOffsets reveals zero,one or two valid offsets for a local date-time. Use explicit formatters and Locale rather than relying on machine defaults.
 
 ## Exercise 1: Preserve an instant across zones
 
-Task: Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York.
+Task: Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York.
 
 Changing the display zone does not move the event. A date-only grouping can nevertheless change because calendar boundaries differ by zone.
 
@@ -29,9 +29,9 @@ var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
 assert utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023,12,31));
 ```
 
-**Expected:** same instant;New York local date2023-12-31.
+**Expected:** same instant; New York local date 2023-12-31.
 
-**Verify:** Compare the program values or named exception with same instant;New York local date2023-12-31. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with same instant; New York local date 2023-12-31. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Compare calendar and elapsed days
 
@@ -52,7 +52,7 @@ assert nextDay.getHour() == 12 && next24.getHour() == 13;
 
 ## Exercise 3: Detect a nonexistent local time
 
-Task: Ask for valid offsets at2024-03-10 02:30 inNew York.
+Task: Ask for valid offsets at2024-03-10 02:30 in New York.
 
 A parser may resolve a gap according to an API policy, but the original local reading did not occur. Validate explicitly when silent adjustment is unacceptable.
 
@@ -68,7 +68,7 @@ assert zone.getRules().getValidOffsets(gap).isEmpty();
 
 ## Exercise 4: Detect an ambiguous local time
 
-Task: Ask for offsets at2024-11-03 01:30 inNew York.
+Task: Ask for offsets at2024-11-03 01:30 in New York.
 
 The clock reading occurs twice during the fall transition. A domain record needs an offset or a declared ambiguity-resolution policy to identify one instant.
 
@@ -83,7 +83,7 @@ assert zone.getRules().getValidOffsets(overlap).size() == 2;
 
 ## Exercise 5: Parse a strict calendar date
 
-Task: Parse2024-02-29 and reject2023-02-29 withISO_LOCAL_DATE.
+Task: Parse 2024-02-29 and reject 2023-02-29 with ISO_LOCAL_DATE.
 
 Validation follows calendar rules rather than accepting any numeric month/day combination. Keep parsing failures distinct from a missing date.
 
@@ -110,9 +110,9 @@ assert !instant.isBefore(instant) && instant.isBefore(end);
 assert !( !end.isBefore(instant) && end.isBefore(end) );
 ```
 
-**Expected:** start included;end excluded.
+**Expected:** start included; end excluded.
 
-**Verify:** Compare the program values or named exception with start included;end excluded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with start included; end excluded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

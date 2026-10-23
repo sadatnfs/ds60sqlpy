@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-53.html#learner">learner SQL</a> · <a href="sql-53.html#solution-1">solution reasoning</a> · <a href="sql-53.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-53 — Project3 DWH Part2 SCD</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -406,10 +454,10 @@
 </ol>
 <p>This lesson requires the committed Day 52 warehouse. The guided preparation cell resolves that cataloged predecessor. For a direct terminal run, execute Day 52 successfully first; do not assume a rolled-back Day 53 exercise persists into Day 54.</p>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day53_project3_dwh_part2_scd.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day53_project3_dwh_part2_scd.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -419,43 +467,43 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">CREATE TEMP TABLE changed_customers AS
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       CASE WHEN c.segment = &#x27;platinum&#x27; THEN &#x27;gold&#x27; ELSE &#x27;platinum&#x27; END AS segment
-FROM training.customers c
-ORDER BY c.customer_id
-LIMIT 10;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_customers <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment
+<span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>customers <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>customer_id</code>, <code>full_name</code>, and <code>country</code>, capped at 10 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code> from <code>training.customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">WITH current_dim AS (
-  SELECT dc.*
-  FROM dim_customer dc
-  WHERE dc.is_current
-), diffs AS (
-  SELECT s.customer_id,
-         s.full_name,
-         s.country,
-         s.segment
-  FROM changed_customers s
-  JOIN current_dim dc ON dc.customer_id = s.customer_id
-  WHERE coalesce(s.full_name,&#x27;&#x27;) &lt;&gt; coalesce(dc.full_name,&#x27;&#x27;)
-     OR coalesce(s.country,&#x27;&#x27;)   &lt;&gt; coalesce(dc.country,&#x27;&#x27;)
-     OR coalesce(s.segment,&#x27;&#x27;)   &lt;&gt; coalesce(dc.segment,&#x27;&#x27;)
-), closed AS (
-  UPDATE dim_customer dc
-  SET valid_to = CURRENT_DATE - 1,
-      is_current = FALSE
-  FROM diffs d
-  WHERE dc.customer_id = d.customer_id
-    AND dc.is_current
-  RETURNING dc.customer_id
-)
-INSERT INTO dim_customer(customer_id, full_name, country, segment, valid_from, valid_to, is_current)
-SELECT d.customer_id, d.full_name, d.country, d.segment, CURRENT_DATE, NULL, TRUE
-FROM diffs d;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> current_dim <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> dc<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span>
+  <span class="syntax-keyword">FROM</span> dim_customer dc
+  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>is_current
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+         s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+         s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+         s<span class="syntax-punctuation">.</span>segment
+  <span class="syntax-keyword">FROM</span> changed_customers s
+  <span class="syntax-keyword">JOIN</span> current_dim dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>
+     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>
+     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> closed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">UPDATE</span> dim_customer dc
+  <span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+      is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span>
+  <span class="syntax-keyword">FROM</span> diffs d
+  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>customer_id
+    <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current
+  RETURNING dc<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TRUE</span>
+<span class="syntax-keyword">FROM</span> diffs d<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is a data-changing CTE chain, not a displayed query result. The CTEs <code>current_dim</code>, <code>diffs</code>, and <code>closed</code> identify changed customers, close each former current row, and insert one successor into <code>dim_customer</code>. Read the command tag for the inserted-row count, then verify one current version per customer and non-overlapping validity periods; a successful command tag alone does not prove Type-2 history is correct.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a DML command tag for <code>dim_customer</code>, and <code>changed_customers</code>. Capture the target key set at <code>customer_id</code>, <code>full_name</code>, and <code>country</code> grain before the write, compare it with affected/returned keys, and use a follow-up <code>SELECT</code> to prove the before/after invariant and transaction cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -525,7 +573,7 @@ FROM diffs d;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-53 — Project3 DWH Part2 SCD.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-53 — Project3 DWH Part2 SCD.
 
 I have completed the direct catalog prerequisite: `sql-52`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md
@@ -583,156 +631,156 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 53: Project 3 - Data Warehouse Design (Part 2)</span>
-<span>-- BEGINNER WORKFLOW — sql-53: Project3 DWH Part2 SCD</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-53/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: training.customers, dim_customer, training.products, dim_product.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Topics: Slowly Changing Dimensions (Type 2) for customers/products</span>
-<span>BEGIN;</span>
-<span>SET search_path TO dwh, training, public;</span>
-<span> </span>
-<span>-- Example SCD Type 2 upsert for dim_customer</span>
-<span>-- Assumption: source-of-truth is training.customers; we detect changes by comparing attributes</span>
-<span>-- Steps per changed business key:</span>
-<span>--   1) Close current row (set valid_to = today - 1, is_current = false)</span>
-<span>--   2) Insert new row with updated attributes (valid_from = today, is_current = true)</span>
-<span> </span>
-<span>-- Simulate a change in the OLTP source (demo only)</span>
-<span>CREATE TEMP TABLE changed_customers AS</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.full_name,</span>
-<span>       c.country,</span>
-<span>       CASE WHEN c.segment = &#x27;platinum&#x27; THEN &#x27;gold&#x27; ELSE &#x27;platinum&#x27; END AS segment</span>
-<span>FROM training.customers c</span>
-<span>ORDER BY c.customer_id</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>-- Detect current rows that differ from source attributes</span>
-<span>WITH current_dim AS (</span>
-<span>  SELECT dc.*</span>
-<span>  FROM dim_customer dc</span>
-<span>  WHERE dc.is_current</span>
-<span>), diffs AS (</span>
-<span>  SELECT s.customer_id,</span>
-<span>         s.full_name,</span>
-<span>         s.country,</span>
-<span>         s.segment</span>
-<span>  FROM changed_customers s</span>
-<span>  JOIN current_dim dc ON dc.customer_id = s.customer_id</span>
-<span>  WHERE coalesce(s.full_name,&#x27;&#x27;) &lt;&gt; coalesce(dc.full_name,&#x27;&#x27;)</span>
-<span>     OR coalesce(s.country,&#x27;&#x27;)   &lt;&gt; coalesce(dc.country,&#x27;&#x27;)</span>
-<span>     OR coalesce(s.segment,&#x27;&#x27;)   &lt;&gt; coalesce(dc.segment,&#x27;&#x27;)</span>
-<span>), closed AS (</span>
-<span>  UPDATE dim_customer dc</span>
-<span>  SET valid_to = CURRENT_DATE - 1,</span>
-<span>      is_current = FALSE</span>
-<span>  FROM diffs d</span>
-<span>  WHERE dc.customer_id = d.customer_id</span>
-<span>    AND dc.is_current</span>
-<span>  RETURNING dc.customer_id</span>
-<span>)</span>
-<span>INSERT INTO dim_customer(customer_id, full_name, country, segment, valid_from, valid_to, is_current)</span>
-<span>SELECT d.customer_id, d.full_name, d.country, d.segment, CURRENT_DATE, NULL, TRUE</span>
-<span>FROM diffs d;</span>
-<span> </span>
-<span>-- Verify multiple versions per customer</span>
-<span>SELECT customer_id,</span>
-<span>       COUNT(*) AS versions,</span>
-<span>       MIN(valid_from) AS first_seen,</span>
-<span>       MAX(coalesce(valid_to, CURRENT_DATE)) AS last_seen</span>
-<span>FROM dim_customer</span>
-<span>GROUP BY customer_id</span>
-<span>ORDER BY versions DESC, customer_id</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>-- SCD Type 2 for dim_product (similar pattern)</span>
-<span>CREATE TEMP TABLE changed_products AS</span>
-<span>SELECT p.product_id,</span>
-<span>       p.name,</span>
-<span>       p.category,</span>
-<span>       round(p.price * 1.05, 2) AS price,</span>
-<span>       p.cost</span>
-<span>FROM training.products p</span>
-<span>ORDER BY p.product_id</span>
-<span>LIMIT 10;</span>
-<span> </span>
-<span>WITH current_p AS (</span>
-<span>  SELECT * FROM dim_product WHERE is_current</span>
-<span>), diffs AS (</span>
-<span>  SELECT s.*</span>
-<span>  FROM changed_products s</span>
-<span>  JOIN current_p dp ON dp.product_id = s.product_id</span>
-<span>  WHERE coalesce(s.name,&#x27;&#x27;)     &lt;&gt; coalesce(dp.name,&#x27;&#x27;)</span>
-<span>     OR coalesce(s.category,&#x27;&#x27;) &lt;&gt; coalesce(dp.category,&#x27;&#x27;)</span>
-<span>     OR coalesce(s.price,0)     &lt;&gt; coalesce(dp.price,0)</span>
-<span>     OR coalesce(s.cost,0)      &lt;&gt; coalesce(dp.cost,0)</span>
-<span>), close_p AS (</span>
-<span>  UPDATE dim_product dp</span>
-<span>  SET valid_to = CURRENT_DATE - 1,</span>
-<span>      is_current = FALSE</span>
-<span>  FROM diffs d</span>
-<span>  WHERE dp.product_id = d.product_id</span>
-<span>    AND dp.is_current</span>
-<span>  RETURNING dp.product_id</span>
-<span>)</span>
-<span>INSERT INTO dim_product(product_id, name, category, price, cost, valid_from, valid_to, is_current)</span>
-<span>SELECT d.product_id, d.name, d.category, d.price, d.cost, CURRENT_DATE, NULL, TRUE</span>
-<span>FROM diffs d;</span>
-<span> </span>
-<span>-- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from &lt;= order_date &lt;= coalesce(valid_to,&#x27;infinity&#x27;)).</span>
-<span>--    Inputs: For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.</span>
-<span>--    Verify: For sql-53 Exercise 1, project `order_id` plus the raw source columns from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-53 Exercise 1, start with the first relation in `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.</span>
-<span>-- 2. Add audit columns (updated_by, updated_at) to dim tables.</span>
-<span>--    Inputs: For sql-53 Exercise 2, change only `dim_customer`, and `dim_product` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `information_schema.columns` rows.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `updated_by`, and `day53_solution`.</span>
-<span>--    Verify: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.</span>
-<span>--    Hint ladder, rung 1: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.</span>
-<span>-- 3. Prediction: explain why closing a version at CURRENT_DATE - 1 can create an</span>
-<span>--    invalid range when two changes for one key arrive on the same date.</span>
-<span>--    Inputs: For sql-53 Exercise 3, read from `dim_customer`. Build the answer toward `customer_id`, `valid_from`, `valid_to`, and `invalid_range`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `valid_from`, `valid_to`, and `invalid_range`. The final order is `valid_from`.</span>
-<span>--    Verify: For sql-53 Exercise 3, run an anti-check that counts rows where NOT ((customer_id = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `valid_from`, `valid_to`, and `invalid_range` against `dim_customer`. Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span>
-<span>--    Hint ladder, rung 1: For sql-53 Exercise 3, inspect the source keys that survive `WHERE`; then check `valid_from` before applying the row cap.</span>
-<span>-- 4. Construction: add a constraint or exclusion-style validation that detects</span>
-<span>--    overlapping effective ranges for each natural customer key.</span>
-<span>--    Inputs: For sql-53 Exercise 4, read from `dim_customer`. Build the answer toward `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`; keep `customer_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`. The final order is `a.customer_id, version_a, version_b`.</span>
-<span>--    Verify: For sql-53 Exercise 4, project `customer_id` plus the raw source columns from `dim_customer` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span>
-<span>-- 5. Debugging: make the SCD2 load idempotent so rerunning an unchanged source</span>
-<span>--    creates no new version.</span>
-<span>--    Inputs: For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.</span>
-<span>--    Verify: For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.</span>
-<span>--    Hint ladder, rung 1: Prove both desired and current relations are unique on `customer_id`, then compare with `IS DISTINCT FROM`.</span>
-<span>-- 6. Edge case: define a same-day change policy using timestamptz boundaries or</span>
-<span>--    source sequence numbers, and explain the tradeoff.</span>
-<span>--    Inputs: For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span>
-<span>--    Expected result/shape: For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.</span>
-<span>--    Verify: For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 53: Project 3 - Data Warehouse Design (Part 2)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-53: Project3 DWH Part2 SCD</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-53/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: training.customers, dim_customer, training.products, dim_product.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Topics: Slowly Changing Dimensions (Type 2) for customers/products</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example SCD Type 2 upsert for dim_customer</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumption: source-of-truth is training.customers; we detect changes by comparing attributes</span></span>
+<span class="source-line"><span class="syntax-comment">-- Steps per changed business key:</span></span>
+<span class="source-line"><span class="syntax-comment">--   1) Close current row (set valid_to = today - 1, is_current = false)</span></span>
+<span class="source-line"><span class="syntax-comment">--   2) Insert new row with updated attributes (valid_from = today, is_current = true)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Simulate a change in the OLTP source (demo only)</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_customers <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Detect current rows that differ from source attributes</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> current_dim <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> dc<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         s<span class="syntax-punctuation">.</span>segment</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> changed_customers s</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> current_dim dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> closed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> diffs d</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line">  RETURNING dc<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> diffs d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Verify multiple versions per customer</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">versions</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_seen<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> last_seen</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">versions</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- SCD Type 2 for dim_product (similar pattern)</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_products <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       round<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       p<span class="syntax-punctuation">.</span>cost</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>products p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> current_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> dim_product <span class="syntax-keyword">WHERE</span> is_current</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> changed_products s</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> current_p dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>     <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>     <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>      <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> close_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span> dim_product dp</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> diffs d</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> dp<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line">  RETURNING dp<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_product<span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> price<span class="syntax-punctuation">,</span> cost<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> diffs d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from &lt;= order_date &lt;= coalesce(valid_to,&#x27;infinity&#x27;)).</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 1, project `order_id` plus the raw source columns from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 1, start with the first relation in `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Add audit columns (updated_by, updated_at) to dim tables.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 2, change only `dim_customer`, and `dim_product` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `information_schema.columns` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `updated_by`, and `day53_solution`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Prediction: explain why closing a version at CURRENT_DATE - 1 can create an</span></span>
+<span class="source-line"><span class="syntax-comment">--    invalid range when two changes for one key arrive on the same date.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 3, read from `dim_customer`. Build the answer toward `customer_id`, `valid_from`, `valid_to`, and `invalid_range`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `valid_from`, `valid_to`, and `invalid_range`. The final order is `valid_from`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 3, run an anti-check that counts rows where NOT ((customer_id = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `valid_from`, `valid_to`, and `invalid_range` against `dim_customer`. Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 3, inspect the source keys that survive `WHERE`; then check `valid_from` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Construction: add a constraint or exclusion-style validation that detects</span></span>
+<span class="source-line"><span class="syntax-comment">--    overlapping effective ranges for each natural customer key.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 4, read from `dim_customer`. Build the answer toward `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`. The final order is `a.customer_id, version_a, version_b`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 4, project `customer_id` plus the raw source columns from `dim_customer` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Debugging: make the SCD2 load idempotent so rerunning an unchanged source</span></span>
+<span class="source-line"><span class="syntax-comment">--    creates no new version.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: Prove both desired and current relations are unique on `customer_id`, then compare with `IS DISTINCT FROM`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Edge case: define a same-day change policy using timestamptz boundaries or</span></span>
+<span class="source-line"><span class="syntax-comment">--    source sequence numbers, and explain the tradeoff.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -768,10 +816,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys">Day 53 Solutions — SCD Type 2 and Temporal Fact Keys<a class="heading-anchor" href="#solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day53_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day53_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day53_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -788,35 +836,35 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 53 reads that committed <code>dwh</code> state but wraps its own changes in a transaction and rolls them back. The full answer is <a href="sql-53.html#solution-2"><code>day53_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-resolve-dimension-versions-by-fact-date">Exercise 1 — Resolve dimension versions by fact date<a class="heading-anchor" href="#solution-1--exercise-1-resolve-dimension-versions-by-fact-date" aria-label="Link to this section">#</a></h4>
 <p>The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date.</p>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO dwh, training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE TEMP TABLE fact_sales_temporal_solution AS
-SELECT o.order_id,
-       oi.order_item_id,
-       dd.date_key,
-       dc.customer_sk,
-       dp.product_sk,
-       oi.quantity,
-       oi.unit_price,
-       oi.discount,
-       oi.unit_price * oi.quantity * (1 - oi.discount) AS amount
-FROM training.orders o
-JOIN training.order_items oi USING (order_id)
-JOIN dim_date dd ON dd.date_actual = o.order_date::date
-JOIN dim_customer dc
-  ON dc.customer_id = o.customer_id
- AND o.order_date::date &gt;= dc.valid_from
- AND o.order_date::date &lt;= COALESCE(dc.valid_to, &#x27;infinity&#x27;::date)
-JOIN dim_product dp
-  ON dp.product_id = oi.product_id
- AND o.order_date::date &gt;= dp.valid_from
- AND o.order_date::date &lt;= COALESCE(dp.valid_to, &#x27;infinity&#x27;::date);
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> fact_sales_temporal_solution <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+       oi<span class="syntax-punctuation">.</span>order_item_id<span class="syntax-punctuation">,</span>
+       dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span>
+       dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span>
+       dp<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span>
+       oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span>
+       oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-punctuation">,</span>
+       oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">,</span>
+       oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount
+<span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>orders o
+<span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+<span class="syntax-keyword">JOIN</span> dim_customer dc
+  <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
+ <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from
+ <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">JOIN</span> dim_product dp
+  <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+ <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dp<span class="syntax-punctuation">.</span>valid_from
+ <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-SELECT (SELECT COUNT(*) FROM fact_sales_temporal_solution) AS mapped_fact_rows,
-       (SELECT COUNT(*) FROM training.order_items) AS source_item_rows;
+<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> fact_sales_temporal_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mapped_fact_rows<span class="syntax-punctuation">,</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>order_items<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_item_rows<span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected result: <code>mapped_fact_rows</code> equals <code>source_item_rows</code>. A lower count means a date or dimension-version gap; a higher count means overlapping validity ranges caused one fact to match more than one version.</p>
 <p>The executable solution also stages a deterministic customer change effective 30 days ago, closes the previous current row at <code>effective_date - 1</code>, inserts a new current row, and then performs this temporal mapping.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -831,18 +879,18 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-2-audit-columns">Exercise 2 — Audit columns<a class="heading-anchor" href="#solution-1--exercise-2-audit-columns" aria-label="Link to this section">#</a></h4>
 <p>Inside the Day 53 transaction, the answer adds:</p>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO dwh, training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-ALTER TABLE dim_customer
-  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
-  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+<span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_customer
+  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span>
 
-ALTER TABLE dim_product
-  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
-  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+<span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_product
+  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The SCD close and insert explicitly stamp <code>updated_by = &#x27;day53_solution&#x27;</code>. Because the executable answer rolls back, these columns do not remain after the lesson.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -888,19 +936,19 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-5-gate-unchanged-reruns">Exercise 5 — Gate unchanged reruns<a class="heading-anchor" href="#solution-1--exercise-5-gate-unchanged-reruns" aria-label="Link to this section">#</a></h4>
 <p><code>IS DISTINCT FROM</code> compares nullable attributes safely. The replay must use the same staged desired state that produced the new version—not the unchanged base table—otherwise the deliberate segment change looks like a new change again.</p>
-<pre><code class="language-sql">WITH desired_customer_state AS (
-  SELECT customer_id, full_name, country, segment
-  FROM staged_customer_change
-)
-SELECT COUNT(*) AS unchanged_rows_that_would_version
-FROM dim_customer current_version
-JOIN desired_customer_state desired USING (customer_id)
-WHERE current_version.is_current
-  AND (
-    current_version.full_name IS DISTINCT FROM desired.full_name
-    OR current_version.country IS DISTINCT FROM desired.country
-    OR current_version.segment IS DISTINCT FROM desired.segment
-  );</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> desired_customer_state <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment
+  <span class="syntax-keyword">FROM</span> staged_customer_change
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unchanged_rows_that_would_version
+<span class="syntax-keyword">FROM</span> dim_customer current_version
+<span class="syntax-keyword">JOIN</span> desired_customer_state desired <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> current_version<span class="syntax-punctuation">.</span>is_current
+  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>
+    current_version<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>full_name
+    <span class="syntax-keyword">OR</span> current_version<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>country
+    <span class="syntax-keyword">OR</span> current_version<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>segment
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-53 Exercise 5, compare the current <code>dim_customer</code> row to <code>desired_customer_state</code>, which is copied from the same <code>staged_customer_change</code> used by Exercise 2.</li>
@@ -955,154 +1003,154 @@ WHERE current_version.is_current
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 53 solutions: SCD Type 2 and temporal fact lookup</span>
-<span>-- SOLUTION READING MAP — sql-53: Project3 DWH Part2 SCD</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day53_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day53_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO dwh, training, public;</span>
-<span> </span>
-<span>DO $require_day52$</span>
-<span>BEGIN</span>
-<span>  IF to_regclass(&#x27;dwh.dim_customer&#x27;) IS NULL THEN</span>
-<span>    RAISE EXCEPTION &#x27;Run day52_solutions.sql before Day 53&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$require_day52$;</span>
-<span> </span>
-<span>-- Exercise 2: audit metadata on both changing dimensions.</span>
-<span>ALTER TABLE dim_customer</span>
-<span>  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,</span>
-<span>  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;</span>
-<span>ALTER TABLE dim_product</span>
-<span>  ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,</span>
-<span>  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;</span>
-<span> </span>
-<span>-- A deterministic customer change effective 30 days ago.</span>
-<span>CREATE TEMP TABLE staged_customer_change AS</span>
-<span>SELECT customer_id,</span>
-<span>       full_name,</span>
-<span>       country,</span>
-<span>       CASE WHEN segment = &#x27;gold&#x27; THEN &#x27;silver&#x27; ELSE &#x27;gold&#x27; END AS segment,</span>
-<span>       (CURRENT_DATE - 30) AS effective_date</span>
-<span>FROM dim_customer</span>
-<span>WHERE customer_id = 1</span>
-<span>  AND is_current;</span>
-<span> </span>
-<span>UPDATE dim_customer dc</span>
-<span>SET valid_to = s.effective_date - 1,</span>
-<span>    is_current = FALSE,</span>
-<span>    updated_by = &#x27;day53_solution&#x27;,</span>
-<span>    updated_at = CURRENT_TIMESTAMP</span>
-<span>FROM staged_customer_change s</span>
-<span>WHERE dc.customer_id = s.customer_id</span>
-<span>  AND dc.is_current;</span>
-<span> </span>
-<span>INSERT INTO dim_customer(</span>
-<span>  customer_id, full_name, country, segment, country_sk,</span>
-<span>  valid_from, valid_to, is_current, updated_by, updated_at</span>
-<span>)</span>
-<span>SELECT s.customer_id,</span>
-<span>       s.full_name,</span>
-<span>       s.country,</span>
-<span>       s.segment,</span>
-<span>       co.country_sk,</span>
-<span>       s.effective_date,</span>
-<span>       NULL,</span>
-<span>       TRUE,</span>
-<span>       &#x27;day53_solution&#x27;,</span>
-<span>       CURRENT_TIMESTAMP</span>
-<span>FROM staged_customer_change s</span>
-<span>JOIN dim_country co ON co.country_code = s.country;</span>
-<span> </span>
-<span>-- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions</span>
-<span>-- whose validity intervals contain each order date.</span>
-<span>CREATE TEMP TABLE fact_sales_temporal_solution AS</span>
-<span>SELECT o.order_id,</span>
-<span>       oi.order_item_id,</span>
-<span>       dd.date_key,</span>
-<span>       dc.customer_sk,</span>
-<span>       dp.product_sk,</span>
-<span>       oi.quantity,</span>
-<span>       oi.unit_price,</span>
-<span>       oi.discount,</span>
-<span>       oi.unit_price * oi.quantity * (1 - oi.discount) AS amount</span>
-<span>FROM training.orders o</span>
-<span>JOIN training.order_items oi USING (order_id)</span>
-<span>JOIN dim_date dd ON dd.date_actual = o.order_date::date</span>
-<span>JOIN dim_customer dc</span>
-<span>  ON dc.customer_id = o.customer_id</span>
-<span> AND o.order_date::date &gt;= dc.valid_from</span>
-<span> AND o.order_date::date &lt;= COALESCE(dc.valid_to, &#x27;infinity&#x27;::date)</span>
-<span>JOIN dim_product dp</span>
-<span>  ON dp.product_id = oi.product_id</span>
-<span> AND o.order_date::date &gt;= dp.valid_from</span>
-<span> AND o.order_date::date &lt;= COALESCE(dp.valid_to, &#x27;infinity&#x27;::date);</span>
-<span> </span>
-<span>SELECT (SELECT COUNT(*) FROM fact_sales_temporal_solution) AS mapped_fact_rows,</span>
-<span>       (SELECT COUNT(*) FROM training.order_items) AS source_item_rows,</span>
-<span>       (SELECT COUNT(*) FROM dim_customer WHERE customer_id = 1) AS customer_versions;</span>
-<span> </span>
-<span>-- Exercise 3: date-grain closed intervals cannot represent two ordered changes</span>
-<span>-- on one date without an invalid or overlapping range. Surface that limitation.</span>
-<span>SELECT customer_id, valid_from, valid_to,</span>
-<span>       (valid_to IS NOT NULL AND valid_to &lt; valid_from) AS invalid_range</span>
-<span>FROM dim_customer</span>
-<span>WHERE customer_id = 1</span>
-<span>ORDER BY valid_from;</span>
-<span> </span>
-<span>-- Exercise 4: each pair is compared once. Inclusive validity ranges overlap</span>
-<span>-- when neither ends before the other begins.</span>
-<span>SELECT a.customer_id,</span>
-<span>       a.customer_sk AS version_a,</span>
-<span>       b.customer_sk AS version_b,</span>
-<span>       a.valid_from AS a_from,</span>
-<span>       a.valid_to AS a_to,</span>
-<span>       b.valid_from AS b_from,</span>
-<span>       b.valid_to AS b_to</span>
-<span>FROM dim_customer a</span>
-<span>JOIN dim_customer b</span>
-<span>  ON b.customer_id = a.customer_id</span>
-<span> AND b.customer_sk &gt; a.customer_sk</span>
-<span> AND a.valid_from &lt;= COALESCE(b.valid_to, &#x27;infinity&#x27;::date)</span>
-<span> AND b.valid_from &lt;= COALESCE(a.valid_to, &#x27;infinity&#x27;::date)</span>
-<span>ORDER BY a.customer_id, version_a, version_b;</span>
-<span> </span>
-<span>-- Exercise 5: replay the SAME desired state used by the first application.</span>
-<span>-- Comparing to training.customers here would be wrong: Exercise 2 deliberately</span>
-<span>-- changed the segment only in staged_customer_change and dim_customer.</span>
-<span>WITH desired_customer_state AS (</span>
-<span>  SELECT customer_id, full_name, country, segment</span>
-<span>  FROM staged_customer_change</span>
-<span>)</span>
-<span>SELECT COUNT(*) AS unchanged_rows_that_would_version</span>
-<span>FROM dim_customer dc</span>
-<span>JOIN desired_customer_state desired USING (customer_id)</span>
-<span>WHERE dc.is_current</span>
-<span>  AND (</span>
-<span>    dc.full_name IS DISTINCT FROM desired.full_name</span>
-<span>    OR dc.country IS DISTINCT FROM desired.country</span>
-<span>    OR dc.segment IS DISTINCT FROM desired.segment</span>
-<span>  );</span>
-<span> </span>
-<span>-- Exercise 6: timestamp-effective ranges support same-day ordering, but require</span>
-<span>-- source effective timestamps (or a source sequence), not load time guesses.</span>
-<span>SELECT &#x27;[2026-01-15 09:00+00,2026-01-15 12:00+00)&#x27;::tstzrange</span>
-<span>         AS first_version,</span>
-<span>       &#x27;[2026-01-15 12:00+00,infinity)&#x27;::tstzrange AS second_version;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 53 solutions: SCD Type 2 and temporal fact lookup</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-53: Project3 DWH Part2 SCD</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day53_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day53_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $require_day52$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dwh.dim_customer&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Run day52_solutions.sql before Day 53&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$require_day52$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: audit metadata on both changing dimensions.</span></span>
+<span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_customer</span>
+<span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_product</span>
+<span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- A deterministic customer change effective 30 days ago.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> staged_customer_change <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;silver&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> effective_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> is_current<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span> dim_customer dc</span>
+<span class="source-line"><span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>effective_date <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    updated_by <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    updated_at <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> staged_customer_change s</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer<span class="syntax-punctuation">(</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> country_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">,</span> updated_by<span class="syntax-punctuation">,</span> updated_at</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       co<span class="syntax-punctuation">.</span>country_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>effective_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> staged_customer_change s</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_country co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>country_code <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions</span></span>
+<span class="source-line"><span class="syntax-comment">-- whose validity intervals contain each order date.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> fact_sales_temporal_solution <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       oi<span class="syntax-punctuation">.</span>order_item_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       dp<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>orders o</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_product dp</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dp<span class="syntax-punctuation">.</span>valid_from</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> fact_sales_temporal_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mapped_fact_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>order_items<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_item_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> dim_customer <span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_versions<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: date-grain closed intervals cannot represent two ordered changes</span></span>
+<span class="source-line"><span class="syntax-comment">-- on one date without an invalid or overlapping range. Surface that limitation.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span>valid_to <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> valid_to <span class="syntax-operator">&lt;</span> valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_range</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> valid_from<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: each pair is compared once. Inclusive validity ranges overlap</span></span>
+<span class="source-line"><span class="syntax-comment">-- when neither ends before the other begins.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> a_from<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       a<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> a_to<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> b_from<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       b<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> b_to</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer a</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_customer b</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>customer_sk</span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> version_a<span class="syntax-punctuation">,</span> version_b<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: replay the SAME desired state used by the first application.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Comparing to training.customers here would be wrong: Exercise 2 deliberately</span></span>
+<span class="source-line"><span class="syntax-comment">-- changed the segment only in staged_customer_change and dim_customer.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> desired_customer_state <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> staged_customer_change</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unchanged_rows_that_would_version</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer dc</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> desired_customer_state desired <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    dc<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>country</span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>segment</span>
+<span class="source-line">  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: timestamp-effective ranges support same-day ordering, but require</span></span>
+<span class="source-line"><span class="syntax-comment">-- source effective timestamps (or a source sequence), not load time guesses.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;[2026-01-15 09:00+00,2026-01-15 12:00+00)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange</span>
+<span class="source-line">         <span class="syntax-keyword">AS</span> first_version<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&#x27;[2026-01-15 12:00+00,infinity)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> second_version<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

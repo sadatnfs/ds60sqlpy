@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,16 +165,16 @@
 <p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/llm-003.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
 <p>The <a href="llm-003_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
 <h3 id="exercise-1-trace-the-fixed-conditionals">Exercise 1: Trace the fixed conditionals<a class="heading-anchor" href="#exercise-1-trace-the-fixed-conditionals" aria-label="Link to this section">#</a></h3>
-<p>The product is 0.5<em>0.25</em>0.8=0.1. Taking the negative natural log yields log(10), equivalently the sum of three negative log terms. The scored-target count is three. Each number belongs to its own preceding context in the probability chain. The arithmetic alone cannot check that a model produced the right contextual probability, so retain a prefix/target table as semantic evidence alongside the numeric assertions.</p>
-<p><strong>Expected:</strong> Likelihood 0.1, total NLL log(10), and three targets.</p>
+<p>The product is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0.5</mn><mo>·</mo><mn>0.25</mn><mo>·</mo><mn>0.8</mn><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">0.5\cdot 0.25\cdot 0.8=0.1</annotation></semantics></math>. Taking the negative natural log yields <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(10)</annotation></semantics></math>, equivalently the sum of three negative log terms. The scored-target count is three. Each number belongs to its own preceding context in the probability chain. The arithmetic alone cannot check that a model produced the right contextual probability, so retain a prefix/target table as semantic evidence alongside the numeric assertions.</p>
+<p><strong>Expected:</strong> Likelihood 0.1, total NLL <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(10)</annotation></semantics></math>, and three targets.</p>
 <p><strong>Verify:</strong> Assert the product and log score within 1e-12 and name each preceding context in a short table.</p>
 <h3 id="exercise-2-change-the-conditioning-assumption">Exercise 2: Change the conditioning assumption<a class="heading-anchor" href="#exercise-2-change-the-conditioning-assumption" aria-label="Link to this section">#</a></h3>
-<p>Reusing 0.5 at every position gives 0.125 and total NLL 3*log(2). These differ from the supplied conditional table&#x27;s 0.1 and log(10). The probability chain rule does not authorize replacing conditional values with marginals: that substitution changes the assumptions about context and defines a different distribution. It could accidentally match a special dataset, but it is not an identity. Compare the declared contexts rather than declaring either numeric result an implementation bug by itself.</p>
-<p><strong>Expected:</strong> The alternative product is 0.125 and its total NLL is 3*log(2), different from log(10).</p>
+<p>Reusing 0.5 at every position gives 0.125 and total NLL <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot \log(2)</annotation></semantics></math>. These differ from the supplied conditional table&#x27;s 0.1 and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(10)</annotation></semantics></math>. The probability chain rule does not authorize replacing conditional values with marginals: that substitution changes the assumptions about context and defines a different distribution. It could accidentally match a special dataset, but it is not an identity. Compare the declared contexts rather than declaring either numeric result an implementation bug by itself.</p>
+<p><strong>Expected:</strong> The alternative product is 0.125 and its total NLL is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot \log(2)</annotation></semantics></math>, different from <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(10)</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Record both products and explain that the changed conditionals define a different model, not an algebraic shortcut.</p>
 <h3 id="exercise-3-preserve-a-long-log-score">Exercise 3: Preserve a long log score<a class="heading-anchor" href="#exercise-3-preserve-a-long-log-score" aria-label="Link to this section">#</a></h3>
-<p>For a thousand values of 0.01, a direct floating product rounds to zero, while adding the negative logs produces the finite total 1000*log(100). The reference uses math.fsum for the log terms to reduce accumulation error. Store the product and total as separate fields so the underflow is visible instead of hidden. Computing -log(product) afterward would either fail at zero or return infinity and would discard useful information already available in the individual factors.</p>
-<p><strong>Expected:</strong> Direct product is 0.0 from underflow; total NLL is finite and equals 1000*log(100) within 1e-9.</p>
+<p>For a thousand values of 0.01, a direct floating product rounds to zero, while adding the negative logs produces the finite total <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1000</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>100</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1000\cdot \log(100)</annotation></semantics></math>. The reference uses math.fsum for the log terms to reduce accumulation error. Store the product and total as separate fields so the underflow is visible instead of hidden. Computing <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>log</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-\log(\mathrm{product})</annotation></semantics></math> afterward would either fail at zero or return infinity and would discard useful information already available in the individual factors.</p>
+<p><strong>Expected:</strong> Direct product is 0.0 from underflow; total NLL is finite and equals <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1000</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>100</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1000\cdot \log(100)</annotation></semantics></math> within 1e-9.</p>
 <p><strong>Verify:</strong> Assert the finite log-space value and keep the underflowed product labeled separately.</p>
 <h3 id="exercise-4-handle-certain-and-impossible-targets">Exercise 4: Handle certain and impossible targets<a class="heading-anchor" href="#exercise-4-handle-certain-and-impossible-targets" aria-label="Link to this section">#</a></h3>
 <p>Every probability in [1,1] is certain under the declared model, so both negative log terms are zero and the total is zero. In [0.5,0], the model assigns no probability to one observed target; its total NLL is positive infinity. This is not the same as underflow from many small positive values. Clipping zero to an epsilon creates a different scoring policy that must be disclosed and justified; it cannot be silently used to obtain a nicer finite result.</p>
@@ -140,30 +186,30 @@
 <p><strong>Verify:</strong> Capture each rejected case separately and then verify the original three-target fixture remains unchanged.</p>
 <h3 id="exercise-6-declare-an-aggregation-unit">Exercise 6: Declare an aggregation unit<a class="heading-anchor" href="#exercise-6-declare-an-aggregation-unit" aria-label="Link to this section">#</a></h3>
 <p>Document A has total ln(2) over one target. Document B has total 3<em>ln(4)=6</em>ln(2) over three targets. Across all four targets, the mean is 7<em>ln(2)/4. Giving the two document means equal weight gives (ln(2)+2</em>ln(2))/2=3*ln(2)/2. Both calculations are valid under their different units. State the aggregation before comparing models, and do not switch the policy after seeing which answer supports a preferred conclusion.</p>
-<p><strong>Expected:</strong> Token mean is 7<em>log(2)/4; equal-document mean is 3</em>log(2)/2.</p>
+<p><strong>Expected:</strong> Token mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>7</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{7\cdot \log(2)}{4}</annotation></semantics></math>; equal-document mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3\cdot \log(2)}{2}</annotation></semantics></math>.</p>
 <p><strong>Verify:</strong> Write the four-target denominator and the two-document denominator explicitly and assert both values within 1e-12.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
 <p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
-<pre><code class="language-python">from __future__ import annotations
-import math
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
 
 
-def sequence_score(probabilities):
-    probabilities = list(probabilities)
-    if not probabilities:
-        raise ValueError(&quot;nonempty probability sequence required&quot;)
-    if any(isinstance(p, bool) for p in probabilities):
-        raise TypeError(&quot;probabilities must be real numbers, not boolean&quot;)
-    probabilities = [float(p) for p in probabilities]
-    if any(not math.isfinite(p) or p &lt; 0 or p &gt; 1 for p in probabilities):
-        raise ValueError(&quot;finite probabilities in [0,1] required&quot;)
-    nll = math.inf if 0 in probabilities else math.fsum(-math.log(p) for p in probabilities)
-    return {
-        &quot;probability&quot;: math.prod(probabilities),
-        &quot;nll&quot;: nll,
-        &quot;targets&quot;: len(probabilities),
-        &quot;mean_nll&quot;: nll / len(probabilities),
-    }</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">sequence_score</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    probabilities <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> probabilities<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty probability sequence required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">probabilities must be real numbers, not boolean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    probabilities <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> p <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> p <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite probabilities in [0,1] required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    nll <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>inf <span class="syntax-keyword">if</span> <span class="syntax-number">0</span> <span class="syntax-operator">in</span> probabilities <span class="syntax-keyword">else</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">probability</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> math<span class="syntax-operator">.</span>prod<span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> nll<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">targets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">mean_nll</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> nll <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without opening the helper, derive the log score of probabilities [0.25,1]. Explain why adding conditional log probabilities does not assume independent tokens. Name one way a zero printed likelihood can coexist with finite NLL.</p>
 <p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>

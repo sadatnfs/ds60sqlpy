@@ -4,11 +4,11 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks andtooling,but it moves some errors from compilation to runtime andcan obscure dependencies. An annotation is metadata;it doesnot enforce behavior until code reads it andapplies a policy. Runtime retention is required when reflection should see an annotation after compilation.
+Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks and tooling,but it moves some errors from compilation to runtime and can obscure dependencies. An annotation is metadata;it does not enforce behavior until code reads it and applies a policy. Runtime retention is required when reflection should see an annotation after compilation.
 
-ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract,and provider metadata names implementations. The provider still needs a compatible constructor,module/classpath visibility andbehavior. This lesson creates an owned temporary service descriptor for a known local nested provider,loads it through a scopedURLClassLoader,andvalidates its annotation andmethod behavior. It doesnot load remote code oraccept arbitrary class names from untrusted input.
+ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract,and provider metadata names implementations. The provider still needs a compatible constructor,module/classpath visibility and behavior. This lesson creates an owned temporary service descriptor for a known local nested provider,loads it through a scoped URLClassLoader,and validates its annotation and method behavior. It does not load remote code or accept arbitrary class names from untrusted input.
 
-**Reflection:** Runtime inspection orinvocation through class metadata.
+**Reflection:** Runtime inspection or invocation through class metadata.
 
 **Runtime annotation:** Metadata retained so reflection can inspect it after compilation.
 
@@ -18,11 +18,11 @@ ServiceLoader provides a structured provider-discovery mechanism. A service inte
 
 ## Reading the reference
 
-Use getAnnotation for a runtime-retained annotation andgetMethod for a publicmethod signature. Method.invoke wraps an exception thrown by the target inInvocationTargetException. Class.forName reports missing classes explicitly. Aclasspath service descriptor is namedMETA-INF/services/<service-interface-binary-name> andcontains provider binary names. Close the ownedURLClassLoader andtemporary directory after discovery.
+Use getAnnotation for a runtime-retained annotation andgetMethod for a public method signature. Method.invoke wraps an exception thrown by the target in InvocationTargetException. Class.forName reports missing classes explicitly. Aclasspath service descriptor is namedMETA-INF/services/<service-interface-binary-name> and contains provider binary names. Close the owned URLClassLoader and temporary directory after discovery.
 
 ## Exercise 1: Inspect a retained annotation
 
-Task: ReadVersion on the knownFriendly provider.
+Task: Read Version on the known Friendly provider.
 
 The annotation's retention policy makes it visible at runtime. Its value is information for a compatibility check,not automatic enforcement.
 
@@ -31,15 +31,15 @@ Version version=Friendly.class.getAnnotation(Version.class);
 assert version!=null && version.value()==2;
 ```
 
-**Expected:** version2.
+**Expected:** version 2.
 
-**Verify:** Compare the program values or named exception with version2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with version 2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Invoke a known public method reflectively
 
-Task: Findgreet(String) andinvoke it withAda.
+Task: Findgreet(String) and invoke it with Ada.
 
-The method name andparameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
+The method name and parameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
 
 ```java
 var method=Friendly.class.getMethod("greet",String.class);
@@ -52,9 +52,9 @@ assert method.invoke(new Friendly(),"Ada").equals("Hello, Ada");
 
 ## Exercise 3: Load a real local service descriptor
 
-Task: Create the temporaryMETA-INF/services entry anddiscoverGreeting providers.
+Task: Create the temporaryMETA-INF/services entry and discover Greeting providers.
 
-This exercises actualServiceLoader discovery andprovider construction. A manually instantiated object alone would not verify the descriptor path orbinary names.
+This exercises actual ServiceLoader discovery and provider construction. A manually instantiated object alone would not verify the descriptor path or binary names.
 
 ```java
 try(ServiceFixture fixture=new ServiceFixture()) {
@@ -64,13 +64,13 @@ try(ServiceFixture fixture=new ServiceFixture()) {
 }
 ```
 
-**Expected:** oneFriendly provider withversion2 andworkinggreet.
+**Expected:** oneFriendly provider with version 2 andworkinggreet.
 
-**Verify:** Compare the program values or named exception with oneFriendly provider withversion2 andworkinggreet. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with oneFriendly provider with version 2 andworkinggreet. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Preserve a reflected target failure
 
-Task: Invokegreet withblanktext andinspectInvocationTargetException cause.
+Task: Invokegreet with blank text and inspect InvocationTargetException cause.
 
 The wrapper distinguishes invocation machinery from the domain failure thrown by the target. Preserve the cause when reporting it.
 
@@ -84,11 +84,11 @@ assert targetFailure;
 
 **Verify:** Compare the program values or named exception with causeIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-## Exercise 5: Reject missing class andmethod contracts
+## Exercise 5: Reject missing class and method contracts
 
-Task: Look up an absent class andan unsupportedgreet(int)signature.
+Task: Look up an absent class and an unsupportedgreet(int)signature.
 
-Reflection doesnot remove type contracts;it delays some checks. Fixed allowlists andstartup validation can keep failures understandable.
+Reflection does not remove type contracts;it delays some checks. Fixed allowlists and startup validation can keep failures understandable.
 
 ```java
 boolean missingClass=false,missingMethod=false;
@@ -97,24 +97,24 @@ try{Friendly.class.getMethod("greet",int.class);}catch(NoSuchMethodException exp
 assert missingClass && missingMethod;
 ```
 
-**Expected:** ClassNotFoundException andNoSuchMethodException.
+**Expected:** ClassNotFoundException and NoSuchMethodException.
 
-**Verify:** Compare the program values or named exception with ClassNotFoundException andNoSuchMethodException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with ClassNotFoundException and NoSuchMethodException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 6: Treat provider metadata as a policy input
 
-Task: Accept provider versions1..2 andreject a hypotheticalversion3 under the currentconsumer contract.
+Task: Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer contract.
 
-A version annotation doesnot make a provider compatible by itself. The consumer must define andapply an admission policy andtest actualbehavior.
+A version annotation does not make a provider compatible by itself. The consumer must define and apply an admission policy and test actual behavior.
 
 ```java
 int supportedMaximum=2;assert version.value()>=1 && version.value()<=supportedMaximum;
 assert 3>supportedMaximum;
 ```
 
-**Expected:** version2accepted;version3rejected.
+**Expected:** version 2 accepted;version 3 rejected.
 
-**Verify:** Compare the program values or named exception with version2accepted;version3rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with version 2 accepted;version 3 rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

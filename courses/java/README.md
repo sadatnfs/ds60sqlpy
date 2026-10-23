@@ -8,17 +8,17 @@
 > work. Native terminal/editor commands below are optional alternatives.
 
 
-All36 lessons in the [reviewed route](track.json) now have complete authored bundles in the [manifest](lessons.json). The course starts with source,types,control flow andobjects,then develops collections,generics,functional code,testing,algorithms,concurrency,files,HTTP,JDBC,serialization,service discovery,profiling andrelease engineering. Every guide has two complete worked examples,six inspectable exercises,mechanism explanations,diagnosis,hints andseparate executable/explanatory solutions.
+All36 lessons in the [reviewed route](track.json) now have complete authored bundles in the [manifest](lessons.json). The course starts with source,types,control flow and objects,then develops collections,generics,functional code,testing,algorithms,concurrency,files,HTTP,JDBC,serialization,service discovery,profiling and release engineering. Every guide has two complete worked examples,six inspectable exercises,mechanism explanations,diagnosis,hints and separate executable/explanatory solutions.
 
-Use the Docker classroom's prepared Java21 profile. The pad is compiled as `Main.java` with `--release 21` andrun with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing,compilation,reference execution andlearner mastery are separate evidence;the [checkpoint](../../docs/implementation/java-content-status.md) records actual prepared-container results.
+Use the Docker classroom's prepared Java 21 profile. The pad is compiled as `Main.java` with `--release 21` and run with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing,compilation,reference execution and learner mastery are separate evidence;the [checkpoint](../../docs/implementation/java-content-status.md) records actual prepared-container results.
 
-## Runtime andresource boundaries
+## Runtime and resource boundaries
 
-Default examples use small local fixtures andprepared JDK libraries. JDBC29 additionally uses the pinned H2 driver already included in the Java image at `/opt/course-libs/h2-2.5.252.jar`. It opens only owned in-memory H2 databases andperforms real SQL/transaction checks. No lesson installs a package orcontacts a shared database.
+Default examples use small local fixtures and prepared JDK libraries. JDBC29 additionally uses the pinned H2 driver already included in the Java image at `/opt/course-libs/h2-2.5.252.jar`. It opens only owned in-memory H2 databases and performs real SQL/transaction checks. No lesson installs a package or contacts a shared database.
 
-HTTP lessons start short-lived loopback servers on ephemeral ports andclose them after checks. Concurrency lessons use bounded waits andcooperative cleanup. Module,JAR,JFR andrelease examples write only owned temporary files. The [manual module fixture](fixtures/java-026/README.md), [manual JAR fixture](fixtures/java-027/README.md) and [optional jlink workflow](fixtures/java-036/README.md) explain multi-file orlarger packaging work outside the single-file pad. A customruntime image is platform-specific andis not claimed built by the default reference.
+HTTP lessons start short-lived loopback servers on ephemeral ports and close them after checks. Concurrency lessons use bounded waits andcooperative cleanup. Module,JAR,JFR and release examples write only owned temporary files. The [manual module fixture](fixtures/java-026/README.md), [manual JAR fixture](fixtures/java-027/README.md) and [optional jlink workflow](fixtures/java-036/README.md) explain multi-file or larger packaging work outside the single-file pad. A custom runtime image is platform-specific and is not claimed built by the default reference.
 
-Keep attempts in saved classroom pads oryour own ignored `.learning/` copy. Do not edit official solutions to obtain a passing run. Predict outputs andfailure types,attempt the exercises,then compare with the reference andsolve a fresh boundary case.
+Keep attempts in saved classroom pads or your own ignored `.learning/` copy. Do not edit official solutions to obtain a passing run. Predict outputs and failure types,attempt the exercises,then compare with the reference and solve a fresh boundary case.
 
 | Lesson | Topic |
 | --- | --- |
@@ -59,8 +59,8 @@ Keep attempts in saved classroom pads oryour own ignored `.learning/` copy. Do n
 | [java-035](guides/java-035.md) | Build a tested local data service |
 | [java-036](guides/java-036.md) | Package, diagnose and maintain a release |
 
-## Evidence andnext work
+## Evidence and next work
 
-The references include actual compiler diagnostics,controlled lost updates,executor cancellation andqueue rejection,virtual-thread admission limits,module resolution,fresh-JVM JAR launch,prepared JDBC transactions,JFR readback andnegative integrity gates. Their bounded fixtures do not establish production service reliability,cross-platform installer acceptance oruniversal performance claims.
+The references include actual compiler diagnostics,controlled lost updates,executor cancellation and queue rejection,virtual-thread admission limits,module resolution,fresh-JVM JAR launch,prepared JDBC transactions,JFR readback and negative integrity gates. Their bounded fixtures do not establish production service reliability,cross-platform installer acceptance or universal performance claims.
 
-Use the [Docker classroom guide](../../docs/docker-classroom.md) for image preparation,visible logs,persistent learner state andstopping the environment. The course's full quality review also checks explanation depth,assumptions andfailure analysis beyond minimum word orartifact counts.
+Use the [Docker classroom guide](../../docs/docker-classroom.md) for image preparation,visible logs,persistent learner state and stopping the environment. The course's full quality review also checks explanation depth,assumptions and failure analysis beyond minimum word or artifact counts.

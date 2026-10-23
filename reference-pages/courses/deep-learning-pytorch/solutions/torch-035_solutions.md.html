@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -165,32 +211,32 @@
 <td>-1</td>
 </tr>
 </tbody></table></div>
-<p>The mean contrast is-2/3 in squared-target units. Its sign favors A for this loss and these three cases. It does not mean A wins on every possible metric, group or deployment condition. Equal key sets are required before indexing; silently dropping missing predictions can select an easier assessment subset.</p>
-<p>Pairing preserves shared case difficulty. In general, Var(lossA-lossB)=Var(lossA)+Var(lossB)-2Cov(lossA, lossB). Independently resampling the two models discards that covariance and answers a different question. The particular fixture has B losses all equal to one, so its covariance term is zero; it is not by itself a strong counterexample for every unpaired bootstrap mistake.</p>
+<p>The mean contrast is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-2}{3}</annotation></semantics></math> in squared-target units. Its sign favors A for this loss and these three cases. It does not mean A wins on every possible metric, group or deployment condition. Equal key sets are required before indexing; silently dropping missing predictions can select an easier assessment subset.</p>
+<p>Pairing preserves shared case difficulty. In general, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><msub><mi>ℓ</mi><mi>A</mi></msub><mo>−</mo><msub><mi>ℓ</mi><mi>B</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mo>Var</mo><mo stretchy="false">(</mo><msub><mi>ℓ</mi><mi>A</mi></msub><mo stretchy="false">)</mo><mo>+</mo><mo>Var</mo><mo stretchy="false">(</mo><msub><mi>ℓ</mi><mi>B</mi></msub><mo stretchy="false">)</mo><mo>−</mo><mn>2</mn><mo>Cov</mo><mo stretchy="false">(</mo><msub><mi>ℓ</mi><mi>A</mi></msub><mo>,</mo><msub><mi>ℓ</mi><mi>B</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{Var}(\ell_A-\ell_B)=\operatorname{Var}(\ell_A)+\operatorname{Var}(\ell_B)-2\operatorname{Cov}(\ell_A,\ell_B)</annotation></semantics></math>. Independently resampling the two models discards that covariance and answers a different question. The particular fixture has B losses all equal to one, so its covariance term is zero; it is not by itself a strong counterexample for every unpaired bootstrap mistake.</p>
 <p>A separate analytic example makes the dependence visible. Suppose two cases have losses A=[1, 11] and B=[0, 10]. Every paired difference is one, so every paired resampled mean is one. Independent resampling can pair the easy A loss with the hard B loss or vice versa and create variation that was absent from the paired contrast. This explains the method without claiming that the original three-case code exercised that different fixture.</p>
-<p>For the actual differences[-1, 0, -1], an empirical draw has probability 2/3 of-1 and 1/3 of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, 2/3) law and the estimate is-K/3:</p>
+<p>For the actual differences[-1, 0, -1], an empirical draw has probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math> of-1 and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>) law and the estimate is-K/3:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Resampled mean</th>
 <th>Exact empirical probability</th>
 </tr></thead><tbody>
 <tr>
 <td>-1</td>
-<td>8/27</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>27</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{27}</annotation></semantics></math></td>
 </tr>
 <tr>
-<td>-2/3</td>
-<td>12/27</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-2}{3}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>12</mn></mrow><mrow><mn>27</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{12}{27}</annotation></semantics></math></td>
 </tr>
 <tr>
-<td>-1/3</td>
-<td>6/27</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-1}{3}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>6</mn></mrow><mrow><mn>27</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{6}{27}</annotation></semantics></math></td>
 </tr>
 <tr>
 <td>0</td>
-<td>1/27</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>27</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{27}</annotation></semantics></math></td>
 </tr>
 </tbody></table></div>
-<p>The expected bootstrap mean is-2/3 and its variance is 2/27 under this empirical resampling model. These are properties of resampling the three observed values, not a proof that the unknown population has this four-point distribution. The thousand generated estimates approximate these probabilities with random frequency variation. The reference checks shape, finiteness and the exact allowed range, not a guaranteed count for each value.</p>
+<p>The expected bootstrap mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-2}{3}</annotation></semantics></math> and its variance is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>27</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{27}</annotation></semantics></math> under this empirical resampling model. These are properties of resampling the three observed values, not a proof that the unknown population has this four-point distribution. The thousand generated estimates approximate these probabilities with random frequency variation. The reference checks shape, finiteness and the exact allowed range, not a guaranteed count for each value.</p>
 <p>More draws refine the numerical approximation to that empirical distribution. They do not turn three cases into a thousand independent assessment observations. Even the ideal empirical percentile interval can be uninformative here: the lower tail includes-1 and the upper tail reaches zero. The code does not calculate or certify a particular confidence interval, and any interval method would still need its sampling assumptions and quantile convention stated.</p>
 <p>If several rows come from one source family, resample families together when the intended independence is at that level. Define the estimand as well: equal family means and row-weighted population means differ when families have different sizes. Time dependence may require blocks or another design rather than an ordinary independent-row bootstrap. Stable row IDs alone do not resolve those dependencies.</p>
 <p>The local torch.Generator makes this calculation reproducible without depending on unrelated global draws. A fresh generator seeded identically reproduces the index matrix in the tested environment. NumPy&#x27;s generator in the paired TensorFlow route is a different random implementation; identical seed numbers do not require identical index matrices across the two libraries. Compare the statistical contract, allowed values and within-implementation replay rather than treating cross-library random bits as a shared oracle.</p>
@@ -199,44 +245,44 @@
 <h3 id="exercise-1-align-predictions-by-id">Exercise 1: Align predictions by ID<a class="heading-anchor" href="#exercise-1-align-predictions-by-id" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.</p>
 <p>Dictionary insertion order is not an identity join. The contrast must keep each prediction attached to its own target.</p>
-<pre><code class="language-python">truth={&#x27;a&#x27;:0.,&#x27;b&#x27;:1.,&#x27;c&#x27;:2.}; a={&#x27;a&#x27;:0.,&#x27;b&#x27;:2.,&#x27;c&#x27;:2.}; b={&#x27;c&#x27;:3.,&#x27;a&#x27;:1.,&#x27;b&#x27;:2.}; ids=sorted(truth)
-difference=torch.tensor([(a[i]-truth[i])**2-(b[i]-truth[i])**2 for i in ids],dtype=torch.float64)
-assert difference.tolist()==[-1.,0.,-1.]</code></pre>
+<pre class="highlighted-code"><code class="language-python">truth<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2.</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> a<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2.</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> b<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">a</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2.</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> ids<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>truth<span class="syntax-punctuation">)</span>
+difference<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>truth<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">-</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>truth<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> ids<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> difference<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> paired squared-loss differences-1, 0, -1.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with paired squared-loss differences-1, 0, -1.</p>
 <h3 id="exercise-2-interpret-the-average-contrast">Exercise 2: Interpret the average contrast<a class="heading-anchor" href="#exercise-2-interpret-the-average-contrast" aria-label="Link to this section">#</a></h3>
 <p>The question is: Average the three paired differences.</p>
 <p>The sign follows the declared A-minus-Blossorder. A negative value favors A only for this metric and assessment set.</p>
-<pre><code class="language-python">np.testing.assert_allclose(difference.mean().item(),-2/3,atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> mean-2/3, favoring A on this loss fixture.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with mean-2/3, favoring A on this loss fixture.</p>
+<pre class="highlighted-code"><code class="language-python">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>difference<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-2}{3}</annotation></semantics></math>, favoring A on this loss fixture.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{-2}{3}</annotation></semantics></math>, favoring A on this loss fixture.</p>
 <h3 id="exercise-3-resample-pairs-reproducibly">Exercise 3: Resample pairs reproducibly<a class="heading-anchor" href="#exercise-3-resample-pairs-reproducibly" aria-label="Link to this section">#</a></h3>
 <p>The question is: Draw 1000 three-index bootstrap samples with local Generator seed 7.</p>
 <p>The known range of per-record differences bounds every resampled mean. That independent bound can expose an indexing or reduction error.</p>
-<pre><code class="language-python">generator=torch.Generator().manual_seed(7); indices=torch.randint(0,3,(1000,3),generator=generator); estimates=difference[indices].mean(1)
-assert tuple(estimates.shape)==(1000,) and torch.isfinite(estimates).all() and estimates.min()&gt;=-1 and estimates.max()&lt;=0</code></pre>
+<pre class="highlighted-code"><code class="language-python">generator<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>Generator<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> indices<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>randint<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>generator<span class="syntax-operator">=</span>generator<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> estimates<span class="syntax-operator">=</span>difference<span class="syntax-punctuation">[</span>indices<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>estimates<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>estimates<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> estimates<span class="syntax-operator">.</span>min<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> estimates<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> 1000finite estimates within-1..0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 1000finite estimates within-1..0.</p>
 <h3 id="exercise-4-replay-the-local-random-stream">Exercise 4: Replay the local random stream<a class="heading-anchor" href="#exercise-4-replay-the-local-random-stream" aria-label="Link to this section">#</a></h3>
 <p>The question is: Create a new Generator with seed 7 and compare the index matrix.</p>
 <p>Reusing an advanced generator would not replay the beginning. The generator state is part of the reproducibility record.</p>
-<pre><code class="language-python">again=torch.randint(0,3,(1000,3),generator=torch.Generator().manual_seed(7))
-assert torch.equal(indices,again)</code></pre>
+<pre class="highlighted-code"><code class="language-python">again<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>randint<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>generator<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>Generator<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>indices<span class="syntax-punctuation">,</span>again<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> exact match.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with exact match.</p>
 <h3 id="exercise-5-reject-missing-assessment-identities">Exercise 5: Reject missing assessment identities<a class="heading-anchor" href="#exercise-5-reject-missing-assessment-identities" aria-label="Link to this section">#</a></h3>
 <p>The question is: Remove c from one prediction dictionary and check the keyset.</p>
 <p>Silently inner-joining would drop a missing prediction and change the evaluation population. Define a failure policy instead of removing hard cases.</p>
-<pre><code class="language-python">missing={key:value for key,value in b.items() if key!=&#x27;c&#x27;}
-assert set(missing)!=set(truth)</code></pre>
+<pre class="highlighted-code"><code class="language-python">missing<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span>value <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span>value <span class="syntax-operator">in</span> b<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> key<span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">c</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>truth<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> mismatch detected before comparison.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with mismatch detected before comparison.</p>
 <h3 id="exercise-6-preserve-a-final-test-boundary">Exercise 6: Preserve a final-test boundary<a class="heading-anchor" href="#exercise-6-preserve-a-final-test-boundary" aria-label="Link to this section">#</a></h3>
 <p>The question is: Record configuration choice on validation and assessment on test; flag a test-driven new choice.</p>
 <p>The boundary depends on the actual decision sequence, not on the dataset filename. After test-driven changes, new untouched evidence is needed.</p>
-<pre><code class="language-python">ledger=[(&#x27;choose&#x27;,&#x27;validation&#x27;),(&#x27;assess&#x27;,&#x27;test&#x27;)]
-assert all(partition==&#x27;validation&#x27; for action,partition in ledger if action==&#x27;choose&#x27;)
-assert (&#x27;choose&#x27;,&#x27;test&#x27;)[1]!=&#x27;validation&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python">ledger<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assess</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>partition<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">for</span> action<span class="syntax-punctuation">,</span>partition <span class="syntax-operator">in</span> ledger <span class="syntax-keyword">if</span> action<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> test selection violates the declared boundary.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with test selection violates the declared boundary.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

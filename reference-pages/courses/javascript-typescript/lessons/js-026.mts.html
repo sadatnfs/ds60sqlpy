@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,35 +161,35 @@
       <h1>Js 026</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-026.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>// Answer-free learner source. Save your own copy before editing.</span>
-<span> </span>
-<span>export {};</span>
-<span>// Exercise 1: Maintain balance through methods</span>
-<span>// Start with 100 cents, deposit 50 and withdraw 30.</span>
-<span>// Expected: balance 120; no enumerable balance field.</span>
-<span> </span>
-<span>// Exercise 2: Inject a deterministic clock</span>
-<span>// Create a receipt service using a fixed clock.</span>
-<span>// Expected: timestamp 2026-01-01T00:00:00.000Z.</span>
-<span> </span>
-<span>// Exercise 3: Reject invalid transitions without mutation</span>
-<span>// Try a negative deposit and an overdraw.</span>
-<span>// Expected: both throw; balance stays 100.</span>
-<span> </span>
-<span>// Exercise 4: Guard derived overflow</span>
-<span>// Deposit one cent into the maximum safe balance.</span>
-<span>// Expected: RangeError; original balance preserved.</span>
-<span> </span>
-<span>// Exercise 5: Reject an incompatible collaborator</span>
-<span>// Pass a clock returning text in an uncalled negative type check.</span>
-<span>// Expected: expected compiler error; valid Date clock works.</span>
-<span> </span>
-<span>// Exercise 6: Distinguish private storage from a lookalike property</span>
-<span>// Add an ordinary balance property to the wallet.</span>
-<span>// Expected: ordinary property 999; private cents remain 2.</span>
-<span> </span>
-<span>console.log(&quot;Implement the six exercises in your saved copy.&quot;);</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Maintain balance through methods</span></span>
+<span class="source-line"><span class="syntax-comment">// Start with 100 cents, deposit 50 and withdraw 30.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: balance 120; no enumerable balance field.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Inject a deterministic clock</span></span>
+<span class="source-line"><span class="syntax-comment">// Create a receipt service using a fixed clock.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: timestamp 2026-01-01T00:00:00.000Z.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Reject invalid transitions without mutation</span></span>
+<span class="source-line"><span class="syntax-comment">// Try a negative deposit and an overdraw.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: both throw; balance stays 100.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Guard derived overflow</span></span>
+<span class="source-line"><span class="syntax-comment">// Deposit one cent into the maximum safe balance.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: RangeError; original balance preserved.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Reject an incompatible collaborator</span></span>
+<span class="source-line"><span class="syntax-comment">// Pass a clock returning text in an uncalled negative type check.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: expected compiler error; valid Date clock works.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Distinguish private storage from a lookalike property</span></span>
+<span class="source-line"><span class="syntax-comment">// Add an ordinary balance property to the wallet.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: ordinary property 999; private cents remain 2.</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six exercises in your saved copy.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

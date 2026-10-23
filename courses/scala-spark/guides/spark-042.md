@@ -70,7 +70,7 @@ After the restart, the program publishesBatchB and BatchC in turn and waits for 
 
 The final packet contains the literal full-state oracle, source batch definitions, query/run identities, attempt IDs, callback row work, three committed batch files and the declared bounds. A sink binding connects the application namespace to its source, checkpoint and policy version. An attempt to point that sink at another checkpoint is refused before a query starts.
 
-Every query has a45-second await bound and a five-second stop timeout. Only queries created by this program are stopped. The owned root is removed only after those queries are inactive, and the session is stopped in finally. No existing checkpoint or learner directory is reset. Resource counts are local work evidence, not a cloud invoice or a throughput forecast.
+Every query has a 45-second await bound and a five-second stop timeout. Only queries created by this program are stopped. The owned root is removed only after those queries are inactive, and the session is stopped in finally. No existing checkpoint or learner directory is reset. Resource counts are local work evidence, not a cloud invoice or a throughput forecast.
 
 A reviewer should be able to explain the cutoff boundary, zero retention, conflicting-ID policy, after-publication failure and replay no-op without reading the implementation first. The two languages must independently match the literal product oracle. Their agreement alone would not rule out a shared policy error.
 
@@ -155,7 +155,7 @@ Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1
 
 **Expected result/shape:** BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.
 
-**Verify:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a12-row union.
+**Verify:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a 12-row union.
 
 **Progressive hint:** Structural delivery identity is required even when business data is invalid.
 

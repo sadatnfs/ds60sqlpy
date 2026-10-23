@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,62 +168,62 @@
 <h3 id="1-install-the-notebook-database-profile">1. Install the notebook database profile<a class="heading-anchor" href="#1-install-the-notebook-database-profile" aria-label="Link to this section">#</a></h3>
 <p>The default Core setup installs the required packages on all three operating systems. The large advanced profile is not required for this lesson.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-&amp; .\scripts\bootstrap_windows.ps1
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1
 
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}</code></pre>
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span></code></pre>
 <p>The resolver supports both a standard <code>venv</code> and the Anaconda conda-prefix fallback. Reuse <code>$CoursePython</code> for the remaining Windows commands in this PowerShell window.</p>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh</code></pre>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh</code></pre>
 <p>For a smaller targeted installation after normal setup:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-&amp; $CoursePython -m pip install -e &quot;.[sql-notebooks]&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-.venv/bin/python -m pip install -e &quot;.[sql-notebooks]&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install -e <span class="syntax-string">&quot;</span><span class="syntax-string">.[sql-notebooks]</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+.venv/bin/python -m pip install -e <span class="syntax-string">&quot;.[sql-notebooks]&quot;</span></code></pre>
 <p>The profile installs JupySQL, pandas for <code>.DataFrame()</code> result conversion, SQLAlchemy, and Psycopg 3. Do not put <code>%pip</code> installation cells into a lesson notebook: they hide which interpreter was modified and cannot work during offline study.</p>
 <h3 id="2-prepare-only-the-disposable-database">2. Prepare only the disposable database<a class="heading-anchor" href="#2-prepare-only-the-disposable-database" aria-label="Link to this section">#</a></h3>
 <p>Start or verify PostgreSQL, then reset the course-owned <code>training</code> schema with the commands in the operating-system setup guide.</p>
 <p>If you use the repository Compose service:</p>
-<pre><code class="language-text">docker compose up -d postgres
+<pre class="highlighted-code"><code class="language-text">docker compose up -d postgres
 docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
 docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql</code></pre>
 <p>Never point the reset or professional notebook at a workplace, shared, production, or personally valuable database.</p>
 <h3 id="3-set-the-connection-for-this-terminal">3. Set the connection for this terminal<a class="heading-anchor" href="#3-set-the-connection-for-this-terminal" aria-label="Link to this section">#</a></h3>
 <p>The notebook reads <code>DS60_DATABASE_URL</code>. Keep it in the terminal environment; do not paste a real password into the notebook, commit it, or print it.</p>
 <p>For the repository&#x27;s disposable Compose database:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-$env:DS60_DATABASE_URL = &quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-export DS60_DATABASE_URL=&quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://admin:admin@localhost:55432/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</span></code></pre>
 <p>Those <code>ds60</code> credentials belong only to the disposable local Compose service. For native PostgreSQL, use the local role and authentication method from the OS setup guide. If a password must appear in a URL, percent-encode reserved characters and keep the value out of shell history and repository files; a local password file or operating-system credential store is preferable.</p>
 <p>For a native macOS/Linux username-and-socket route, this dedicated JupySQL notebook needs <code>postgresql:///advanced_sql_training</code> rather than the literal database name accepted by the <code>psql</code>-based guided notebooks. See <a href="postgresql.md.html">Local PostgreSQL</a> for this distinction and socket-location troubleshooting.</p>
 <p>Closing the terminal clears these process-scoped settings. A personal <code>.env</code> file is ignored by Git, but the notebook deliberately does not load one silently.</p>
 <h3 id="4-start-the-course-kernel">4. Start the course kernel<a class="heading-anchor" href="#4-start-the-course-kernel" aria-label="Link to this section">#</a></h3>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">&amp; $CoursePython -m jupyter lab .\bridge\professional\notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>notebooks</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab bridge/professional/notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab bridge/professional/notebooks</code></pre>
 <p>In VS Code, open <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code> and select <strong>Python (ds60sqlpy)</strong> (internal kernel name <code>ds60sqlpy</code>).</p>
 <p>The notebook parses the environment value, refuses any target except the disposable course database, and selects the explicit Psycopg 3 driver:</p>
-<pre><code class="language-python">import os
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> os
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine import make_url
+<span class="syntax-keyword">from</span> sqlalchemy <span class="syntax-keyword">import</span> create_engine
+<span class="syntax-keyword">from</span> sqlalchemy.engine <span class="syntax-keyword">import</span> make_url
 
-course_url = make_url(os.environ[&quot;DS60_DATABASE_URL&quot;])
-if course_url.get_backend_name() not in {&quot;postgres&quot;, &quot;postgresql&quot;}:
-    raise RuntimeError(&quot;DS60_DATABASE_URL must select PostgreSQL.&quot;)
-if course_url.database != &quot;advanced_sql_training&quot;:
-    raise RuntimeError(&quot;This notebook is restricted to the disposable course database.&quot;)
+course_url <span class="syntax-operator">=</span> make_url<span class="syntax-punctuation">(</span>os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_DATABASE_URL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> course_url<span class="syntax-operator">.</span>get_backend_name<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">postgres</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_DATABASE_URL must select PostgreSQL.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> course_url<span class="syntax-operator">.</span>database <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">advanced_sql_training</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This notebook is restricted to the disposable course database.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-psycopg_url = course_url.set(drivername=&quot;postgresql+psycopg&quot;)
-engine = create_engine(psycopg_url, pool_pre_ping=True)</code></pre>
+psycopg_url <span class="syntax-operator">=</span> course_url<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span>drivername<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">postgresql+psycopg</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+engine <span class="syntax-operator">=</span> create_engine<span class="syntax-punctuation">(</span>psycopg_url<span class="syntax-punctuation">,</span> pool_pre_ping<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <p>It then loads the extension and passes the engine object - not a password-bearing string - to the magic:</p>
-<pre><code class="language-text">%load_ext sql
+<pre class="highlighted-code"><code class="language-text">%load_ext sql
 %config SqlMagic.displaycon = False
 %sql engine --alias ds60-course</code></pre>
 <p>JupySQL&#x27;s current connection documentation recommends avoiding hard-coded passwords, and SQLAlchemy documents <code>postgresql+psycopg://</code> as the Psycopg 3 dialect. See the <a href="https://jupysql.readthedocs.io/en/latest/connecting.html">JupySQL connection guide</a> and <a href="https://docs.sqlalchemy.org/en/20/dialects/postgresql.html">SQLAlchemy PostgreSQL dialect</a>.</p>
@@ -195,9 +241,9 @@ engine = create_engine(psycopg_url, pool_pre_ping=True)</code></pre>
 <p>JupySQL defaults to autocommit. The lesson therefore uses bounded read queries and explains transaction ownership before any write. Do not assume that running several notebook cells creates one atomic transaction.</p>
 <h3 id="6-verify-and-go-offline">6. Verify and go offline<a class="heading-anchor" href="#6-verify-and-go-offline" aria-label="Link to this section">#</a></h3>
 <p>Run the notebook checks while connected:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-&amp; $CoursePython scripts\validate_notebooks.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>validate_notebooks<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python scripts/validate_notebooks.py</code></pre>
 <p>After packages and PostgreSQL are installed, the notebook needs no internet connection. The database server must still be running locally. Structural validation does not prove live authentication; execute the solution notebook top to bottom against the disposable database for that evidence.</p>
 <h3 id="common-failures">Common failures<a class="heading-anchor" href="#common-failures" aria-label="Link to this section">#</a></h3>

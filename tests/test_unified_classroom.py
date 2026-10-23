@@ -45,6 +45,10 @@ def fixture_service(
                 ],
             }
         ],
+        "lesson_links": {
+            "/reference-pages/courses/scala-spark/guides/spark-013.md.html": "spark-013",
+            "/reference-pages/courses/scala-spark/lessons/spark-013.py.html": "spark-013@pyspark",
+        },
         "active_job": {"job_id": "owned-job", "lesson_id": "spark-013"},
     }
     calls: list[dict[str, Any]] = []
@@ -70,7 +74,16 @@ def test_subject_directory_unifies_without_mutating_or_reading_solutions(tmp_pat
     assert index["subject_count"] == 2 and index["lesson_count"] == 2
     assert index["authored_count"] == 2 and index["planned_count"] == 0
     assert index["variant_count"] == 1
+    assert index["lesson_links"]["/lesson-pages/python-01.html"] == "python-01"
+    assert (
+        index["lesson_links"]["/reference-pages/courses/scala-spark/lessons/spark-013.py.html"]
+        == "spark-013@pyspark"
+    )
+    assert not any("solutions" in key for key in index["lesson_links"])
+
     assert index["tracks"][0]["lessons"][0]["completed"] is True
+    assert index["tracks"][0]["lessons"][0]["level"] == "beginner"
+    assert index["tracks"][0]["lessons"][0]["source_level"] == "foundation"
     assert index["tracks"][1]["estimated_minutes"] == 90
     assert index["active_job"]["lesson_id"] == "spark-013"
     assert [call["action"] for call in calls] == ["module-index", "paths"]
@@ -235,3 +248,122 @@ def test_syntax_preview_is_escaped_and_unknown_languages_are_readable(tmp_path: 
         {"action": "classroom-highlight", "source": source, "language": "futurelang"}
     )
     assert unescape(unknown["html"]) == source and not calls
+
+
+def test_completed_legacy_run_is_readable_after_server_recreation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    service, _, _ = fixture_service(tmp_path)
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    calls: list[str] = []
+    server = LabServer(service.catalog, progress_path=tmp_path / "progress.json")
+
+    def execute(lesson_id: str, language: str, source: str) -> dict[str, Any]:
+        calls.append(source)
+        return {
+            "returncode": 0,
+            "output": "42\n",
+            "elapsed_seconds": 0.02,
+            "language": language,
+            "figures": [],
+        }
+
+    monkeypatch.setattr(server.pads, "run", execute)
+    try:
+        result = server.action(
+            {"action": "run", "lesson_id": "python-01", "language": "python", "code": "print(42)"}
+        )
+        assert result["receipt_saved"] is True and result["output"] == "42\n"
+        receipt_id = result["receipt_id"]
+    finally:
+        server.server_close()
+    reopened = LabServer(service.catalog, progress_path=tmp_path / "progress.json")
+    try:
+        context = {"lesson_id": "python-01", "language": "python", "mode": "snippet"}
+        history = reopened.action({"action": "classroom-history", **context})["history"]
+        assert len(history) == 1 and history[0]["id"] == receipt_id
+        assert "source" not in history[0] and "result" not in history[0]
+        saved = reopened.action(
+            {"action": "classroom-run-result", **context, "receipt_id": receipt_id}
+        )["receipt"]
+        assert saved["source"] == "print(42)" and saved["result"]["output"] == "42\n"
+        assert calls == ["print(42)"]
+    finally:
+        reopened.server_close()
+
+
+def test_receipt_failure_never_relabels_or_replays_completed_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    service, _, _ = fixture_service(tmp_path)
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    server = LabServer(service.catalog, progress_path=tmp_path / "progress.json")
+    calls: list[str] = []
+
+    def execute(lesson_id: str, language: str, source: str) -> dict[str, Any]:
+        calls.append(source)
+        return {"returncode": 0, "output": "committed once", "elapsed_seconds": 0.02}
+
+    def unavailable(*args: Any, **kwargs: Any) -> None:
+        raise OSError("private-path-must-not-appear")
+
+    monkeypatch.setattr(server.pads, "run", execute)
+    monkeypatch.setattr(server._classroom.runs, "record", unavailable)
+    try:
+        result = server.action(
+            {"action": "run", "lesson_id": "python-01", "language": "python", "code": "print(42)"}
+        )
+        assert result["returncode"] == 0 and result["output"] == "committed once"
+        assert result["receipt_saved"] is False and "Do not rerun" in result["receipt_error"]
+        assert "private-path" not in result["receipt_error"]
+        assert calls == ["print(42)"] and not server.execution_lock.locked()
+    finally:
+        server.server_close()
+
+
+def test_whole_sql_run_receipt_retains_its_separate_context(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    lesson = replace(Catalog.load().get("sql-01"), prerequisites=())
+    catalog = Catalog(tmp_path, [lesson])
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    server = LabServer(catalog, progress_path=tmp_path / "progress.json")
+
+    def execute(lesson_id: str, code: str, *, timeout_seconds: int) -> dict[str, Any]:
+        assert timeout_seconds == 60
+        return {
+            "returncode": 0,
+            "output": "whole script done",
+            "elapsed_seconds": 0.01,
+            "language": "sql",
+            "mode": "lesson",
+        }
+
+    monkeypatch.setattr(server.sql_lessons, "run", execute)
+    try:
+        result = server.action(
+            {"action": "run-lesson", "lesson_id": "sql-01", "code": "SELECT 42;"}
+        )
+        assert result["receipt_saved"] is True
+        assert (
+            server.action(
+                {
+                    "action": "classroom-history",
+                    "lesson_id": "sql-01",
+                    "language": "sql",
+                    "mode": "snippet",
+                }
+            )["history"]
+            == []
+        )
+        history = server.action(
+            {
+                "action": "classroom-history",
+                "lesson_id": "sql-01",
+                "language": "sql",
+                "mode": "lesson",
+            }
+        )["history"]
+        assert history[0]["id"] == result["receipt_id"] and history[0]["mode"] == "lesson"
+    finally:
+        server.server_close()

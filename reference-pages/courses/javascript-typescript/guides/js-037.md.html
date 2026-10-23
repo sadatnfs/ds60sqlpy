@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -138,148 +184,148 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-retry-transient-failures-with-deterministic-full-jitter">Example A: Retry transient failures with deterministic full jitter<a class="heading-anchor" href="#example-a-retry-transient-failures-with-deterministic-full-jitter" aria-label="Link to this section">#</a></h4>
 <p>The injected wait records policy without sleeping. The result demonstrates classification and arithmetic, not elapsed network latency or a live outage recovery.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> setTimeout <span class="syntax-keyword">as</span> delay <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:timers/promises&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function retry(operation, { attempts = 3, base = 100, cap = 1000, random = Math.random, wait = (milliseconds, signal) =&gt; delay(milliseconds, undefined, { signal }), signal = new AbortController().signal } = {}) {
-  if (!Number.isInteger(attempts) || attempts &lt; 1 || attempts &gt; 5) throw new RangeError(&#x27;attempts from 1 to 5 required&#x27;);
-  if (!Number.isFinite(base) || !Number.isFinite(cap) || base &lt; 0 || cap &lt; 0 || cap &gt; 10000) throw new RangeError(&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;);
-  for (let index = 0; index &lt; attempts; index += 1) {
-    signal.throwIfAborted();
-    try { return await operation(signal); }
-    catch (error) {
-      if (!error || error.transient !== true || index + 1 === attempts) throw error;
-      signal.throwIfAborted();
-      const sample = random();
-      if (!(sample &gt;= 0 &amp;&amp; sample &lt; 1)) throw new RangeError(&#x27;random sample must be in [0,1)&#x27;);
-      await wait(Math.floor(Math.min(cap, base * 2 ** index) * sample), signal);
-    }
-  }
-  throw new Error(&#x27;unreachable retry state&#x27;);
-}
-class IdempotentStore {
-  records = new Map();
-  effects = 0;
-  apply(key, payload) {
-    if (typeof key !== &#x27;string&#x27; || !key || !Number.isSafeInteger(payload.amount) || payload.amount &lt;= 0) throw new TypeError(&#x27;valid key and amount required&#x27;);
-    const canonical = JSON.stringify({ amount: payload.amount });
-    const previous = this.records.get(key);
-    if (previous) {
-      if (previous.canonical !== canonical) throw new Error(&#x27;idempotency key conflict&#x27;);
-      return { ...previous.result };
-    }
-    this.effects += 1;
-    const result = { sequence: this.effects, amount: payload.amount };
-    this.records.set(key, { canonical, result });
-    return { ...result };
-  }
-}
-async function mapBounded(values, limit, operation) {
-  if (!Number.isInteger(limit) || limit &lt; 1 || limit &gt; 8) throw new RangeError(&#x27;limit from 1 to 8 required&#x27;);
-  const results = new Array(values.length);
-  let next = 0;
-  let failed = false;
-  let failure;
-  async function worker() {
-    while (!failed &amp;&amp; next &lt; values.length) {
-      const index = next++;
-      try { results[index] = await operation(values[index], index); }
-      catch (error) { if (!failed) { failed = true; failure = error; } }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
-  if (failed) throw failure;
-  return results;
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> retry<span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> attempts <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> base <span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> cap <span class="syntax-operator">=</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> random <span class="syntax-operator">=</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>random<span class="syntax-punctuation">,</span> wait <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>milliseconds<span class="syntax-punctuation">,</span> signal<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> delay<span class="syntax-punctuation">(</span>milliseconds<span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> signal <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> attempts <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">||</span> attempts <span class="syntax-operator">&gt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;attempts from 1 to 5 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>base<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>cap<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> base <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">||</span> cap <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">||</span> cap <span class="syntax-operator">&gt;</span> <span class="syntax-number">10000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> attempts<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    signal<span class="syntax-punctuation">.</span>throwIfAborted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> operation<span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>error <span class="syntax-operator">||</span> error<span class="syntax-punctuation">.</span><span class="syntax-keyword">transient</span> <span class="syntax-operator">!==</span> <span class="syntax-keyword">true</span> <span class="syntax-operator">||</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">===</span> attempts<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> error<span class="syntax-punctuation">;</span>
+      signal<span class="syntax-punctuation">.</span>throwIfAborted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">const</span> sample <span class="syntax-operator">=</span> random<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>sample <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> sample <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;random sample must be in [0,1)&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">await</span> wait<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>floor<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>min<span class="syntax-punctuation">(</span>cap<span class="syntax-punctuation">,</span> base <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">**</span> index<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> sample<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> signal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unreachable retry state&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">class</span> IdempotentStore <span class="syntax-punctuation">{</span>
+  records <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Map</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  effects <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  apply<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> key <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;string&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span>key <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isSafeInteger<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;valid key and amount required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> canonical <span class="syntax-operator">=</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> previous <span class="syntax-operator">=</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>records<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>previous<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>previous<span class="syntax-punctuation">.</span>canonical <span class="syntax-operator">!==</span> canonical<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;idempotency key conflict&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>previous<span class="syntax-punctuation">.</span>result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>effects <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> sequence<span class="syntax-operator">:</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>effects<span class="syntax-punctuation">,</span> amount<span class="syntax-operator">:</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>records<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> canonical<span class="syntax-punctuation">,</span> result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> mapBounded<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">,</span> operation<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">||</span> limit <span class="syntax-operator">&gt;</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;limit from 1 to 8 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> results <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Array</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> next <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> failed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> failure<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> worker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>failed <span class="syntax-operator">&amp;&amp;</span> next <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> index <span class="syntax-operator">=</span> next<span class="syntax-operator">++</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> results<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> operation<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>failed<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> failed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> failure <span class="syntax-operator">=</span> error<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">await</span> <span class="syntax-builtin">Promise</span><span class="syntax-punctuation">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>min<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> worker<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>failed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> failure<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> results<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    let attempts = 0;
-    const waits = [];
-    const result = await retry(async () =&gt; { attempts += 1; if (attempts &lt; 3) throw Object.assign(new Error(&#x27;temporary&#x27;), { transient: true }); return &#x27;ready&#x27;; }, { wait: async value =&gt; { waits.push(value); }, random: () =&gt; 0.5 });
-    assert.equal(result, &#x27;ready&#x27;);
-    assert.equal(attempts, 3);
-    assert.deepEqual(waits, [50, 100]);
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">let</span> attempts <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> waits <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> attempts <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>attempts <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;temporary&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span><span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> wait<span class="syntax-operator">:</span> <span class="syntax-keyword">async</span> value <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> waits<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> random<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">0.5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>waits<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> three attempts; delays 50 and 100; result ready.</p>
 <h4 id="example-b-stop-on-permanent-failure-and-on-exhausted-attempts">Example B: Stop on permanent failure and on exhausted attempts<a class="heading-anchor" href="#example-b-stop-on-permanent-failure-and-on-exhausted-attempts" aria-label="Link to this section">#</a></h4>
 <p>A retry policy must retain a bounded final failure. Converting exhaustion into a default success would erase the operation&#x27;s actual outcome.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> setTimeout <span class="syntax-keyword">as</span> delay <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:timers/promises&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function retry(operation, { attempts = 3, base = 100, cap = 1000, random = Math.random, wait = (milliseconds, signal) =&gt; delay(milliseconds, undefined, { signal }), signal = new AbortController().signal } = {}) {
-  if (!Number.isInteger(attempts) || attempts &lt; 1 || attempts &gt; 5) throw new RangeError(&#x27;attempts from 1 to 5 required&#x27;);
-  if (!Number.isFinite(base) || !Number.isFinite(cap) || base &lt; 0 || cap &lt; 0 || cap &gt; 10000) throw new RangeError(&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;);
-  for (let index = 0; index &lt; attempts; index += 1) {
-    signal.throwIfAborted();
-    try { return await operation(signal); }
-    catch (error) {
-      if (!error || error.transient !== true || index + 1 === attempts) throw error;
-      signal.throwIfAborted();
-      const sample = random();
-      if (!(sample &gt;= 0 &amp;&amp; sample &lt; 1)) throw new RangeError(&#x27;random sample must be in [0,1)&#x27;);
-      await wait(Math.floor(Math.min(cap, base * 2 ** index) * sample), signal);
-    }
-  }
-  throw new Error(&#x27;unreachable retry state&#x27;);
-}
-class IdempotentStore {
-  records = new Map();
-  effects = 0;
-  apply(key, payload) {
-    if (typeof key !== &#x27;string&#x27; || !key || !Number.isSafeInteger(payload.amount) || payload.amount &lt;= 0) throw new TypeError(&#x27;valid key and amount required&#x27;);
-    const canonical = JSON.stringify({ amount: payload.amount });
-    const previous = this.records.get(key);
-    if (previous) {
-      if (previous.canonical !== canonical) throw new Error(&#x27;idempotency key conflict&#x27;);
-      return { ...previous.result };
-    }
-    this.effects += 1;
-    const result = { sequence: this.effects, amount: payload.amount };
-    this.records.set(key, { canonical, result });
-    return { ...result };
-  }
-}
-async function mapBounded(values, limit, operation) {
-  if (!Number.isInteger(limit) || limit &lt; 1 || limit &gt; 8) throw new RangeError(&#x27;limit from 1 to 8 required&#x27;);
-  const results = new Array(values.length);
-  let next = 0;
-  let failed = false;
-  let failure;
-  async function worker() {
-    while (!failed &amp;&amp; next &lt; values.length) {
-      const index = next++;
-      try { results[index] = await operation(values[index], index); }
-      catch (error) { if (!failed) { failed = true; failure = error; } }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
-  if (failed) throw failure;
-  return results;
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> retry<span class="syntax-punctuation">(</span>operation<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> attempts <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> base <span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> cap <span class="syntax-operator">=</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> random <span class="syntax-operator">=</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>random<span class="syntax-punctuation">,</span> wait <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>milliseconds<span class="syntax-punctuation">,</span> signal<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> delay<span class="syntax-punctuation">(</span>milliseconds<span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> signal <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> attempts <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">||</span> attempts <span class="syntax-operator">&gt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;attempts from 1 to 5 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>base<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>cap<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> base <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">||</span> cap <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">||</span> cap <span class="syntax-operator">&gt;</span> <span class="syntax-number">10000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> index <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> index <span class="syntax-operator">&lt;</span> attempts<span class="syntax-punctuation">;</span> index <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    signal<span class="syntax-punctuation">.</span>throwIfAborted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> operation<span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>error <span class="syntax-operator">||</span> error<span class="syntax-punctuation">.</span><span class="syntax-keyword">transient</span> <span class="syntax-operator">!==</span> <span class="syntax-keyword">true</span> <span class="syntax-operator">||</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">===</span> attempts<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> error<span class="syntax-punctuation">;</span>
+      signal<span class="syntax-punctuation">.</span>throwIfAborted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">const</span> sample <span class="syntax-operator">=</span> random<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-punctuation">(</span>sample <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> sample <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;random sample must be in [0,1)&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">await</span> wait<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>floor<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>min<span class="syntax-punctuation">(</span>cap<span class="syntax-punctuation">,</span> base <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">**</span> index<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> sample<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> signal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unreachable retry state&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">class</span> IdempotentStore <span class="syntax-punctuation">{</span>
+  records <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Map</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  effects <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  apply<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> key <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;string&#x27;</span> <span class="syntax-operator">||</span> <span class="syntax-operator">!</span>key <span class="syntax-operator">||</span> <span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isSafeInteger<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;valid key and amount required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> canonical <span class="syntax-operator">=</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> previous <span class="syntax-operator">=</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>records<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>previous<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>previous<span class="syntax-punctuation">.</span>canonical <span class="syntax-operator">!==</span> canonical<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;idempotency key conflict&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>previous<span class="syntax-punctuation">.</span>result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>effects <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> sequence<span class="syntax-operator">:</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>effects<span class="syntax-punctuation">,</span> amount<span class="syntax-operator">:</span> payload<span class="syntax-punctuation">.</span>amount <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">this</span><span class="syntax-punctuation">.</span>records<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> canonical<span class="syntax-punctuation">,</span> result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>result <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> mapBounded<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">,</span> operation<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>isInteger<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span> <span class="syntax-operator">||</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span> <span class="syntax-operator">||</span> limit <span class="syntax-operator">&gt;</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;limit from 1 to 8 required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> results <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Array</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> next <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> failed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">let</span> failure<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> worker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>failed <span class="syntax-operator">&amp;&amp;</span> next <span class="syntax-operator">&lt;</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> index <span class="syntax-operator">=</span> next<span class="syntax-operator">++</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> results<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> operation<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>failed<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> failed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> failure <span class="syntax-operator">=</span> error<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">await</span> <span class="syntax-builtin">Promise</span><span class="syntax-punctuation">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-builtin">Array</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>min<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">.</span>length<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> worker<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>failed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> failure<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> results<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    let permanent = 0;
-    await assert.rejects(retry(async () =&gt; { permanent += 1; throw new Error(&#x27;permanent&#x27;); }), /permanent/u);
-    assert.equal(permanent, 1);
-    let transient = 0;
-    await assert.rejects(retry(async () =&gt; { transient += 1; throw Object.assign(new Error(&#x27;still unavailable&#x27;), { transient: true }); }, { wait: async () =&gt; {} }), /still unavailable/u);
-    assert.equal(transient, 3);
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">let</span> permanent <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> permanent <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;permanent&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/permanent/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>permanent<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">let</span> <span class="syntax-keyword">transient</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span> <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;still unavailable&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span><span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> wait<span class="syntax-operator">:</span> <span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/still unavailable/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">transient</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> permanent attempted once; transient attempted three times and still rejects.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
@@ -314,7 +360,7 @@ console.log(JSON.stringify(await verify()));
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://nodejs.org/download/release/v24.11.0/docs/api/timers.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-037: Network retries, idempotency and bounded concurrency.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-037: Network retries, idempotency and bounded concurrency.
 Read courses/javascript-typescript/guides/js-037.md and courses/javascript-typescript/lessons/js-037.mjs. Direct prerequisites: `js-036`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

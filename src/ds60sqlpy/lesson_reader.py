@@ -100,6 +100,13 @@ _LINK_OR_CODE_RE = re.compile(
 _SAFE_ID_RE = re.compile(r"[^a-z0-9]+")
 
 
+def _is_fence_closer(line: str, marker: str) -> bool:
+    """Accept only a same-character fence at least as long, with no info text."""
+
+    candidate = line.strip()
+    return len(candidate) >= len(marker) and all(character == marker[0] for character in candidate)
+
+
 def _clean_generated_html(document: str) -> str:
     """Return deterministic HTML with one newline and no trailing whitespace."""
 
@@ -583,7 +590,7 @@ def _strip_html_comments_outside_fences(source: str) -> str:
                 output.append(line)
                 if line_end < len(normalized):
                     output.append("\n")
-                if line.lstrip().startswith(fence_marker[0] * len(fence_marker)):
+                if _is_fence_closer(line, fence_marker):
                     fence_marker = None
                 position = line_end + (line_end < len(normalized))
                 continue
@@ -657,9 +664,7 @@ def render_markdown(
             language = fence.group(2).strip().split(maxsplit=1)[0] if fence.group(2).strip() else ""
             code_lines: list[str] = []
             index += 1
-            while index < len(lines) and not lines[index].lstrip().startswith(
-                marker[0] * len(marker)
-            ):
+            while index < len(lines) and not _is_fence_closer(lines[index], marker):
                 code_lines.append(lines[index])
                 index += 1
             if index < len(lines):

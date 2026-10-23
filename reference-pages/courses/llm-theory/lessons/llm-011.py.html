@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,44 +161,44 @@
       <h1>Llm 011</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/lessons/llm-011.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-011: Multiple heads, residuals and a decoder block.</span>
-<span> </span>
-<span>Answer-free learner worksheet. See the companion guide for worked examples.</span>
-<span>Copy to .learning before editing. Six independent attempts belong below.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span># Exercise 1: Split and rejoin</span>
-<span># Split X=[[0,1,2,3],[4,5,6,7]] into two heads, inspect membership, then invert the</span>
-<span># layout.</span>
-<span># Expected: head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.</span>
-<span> </span>
-<span># Exercise 2: Calculate a residual</span>
-<span># Add branch 2X to X, then compare with zero and cancelling branches.</span>
-<span># Expected: 2X gives 3X, zero branch gives X, and branch -X gives zero; all retain the same shape.</span>
-<span> </span>
-<span># Exercise 3: Use a tokenwise nonlinear block</span>
-<span># Apply the explicit identity-weight, bias-minus-two feed-forward branch to two token</span>
-<span># rows.</span>
-<span># Expected: first output [0,0,0,1]; changing the second token does not change the first output.</span>
-<span> </span>
-<span># Exercise 4: Test actual head mixtures and causal prefixes</span>
-<span># Run the three-token four-feature fixture through two causal heads and compare</span>
-<span># independently recomputed prefixes.</span>
-<span># Expected: head distributions differ as derived, row-one output is [1/(1+a),a/(1+a),1,0.5], and every prefix matches.</span>
-<span> </span>
-<span># Exercise 5: Reject an indivisible width</span>
-<span># Call the split helper with width 5 and two heads, then with zero heads and an empty</span>
-<span># token axis.</span>
-<span># Expected: each invalid layout raises ValueError before reshape.</span>
-<span> </span>
-<span># Exercise 6: Detect a wrong rejoin</span>
-<span># Flatten the head-major tensor directly and compare values with the correctly inverted</span>
-<span># transpose.</span>
-<span># Expected: the wrong [2,4] result differs despite matching shape; the inverse operation restores X.</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-011: Multiple heads, residuals and a decoder block.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Answer-free learner worksheet. See the companion guide for worked examples.</span></span>
+<span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Split and rejoin</span></span>
+<span class="source-line"><span class="syntax-comment"># Split X=[[0,1,2,3],[4,5,6,7]] into two heads, inspect membership, then invert the</span></span>
+<span class="source-line"><span class="syntax-comment"># layout.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Calculate a residual</span></span>
+<span class="source-line"><span class="syntax-comment"># Add branch 2X to X, then compare with zero and cancelling branches.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2X gives 3X, zero branch gives X, and branch -X gives zero; all retain the same shape.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Use a tokenwise nonlinear block</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply the explicit identity-weight, bias-minus-two feed-forward branch to two token</span></span>
+<span class="source-line"><span class="syntax-comment"># rows.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: first output [0,0,0,1]; changing the second token does not change the first output.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Test actual head mixtures and causal prefixes</span></span>
+<span class="source-line"><span class="syntax-comment"># Run the three-token four-feature fixture through two causal heads and compare</span></span>
+<span class="source-line"><span class="syntax-comment"># independently recomputed prefixes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: head distributions differ as derived, row-one output is [1/(1+a),a/(1+a),1,0.5], and every prefix matches.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Reject an indivisible width</span></span>
+<span class="source-line"><span class="syntax-comment"># Call the split helper with width 5 and two heads, then with zero heads and an empty</span></span>
+<span class="source-line"><span class="syntax-comment"># token axis.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: each invalid layout raises ValueError before reshape.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Detect a wrong rejoin</span></span>
+<span class="source-line"><span class="syntax-comment"># Flatten the head-major tensor directly and compare values with the correctly inverted</span></span>
+<span class="source-line"><span class="syntax-comment"># transpose.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the wrong [2,4] result differs despite matching shape; the inverse operation restores X.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

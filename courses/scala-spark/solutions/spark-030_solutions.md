@@ -28,7 +28,7 @@ Acceptance would check the 30-row schema and digest from the actual runtime loca
 
 **Expected:** A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
 
-TheScala jar must be compiled for the declaredScala 2.13 binary family and checked against the selectedSpark 4.0.1/JDK 17 runtime. AScala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.
+TheScala jar must be compiled for the declaredScala 2.13 binary family and checked against the selectedSpark 4.0.1/JDK 17 runtime. A Scala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.
 
 The purePythonrules.zip can be a candidate for a supported Python-file distribution mechanism. Imports used by driver code must work in the driver's interpreter; imports used by task code must work in executor Python processes. A native-extension wheel additionally depends on interpreter ABI, platform and shared-library compatibility, so treating it as a source zip is insufficient. A qualified image or environment-archive approach could provide those layers, but its exact versions and bounded import/task receipt are still required. The worksheet neither installs that environment nor downloads packages.
 
@@ -62,7 +62,7 @@ The record should first identify the intended platform, driver placement, depend
 
 Production readiness is a further tier involving representative data volumes, availability, monitoring, concurrency and operational rollback. The proposed remote path and native-package environment remain open requirements, and the Connect adapter remains separate work. A failure action should preserve artifacts and logs, stop only owned work and return to the last qualified implementation. The worksheet approves no deployment and starts no service; its deliverable is a concrete evidence plan that another reviewer can assess before any remote action is considered.
 
-**Verification evidence:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram orsyntax alone.
+**Verification evidence:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.
 
 ## Evidence boundary
 

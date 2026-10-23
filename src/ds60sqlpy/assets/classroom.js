@@ -55,6 +55,9 @@ let visibleRoute = "/classroom",
   highlightSequence = 0,
   highlightTimer = null,
   previewVisible = false;
+let resultRevision = 0,
+  runHistorySequence = 0,
+  receiptLoadSequence = 0;
 let hintNumber = 1,
   phase = "read",
   phaseNotes = {},
@@ -651,7 +654,7 @@ function renderLegacyControls(data) {
   const legacy = data.engine === "legacy";
   for (const id of ["legacy-workspace", "legacy-evidence", "legacy-pad-tools"])
     $(id).hidden = !legacy;
-  $("job-history").hidden = legacy;
+  $("job-history").hidden = false;
   $("cancel").hidden = legacy && !activeJob;
   $("source-section").hidden = legacy && data.runtime_profile === "reading";
   if (!legacy) return;
@@ -900,8 +903,13 @@ async function openLesson(id, save = true, requested = {}) {
   }
   previewVisible = pref("preview." + trackId, false);
   updatePreviewVisibility();
-  if (data.engine === "legacy")
+  if (data.engine === "legacy") {
     refreshPadHistory().catch((error) => status(error.message, true));
+    const retained = legacyReceipts.get(key);
+    refreshRunHistory({
+      showLatest: retained?.result.receipt_saved !== false,
+    }).catch((error) => status(error.message, true));
+  }
   remember("lastLesson", {
     id,
     context: { language: data.runner?.id, mode: data.mode },
@@ -1059,6 +1067,10 @@ function showCapability(cap) {
   }
 }
 function resetResult() {
+  resultRevision++;
+  $("run-storage-status").textContent = "";
+  $("receipt-source-details").hidden = true;
+  $("receipt-source").replaceChildren();
   displayedJob = null;
   $("recover").hidden = true;
   $("reconnect").hidden = true;
@@ -1401,6 +1413,28 @@ function showLegacyResult(result, context, source) {
     return;
   }
   resetResult();
+  const displayRevision = resultRevision;
+  $("run-storage-status").textContent =
+    result.receipt_saved === true
+      ? "Saved run" +
+        (result.saved_at
+          ? " from " + new Date(result.saved_at).toLocaleString()
+          : "") +
+        ". This output belongs to its recorded source; viewing it does not change your current pad."
+      : result.receipt_saved === false
+        ? "This run finished, but its result could not be saved. Copy any output you need before leaving or reloading. " +
+          (result.receipt_error || "") +
+          " No automatic retry was started."
+        : "A durable receipt was not confirmed for this run. Keep a copy of any output you need.";
+  $("receipt-source-details").hidden = false;
+  const submitted = node("pre", source, "result-log");
+  $("receipt-source").replaceChildren(submitted);
+  classroom("classroom-highlight", { source, language: context.language })
+    .then((data) => {
+      if (workspaceKey() === context.key && resultRevision === displayRevision)
+        $("receipt-source").innerHTML = data.html;
+    })
+    .catch(() => {});
   $("job-status").textContent =
     "Exit " +
     result.returncode +
@@ -1442,6 +1476,101 @@ function showLegacyResult(result, context, source) {
         : "The program reported an error. Use the diagnostic to investigate a small reproducible example.",
     ),
   );
+}
+function receiptScope(context) {
+  return {
+    lesson_id: context.id,
+    language: context.language,
+    mode: context.mode || "snippet",
+  };
+}
+async function openRunReceipt(
+  context,
+  receiptId,
+  version = intentVersion,
+  expectedRevision = resultRevision,
+) {
+  const sequence = ++receiptLoadSequence;
+  try {
+    const data = await classroom("classroom-run-result", {
+      ...receiptScope(context),
+      receipt_id: receiptId,
+    });
+    if (
+      workspaceKey() !== context.key ||
+      intentVersion !== version ||
+      sequence !== receiptLoadSequence ||
+      resultRevision !== expectedRevision
+    )
+      return;
+    const receipt = data.receipt;
+    if (
+      receipt.lesson_id !== context.id ||
+      receipt.language !== context.language ||
+      receipt.mode !== (context.mode || "snippet")
+    )
+      throw new Error("The saved run does not belong to this workspace.");
+    showLegacyResult(
+      {
+        ...receipt.result,
+        receipt_id: receipt.id,
+        receipt_saved: true,
+        saved_at: receipt.saved_at,
+      },
+      context,
+      receipt.source,
+    );
+  } catch (error) {
+    if (
+      workspaceKey() === context.key &&
+      intentVersion === version &&
+      sequence === receiptLoadSequence
+    )
+      status(
+        "Could not open the saved run. Your source is unchanged. " +
+          error.message,
+        true,
+      );
+  }
+}
+async function refreshRunHistory({ showLatest = false } = {}) {
+  if (current?.engine !== "legacy" || current.runtime_profile === "reading")
+    return;
+  const context = contextOf(),
+    version = intentVersion,
+    sequence = ++runHistorySequence,
+    revision = resultRevision;
+  const data = await classroom("classroom-history", receiptScope(context));
+  if (
+    workspaceKey() !== context.key ||
+    intentVersion !== version ||
+    sequence !== runHistorySequence
+  )
+    return;
+  $("history").replaceChildren();
+  for (const receipt of data.history) {
+    const button = node(
+      "button",
+      new Date(receipt.saved_at).toLocaleString() +
+        " · Exit " +
+        receipt.returncode +
+        " · " +
+        receipt.status +
+        " · " +
+        receipt.source_sha256.slice(0, 10),
+    );
+    button.type = "button";
+    button.addEventListener("click", () =>
+      openRunReceipt(context, receipt.id, version),
+    );
+    $("history").append(button);
+  }
+  if (!data.history.length)
+    $("history").append(
+      node("p", "No saved runs for this language and workspace yet.", "muted"),
+    );
+  if (showLatest && data.history.length && resultRevision === revision)
+    await openRunReceipt(context, data.history[0].id, version, revision);
 }
 function showSqlResults(output) {
   let parsed;
@@ -1538,7 +1667,20 @@ async function runCode() {
           false,
         );
         showLegacyResult(result, context, intent.source);
-        if (workspaceKey() === context.key) await refreshPadHistory();
+        if (workspaceKey() === context.key) {
+          const updates = await Promise.allSettled([
+            refreshPadHistory(),
+            refreshRunHistory({ showLatest: false }),
+          ]);
+          if (
+            workspaceKey() === context.key &&
+            updates.some((update) => update.status === "rejected")
+          )
+            status(
+              "The run finished, but its saved-history list could not be refreshed. The actual result remains visible; no code was rerun.",
+              true,
+            );
+        }
       } catch (error) {
         throw new Error(
           "The result is not confirmed. Do not resubmit until the original run deadline has passed. " +
@@ -2038,33 +2180,103 @@ window.addEventListener("popstate", async () => {
     );
   }
 });
-function followGuideLink(event) {
+function scrollToGuideFragment(fragment) {
+  if (!fragment) return false;
+  let id;
+  try {
+    id = decodeURIComponent(fragment.replace(/^#/, ""));
+  } catch (_) {
+    return false;
+  }
+  const unprefixed = id.replace(
+    /^(?:guide|reference|module-guide|lab-guide)--/,
+    "",
+  );
+  const target = [...$("guide").querySelectorAll("[id]")].find(
+    (element) =>
+      element.id === id ||
+      element.id === unprefixed ||
+      element.id.endsWith("--" + unprefixed),
+  );
+  if (!target) return false;
+  target.setAttribute("tabindex", "-1");
+  target.scrollIntoView({ block: "start" });
+  target.focus({ preventScroll: true });
+  return true;
+}
+async function followGuideLink(event) {
+  if (
+    event.defaultPrevented ||
+    event.button > 0 ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
   const anchor = event.target.closest?.("a[href]");
-  if (!anchor) return;
-  const url = new URL(anchor.getAttribute("href"), location.href);
+  if (
+    !anchor ||
+    (anchor.getAttribute("download") !== null &&
+      anchor.getAttribute("download") !== undefined)
+  )
+    return;
+  const target = anchor.getAttribute("target");
+  if (target && target.toLowerCase() !== "_self") return;
+  let url;
+  try {
+    url = new URL(anchor.getAttribute("href"), location.href);
+  } catch (_) {
+    return;
+  }
   if (url.origin !== location.origin) return;
   const linked = /^\/lesson-pages\/([^/]+)\.html$/.exec(url.pathname),
     params = new URLSearchParams(url.hash.slice(1));
+  const mapped = Object.prototype.hasOwnProperty.call(
+    index?.lesson_links || {},
+    url.pathname,
+  )
+    ? index.lesson_links[url.pathname]
+    : null;
   const id =
+    mapped ||
     linked?.[1] ||
     (["/classroom", "/learn", "/journeys"].includes(url.pathname)
       ? params.get("lesson")
       : null);
-  if (id && locate(id)) {
+  if (typeof id === "string" && locate(id)) {
     event.preventDefault();
-    openLesson(id).catch((error) => status(error.message, true));
+    const opening = openLesson(id),
+      version = intentVersion;
+    try {
+      await opening;
+      if (
+        current?.id === id &&
+        version === intentVersion &&
+        !params.has("lesson")
+      ) {
+        if (/^#solutions?(?:[-_]|$)/i.test(url.hash)) {
+          if (current.learning_mode === "tutorial")
+            status(
+              "Worked explanations are already included in this tutorial chapter.",
+            );
+          else {
+            $("reveal").scrollIntoView({ block: "center" });
+            $("reveal").focus({ preventScroll: true });
+            status("Choose Reveal solutions to open this comparison.");
+          }
+        } else scrollToGuideFragment(url.hash);
+      }
+    } catch (error) {
+      status(
+        "Navigation paused to protect your unsaved work. " + error.message,
+        true,
+      );
+    }
     return;
   }
   if (url.pathname === location.pathname && url.hash && !params.has("lesson")) {
-    const target = document.getElementById(
-      decodeURIComponent(url.hash.slice(1)),
-    );
-    if (target) {
-      event.preventDefault();
-      target.setAttribute("tabindex", "-1");
-      target.scrollIntoView({ block: "start" });
-      target.focus({ preventScroll: true });
-    }
+    if (scrollToGuideFragment(url.hash)) event.preventDefault();
   }
 }
 $("guide").addEventListener("click", followGuideLink);

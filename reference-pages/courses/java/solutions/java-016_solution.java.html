@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,65 +161,65 @@
       <h1>Java 016 Solution</h1>
       <p class="source-path">Generated from <code>courses/java/solutions/java-016_solution.java</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-java"><code><span>import java.util.*;</span>
-<span> </span>
-<span>public class Main {</span>
-<span>    @FunctionalInterface interface FileWork { void run(java.nio.file.Path root) throws Exception; }</span>
-<span>    static void withTemp(FileWork work) throws Exception {</span>
-<span>        var root=java.nio.file.Files.createTempDirectory(&quot;ds60-java-&quot;);</span>
-<span>        try { work.run(root); }</span>
-<span>        finally {</span>
-<span>            try(var paths=java.nio.file.Files.walk(root)) {</span>
-<span>                for(var path:paths.sorted(Comparator.reverseOrder()).toList()) java.nio.file.Files.deleteIfExists(path);</span>
-<span>            }</span>
-<span>        }</span>
-<span>    }</span>
-<span>    public static void main(String[] args) throws Exception {</span>
-<span>        // Exercise 1: Round-trip explicit UTF-8</span>
-<span>        withTemp(root -&gt; {</span>
-<span>            var path = root.resolve(&quot;text.txt&quot;); String text = &quot;Café 🙂&quot;;</span>
-<span>            java.nio.file.Files.writeString(path,text,java.nio.charset.StandardCharsets.UTF_8);</span>
-<span>            assert java.nio.file.Files.readString(path,java.nio.charset.StandardCharsets.UTF_8).equals(text);</span>
-<span>        });</span>
-<span> </span>
-<span>        // Exercise 2: Distinguish a path from existence</span>
-<span>        withTemp(root -&gt; {</span>
-<span>            var missing = root.resolve(&quot;missing.txt&quot;);</span>
-<span>            assert missing.getFileName().toString().equals(&quot;missing.txt&quot;) &amp;&amp; !java.nio.file.Files.exists(missing);</span>
-<span>        });</span>
-<span> </span>
-<span>        // Exercise 3: Close a directory stream</span>
-<span>        withTemp(root -&gt; {</span>
-<span>            java.nio.file.Files.writeString(root.resolve(&quot;a.txt&quot;),&quot;a&quot;); java.nio.file.Files.writeString(root.resolve(&quot;b.txt&quot;),&quot;b&quot;);</span>
-<span>            try(var entries = java.nio.file.Files.list(root)) { assert entries.count() == 2; }</span>
-<span>        });</span>
-<span> </span>
-<span>        // Exercise 4: Request atomic replacement honestly</span>
-<span>        withTemp(root -&gt; {</span>
-<span>            var target=root.resolve(&quot;target.txt&quot;); var staged=root.resolve(&quot;staged.txt&quot;);</span>
-<span>            java.nio.file.Files.writeString(target,&quot;old&quot;); java.nio.file.Files.writeString(staged,&quot;new&quot;);</span>
-<span>            try {</span>
-<span>                java.nio.file.Files.move(staged,target,java.nio.file.StandardCopyOption.ATOMIC_MOVE,java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
-<span>                assert java.nio.file.Files.readString(target).equals(&quot;new&quot;) &amp;&amp; !java.nio.file.Files.exists(staged);</span>
-<span>            } catch(java.nio.file.AtomicMoveNotSupportedException expected) {</span>
-<span>                assert java.nio.file.Files.readString(target).equals(&quot;old&quot;);</span>
-<span>            }</span>
-<span>        });</span>
-<span> </span>
-<span>        // Exercise 5: Expose a lexical path escape</span>
-<span>        withTemp(root -&gt; {</span>
-<span>            var candidate=root.resolve(&quot;../outside&quot;).normalize();</span>
-<span>            assert !candidate.startsWith(root.normalize());</span>
-<span>        });</span>
-<span> </span>
-<span>        // Exercise 6: Verify cleanup after failure</span>
-<span>        final java.nio.file.Path[] created={null}; boolean propagated=false;</span>
-<span>        try { withTemp(root -&gt; { created[0]=root; throw new java.io.IOException(&quot;fixture failure&quot;); }); }</span>
-<span>        catch(java.io.IOException expected) { propagated=expected.getMessage().equals(&quot;fixture failure&quot;); }</span>
-<span>        assert propagated &amp;&amp; created[0]!=null &amp;&amp; !java.nio.file.Files.exists(created[0]);</span>
-<span>    }</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-java"><code><span class="source-line"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-decorator">@FunctionalInterface</span> <span class="syntax-keyword">interface</span> <span class="syntax-class">FileWork</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">void</span> <span class="syntax-function">run</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Path</span> root<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">withTemp</span><span class="syntax-punctuation">(</span>FileWork work<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">var</span> root<span class="syntax-operator">=</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">createTempDirectory</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-java-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> work<span class="syntax-punctuation">.</span><span class="syntax-attribute">run</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> paths<span class="syntax-operator">=</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">walk</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> path<span class="syntax-punctuation">:</span>paths<span class="syntax-punctuation">.</span><span class="syntax-attribute">sorted</span><span class="syntax-punctuation">(</span>Comparator<span class="syntax-punctuation">.</span><span class="syntax-attribute">reverseOrder</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">toList</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">deleteIfExists</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 1: Round-trip explicit UTF-8</span></span>
+<span class="source-line">        withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-keyword">var</span> path <span class="syntax-operator">=</span> root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">text.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> String text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Café 🙂</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">,</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">charset</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">StandardCharsets</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">UTF_8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">readString</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">charset</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">StandardCharsets</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">UTF_8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 2: Distinguish a path from existence</span></span>
+<span class="source-line">        withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-keyword">var</span> missing <span class="syntax-operator">=</span> root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> missing<span class="syntax-punctuation">.</span><span class="syntax-attribute">getFileName</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">toString</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> <span class="syntax-operator">!</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">exists</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 3: Close a directory stream</span></span>
+<span class="source-line">        withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">b.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> entries <span class="syntax-operator">=</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">list</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">assert</span> entries<span class="syntax-punctuation">.</span><span class="syntax-attribute">count</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 4: Request atomic replacement honestly</span></span>
+<span class="source-line">        withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-keyword">var</span> target<span class="syntax-operator">=</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">target.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">var</span> staged<span class="syntax-operator">=</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">staged.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">old</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">writeString</span><span class="syntax-punctuation">(</span>staged<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">move</span><span class="syntax-punctuation">(</span>staged<span class="syntax-punctuation">,</span>target<span class="syntax-punctuation">,</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">StandardCopyOption</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ATOMIC_MOVE</span><span class="syntax-punctuation">,</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">StandardCopyOption</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">REPLACE_EXISTING</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">                <span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">readString</span><span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> <span class="syntax-operator">!</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">exists</span><span class="syntax-punctuation">(</span>staged<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">AtomicMoveNotSupportedException</span> expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">                <span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">readString</span><span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">old</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 5: Expose a lexical path escape</span></span>
+<span class="source-line">        withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">            <span class="syntax-keyword">var</span> candidate<span class="syntax-operator">=</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">resolve</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">../outside</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">normalize</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">            <span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>candidate<span class="syntax-punctuation">.</span><span class="syntax-attribute">startsWith</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">.</span><span class="syntax-attribute">normalize</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-comment">// Exercise 6: Verify cleanup after failure</span></span>
+<span class="source-line">        <span class="syntax-keyword">final</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Path</span><span class="syntax-operator">[</span><span class="syntax-operator">]</span> created<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">boolean</span> propagated<span class="syntax-operator">=</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> withTemp<span class="syntax-punctuation">(</span>root <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span> created<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">=</span>root<span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">fixture failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">catch</span><span class="syntax-punctuation">(</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">io</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">IOException</span> expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> propagated<span class="syntax-operator">=</span>expected<span class="syntax-punctuation">.</span><span class="syntax-attribute">getMessage</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">fixture failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> propagated <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> created<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-operator">!</span><span class="syntax-operator">=</span><span class="syntax-keyword">null</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> <span class="syntax-operator">!</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">nio</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">file</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Files</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">exists</span><span class="syntax-punctuation">(</span>created<span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

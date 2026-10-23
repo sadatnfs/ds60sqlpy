@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,11 +169,11 @@
 <p><strong>Confounder:</strong> Another changed factor that prevents attributing an effect to one cause.</p>
 <p><strong>Extrapolation:</strong> A prediction outside the range of observed conditions.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is log(L2/L1)/log(C2/C1), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.</p>
+<p>Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><msub><mi>L</mi><mrow><mn>2</mn></mrow></msub></mrow><mrow><msub><mi>L</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo stretchy="false">)</mo></mrow><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><msub><mi>C</mi><mrow><mn>2</mn></mrow></msub></mrow><mrow><msub><mi>C</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\log(\frac{L_{2}}{L_{1}})}{\log(\frac{C_{2}}{C_{1}})}</annotation></semantics></math>, meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.</p>
 <h3 id="exercise-1-read-a-controlled-comparison">Exercise 1: Read a controlled comparison<a class="heading-anchor" href="#exercise-1-read-a-controlled-comparison" aria-label="Link to this section">#</a></h3>
-<p>The question is: Inspect rowsA(P1000,D10000,S100,C1,L2.0) andB(P1000,D10000,S200,C2,L1.8). Identify what changed.</p>
+<p>The question is: Inspect rowsA(P1000,D10000,S100,C1,L2.0) and B(P1000,D10000,S200,C2,L1.8). Identify what changed.</p>
 <p>The comparison is evidence about additional optimization under this setup. It is not a direct experiment on model size because parameter count stayed fixed.</p>
-<pre><code class="language-text">Run P     D     S   C L
+<pre class="highlighted-code"><code class="language-text">Run P     D     S   C L
 A   1000  10000 100 1 2.0
 B   1000  10000 200 2 1.8
 Controlled: P,D,evaluation protocol. Changed: S,C.</code></pre>
@@ -136,7 +182,7 @@ Controlled: P,D,evaluation protocol. Changed: S,C.</code></pre>
 <h3 id="exercise-2-find-a-confounded-row">Exercise 2: Find a confounded row<a class="heading-anchor" href="#exercise-2-find-a-confounded-row" aria-label="Link to this section">#</a></h3>
 <p>The question is: CompareA withC(P2000,D20000,S200,C8,L1.5). Can the gain be assigned only to parameters?</p>
 <p>Several plausible mechanisms explain the difference. A larger model, more data and more updates each change the experiment, so the table does not isolate one effect.</p>
-<pre><code class="language-text">A -&gt; C:
+<pre class="highlighted-code"><code class="language-text">A -&gt; C:
 P x2; D x2; S x2; C x8; L 2.0 -&gt; 1.5
 Attribution to P alone is unsupported.</code></pre>
 <p><strong>Expected:</strong> No;P,D,S,C all changed.</p>
@@ -144,14 +190,14 @@ Attribution to P alone is unsupported.</code></pre>
 <h3 id="exercise-3-calculate-a-local-ratio">Exercise 3: Calculate a local ratio<a class="heading-anchor" href="#exercise-3-calculate-a-local-ratio" aria-label="Link to this section">#</a></h3>
 <p>The question is: CalculateB/A loss ratio and percent decrease relative toA.</p>
 <p>A ten-percent relative decrease is different from an absolute decrease of0.2 loss units. Keep the denominator and units explicit.</p>
-<pre><code class="language-text">1.8 / 2.0 = 0.9
+<pre class="highlighted-code"><code class="language-text">1.8 / 2.0 = 0.9
 (2.0 - 1.8) / 2.0 = 0.10</code></pre>
-<p><strong>Expected:</strong> ratio.9; decrease10percent.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with ratio.9; decrease10percent.</p>
+<p><strong>Expected:</strong> ratio.9; decrease 10 percent.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with ratio.9; decrease 10 percent.</p>
 <h3 id="exercise-4-reject-an-unsupported-forecast">Exercise 4: Reject an unsupported forecast<a class="heading-anchor" href="#exercise-4-reject-an-unsupported-forecast" aria-label="Link to this section">#</a></h3>
 <p>The question is: A reviewer predicts loss.1 at compute1000000 from rowsA,B. Evaluate the claim.</p>
 <p>Two nearby measurements do not establish the relationship over six orders of magnitude. A fitted equation can produce a number without making that number evidence-backed.</p>
-<pre><code class="language-text">Observed compute range: [1,2]
+<pre class="highlighted-code"><code class="language-text">Observed compute range: [1,2]
 Claimed compute: 1000000
 Missing: regime checks, more runs, uncertainty, data/optimization policy.</code></pre>
 <p><strong>Expected:</strong> unsupported extrapolation far outside compute1..2.</p>
@@ -159,7 +205,7 @@ Missing: regime checks, more runs, uncertainty, data/optimization policy.</code>
 <h3 id="exercise-5-design-a-discriminating-next-run">Exercise 5: Design a discriminating next run<a class="heading-anchor" href="#exercise-5-design-a-discriminating-next-run" aria-label="Link to this section">#</a></h3>
 <p>The question is: Propose a run testing parameter count while holding training data and update policy fixed.</p>
 <p>Holding steps fixed does not hold compute fixed when the model grows. The design should state which budget is controlled and measure the resulting other quantity.</p>
-<pre><code class="language-text">Next run: P2000,D10000,S100
+<pre class="highlighted-code"><code class="language-text">Next run: P2000,D10000,S100
 Keep tokenizer,split,optimizer policy fixed.
 Measure actual C and held-out L; repeat seeds if studying variation.</code></pre>
 <p><strong>Expected:</strong> D10000,S100,declared largerP; compute measured separately.</p>
@@ -167,7 +213,7 @@ Measure actual C and held-out L; repeat seeds if studying variation.</code></pre
 <h3 id="exercise-6-write-a-bounded-conclusion">Exercise 6: Write a bounded conclusion<a class="heading-anchor" href="#exercise-6-write-a-bounded-conclusion" aria-label="Link to this section">#</a></h3>
 <p>The question is: SummarizeA/B/C without calling a toy trend a frontier scaling law.</p>
 <p>A precise limited conclusion is more useful than a sweeping claim. It identifies both the observation and the experiment still needed to answer the next question.</p>
-<pre><code class="language-text">Within this toy setup, doubling updates from A to B reduced loss from2.0 to1.8.
+<pre class="highlighted-code"><code class="language-text">Within this toy setup, doubling updates from A to B reduced loss from2.0 to1.8.
 C has lower loss but changes several factors.
 No frontier-performance prediction is supported.</code></pre>
 <p><strong>Expected:</strong> conclusion names local fixture and confoundedC.</p>

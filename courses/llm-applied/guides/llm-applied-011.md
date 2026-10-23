@@ -180,7 +180,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** document exists but significance claim unsupported.
    **Verify:** Save the assertion results for exercise 4, including document exists but significance claim unsupported.
 
-5. **Bind the source version.** Compare a citation requiringversion 1 with a suppliedversion 2 document.
+5. **Bind the source version.** Compare a citation requiring version 1 with a supplied version 2 document.
    **Expected:** version mismatch blocks citation reuse.
    **Verify:** Save the assertion results for exercise 5, including version mismatch blocks citation reuse.
 

@@ -36,7 +36,7 @@ def product_digest(frame):
 
 Validation establishes the business product before hashing its canonical representation. Sorting makes the digest independent of execution partition and arrival order. The count check bounds the driver collection to 30 rows. The digest convention is explicit so different implementations cannot silently hash different field orders, newline conventions or number renderings and call the results equivalent.
 
-**Verification evidence:** Assert a64-hex digest and equal digest after repartitioning; reject a31-row source.
+**Verification evidence:** Assert a64-hex digest and equal digest after repartitioning; reject a 31-row source.
 
 ### Exercise 2: Stage a run and validate the persisted readback
 

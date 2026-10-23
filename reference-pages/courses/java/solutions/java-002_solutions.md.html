@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,62 +165,62 @@
 <p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A numeric type defines both a range and a set of operations. Java int arithmetic uses fixed-width signed integers and can wrap on overflow. Integer division discards the fractional part toward zero, while a floating-point operand changes the operation to approximate real-number arithmetic. A cast can narrow a value and lose information; it does not prove the value fits. BigDecimal represents decimal arithmetic with explicit precision and rounding choices, useful when exact decimal meaning matters. Construct it from text when the source is decimal text, because constructing from a binary floating-point value preserves that prior approximation. Choose types from the domain contract rather than from the apparent size of one example.</p>
-<p><strong>Primitive:</strong> A built-in value type such asint orboolean.</p>
+<p><strong>Primitive:</strong> A built-in value type such asint or boolean.</p>
 <p><strong>Overflow:</strong> A result outside the range of its chosen representation.</p>
 <p><strong>Narrowing conversion:</strong> A conversion that can lose range or precision.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
-<p>L suffix creates a long literal. A widening conversion fromint tolong preserves the integer value, but the multiplication must occur after widening if it would overflowint. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so1.0 and1.00 need a declared equality policy.</p>
+<p>L suffix creates a long literal. A widening conversion fromint to long preserves the integer value, but the multiplication must occur after widening if it would overflowint. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so1.0 and 1.00 need a declared equality policy.</p>
 <h3 id="exercise-1-compare-integer-and-decimal-division">Exercise 1: Compare integer and decimal division<a class="heading-anchor" href="#exercise-1-compare-integer-and-decimal-division" aria-label="Link to this section">#</a></h3>
-<p>Task: Calculate7/2 and7/2.0.</p>
+<p>Task: Calculate integer division <code>7 / 2</code> and floating-point division <code>7 / 2.0</code>.</p>
 <p>The operand types select the operation. Assigning7/2 to a double afterward would preserve the already-truncated value3.0.</p>
-<pre><code class="language-java">int whole = 7 / 2;
-double fractional = 7 / 2.0;
-assert whole == 3 &amp;&amp; fractional == 3.5;</code></pre>
-<p><strong>Expected:</strong> integer3 and double3.5.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with integer3 and double3.5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> whole <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> fractional <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> integer 3 and double 3.5.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with integer 3 and double 3.5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-2-widen-before-multiplication">Exercise 2: Widen before multiplication<a class="heading-anchor" href="#exercise-2-widen-before-multiplication" aria-label="Link to this section">#</a></h3>
 <p>Task: Compute50000 squared with an explicitly widened left operand.</p>
-<p>The cast affects the multiplication itself. Casting the wrappedint result tolong afterward cannot recover lost information.</p>
-<pre><code class="language-java">long safe = (long) 50_000 * 50_000;
-int wrapped = 50_000 * 50_000;
-assert safe == 2_500_000_000L;
-assert wrapped != safe;</code></pre>
+<p>The cast affects the multiplication itself. Casting the wrappedint result to long afterward cannot recover lost information.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">long</span> safe <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">long</span><span class="syntax-punctuation">)</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">int</span> wrapped <span class="syntax-operator">=</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> safe <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2_500_000_000L</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> wrapped <span class="syntax-operator">!</span><span class="syntax-operator">=</span> safe<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 2500000000L;int product differs.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with 2500000000L;int product differs. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-3-detect-overflow-explicitly">Exercise 3: Detect overflow explicitly<a class="heading-anchor" href="#exercise-3-detect-overflow-explicitly" aria-label="Link to this section">#</a></h3>
 <p>Task: Add1 to Integer.MAX_VALUE withMath.addExact.</p>
 <p>Exact arithmetic helpers turn silent wraparound into a named boundary failure. Use them when overflow violates the domain contract.</p>
-<pre><code class="language-java">boolean rejected = false;
-try { Math.addExact(Integer.MAX_VALUE, 1); }
-catch (ArithmeticException expected) { rejected = true; }
-assert rejected;</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> rejected <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> Math<span class="syntax-punctuation">.</span><span class="syntax-attribute">addExact</span><span class="syntax-punctuation">(</span>Integer<span class="syntax-punctuation">.</span><span class="syntax-attribute">MAX_VALUE</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>ArithmeticException expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> rejected <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> rejected<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ArithmeticException.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with ArithmeticException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-4-preserve-decimal-source-meaning">Exercise 4: Preserve decimal source meaning<a class="heading-anchor" href="#exercise-4-preserve-decimal-source-meaning" aria-label="Link to this section">#</a></h3>
-<p>Task: Add BigDecimal values constructed from strings0.10 and0.20.</p>
+<p>Task: Add BigDecimal values constructed from strings0.10 and 0.20.</p>
 <p>Text construction preserves the supplied decimal digits. A binary floating-point constructor can introduce a long decimal expansion before the addition begins.</p>
-<pre><code class="language-java">var amount = new java.math.BigDecimal(&quot;0.10&quot;).add(new java.math.BigDecimal(&quot;0.20&quot;));
-assert amount.equals(new java.math.BigDecimal(&quot;0.30&quot;));</code></pre>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> amount <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.10</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.20</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> amount<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.30</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> exact decimal0.30.</p>
 <p><strong>Verify:</strong> Compare the program values or named exception with exact decimal0.30. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-5-distinguish-value-from-scale">Exercise 5: Distinguish value from scale<a class="heading-anchor" href="#exercise-5-distinguish-value-from-scale" aria-label="Link to this section">#</a></h3>
-<p>Task: Compare BigDecimal1.0 and1.00 withcompareTo andequals.</p>
+<p>Task: Compare BigDecimal1.0 and 1.00 withcompareTo and equals.</p>
 <p>The two objects have the same numeric value but different scale. Collection keys and domain equality need an explicit policy rather than a casual interchange of the two methods.</p>
-<pre><code class="language-java">var one = new java.math.BigDecimal(&quot;1.0&quot;);
-var scaled = new java.math.BigDecimal(&quot;1.00&quot;);
-assert one.compareTo(scaled) == 0 &amp;&amp; !one.equals(scaled);</code></pre>
-<p><strong>Expected:</strong> compareTo0;equalsfalse.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with compareTo0;equalsfalse. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">var</span> one <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1.0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> scaled <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1.00</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> one<span class="syntax-punctuation">.</span><span class="syntax-attribute">compareTo</span><span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> <span class="syntax-operator">!</span>one<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> compareTo0;equals false.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with compareTo0;equals false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="exercise-6-reject-an-unsupported-exact-division">Exercise 6: Reject an unsupported exact division<a class="heading-anchor" href="#exercise-6-reject-an-unsupported-exact-division" aria-label="Link to this section">#</a></h3>
-<p>Task: Divide decimal1 by3 without a rounding policy, then supply scale2 andHALF_UP.</p>
+<p>Task: Divide decimal1 by3 without a rounding policy, then supply scale2 and HALF_UP.</p>
 <p>One third has no finite decimal expansion. A rounding policy is part of the calculation definition, not merely a display setting.</p>
-<pre><code class="language-java">boolean repeating = false;
-try { java.math.BigDecimal.ONE.divide(new java.math.BigDecimal(&quot;3&quot;)); }
-catch (ArithmeticException expected) { repeating = true; }
-assert repeating;
-assert java.math.BigDecimal.ONE.divide(new java.math.BigDecimal(&quot;3&quot;), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals(&quot;0.33&quot;);</code></pre>
-<p><strong>Expected:</strong> exact division throws;rounded result0.33.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with exact division throws;rounded result0.33. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> repeating <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ONE</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">divide</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>ArithmeticException expected<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> repeating <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> repeating<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">assert</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">ONE</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">divide</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">BigDecimal</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">math</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">RoundingMode</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">HALF_UP</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">toPlainString</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">0.33</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> exact division throws; rounded result 0.33.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with exact division throws; rounded result 0.33. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

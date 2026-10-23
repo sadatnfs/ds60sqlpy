@@ -18,7 +18,7 @@ Predicate<T> returns boolean, Function<T,R> maps a value to another value, and C
 
 ## Exercise 1: Use a predicate
 
-Task: Create a Predicate<Integer> accepting positive values and test3,0,-1.
+Task: Create a Predicate<Integer> accepting positive values and test 3,0,-1.
 
 The predicate has a single purpose and no side effects. Boundary zero is checked explicitly rather than inferred from a positive example.
 
@@ -27,9 +27,9 @@ java.util.function.Predicate<Integer> positive = value -> value > 0;
 assert positive.test(3) && !positive.test(0) && !positive.test(-1);
 ```
 
-**Expected:** true,false,false.
+**Expected:** true, false, false.
 
-**Verify:** Compare the program values or named exception with true,false,false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with true, false, false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Compose transformations
 
@@ -43,13 +43,13 @@ java.util.function.Function<String,String> upper = value -> value.toUpperCase(Lo
 assert strip.andThen(upper).apply(" red ").equals("RED");
 ```
 
-**Expected:** inputspace red space becomesRED.
+**Expected:** input space red space becomesRED.
 
-**Verify:** Compare the program values or named exception with inputspace red space becomesRED. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with input space red space becomesRED. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 3: Distinguish composition order
 
-Task: Compose add1 andmultiply2 usingandThen andcompose on3.
+Task: Compose add1 andmultiply2 usingandThen and compose on3.
 
 A small noncommuting example makes the API semantics visible. Readingcompose as if it wereandThen is a common source of subtle pipeline errors.
 
@@ -60,9 +60,9 @@ assert addOne.andThen(twice).apply(3) == 8;
 assert addOne.compose(twice).apply(3) == 7;
 ```
 
-**Expected:** andThen8;compose7.
+**Expected:** andThen gives 8;compose7.
 
-**Verify:** Compare the program values or named exception with andThen8;compose7. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with andThen gives 8;compose7. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Capture a stable threshold
 
@@ -82,7 +82,7 @@ assert !enough.test(9) && enough.test(10) && enough.test(11);
 
 ## Exercise 5: Expose mutable captured state
 
-Task: Capture a list in aConsumer and append two values.
+Task: Capture a list in a Consumer and append two values.
 
 The reference binding is stable, but the list remains mutable. This action should not be treated as a pure mapper or assumed safe under concurrent execution.
 
@@ -111,9 +111,9 @@ try { parser.apply(" "); } catch(IllegalArgumentException expected) { blank = tr
 assert blank;
 ```
 
-**Expected:** 7 accepted;blank rejected.
+**Expected:** 7 accepted; blank rejected.
 
-**Verify:** Compare the program values or named exception with 7 accepted;blank rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with 7 accepted; blank rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

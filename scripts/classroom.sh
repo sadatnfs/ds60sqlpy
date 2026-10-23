@@ -231,7 +231,9 @@ if command -v curl >/dev/null 2>&1; then
 else
   if ! (
     exec 3<>"/dev/tcp/127.0.0.1/$public_port" || exit 1
-    printf 'GET /classroom HTTP/1.0\r\nHost: 127.0.0.1:%s\r\nConnection: close\r\n\r\n' "$public_port" >&3 || exit 1
+    host_header=127.0.0.1
+    [ "$public_port" = 80 ] || host_header="127.0.0.1:$public_port"
+    printf 'GET /classroom HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n\r\n' "$host_header" >&3 || exit 1
     IFS= read -r -t 10 response <&3 || exit 1
     [[ "$response" =~ ^HTTP/1[.][01][[:space:]]200[[:space:]] ]] || exit 1
     exec 3>&-

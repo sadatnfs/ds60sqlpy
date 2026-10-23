@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,47 +161,47 @@
       <h1>Chapter 26</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_26.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def baselines_and_smoothing():</span>
-<span>    y=np.array([10.,12.,14.,16.]);h=np.arange(1,4)</span>
-<span>    naive=np.repeat(y[-1],3);drift=y[-1]+h*(y[-1]-y[0])/(len(y)-1)</span>
-<span>    level=y[0]</span>
-<span>    for value in y[1:]:level=.5*value+.5*level</span>
-<span>    assert naive.tolist()==[16.,16.,16.]</span>
-<span>    assert drift.tolist()==[18.,20.,22.] and level==14.25</span>
-<span>    print(&quot;Naive:&quot;,naive,&quot;drift:&quot;,drift,&quot;SES level:&quot;,level)</span>
-<span> </span>
-<span>def recursive_ar():</span>
-<span>    phi=.5;intercept=2.;current=10.;forecast=[]</span>
-<span>    for _ in range(4):</span>
-<span>        current=intercept+phi*current;forecast.append(current)</span>
-<span>    assert np.allclose(forecast,[7.,5.5,4.75,4.375])</span>
-<span>    assert intercept/(1-phi)==4.</span>
-<span>    print(&quot;AR forecasts:&quot;,forecast,&quot;long-run mean:&quot;,4.)</span>
-<span> </span>
-<span>def scalar_kalman():</span>
-<span>    prior_mean=0.;prior_variance=4.;measurement=3.;measurement_variance=1.</span>
-<span>    gain=prior_variance/(prior_variance+measurement_variance)</span>
-<span>    posterior=prior_mean+gain*(measurement-prior_mean)</span>
-<span>    variance=(1-gain)*prior_variance</span>
-<span>    assert np.isclose(gain,.8) and np.isclose(posterior,2.4) and np.isclose(variance,.8)</span>
-<span>    noisy_gain=4/(4+16)</span>
-<span>    assert noisy_gain&lt;gain</span>
-<span>    print(&quot;Kalman gain, posterior mean, variance:&quot;,gain,posterior,variance)</span>
-<span> </span>
-<span>def volatility_update():</span>
-<span>    omega,alpha,beta=.1,.2,.7</span>
-<span>    next_variance=omega+alpha*3**2+beta*1.</span>
-<span>    assert np.isclose(next_variance,2.6) and alpha+beta&lt;1</span>
-<span>    print(&quot;Variance after shock 3:&quot;,next_variance)</span>
-<span> </span>
-<span>def main():</span>
-<span>    baselines_and_smoothing();recursive_ar();scalar_kalman();volatility_update()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">baselines_and_smoothing</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">,</span><span class="syntax-number">14.</span><span class="syntax-punctuation">,</span><span class="syntax-number">16.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>h<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    naive<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>repeat<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>drift<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">+</span>h<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    level<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> y<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>level<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span>value<span class="syntax-operator">+</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span>level</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> naive<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">16.</span><span class="syntax-punctuation">,</span><span class="syntax-number">16.</span><span class="syntax-punctuation">,</span><span class="syntax-number">16.</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> drift<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">18.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">22.</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> level<span class="syntax-operator">==</span><span class="syntax-number">14.25</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Naive:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>naive<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">drift:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>drift<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">SES level:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>level<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">recursive_ar</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    phi<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">;</span>intercept<span class="syntax-operator">=</span><span class="syntax-number">2.</span><span class="syntax-punctuation">;</span>current<span class="syntax-operator">=</span><span class="syntax-number">10.</span><span class="syntax-punctuation">;</span>forecast<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        current<span class="syntax-operator">=</span>intercept<span class="syntax-operator">+</span>phi<span class="syntax-operator">*</span>current<span class="syntax-punctuation">;</span>forecast<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>current<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>forecast<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.75</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.375</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> intercept<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>phi<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4.</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">AR forecasts:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>forecast<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">long-run mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">scalar_kalman</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    prior_mean<span class="syntax-operator">=</span><span class="syntax-number">0.</span><span class="syntax-punctuation">;</span>prior_variance<span class="syntax-operator">=</span><span class="syntax-number">4.</span><span class="syntax-punctuation">;</span>measurement<span class="syntax-operator">=</span><span class="syntax-number">3.</span><span class="syntax-punctuation">;</span>measurement_variance<span class="syntax-operator">=</span><span class="syntax-number">1.</span></span>
+<span class="source-line">    gain<span class="syntax-operator">=</span>prior_variance<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>prior_variance<span class="syntax-operator">+</span>measurement_variance<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    posterior<span class="syntax-operator">=</span>prior_mean<span class="syntax-operator">+</span>gain<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>measurement<span class="syntax-operator">-</span>prior_mean<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    variance<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>gain<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>prior_variance</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>gain<span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>posterior<span class="syntax-punctuation">,</span><span class="syntax-number">2.4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    noisy_gain<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-operator">+</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> noisy_gain<span class="syntax-operator">&lt;</span>gain</span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Kalman gain, posterior mean, variance:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>gain<span class="syntax-punctuation">,</span>posterior<span class="syntax-punctuation">,</span>variance<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">volatility_update</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    omega<span class="syntax-punctuation">,</span>alpha<span class="syntax-punctuation">,</span>beta<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.7</span></span>
+<span class="source-line">    next_variance<span class="syntax-operator">=</span>omega<span class="syntax-operator">+</span>alpha<span class="syntax-operator">*</span><span class="syntax-number">3</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">+</span>beta<span class="syntax-operator">*</span><span class="syntax-number">1.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>next_variance<span class="syntax-punctuation">,</span><span class="syntax-number">2.6</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> alpha<span class="syntax-operator">+</span>beta<span class="syntax-operator">&lt;</span><span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Variance after shock 3:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>next_variance<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    baselines_and_smoothing<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>recursive_ar<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>scalar_kalman<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>volatility_update<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

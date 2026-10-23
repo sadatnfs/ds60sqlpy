@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -377,43 +423,45 @@
 </tbody></table></div>
 <p>An API boundary should reject malformed input before model code runs. A four-number list is adequate for this exercise, but named fields and units are safer in a real service.</p>
 <h4 id="guide--worked-example-validate-the-feature-count">Worked example: validate the feature count<a class="heading-anchor" href="#guide--worked-example-validate-the-feature-count" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">from typing import Annotated
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Annotated
 
-import joblib
-import numpy as np
-from fastapi import FastAPI
-from pathlib import Path
-from pydantic import BaseModel, Field
+<span class="syntax-keyword">import</span> joblib
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> Field
 
-app = FastAPI()
-artifact_dir = Path(__file__).resolve().parent
-model = joblib.load(artifact_dir / &quot;model.joblib&quot;)  # load only an artifact you trust
-class_names = [&quot;setosa&quot;, &quot;versicolor&quot;, &quot;virginica&quot;]
+app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parent
+model <span class="syntax-operator">=</span> joblib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># load only an artifact you trust</span>
+class_names <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">setosa</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">versicolor</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">virginica</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 
-class IrisFeatures(BaseModel):
-    features: Annotated[list[float], Field(min_length=4, max_length=4)]
+<span class="syntax-keyword">class</span> <span class="syntax-class">IrisFeatures</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    features<span class="syntax-punctuation">:</span> Annotated<span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">(</span>min_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 
-@app.post(&quot;/predict&quot;)
-def predict(payload: IrisFeatures) -&gt; dict[str, int | str]:
-    row = np.asarray([payload.features], dtype=float)
-    prediction = int(model.predict(row)[0])
-    return {
-        &quot;prediction&quot;: prediction,
-        &quot;class_name&quot;: class_names[prediction],
-    }</code></pre>
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">:</span> IrisFeatures<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    row <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>payload<span class="syntax-operator">.</span>features<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    prediction <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">prediction</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> prediction<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">class_name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> class_names<span class="syntax-punctuation">[</span>prediction<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span></code></pre>
 <p>Keep <code>app.py</code> beside the trusted model under <code>artifacts/day44/</code>, then run <code>python -m uvicorn app:app --app-dir artifacts/day44 --reload</code> from the repository root. Use development reload only while editing.</p>
 <h4 id="guide--test-the-request-on-your-operating-system">Test the request on your operating system<a class="heading-anchor" href="#guide--test-the-request-on-your-operating-system" aria-label="Link to this section">#</a></h4>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m uvicorn app:app --reload
-curl -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;:[5.1,3.5,1.4,0.2]}&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m uvicorn app:app --reload
+curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;:[5.1,3.5,1.4,0.2]}&#x27;</span></code></pre>
 <p>Windows PowerShell (server in one terminal, request in another):</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m uvicorn app:app --reload
-$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
-  -ContentType &#x27;application/json&#x27; -Body $body</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m uvicorn app<span class="syntax-punctuation">:</span>app <span class="syntax-punctuation">-</span>-reload
+$body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">{</span> features <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span>5<span class="syntax-punctuation">.</span>1<span class="syntax-punctuation">,</span> 3<span class="syntax-punctuation">.</span>5<span class="syntax-punctuation">,</span> 1<span class="syntax-punctuation">.</span>4<span class="syntax-punctuation">,</span> 0<span class="syntax-punctuation">.</span>2<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">|</span> <span class="syntax-builtin">ConvertTo-Json</span>
+<span class="syntax-builtin">Invoke-RestMethod</span> -Method Post -Uri <span class="syntax-string">&#x27;http://127.0.0.1:8000/predict&#x27;</span> <span class="syntax-punctuation">`</span>
+  -ContentType <span class="syntax-string">&#x27;application/json&#x27;</span> -Body $body</code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 44 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -421,9 +469,9 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints">Concept deep dive — validated request contracts, trusted artifacts, and testable inference endpoints<a class="heading-anchor" href="#guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -438,34 +486,34 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-make-request-validation-fail-before-inference">Focused example A — make request validation fail before inference<a class="heading-anchor" href="#guide--focused-example-a-make-request-validation-fail-before-inference" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">from pydantic import BaseModel, Field, ValidationError
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">,</span> ValidationError
 
-class PredictionRequest(BaseModel):
-    measurements: list[float] = Field(min_length=4, max_length=4)
+<span class="syntax-keyword">class</span> <span class="syntax-class">PredictionRequest</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    measurements<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> Field<span class="syntax-punctuation">(</span>min_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
 
-valid = PredictionRequest.model_validate(
-    {&quot;measurements&quot;: [5.1, 3.5, 1.4, 0.2]}
-)
-print(valid.model_dump())
-try:
-    PredictionRequest.model_validate({&quot;measurements&quot;: [5.1, 3.5]})
-except ValidationError as exc:
-    print(exc.errors()[0][&quot;type&quot;])</code></pre>
+valid <span class="syntax-operator">=</span> PredictionRequest<span class="syntax-operator">.</span>model_validate<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">measurements</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>valid<span class="syntax-operator">.</span>model_dump<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    PredictionRequest<span class="syntax-operator">.</span>model_validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">measurements</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValidationError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>exc<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The valid payload becomes a typed object; the short list raises a structured validation error before any model call.</p>
 <p><strong>Assumption to name:</strong> Exactly four ordered measurements is the public contract; coercion and range policy are documented.</p>
 <h5 id="guide--focused-example-b-check-artifact-feature-compatibility-explicitly">Focused example B — check artifact feature compatibility explicitly<a class="heading-anchor" href="#guide--focused-example-b-check-artifact-feature-compatibility-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.linear_model import LogisticRegression
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
 
-X = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-y = np.array([0, 0, 1, 1])
-model = LogisticRegression().fit(X, y)
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
 
-request_features = np.array([[0.2, 0.8]])
-if request_features.shape[1] != model.n_features_in_:
-    raise ValueError(&quot;feature-count mismatch&quot;)
-print(model.predict_proba(request_features).tolist())</code></pre>
+request_features <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> request_features<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> model<span class="syntax-operator">.</span>n_features_in_<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature-count mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>request_features<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Inference proceeds only after the request matrix matches the fitted feature-count contract.</p>
 <p><strong>Assumption to name:</strong> Feature count alone is insufficient in production; names, order, types, and preprocessing version must also match.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -588,7 +636,7 @@ print(model.predict_proba(request_features).tolist())</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize validated request contracts, trusted artifacts, and testable inference endpoints. Use exactly these maintained learner materials:
@@ -655,47 +703,47 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Build a minimal FastAPI endpoint.</li>
 <li>Send a sample request. Note: Running the server requires a terminal (see code comments).</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>import joblib</span>
-<span>from sklearn.datasets import load_iris</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span> </span>
-<span>artifact_dir = Path(&#x27;artifacts/day44&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>model_path = artifact_dir / &#x27;model.joblib&#x27;</span>
-<span>X,y = load_iris(return_X_y=True)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y,random_state=42)</span>
-<span>clf = LogisticRegression(max_iter=1000).fit(Xtr,ytr)</span>
-<span>print(&#x27;test acc:&#x27;, clf.score(Xte,yte))</span>
-<span>joblib.dump(clf, model_path)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> joblib</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day44</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_iris<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test acc:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> clf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">joblib<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> model_path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--minimal-fastapi-app-app-py">Minimal FastAPI app (app.py)<a class="heading-anchor" href="#learner--cell-3--minimal-fastapi-app-app-py" aria-label="Link to this section">#</a></h4>
 <p>Create a file <code>app.py</code> in this folder:</p>
-<pre><code class="language-python">from fastapi import FastAPI
-from pydantic import BaseModel
-import joblib
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI
+<span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel
+<span class="syntax-keyword">import</span> joblib
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-app = FastAPI()
-model = joblib.load(model_path)
+app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> joblib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>model_path<span class="syntax-punctuation">)</span>
 
-class IrisFeatures(BaseModel):
-    features: list
+<span class="syntax-keyword">class</span> <span class="syntax-class">IrisFeatures</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    features<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span>
 
-@app.post(&#x27;/predict&#x27;)
-def predict(data: IrisFeatures):
-    X = np.array([data.features])
-    pred = model.predict(X).tolist()[0]
-    return {&#x27;prediction&#x27;: int(pred)}</code></pre>
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">:</span> IrisFeatures<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>data<span class="syntax-operator">.</span>features<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    pred <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prediction</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>pred<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Run server:</p>
-<pre><code class="language-bash">uvicorn app:app --reload</code></pre>
+<pre class="highlighted-code"><code class="language-bash">uvicorn app:app --reload</code></pre>
 <p>Send a request (new terminal):</p>
-<pre><code class="language-bash">curl -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;</code></pre></article>
+<pre class="highlighted-code"><code class="language-bash">curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;</span></code></pre></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
 <h4 id="learner--cell-4--concept-lab-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints">Concept lab — validated request contracts, trusted artifacts, and testable inference endpoints<a class="heading-anchor" href="#learner--cell-4--concept-lab-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints" aria-label="Link to this section">#</a></h4>
@@ -712,36 +760,36 @@ def predict(data: IrisFeatures):
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h5 id="learner--cell-5--focused-example-a-make-request-validation-fail-before-inference">Focused example A — make request validation fail before inference<a class="heading-anchor" href="#learner--cell-5--focused-example-a-make-request-validation-fail-before-inference" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Exactly four ordered measurements is the public contract; coercion and range policy are documented.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from pydantic import BaseModel, Field, ValidationError</span>
-<span> </span>
-<span>class PredictionRequest(BaseModel):</span>
-<span>    measurements: list[float] = Field(min_length=4, max_length=4)</span>
-<span> </span>
-<span>valid = PredictionRequest.model_validate(</span>
-<span>    {&quot;measurements&quot;: [5.1, 3.5, 1.4, 0.2]}</span>
-<span>)</span>
-<span>print(valid.model_dump())</span>
-<span>try:</span>
-<span>    PredictionRequest.model_validate({&quot;measurements&quot;: [5.1, 3.5]})</span>
-<span>except ValidationError as exc:</span>
-<span>    print(exc.errors()[0][&quot;type&quot;])</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">,</span> ValidationError</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">PredictionRequest</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    measurements<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> Field<span class="syntax-punctuation">(</span>min_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">valid <span class="syntax-operator">=</span> PredictionRequest<span class="syntax-operator">.</span>model_validate<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">measurements</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>valid<span class="syntax-operator">.</span>model_dump<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    PredictionRequest<span class="syntax-operator">.</span>model_validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">measurements</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValidationError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>exc<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The valid payload becomes a typed object; the short list raises a structured validation error before any model call.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-8--focused-example-b-check-artifact-feature-compatibility-explicitly">Focused example B — check artifact feature compatibility explicitly<a class="heading-anchor" href="#learner--cell-8--focused-example-b-check-artifact-feature-compatibility-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Feature count alone is insufficient in production; names, order, types, and preprocessing version must also match.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span> </span>
-<span>X = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])</span>
-<span>y = np.array([0, 0, 1, 1])</span>
-<span>model = LogisticRegression().fit(X, y)</span>
-<span> </span>
-<span>request_features = np.array([[0.2, 0.8]])</span>
-<span>if request_features.shape[1] != model.n_features_in_:</span>
-<span>    raise ValueError(&quot;feature-count mismatch&quot;)</span>
-<span>print(model.predict_proba(request_features).tolist())</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">request_features <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> request_features<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> model<span class="syntax-operator">.</span>n_features_in_<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">feature-count mismatch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>request_features<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> Inference proceeds only after the request matrix matches the fitted feature-count contract.</p>
 <h5 id="learner--cell-10--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-10--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -815,19 +863,19 @@ def predict(data: IrisFeatures):
 </ol>
 <p><strong>Verify:</strong> Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Boundary-case testing</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Batch contract</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Artifact-compatibility check</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Boundary-case testing</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Batch contract</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Artifact-compatibility check</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -871,65 +919,65 @@ def predict(data: IrisFeatures):
 </ul>
 <hr>
 <p>Worked reference for Exercise 1 — Train and save model</p>
-<pre><code class="language-python">from sklearn.datasets import load_iris
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-import joblib
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris
+<span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">import</span> joblib
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-X, y = load_iris(return_X_y=True)
-Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
-clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)
-print({&#x27;test_acc&#x27;: clf.score(Xte, yte)})
-artifact_dir = Path(&#x27;artifacts/day44&#x27;)
-artifact_dir.mkdir(parents=True, exist_ok=True)
-model_path = artifact_dir / &#x27;model.joblib&#x27;
-joblib.dump(clf, model_path)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_iris<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+clf <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_acc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> clf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day44</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+model_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&#x27;</span>
+joblib<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> model_path<span class="syntax-punctuation">)</span>
 
-# Reload &amp; quick sanity
-m = joblib.load(model_path)
-assert m.predict(Xte[:1]).shape == (1,)</code></pre>
+<span class="syntax-comment"># Reload &amp; quick sanity</span>
+m <span class="syntax-operator">=</span> joblib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>model_path<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> m<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Line-by-line</p>
 <ul>
 <li>joblib.dump persists the fitted estimator; joblib.load restores it for serving</li>
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Minimal FastAPI endpoint Create <code>artifacts/day44/app.py</code>:</p>
-<pre><code class="language-python">from typing import Annotated
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Annotated
 
-import joblib
-import numpy as np
-from fastapi import FastAPI
-from pathlib import Path
-from pydantic import BaseModel, Field
+<span class="syntax-keyword">import</span> joblib
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> Field
 
-app = FastAPI()
-artifact_dir = Path(__file__).resolve().parent
-model = joblib.load(artifact_dir / &#x27;model.joblib&#x27;)
-CLASS_NAMES = [&#x27;setosa&#x27;, &#x27;versicolor&#x27;, &#x27;virginica&#x27;]
+app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parent
+model <span class="syntax-operator">=</span> joblib<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span>artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+CLASS_NAMES <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">setosa</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">versicolor</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">virginica</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
 
-class IrisFeatures(BaseModel):
-    # exactly 4 numeric features (sepal length/width, petal length/width)
-    features: Annotated[list[float], Field(min_length=4, max_length=4)]
+<span class="syntax-keyword">class</span> <span class="syntax-class">IrisFeatures</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># exactly 4 numeric features (sepal length/width, petal length/width)</span>
+    features<span class="syntax-punctuation">:</span> Annotated<span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">(</span>min_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 
-@app.post(&#x27;/predict&#x27;)
-def predict(data: IrisFeatures):
-    X = np.array([data.features], dtype=float)
-    pred = int(model.predict(X).tolist()[0])
-    return {&#x27;prediction&#x27;: pred, &#x27;class_name&#x27;: CLASS_NAMES[pred]}</code></pre>
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">:</span> IrisFeatures<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>data<span class="syntax-operator">.</span>features<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    pred <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prediction</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> pred<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">class_name</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> CLASS_NAMES<span class="syntax-punctuation">[</span>pred<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Run the server in a terminal:</p>
-<pre><code class="language-bash">python -m uvicorn app:app --app-dir artifacts/day44 --reload</code></pre>
+<pre class="highlighted-code"><code class="language-bash">python -m uvicorn app:app --app-dir artifacts/day44 --reload</code></pre>
 <hr>
 <p>Worked reference for Exercise 3 — Test with curl; handle bad inputs</p>
-<pre><code class="language-bash"># OK request
-curl -s -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># OK request</span>
+curl -s -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;: [5.1, 3.5, 1.4, 0.2]}&#x27;</span>
 
-# Bad request (length != 4) triggers validation error
-curl -s -X POST http://127.0.0.1:8000/predict \
-  -H &#x27;Content-Type: application/json&#x27; \
-  -d &#x27;{&quot;features&quot;: [1,2,3]}&#x27;</code></pre>
+<span class="syntax-comment"># Bad request (length != 4) triggers validation error</span>
+curl -s -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;features&quot;: [1,2,3]}&#x27;</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>Pydantic validates the request shape and types automatically</li>
@@ -1029,52 +1077,52 @@ curl -s -X POST http://127.0.0.1:8000/predict \
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-44-solutions-model-deployment-with-fastapi">Day 44 — Solutions: Model Deployment with FastAPI<a class="heading-anchor" href="#solution-2--cell-1--day-44-solutions-model-deployment-with-fastapi" aria-label="Link to this section">#</a></h3>
 <p>Train + save model (joblib), serve predictions via FastAPI, test with curl.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>import joblib</span>
-<span>from sklearn.datasets import load_iris</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span> </span>
-<span>artifact_dir = Path(&#x27;artifacts/day44&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>model_path = artifact_dir / &#x27;model.joblib&#x27;</span>
-<span> </span>
-<span>X, y = load_iris(return_X_y=True)</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)</span>
-<span>clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)</span>
-<span>clf.score(Xte, yte), joblib.dump(clf, model_path)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> joblib</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day44</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">model_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_iris<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> joblib<span class="syntax-operator">.</span>dump<span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">,</span> model_path<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--minimal-fastapi-app-save-as-app-py">Minimal FastAPI app (save as app.py)<a class="heading-anchor" href="#solution-2--cell-3--minimal-fastapi-app-save-as-app-py" aria-label="Link to this section">#</a></h4></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>app_py = &#x27;&#x27;&#x27;</span>
-<span>from typing import Annotated</span>
-<span> </span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>import joblib</span>
-<span>import numpy as np</span>
-<span>from fastapi import FastAPI</span>
-<span>from pydantic import BaseModel, Field</span>
-<span> </span>
-<span>artifact_dir = Path(__file__).resolve().parent</span>
-<span>app = FastAPI()</span>
-<span>model = joblib.load(artifact_dir / &#x27;model.joblib&#x27;)</span>
-<span>CLASS_NAMES = [&#x27;setosa&#x27;, &#x27;versicolor&#x27;, &#x27;virginica&#x27;]</span>
-<span> </span>
-<span>class IrisFeatures(BaseModel):</span>
-<span>    features: Annotated[list[float], Field(min_length=4, max_length=4)]</span>
-<span> </span>
-<span>@app.post(&#x27;/predict&#x27;)</span>
-<span>def predict(data: IrisFeatures):</span>
-<span>    X = np.array([data.features], dtype=float)</span>
-<span>    pred = int(model.predict(X).tolist()[0])</span>
-<span>    return {&#x27;prediction&#x27;: pred, &#x27;class_name&#x27;: CLASS_NAMES[pred]}</span>
-<span>&#x27;&#x27;&#x27;</span>
-<span> </span>
-<span>app_path = artifact_dir / &#x27;app.py&#x27;</span>
-<span>app_path.write_text(app_py, encoding=&#x27;utf-8&#x27;)</span>
-<span>f&#x27;Wrote {app_path}&#x27;</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">app_py <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;&#x27;</span></span>
+<span class="source-line"><span class="syntax-string">from typing import Annotated</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">from pathlib import Path</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">import joblib</span></span>
+<span class="source-line"><span class="syntax-string">import numpy as np</span></span>
+<span class="source-line"><span class="syntax-string">from fastapi import FastAPI</span></span>
+<span class="source-line"><span class="syntax-string">from pydantic import BaseModel, Field</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">artifact_dir = Path(__file__).resolve().parent</span></span>
+<span class="source-line"><span class="syntax-string">app = FastAPI()</span></span>
+<span class="source-line"><span class="syntax-string">model = joblib.load(artifact_dir / </span><span class="syntax-string">&#x27;</span><span class="syntax-string">model.joblib</span><span class="syntax-string">&#x27;</span><span class="syntax-string">)</span></span>
+<span class="source-line"><span class="syntax-string">CLASS_NAMES = [</span><span class="syntax-string">&#x27;</span><span class="syntax-string">setosa</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-string">versicolor</span><span class="syntax-string">&#x27;</span><span class="syntax-string">, </span><span class="syntax-string">&#x27;</span><span class="syntax-string">virginica</span><span class="syntax-string">&#x27;</span><span class="syntax-string">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">class IrisFeatures(BaseModel):</span></span>
+<span class="source-line"><span class="syntax-string">    features: Annotated[list[float], Field(min_length=4, max_length=4)]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">@app.post(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-string">)</span></span>
+<span class="source-line"><span class="syntax-string">def predict(data: IrisFeatures):</span></span>
+<span class="source-line"><span class="syntax-string">    X = np.array([data.features], dtype=float)</span></span>
+<span class="source-line"><span class="syntax-string">    pred = int(model.predict(X).tolist()[0])</span></span>
+<span class="source-line"><span class="syntax-string">    return </span><span class="syntax-string">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prediction</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: pred, </span><span class="syntax-string">&#x27;</span><span class="syntax-string">class_name</span><span class="syntax-string">&#x27;</span><span class="syntax-string">: CLASS_NAMES[pred]}</span></span>
+<span class="source-line"><span class="syntax-string">&#x27;&#x27;&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line">app_path <span class="syntax-operator">=</span> artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">app.py</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">app_path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>app_py<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Wrote </span><span class="syntax-string">{</span>app_path<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--run-server-in-terminal">Run server (in terminal)<a class="heading-anchor" href="#solution-2--cell-5--run-server-in-terminal" aria-label="Link to this section">#</a></h4>
 <p>uvicorn app:app --reload</p>

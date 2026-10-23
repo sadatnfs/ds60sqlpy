@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -130,9 +176,9 @@
 <p>The negative-index example separates a general array feature from the model&#x27;s domain contract. NumPy accepts -1 as an address relative to the end of an array. The tokenizer contract here defines valid IDs from zero through V-1, so -1 must be rejected. A language library may legally execute an operation that is invalid for the application. The same principle applies to a tokenizer/model mismatch: two models can share a vocabulary size while assigning different meanings to the same row numbers, producing no shape error at all.</p>
 <p>Embeddings are useful because training can organize reusable numeric features under an objective. The lookup itself supplies no guarantee of semantic similarity, knowledge or contextual understanding. It creates the parameterized representation on which attention and other transformations can operate.</p>
 <h3 id="a-lookup-selects-parameters-and-accumulates-their-gradients">A lookup selects parameters and accumulates their gradients<a class="heading-anchor" href="#a-lookup-selects-parameters-and-accumulates-their-gradients" aria-label="Link to this section">#</a></h3>
-<p>Let E have shape(V,D), where V is vocabulary size and D is feature width. For token IDs t_1 through t_T, the output row i is X_i=E_(t_i). A one-hot selection matrix S with shape(T,V) gives the same operation as X=SE. Each row of S contains one1. This algebra explains why lookup preserves token order and why repeated IDs select the same parameter row. An implementation need not materialize S; direct indexing avoids allocating T*V mostly-zero entries.</p>
+<p>Let E have shape(V,D), where V is vocabulary size and D is feature width. For token IDs t_1 through t_T, the output row i is X_i=E_(t_i). A one-hot selection matrix S with shape(T,V) gives the same operation as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">E</mi></mrow></mrow><annotation encoding="application/x-tex">X=\mathrm{SE}</annotation></semantics></math>. Each row of S contains one1. This algebra explains why lookup preserves token order and why repeated IDs select the same parameter row. An implementation need not materialize S; direct indexing avoids allocating <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>T</mi><mo>·</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">T\cdot V</annotation></semantics></math> mostly-zero entries.</p>
 <p>For the fixture IDs[2,0,2], S selects vocabulary row2 twice and row0 once. The output is a three-position sequence with feature width 2. There are still only four vocabulary parameters rows in the table. Token ID2 is an address into that table; it is not a magnitude that should be interpreted as &quot;twice token 1.&quot; Interpolating between integer IDs or averaging them before lookup therefore has no justified semantic meaning under this representation.</p>
-<p>The backward relation follows directly: if G=dL/dX has shape(T,D), then dL/dE=S^T G. In coordinates, the gradient of row r is the sum of G_i over positions whose ID equals r. Take upstream rows G=[[1,2],[3,4],[5,6]] for the three fixture positions. Row0 receives[3,4]; row2 receives[6,8]; rows1 and 3 receive[0,0]. The two appearances of token 2 accumulate into the same parameter. Assigning rather than adding the second occurrence&#x27;s gradient would lose one contribution. The current NumPy lookup example does not execute this backward update; this is an independent derivation of what a differentiable embedding layer must do.</p>
+<p>The backward relation follows directly: if <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>G</mi><mo>=</mo><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>X</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">G=\frac{\partial L}{\partial X}</annotation></semantics></math> has shape(T,D), then <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>E</mi></mrow></mfrac><mo>=</mo><msup><mrow><mi>S</mi></mrow><mrow><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial E}={S}^{T}</annotation></semantics></math> G. In coordinates, the gradient of row r is the sum of G_i over positions whose ID equals r. Take upstream rows <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>3</mn><mo>,</mo><mn>4</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>5</mn><mo>,</mo><mn>6</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">G=[[1,2],[3,4],[5,6]]</annotation></semantics></math> for the three fixture positions. Row0 receives[3,4]; row2 receives[6,8]; rows1 and 3 receive[0,0]. The two appearances of token 2 accumulate into the same parameter. Assigning rather than adding the second occurrence&#x27;s gradient would lose one contribution. The current NumPy lookup example does not execute this backward update; this is an independent derivation of what a differentiable embedding layer must do.</p>
 <p>That gradient statement assumes the loss depends on E through the input lookup alone. If the table is also tied to the output classifier, logits for hidden state h may be E h, and the softmax loss supplies additional gradients through output-vocabulary rows. With weight tying, a row absent from the input sequence can still receive an output-side gradient. This is why &quot;unused input IDs never change&quot; is too broad unless all paths and optimizer behavior have been specified.</p>
 <p>Padding has similarly separate contracts. An embedding layer may suppress gradient accumulation for a designated padding row, but that does not automatically prevent padding positions from participating in attention, pooling or loss. Nor does it prove that optimizer weight decay or another shared use cannot alter that row. A model needs an input padding convention, an attention mask where appropriate, and a supervised-target inclusion rule. These controls operate on different axes and should be checked independently.</p>
 <p>A vocabulary permutation can produce a silent failure while all shapes remain valid. Suppose a new tokenizer swaps IDs0 and 2, but the old table is kept unchanged. The new ID0 now means the token formerly represented by row2, yet lookup returns[1,0] instead of[2,2]. No index error occurs because both IDs are legal. Correct migration would remap every affected input ID and the corresponding input/output vocabulary parameters consistently. Keeping vocabulary size and file format unchanged is not a compatibility proof.</p>
@@ -148,32 +194,32 @@
 <p>table[ids] uses advanced integer indexing to select rows. For a table shaped (vocabulary,features) and one-dimensional IDs shaped (tokens,), the result is (tokens,features). The same operation can be written as one_hot(ids) @ table, which makes the vocabulary axis explicit without being the preferred memory-efficient implementation.</p>
 <p>The reference requires a finite nonempty table and integer rank-one IDs in the legal range. An empty ID list is explicitly accepted and returns shape (0,features); the later attention function separately rejects an empty sequence. Advanced indexing returns independent output storage in this reference, so changing an exercise result must not overwrite the table or another repeated row. State this mutation contract rather than assuming every array view behaves alike.</p>
 <h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
-<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, choose <strong>Journeys</strong> and select <code>llm-008</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
+<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, return to the classroom home and choose the LLM theory path and select <code>llm-008</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
 <p>Open <a href="../lessons/llm-008.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-008/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
-<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
-&amp; $CoursePython .learning\expansion\llm-008\practice.py</code></pre>
-<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
-&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/llm-008/practice.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell: selected interpreter from the course setup.</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>expansion<span class="syntax-punctuation">\</span>llm<span class="syntax-punctuation">-</span>008<span class="syntax-punctuation">\</span>practice<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux: selected course interpreter path from setup.</span>
+<span class="syntax-string">&quot;</span>$DS60_COURSE_PYTHON<span class="syntax-string">&quot;</span> .learning/expansion/llm-008/practice.py</code></pre>
 <p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-repeated-ids-preserve-token-order">Example A: Repeated IDs preserve token order<a class="heading-anchor" href="#example-a-repeated-ids-preserve-token-order" aria-label="Link to this section">#</a></h4>
 <p>Inspect rows two, zero and two of the fixed table.</p>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-table = np.array([[1, 0], [0, 1], [2, 2], [-1, 1]], dtype=np.float64)
-ids = np.array([2, 0, 2], dtype=np.int64)
-output = table[ids]
-np.testing.assert_array_equal(output, [[2, 2], [1, 0], [2, 2]])
-assert output.shape == (3, 2)
-print(output)</code></pre>
+table <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+ids <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span>
+output <span class="syntax-operator">=</span> table<span class="syntax-punctuation">[</span>ids<span class="syntax-punctuation">]</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> output<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The first and third outputs match because the same vocabulary row was selected twice. Two is the feature width, not the number of token choices.</p>
 <h4 id="example-b-a-legal-numpy-index-can-be-an-illegal-token-id">Example B: A legal NumPy index can be an illegal token ID<a class="heading-anchor" href="#example-b-a-legal-numpy-index-can-be-an-illegal-token-id" aria-label="Link to this section">#</a></h4>
 <p>Show the behavior that the domain guard must reject.</p>
-<pre><code class="language-python">wrapped = table[np.array([-1])]
-np.testing.assert_array_equal(wrapped, [[-1, 1]])
-assert int(np.array([-1])[0]) &lt; 0
-print(wrapped)</code></pre>
+<pre class="highlighted-code"><code class="language-python">wrapped <span class="syntax-operator">=</span> table<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>wrapped<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>wrapped<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> NumPy interprets -1 as the final row. Our token contract rejects it instead of silently treating an invalid ID as a valid vocabulary member.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
@@ -208,11 +254,11 @@ print(wrapped)</code></pre>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Without the table in view, state the three shape roles: vocabulary, tokens and features. Then invent a three-row table and show how a table-row permutation requires a matching ID permutation to preserve the selected features.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p><a href="llm-009.md.html">llm-009</a> introduces the first operation that mixes information between token positions: attention. Keep the distinction between a vocabulary row and an occurrence in a sequence. Two occurrences can start with the same embedding and still receive different contextual outputs, provided the subsequent computation has the relevant position and information boundaries.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-008,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-008,
 Embedding lookup is a learned table. Read courses/llm-theory/guides/llm-008.md
 and courses/llm-theory/lessons/llm-008.py. Respect direct prerequisites
 llm-007 and beginner depth. Explain the actual fixture&#x27;s

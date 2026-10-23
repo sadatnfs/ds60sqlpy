@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,76 +161,76 @@
       <h1>Review Runtime Evidence</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/authoring/review_runtime_evidence.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;qualification_date&quot;: &quot;2026-10-23&quot;,</span>
-<span>  &quot;records&quot;: [</span>
-<span>    {</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-010_solution.py&quot;,</span>
-<span>      &quot;source_sha256&quot;: &quot;2df24c0a62b78d09451ef3dd50b7d686dfdf11bdfd29d46c56ad56fe6770c86c&quot;,</span>
-<span>      &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
-<span>      &quot;image_id&quot;: &quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;,</span>
-<span>      &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>      &quot;elapsed&quot;: 0.041,</span>
-<span>      &quot;lesson_id&quot;: &quot;llm-applied-010&quot;,</span>
-<span>      &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;receipt_path&quot;: &quot;work/applied010-depth-repaired-acceptance.jsonl&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-015_solution.py&quot;,</span>
-<span>      &quot;source_sha256&quot;: &quot;cf4f7ada6283bd5994c99539fbfe72be9cfd9bdcdd257006ce9f1e78a1c637c1&quot;,</span>
-<span>      &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
-<span>      &quot;image_id&quot;: &quot;sha256:b93cf9f556f8108b9456e259fd148b6d85eb04421a2961316f6926515259e2b5&quot;,</span>
-<span>      &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>      &quot;elapsed&quot;: 1.12,</span>
-<span>      &quot;lesson_id&quot;: &quot;llm-applied-015&quot;,</span>
-<span>      &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;receipt_path&quot;: &quot;work/applied015-final-state-repaired-acceptance.jsonl&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-022_solution.py&quot;,</span>
-<span>      &quot;source_sha256&quot;: &quot;b2b2d41a7e86f8413252a5a2df8b02ef5ebb2777577852f2a6379ae8139dc0d4&quot;,</span>
-<span>      &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
-<span>      &quot;image_id&quot;: &quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;,</span>
-<span>      &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>      &quot;elapsed&quot;: 0.041,</span>
-<span>      &quot;lesson_id&quot;: &quot;llm-applied-022&quot;,</span>
-<span>      &quot;kind&quot;: &quot;reference&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;receipt_path&quot;: &quot;work/applied022-stable-mean-repaired-acceptance.jsonl&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;source_path&quot;: &quot;work/applied-depth-worked/llm-applied-010-abc.py&quot;,</span>
-<span>      &quot;source_sha256&quot;: &quot;cba86bf45cab6c3bafe040971a0465d3efcc0157ebafbadcf33227db79bdb650&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-010.md&quot;,</span>
-<span>      &quot;guide_sha256&quot;: &quot;989ca930983f29c76b918c6674fca30e962f7087954782e152259bc886ba2889&quot;,</span>
-<span>      &quot;image_id&quot;: &quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;,</span>
-<span>      &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>      &quot;elapsed&quot;: 0.041,</span>
-<span>      &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>      &quot;lesson_id&quot;: &quot;llm-applied-010&quot;,</span>
-<span>      &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;receipt_path&quot;: &quot;work/ml-worked-applied010-depth-repaired-acceptance.jsonl&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;source_path&quot;: &quot;work/applied-depth-worked/llm-applied-022-abc.py&quot;,</span>
-<span>      &quot;source_sha256&quot;: &quot;b50ec686a57b36f3938b01b9694cd0be977f05a05b8b0ef5ceb1e26e1d8997b0&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-022.md&quot;,</span>
-<span>      &quot;guide_sha256&quot;: &quot;1511dd510985f49feb4359df3085690634a6b509f6d696e4e635fb5ba702fe70&quot;,</span>
-<span>      &quot;image_id&quot;: &quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;,</span>
-<span>      &quot;status&quot;: &quot;succeeded&quot;,</span>
-<span>      &quot;elapsed&quot;: 0.041,</span>
-<span>      &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
-<span>      &quot;lesson_id&quot;: &quot;llm-applied-022&quot;,</span>
-<span>      &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;receipt_path&quot;: &quot;work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;qualification_date&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-23&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;records&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-010_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2df24c0a62b78d09451ef3dd50b7d686dfdf11bdfd29d46c56ad56fe6770c86c&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.041</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/applied010-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-015_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cf4f7ada6283bd5994c99539fbfe72be9cfd9bdcdd257006ce9f1e78a1c637c1&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:b93cf9f556f8108b9456e259fd148b6d85eb04421a2961316f6926515259e2b5&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.12</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/applied015-final-state-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-022_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b2b2d41a7e86f8413252a5a2df8b02ef5ebb2777577852f2a6379ae8139dc0d4&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;worker_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.041</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/applied022-stable-mean-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/applied-depth-worked/llm-applied-010-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cba86bf45cab6c3bafe040971a0465d3efcc0157ebafbadcf33227db79bdb650&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-010.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;989ca930983f29c76b918c6674fca30e962f7087954782e152259bc886ba2889&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.041</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-applied010-depth-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/applied-depth-worked/llm-applied-022-abc.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b50ec686a57b36f3938b01b9694cd0be977f05a05b8b0ef5ceb1e26e1d8997b0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-022.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1511dd510985f49feb4359df3085690634a6b509f6d696e4e635fb5ba702fe70&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;image_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;succeeded&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;elapsed&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.041</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;execution_contract&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;sequential_examples_A_B_C_in_one_fresh_process&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;kind&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;worked_sequence&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;receipt_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

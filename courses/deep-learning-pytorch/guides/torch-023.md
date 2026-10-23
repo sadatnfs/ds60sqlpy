@@ -42,7 +42,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients inplace and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
+Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients in place and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
 
 ## Trace the optimizer state transition and objective denominator
 
@@ -125,7 +125,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** detached loss requires_grad False; backward raises RuntimeError.
    **Verify:** Save the assertion results for exercise 1, including detached loss requires_grad False; backward raises RuntimeError.
 
-2. **Repair two exact updates.** Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+2. **Repair two exact updates.** Use x 1, 2, 3, y = 2x, w = 0 and two SGD with rate 0.1 steps with gradient clearing.
    **Expected:** weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
    **Verify:** Save the assertion results for exercise 2, including weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
 
@@ -133,7 +133,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** returned norm 5; new gradient approximately.6, .8.
    **Verify:** Save the assertion results for exercise 3, including returned norm 5; new gradient approximately.6, .8.
 
-4. **Apply the clipped update.** Use SGD.1 after clipping and inspect the parameter.
+4. **Apply the clipped update.** Use SGD with rate 0.1 after clipping and inspect the parameter.
    **Expected:** approximately-.06, -.08.
    **Verify:** Save the assertion results for exercise 4, including approximately-.06, -.08.
 

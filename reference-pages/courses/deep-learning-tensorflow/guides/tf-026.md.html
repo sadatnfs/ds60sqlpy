@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,7 +173,7 @@
 <p><strong>Residual:</strong> An input added to a transformation with matching dimensions.</p>
 <p><strong>Build:</strong> One-time creation of weights for a declared input shape.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>tf-026</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-026/</code> so the checked-in worksheet remains available.</p>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-026</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-026/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>build(input_shape) reads the trailing feature width and creates one square kernel. call(x) computes x+x@kernel. The same layer object reuses that kernel on later calls. trainable_variables supplies the variables the optimizer should update. A width mismatch should be reported rather than silently constructing a new parameter set. Batch length may change without changing feature width.</p>
@@ -139,33 +185,33 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-create-an-identity-residual">Example A: Create an identity residual<a class="heading-anchor" href="#example-a-create-an-identity-residual" aria-label="Link to this section">#</a></h4>
 <p>The zero branch contributes nothing initially. This is a useful reference behavior but does not mean the branch has no gradient or will remain zero during training.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
-class Residual(tf.keras.layers.Layer):
-    def build(self,input_shape):
-        self.width=int(input_shape[-1])
-        self.kernel=self.add_weight(name=&#x27;kernel&#x27;,shape=(self.width,self.width),initializer=&#x27;zeros&#x27;)
-    def call(self,x):
-        if x.shape[-1]!=self.width: raise ValueError(&#x27;feature width mismatch&#x27;)
-        return x+x@self.kernel
-layer=Residual(); x=tf.constant([[1.,2.],[3.,4.]]); out=layer(x)
-np.testing.assert_array_equal(out.numpy(),x.numpy()); assert len(layer.trainable_variables)==1</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+<span class="syntax-keyword">class</span> <span class="syntax-class">Residual</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>Layer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">build</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>input_shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>input_shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>kernel<span class="syntax-operator">=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>add_weight<span class="syntax-punctuation">(</span>name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">kernel</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>shape<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">,</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>initializer<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">zeros</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">call</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">feature width mismatch</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> x<span class="syntax-operator">+</span>x<span class="syntax-decorator">@self</span><span class="syntax-operator">.</span>kernel
+layer<span class="syntax-operator">=</span>Residual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> out<span class="syntax-operator">=</span>layer<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>out<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>x<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>layer<span class="syntax-operator">.</span>trainable_variables<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span></code></pre>
 <p><strong>Expected:</strong> output equals input; one tracked kernel.</p>
 <h4 id="example-b-reuse-the-state">Example B: Reuse the state<a class="heading-anchor" href="#example-b-reuse-the-state" aria-label="Link to this section">#</a></h4>
 <p>A new batch should change transient activations, not create a new model. Object identity complements a parameter count, since replacing one variable with another could preserve the count.</p>
-<pre><code class="language-python">import numpy as np
-import tensorflow as tf
-class Residual(tf.keras.layers.Layer):
-    def build(self,input_shape):
-        self.width=int(input_shape[-1])
-        self.kernel=self.add_weight(name=&#x27;kernel&#x27;,shape=(self.width,self.width),initializer=&#x27;zeros&#x27;)
-    def call(self,x):
-        if x.shape[-1]!=self.width: raise ValueError(&#x27;feature width mismatch&#x27;)
-        return x+x@self.kernel
-layer=Residual(); x=tf.constant([[1.,2.],[3.,4.]]); out=layer(x)
-np.testing.assert_array_equal(out.numpy(),x.numpy()); assert len(layer.trainable_variables)==1
-variable=layer.trainable_variables[0]; layer(tf.constant([[9.,8.]]))
-assert layer.trainable_variables[0] is variable and len(layer.trainable_variables)==1</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+<span class="syntax-keyword">class</span> <span class="syntax-class">Residual</span><span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>Layer<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">build</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>input_shape<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>input_shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>kernel<span class="syntax-operator">=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>add_weight<span class="syntax-punctuation">(</span>name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">kernel</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>shape<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">,</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>initializer<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">zeros</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">call</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">feature width mismatch</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> x<span class="syntax-operator">+</span>x<span class="syntax-decorator">@self</span><span class="syntax-operator">.</span>kernel
+layer<span class="syntax-operator">=</span>Residual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> out<span class="syntax-operator">=</span>layer<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>out<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>x<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>layer<span class="syntax-operator">.</span>trainable_variables<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span>
+variable<span class="syntax-operator">=</span>layer<span class="syntax-operator">.</span>trainable_variables<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> layer<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">8.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> layer<span class="syntax-operator">.</span>trainable_variables<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> variable <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>layer<span class="syntax-operator">.</span>trainable_variables<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span></code></pre>
 <p><strong>Expected:</strong> same variable object and variable count1.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Variable count does not grow on the second call. A residual addition requires matching trailing dimensions; incompatible inputs produce a declared validation failure. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -199,7 +245,7 @@ assert layer.trainable_variables[0] is variable and len(layer.trainable_variable
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://keras.io/api/">Keras API</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-026, Custom layers, residuals and trainable state.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-026, Custom layers, residuals and trainable state.
 Read courses/deep-learning-tensorflow/guides/tf-026.md and courses/deep-learning-tensorflow/lessons/tf-026.py. Direct prerequisites: `tf-025`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

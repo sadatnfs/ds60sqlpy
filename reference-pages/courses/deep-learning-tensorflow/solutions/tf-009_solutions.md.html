@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,55 +173,55 @@
 <h3 id="exercise-1-count-updates">Exercise 1: Count updates<a class="heading-anchor" href="#exercise-1-count-updates" aria-label="Link to this section">#</a></h3>
 <p>The question is: Partition IDs 1..6 into batches of size two; retain each batch and count one update per batch.</p>
 <p>The counter measures updates, not observations. Concatenating the three batches recovers the six original identities exactly once. This check detects both an omitted final slice and a loop that increments once per record.</p>
-<pre><code class="language-python">ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,6,2)]
-assert batches==[[1,2],[3,4],[5,6]]</code></pre>
+<pre class="highlighted-code"><code class="language-python">ids<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> batches<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>ids<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> batches<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> batches [[1,2],[3,4],[5,6]] and 3 updates.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with batches [[1,2],[3,4],[5,6]] and 3 updates.</p>
 <h3 id="exercise-2-retain-a-remainder">Exercise 2: Retain a remainder<a class="heading-anchor" href="#exercise-2-retain-a-remainder" aria-label="Link to this section">#</a></h3>
 <p>The question is: Partition five IDs by two and compare with explicitly dropping the short batch.</p>
 <p>An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example and its mean gradient must divide by one.</p>
-<pre><code class="language-python">ids=list(range(1,6)); batches=[ids[i:i+2] for i in range(0,5,2)]
-assert list(map(len,batches))==[2,2,1]
-assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]</code></pre>
+<pre class="highlighted-code"><code class="language-python">ids<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> batches<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>ids<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">,</span>batches<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>b <span class="syntax-keyword">for</span> b <span class="syntax-operator">in</span> batches <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> sizes [2,2,1]; dropping retains only IDs1..4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with sizes [2,2,1]; dropping retains only IDs1..4.</p>
 <h3 id="exercise-3-trace-weight-state">Exercise 3: Trace weight state<a class="heading-anchor" href="#exercise-3-trace-weight-state" aria-label="Link to this section">#</a></h3>
-<p>The question is: Implement three batch updates for x=1..6,y=2x,w=0,rate=.01; record the weight before each update.</p>
+<p>The question is: Implement three batch updates for x=1..6,y=2x,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>,rate=.01; record the weight before each update.</p>
 <p>Each gradient depends on the current weight. Recording only the final loss would conceal whether the assignment happened. The finite and distinct states show real updates for this fixture without claiming that every possible dataset produces a different weight each time.</p>
-<pre><code class="language-python">x=tf.constant([1.,2.,3.,4.,5.,6.]); y=2*x; w=tf.Variable(0.); history=[]
-for i in range(0,6,2):
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x[i:i+2]-y[i:i+2])**2)
-    w.assign_sub(.01*tape.gradient(loss,w)); history.append(float(w))
-assert len(history)==3 and all(np.isfinite(history))
-assert len(set(history))==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">;</span> w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> 3 finite, nonidentical updated weights.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 3 finite, nonidentical updated weights.</p>
 <h3 id="exercise-4-compare-batch-policies">Exercise 4: Compare batch policies<a class="heading-anchor" href="#exercise-4-compare-batch-policies" aria-label="Link to this section">#</a></h3>
-<p>The question is: Repeat one epoch with sizes one and three from exactly w=0; compare update counts and endpoint weights.</p>
+<p>The question is: Repeat one epoch with sizes one and three from exactly <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>; compare update counts and endpoint weights.</p>
 <p>Both runs process six records but perform different optimization experiments. Equal epochs are not equal compute budgets. Resetting the variable is necessary because otherwise the second run would begin with the first run&#x27;s trained state.</p>
-<pre><code class="language-python">def train(size):
-    w=tf.Variable(0.); steps=0
-    for i in range(0,6,size):
-        with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x[i:i+size]-y[i:i+size])**2)
-        w.assign_sub(.01*tape.gradient(loss,w)); steps+=1
-    return float(w),steps
-a,na=train(1); b,nb=train(3)
-assert (na,nb)==(6,2) and abs(a-b)&gt;1e-6</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">train</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    w<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> steps<span class="syntax-operator">=</span><span class="syntax-number">0</span>
+    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span> loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>reduce_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span>size<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span>size<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+        w<span class="syntax-operator">.</span>assign_sub<span class="syntax-punctuation">(</span><span class="syntax-number">.01</span><span class="syntax-operator">*</span>tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> steps<span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>steps
+a<span class="syntax-punctuation">,</span>na<span class="syntax-operator">=</span>train<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> b<span class="syntax-punctuation">,</span>nb<span class="syntax-operator">=</span>train<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>na<span class="syntax-punctuation">,</span>nb<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">-</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1e-6</span></code></pre>
 <p><strong>Expected:</strong> 6 versus2 steps and different endpoint weights.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 6 versus2 steps and different endpoint weights.</p>
 <h3 id="exercise-5-preserve-pairs">Exercise 5: Preserve pairs<a class="heading-anchor" href="#exercise-5-preserve-pairs" aria-label="Link to this section">#</a></h3>
 <p>The question is: Shuffle IDs with permutation [5,0,4,1,3,2] and apply the same permutation to inputs and targets.</p>
 <p>A shared index permutation preserves the relation between records. Independently shuffling targets creates a different task while preserving marginal value distributions, which is why checking only target histograms cannot detect this bug.</p>
-<pre><code class="language-python">order=tf.constant([5,0,4,1,3,2]); sx=tf.gather(x,order); sy=tf.gather(y,order)
-np.testing.assert_allclose(sy.numpy(),2*sx.numpy())
-assert not np.allclose(y.numpy(),2*sx.numpy())</code></pre>
+<pre class="highlighted-code"><code class="language-python">order<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> sx<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span>order<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> sy<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">,</span>order<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>sy<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>sx<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>y<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>sx<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Every shuffled target equals twice its paired input.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with Every shuffled target equals twice its paired input.</p>
 <h3 id="exercise-6-aggregate-unequal-batches">Exercise 6: Aggregate unequal batches<a class="heading-anchor" href="#exercise-6-aggregate-unequal-batches" aria-label="Link to this section">#</a></h3>
-<p>The question is: Combine batch mean losses2 and8 with counts2 and1; compare mean-of-means with the record mean.</p>
+<p>The question is: Combine batch mean losses2 and8 with counts2 and 1; compare mean-of-means with the record mean.</p>
 <p>The correct epoch statistic counts examples. Batch means hide their denominators. Reconstruct sums by multiplying each mean by its batch count, sum those numerators, then divide by total examples.</p>
-<pre><code class="language-python">assert (2*2+8*1)/3==4
-assert (2+8)/2==5</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">8</span><span class="syntax-operator">*</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-operator">==</span><span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">==</span><span class="syntax-number">5</span></code></pre>
 <p><strong>Expected:</strong> record mean4; unweighted batch mean5.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with record mean4; unweighted batch mean5.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

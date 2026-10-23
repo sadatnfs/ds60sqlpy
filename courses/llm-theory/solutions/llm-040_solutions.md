@@ -77,7 +77,7 @@ assert answered/total==.5 and correct/answered==1 and correct==2
 
 ## Exercise 5: Audit decision chronology
 
-The question is: Record prompt selection onvalidation followed by final-test assessment; flag a test-driven prompt change.
+The question is: Record prompt selection on validation followed by final-test assessment; flag a test-driven prompt change.
 
 Information use determines the boundary. Renaming a file or calling a repeated assessment a confirmation does not restore an untouched holdout.
 
@@ -93,7 +93,7 @@ forbidden=('select_prompt','test'); assert forbidden[1]!='validation'
 
 ## Exercise 6: Combine gates with uncertainty
 
-The question is: Require no severe failures and adequate family coverage; evaluate a report withone severe failure.
+The question is: Require no severe failures and adequate family coverage; evaluate a report with one severe failure.
 
 The decision reflects a predeclared constraint. A mean difference and a bootstrap summary provide evidence but do not replace a required failure-severity gate.
 

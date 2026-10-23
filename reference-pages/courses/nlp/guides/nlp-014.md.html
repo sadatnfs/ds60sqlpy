@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,8 +173,8 @@
 <p>After pooling, L2 normalization maps a nonzero vector to unit length. Dot products then equal cosine similarity. Without normalization, large vector norms can influence scores, which may or may not match the training objective. The index metric, query normalization and document normalization must agree with the trained representation contract.</p>
 <p>Mean pooling of fixed token vectors ignores order. Dog bites person and person bites dog use the same multiset and therefore get identical means, despite different event roles. A contextual encoder can make token vectors depend on surrounding words before pooling, but merely averaging static vectors does not solve the problem. Keep this counterexample in evaluation rather than hiding it behind a synonym probe.</p>
 <h3 id="contrastive-learning-and-negative-examples">Contrastive learning and negative examples<a class="heading-anchor" href="#contrastive-learning-and-negative-examples" aria-label="Link to this section">#</a></h3>
-<p>Contrastive training encourages a query to score its relevant partner above alternatives. For a batch of paired examples with score matrix S, one common row loss is -log[exp(S_ii/tau)/sum_j exp(S_ij/tau)]. The temperature tau scales how strongly score differences affect the distribution. logsumexp computes the denominator stably.</p>
-<p>With scores [[3,1],[1,3]] and temperature one, each correct-pair probability is exp(3)/(exp(3)+exp(1)), and average loss is log(1+exp(-2)), about 0.12693. Reducing temperature to one-half lowers the loss on these already correctly ordered scores. It does not prove better generalization or calibrated relevance probabilities.</p>
+<p>Contrastive training encourages a query to score its relevant partner above alternatives. For a batch of paired examples with score matrix S, one common row loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>log</mi><mfrac><mrow><mi>exp</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>i</mi><mi>i</mi></mrow></msub><mo>/</mo><mi>τ</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mo>∑</mo><mi>j</mi></msub><mi>exp</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>/</mo><mi>τ</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">-\log\frac{\exp(S_{ii}/\tau)}{\sum_j\exp(S_{ij}/\tau)}</annotation></semantics></math>. The temperature tau scales how strongly score differences affect the distribution. logsumexp computes the denominator stably.</p>
+<p>With scores [[3,1],[1,3]] and temperature one, each correct-pair probability is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><mrow><mi>exp</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\exp(3)}{\exp(3)+\exp(1)}</annotation></semantics></math>, and average loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-2))</annotation></semantics></math>, about 0.12693. Reducing temperature to one-half lowers the loss on these already correctly ordered scores. It does not prove better generalization or calibrated relevance probabilities.</p>
 <p>Negative selection matters. If a batch contains two equally valid documents for a query but labels only one as positive, the other becomes a false negative and training pushes useful content away. Easy random negatives can produce excellent training loss while failing difficult near-miss retrieval. Construct negatives and evaluation candidates from the deployment task, preserving source-family separation.</p>
 <h3 id="from-vector-search-to-supported-evidence">From vector search to supported evidence<a class="heading-anchor" href="#from-vector-search-to-supported-evidence" aria-label="Link to this section">#</a></h3>
 <p>A semantic score is an association under a representation, not an entailment judgment. A passage about approving a restart can be near a query about a completed restart without proving that any restart occurred. Retrieval should preserve document IDs, dates, access metadata and source spans so later stages can inspect what the text actually supports.</p>
@@ -140,17 +186,17 @@
 <h4 id="worked-example-2-exclude-padding-and-expose-order-loss">Worked example 2: Exclude padding and expose order loss<a class="heading-anchor" href="#worked-example-2-exclude-padding-and-expose-order-loss" aria-label="Link to this section">#</a></h4>
 <p>Vectors [1,2] and [3,4] with a padded [100,100] row and mask [1,1,0] average to [2,3]. Including padding would produce a very different result. Separately, reversing dog and person around bites leaves a static mean unchanged. Correct masking and semantic adequacy are different checks.</p>
 <h4 id="worked-example-3-calculate-a-contrastive-objective">Worked example 3: Calculate a contrastive objective<a class="heading-anchor" href="#worked-example-3-calculate-a-contrastive-objective" aria-label="Link to this section">#</a></h4>
-<p>Scores three on the diagonal and one off the diagonal yield loss log(1+exp(-2)) at temperature one. The loss compares each positive to the candidate negatives in its row. Changing the candidate set or temperature changes the objective even if the encoder vectors stay fixed.</p>
+<p>Scores three on the diagonal and one off the diagonal yield loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-2))</annotation></semantics></math> at temperature one. The loss compares each positive to the candidate negatives in its row. Changing the candidate set or temperature changes the objective even if the encoder vectors stay fixed.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">import numpy as np
-values=np.array([[1.,2.],[3.,4.],[100.,100.]])
-mask=np.array([True,True,False])
-print(values[mask].mean(axis=0))
-assert np.allclose(values[mask].mean(axis=0),[2.,3.])</code></pre>
-<pre><code class="language-python">loss=np.logaddexp(3.,1.)-3.
-print(loss)
-assert np.isclose(loss,np.log1p(np.exp(-2)))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+values<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">100.</span><span class="syntax-punctuation">,</span><span class="syntax-number">100.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+mask<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>mask<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span>mask<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">loss<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">3.</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log1p<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-014.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-014-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-014.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-014_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -171,8 +217,8 @@ assert np.isclose(loss,np.log1p(np.exp(-2)))</code></pre>
 <p><strong>Hints:</strong> Addition is commutative, so the token multiset determines the mean.</p>
 <h4 id="exercise-4-derive-contrastive-loss">Exercise 4: Derive contrastive loss<a class="heading-anchor" href="#exercise-4-derive-contrastive-loss" aria-label="Link to this section">#</a></h4>
 <p>Compute row-wise loss for scores[[3,1],[1,3]] at temperature1.</p>
-<p><strong>Expected:</strong> Average log(1+exp(-2)), approximately .126928.</p>
-<p><strong>Verify:</strong> Average log(1+exp(-2)), approximately .126928. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> Average <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-2))</annotation></semantics></math>, approximately .126928.</p>
+<p><strong>Verify:</strong> Average <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(1+\exp(-2))</annotation></semantics></math>, approximately .126928. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Subtract the positive score from each row logsumexp.</p>
 <h4 id="exercise-5-change-temperature-and-candidate-semantics">Exercise 5: Change temperature and candidate semantics<a class="heading-anchor" href="#exercise-5-change-temperature-and-candidate-semantics" aria-label="Link to this section">#</a></h4>
 <p>Repeat at temperature.5 and explain a false-negative document case.</p>
@@ -200,7 +246,7 @@ assert np.isclose(loss,np.log1p(np.exp(-2)))</code></pre>
 <h3 id="related-local-tracks">Related local tracks<a class="heading-anchor" href="#related-local-tracks" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../llm-applied/guides/llm-applied-011.md.html">grounded claims</a> and <a href="../../llm-applied/guides/llm-applied-012.md.html">retrieval/answer evaluation</a> when a sentence retriever becomes part of a domain assistant. Similarity and claim support remain separate checks.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-014.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-014.
 Read courses/nlp/guides/nlp-014.md and courses/nlp/learners/nlp-014.py.
 Direct prerequisites: `nlp-013`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,39 +161,39 @@
       <h1>Chapter 39</h1>
       <p class="source-path">Generated from <code>courses/statistics-ml/examples/chapter_39.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span> </span>
-<span>def meta_weights():</span>
-<span>    effect=np.array([.2,.5]);variance=np.array([.1,.2])**2</span>
-<span>    weight=1/variance;common=np.sum(weight*effect)/weight.sum();se=np.sqrt(1/weight.sum())</span>
-<span>    random_weight=1/(variance+.04);random_mean=np.sum(random_weight*effect)/random_weight.sum()</span>
-<span>    assert np.isclose(common,.26) and np.isclose(se,np.sqrt(1/125))</span>
-<span>    assert random_mean&gt;common and random_weight[0]/random_weight[1]&lt;weight[0]/weight[1]</span>
-<span>    print(&quot;Common-effect mean and SE:&quot;,common,se,&quot;illustrative tau-squared=.04 mean:&quot;,random_mean)</span>
-<span> </span>
-<span>def relative_and_circular():</span>
-<span>    composition=np.array([1.,2.,7.]);scaled=10*composition</span>
-<span>    assert np.allclose(composition/composition.sum(),scaled/scaled.sum())</span>
-<span>    ratio=np.log(composition[0]/composition[1])</span>
-<span>    assert np.isclose(ratio,np.log(scaled[0]/scaled[1]))</span>
-<span>    radians=np.deg2rad([359.,1.]);circular=np.rad2deg(np.angle(np.mean(np.exp(1j*radians))))</span>
-<span>    assert abs(circular)&lt;1e-10 and np.mean([359.,1.])==180.</span>
-<span>    print(&quot;Invariant log ratio:&quot;,ratio,&quot;circular mean near zero:&quot;,circular)</span>
-<span> </span>
-<span>def laplace_ratio():</span>
-<span>    epsilon=1.;sensitivity=1.;scale=sensitivity/epsilon</span>
-<span>    def density(output,count):return np.exp(-abs(output-count)/scale)/(2*scale)</span>
-<span>    ratio=density(7.,6.)/density(7.,5.)</span>
-<span>    assert np.isclose(ratio,np.exp(epsilon))</span>
-<span>    assert sensitivity/.5&gt;sensitivity/2.</span>
-<span>    print(&quot;Adjacent-count density ratio:&quot;,ratio,&quot;bound:&quot;,np.exp(epsilon))</span>
-<span> </span>
-<span>def main():</span>
-<span>    meta_weights();relative_and_circular();laplace_ratio()</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">meta_weights</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    effect<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>variance<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span></span>
+<span class="source-line">    weight<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>variance<span class="syntax-punctuation">;</span>common<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>weight<span class="syntax-operator">*</span>effect<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>se<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    random_weight<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>variance<span class="syntax-operator">+</span><span class="syntax-number">.04</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>random_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>random_weight<span class="syntax-operator">*</span>effect<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>random_weight<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>common<span class="syntax-punctuation">,</span><span class="syntax-number">.26</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>se<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">125</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> random_mean<span class="syntax-operator">&gt;</span>common <span class="syntax-operator">and</span> random_weight<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>random_weight<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span>weight<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>weight<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Common-effect mean and SE:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>common<span class="syntax-punctuation">,</span>se<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">illustrative tau-squared=.04 mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>random_mean<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">relative_and_circular</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    composition<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">7.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>scaled<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-operator">*</span>composition</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>composition<span class="syntax-operator">/</span>composition<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>scaled<span class="syntax-operator">/</span>scaled<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ratio<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>composition<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>composition<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ratio<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>scaled<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    radians<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>deg2rad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">359.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>circular<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>rad2deg<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>angle<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-number">1</span>j<span class="syntax-operator">*</span>radians<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>circular<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-10</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">359.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">180.</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Invariant log ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ratio<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">circular mean near zero:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>circular<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">laplace_ratio</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    epsilon<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">;</span>sensitivity<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">;</span>scale<span class="syntax-operator">=</span>sensitivity<span class="syntax-operator">/</span>epsilon</span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">density</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span>count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>output<span class="syntax-operator">-</span>count<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>scale<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>scale<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ratio<span class="syntax-operator">=</span>density<span class="syntax-punctuation">(</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">6.</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>density<span class="syntax-punctuation">(</span><span class="syntax-number">7.</span><span class="syntax-punctuation">,</span><span class="syntax-number">5.</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>ratio<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> sensitivity<span class="syntax-operator">/</span><span class="syntax-number">.5</span><span class="syntax-operator">&gt;</span>sensitivity<span class="syntax-operator">/</span><span class="syntax-number">2.</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Adjacent-count density ratio:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>ratio<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">bound:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    meta_weights<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>relative_and_circular<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>laplace_ratio<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

@@ -24,7 +24,7 @@ The qualified reference preserves that distinction. It recomputes final training
 
 ## Follow the supervised signal through the decoder
 
-The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes[2,3,32] hidden states, two attention heads and finally[2,3,16] logits.
+The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a 16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes[2,3,32] hidden states, two attention heads and finally[2,3,16] logits.
 
 At an active target position, cross entropy encourages the target logit relative to the other vocabulary logits. Its derivative contains the predicted class probabilities minus the target indicator, scaled by the active-event denominator. This local derivative then flows through the output projection, feed-forward and attention paths into earlier parameters. The independent zero-logit probe isolates that first step without relying on the randomly initialized decoder's output.
 

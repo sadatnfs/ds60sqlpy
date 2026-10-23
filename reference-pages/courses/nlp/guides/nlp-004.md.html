@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -124,12 +170,12 @@
 <p>Distinguish <strong>segmentation</strong>, which decides boundaries in a text, from <strong>vocabulary encoding</strong>, which assigns model IDs to the resulting pieces. A <strong>special token</strong> represents a structural role such as sequence termination or a chat boundary. A <strong>subword vocabulary</strong> represents many words using reusable smaller units. <strong>Out-of-vocabulary behavior</strong> specifies what happens when an input cannot be represented by the known inventory.</p>
 <p>A tokenizer does not prove linguistic correctness. Different tasks benefit from different boundaries. Splitting a contraction may be acceptable for one statistical representation and inconvenient for a rule that needs the original word. A legal citation, product code, emoji sequence and ordinary sentence can each expose different weaknesses. Preserve raw text and specify the transformations that happened before tokenization.</p>
 <h3 id="worked-example-three-plausible-policies">Worked example: three plausible policies<a class="heading-anchor" href="#worked-example-three-plausible-policies" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-python">import re
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
 
-text = &quot;can&#x27;t pay.&quot;
-print(text.split())
-print(re.findall(r&quot;\w+|[^\w\s]&quot;, text))
-print(re.findall(r&quot;\w+(?:&#x27;\w+)*|[^\w\s]&quot;, text))</code></pre>
+text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">can</span><span class="syntax-string">&#x27;</span><span class="syntax-string">t pay.</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">\</span><span class="syntax-string">w+|[^</span><span class="syntax-string">\</span><span class="syntax-string">w</span><span class="syntax-string">\</span><span class="syntax-string">s]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">\</span><span class="syntax-string">w+(?:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">\</span><span class="syntax-string">w+)*|[^</span><span class="syntax-string">\</span><span class="syntax-string">w</span><span class="syntax-string">\</span><span class="syntax-string">s]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: <code>[&quot;can&#x27;t&quot;, &#x27;pay.&#x27;]</code>, then <code>[&#x27;can&#x27;, &quot;&#x27;&quot;, &#x27;t&#x27;, &#x27;pay&#x27;, &#x27;.&#x27;]</code>, then <code>[&quot;can&#x27;t&quot;, &#x27;pay&#x27;, &#x27;.&#x27;]</code>. Whitespace splitting keeps punctuation attached. The first regex separates the apostrophe. The second keeps a straight-apostrophe contraction together. None is a universal language tokenizer: the last pattern says nothing about a curly apostrophe, languages without spaces or every punctuation convention.</p>
 <p>Ask which boundary matters to the downstream task. For word-level annotation, you may need agreement with the annotation tool. For a pretrained model, you need its exact tokenizer. For a small bag-of-words baseline, a documented simple policy may be sufficient. Choosing the policy after inspecting the final evaluation score without accounting for the selection process can bias the comparison.</p>
 <p><code>finditer</code> can retain raw code-point spans for a regex tokenizer. The match <code>pay</code> occupies <code>[6,9)</code> in this example. If you normalize the text first, those spans refer to the normalized version. A tokenizer library may provide alignment metadata, but its offset convention must still be checked. Do not assume that every token has a nonempty human-visible span: structural markers can be synthetic.</p>
@@ -138,38 +184,38 @@ print(re.findall(r&quot;\w+(?:&#x27;\w+)*|[^\w\s]&quot;, text))</code></pre>
 <p>Suppose the training corpus contains the word <code>low</code> three times and <code>lower</code> once. Start with <code>(&#x27;l&#x27;,&#x27;o&#x27;,&#x27;w&#x27;,&#x27;&lt;/w&gt;&#x27;)</code> and <code>(&#x27;l&#x27;,&#x27;o&#x27;,&#x27;w&#x27;,&#x27;e&#x27;,&#x27;r&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>. The pair <code>(&#x27;l&#x27;,&#x27;o&#x27;)</code> appears four times after weighting by word frequency. So does <code>(&#x27;o&#x27;,&#x27;w&#x27;)</code>. We resolve this tie lexicographically to make the example reproducible. The first merge creates <code>lo</code>; the next frequent merge combines <code>lo</code> and <code>w</code> into <code>low</code>.</p>
 <p>After those two learned merges, <code>low</code> is represented as <code>(&#x27;low&#x27;,&#x27;&lt;/w&gt;&#x27;)</code> and <code>lower</code> as <code>(&#x27;low&#x27;,&#x27;e&#x27;,&#x27;r&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>. Frequent sequences can now use fewer symbols. The greedy merge criterion is a frequency/compression heuristic. It does not optimize truthfulness, sentiment classification or syntactic understanding. A tokenizer can be efficient at representing an unhelpful or biased corpus.</p>
 <h3 id="worked-example-merge-without-overlapping-replacements">Worked example: merge without overlapping replacements<a class="heading-anchor" href="#worked-example-merge-without-overlapping-replacements" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-python">def merge_pair(tokens, pair):
-    result = []
-    i = 0
-    while i &lt; len(tokens):
-        if i + 1 &lt; len(tokens) and (tokens[i], tokens[i + 1]) == pair:
-            result.append(tokens[i] + tokens[i + 1])
-            i += 2
-        else:
-            result.append(tokens[i])
-            i += 1
-    return tuple(result)
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">merge_pair</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    result <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    i <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">while</span> i <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> i <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> tokens<span class="syntax-punctuation">[</span>i <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> pair<span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> tokens<span class="syntax-punctuation">[</span>i <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            i <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            i <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span>
 
-print(merge_pair((&quot;l&quot;, &quot;o&quot;, &quot;w&quot;, &quot;&lt;/w&gt;&quot;), (&quot;l&quot;, &quot;o&quot;)))
-print(merge_pair((&quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;&lt;/w&gt;&quot;), (&quot;a&quot;, &quot;a&quot;)))</code></pre>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>merge_pair<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">l</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">o</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">w</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/w&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">l</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">o</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>merge_pair<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/w&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: <code>(&#x27;lo&#x27;,&#x27;w&#x27;,&#x27;&lt;/w&gt;&#x27;)</code> and <code>(&#x27;aa&#x27;,&#x27;a&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>. The repeated <code>a</code> example matters. Although the original sequence has two adjacent <code>(&#x27;a&#x27;,&#x27;a&#x27;)</code> positions, the left-to-right nonoverlapping replacement consumes the first two symbols together and leaves the third. A naive replacement that reuses one symbol twice would not implement this operation.</p>
 <p>The loop advances by two after a merge and one otherwise. Each original token is consumed exactly once. That invariant explains why the function preserves order and why decoding the merged symbols can recover the same word. This function operates on a tuple of symbols, not directly on arbitrary prose. The word boundary marker is part of the teaching representation and must be handled separately when decoding.</p>
 <h3 id="worked-example-learn-and-freeze-two-merges">Worked example: learn and freeze two merges<a class="heading-anchor" href="#worked-example-learn-and-freeze-two-merges" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-python">from collections import Counter
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
 
-words = {&quot;low&quot;: 3, &quot;lower&quot;: 1}
-state = {word: tuple(word) + (&quot;&lt;/w&gt;&quot;,) for word in words}
-merges = []
-for _ in range(2):
-    counts = Counter()
-    for word, tokens in state.items():
-        for pair in zip(tokens, tokens[1:]):
-            counts[pair] += words[word]
-    pair = min(counts, key=lambda candidate: (-counts[candidate], candidate))
-    merges.append(pair)
-    state = {word: merge_pair(tokens, pair) for word, tokens in state.items()}
-print(merges)
-print(state)</code></pre>
+words <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">low</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">lower</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span>
+state <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>word<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/w&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> words<span class="syntax-punctuation">}</span>
+merges <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    counts <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> word<span class="syntax-punctuation">,</span> tokens <span class="syntax-operator">in</span> state<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> tokens<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            counts<span class="syntax-punctuation">[</span>pair<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span><span class="syntax-operator">=</span> words<span class="syntax-punctuation">[</span>word<span class="syntax-punctuation">]</span>
+    pair <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> candidate<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>counts<span class="syntax-punctuation">[</span>candidate<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> candidate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    merges<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>pair<span class="syntax-punctuation">)</span>
+    state <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>word<span class="syntax-punctuation">:</span> merge_pair<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word<span class="syntax-punctuation">,</span> tokens <span class="syntax-operator">in</span> state<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>merges<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">)</span></code></pre>
 <p>Expected learned pairs: <code>[(&#x27;l&#x27;,&#x27;o&#x27;), (&#x27;lo&#x27;,&#x27;w&#x27;)]</code>. Expected state: <code>low</code> maps to <code>(&#x27;low&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>, and <code>lower</code> to <code>(&#x27;low&#x27;,&#x27;e&#x27;,&#x27;r&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>. Run this block after defining <code>merge_pair</code> from the preceding example. The <code>Counter</code> is rebuilt after each merge because the available neighboring symbols have changed. Reusing the original counts would train a different and generally incorrect procedure.</p>
 <p><code>(-counts[candidate], candidate)</code> sorts first by descending frequency and then by the pair itself. The explicit tie rule makes the tiny training run deterministic across dictionary insertion orders. A production tokenizer has more implementation details, including normalization, pre-tokenization, reserved IDs, byte handling and merge ordering. Record those details rather than inferring compatibility from the label “BPE.”</p>
 <p>When encoding a new word, apply the learned merges in the recorded order. Do not learn new merges from the test document just to reduce its length. That would change the representation being evaluated. For this teaching model, <code>row</code> uses only known characters and remains <code>(&#x27;r&#x27;,&#x27;o&#x27;,&#x27;w&#x27;,&#x27;&lt;/w&gt;&#x27;)</code>: the learned rules do not include a standalone <code>(&#x27;o&#x27;,&#x27;w&#x27;)</code> merge. Greedy longest-substring matching is not automatically equivalent to applying this learned merge sequence.</p>
@@ -199,7 +245,7 @@ print(state)</code></pre>
 <h3 id="references-and-continuation">References and continuation<a class="heading-anchor" href="#references-and-continuation" aria-label="Link to this section">#</a></h3>
 <p>See the original <a href="https://aclanthology.org/P16-1162/">subword BPE paper</a> and <a href="https://huggingface.co/docs/tokenizers/">Hugging Face tokenizer documentation</a>. The implementation here is deliberately small and character-based, with a declared ASCII word contract. Continue to <code>nlp-005</code> to distinguish learned subword units from linguistic morphology and syntax.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-004 after nlp-003.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-004 after nlp-003.
 Read courses/nlp/guides/nlp-004.md and courses/nlp/learners/nlp-004.py.
 Explain segmentation, vocabulary IDs and the toy BPE contract separately.
 Ask me to predict weighted pair counts and each merge before running code.

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,8 +168,8 @@
 <p>Explain how local derivatives compose and where a derivative convention matters. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A network is a composition of small operations. The chain rule connects their local derivatives: a change in a weight changes an intermediate value, which changes an activation, which changes the loss. Multiplying the local sensitivities gives the derivative along that path. Missing one factor can leave every forward value correct while producing the wrong update.</p>
-<p>Trace z=2<em>w, a=z</em>z and L=(a-1)^2 at w=1. The intermediate values are z=2, a=4 and L=9. Their local sensitivities are dz/dw=2, da/dz=2<em>z=4 and dL/da=2</em>(a-1)=6. The product is 48. Writing these values separately makes a factor-of-two mistake diagnosable before using a tape.</p>
-<p>A path can also become constant. If the activation a=4 is computed once and then held fixed while w varies, the displayed loss at w=1 is still 9, but the new computation no longer depends on w. Its derivative is zero. The next lesson turns that distinction into recording-scope behavior; here you can see it directly with functions and finite probes.</p>
+<p>Trace <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">z=2\cdot w</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mi>z</mi><mo>·</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">a=z\cdot z</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">L={\left(a-1\right)}^{2}</annotation></semantics></math> at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>. The intermediate values are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">z=2</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">L=9</annotation></semantics></math>. Their local sensitivities are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\frac{\partial z}{\partial w}=2</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>a</mi></mrow><mrow><mo>∂</mo><mi>z</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mo>·</mo><mi>z</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">\frac{\partial a}{\partial z}=2\cdot z=4</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>a</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mo>·</mo><mo stretchy="false">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial a}=2\cdot (a-1)=6</annotation></semantics></math>. The product is 48. Writing these values separately makes a factor-of-two mistake diagnosable before using a tape.</p>
+<p>A path can also become constant. If the activation <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math> is computed once and then held fixed while w varies, the displayed loss at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math> is still 9, but the new computation no longer depends on w. Its derivative is zero. The next lesson turns that distinction into recording-scope behavior; here you can see it directly with functions and finite probes.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Composition:</strong> a computation that feeds the output of one operation into another.</p>
 <p><strong>Local derivative:</strong> the sensitivity of one operation output to its immediate input at the current value.</p>
@@ -144,43 +190,43 @@
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-recover-every-chain-factor">Example A: Recover every chain factor<a class="heading-anchor" href="#example-a-recover-every-chain-factor" aria-label="Link to this section">#</a></h4>
 <p>Do the forward pass and then calculate each local derivative.</p>
-<pre><code class="language-python">w = 1.0
-z = 2 * w
-a = z * z
-loss = (a - 1) ** 2
-gradient = (2 * (a - 1)) * (2 * z) * 2
-assert (z, a, loss, gradient) == (2.0, 4.0, 9.0, 48.0)
-print(z, a, loss, gradient)</code></pre>
+<pre class="highlighted-code"><code class="language-python">w <span class="syntax-operator">=</span> <span class="syntax-number">1.0</span>
+z <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> w
+a <span class="syntax-operator">=</span> z <span class="syntax-operator">*</span> z
+loss <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>a <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span>
+gradient <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>a <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> z<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">,</span> loss<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">48.0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">,</span> loss<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The three factors are 6, 4 and 2. A correct loss of 9 does not guarantee all factors were retained.</p>
 <h4 id="example-b-freeze-one-intermediate-value">Example B: Freeze one intermediate value<a class="heading-anchor" href="#example-b-freeze-one-intermediate-value" aria-label="Link to this section">#</a></h4>
 <p>Compare functions with the same value at the original point but different dependencies.</p>
-<pre><code class="language-python">full = lambda value: ((2 * value) ** 2 - 1) ** 2
-frozen_a = 4.0
-frozen = lambda value: (frozen_a - 1) ** 2
-h = 1e-5
-full_slope = (full(1 + h) - full(1 - h)) / (2 * h)
-frozen_slope = (frozen(1 + h) - frozen(1 - h)) / (2 * h)
-assert abs(full_slope - 48) &lt; 1e-7
-assert frozen_slope == 0.0
-print(full_slope, frozen_slope)</code></pre>
-<p><strong>Expected:</strong> Both functions equal 9 at w=1. Their slopes differ because only the first recomputes a from the changed weight.</p>
+<pre class="highlighted-code"><code class="language-python">full <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> value<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span>
+frozen_a <span class="syntax-operator">=</span> <span class="syntax-number">4.0</span>
+frozen <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>frozen_a <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span>
+h <span class="syntax-operator">=</span> <span class="syntax-number">1e-5</span>
+full_slope <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>full<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">+</span> h<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> full<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> h<span class="syntax-punctuation">)</span>
+frozen_slope <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>frozen<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">+</span> h<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> frozen<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> h<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>full_slope <span class="syntax-operator">-</span> <span class="syntax-number">48</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-7</span>
+<span class="syntax-keyword">assert</span> frozen_slope <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>full_slope<span class="syntax-punctuation">,</span> frozen_slope<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Both functions equal 9 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>. Their slopes differ because only the first recomputes a from the changed weight.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Build a forward/backward table.</strong> Trace z, a, loss and all three derivative factors at w=1 for inner scale 2. <strong>Expected:</strong> Forward values [2,4,9], factors [2,4,6] in forward order, total gradient 48. <strong>Verify:</strong> Assert the product of the three factors and compare it with the derivative of the expanded scalar polynomial.</li>
+<li><strong>Build a forward/backward table.</strong> Trace z, a, loss and all three derivative factors at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math> for inner scale 2. <strong>Expected:</strong> Forward values [2,4,9], factors [2,4,6] in forward order, total gradient 48. <strong>Verify:</strong> Assert the product of the three factors and compare it with the derivative of the expanded scalar polynomial.</li>
 </ol>
 <ol>
-<li><strong>Change one inner operation.</strong> Change z=2<em>w to z=3</em>w and keep the rest of the composition fixed at w=1. <strong>Expected:</strong> z=3, a=9, loss=64 and gradient 288. <strong>Verify:</strong> Inspect the changed forward trace and assert 16<em>6</em>3 equals the total gradient.</li>
+<li><strong>Change one inner operation.</strong> Change <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">z=2\cdot w</annotation></semantics></math> to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>3</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">z=3\cdot w</annotation></semantics></math> and keep the rest of the composition fixed at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>. <strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">z=3</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">a=9</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">\mathrm{loss}=64</annotation></semantics></math> and gradient 288. <strong>Verify:</strong> Inspect the changed forward trace and assert <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>16</mn><mo>·</mo><mn>6</mn><mo>·</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">16\cdot 6\cdot 3</annotation></semantics></math> equals the total gradient.</li>
 </ol>
 <ol>
-<li><strong>Construct an independent probe.</strong> Implement chain_trace(weight,scale) and compare the scale-2 gradient with a central probe using h=1e-5. <strong>Expected:</strong> Analytic gradient 48 and central estimate within 1e-7. <strong>Verify:</strong> Recompute both complete perturbed paths and assert that the measured absolute gradient error is at most 1e-7.</li>
+<li><strong>Construct an independent probe.</strong> Implement chain_trace(weight,scale) and compare the scale-2 gradient with a central probe using <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>h</mi><mo>=</mo><mn>1</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">h=1\times10^{-5}</annotation></semantics></math>. <strong>Expected:</strong> Analytic gradient 48 and central estimate within 1e-7. <strong>Verify:</strong> Recompute both complete perturbed paths and assert that the measured absolute gradient error is at most 1e-7.</li>
 </ol>
 <ol>
 <li><strong>State the activation boundary.</strong> Write ReLU values/slopes at -1 and +1. At zero, distinguish one-sided slopes from a chosen zero convention. <strong>Expected:</strong> Negative-side slope 0, positive-side slope 1; the zero kink has no unique ordinary derivative. <strong>Verify:</strong> Inspect one-sided values and show a central probe at zero yields 0.5 rather than proving the chosen convention.</li>
 </ol>
 <ol>
-<li><strong>Diagnose a disconnected calculation.</strong> Freeze a=4 outside a function of w, compare its loss and slope at one with the fully recomputed path. <strong>Expected:</strong> Both losses are 9; frozen slope 0 and full slope 48. <strong>Verify:</strong> Assert both equal forward values and the two different slopes instead of accepting the matching loss as a dependency check.</li>
+<li><strong>Diagnose a disconnected calculation.</strong> Freeze <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math> outside a function of w, compare its loss and slope at one with the fully recomputed path. <strong>Expected:</strong> Both losses are 9; frozen slope 0 and full slope 48. <strong>Verify:</strong> Assert both equal forward values and the two different slopes instead of accepting the matching loss as a dependency check.</li>
 </ol>
 <ol>
 <li><strong>Find a missing factor.</strong> A proposed backward pass multiplies only dL/da and da/dz, omitting dz/dw. Diagnose it for scales 2 and 3. <strong>Expected:</strong> The incorrect gradients are 24 and 96, versus correct 48 and 288. <strong>Verify:</strong> Write the missing scale factor explicitly and assert the repaired products for both fixtures.</li>
@@ -195,13 +241,13 @@ print(full_slope, frozen_slope)</code></pre>
 <p>If a backward answer is off by a small integer factor, inspect the local derivative table before changing a learning rate. A tuned rate can hide a wrong gradient for one fixture and fail on another. If a finite probe reports zero while a hand derivative is nonzero, check that the perturbed function recomputes every dependent value instead of closing over a frozen activation.</p>
 <p>At ReLU zero, a symmetric slope of one half does not contradict a framework convention of zero. They describe different objects at a nondifferentiable point. Keep forward correctness, dependency connectivity and derivative policy as separate checks. A constant path and a connected path can also share the same value at one input, so a scalar loss comparison alone is insufficient.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Without viewing the trace, replace the inner scale with 1 and derive the loss and gradient at w=2. Then explain why holding a fixed changes the function even when the original loss remains identical.</p>
+<p>Without viewing the trace, replace the inner scale with 1 and derive the loss and gradient at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">w=2</annotation></semantics></math>. Then explain why holding a fixed changes the function even when the original loss remains identical.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>tf-007</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-006,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-006,
 The chain rule and activation boundaries. Read courses/deep-learning-tensorflow/guides/tf-006.md
 and courses/deep-learning-tensorflow/lessons/tf-006.py. Respect direct prerequisites
 tf-005 and beginner depth. Explain the actual fixture&#x27;s

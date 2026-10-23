@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,8 +171,8 @@
 <p>A test suite observes a finite set of cases under a particular system configuration. It can reveal failures, estimate rates under stated sampling assumptions and check required behaviors. It cannot enumerate every possible future input or prove an unrestricted zero-risk claim. The purpose of careful reporting is not to make every result sound uncertain; it is to distinguish what was observed from what the design can reasonably support.</p>
 <p>The worksheet uses fictional groups and authored cases. Group A has zero failures in ten cases, while group B has zero failures in one case. Both observed rates are zero. They do not carry the same amount of information, and neither observation makes a population failure probability exactly zero. Keeping the numerator and denominator visible is the first step toward a defensible interpretation.</p>
 <h5 id="derive-what-zero-observed-failures-can-mean">Derive what zero observed failures can mean<a class="heading-anchor" href="#derive-what-zero-observed-failures-can-mean" aria-label="Link to this section">#</a></h5>
-<p>Suppose, for a deliberately simplified calculation, that N cases are independent draws from a stable population with the same unknown failure probability p. The probability of observing zero failures is(1-p)^N. Setting that probability equal to a tail level alpha gives an upper boundary p_upper=1-alpha^(1/N) for the corresponding exact one-sided binomial construction when zero failures were observed.</p>
-<p>At alpha=.05, N=1 gives p_upper=.95. For N=10, the value is about .2589. For N=100, it is about .0295. These are not claims that the actual risk equals those boundaries. They illustrate how much a zero count can still leave unresolved under the stated independent, identically distributed sampling model. The familiar approximation 3/N comes from-log(.05)/N for sufficiently large N, not from a universal rule that every zero-failure test proves risk below that number.</p>
+<p>Suppose, for a deliberately simplified calculation, that N cases are independent draws from a stable population with the same unknown failure probability p. The probability of observing zero failures is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>N</mi></msup></mrow><annotation encoding="application/x-tex">(1-p)^N</annotation></semantics></math>. Setting that probability equal to a tail level alpha gives an upper boundary <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mrow><mi mathvariant="normal">u</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></mrow></msub><mo>=</mo><mn>1</mn><mo>−</mo><msup><mrow><mi>α</mi></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>N</mi></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">p_{\mathrm{upper}}=1-{\alpha}^{\frac{1}{N}}</annotation></semantics></math> for the corresponding exact one-sided binomial construction when zero failures were observed.</p>
+<p>At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">\alpha=0.05</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>N</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">N=1</annotation></semantics></math> gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mrow><mi mathvariant="normal">u</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></mrow></msub><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">p_{\mathrm{upper}}=0.95</annotation></semantics></math>. For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>N</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">N=10</annotation></semantics></math>, the value is about .2589. For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>N</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">N=100</annotation></semantics></math>, it is about .0295. These are not claims that the actual risk equals those boundaries. They illustrate how much a zero count can still leave unresolved under the stated independent, identically distributed sampling model. The familiar approximation <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{N}</annotation></semantics></math> comes from <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mfrac><mrow><mi>log</mi><mn>0.05</mn></mrow><mrow><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">-\frac{\log0.05}{N}</annotation></semantics></math> for sufficiently large N, not from a universal rule that every zero-failure test proves risk below that number.</p>
 <p>The assumptions matter as much as the formula. Ten paraphrases of one easy question are not necessarily ten independent draws from the intended deployment population. A hand-selected adversarial test set may be excellent for finding a specific weakness while not estimating an ordinary-traffic failure rate. A population that changes after deployment violates the stable-distribution assumption. Report the case-selection process instead of attaching a binomial interval to any convenient count.</p>
 <h5 id="separate-group-rates-from-group-evidence">Separate group rates from group evidence<a class="heading-anchor" href="#separate-group-rates-from-group-evidence" aria-label="Link to this section">#</a></h5>
 <p>If both groups show zero failures, saying &quot;the groups perform equally&quot; confuses equal observed rates with equal underlying behavior. Group B&#x27;s single case leaves much more uncertainty and may not cover its important subtypes. Increasing the number of independent cases in B could reveal a failure pattern that was invisible in the initial sample. A denominator is part of the evidence, not a footnote to the percentage.</p>
@@ -145,7 +191,7 @@
 <p>Distinguish natural variation from adversarial stress cases. Natural variation can help estimate behavior across a workload distribution if sampled appropriately. Stress cases can expose boundary failures even when their frequency is unknown. Both are useful, but their denominators support different claims. Do not report the pass rate on a hand-constructed stress set as though it were a measured production incident rate.</p>
 <p>Repeatedly repairing a system against the same stress cases can overfit the test set. Preserve fresh cases or families for later assessment, and document which failures influenced prompt, model or tool-policy changes. A test suite&#x27;s usefulness as a development aid does not guarantee that it remains an untouched final evaluation.</p>
 <h5 id="build-a-result-that-remains-useful-after-a-failure">Build a result that remains useful after a failure<a class="heading-anchor" href="#build-a-result-that-remains-useful-after-a-failure" aria-label="Link to this section">#</a></h5>
-<p>A strong report includes the system/configuration identity, task scope, case-selection method, group and family counts, observed failures, severity rubric, required gates and unresolved conditions. It distinguishes a mechanism check from an empirical rate and a policy decision. A statement such as &quot;0/10 observed under these authored cases&quot; is more informative than &quot;safe&quot; because another reader can see both the observation and its boundary.</p>
+<p>A strong report includes the system/configuration identity, task scope, case-selection method, group and family counts, observed failures, severity rubric, required gates and unresolved conditions. It distinguishes a mechanism check from an empirical rate and a policy decision. A statement such as &quot;<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>0</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{0}{10}</annotation></semantics></math> observed under these authored cases&quot; is more informative than &quot;safe&quot; because another reader can see both the observation and its boundary.</p>
 <p>For a subject-matter assistant, include unsupported-answer behavior and tool-boundary violations alongside ordinary answer accuracy. A model can answer many questions correctly while mishandling a missing-evidence case or attempting an unavailable operation. The preceding chapters supplied those mechanism-specific records; this chapter explains how to retain them without letting an aggregate erase their significance.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Counterfactual pair:</strong> Two cases differing in a controlled attribute.</p>
@@ -157,8 +203,8 @@
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Read the supplied rows as family,group,count,failures,severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.</p>
 <h3 id="zero-observed-failures-is-a-finite-observation">Zero observed failures is a finite observation<a class="heading-anchor" href="#zero-observed-failures-is-a-finite-observation" aria-label="Link to this section">#</a></h3>
-<p>Group A has zero failures in ten trials; group B has zero failures in one trial. Both observed rates are zero, but the amount of evidence is very different. Under an explicit independent, identically distributed Bernoulli model with failure probability p, the probability of seeing zero failures in n trials is (1-p)^n. Setting this probability to 0.05 gives the one-sided 95% zero-failure upper confidence bound p_upper=1-0.05^(1/n).</p>
-<p>For n=10 the bound is about 0.2589; for n=1 it is 0.95. These large values show how little zero failures can establish with very small samples. The formula depends on the sampling model. Ten paraphrases from one prompt family may not behave like ten independent trials, and a hand-selected challenge set does not automatically estimate deployment prevalence. State the unit and collection process before attaching a population interpretation to an interval.</p>
+<p>Group A has zero failures in ten trials; group B has zero failures in one trial. Both observed rates are zero, but the amount of evidence is very different. Under an explicit independent, identically distributed Bernoulli model with failure probability p, the probability of seeing zero failures in n trials is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mi>n</mi></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(1-p\right)}^{n}</annotation></semantics></math>. Setting this probability to 0.05 gives the one-sided 95% zero-failure upper confidence bound <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>p</mi><mrow><mrow><mi mathvariant="normal">u</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></mrow></msub><mo>=</mo><mn>1</mn><mo>−</mo><msup><mrow><mn>0.05</mn></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">p_{\mathrm{upper}}=1-{0.05}^{\frac{1}{n}}</annotation></semantics></math>.</p>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">n=10</annotation></semantics></math> the bound is about 0.2589; for <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n=1</annotation></semantics></math> it is 0.95. These large values show how little zero failures can establish with very small samples. The formula depends on the sampling model. Ten paraphrases from one prompt family may not behave like ten independent trials, and a hand-selected challenge set does not automatically estimate deployment prevalence. State the unit and collection process before attaching a population interpretation to an interval.</p>
 <p>An untested group has no observed rate. Filling it with zero would confuse absence of evidence with observed success. Group definitions also need a task-relevant rationale and enough coverage to support the intended comparison. A pooled result can hide a concentrated failure in one slice, while many tiny slices can produce unstable estimates. Preserve counts and concrete failure examples alongside any aggregate.</p>
 <h3 id="robustness-tests-need-a-justified-invariance">Robustness tests need a justified invariance<a class="heading-anchor" href="#robustness-tests-need-a-justified-invariance" aria-label="Link to this section">#</a></h3>
 <p>A counterfactual pair changes a feature while holding the task-relevant information constant. If the changed attribute should not affect the answer under the task specification, a different answer is a useful diagnostic. Not every attribute change should preserve output: changing an actual causal input to the requested calculation may correctly change the result. Specify why invariance is expected before grading the pair.</p>
@@ -166,16 +212,16 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-read-group-denominators">Example A: Read group denominators<a class="heading-anchor" href="#example-a-read-group-denominators" aria-label="Link to this section">#</a></h4>
 <p>Equal observed rates do not imply equal uncertainty. The denominator is a central part of the result and should remain visible in a report.</p>
-<pre><code class="language-text">A: failures0,count10,observed rate0/10
+<pre class="highlighted-code"><code class="language-text">A: failures0,count10,observed rate0/10
 B: failures0,count1,observed rate0/1
 Neither establishes a zero population failure probability.</code></pre>
 <p><strong>Expected:</strong> both observed zero;B has much less evidence.</p>
 <h4 id="example-b-expose-a-severe-failure">Example B: Expose a severe failure<a class="heading-anchor" href="#example-b-expose-a-severe-failure" aria-label="Link to this section">#</a></h4>
 <p>Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.</p>
-<pre><code class="language-text">Pass rate = 9/10 = 90percent
+<pre class="highlighted-code"><code class="language-text">Pass rate = 9/10 = 90percent
 Severe failures = 1
 Required severe-failure gate = fail</code></pre>
-<p><strong>Expected:</strong> 90percent passes;gatefails.</p>
+<p><strong>Expected:</strong> 90percent passes;gate fails.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Every result reports family, group, count and severity. Zero observed failures is not described as zero risk; no private/personally identifying data is collected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -183,16 +229,16 @@ Required severe-failure gate = fail</code></pre>
 <li><strong>Read group denominators.</strong> GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established. <strong>Expected:</strong> both observed zero;B has much less evidence. <strong>Verify:</strong> Save the reasoning table for exercise 1, including both observed zero;B has much less evidence.</li>
 </ol>
 <ol>
-<li><strong>Expose a severe failure.</strong> Nine minor cases pass andone severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate. <strong>Expected:</strong> 90percent passes;gatefails. <strong>Verify:</strong> Save the reasoning table for exercise 2, including 90percent passes;gatefails.</li>
+<li><strong>Expose a severe failure.</strong> Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate. <strong>Expected:</strong> 90percent passes;gate fails. <strong>Verify:</strong> Save the reasoning table for exercise 2, including 90percent passes;gate fails.</li>
 </ol>
 <ol>
 <li><strong>Analyze a counterfactual pair.</strong> Two fictional applicants have identical task-relevant qualifications; only a neutral name token differs, and the system gives opposite eligibility outcomes. <strong>Expected:</strong> inconsistency requires investigation under this fixture rubric. <strong>Verify:</strong> Save the reasoning table for exercise 3, including inconsistency requires investigation under this fixture rubric.</li>
 </ol>
 <ol>
-<li><strong>Handle an untested group.</strong> GroupC hascount0. Decide what rate and claim to report. <strong>Expected:</strong> rateunknown;groupuntested. <strong>Verify:</strong> Save the reasoning table for exercise 4, including rateunknown;groupuntested.</li>
+<li><strong>Handle an untested group.</strong> GroupC hascount0. Decide what rate and claim to report. <strong>Expected:</strong> rate unknown;group untested. <strong>Verify:</strong> Save the reasoning table for exercise 4, including rate unknown;group untested.</li>
 </ol>
 <ol>
-<li><strong>Separate families from paraphrases.</strong> Twenty prompts are paraphrases ofone attack family. State the independent coverage count under family-based evaluation. <strong>Expected:</strong> one tested family,twenty variants. <strong>Verify:</strong> Save the reasoning table for exercise 5, including one tested family,twenty variants.</li>
+<li><strong>Separate families from paraphrases.</strong> Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation. <strong>Expected:</strong> one tested family,twenty variants. <strong>Verify:</strong> Save the reasoning table for exercise 5, including one tested family,twenty variants.</li>
 </ol>
 <ol>
 <li><strong>Write a finite claim.</strong> Draft a conclusion for the cases above including the severe failure and untested group. <strong>Expected:</strong> conclusion rejects a universal safety guarantee. <strong>Verify:</strong> Save the reasoning table for exercise 6, including conclusion rejects a universal safety guarantee.</li>
@@ -208,7 +254,7 @@ Required severe-failure gate = fail</code></pre>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://arxiv.org/abs/1810.03993">Model Cards for Model Reporting</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-039, Robustness, fairness and finite safety evidence.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-039, Robustness, fairness and finite safety evidence.
 Read courses/llm-theory/guides/llm-039.md and courses/llm-theory/lessons/llm-039.md. Direct prerequisites: `llm-038`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

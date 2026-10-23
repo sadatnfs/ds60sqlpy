@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,324 +161,324 @@
       <h1>Lessons</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/lessons.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;schema_version&quot;: 1,</span>
-<span>  &quot;track_id&quot;: &quot;llm-applied&quot;,</span>
-<span>  &quot;lessons&quot;: [</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-001&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-001.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-001.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-001_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-001_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-002&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-002.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-002.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-002_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-002_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-003&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-003.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-003.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-003_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-003_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-004&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-004.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-004.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-004_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-004_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-005&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-005.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-005.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-005_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-005_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-006&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-006.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-006.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-006_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-006_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-007&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-007.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-007.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-007_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-007_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-008&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-008.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-008.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-008_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-008_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-009&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-009.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-009.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-009_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-009_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-010&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-010.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-010.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-010_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-010_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-011&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-011.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-011.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-011_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-011_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-012&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-012.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-012.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-012_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-012_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-013&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-013.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-013.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-013_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-013_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-014&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-014.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-014.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-014_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-014_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-015&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-015.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-015.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-015_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-015_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-016&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-016.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-016.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-016_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-016_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-017&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-017.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-017.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-017_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-017_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-018&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-018.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-018.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-018_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-018_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-019&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-019.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-019.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-019_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-019_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-020&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-020.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-020.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-020_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-020_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-021&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;markdown&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;reading&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-021.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-021.md&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-021_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-022&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-022.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-022.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-022_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-022_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-023&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-023.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-023.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-023_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-023_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;id&quot;: &quot;llm-applied-024&quot;,</span>
-<span>      &quot;status&quot;: &quot;authored&quot;,</span>
-<span>      &quot;language&quot;: &quot;python&quot;,</span>
-<span>      &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
-<span>      &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-024.md&quot;,</span>
-<span>      &quot;source_path&quot;: &quot;courses/llm-applied/lessons/llm-applied-024.py&quot;,</span>
-<span>      &quot;solution_paths&quot;: [</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-024_solution.py&quot;,</span>
-<span>        &quot;courses/llm-applied/solutions/llm-applied-024_solutions.md&quot;</span>
-<span>      ],</span>
-<span>      &quot;verification_id&quot;: null</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;track_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lessons&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-001&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-001.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-001.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-001_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-001_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-002&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-002.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-002.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-002_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-002_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-003&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-003.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-003.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-003_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-003_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-004&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-004.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-004.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-004_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-004_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-005&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-005.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-005.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-005_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-005_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-006&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-006.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-006.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-006_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-006_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-007&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-007.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-007.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-007_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-007_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-008&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-008.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-008.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-008_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-008_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-009&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-009.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-009.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-009_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-009_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-010&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-010.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-010.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-010_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-010_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-011&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-011.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-011.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-011_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-011_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-012&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-012.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-012.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-012_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-012_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-013&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-013.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-013.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-013_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-013_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-014&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-014.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-014.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-014_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-014_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-015&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-015.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-015.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-015_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-015_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-016&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-016.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-016.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-016_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-016_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-017&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-017.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-017.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-017_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-017_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-018&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-018.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-018.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-018_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-018_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-019&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-019.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-019.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-019_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-019_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-020&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-torch-cpu&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-020.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-020.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-020_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-020_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-021&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;markdown&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;reading&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-021.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-021.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-021_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-022.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-022.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-022_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-022_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-023&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-023.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-023.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-023_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-023_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;llm-applied-024&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;python-core&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/guides/llm-applied-024.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/llm-applied/lessons/llm-applied-024.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-024_solution.py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;courses/llm-applied/solutions/llm-applied-024_solutions.md&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">],</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

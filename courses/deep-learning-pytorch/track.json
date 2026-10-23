@@ -38,7 +38,7 @@
         "Broadcasting"
       ],
       "outcome": "A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.",
-      "lab": "Create a2x3 float64 CPU tensor from values 0..5.",
+      "lab": "Create a 2-by-3 float64 CPU tensor from values 0..5.",
       "verification": "shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.",
       "paired_lesson_id": "tf-002"
     },
@@ -134,7 +134,7 @@
         "Gradient mode"
       ],
       "outcome": "PyTorch distinguishes graph tracking from gradient storage.",
-      "lab": "Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.",
+      "lab": "Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.",
       "verification": "w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.",
       "paired_lesson_id": "tf-007"
     },
@@ -153,7 +153,7 @@
         "Independent oracle"
       ],
       "outcome": "One optimizer step is the smallest complete training experiment.",
-      "lab": "Use float64 x1, 2, 3, y2x and scalar w0.",
+      "lab": "Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.",
       "verification": "mean squared loss 56/3. w.grad None; updated weight unchanged.",
       "paired_lesson_id": "tf-008"
     },
@@ -327,7 +327,7 @@
         "Weight decay"
       ],
       "outcome": "Regularization and training mode affect different parts of the experiment.",
-      "lab": "Use weights 1, -2 and compute L1and squared L2sums.",
+      "lab": "Use weights 1, -2 and compute L1 and squared L2 sums.",
       "verification": "L1=3; squared L2=5. output still requires grad; backward gives ones.",
       "paired_lesson_id": "tf-017"
     },
@@ -367,7 +367,7 @@
         "Cross-correlation"
       ],
       "outcome": "Convolution applies a shared local kernel across spatial positions.",
-      "lab": "Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.",
+      "lab": "Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.",
       "verification": "output shape 1, 1, 2, 2; all values-4. 8trainable scalars.",
       "paired_lesson_id": "tf-019"
     },
@@ -386,7 +386,7 @@
         "Label invariance"
       ],
       "outcome": "Pooling reduces local spatial information.",
-      "lab": "Pool patch 1, 3; 2, 4 with a2x2window.",
+      "lab": "Pool patch 1, 3; 2, 4 with a 2-by-2 window.",
       "verification": "max 4; average 2.5. left->right->left.",
       "paired_lesson_id": "tf-020"
     },
@@ -406,7 +406,7 @@
         "Valid-target denominator"
       ],
       "outcome": "A padded sequence contains real positions and artificial storage positions.",
-      "lab": "Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row.",
+      "lab": "Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.",
       "verification": "embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.",
       "paired_lesson_id": "tf-021"
     },
@@ -524,7 +524,7 @@
         "Unfreeze phase"
       ],
       "outcome": "Transfer learning reuses a representation while adapting a task-specific head.",
-      "lab": "Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.",
+      "lab": "Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.",
       "verification": "base output equals input; all base parameters frozen. base weight now changes.",
       "paired_lesson_id": "tf-027"
     },
@@ -564,7 +564,7 @@
         "Gradient scaling"
       ],
       "outcome": "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.",
-      "lab": "Exponentiate float32 logits1000, 999 directly.",
+      "lab": "Exponentiate float32 logits 1000, 999 directly.",
       "verification": "both exponentials infinite. ValueError before loss evaluation.",
       "paired_lesson_id": "tf-029"
     },
@@ -704,8 +704,8 @@
         "Rollback identity"
       ],
       "outcome": "A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.",
-      "lab": "Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.",
-      "verification": "3training and 2 holdout records. local checks True; production no-go; directory absent.",
+      "lab": "Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.",
+      "verification": "3 training and 2 holdout records. local checks True; production no-go; directory absent.",
       "paired_lesson_id": "tf-036"
     }
   ],

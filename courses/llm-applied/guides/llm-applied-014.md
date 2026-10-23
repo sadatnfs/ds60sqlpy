@@ -84,7 +84,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtargets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
+Concatenate prompt IDs and answer IDs, then create inputs=sequence[:-1] and targets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
 
 ## Enumerate the target positions before training
 
@@ -168,11 +168,11 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Align an answer-only record.** Use promptIDs[1, 2] andanswerIDs[5, 6, 3].
+1. **Align an answer-only record.** Use prompt IDs[1, 2] and answer IDs[5, 6, 3].
    **Expected:** inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
    **Verify:** Save the assertion results for exercise 1, including inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
 
-2. **Preserve prompt context without prompt loss.** Change promptIDs to[8, 9] while retaining the answer; inspect labels.
+2. **Preserve prompt context without prompt loss.** Change prompt IDs to[8, 9] while retaining the answer; inspect labels.
    **Expected:** prompt inputs change; answer labels remain 5, 6, 3.
    **Verify:** Save the assertion results for exercise 2, including prompt inputs change; answer labels remain 5, 6, 3.
 

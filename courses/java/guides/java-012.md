@@ -6,11 +6,11 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-011`
 
 ## Learning objectives
 
-Explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is SumList.of(1,2,3) andList.of(1.5,2.5) throughList<?extendsNumber>. The final exercise transfers the mechanism to observe erasure carefully.
+Explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>. The final exercise transfers the mechanism to observe erasure carefully.
 
 ## Purpose and mental model
 
-Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype ofList<Number>, because a caller holdingList<Number> could insert aDouble and violate the original integer list. A producer wildcard?extendsNumber permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguishArrayList<String> fromArrayList<Integer>. Avoid raw types that bypass these checks.
+Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype of List<Number>, because a caller holdingList<Number> could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList<String> from ArrayList<Integer>. Avoid raw types that bypass these checks.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ Generics express type relationships so many errors can be detected before execut
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-012/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-The<T> before a method return type declares a method type parameter. List<?extendsNumber> can be iterated asNumber for summation. List<?superInteger> can acceptInteger values. Use<T>voidcopy(List<?extendsT>source,List<?superT>target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
+The<T> before a method return type declares a method type parameter. List<?extends Number> can be iterated asNumber for summation. List<?superInteger> can acceptInteger values. Use<T>void copy(List<?extendsT>source,List<?superT>target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
 
 ## Worked example / walkthrough
 
 ### Example A: Read from a producer
 
-The method needs only to readNumber values, so anextends bound accepts both integer and double lists without permitting unsafe insertion.
+The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
 
 ```java
 import java.util.*;
@@ -61,11 +61,11 @@ public class Main {
 
 ```
 
-**Expected:** sums6.0 and4.0.
+**Expected:** sums 6.0 and 4.0.
 
 ### Example B: Write to a consumer
 
-ANumber list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
+A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
 
 ```java
 import java.util.*;
@@ -94,11 +94,11 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Read from a producer.** SumList.of(1,2,3) andList.of(1.5,2.5) throughList<?extendsNumber>.
-   **Expected:** sums6.0 and4.0.
-   **Verify:** Compare your assertion values or captured diagnostic with sums6.0 and4.0.
+1. **Read from a producer.** Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.
+   **Expected:** sums 6.0 and 4.0.
+   **Verify:** Compare your assertion values or captured diagnostic with sums 6.0 and 4.0.
 
-2. **Write to a consumer.** Append integers1,2 to aList<Number> throughList<?superInteger>.
+2. **Write to a consumer.** Append integers1,2 to a List<Number> through List<?superInteger>.
    **Expected:** listcontains1,2.
    **Verify:** Compare your assertion values or captured diagnostic with listcontains1,2.
 
@@ -106,17 +106,17 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** destinationcontains3,4.
    **Verify:** Compare your assertion values or captured diagnostic with destinationcontains3,4.
 
-4. **Preserve generic return type.** Callfirst on aString list and assign directly toString.
-   **Expected:** resultalpha.
-   **Verify:** Compare your assertion values or captured diagnostic with resultalpha.
+4. **Preserve generic return type.** Callfirst on a String list and assign directly toString.
+   **Expected:** result alpha.
+   **Verify:** Compare your assertion values or captured diagnostic with result alpha.
 
 5. **Handle an empty input contract.** Callfirst on an empty list and require a named failure.
    **Expected:** NoSuchElementException.
    **Verify:** Compare your assertion values or captured diagnostic with NoSuchElementException.
 
-6. **Observe erasure carefully.** Compare runtime classes ofArrayList<String> andArrayList<Integer>;explain why this does not permit unsafe assignments.
-   **Expected:** runtime classes equal;compile-time contracts remain distinct.
-   **Verify:** Compare your assertion values or captured diagnostic with runtime classes equal;compile-time contracts remain distinct.
+6. **Observe erasure carefully.** Compare runtime classes of ArrayList<String> and ArrayList<Integer>;explain why this does not permit unsafe assignments.
+   **Expected:** runtime classes equal; compile-time contracts remain distinct.
+   **Verify:** Compare your assertion values or captured diagnostic with runtime classes equal; compile-time contracts remain distinct.
 
 ## Common pitfalls and diagnosis
 

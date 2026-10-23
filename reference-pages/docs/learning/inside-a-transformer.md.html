@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
 <p>The complete <a href="examples/transformer_forward.py.html">NumPy walkthrough program</a> runs without network access or pretrained weights. It is deliberately small enough to inspect. Open an authored <code>python-core</code> lesson, save any existing pad, and paste the complete program into that pad to run it in Docker. The filename does not matter for the Python pad. Alternatively, run the downloaded file in a prepared Python environment with NumPy. The program includes its own checks and prints the observations discussed below.</p>
 <h3 id="1-what-the-model-is-trying-to-compute">1. What the model is trying to compute<a class="heading-anchor" href="#1-what-the-model-is-trying-to-compute" aria-label="Link to this section">#</a></h3>
 <p>A causal language model predicts a probability distribution for the next token given the tokens already visible. For a sequence of token IDs <code>x0,x1,x2</code>, the probability assigned to the sequence factors into conditional probabilities. With an explicit start context, the factorization is:</p>
-<pre><code class="language-text">P(x0,x1,x2 | start)
+<pre class="highlighted-code"><code class="language-text">P(x0,x1,x2 | start)
   = P(x0 | start) × P(x1 | start,x0) × P(x2 | start,x0,x1)</code></pre>
 <p>That identity does not specify a neural network. A table of counts can estimate the conditionals too. The Transformer is a flexible way to calculate them from a long, changing context while sharing learned parameters across positions. A good next-token model can support completion, translation, classification, code generation and dialogue when those tasks are represented as sequences. The objective alone does not guarantee factual accuracy, reliable reasoning, privacy, good calibration or compliance with an instruction.</p>
 <p>Suppose a model assigns the next observed tokens probabilities <code>0.5,0.25,0.1</code>. The sequence probability is <code>0.0125</code>. Multiplying many small probabilities underflows, so training sums negative logarithms instead. The three losses are approximately <code>0.693,1.386,2.303</code> nats. Their mean is <code>1.461</code>, and the corresponding perplexity is <code>exp(1.461)</code>, approximately <code>4.31</code>. Perplexity is a transformation of mean token loss. Comparisons require compatible tokenization, target masks, datasets and aggregation rules. It is not a direct percentage of correct facts.</p>
@@ -160,7 +206,7 @@
 <p>The walkthrough adds a small fixed position table to the embedding rows. This makes position visible without adding much arithmetic. Real models use several position schemes. RoPE rotates query and key coordinates as a function of position; it does not simply append a position ID to the text. Longer position ranges require separate evaluation, even when the formula can be evaluated there. See <a href="../../courses/llm-theory/guides/llm-007.md.html">tokenization</a>, <a href="../../courses/llm-theory/guides/llm-008.md.html">embedding lookup</a> and <a href="../../courses/llm-theory/guides/llm-044.md.html">position methods</a>.</p>
 <h3 id="3-attention-a-learned-way-to-mix-information-across-positions">3. Attention: a learned way to mix information across positions<a class="heading-anchor" href="#3-attention-a-learned-way-to-mix-information-across-positions" aria-label="Link to this section">#</a></h3>
 <p>Each position needs information from other permitted positions. Self-attention builds three projections from the current token representations:</p>
-<pre><code class="language-text">Q = X Wq          queries: what this position uses to select information
+<pre class="highlighted-code"><code class="language-text">Q = X Wq          queries: what this position uses to select information
 K = X Wk          keys: what other positions expose for that comparison
 V = X Wv          values: the information mixed after selection</code></pre>
 <p>The words query, key and value are an intuition for matrix operations. They are not stored natural-language questions, database keys or dictionary values. In one head, <code>Q</code> and <code>K</code> have shape <code>[T,dh]</code>. Their product <code>Q K^T</code> has shape <code>[T,T]</code>: row <code>i</code>, column <code>j</code> is the compatibility of query position <code>i</code> with key position <code>j</code>. Divide scores by <code>sqrt(dh)</code>, apply the allowed-position mask, then normalize each query row with softmax. Multiplying the resulting weights by <code>V</code> produces a weighted combination of value vectors for every query. This is the scaled dot-product mechanism introduced in the <a href="https://arxiv.org/abs/1706.03762">Transformer paper</a>.</p>
@@ -169,12 +215,12 @@ V = X Wv          values: the information mixed after selection</code></pre>
 <h4 id="why-the-causal-mask-matters">Why the causal mask matters<a class="heading-anchor" href="#why-the-causal-mask-matters" aria-label="Link to this section">#</a></h4>
 <p>During next-token training, the full training sequence is already in memory. Without a mask, the representation used to predict <code>fox</code> could inspect <code>fox</code> itself or later words. The model could reduce its training loss by using information unavailable during generation.</p>
 <p>For a three-position decoder input, the permitted-key matrix is:</p>
-<pre><code class="language-text">             key0  key1  key2
+<pre class="highlighted-code"><code class="language-text">             key0  key1  key2
 query0         1     0     0
 query1         1     1     0
 query2         1     1     1</code></pre>
 <p>The diagonal is permitted: the representation at input position 0 can use the input token at position 0 to predict the target at position 1. Shifted targets are what make this valid. The walkthrough obtains this first-head matrix:</p>
-<pre><code class="language-text">[[1.000000, 0.000000, 0.000000],
+<pre class="highlighted-code"><code class="language-text">[[1.000000, 0.000000, 0.000000],
  [0.218664, 0.781336, 0.000000],
  [0.280402, 0.339558, 0.380041]]</code></pre>
 <p>The zeros above the diagonal are structural, not merely very small learned preferences. The first position can attend only to itself. The second mixes the first two positions. Changing the third input token must leave the first two output rows unchanged. That <strong>prefix-invariance</strong> test is stronger than checking that a matrix happens to contain zeros: it can catch future leakage through another operation, such as normalization across the sequence.</p>

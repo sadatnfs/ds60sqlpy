@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -129,53 +175,53 @@
 <h3 id="exercise-1-trace-plus-versus-numeric-conversion">Exercise 1: Trace plus versus numeric conversion<a class="heading-anchor" href="#exercise-1-trace-plus-versus-numeric-conversion" aria-label="Link to this section">#</a></h3>
 <p>Task: Compare 2+3, 2+string 3, and Number(string 3)+2.</p>
 <p>The same symbol has different behavior when a string participates. Explicit conversion makes the intended numeric operation visible.</p>
-<pre><code class="language-javascript">assert.equal(2 + 3, 5);
-assert.equal(2 + &#x27;3&#x27;, &#x27;23&#x27;);
-assert.equal(Number(&#x27;3&#x27;) + 2, 5);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;3&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;23&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;3&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 5, string 23, and 5.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-inspect-absence-and-nan">Exercise 2: Inspect absence and NaN<a class="heading-anchor" href="#exercise-2-inspect-absence-and-nan" aria-label="Link to this section">#</a></h3>
 <p>Task: Compare typeof null, undefined and Number.isNaN results.</p>
 <p>The typeof null result is a language legacy, not evidence that null has usable object properties. Number.isNaN avoids converting arbitrary text.</p>
-<pre><code class="language-javascript">assert.equal(typeof null, &#x27;object&#x27;);
-assert.equal(typeof undefined, &#x27;undefined&#x27;);
-assert.equal(Number.isNaN(NaN), true);
-assert.equal(Number.isNaN(&#x27;not a number&#x27;), false);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;object&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;undefined&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isNaN</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isNaN</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;not a number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> null reports object; undefined reports undefined; only numeric NaN passes isNaN.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-compare-equality-contracts">Exercise 3: Compare equality contracts<a class="heading-anchor" href="#exercise-3-compare-equality-contracts" aria-label="Link to this section">#</a></h3>
 <p>Task: Use NaN, +0 and -0 with strict equality and Object.is.</p>
 <p>Different APIs use different equality relations. A collection key policy may differ from Object.is, which is examined in the Map/Set lesson.</p>
-<pre><code class="language-javascript">assert.equal(NaN === NaN, false);
-assert.equal(Object.is(NaN, NaN), true);
-assert.equal(0 === -0, true);
-assert.equal(Object.is(0, -0), false);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span> <span class="syntax-operator">===</span> <span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>is<span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NaN</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span> <span class="syntax-operator">===</span> <span class="syntax-operator">-</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>is<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-expose-floating-point-approximation">Exercise 4: Expose floating-point approximation<a class="heading-anchor" href="#exercise-4-expose-floating-point-approximation" aria-label="Link to this section">#</a></h3>
 <p>Task: Add 0.1 and 0.2 and compare with 0.3 under an explicit tolerance.</p>
 <p>A tolerance is appropriate only when the domain permits approximate arithmetic. Currency or identity calculations may require integer units or another representation.</p>
-<pre><code class="language-javascript">const value = 0.1 + 0.2;
-assert.notEqual(value, 0.3);
-assert.ok(Math.abs(value - 0.3) &lt; 1e-15);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>abs<span class="syntax-punctuation">(</span>value <span class="syntax-operator">-</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-15</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> strict equality false; absolute error below 1e-15.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-protect-integer-identity">Exercise 5: Protect integer identity<a class="heading-anchor" href="#exercise-5-protect-integer-identity" aria-label="Link to this section">#</a></h3>
 <p>Task: Compare the two integers just beyond Number.MAX_SAFE_INTEGER and then use BigInt.</p>
 <p>Losing a unit difference is unacceptable for an identifier or counter requiring exactness. Converting after rounding cannot recover the original integer.</p>
-<pre><code class="language-javascript">const max = Number.MAX_SAFE_INTEGER;
-assert.equal(max + 1, max + 2);
-const exact = BigInt(max);
-assert.notEqual(exact + 1n, exact + 2n);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> max <span class="syntax-operator">=</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>max <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> max <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> exact <span class="syntax-operator">=</span> <span class="syntax-builtin">BigInt</span><span class="syntax-punctuation">(</span>max<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>exact <span class="syntax-operator">+</span> <span class="syntax-number">1n</span><span class="syntax-punctuation">,</span> exact <span class="syntax-operator">+</span> <span class="syntax-number">2n</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> Number collapses a difference; BigInt preserves it.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-reject-ambiguous-numeric-input">Exercise 6: Reject ambiguous numeric input<a class="heading-anchor" href="#exercise-6-reject-ambiguous-numeric-input" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate finite nonblank numeric text and reject blank, Infinity and mixed BigInt arithmetic.</p>
 <p>The parser states its accepted text domain instead of accepting every Number coercion. BigInt and Number mixing needs an explicit precision policy.</p>
-<pre><code class="language-javascript">assert.equal(parseFinite(&#x27;12&#x27;), 12);
-assert.throws(() =&gt; parseFinite(&#x27; &#x27;), TypeError);
-assert.throws(() =&gt; parseFinite(&#x27;Infinity&#x27;), TypeError);
-assert.throws(() =&gt; 1n + 1, TypeError);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;12&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27; &#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Infinity&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">1n</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> valid 12 accepted; invalid cases throw.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

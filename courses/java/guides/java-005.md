@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-004`
 
 ## Learning objectives
 
-Explain array index, utf-16 code unit, code point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Copy array1,2,3,mutate the copy and compare the original. The final exercise transfers the mechanism to reject an invalid array index.
+Explain array index, utf-16 code unit, code point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Copy array 1,2,3,mutate the copy and compare the original. The final exercise transfers the mechanism to reject an invalid array index.
 
 ## Purpose and mental model
 
@@ -22,7 +22,7 @@ An array is a fixed-length indexed container. A String is immutable text represe
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-005/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Array indices start at0 and stop beforelength. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
+Array indices start at0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
 
 ## Worked example / walkthrough
 
 ### Example A: Copy array storage
 
-The new array owns its storage. A simple assignmentcopy=original would alias the same array and make the mutation visible through both variables.
+The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.
 
 ```java
 import java.util.*;
@@ -58,7 +58,7 @@ public class Main {
 
 ```
 
-**Expected:** original starts1;copy starts9.
+**Expected:** original starts 1; copy starts 9.
 
 ### Example B: Count text units
 
@@ -89,9 +89,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Copy array storage.** Copy array1,2,3,mutate the copy and compare the original.
-   **Expected:** original starts1;copy starts9.
-   **Verify:** Compare your assertion values or captured diagnostic with original starts1;copy starts9.
+1. **Copy array storage.** Copy array 1,2,3,mutate the copy and compare the original.
+   **Expected:** original starts 1; copy starts 9.
+   **Verify:** Compare your assertion values or captured diagnostic with original starts 1; copy starts 9.
 
 2. **Count text units.** Inspect stringA followed by an emoji.
    **Expected:** length3 code units;2 code points.

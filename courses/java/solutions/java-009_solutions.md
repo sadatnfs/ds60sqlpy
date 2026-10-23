@@ -14,11 +14,11 @@ Exceptions separate normal return values from failure. A checked exception is de
 
 ## Reading the reference
 
-A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing fromfinally can replace an important earlier failure.
+A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
 
 ## Exercise 1: Close on normal completion
 
-Task: Open a Probe resource,recordbody,then inspect closure order.
+Task: Open a Probe resource, record body, then inspect closure order.
 
 Leaving the block triggers close even without an explicit call in the body. Ownership is visible in the block structure.
 
@@ -28,9 +28,9 @@ try (Probe resource = new Probe("A", events, false)) { events.add("body"); }
 assert events.equals(List.of("body", "closeA"));
 ```
 
-**Expected:** eventsbody,closeA.
+**Expected:** events body, close A.
 
-**Verify:** Compare the program values or named exception with eventsbody,closeA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with events body, close A. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 2: Close in reverse order
 
@@ -50,9 +50,9 @@ assert events.equals(List.of("body", "closeB", "closeA"));
 
 ## Exercise 3: Close after body failure
 
-Task: ThrowIllegalStateException in the body and inspect events after catching it.
+Task: Throw IllegalStateException in the body and inspect events after catching it.
 
-Exceptional control flow does not skip resource closure. A manually placedclose after the body statement would never execute in this case.
+Exceptional control flow does not skip resource closure. A manually placed close after the body statement would never execute in this case.
 
 ```java
 events.clear(); boolean bodyFailed = false;
@@ -61,9 +61,9 @@ catch (IllegalStateException expected) { bodyFailed = true; }
 assert bodyFailed && events.equals(List.of("closeA"));
 ```
 
-**Expected:** closeA stillrecorded.
+**Expected:** close A still recorded.
 
-**Verify:** Compare the program values or named exception with closeA stillrecorded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with close A still recorded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 4: Preserve suppressed close failure
 
@@ -81,13 +81,13 @@ catch (IllegalStateException expected) {
 }
 ```
 
-**Expected:** primary messagebody;one suppressed exceptioncloseA.
+**Expected:** primary message body;one suppressed exceptioncloseA.
 
-**Verify:** Compare the program values or named exception with primary messagebody;one suppressed exceptioncloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with primary message body;one suppressed exceptioncloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Observe close-only failure
 
-Task: Let the body succeed butclose throwIOException.
+Task: Let the body succeed but close throwIOException.
 
 When there is no body exception, a close failure becomes the primary failure. Resource cleanup is part of the operation outcome.
 
@@ -104,7 +104,7 @@ assert closeFailed;
 
 ## Exercise 6: Retain a translated cause
 
-Task: Wrap anIOException inIllegalStateException with a domain message and inspectcause.
+Task: Wrap an IOException in IllegalStateException with a domain message and inspect cause.
 
 A useful translation adds context while preserving diagnostic ancestry. Creating a new exception with only the old message would discard type and stack information.
 
@@ -114,9 +114,9 @@ var translated = new IllegalStateException("Cannot load lesson fixture", origina
 assert translated.getCause() == original && translated.getMessage().contains("fixture");
 ```
 
-**Expected:** cause remains the originalIOException.
+**Expected:** cause remains the original IOException.
 
-**Verify:** Compare the program values or named exception with cause remains the originalIOException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with cause remains the original IOException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

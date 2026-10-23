@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -385,12 +431,14 @@
 
         <div class="artifact-content"><h3 id="guide--sql-scale-01-cursor-pagination-and-bounded-batches">SQL-SCALE-01: Cursor Pagination and Bounded Batches<a class="heading-anchor" href="#guide--sql-scale-01-cursor-pagination-and-bounded-batches" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Use only the local disposable <code>advanced_sql_training</code> database on PostgreSQL 16 or newer. The lesson page is a readable preview. In the private course portal, choose <strong>Create/open guided SQL notebook</strong>, run readiness, acknowledge only the explicitly offered course reset if needed, and edit the notebook&#x27;s ignored <code>.learning/sql/sql-scale-01/</code> SQL copy. Its exact path is <code>.learning/sql/sql-scale-01/lesson/workspace/sql/professional/lessons/sql_scale_01_cursors_and_batches.sql</code>. Save the copy and run its complete-script cell. Output appears below that cell as a full <code>psql</code> transcript. A successful run ends in <code>ROLLBACK</code>, exits 0, and has the example identities stated below. The setup uses temporary tables and no external data or extension.</p>
 <p>If using VS Code directly, run from the repository root. These fallbacks work in terminals after PostgreSQL setup:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql/professional/lessons/sql_scale_01_cursors_and_batches.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_scale_01_cursors_and_batches.sql</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_scale_01_cursors_and_batches.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_scale_01_cursors_and_batches.sql</code></pre>
 <p>Keep <code>-X</code> to ignore personal client startup changes and <code>ON_ERROR_STOP</code> to stop at the first unexpected error. If <code>psql</code> is missing, return to the operating-system setup and <code>scripts/course.py doctor</code>. An authentication failure needs the local setup workflow, never a password pasted into a lesson. If the database-name guard rejects the run, inspect your target instead of removing the guard. After an unexpected transaction error, fix that first error and rerun the whole file in a fresh connection. To try an exercise, put its SQL before the final <code>ROLLBACK</code> in your private copy; temporary tables exist only in that connection and transaction. Running this official learner file demonstrates the examples; exercises remain answer-free until you add an attempt. Do not edit the separate official solutions while studying.</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -433,18 +481,18 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-save-the-whole-boundary-from-the-first-page">Example 1: Save the whole boundary from the first page<a class="heading-anchor" href="#guide--example-1-save-the-whole-boundary-from-the-first-page" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT event_id, occurred_at
-FROM scale_events
-ORDER BY occurred_at DESC NULLS LAST, event_id DESC
-LIMIT 2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span> occurred_at
+<span class="syntax-keyword">FROM</span> scale_events
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The first page returns IDs 6 and 3. The continuation boundary is the second row, timestamp 11:00 UTC and event_id 3. Both values are required by the complete order. LIMIT bounds the result, and the index is a possible access path rather than a guarantee that this six-row example will use it. The event timestamp can differ from arrival order.</p>
 <p><strong>Expected:</strong> Two event rows, columns event_id, occurred_at: IDs 6 then 3; cursor (2024-01-01 11:00+00,3).</p>
 <h5 id="guide--example-2-continue-across-a-tied-timestamp">Example 2: Continue across a tied timestamp<a class="heading-anchor" href="#guide--example-2-continue-across-a-tied-timestamp" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT event_id, occurred_at
-FROM scale_events
-WHERE (occurred_at,event_id) &lt; (TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3)
-ORDER BY occurred_at DESC NULLS LAST,event_id DESC
-LIMIT 2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span> occurred_at
+<span class="syntax-keyword">FROM</span> scale_events
+<span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The known-value comparison admits IDs 2,1,5, then the row cap returns 2 and 1. Their equal timestamps remain distinct because identity is the second comparison key. This short example deliberately does not finish the NULL phase; the later exercise adds that policy. The final returned boundary becomes (10:00,1), so continuing from timestamp alone would lose or repeat a tied event.</p>
 <p><strong>Expected:</strong> Two event rows, columns event_id, occurred_at: IDs 2 then 1, both 10:00 UTC.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -520,7 +568,7 @@ LIMIT 2;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>
-<pre><code class="language-text">Tutor me through sql-scale-01: Cursor Pagination and Bounded Batches using the checked-in $guide-ds60sqlpy-learning skill.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-scale-01: Cursor Pagination and Bounded Batches using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md
 Answer-free learner: sql/professional/lessons/sql_scale_01_cursors_and_batches.sql
 Direct prerequisite boundary: sql-35, sql-38, sql-test-01.
@@ -568,97 +616,97 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-SCALE-01: Cursor Pagination and Bounded Batches</span>
-<span> </span>
-<span>-- Guide: sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md</span>
-<span> </span>
-<span>-- Use Create/open guided SQL notebook and the ignored learner copy.</span>
-<span> </span>
-<span>-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span>
-<span> </span>
-<span>-- Only the local disposable advanced_sql_training database is permitted.</span>
-<span> </span>
-<span>-- Setup is supplied. Write attempts before the final ROLLBACK.</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE scale_events (</span>
-<span>  event_id integer PRIMARY KEY, received_seq integer UNIQUE NOT NULL,</span>
-<span>  occurred_at timestamptz</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO scale_events VALUES</span>
-<span>(1,1,TIMESTAMPTZ &#x27;2024-01-01 10:00+00&#x27;),</span>
-<span>(2,2,TIMESTAMPTZ &#x27;2024-01-01 10:00+00&#x27;),</span>
-<span>(3,3,TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;),</span>
-<span>(4,4,NULL), (5,5,TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27;),</span>
-<span>(6,6,TIMESTAMPTZ &#x27;2024-01-01 12:00+00&#x27;);</span>
-<span>CREATE INDEX ON scale_events (occurred_at DESC NULLS LAST,event_id DESC);</span>
-<span> </span>
-<span>-- Example 1: Save the whole boundary from the first page</span>
-<span>-- Expected: Two event rows, columns event_id, occurred_at: IDs 6 then 3; cursor (2024-01-01 11:00+00,3).</span>
-<span>SELECT event_id, occurred_at</span>
-<span>FROM scale_events</span>
-<span>ORDER BY occurred_at DESC NULLS LAST, event_id DESC</span>
-<span>LIMIT 2;</span>
-<span> </span>
-<span>-- Example 2: Continue across a tied timestamp</span>
-<span>-- Expected: Two event rows, columns event_id, occurred_at: IDs 2 then 1, both 10:00 UTC.</span>
-<span>SELECT event_id, occurred_at</span>
-<span>FROM scale_events</span>
-<span>WHERE (occurred_at,event_id) &lt; (TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3)</span>
-<span>ORDER BY occurred_at DESC NULLS LAST,event_id DESC</span>
-<span>LIMIT 2;</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- Keep predictions and attempts in your own working copy.</span>
-<span> </span>
-<span>-- 1. Record an exact first-page boundary.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 1, Return the first two event rows with event_id, occurred_at. Record both cursor fields and explain why timestamp alone is insufficient.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 1, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 6,3. Cursor is (11:00 UTC on January 1 2024,3).</span>
-<span>-- Verify: For sql-scale-01 Exercise 1, Inspect page IDs 6,3 and save both values from the last returned row, timestamp 11:00 UTC and ID 3. A separately computed maximum ID is not this cursor.</span>
-<span>-- Hint: The cursor comes from the last row actually returned.</span>
-<span> </span>
-<span>-- 2. Traverse a timestamp tie without overlap.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 2, Continue after (2024-01-01 11:00+00,3) for two known-timestamp rows, projecting event_id, occurred_at. Use a strict compound boundary.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 2, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1. Neither appears on page one; both timestamp ties survive.</span>
-<span>-- Verify: For sql-scale-01 Exercise 2, Compare ordered IDs 2,1, require no overlap with first-page IDs 6,3, and retain both equal 10:00 timestamps. A timestamp-only or non-strict boundary fails these controls.</span>
-<span>-- Hint: Compare the row pair in the same direction as the final sort.</span>
-<span> </span>
-<span>-- 3. Cross into the unknown-timestamp phase.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 3, Continue after the last known boundary (2024-01-01 09:00+00,5) and include the NULL tail. Return event_id, occurred_at. Explain the follow-on predicate after a NULL cursor at ID 4.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 3, One event row keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: ID 4 with NULL. After that NULL cursor, occurred_at IS NULL AND event_id &lt; 4 returns zero rows.</span>
-<span>-- Verify: For sql-scale-01 Exercise 3, Require ID 4 with occurred_at NULL, then inspect the follow-on NULL-only identity predicate and confirm it returns zero rows for this fixture.</span>
-<span>-- Hint: A known boundary admits its earlier known rows plus the NULL phase.</span>
-<span> </span>
-<span>-- 4. Expose positional drift after an insertion.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 4, Model inserting event 7 at 13:00 after page one. Compare an OFFSET 2 page with the original compound cursor page. Return path, event_id, occurred_at for both two-row pages.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 4, Four path-event rows identified by (path,event_id), columns path, event_id, occurred_at; final ORDER BY path, occurred_at DESC NULLS LAST, event_id DESC. cursor gives 2,1; offset gives 3,2, repeating page-one ID 3.</span>
-<span>-- Verify: For sql-scale-01 Exercise 4, Compare offset page IDs 3,2 with cursor page IDs 2,1. Only the offset result repeats first-page ID 3, and a separate source count still equals six.</span>
-<span>-- Hint: Use a CTE that UNION ALL adds event 7 without changing the fixture.</span>
-<span> </span>
-<span>-- 5. Exclude a late arrival with a declared sealed prefix.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 5, Add an illustrative event 7 received_seq 7 with event timestamp 10:30. Continue after (11:00,3) under the sealed received_seq &lt;= 6 fence, including NULLs. Return event_id, received_seq, occurred_at.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 5, Four event rows keyed by event_id, columns event_id, received_seq, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1,5,4. Late event 7 is excluded despite fitting the time cursor.</span>
-<span>-- Verify: For sql-scale-01 Exercise 5, Inspect returned event_id values 2,1,5,4 under the sealed prefix and confirm incoming ID 7 is excluded despite fitting the timestamp cursor. Explain why allocated sequence order is not committed-prefix completeness.</span>
-<span>-- Hint: Apply membership and continuation as separate AND conditions; group the OR continuation cases.</span>
-<span> </span>
-<span>-- 6. Prove bounded traversal covers the static fixture.</span>
-<span>-- Inputs/evidence: For sql-scale-01 Exercise 6, Build a deterministic batch manifest over all six rows with a batch size of two using row_number only as a validation oracle. Return batch_no, event_ids, row_count. Explain why this oracle is not the production cursor algorithm.</span>
-<span>-- Expected result/shape: For sql-scale-01 Exercise 6, Three manifest rows keyed by batch_no, columns batch_no, event_ids, row_count; final ORDER BY batch_no: (1,{6,3},2),(2,{2,1},2),(3,{5,4},2). Concatenated identities cover all six exactly once.</span>
-<span>-- Verify: For sql-scale-01 Exercise 6, Inspect batch arrays {6,3},{2,1},{5,4}, each size two. Their concatenation must contain all six source event_id values exactly once, including the unknown timestamp row.</span>
-<span>-- Hint: Number the fixed ordered input and group each consecutive pair.</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-SCALE-01: Cursor Pagination and Bounded Batches</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> scale_events <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> received_seq <span class="syntax-builtin">integer</span> <span class="syntax-keyword">UNIQUE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  occurred_at timestamptz</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> scale_events <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 12:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">ON</span> scale_events <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 1: Save the whole boundary from the first page</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two event rows, columns event_id, occurred_at: IDs 6 then 3; cursor (2024-01-01 11:00+00,3).</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span> occurred_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 2: Continue across a tied timestamp</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two event rows, columns event_id, occurred_at: IDs 2 then 1, both 10:00 UTC.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span> occurred_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Record an exact first-page boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 1, Return the first two event rows with event_id, occurred_at. Record both cursor fields and explain why timestamp alone is insufficient.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 1, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 6,3. Cursor is (11:00 UTC on January 1 2024,3).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 1, Inspect page IDs 6,3 and save both values from the last returned row, timestamp 11:00 UTC and ID 3. A separately computed maximum ID is not this cursor.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: The cursor comes from the last row actually returned.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Traverse a timestamp tie without overlap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 2, Continue after (2024-01-01 11:00+00,3) for two known-timestamp rows, projecting event_id, occurred_at. Use a strict compound boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 2, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1. Neither appears on page one; both timestamp ties survive.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 2, Compare ordered IDs 2,1, require no overlap with first-page IDs 6,3, and retain both equal 10:00 timestamps. A timestamp-only or non-strict boundary fails these controls.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Compare the row pair in the same direction as the final sort.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Cross into the unknown-timestamp phase.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 3, Continue after the last known boundary (2024-01-01 09:00+00,5) and include the NULL tail. Return event_id, occurred_at. Explain the follow-on predicate after a NULL cursor at ID 4.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 3, One event row keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: ID 4 with NULL. After that NULL cursor, occurred_at IS NULL AND event_id &lt; 4 returns zero rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 3, Require ID 4 with occurred_at NULL, then inspect the follow-on NULL-only identity predicate and confirm it returns zero rows for this fixture.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: A known boundary admits its earlier known rows plus the NULL phase.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Expose positional drift after an insertion.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 4, Model inserting event 7 at 13:00 after page one. Compare an OFFSET 2 page with the original compound cursor page. Return path, event_id, occurred_at for both two-row pages.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 4, Four path-event rows identified by (path,event_id), columns path, event_id, occurred_at; final ORDER BY path, occurred_at DESC NULLS LAST, event_id DESC. cursor gives 2,1; offset gives 3,2, repeating page-one ID 3.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 4, Compare offset page IDs 3,2 with cursor page IDs 2,1. Only the offset result repeats first-page ID 3, and a separate source count still equals six.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Use a CTE that UNION ALL adds event 7 without changing the fixture.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Exclude a late arrival with a declared sealed prefix.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 5, Add an illustrative event 7 received_seq 7 with event timestamp 10:30. Continue after (11:00,3) under the sealed received_seq &lt;= 6 fence, including NULLs. Return event_id, received_seq, occurred_at.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 5, Four event rows keyed by event_id, columns event_id, received_seq, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1,5,4. Late event 7 is excluded despite fitting the time cursor.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 5, Inspect returned event_id values 2,1,5,4 under the sealed prefix and confirm incoming ID 7 is excluded despite fitting the timestamp cursor. Explain why allocated sequence order is not committed-prefix completeness.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Apply membership and continuation as separate AND conditions; group the OR continuation cases.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Prove bounded traversal covers the static fixture.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-scale-01 Exercise 6, Build a deterministic batch manifest over all six rows with a batch size of two using row_number only as a validation oracle. Return batch_no, event_ids, row_count. Explain why this oracle is not the production cursor algorithm.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-scale-01 Exercise 6, Three manifest rows keyed by batch_no, columns batch_no, event_ids, row_count; final ORDER BY batch_no: (1,{6,3},2),(2,{2,1},2),(3,{5,4},2). Concatenated identities cover all six exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-scale-01 Exercise 6, Inspect batch arrays {6,3},{2,1},{5,4}, each size two. Their concatenation must contain all six source event_id values exactly once, including the unknown timestamp row.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Number the fixed ordered input and group each consecutive pair.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -696,62 +744,62 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-record-an-exact-first-page-boundary">Exercise 1: Record an exact first-page boundary<a class="heading-anchor" href="#solution-1--exercise-1-record-an-exact-first-page-boundary" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT event_id,occurred_at FROM scale_events ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The query establishes a complete order before limiting the page. Known timestamps descend, NULL values are postponed, and event_id breaks all remaining ties. Capture the last returned pair, not the largest ID in the table or an independently calculated timestamp. The assertion checks the first-page identity sequence. Although the tiny table may choose a sequential scan, that says nothing about the semantic correctness of its page boundary. A representative performance exercise belongs in a separate controlled dataset. Keep cursor format and timestamp zone explicit when an application serializes it, and reject malformed or incompatible cursors before composing a query.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 1, Return the first two event rows with event_id, occurred_at. Record both cursor fields and explain why timestamp alone is insufficient.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 1, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 6,3. Cursor is (11:00 UTC on January 1 2024,3).</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 1, Inspect page IDs 6,3 and save both values from the last returned row, timestamp 11:00 UTC and ID 3. A separately computed maximum ID is not this cursor.</p>
 <h4 id="solution-1--exercise-2-traverse-a-timestamp-tie-without-overlap">Exercise 2: Traverse a timestamp tie without overlap<a class="heading-anchor" href="#solution-1--exercise-2-traverse-a-timestamp-tie-without-overlap" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT event_id,occurred_at FROM scale_events WHERE (occurred_at,event_id) &lt; (TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Lexicographic less-than matches the two descending keys for these non-NULL rows. At the cursor timestamp, smaller IDs qualify; at earlier timestamps, any ID qualifies. Strict comparison excludes the cursor itself. The returned pair at 10:00 demonstrates that ties must be resolved in both ORDER BY and the continuation condition. The assertion checks the full ordered identity list and also checks that none belongs to page one. This exercise intentionally handles known timestamps only. Presenting it as a complete all-row export would be wrong because a NULL timestamp does not participate in ordinary tuple inequality the way ORDER BY places it.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 2, Continue after (2024-01-01 11:00+00,3) for two known-timestamp rows, projecting event_id, occurred_at. Use a strict compound boundary.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 2, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1. Neither appears on page one; both timestamp ties survive.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 2, Compare ordered IDs 2,1, require no overlap with first-page IDs 6,3, and retain both equal 10:00 timestamps. A timestamp-only or non-strict boundary fails these controls.</p>
 <h4 id="solution-1--exercise-3-cross-into-the-unknown-timestamp-phase">Exercise 3: Cross into the unknown-timestamp phase<a class="heading-anchor" href="#solution-1--exercise-3-cross-into-the-unknown-timestamp-phase" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">SELECT event_id,occurred_at FROM scale_events
-WHERE occurred_at &lt; TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27;
-   OR (occurred_at = TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27; AND event_id &lt; 5)
-   OR occurred_at IS NULL
-ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events
+<span class="syntax-keyword">WHERE</span> occurred_at <span class="syntax-operator">&lt;</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span>
+   <span class="syntax-keyword">OR</span> <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-operator">=</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span> <span class="syntax-keyword">AND</span> event_id <span class="syntax-operator">&lt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+   <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The expanded predicate names the two known-value continuation cases and the separate unknown phase. This matches the presentation policy rather than relying on an arbitrary sentinel timestamp. Once the saved cursor itself is NULL, remaining known timestamps are already behind the traversal and must not be revisited; compare event_id only among NULL timestamp rows. The assertion verifies that ID 4 is returned with its missing timestamp intact and that the next phase is empty on the fixture. A real cursor should encode enough state to choose the appropriate predicate safely. Adding NULLS LAST to ORDER BY alone never repairs a WHERE predicate that excludes every NULL.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 3, Continue after the last known boundary (2024-01-01 09:00+00,5) and include the NULL tail. Return event_id, occurred_at. Explain the follow-on predicate after a NULL cursor at ID 4.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 3, One event row keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: ID 4 with NULL. After that NULL cursor, occurred_at IS NULL AND event_id &lt; 4 returns zero rows.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 3, Require ID 4 with occurred_at NULL, then inspect the follow-on NULL-only identity predicate and confirm it returns zero rows for this fixture.</p>
 <h4 id="solution-1--exercise-4-expose-positional-drift-after-an-insertion">Exercise 4: Expose positional drift after an insertion<a class="heading-anchor" href="#solution-1--exercise-4-expose-positional-drift-after-an-insertion" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">WITH changed AS (
- SELECT event_id,occurred_at FROM scale_events
- UNION ALL SELECT 7,TIMESTAMPTZ &#x27;2024-01-01 13:00+00&#x27;
-), positional AS (
- SELECT event_id,occurred_at FROM changed ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2 OFFSET 2
-), continuation AS (
- SELECT event_id,occurred_at FROM changed WHERE (occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3)
- ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2
-)
-SELECT &#x27;offset&#x27; AS path,event_id,occurred_at FROM positional
-UNION ALL SELECT &#x27;cursor&#x27;,event_id,occurred_at FROM continuation
-ORDER BY path,occurred_at DESC NULLS LAST,event_id DESC;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 13:00+00&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> positional <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span> <span class="syntax-keyword">OFFSET</span> <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> continuation <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;offset&#x27;</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> positional
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> continuation
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The CTE builds a changed input where a new leading event shifts every old position. OFFSET 2 now starts at original page-one row 3, so that row repeats. The saved cursor still filters below the old boundary and returns IDs 2 and 1. This is evidence for a specific mutation case, not proof against all mutations: changing a previously returned row&#x27;s sort timestamp could still move it across the cursor. The assertion checks each labeled page independently. No permanent insert is needed to demonstrate the counterexample, so the default script stays single-session and rollback-safe. Explain the mutation policy along with the query whenever promising traversal behavior.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 4, Model inserting event 7 at 13:00 after page one. Compare an OFFSET 2 page with the original compound cursor page. Return path, event_id, occurred_at for both two-row pages.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 4, Four path-event rows identified by (path,event_id), columns path, event_id, occurred_at; final ORDER BY path, occurred_at DESC NULLS LAST, event_id DESC. cursor gives 2,1; offset gives 3,2, repeating page-one ID 3.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 4, Compare offset page IDs 3,2 with cursor page IDs 2,1. Only the offset result repeats first-page ID 3, and a separate source count still equals six.</p>
 <h4 id="solution-1--exercise-5-exclude-a-late-arrival-with-a-declared-sealed-prefix">Exercise 5: Exclude a late arrival with a declared sealed prefix<a class="heading-anchor" href="#solution-1--exercise-5-exclude-a-late-arrival-with-a-declared-sealed-prefix" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">WITH incoming AS (
- SELECT event_id,received_seq,occurred_at FROM scale_events
- UNION ALL SELECT 7,7,TIMESTAMPTZ &#x27;2024-01-01 10:30+00&#x27;
-)
-SELECT event_id,received_seq,occurred_at FROM incoming
-WHERE received_seq &lt;= 6 AND ((occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) OR occurred_at IS NULL)
-ORDER BY occurred_at DESC NULLS LAST,event_id DESC;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:30+00&#x27;</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> incoming
+<span class="syntax-keyword">WHERE</span> received_seq <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The fence defines input membership, while the cursor defines position inside that membership. The late event&#x27;s timestamp fits below the cursor, but its received_seq lies beyond the sealed prefix, so it is excluded. Parentheses prevent the NULL alternative from bypassing the fence. The assertion checks all remaining IDs in presentation order. This fixture&#x27;s prefix is explicitly complete and immutable. It is not a general guarantee of PostgreSQL sequence values: values can be allocated in a transaction that commits after a later allocation, and sequence gaps are normal. A real export must establish a valid snapshot or application seal before interpreting a numeric cutoff as complete input.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 5, Add an illustrative event 7 received_seq 7 with event timestamp 10:30. Continue after (11:00,3) under the sealed received_seq &lt;= 6 fence, including NULLs. Return event_id, received_seq, occurred_at.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 5, Four event rows keyed by event_id, columns event_id, received_seq, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1,5,4. Late event 7 is excluded despite fitting the time cursor.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 5, Inspect returned event_id values 2,1,5,4 under the sealed prefix and confirm incoming ID 7 is excluded despite fitting the timestamp cursor. Explain why allocated sequence order is not committed-prefix completeness.</p>
 <h4 id="solution-1--exercise-6-prove-bounded-traversal-covers-the-static-fixture">Exercise 6: Prove bounded traversal covers the static fixture<a class="heading-anchor" href="#solution-1--exercise-6-prove-bounded-traversal-covers-the-static-fixture" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">WITH ordered AS (
- SELECT event_id,row_number() OVER (ORDER BY occurred_at DESC NULLS LAST,event_id DESC) AS position FROM scale_events
-)
-SELECT ((position-1)/2+1)::integer AS batch_no,array_agg(event_id ORDER BY position) AS event_ids,count(*) AS row_count
-FROM ordered GROUP BY (position-1)/2+1 ORDER BY batch_no;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span> <span class="syntax-keyword">FROM</span> scale_events
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> batch_no<span class="syntax-punctuation">,</span>array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_ids<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span> ordered <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> batch_no<span class="syntax-punctuation">;</span></code></pre>
 <p>ROW_NUMBER assigns a unique position under the same total order, and integer division groups consecutive pairs into manifest batches. This makes a simple independent oracle for a fixed fixture: compare actual cursor pages against the listed batches. Computing positions for the whole input on every request would give up the bounded continuation behavior being taught, so the oracle is a verification tool rather than the implementation. The assertion checks the complete expected manifest and total row coverage. For real workloads separately measure representative EXPLAIN plans and latency without forcing an index choice. EXPLAIN ANALYZE executes its statement; do not adapt the example to writes without acknowledging that effect.</p>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 6, Build a deterministic batch manifest over all six rows with a batch size of two using row_number only as a validation oracle. Return batch_no, event_ids, row_count. Explain why this oracle is not the production cursor algorithm.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 6, Three manifest rows keyed by batch_no, columns batch_no, event_ids, row_count; final ORDER BY batch_no: (1,{6,3},2),(2,{2,1},2),(3,{5,4},2). Concatenated identities cover all six exactly once.</p>
@@ -790,154 +838,154 @@ FROM ordered GROUP BY (position-1)/2+1 ORDER BY batch_no;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-SCALE-01: executable solutions and fail-fast checks</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>DO $course_target$</span>
-<span>BEGIN</span>
-<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
-<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$course_target$;</span>
-<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
-<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
-<span> </span>
-<span>CREATE TEMP TABLE scale_events (</span>
-<span>  event_id integer PRIMARY KEY, received_seq integer UNIQUE NOT NULL,</span>
-<span>  occurred_at timestamptz</span>
-<span>) ON COMMIT DROP;</span>
-<span>INSERT INTO scale_events VALUES</span>
-<span>(1,1,TIMESTAMPTZ &#x27;2024-01-01 10:00+00&#x27;),</span>
-<span>(2,2,TIMESTAMPTZ &#x27;2024-01-01 10:00+00&#x27;),</span>
-<span>(3,3,TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;),</span>
-<span>(4,4,NULL), (5,5,TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27;),</span>
-<span>(6,6,TIMESTAMPTZ &#x27;2024-01-01 12:00+00&#x27;);</span>
-<span>CREATE INDEX ON scale_events (occurred_at DESC NULLS LAST,event_id DESC);</span>
-<span> </span>
-<span>CREATE FUNCTION pg_temp.assert_true(ok boolean, message text)</span>
-<span>RETURNS void LANGUAGE plpgsql AS $assert$</span>
-<span>BEGIN</span>
-<span>  IF ok IS DISTINCT FROM true THEN</span>
-<span>    RAISE EXCEPTION &#x27;Contract failed: %&#x27;, message;</span>
-<span>  END IF;</span>
-<span>END</span>
-<span>$assert$;</span>
-<span> </span>
-<span>-- Exercises: one isolated answer and verification per prompt.</span>
-<span> </span>
-<span>-- 1. Record an exact first-page boundary</span>
-<span>SAVEPOINT exercise_1;</span>
-<span>SELECT event_id,occurred_at FROM scale_events ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>CREATE TEMP TABLE solution_answer_1 ON COMMIT DROP AS</span>
-<span>SELECT event_id,occurred_at FROM scale_events ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(event_id ORDER BY occurred_at DESC NULLS LAST,event_id DESC) FROM solution_answer_1) = ARRAY[6,3], &#x27;sql-scale-01 exercise 1&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
-<span>RELEASE SAVEPOINT exercise_1;</span>
-<span> </span>
-<span>-- 2. Traverse a timestamp tie without overlap</span>
-<span>SAVEPOINT exercise_2;</span>
-<span>SELECT event_id,occurred_at FROM scale_events WHERE (occurred_at,event_id) &lt; (TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>CREATE TEMP TABLE solution_answer_2 ON COMMIT DROP AS</span>
-<span>SELECT event_id,occurred_at FROM scale_events WHERE (occurred_at,event_id) &lt; (TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(event_id ORDER BY occurred_at DESC NULLS LAST,event_id DESC) FROM solution_answer_2)=ARRAY[2,1] AND NOT EXISTS (SELECT 1 FROM solution_answer_2 WHERE event_id IN (6,3)), &#x27;sql-scale-01 exercise 2&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
-<span>RELEASE SAVEPOINT exercise_2;</span>
-<span> </span>
-<span>-- 3. Cross into the unknown-timestamp phase</span>
-<span>SAVEPOINT exercise_3;</span>
-<span>SELECT event_id,occurred_at FROM scale_events</span>
-<span>WHERE occurred_at &lt; TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27;</span>
-<span>   OR (occurred_at = TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27; AND event_id &lt; 5)</span>
-<span>   OR occurred_at IS NULL</span>
-<span>ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>CREATE TEMP TABLE solution_answer_3 ON COMMIT DROP AS</span>
-<span>SELECT event_id,occurred_at FROM scale_events</span>
-<span>WHERE occurred_at &lt; TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27;</span>
-<span>   OR (occurred_at = TIMESTAMPTZ &#x27;2024-01-01 09:00+00&#x27; AND event_id &lt; 5)</span>
-<span>   OR occurred_at IS NULL</span>
-<span>ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*)=1 AND min(event_id)=4 AND bool_and(occurred_at IS NULL) FROM solution_answer_3) AND NOT EXISTS (SELECT 1 FROM scale_events WHERE occurred_at IS NULL AND event_id&lt;4), &#x27;sql-scale-01 exercise 3&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
-<span>RELEASE SAVEPOINT exercise_3;</span>
-<span> </span>
-<span>-- 4. Expose positional drift after an insertion</span>
-<span>SAVEPOINT exercise_4;</span>
-<span>WITH changed AS (</span>
-<span> SELECT event_id,occurred_at FROM scale_events</span>
-<span> UNION ALL SELECT 7,TIMESTAMPTZ &#x27;2024-01-01 13:00+00&#x27;</span>
-<span>), positional AS (</span>
-<span> SELECT event_id,occurred_at FROM changed ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2 OFFSET 2</span>
-<span>), continuation AS (</span>
-<span> SELECT event_id,occurred_at FROM changed WHERE (occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3)</span>
-<span> ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2</span>
-<span>)</span>
-<span>SELECT &#x27;offset&#x27; AS path,event_id,occurred_at FROM positional</span>
-<span>UNION ALL SELECT &#x27;cursor&#x27;,event_id,occurred_at FROM continuation</span>
-<span>ORDER BY path,occurred_at DESC NULLS LAST,event_id DESC;</span>
-<span>CREATE TEMP TABLE solution_answer_4 ON COMMIT DROP AS</span>
-<span>WITH changed AS (</span>
-<span> SELECT event_id,occurred_at FROM scale_events</span>
-<span> UNION ALL SELECT 7,TIMESTAMPTZ &#x27;2024-01-01 13:00+00&#x27;</span>
-<span>), positional AS (</span>
-<span> SELECT event_id,occurred_at FROM changed ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2 OFFSET 2</span>
-<span>), continuation AS (</span>
-<span> SELECT event_id,occurred_at FROM changed WHERE (occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3)</span>
-<span> ORDER BY occurred_at DESC NULLS LAST,event_id DESC LIMIT 2</span>
-<span>)</span>
-<span>SELECT &#x27;offset&#x27; AS path,event_id,occurred_at FROM positional</span>
-<span>UNION ALL SELECT &#x27;cursor&#x27;,event_id,occurred_at FROM continuation</span>
-<span>ORDER BY path,occurred_at DESC NULLS LAST,event_id DESC;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(event_id ORDER BY occurred_at DESC NULLS LAST,event_id DESC) FROM solution_answer_4 WHERE path=&#x27;cursor&#x27;)=ARRAY[2,1] AND (SELECT array_agg(event_id ORDER BY occurred_at DESC NULLS LAST,event_id DESC) FROM solution_answer_4 WHERE path=&#x27;offset&#x27;)=ARRAY[3,2], &#x27;sql-scale-01 exercise 4&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
-<span>RELEASE SAVEPOINT exercise_4;</span>
-<span> </span>
-<span>-- 5. Exclude a late arrival with a declared sealed prefix</span>
-<span>SAVEPOINT exercise_5;</span>
-<span>WITH incoming AS (</span>
-<span> SELECT event_id,received_seq,occurred_at FROM scale_events</span>
-<span> UNION ALL SELECT 7,7,TIMESTAMPTZ &#x27;2024-01-01 10:30+00&#x27;</span>
-<span>)</span>
-<span>SELECT event_id,received_seq,occurred_at FROM incoming</span>
-<span>WHERE received_seq &lt;= 6 AND ((occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) OR occurred_at IS NULL)</span>
-<span>ORDER BY occurred_at DESC NULLS LAST,event_id DESC;</span>
-<span>CREATE TEMP TABLE solution_answer_5 ON COMMIT DROP AS</span>
-<span>WITH incoming AS (</span>
-<span> SELECT event_id,received_seq,occurred_at FROM scale_events</span>
-<span> UNION ALL SELECT 7,7,TIMESTAMPTZ &#x27;2024-01-01 10:30+00&#x27;</span>
-<span>)</span>
-<span>SELECT event_id,received_seq,occurred_at FROM incoming</span>
-<span>WHERE received_seq &lt;= 6 AND ((occurred_at,event_id)&lt;(TIMESTAMPTZ &#x27;2024-01-01 11:00+00&#x27;,3) OR occurred_at IS NULL)</span>
-<span>ORDER BY occurred_at DESC NULLS LAST,event_id DESC;</span>
-<span>SELECT pg_temp.assert_true((SELECT array_agg(event_id ORDER BY occurred_at DESC NULLS LAST,event_id DESC) FROM solution_answer_5)=ARRAY[2,1,5,4] AND (SELECT max(received_seq) FROM solution_answer_5)&lt;=6, &#x27;sql-scale-01 exercise 5&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
-<span>RELEASE SAVEPOINT exercise_5;</span>
-<span> </span>
-<span>-- 6. Prove bounded traversal covers the static fixture</span>
-<span>SAVEPOINT exercise_6;</span>
-<span>WITH ordered AS (</span>
-<span> SELECT event_id,row_number() OVER (ORDER BY occurred_at DESC NULLS LAST,event_id DESC) AS position FROM scale_events</span>
-<span>)</span>
-<span>SELECT ((position-1)/2+1)::integer AS batch_no,array_agg(event_id ORDER BY position) AS event_ids,count(*) AS row_count</span>
-<span>FROM ordered GROUP BY (position-1)/2+1 ORDER BY batch_no;</span>
-<span>CREATE TEMP TABLE solution_answer_6 ON COMMIT DROP AS</span>
-<span>WITH ordered AS (</span>
-<span> SELECT event_id,row_number() OVER (ORDER BY occurred_at DESC NULLS LAST,event_id DESC) AS position FROM scale_events</span>
-<span>)</span>
-<span>SELECT ((position-1)/2+1)::integer AS batch_no,array_agg(event_id ORDER BY position) AS event_ids,count(*) AS row_count</span>
-<span>FROM ordered GROUP BY (position-1)/2+1 ORDER BY batch_no;</span>
-<span>SELECT pg_temp.assert_true((SELECT count(*)=3 AND sum(row_count)=6 FROM solution_answer_6) AND (SELECT event_ids FROM solution_answer_6 WHERE batch_no=1)=ARRAY[6,3] AND (SELECT event_ids FROM solution_answer_6 WHERE batch_no=2)=ARRAY[2,1] AND (SELECT event_ids FROM solution_answer_6 WHERE batch_no=3)=ARRAY[5,4], &#x27;sql-scale-01 exercise 6&#x27;);</span>
-<span> </span>
-<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
-<span>RELEASE SAVEPOINT exercise_6;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-SCALE-01: executable solutions and fail-fast checks</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> scale_events <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> received_seq <span class="syntax-builtin">integer</span> <span class="syntax-keyword">UNIQUE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  occurred_at timestamptz</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> scale_events <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 12:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">ON</span> scale_events <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Record an exact first-page boundary</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Traverse a timestamp tie without overlap</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_2 <span class="syntax-keyword">WHERE</span> event_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Cross into the unknown-timestamp phase</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> occurred_at <span class="syntax-operator">&lt;</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-operator">=</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span> <span class="syntax-keyword">AND</span> event_id <span class="syntax-operator">&lt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> occurred_at <span class="syntax-operator">&lt;</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-operator">=</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span> <span class="syntax-keyword">AND</span> event_id <span class="syntax-operator">&lt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">4</span> <span class="syntax-keyword">AND</span> bool_and<span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> scale_events <span class="syntax-keyword">WHERE</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> event_id<span class="syntax-operator">&lt;</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Expose positional drift after an insertion</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 13:00+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> positional <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span> <span class="syntax-keyword">OFFSET</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> continuation <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;offset&#x27;</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> positional</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> continuation</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 13:00+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> positional <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span> <span class="syntax-keyword">OFFSET</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> continuation <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> changed <span class="syntax-keyword">WHERE</span> <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;offset&#x27;</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> positional</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> continuation</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_4 <span class="syntax-keyword">WHERE</span> path<span class="syntax-operator">=</span><span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_4 <span class="syntax-keyword">WHERE</span> path<span class="syntax-operator">=</span><span class="syntax-string">&#x27;offset&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Exclude a late arrival with a declared sealed prefix</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:30+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> incoming</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> received_seq <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:30+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>received_seq<span class="syntax-punctuation">,</span>occurred_at <span class="syntax-keyword">FROM</span> incoming</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> received_seq <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span>event_id<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>received_seq<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Prove bounded traversal covers the static fixture</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span> <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> batch_no<span class="syntax-punctuation">,</span>array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_ids<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> ordered <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> batch_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> event_id<span class="syntax-punctuation">,</span>row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span> <span class="syntax-keyword">FROM</span> scale_events</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> batch_no<span class="syntax-punctuation">,</span>array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_ids<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> ordered <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> batch_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">6</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> event_ids <span class="syntax-keyword">FROM</span> solution_answer_6 <span class="syntax-keyword">WHERE</span> batch_no<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> event_ids <span class="syntax-keyword">FROM</span> solution_answer_6 <span class="syntax-keyword">WHERE</span> batch_no<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> event_ids <span class="syntax-keyword">FROM</span> solution_answer_6 <span class="syntax-keyword">WHERE</span> batch_no<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

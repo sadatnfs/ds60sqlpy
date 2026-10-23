@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -391,13 +437,15 @@
 <li><strong>Artifacts:</strong> <a href="sql-60.html#learner">learner SQL</a> · <a href="sql-60.html#solution-1">solution reasoning</a> · <a href="sql-60.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
 <ol>
 <li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
 </ol>
-<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
 <p>On macOS or Linux, run:</p>
-<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
 <li>Open <strong>SQL-60 — Final Capstone Part3</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
@@ -405,10 +453,10 @@
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
 <p>Manual <code>psql</code> fallback:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day60_final_capstone_part3.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day60_final_capstone_part3.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day60_final_capstone_part3.sql</code></pre>
 <p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -418,11 +466,11 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day60_final_capstone_part3.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT * FROM v_dq_customers;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_customers<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>v_dq_customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>*</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per the primary/business key of <code>v_dq_customers</code> from <code>v_dq_customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-sql">SELECT * FROM v_dq_orders;</code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_orders<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>v_dq_orders</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>*</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per the primary/business key of <code>v_dq_orders</code> from <code>v_dq_orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -497,7 +545,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The learner file ends with <code>ROLLBACK</code>; its views and indexes do not persist. Replace it with <code>COMMIT</code> only as a deliberate reviewed migration. Days 59–60 are capstone criteria/checkpoints, so measured evidence and documentation are part of the deliverable, not optional stretch work.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-60 — Final Capstone Part3.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-60 — Final Capstone Part3.
 
 I have completed the direct catalog prerequisite: `sql-59`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day60_final_capstone_part3.md
@@ -555,266 +603,266 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 60: Final Capstone - Integrated Data Challenge (Part 3)</span>
-<span>-- BEGINNER WORKFLOW — sql-60: Final Capstone Part3</span>
-<span>-- Guide: sql/postgres-60day/companion-guides/day60_final_capstone_part3.md</span>
-<span>-- Recommended runner: open the private lesson reader and choose</span>
-<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
-<span>-- creates an ignored .learning/sql/sql-60/ copy, and prints the full</span>
-<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
-<span>-- source, while studying.</span>
-<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
-<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
-<span>-- declare what one input row and one output row represent. A displayed result</span>
-<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
-<span>-- Primary objects in the worked examples: customers, orders, order_items, expenses, budgets.</span>
-<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
-<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
-<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
-<span>-- only in your ignored working copy.</span>
-<span>--</span>
-<span>-- Focus: End-to-end solution: DQ -&gt; Transform -&gt; Analytics -&gt; Performance sign-off</span>
-<span>-- Success Criteria:</span>
-<span>--  - All critical queries complete &lt; 10s on your dataset</span>
-<span>--  - DQ checks pass with documented exceptions</span>
-<span>--  - Clear documentation of choices and optimizations</span>
-<span> </span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>-- 1. DQ Summary Views (re-usable) ------------------------------------------</span>
-<span>CREATE OR REPLACE VIEW v_dq_customers AS</span>
-<span>SELECT COUNT(*) AS total,</span>
-<span>       SUM(CASE WHEN email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27; THEN 1 ELSE 0 END) AS invalid_email,</span>
-<span>       SUM(CASE WHEN country IS NULL OR country !~ &#x27;^[A-Z]{2}$&#x27; THEN 1 ELSE 0 END) AS invalid_country,</span>
-<span>       SUM(CASE WHEN full_name IS NULL OR btrim(full_name) = &#x27;&#x27; THEN 1 ELSE 0 END) AS invalid_name</span>
-<span>FROM customers;</span>
-<span> </span>
-<span>CREATE OR REPLACE VIEW v_dq_orders AS</span>
-<span>SELECT COUNT(*) AS total,</span>
-<span>       SUM(CASE WHEN total_amount &lt; 0 THEN 1 ELSE 0 END) AS negative_amounts,</span>
-<span>       SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS missing_customer</span>
-<span>FROM orders;</span>
-<span> </span>
-<span>SELECT * FROM v_dq_customers;</span>
-<span>SELECT * FROM v_dq_orders;</span>
-<span> </span>
-<span>-- 2. Core Business Views ----------------------------------------------------</span>
-<span>-- Lifetime value per customer.</span>
-<span>--</span>
-<span>-- Grain: exactly one row per customer, including customers who have not placed</span>
-<span>-- an order. `orders.total_amount` is the authoritative revenue measure for this</span>
-<span>-- capstone. Re-summing order lines here could silently change the definition</span>
-<span>-- by excluding header-only orders or omitting adjustments stored on the header.</span>
-<span>CREATE OR REPLACE VIEW v_customer_ltv AS</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.full_name,</span>
-<span>       c.country,</span>
-<span>       c.segment,</span>
-<span>       COUNT(o.order_id) AS order_count,</span>
-<span>       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN orders o USING (customer_id)</span>
-<span>GROUP BY c.customer_id, c.full_name, c.country, c.segment;</span>
-<span> </span>
-<span>-- Control 1: zero-order customers must still appear in the view.</span>
-<span>SELECT COUNT(*) AS customers_missing_from_ltv</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN v_customer_ltv l USING (customer_id)</span>
-<span>WHERE l.customer_id IS NULL;</span>
-<span> </span>
-<span>-- Control 2: customer-level LTV must reconcile to the authoritative order</span>
-<span>-- header total. Expected `difference` is 0.00 on the course seed.</span>
-<span>SELECT ROUND(COALESCE(SUM(ltv), 0), 2) AS ltv_total,</span>
-<span>       (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS order_total,</span>
-<span>       ROUND(COALESCE(SUM(ltv), 0), 2)</span>
-<span>         - (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS difference</span>
-<span>FROM v_customer_ltv;</span>
-<span> </span>
-<span>-- Monthly revenue and MoM growth</span>
-<span>CREATE OR REPLACE VIEW v_monthly_revenue AS</span>
-<span>WITH m AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,</span>
-<span>         SUM(o.total_amount) AS revenue</span>
-<span>  FROM orders o</span>
-<span>  GROUP BY 1</span>
-<span>)</span>
-<span>SELECT m.month,</span>
-<span>       m.revenue,</span>
-<span>       LAG(m.revenue) OVER (ORDER BY m.month) AS prev_month,</span>
-<span>       ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month),0)) / NULLIF(LAG(m.revenue) OVER (ORDER BY m.month),0), 4) AS mom_growth</span>
-<span>FROM m;</span>
-<span> </span>
-<span>-- 3. Stakeholder-ready Queries ---------------------------------------------</span>
-<span>-- Finance: Budget vs Actual by month/category (YTD)</span>
-<span>WITH exp AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, expense_date)::date AS month, category, SUM(amount) AS actual</span>
-<span>  FROM expenses WHERE expense_date &gt;= date_trunc(&#x27;year&#x27;, now()) GROUP BY 1,2</span>
-<span>), bud AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, period)::date AS month, category, SUM(amount) AS budget</span>
-<span>  FROM budgets WHERE period &gt;= date_trunc(&#x27;year&#x27;, now()) GROUP BY 1,2</span>
-<span>)</span>
-<span>SELECT COALESCE(b.category, e.category) AS category,</span>
-<span>       COALESCE(b.month, e.month) AS month,</span>
-<span>       COALESCE(b.budget,0) AS budget,</span>
-<span>       COALESCE(e.actual,0) AS actual,</span>
-<span>       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance</span>
-<span>FROM bud b FULL OUTER JOIN exp e ON e.month=b.month AND e.category=b.category</span>
-<span>ORDER BY month DESC, category</span>
-<span>LIMIT 120;</span>
-<span> </span>
-<span>-- Marketing: Cohort retention for the latest 6 signup cohorts.</span>
-<span>--</span>
-<span>-- A cohort is the customer&#x27;s signup month. An active customer has at least one</span>
-<span>-- order in the lifecycle month being measured. `cohort_size` includes every</span>
-<span>-- signup, including people who never order; dividing by only active customers</span>
-<span>-- would inflate the reported retention rate.</span>
-<span>WITH orders_m AS (</span>
-<span>  SELECT DISTINCT</span>
-<span>         o.customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, o.order_date)::date AS order_month</span>
-<span>  FROM orders o</span>
-<span>), cohorts AS (</span>
-<span>  SELECT c.customer_id,</span>
-<span>         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month</span>
-<span>  FROM customers c</span>
-<span>), latest_six_cohorts AS (</span>
-<span>  SELECT cohort_month</span>
-<span>  FROM cohorts</span>
-<span>  GROUP BY cohort_month</span>
-<span>  ORDER BY cohort_month DESC</span>
-<span>  LIMIT 6</span>
-<span>), cohort_members AS (</span>
-<span>  SELECT c.customer_id, c.cohort_month</span>
-<span>  FROM cohorts c</span>
-<span>  JOIN latest_six_cohorts latest USING (cohort_month)</span>
-<span>), cohort_sizes AS (</span>
-<span>  SELECT cohort_month, COUNT(*)::numeric AS cohort_size</span>
-<span>  FROM cohort_members</span>
-<span>  GROUP BY cohort_month</span>
-<span>), month_offsets AS (</span>
-<span>  -- The seven requested lifecycle buckets are month 0 through month 6.</span>
-<span>  SELECT generate_series(0, 6)::int AS month_offset</span>
-<span>), retention AS (</span>
-<span>  SELECT cm.cohort_month,</span>
-<span>         offsets.month_offset,</span>
-<span>         sizes.cohort_size,</span>
-<span>         COUNT(DISTINCT om.customer_id) AS active_customers</span>
-<span>  FROM cohort_members cm</span>
-<span>  JOIN cohort_sizes sizes USING (cohort_month)</span>
-<span>  CROSS JOIN month_offsets offsets</span>
-<span>  LEFT JOIN orders_m om</span>
-<span>    ON om.customer_id = cm.customer_id</span>
-<span>   AND om.order_month = (</span>
-<span>         cm.cohort_month + make_interval(months =&gt; offsets.month_offset)</span>
-<span>       )::date</span>
-<span>  GROUP BY cm.cohort_month, offsets.month_offset, sizes.cohort_size</span>
-<span>)</span>
-<span>SELECT cohort_month,</span>
-<span>       month_offset,</span>
-<span>       cohort_size,</span>
-<span>       active_customers,</span>
-<span>       ROUND(</span>
-<span>         active_customers::numeric / NULLIF(cohort_size, 0),</span>
-<span>         4</span>
-<span>       ) AS retention_rate</span>
-<span>FROM retention</span>
-<span>ORDER BY cohort_month DESC, month_offset;</span>
-<span> </span>
-<span>-- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)</span>
-<span>EXPLAIN</span>
-<span>SELECT p.category, SUM(oi.quantity) AS qty</span>
-<span>FROM order_items oi</span>
-<span>JOIN products p ON p.product_id = oi.product_id</span>
-<span>JOIN orders o   ON o.order_id = oi.order_id</span>
-<span>WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;</span>
-<span>GROUP BY p.category</span>
-<span>ORDER BY qty DESC;</span>
-<span> </span>
-<span>-- 4. Performance Checklist ---------------------------------------------------</span>
-<span>-- Indexes helpful for above queries (will be rolled back unless COMMIT)</span>
-<span>CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);</span>
-<span>CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);</span>
-<span>CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items(order_id);</span>
-<span>CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);</span>
-<span>CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses(expense_date);</span>
-<span>CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets(period);</span>
-<span> </span>
-<span>-- Validate plan improvements quickly</span>
-<span>EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;</span>
-<span> </span>
-<span>-- 5. Documentation Hints ----------------------------------------------------</span>
-<span>-- Include in your write-up:</span>
-<span>--  - Data quality findings (from v_dq_*) and remediation steps</span>
-<span>--  - Core model entities used and rationale (customers/orders/items/events/etc.)</span>
-<span>--  - Queries and indexes that moved the needle, with before/after EXPLAIN metrics</span>
-<span>--  - Any compromises (freshness vs speed, materialized views, partitioning)</span>
-<span> </span>
-<span>-- Exercises</span>
-<span>-- 1. Prediction: identify which views are snapshot-independent and which use</span>
-<span>--    CURRENT_DATE/now(), then explain the reproducibility consequence.</span>
-<span>--    Inputs: For sql-60 Exercise 1, read from the inline `VALUES` fixture. Build the answer toward `object_name`, and `clock_contract`; keep `object_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 1, expected output: one row per `object_name`. The final columns are `object_name`, and `clock_contract`.</span>
-<span>--    Verify: For sql-60 Exercise 1, reselect the returned keys directly from the source; require unique `object_name` where the expected grain is one row per key and confirm the projected `object_name`, and `clock_contract` against the inline `VALUES` fixture. Add one source row with a new `object_name`; verify the result gains exactly one row carrying that `object_name` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 1, select `object_name` from the inline `VALUES` fixture before adding derived columns.</span>
-<span>-- 2. Construction: build a single sign-off query whose rows are named checks</span>
-<span>--    with observed_value, expected_value, pass, severity, and remediation.</span>
-<span>--    Inputs: For sql-60 Exercise 2, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `severity, check_name`.</span>
-<span>--    Verify: For sql-60 Exercise 2, project `order_id` plus the raw source columns from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 2, run `checks` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
-<span>-- 3. Debugging: remove repeated LAG expressions from v_monthly_revenue by using</span>
-<span>--    a second CTE, while preserving the first month&#x27;s NULL growth rate.</span>
-<span>--    Inputs: For sql-60 Exercise 3, read from `orders`, and `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, `previous_month`, and `month_over_month_growth`; keep `month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `previous_month`, and `month_over_month_growth`. The final order is `month`.</span>
-<span>--    Verify: For sql-60 Exercise 3, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, `previous_month`, and `month_over_month_growth` against `orders`, and `v_monthly_revenue_refactored_solution`. Repeat with `NULL` in `LAG` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 3, run `monthly`, and `with_previous` one at a time. Record each CTE&#x27;s row count and `month` uniqueness before the next stage uses it.</span>
-<span>-- 4. Edge case: represent an incomplete current month separately so it is not</span>
-<span>--    compared directly with a complete prior month.</span>
-<span>--    Inputs: For sql-60 Exercise 4, read from `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, and `is_incomplete_month`; keep `month` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 4, expected output: one row per `month`. The final columns are `month`, `revenue`, and `is_incomplete_month`. The final order is `month DESC`.</span>
-<span>--    Verify: For sql-60 Exercise 4, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, and `is_incomplete_month` against `v_monthly_revenue_refactored_solution`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 4, check `month DESC` before applying the row cap.</span>
-<span>-- 5. Performance: capture before/after plans in JSON and document plan shape,</span>
-<span>--    estimates, actual rows, buffers, and timing without promising universal gains.</span>
-<span>--    Inputs: For sql-60 Exercise 5, run the underlying read-only query over `v_monthly_revenue_refactored_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 5, expected output: at most 12 rows keyed by `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`. The final order is `month DESC`.</span>
-<span>--    Verify: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span>
-<span>-- 6. Explanation: produce a release checklist covering rollback, ownership,</span>
-<span>--    permissions, refresh cadence, monitoring, data contracts, and known limits.</span>
-<span>--    Inputs: For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.</span>
-<span>--    Verify: For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 6, select `evidence` from the inline `VALUES` fixture before adding derived columns.</span>
-<span>-- 7. Construction: create a lineage table that maps each published metric to</span>
-<span>--    its source tables, transformation grain, and validation query.</span>
-<span>--    Inputs: For sql-60 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`; keep `metric_name` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 7, expected output: one row per `metric_name`. The final columns are `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`.</span>
-<span>--    Verify: For sql-60 Exercise 7, reselect the returned keys directly from the source; require unique `metric_name` where the expected grain is one row per key and confirm the projected `metric_name`, `source_tables`, `transformation_grain`, and `validation_query` against the inline `VALUES` fixture. Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 7, select `metric_name` from the inline `VALUES` fixture before adding derived columns.</span>
-<span>-- 8. Debugging: prove every dashboard subtotal reconciles to a simpler control</span>
-<span>--    query before approving any performance optimization.</span>
-<span>--    Inputs: For sql-60 Exercise 8, read from `v_monthly_revenue_refactored_solution`, and `orders`. Compute `dashboard_total`, `source_total`, and `difference` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 8, expected output: exactly one aggregate summary row. The final columns are `dashboard_total`, `source_total`, and `difference`.</span>
-<span>--    Verify: For sql-60 Exercise 8, evaluate each of `dashboard_total`, and `source_total` in a separate control `SELECT` over `v_monthly_revenue_refactored_solution`, and `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 8, select `order_id` from `v_monthly_revenue_refactored_solution`, and `orders` before adding derived columns.</span>
-<span>-- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and</span>
-<span>--    record which assumptions prevent each from reaching production.</span>
-<span>--    Inputs: For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.</span>
-<span>--    Verify: For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.</span>
-<span>-- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;</span>
-<span>--     prose alone must never turn an unexecuted check into PASS.</span>
-<span> </span>
-<span>-- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.</span>
-<span>--    Inputs: For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.</span>
-<span>--    Expected result/shape: For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.</span>
-<span>--    Verify: For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
-<span>--    Hint ladder, rung 1: For sql-60 Exercise 10, check `criterion` before applying the row cap.</span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 60: Final Capstone - Integrated Data Challenge (Part 3)</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-60: Final Capstone Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day60_final_capstone_part3.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-60/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: customers, orders, order_items, expenses, budgets.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: End-to-end solution: DQ -&gt; Transform -&gt; Analytics -&gt; Performance sign-off</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success Criteria:</span></span>
+<span class="source-line"><span class="syntax-comment">--  - All critical queries complete &lt; 10s on your dataset</span></span>
+<span class="source-line"><span class="syntax-comment">--  - DQ checks pass with documented exceptions</span></span>
+<span class="source-line"><span class="syntax-comment">--  - Clear documentation of choices and optimizations</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. DQ Summary Views (re-usable) ------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">VIEW</span> v_dq_customers <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> country <span class="syntax-operator">!</span><span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^[A-Z]{2}$&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> btrim<span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">VIEW</span> v_dq_orders <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> negative_amounts<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing_customer</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_orders<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Core Business Views ----------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Lifetime value per customer.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Grain: exactly one row per customer, including customers who have not placed</span></span>
+<span class="source-line"><span class="syntax-comment">-- an order. `orders.total_amount` is the authoritative revenue measure for this</span></span>
+<span class="source-line"><span class="syntax-comment">-- capstone. Re-summing order lines here could silently change the definition</span></span>
+<span class="source-line"><span class="syntax-comment">-- by excluding header-only orders or omitting adjustments stored on the header.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">VIEW</span> v_customer_ltv <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Control 1: zero-order customers must still appear in the view.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers_missing_from_ltv</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> v_customer_ltv l <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> l<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Control 2: customer-level LTV must reconcile to the authoritative order</span></span>
+<span class="source-line"><span class="syntax-comment">-- header total. Expected `difference` is 0.00 on the course seed.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> difference</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> v_customer_ltv<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Monthly revenue and MoM growth</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">VIEW</span> v_monthly_revenue <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> m <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prev_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mom_growth</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> m<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Stakeholder-ready Queries ---------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Finance: Budget vs Actual by month/category (YTD)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> exp <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">WHERE</span> expense_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> bud <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> budgets <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">period</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> bud b <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> exp e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-operator">=</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-operator">=</span>b<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">120</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Marketing: Cohort retention for the latest 6 signup cohorts.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- A cohort is the customer&#x27;s signup month. An active customer has at least one</span></span>
+<span class="source-line"><span class="syntax-comment">-- order in the lifecycle month being measured. `cohort_size` includes every</span></span>
+<span class="source-line"><span class="syntax-comment">-- signup, including people who never order; dividing by only active customers</span></span>
+<span class="source-line"><span class="syntax-comment">-- would inflate the reported retention rate.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> orders_m <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span></span>
+<span class="source-line">         o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> latest_six_cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">6</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort_members <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">c</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> latest_six_cohorts latest <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>cohort_month<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort_sizes <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> cohort_size</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohort_members</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> month_offsets <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-comment">-- The seven requested lifecycle buckets are month 0 through month 6.</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> retention <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> cm<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         offsets<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         sizes<span class="syntax-punctuation">.</span>cohort_size<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> om<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_customers</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> cohort_members cm</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> cohort_sizes sizes <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>cohort_month<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> month_offsets offsets</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders_m om</span>
+<span class="source-line">    <span class="syntax-keyword">ON</span> om<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> cm<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">   <span class="syntax-keyword">AND</span> om<span class="syntax-punctuation">.</span>order_month <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         cm<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-operator">+</span> make_interval<span class="syntax-punctuation">(</span>months <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> offsets<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">)</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cm<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> offsets<span class="syntax-punctuation">.</span>month_offset<span class="syntax-punctuation">,</span> sizes<span class="syntax-punctuation">.</span>cohort_size</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       month_offset<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       cohort_size<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       active_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span></span>
+<span class="source-line">         active_customers<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>cohort_size<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">4</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> retention_rate</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> retention</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o   <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Performance Checklist ---------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Indexes helpful for above queries (will be rolled back unless COMMIT)</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_orders_date <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_orders_customer <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_oi_order <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_products_category <span class="syntax-keyword">ON</span> products<span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_expenses_month <span class="syntax-keyword">ON</span> expenses<span class="syntax-punctuation">(</span>expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_budgets_period <span class="syntax-keyword">ON</span> budgets<span class="syntax-punctuation">(</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Validate plan improvements quickly</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_monthly_revenue <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">12</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Documentation Hints ----------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Include in your write-up:</span></span>
+<span class="source-line"><span class="syntax-comment">--  - Data quality findings (from v_dq_*) and remediation steps</span></span>
+<span class="source-line"><span class="syntax-comment">--  - Core model entities used and rationale (customers/orders/items/events/etc.)</span></span>
+<span class="source-line"><span class="syntax-comment">--  - Queries and indexes that moved the needle, with before/after EXPLAIN metrics</span></span>
+<span class="source-line"><span class="syntax-comment">--  - Any compromises (freshness vs speed, materialized views, partitioning)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Prediction: identify which views are snapshot-independent and which use</span></span>
+<span class="source-line"><span class="syntax-comment">--    CURRENT_DATE/now(), then explain the reproducibility consequence.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 1, read from the inline `VALUES` fixture. Build the answer toward `object_name`, and `clock_contract`; keep `object_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 1, expected output: one row per `object_name`. The final columns are `object_name`, and `clock_contract`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 1, reselect the returned keys directly from the source; require unique `object_name` where the expected grain is one row per key and confirm the projected `object_name`, and `clock_contract` against the inline `VALUES` fixture. Add one source row with a new `object_name`; verify the result gains exactly one row carrying that `object_name` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 1, select `object_name` from the inline `VALUES` fixture before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Construction: build a single sign-off query whose rows are named checks</span></span>
+<span class="source-line"><span class="syntax-comment">--    with observed_value, expected_value, pass, severity, and remediation.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 2, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `severity, check_name`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 2, project `order_id` plus the raw source columns from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 2, run `checks` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Debugging: remove repeated LAG expressions from v_monthly_revenue by using</span></span>
+<span class="source-line"><span class="syntax-comment">--    a second CTE, while preserving the first month&#x27;s NULL growth rate.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 3, read from `orders`, and `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, `previous_month`, and `month_over_month_growth`; keep `month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `previous_month`, and `month_over_month_growth`. The final order is `month`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 3, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, `previous_month`, and `month_over_month_growth` against `orders`, and `v_monthly_revenue_refactored_solution`. Repeat with `NULL` in `LAG` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 3, run `monthly`, and `with_previous` one at a time. Record each CTE&#x27;s row count and `month` uniqueness before the next stage uses it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Edge case: represent an incomplete current month separately so it is not</span></span>
+<span class="source-line"><span class="syntax-comment">--    compared directly with a complete prior month.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 4, read from `v_monthly_revenue_refactored_solution`. Build the answer toward `month`, `revenue`, and `is_incomplete_month`; keep `month` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 4, expected output: one row per `month`. The final columns are `month`, `revenue`, and `is_incomplete_month`. The final order is `month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 4, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month`, `revenue`, and `is_incomplete_month` against `v_monthly_revenue_refactored_solution`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 4, check `month DESC` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Performance: capture before/after plans in JSON and document plan shape,</span></span>
+<span class="source-line"><span class="syntax-comment">--    estimates, actual rows, buffers, and timing without promising universal gains.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 5, run the underlying read-only query over `v_monthly_revenue_refactored_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 5, expected output: at most 12 rows keyed by `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`. The final order is `month DESC`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Explanation: produce a release checklist covering rollback, ownership,</span></span>
+<span class="source-line"><span class="syntax-comment">--    permissions, refresh cadence, monitoring, data contracts, and known limits.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 6, select `evidence` from the inline `VALUES` fixture before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 7. Construction: create a lineage table that maps each published metric to</span></span>
+<span class="source-line"><span class="syntax-comment">--    its source tables, transformation grain, and validation query.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`; keep `metric_name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 7, expected output: one row per `metric_name`. The final columns are `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 7, reselect the returned keys directly from the source; require unique `metric_name` where the expected grain is one row per key and confirm the projected `metric_name`, `source_tables`, `transformation_grain`, and `validation_query` against the inline `VALUES` fixture. Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 7, select `metric_name` from the inline `VALUES` fixture before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 8. Debugging: prove every dashboard subtotal reconciles to a simpler control</span></span>
+<span class="source-line"><span class="syntax-comment">--    query before approving any performance optimization.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 8, read from `v_monthly_revenue_refactored_solution`, and `orders`. Compute `dashboard_total`, `source_total`, and `difference` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 8, expected output: exactly one aggregate summary row. The final columns are `dashboard_total`, `source_total`, and `difference`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 8, evaluate each of `dashboard_total`, and `source_total` in a separate control `SELECT` over `v_monthly_revenue_refactored_solution`, and `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 8, select `order_id` from `v_monthly_revenue_refactored_solution`, and `orders` before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and</span></span>
+<span class="source-line"><span class="syntax-comment">--    record which assumptions prevent each from reaching production.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;</span></span>
+<span class="source-line"><span class="syntax-comment">--     prose alone must never turn an unexecuted check into PASS.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-60 Exercise 10, check `criterion` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -850,10 +898,10 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-60-solution-end-to-end-capstone-sign-off">Day 60 Solution — End-to-End Capstone Sign-off<a class="heading-anchor" href="#solution-1--day-60-solution-end-to-end-capstone-sign-off" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre><code class="language-powershell"># Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day60_solutions.sql&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day60_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day60_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
@@ -879,64 +927,64 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>The compact seed makes the 10-second target easy; it does not prove production-scale performance.</p>
 <h4 id="solution-1--deliverable-1-reusable-dq-views">Deliverable 1 — Reusable DQ views<a class="heading-anchor" href="#solution-1--deliverable-1-reusable-dq-views" aria-label="Link to this section">#</a></h4>
 <p>The learner creates <code>v_dq_customers</code> and <code>v_dq_orders</code>. The reference solution uses a suffixed customer view so it cannot collide with a learner&#x27;s view:</p>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE VIEW v_dq_customers_solution AS
-SELECT COUNT(*) AS total_rows,
-       COUNT(*) FILTER (
-         WHERE email IS NULL
-            OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;
-       ) AS invalid_email,
-       COUNT(*) FILTER (WHERE country !~ &#x27;^[A-Z]{2}$&#x27;) AS invalid_country,
-       COUNT(*) FILTER (WHERE trim(full_name) = &#x27;&#x27;) AS invalid_name
-FROM customers;
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_dq_customers_solution <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_rows<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+            <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_email<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">!</span><span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^[A-Z]{2}$&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_country<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_name
+<span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span>
 
-SELECT * FROM v_dq_customers_solution;
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_customers_solution<span class="syntax-punctuation">;</span>
 
-SELECT COUNT(*) AS total_rows,
-       COUNT(*) FILTER (WHERE total_amount &lt; 0) AS negative_amounts,
-       COUNT(*) FILTER (WHERE customer_id IS NULL) AS missing_customer
-FROM orders;
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_rows<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> negative_amounts<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing_customer
+<span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: one customer summary row and one order summary row. The course seed should report zero failures.</p>
 <h4 id="solution-1--deliverable-2-core-business-views-and-reconciliation">Deliverable 2 — Core business views and reconciliation<a class="heading-anchor" href="#solution-1--deliverable-2-core-business-views-and-reconciliation" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE VIEW v_customer_ltv_solution AS
-SELECT c.customer_id,
-       c.country,
-       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv
-FROM customers c
-LEFT JOIN orders o USING (customer_id)
-GROUP BY c.customer_id, c.country;
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_customer_ltv_solution <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
 
-CREATE VIEW v_monthly_revenue_solution AS
-WITH monthly AS (
-  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY date_trunc(&#x27;month&#x27;, order_date)
-)
-SELECT month,
-       revenue,
-       LAG(revenue) OVER (ORDER BY month) AS previous_month,
-       ROUND(
-         (revenue - LAG(revenue) OVER (ORDER BY month))
-           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
-         4
-       ) AS month_over_month_growth
-FROM monthly;
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_monthly_revenue_solution <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+       revenue<span class="syntax-punctuation">,</span>
+       LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_month<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>
+         <span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+           <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-number">4</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_over_month_growth
+<span class="syntax-keyword">FROM</span> monthly<span class="syntax-punctuation">;</span>
 
-SELECT (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
-         AS customer_ltv_total,
-       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS order_total,
-       (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)
-         - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;
+<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span>
+         <span class="syntax-keyword">AS</span> customer_ltv_total<span class="syntax-punctuation">,</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_total<span class="syntax-punctuation">,</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span>
+         <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> difference<span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected reconciliation: <code>difference = 0.00</code>. The monthly view has one row per represented order month; it does not manufacture missing months.</p>
 <h4 id="solution-1--deliverable-3-stakeholder-ready-outputs">Deliverable 3 — Stakeholder-ready outputs<a class="heading-anchor" href="#solution-1--deliverable-3-stakeholder-ready-outputs" aria-label="Link to this section">#</a></h4>
 <p>The learner file contains three runnable outputs:</p>
@@ -947,39 +995,39 @@ ROLLBACK;</code></pre>
 </ul>
 <p>For each output, record the consumer, business definition, result grain, freshness expectation, and at least one reconciliation or sanity check.</p>
 <h4 id="solution-1--deliverable-4-performance-sign-off">Deliverable 4 — Performance sign-off<a class="heading-anchor" href="#solution-1--deliverable-4-performance-sign-off" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-sql">BEGIN;
-SET search_path TO training, public;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-CREATE INDEX idx_orders_date_day60_solution ON orders(order_date);
-CREATE INDEX idx_orders_customer_day60_solution ON orders(customer_id);
-CREATE INDEX idx_order_items_order_day60_solution ON order_items(order_id);
-CREATE INDEX idx_expenses_date_day60_solution ON expenses(expense_date);
-CREATE INDEX idx_budgets_period_day60_solution ON budgets(period);
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_date_day60_solution <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_day60_solution <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_order_items_order_day60_solution <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_expenses_date_day60_solution <span class="syntax-keyword">ON</span> expenses<span class="syntax-punctuation">(</span>expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_budgets_period_day60_solution <span class="syntax-keyword">ON</span> budgets<span class="syntax-punctuation">(</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-CREATE VIEW v_monthly_revenue_solution AS
-WITH monthly AS (
-  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY date_trunc(&#x27;month&#x27;, order_date)
-)
-SELECT month,
-       revenue,
-       LAG(revenue) OVER (ORDER BY month) AS previous_month,
-       ROUND(
-         (revenue - LAG(revenue) OVER (ORDER BY month))
-           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),
-         4
-       ) AS month_over_month_growth
-FROM monthly;
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_monthly_revenue_solution <span class="syntax-keyword">AS</span>
+<span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span> orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+       revenue<span class="syntax-punctuation">,</span>
+       LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_month<span class="syntax-punctuation">,</span>
+       ROUND<span class="syntax-punctuation">(</span>
+         <span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+           <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+         <span class="syntax-number">4</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_over_month_growth
+<span class="syntax-keyword">FROM</span> monthly<span class="syntax-punctuation">;</span>
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT *
-FROM v_monthly_revenue_solution
-ORDER BY month DESC
-LIMIT 12;
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span> v_monthly_revenue_solution
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">12</span><span class="syntax-punctuation">;</span>
 
-ROLLBACK;</code></pre>
+<span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Capture actual execution time and buffers before and after candidate indexes. The transaction rolls back both views and indexes.</p>
 <h4 id="solution-1--deliverable-5-written-sign-off">Deliverable 5 — Written sign-off<a class="heading-anchor" href="#solution-1--deliverable-5-written-sign-off" aria-label="Link to this section">#</a></h4>
 <p>The final write-up must cover:</p>
@@ -1151,219 +1199,219 @@ ROLLBACK;</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 60 solution: end-to-end sign-off</span>
-<span>-- SOLUTION READING MAP — sql-60: Final Capstone Part3</span>
-<span>-- Explanation: sql/postgres-60day/solutions/day60_solutions.md</span>
-<span>-- Run from the repository root only against advanced_sql_training:</span>
-<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day60_solutions.sql</span>
-<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
-<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
-<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
-<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
-<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
-<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
-<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
-<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
-<span>--</span>
-<span>BEGIN;</span>
-<span>SET search_path TO training, public;</span>
-<span> </span>
-<span>CREATE VIEW v_dq_customers_solution AS</span>
-<span>SELECT COUNT(*) AS total_rows,</span>
-<span>       COUNT(*) FILTER (</span>
-<span>         WHERE email IS NULL</span>
-<span>            OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span>
-<span>       ) AS invalid_email,</span>
-<span>       COUNT(*) FILTER (WHERE country !~ &#x27;^[A-Z]{2}$&#x27;) AS invalid_country,</span>
-<span>       COUNT(*) FILTER (WHERE trim(full_name) = &#x27;&#x27;) AS invalid_name</span>
-<span>FROM customers;</span>
-<span> </span>
-<span>CREATE VIEW v_customer_ltv_solution AS</span>
-<span>SELECT c.customer_id,</span>
-<span>       c.country,</span>
-<span>       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv</span>
-<span>FROM customers c</span>
-<span>LEFT JOIN orders o USING (customer_id)</span>
-<span>GROUP BY c.customer_id, c.country;</span>
-<span> </span>
-<span>CREATE VIEW v_monthly_revenue_solution AS</span>
-<span>WITH monthly AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,</span>
-<span>         SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY date_trunc(&#x27;month&#x27;, order_date)</span>
-<span>)</span>
-<span>SELECT month,</span>
-<span>       revenue,</span>
-<span>       LAG(revenue) OVER (ORDER BY month) AS previous_month,</span>
-<span>       ROUND(</span>
-<span>         (revenue - LAG(revenue) OVER (ORDER BY month))</span>
-<span>           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0),</span>
-<span>         4</span>
-<span>       ) AS month_over_month_growth</span>
-<span>FROM monthly;</span>
-<span> </span>
-<span>-- DQ sign-off and business-view reconciliation.</span>
-<span>SELECT * FROM v_dq_customers_solution;</span>
-<span> </span>
-<span>SELECT (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)</span>
-<span>         AS customer_ltv_total,</span>
-<span>       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS order_total,</span>
-<span>       (SELECT ROUND(SUM(ltv), 2) FROM v_customer_ltv_solution)</span>
-<span>         - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;</span>
-<span> </span>
-<span>-- Candidate production indexes remain rolled back in this tutorial answer.</span>
-<span>CREATE INDEX idx_orders_date_day60_solution ON orders(order_date);</span>
-<span>CREATE INDEX idx_orders_customer_day60_solution ON orders(customer_id);</span>
-<span>CREATE INDEX idx_order_items_order_day60_solution ON order_items(order_id);</span>
-<span>CREATE INDEX idx_expenses_date_day60_solution ON expenses(expense_date);</span>
-<span>CREATE INDEX idx_budgets_period_day60_solution ON budgets(period);</span>
-<span> </span>
-<span>EXPLAIN (ANALYZE, BUFFERS)</span>
-<span>SELECT *</span>
-<span>FROM v_monthly_revenue_solution</span>
-<span>ORDER BY month DESC</span>
-<span>LIMIT 12;</span>
-<span> </span>
-<span>-- The written capstone should record these sign-off items and measured values.</span>
-<span>SELECT item</span>
-<span>FROM (</span>
-<span>  VALUES</span>
-<span>    (&#x27;DQ exceptions and remediation&#x27;),</span>
-<span>    (&#x27;model grain and join rationale&#x27;),</span>
-<span>    (&#x27;before/after EXPLAIN evidence&#x27;),</span>
-<span>    (&#x27;freshness versus performance tradeoffs&#x27;),</span>
-<span>    (&#x27;known limitations and next steps&#x27;)</span>
-<span>) AS checklist(item);</span>
-<span> </span>
-<span>-- Exercise 1: clock-dependent queries need an as-of value for reproducibility.</span>
-<span>SELECT *</span>
-<span>FROM (</span>
-<span>  VALUES</span>
-<span>    (&#x27;v_dq_customers_solution&#x27;, &#x27;snapshot-independent&#x27;),</span>
-<span>    (&#x27;v_customer_ltv_solution&#x27;, &#x27;snapshot-independent&#x27;),</span>
-<span>    (&#x27;trailing/current-period reports&#x27;, &#x27;clock-dependent: bind as_of_date&#x27;)</span>
-<span>) AS reproducibility(object_name, clock_contract);</span>
-<span> </span>
-<span>-- Exercise 2: every sign-off row carries observed/expected values, severity, and</span>
-<span>-- remediation. PASS is computed, never typed by hand.</span>
-<span>WITH checks AS (</span>
-<span>  SELECT &#x27;invalid_customer_emails&#x27; AS check_name,</span>
-<span>         invalid_email::numeric AS observed_value,</span>
-<span>         0::numeric AS expected_value,</span>
-<span>         &#x27;critical&#x27; AS severity,</span>
-<span>         &#x27;quarantine invalid customer records&#x27; AS remediation</span>
-<span>  FROM v_dq_customers_solution</span>
-<span>  UNION ALL</span>
-<span>  SELECT &#x27;ltv_reconciles_to_orders&#x27;,</span>
-<span>         ABS(</span>
-<span>           (SELECT SUM(ltv) FROM v_customer_ltv_solution)</span>
-<span>           - (SELECT SUM(total_amount) FROM orders)</span>
-<span>         ),</span>
-<span>         0, &#x27;critical&#x27;, &#x27;repair customer-grain join or revenue definition&#x27;</span>
-<span>)</span>
-<span>SELECT *, observed_value = expected_value AS pass</span>
-<span>FROM checks</span>
-<span>ORDER BY severity, check_name;</span>
-<span> </span>
-<span>-- Exercise 3: compute LAG once in `with_previous`, then use that named value.</span>
-<span>-- The first month intentionally retains NULL growth because no comparison exists.</span>
-<span>CREATE VIEW v_monthly_revenue_refactored_solution AS</span>
-<span>WITH monthly AS (</span>
-<span>  SELECT date_trunc(&#x27;month&#x27;, order_date)::date AS month,</span>
-<span>         SUM(total_amount) AS revenue</span>
-<span>  FROM orders</span>
-<span>  GROUP BY date_trunc(&#x27;month&#x27;, order_date)</span>
-<span>), with_previous AS (</span>
-<span>  SELECT month, revenue,</span>
-<span>         LAG(revenue) OVER (ORDER BY month) AS previous_month</span>
-<span>  FROM monthly</span>
-<span>)</span>
-<span>SELECT month, revenue, previous_month,</span>
-<span>       ROUND((revenue - previous_month) / NULLIF(previous_month, 0), 4)</span>
-<span>         AS month_over_month_growth</span>
-<span>FROM with_previous;</span>
-<span>SELECT * FROM v_monthly_revenue_refactored_solution ORDER BY month;</span>
-<span> </span>
-<span>-- Exercise 4: flag the open calendar month instead of comparing it as if it</span>
-<span>-- were complete. A production report should bind an explicit as-of date.</span>
-<span>SELECT month, revenue,</span>
-<span>       month = date_trunc(&#x27;month&#x27;, CURRENT_DATE)::date AS is_incomplete_month</span>
-<span>FROM v_monthly_revenue_refactored_solution</span>
-<span>ORDER BY month DESC;</span>
-<span> </span>
-<span>-- Exercise 5: structured plan evidence records estimates, actuals, buffers, and</span>
-<span>-- timing. Results remain specific to this server, seed, and cache state.</span>
-<span>EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)</span>
-<span>SELECT * FROM v_monthly_revenue_refactored_solution</span>
-<span>ORDER BY month DESC</span>
-<span>LIMIT 12;</span>
-<span> </span>
-<span>-- Exercise 6: ownership and operations are part of release readiness.</span>
-<span>SELECT *</span>
-<span>FROM (</span>
-<span>  VALUES</span>
-<span>    (&#x27;rollback plan&#x27;, &#x27;documented&#x27;, &#x27;release owner&#x27;),</span>
-<span>    (&#x27;object ownership/privileges&#x27;, &#x27;review required&#x27;, &#x27;database owner&#x27;),</span>
-<span>    (&#x27;refresh cadence&#x27;, &#x27;not applicable to ordinary views&#x27;, &#x27;analytics owner&#x27;),</span>
-<span>    (&#x27;monitoring and alerts&#x27;, &#x27;review required&#x27;, &#x27;operations&#x27;),</span>
-<span>    (&#x27;data contracts&#x27;, &#x27;executable checks above&#x27;, &#x27;data owner&#x27;),</span>
-<span>    (&#x27;known limits&#x27;, &#x27;synthetic seed and local plans&#x27;, &#x27;analytics owner&#x27;)</span>
-<span>) AS release_check(item, evidence, owner);</span>
-<span> </span>
-<span>-- Exercise 7: lineage states source, transformation grain, and its validation.</span>
-<span>SELECT *</span>
-<span>FROM (</span>
-<span>  VALUES</span>
-<span>    (&#x27;customer_ltv&#x27;, &#x27;customers + orders&#x27;, &#x27;customer&#x27;,</span>
-<span>     &#x27;SUM(ltv) = SUM(orders.total_amount)&#x27;),</span>
-<span>    (&#x27;monthly_revenue&#x27;, &#x27;orders&#x27;, &#x27;calendar month&#x27;,</span>
-<span>     &#x27;SUM(month revenue) = SUM(order totals)&#x27;),</span>
-<span>    (&#x27;customer_dq&#x27;, &#x27;customers&#x27;, &#x27;one snapshot summary&#x27;,</span>
-<span>     &#x27;invalid counts are zero or approved exceptions&#x27;)</span>
-<span>) AS lineage(metric_name, source_tables, transformation_grain, validation_query);</span>
-<span> </span>
-<span>-- Exercise 8: dashboard monthly revenue must equal the simpler source control.</span>
-<span>SELECT (SELECT ROUND(SUM(revenue), 2)</span>
-<span>        FROM v_monthly_revenue_refactored_solution) AS dashboard_total,</span>
-<span>       (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS source_total,</span>
-<span>       (SELECT ROUND(SUM(revenue), 2)</span>
-<span>        FROM v_monthly_revenue_refactored_solution)</span>
-<span>       - (SELECT ROUND(SUM(total_amount), 2) FROM orders) AS difference;</span>
-<span> </span>
-<span>-- Exercise 9: explicit miniature fixtures make boundary assumptions reviewable</span>
-<span>-- without corrupting the canonical training data.</span>
-<span>WITH edge_fixture(id, email, amount) AS (</span>
-<span>  VALUES (1, NULL::text, NULL::numeric),</span>
-<span>         (2, &#x27;DUP@example.com&#x27;, 10),</span>
-<span>         (2, &#x27;dup@example.com&#x27;, 10)</span>
-<span>)</span>
-<span>SELECT COUNT(*) AS fixture_rows,</span>
-<span>       COUNT(*) FILTER (WHERE email IS NULL) AS null_email_rows,</span>
-<span>       COUNT(*) - COUNT(DISTINCT id) AS duplicate_key_rows,</span>
-<span>       COUNT(amount) AS nonnull_amount_rows</span>
-<span>FROM edge_fixture;</span>
-<span> </span>
-<span>-- Exercise 10: NOT_RUN is distinct from FAIL. Only executed evidence can PASS.</span>
-<span>SELECT criterion,</span>
-<span>       CASE</span>
-<span>         WHEN executed AND observed = expected THEN &#x27;PASS&#x27;</span>
-<span>         WHEN executed THEN &#x27;FAIL&#x27;</span>
-<span>         ELSE &#x27;NOT_RUN&#x27;</span>
-<span>       END AS result</span>
-<span>FROM (</span>
-<span>  VALUES</span>
-<span>    (&#x27;customer DQ&#x27;, true,</span>
-<span>     (SELECT invalid_email::numeric FROM v_dq_customers_solution), 0::numeric),</span>
-<span>    (&#x27;LTV reconciliation&#x27;, true,</span>
-<span>     ABS((SELECT SUM(ltv) FROM v_customer_ltv_solution)</span>
-<span>         - (SELECT SUM(total_amount) FROM orders)), 0::numeric),</span>
-<span>    (&#x27;Windows CI bootstrap&#x27;, false, NULL::numeric, NULL::numeric)</span>
-<span>) AS acceptance(criterion, executed, observed, expected)</span>
-<span>ORDER BY criterion;</span>
-<span> </span>
-<span>ROLLBACK;</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 60 solution: end-to-end sign-off</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-60: Final Capstone Part3</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day60_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day60_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_dq_customers_solution <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">            <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">!</span><span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^[A-Z]{2}$&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_customer_ltv_solution <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_monthly_revenue_solution <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">           <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">4</span></span>
+<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_over_month_growth</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> monthly<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- DQ sign-off and business-view reconciliation.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_dq_customers_solution<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-keyword">AS</span> customer_ltv_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> difference<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Candidate production indexes remain rolled back in this tutorial answer.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_date_day60_solution <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_day60_solution <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_order_items_order_day60_solution <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_expenses_date_day60_solution <span class="syntax-keyword">ON</span> expenses<span class="syntax-punctuation">(</span>expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_budgets_period_day60_solution <span class="syntax-keyword">ON</span> budgets<span class="syntax-punctuation">(</span><span class="syntax-keyword">period</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> v_monthly_revenue_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">12</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- The written capstone should record these sign-off items and measured values.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> item</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;DQ exceptions and remediation&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;model grain and join rationale&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;before/after EXPLAIN evidence&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;freshness versus performance tradeoffs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;known limitations and next steps&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checklist<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: clock-dependent queries need an as-of value for reproducibility.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;v_dq_customers_solution&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;snapshot-independent&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;v_customer_ltv_solution&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;snapshot-independent&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;trailing/current-period reports&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;clock-dependent: bind as_of_date&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reproducibility<span class="syntax-punctuation">(</span>object_name<span class="syntax-punctuation">,</span> clock_contract<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: every sign-off row carries observed/expected values, severity, and</span></span>
+<span class="source-line"><span class="syntax-comment">-- remediation. PASS is computed, never typed by hand.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> checks <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;invalid_customer_emails&#x27;</span> <span class="syntax-keyword">AS</span> check_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         invalid_email<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> observed_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> expected_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-string">&#x27;critical&#x27;</span> <span class="syntax-keyword">AS</span> severity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-string">&#x27;quarantine invalid customer records&#x27;</span> <span class="syntax-keyword">AS</span> remediation</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> v_dq_customers_solution</span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;ltv_reconciles_to_orders&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">           <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span></span>
+<span class="source-line">           <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;critical&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;repair customer-grain join or revenue definition&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> observed_value <span class="syntax-operator">=</span> expected_value <span class="syntax-keyword">AS</span> pass</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> checks</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> severity<span class="syntax-punctuation">,</span> check_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: compute LAG once in `with_previous`, then use that named value.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The first month intentionally retains NULL growth because no comparison exists.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> v_monthly_revenue_refactored_solution <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> with_previous <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_month</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> monthly</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> previous_month<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> previous_month<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>previous_month<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-keyword">AS</span> month_over_month_growth</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> with_previous<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_monthly_revenue_refactored_solution <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: flag the open calendar month instead of comparing it as if it</span></span>
+<span class="source-line"><span class="syntax-comment">-- were complete. A production report should bind an explicit as-of date.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> is_incomplete_month</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> v_monthly_revenue_refactored_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: structured plan evidence records estimates, actuals, buffers, and</span></span>
+<span class="source-line"><span class="syntax-comment">-- timing. Results remain specific to this server, seed, and cache state.</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">,</span> FORMAT JSON<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> v_monthly_revenue_refactored_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">12</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: ownership and operations are part of release readiness.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;rollback plan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;documented&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;release owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;object ownership/privileges&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;review required&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;database owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;refresh cadence&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;not applicable to ordinary views&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;analytics owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;monitoring and alerts&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;review required&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;operations&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;data contracts&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;executable checks above&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;data owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;known limits&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;synthetic seed and local plans&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;analytics owner&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> release_check<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">,</span> evidence<span class="syntax-punctuation">,</span> <span class="syntax-keyword">owner</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 7: lineage states source, transformation grain, and its validation.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;customer_ltv&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customers + orders&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customer&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">     <span class="syntax-string">&#x27;SUM(ltv) = SUM(orders.total_amount)&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;monthly_revenue&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;orders&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;calendar month&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">     <span class="syntax-string">&#x27;SUM(month revenue) = SUM(order totals)&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;customer_dq&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customers&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;one snapshot summary&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">     <span class="syntax-string">&#x27;invalid counts are zero or approved exceptions&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lineage<span class="syntax-punctuation">(</span>metric_name<span class="syntax-punctuation">,</span> source_tables<span class="syntax-punctuation">,</span> transformation_grain<span class="syntax-punctuation">,</span> validation_query<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 8: dashboard monthly revenue must equal the simpler source control.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">FROM</span> v_monthly_revenue_refactored_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dashboard_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">FROM</span> v_monthly_revenue_refactored_solution<span class="syntax-punctuation">)</span></span>
+<span class="source-line">       <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> difference<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 9: explicit miniature fixtures make boundary assumptions reviewable</span></span>
+<span class="source-line"><span class="syntax-comment">-- without corrupting the canonical training data.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> edge_fixture<span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DUP@example.com&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">         <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;dup@example.com&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fixture_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_email_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> duplicate_key_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> nonnull_amount_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> edge_fixture<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 10: NOT_RUN is distinct from FAIL. Only executed evidence can PASS.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> criterion<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> executed <span class="syntax-keyword">AND</span> observed <span class="syntax-operator">=</span> expected <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;PASS&#x27;</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> executed <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;FAIL&#x27;</span></span>
+<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;NOT_RUN&#x27;</span></span>
+<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">result</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;customer DQ&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">     <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> invalid_email<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">FROM</span> v_dq_customers_solution<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;LTV reconciliation&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">     <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> v_customer_ltv_solution<span class="syntax-punctuation">)</span></span>
+<span class="source-line">         <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Windows CI bootstrap&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> acceptance<span class="syntax-punctuation">(</span>criterion<span class="syntax-punctuation">,</span> executed<span class="syntax-punctuation">,</span> observed<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> criterion<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

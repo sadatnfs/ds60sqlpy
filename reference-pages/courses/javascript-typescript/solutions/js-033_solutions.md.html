@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,55 +177,55 @@
 <h3 id="exercise-1-perform-bounded-cpu-work-in-a-real-worker">Exercise 1: Perform bounded CPU work in a real worker<a class="heading-anchor" href="#exercise-1-perform-bounded-cpu-work-in-a-real-worker" aria-label="Link to this section">#</a></h3>
 <p>Task: Sum integers 1 through 10000 in a worker and inspect its thread id.</p>
 <p>The result came through an actual worker message. The tiny workload illustrates mechanics and may be slower than a direct loop because startup costs dominate.</p>
-<pre><code class="language-javascript">const result = await runWorker(`const { parentPort, workerData, threadId } = require(&#x27;node:worker_threads&#x27;);
-let sum = 0; for (let value = 1; value &lt;= workerData; value += 1) sum += value;
-parentPort.postMessage({ sum, threadId });`, 10000);
-assert.equal(result.sum, 50005000);
-assert.ok(result.threadId &gt; 0);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runWorker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">const { parentPort, workerData, threadId } = require(&#x27;node:worker_threads&#x27;);</span>
+<span class="syntax-string">let sum = 0; for (let value = 1; value &lt;= workerData; value += 1) sum += value;</span>
+<span class="syntax-string">parentPort.postMessage({ sum, threadId });</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>sum<span class="syntax-punctuation">,</span> <span class="syntax-number">50005000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>threadId <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> sum 50005000; worker thread id positive.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-transfer-a-buffer-and-observe-detachment">Exercise 2: Transfer a buffer and observe detachment<a class="heading-anchor" href="#exercise-2-transfer-a-buffer-and-observe-detachment" aria-label="Link to this section">#</a></h3>
 <p>Task: Send an ArrayBuffer by transfer list, modify its first byte in the worker and return the bytes.</p>
 <p>The sender loses access because ownership moved. Treating a detached buffer as still usable would create an invalid lifetime assumption.</p>
-<pre><code class="language-javascript">const buffer = Uint8Array.from([1, 2, 3]).buffer;
-const result = await runWorker(`const { parentPort, workerData } = require(&#x27;node:worker_threads&#x27;);
-const bytes = new Uint8Array(workerData); bytes[0] = 9; parentPort.postMessage([...bytes]);`, buffer, [buffer]);
-assert.equal(buffer.byteLength, 0);
-assert.deepEqual(result, [9, 2, 3]);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> buffer <span class="syntax-operator">=</span> <span class="syntax-builtin">Uint8Array</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>buffer<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runWorker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">const { parentPort, workerData } = require(&#x27;node:worker_threads&#x27;);</span>
+<span class="syntax-string">const bytes = new Uint8Array(workerData); bytes[0] = 9; parentPort.postMessage([...bytes]);</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> buffer<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>buffer<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>buffer<span class="syntax-punctuation">.</span>byteLength<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> parent byteLength 0; returned bytes 9,2,3.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-distinguish-cloning-from-shared-mutation">Exercise 3: Distinguish cloning from shared mutation<a class="heading-anchor" href="#exercise-3-distinguish-cloning-from-shared-mutation" aria-label="Link to this section">#</a></h3>
 <p>Task: Send an object, mutate the worker copy and compare the original.</p>
 <p>Ordinary message data is cloned. This prevents accidental aliasing but can add copying cost for large payloads.</p>
-<pre><code class="language-javascript">const original = { value: 1 };
-const result = await runWorker(`const { parentPort, workerData } = require(&#x27;node:worker_threads&#x27;);
-workerData.value = 9; parentPort.postMessage(workerData.value);`, original);
-assert.equal(result, 9);
-assert.equal(original.value, 1);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runWorker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">const { parentPort, workerData } = require(&#x27;node:worker_threads&#x27;);</span>
+<span class="syntax-string">workerData.value = 9; parentPort.postMessage(workerData.value);</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> worker returns 9; parent remains 1.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-propagate-an-actual-worker-exception">Exercise 4: Propagate an actual worker exception<a class="heading-anchor" href="#exercise-4-propagate-an-actual-worker-exception" aria-label="Link to this section">#</a></h3>
 <p>Task: Run an authored worker that throws a fixture error.</p>
 <p>Worker exceptions arrive through the error event. A parent that listens only for messages could wait forever for a result that cannot arrive.</p>
-<pre><code class="language-javascript">await assert.rejects(runWorker(`throw new Error(&#x27;worker fixture failed&#x27;);`, null), /worker fixture failed/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>runWorker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">throw new Error(&#x27;worker fixture failed&#x27;);</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/worker fixture failed/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> parent Promise rejects with worker fixture failed.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-terminate-an-owned-worker-that-remains-alive">Exercise 5: Terminate an owned worker that remains alive<a class="heading-anchor" href="#exercise-5-terminate-an-owned-worker-that-remains-alive" aria-label="Link to this section">#</a></h3>
 <p>Task: Start a worker that reports ready and keeps an interval open, then terminate it.</p>
 <p>A ready message does not close active handles. Explicit termination releases the owned worker and its interval; the test does not leave background work running.</p>
-<pre><code class="language-javascript">const worker = new Worker(`const { parentPort } = require(&#x27;node:worker_threads&#x27;); setInterval(() =&gt; {}, 1000); parentPort.postMessage(&#x27;ready&#x27;);`, { eval: true });
-try {
-  assert.equal(await new Promise((resolve, reject) =&gt; { worker.once(&#x27;message&#x27;, resolve); worker.once(&#x27;error&#x27;, reject); }), &#x27;ready&#x27;);
-} finally {
-  const code = await worker.terminate();
-  assert.equal(typeof code, &#x27;number&#x27;);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> worker <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Worker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">const { parentPort } = require(&#x27;node:worker_threads&#x27;); setInterval(() =&gt; {}, 1000); parentPort.postMessage(&#x27;ready&#x27;);</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-builtin">eval</span><span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> <span class="syntax-operator">new</span> <span class="syntax-builtin">Promise</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>resolve<span class="syntax-punctuation">,</span> reject<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> worker<span class="syntax-punctuation">.</span>once<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;message&#x27;</span><span class="syntax-punctuation">,</span> resolve<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> worker<span class="syntax-punctuation">.</span>once<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;error&#x27;</span><span class="syntax-punctuation">,</span> reject<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> code <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> worker<span class="syntax-punctuation">.</span>terminate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> ready observed; terminate resolves with an exit code.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-reject-data-that-cannot-be-cloned">Exercise 6: Reject data that cannot be cloned<a class="heading-anchor" href="#exercise-6-reject-data-that-cannot-be-cloned" aria-label="Link to this section">#</a></h3>
 <p>Task: Try to pass a function through workerData.</p>
 <p>Functions carry executable behavior and closure state, not supported cloneable message data. Define a data protocol and keep worker implementation separate.</p>
-<pre><code class="language-javascript">await assert.rejects(runWorker(`const { parentPort } = require(&#x27;node:worker_threads&#x27;); parentPort.postMessage(&#x27;unused&#x27;);`, { callback: () =&gt; 1 }), error =&gt; error.name === &#x27;DataCloneError&#x27;);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>runWorker<span class="syntax-punctuation">(</span><span class="syntax-string">`</span><span class="syntax-string">const { parentPort } = require(&#x27;node:worker_threads&#x27;); parentPort.postMessage(&#x27;unused&#x27;);</span><span class="syntax-string">`</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> callback<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>name <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;DataCloneError&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> DataCloneError before useful worker execution.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

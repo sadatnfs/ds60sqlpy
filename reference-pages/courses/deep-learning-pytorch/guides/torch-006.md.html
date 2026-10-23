@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,9 +165,9 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-005</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. The finish condition is z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)</strong>2. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">z=2\cdot w</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mi>z</mi><mo>·</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">a=z\cdot z</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(a-1\right)}^{2}</annotation></semantics></math>. The finish condition is z2, a4, loss 9, gradient 48. at new <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">w=1.5</annotation></semantics></math>, gradient -1 for <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math>. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.</p>
+<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><msup><mrow><mi>z</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">a={z}^{2}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(a-1\right)}^{2}</annotation></semantics></math>, the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.</p>
 <p>Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
 <p>Use an explicit intermediate trace when introducing a new differentiable operation, debugging a custom backward rule or comparing two implementations with matching forward values. A small scalar chain lets every local factor be checked independently before the same reasoning is applied to vectors and matrices.</p>
@@ -139,7 +185,7 @@
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Build every intermediate from a requires_grad leaf. autograd.grad(loss, w) composes the chain rule. A direct in-place add on a leaf requiring gradients raises RuntimeError unless performed under a deliberate no_grad update context. Mutating a saved input under no_grad can still make a later backward fail its version check. Use clone when a separate mutable value is needed and recompute the graph after optimizer updates.</p>
 <h3 id="trace-the-graph-and-its-saved-values">Trace the graph and its saved values<a class="heading-anchor" href="#trace-the-graph-and-its-saved-values" aria-label="Link to this section">#</a></h3>
-<p>The chain is w→z→a→L, with z=2w, a=z² and L=(a-1)². At w=1, the full trace is:</p>
+<p>The chain is w→z→a→L, with z=2w, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><msup><mrow><mi>z</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">a={z}^{2}</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">L={\left(a-1\right)}^{2}</annotation></semantics></math>. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>, the full trace is:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Operation</th>
 <th>Forward value</th>
@@ -147,22 +193,22 @@
 </tr></thead><tbody>
 <tr>
 <td>z=2w</td>
-<td>z=2</td>
-<td>dz/dw=2</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">z=2</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\frac{\partial z}{\partial w}=2</annotation></semantics></math></td>
 </tr>
 <tr>
-<td>a=z²</td>
-<td>a=4</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><msup><mrow><mi>z</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">a={z}^{2}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math></td>
 <td>da/dz=2z=4</td>
 </tr>
 <tr>
-<td>L=(a-1)²</td>
-<td>L=9</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">L={\left(a-1\right)}^{2}</annotation></semantics></math></td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">L=9</annotation></semantics></math></td>
 <td>dL/da=2(a-1)=6</td>
 </tr>
 </tbody></table></div>
-<p>Backward composes sensitivities in reverse dependency order: dL/dw=6×4×2=48. Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives z=3, a=9, L=64 and derivative 16×6×3=288. A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.</p>
-<p>The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding a=4 fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.</p>
+<p>Backward composes sensitivities in reverse dependency order: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>w</mi></mrow></mfrac><mo>=</mo><mn>6</mn><mo>·</mo><mn>4</mn><mo>·</mo><mn>2</mn><mo>=</mo><mn>48</mn></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial w}=6\cdot 4\cdot 2=48</annotation></semantics></math>. Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">z=3</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">a=9</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">L=64</annotation></semantics></math> and derivative <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>16</mn><mo>·</mo><mn>6</mn><mo>·</mo><mn>3</mn><mo>=</mo><mn>288</mn></mrow><annotation encoding="application/x-tex">16\cdot 6\cdot 3=288</annotation></semantics></math>. A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.</p>
+<p>The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">a=4</annotation></semantics></math> fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.</p>
 <p>For larger tensors, reverse-mode differentiation propagates vector-Jacobian products rather than materializing every possible derivative matrix. A scalar loss supplies the initial sensitivity one; each operation transforms the incoming sensitivity using its saved forward values. This explains why the graph must retain information from the actual forward pass and why asking for derivatives of a nonscalar result requires an explicit upstream-gradient convention.</p>
 <p>Consider <code>objective = value.square()</code> when value is two. Backward needs the original value to produce derivative four. If code then changes that storage to three before calling backward, the old objective still represents the forward value four, but the saved input has changed. Computing derivative six from the new storage would mix two different states. PyTorch&#x27;s saved-tensor version checks reject such an invalid sequence rather than silently returning that mixed-state result. <a href="https://docs.pytorch.org/docs/2.9/notes/autograd.html">PyTorch 2.9 autograd mechanics</a>.</p>
 <p>Using no_grad around the mutation prevents recording that new operation. It does not restore the saved value or make the earlier graph consistent. A safe ordinary update sequence completes the current derivative computation, updates parameter state at a deliberate boundary, then recomputes the next forward graph. Clone can provide separate mutable storage, but a clone is not a substitute for knowing which value each graph depends on.</p>
@@ -170,34 +216,34 @@
 <p>ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe&#x27;s0.5 as if both were the same object.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-trace-the-chain-rule">Example A: Trace the chain rule<a class="heading-anchor" href="#example-a-trace-the-chain-rule" aria-label="Link to this section">#</a></h4>
-<p>The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying 6<em>4</em>2 gives 48 at the supplied point.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<p>The factors are dL/da=2(a-1)=6, da/dz=2z=4 and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\frac{\partial z}{\partial w}=2</annotation></semantics></math>. Multiplying <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>6</mn><mo>·</mo><mn>4</mn><mo>·</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">6\cdot 4\cdot 2</annotation></semantics></math> gives 48 at the supplied point.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
-gradient=torch.autograd.grad(loss,w)[0]
-assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)</code></pre>
+w<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> z<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>w<span class="syntax-punctuation">;</span> a<span class="syntax-operator">=</span>z<span class="syntax-operator">*</span>z<span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+gradient<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>autograd<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>z<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>a<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>gradient<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">,</span><span class="syntax-number">48.</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> z2, a4, loss 9, gradient 48.</p>
 <h4 id="example-b-check-an-independent-slope">Example B: Check an independent slope<a class="heading-anchor" href="#example-b-check-an-independent-slope" aria-label="Link to this section">#</a></h4>
 <p>The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.</p>
-<pre><code class="language-python">h=1e-5; f=lambda value:((2*value)**2-1)**2
-numeric=(f(1+h)-f(1-h))/(2*h)
-np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python">h<span class="syntax-operator">=</span><span class="syntax-number">1e-5</span><span class="syntax-punctuation">;</span> f<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+numeric<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">+</span>h<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>f<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>h<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>numeric<span class="syntax-punctuation">,</span><span class="syntax-number">48</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-5</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> approximately 48 within 1e-5.</p>
 <h4 id="example-c-observe-a-leaf-mutation-guard">Example C: Observe a leaf mutation guard<a class="heading-anchor" href="#example-c-observe-a-leaf-mutation-guard" aria-label="Link to this section">#</a></h4>
 <p>The guard prevents an ambiguous modification of a value whose derivative history is being tracked. Optimizer updates use a deliberate state-update boundary instead.</p>
-<pre><code class="language-python">leaf=torch.tensor(1.,requires_grad=True)
-try: leaf.add_(1)
-except RuntimeError: pass
-else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">leaf<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> leaf<span class="syntax-operator">.</span>add_<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> RuntimeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unsafe leaf mutation accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> RuntimeError.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">w=1.5</annotation></semantics></math>, gradient -1 for <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math>. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Trace the chain rule.</strong> Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. </strong>Expected:<strong> z2, a4, loss 9, gradient 48. </strong>Verify:** Save the assertion results for exercise 1, including z2, a4, loss 9, gradient 48.</li>
+<li><strong>Trace the chain rule.</strong> Use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>z</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">z=2\cdot w</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mi>z</mi><mo>·</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">a=z\cdot z</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>a</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(a-1\right)}^{2}</annotation></semantics></math>. <strong>Expected:</strong> z2, a4, loss 9, gradient 48. <strong>Verify:</strong> Save the assertion results for exercise 1, including z2, a4, loss 9, gradient 48.</li>
 </ol>
 <ol>
 <li><strong>Check an independent slope.</strong> Compare the chain derivative with a central difference of the complete scalar expression. <strong>Expected:</strong> approximately 48 within 1e-5. <strong>Verify:</strong> Save the assertion results for exercise 2, including approximately 48 within 1e-5.</li>
@@ -206,13 +252,13 @@ else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pr
 <li><strong>Observe a leaf mutation guard.</strong> Try an in-place add on a leaf requiring gradients outside no_grad. <strong>Expected:</strong> RuntimeError. <strong>Verify:</strong> Save the assertion results for exercise 3, including RuntimeError.</li>
 </ol>
 <ol>
-<li><strong>Expose saved-value invalidation.</strong> Build loss=x*x, mutate x under no_grad before backward, and inspect the failure. <strong>Expected:</strong> RuntimeError from a changed saved tensor version. <strong>Verify:</strong> Save the assertion results for exercise 4, including RuntimeError from a changed saved tensor version.</li>
+<li><strong>Expose saved-value invalidation.</strong> Build <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><mi>x</mi><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">\mathrm{loss}=x\cdot x</annotation></semantics></math>, mutate x under no_grad before backward, and inspect the failure. <strong>Expected:</strong> RuntimeError from a changed saved tensor version. <strong>Verify:</strong> Save the assertion results for exercise 4, including RuntimeError from a changed saved tensor version.</li>
 </ol>
 <ol>
 <li><strong>Inspect a ReLU convention.</strong> Differentiate ReLU at negative, zero and positive inputs. <strong>Expected:</strong> gradients 0, 0, 1. <strong>Verify:</strong> Save the assertion results for exercise 5, including gradients 0, 0, 1.</li>
 </ol>
 <ol>
-<li><strong>Recompute after an update.</strong> Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative. <strong>Expected:</strong> at new w=1.5, gradient -1 for (w-2)<strong>2. </strong>Verify:<strong> Save the assertion results for exercise 6, including at new w=1.5, gradient -1 for (w-2)</strong>2.</li>
+<li><strong>Recompute after an update.</strong> Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative. <strong>Expected:</strong> at new <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">w=1.5</annotation></semantics></math>, gradient -1 for <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math>. <strong>Verify:</strong> Save the assertion results for exercise 6, including at new <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">w=1.5</annotation></semantics></math>, gradient -1 for <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math>.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>For a factor mismatch, inspect the local derivative table before changing a learning rate. For a zero finite difference, ensure the complete function is recomputed at each perturbed input. For a tensor-version error, locate the first in-place write to a value saved by the forward graph, including writes through an alias or a no_grad block.</p>
@@ -231,7 +277,7 @@ else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pr
 <p><strong>Why avoid.data as a workaround?</strong></p>
 <p>It can bypass useful autograd safeguards and create silently incorrect derivatives. Understand the graph and use documented no_grad, detach and clone semantics instead.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-006, Autograd graphs, the chain rule and in-place hazards.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-006, Autograd graphs, the chain rule and in-place hazards.
 Read courses/deep-learning-pytorch/guides/torch-006.md and courses/deep-learning-pytorch/lessons/torch-006.py. Direct prerequisites: `torch-005`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

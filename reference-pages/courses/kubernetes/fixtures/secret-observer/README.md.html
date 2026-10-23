@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <p>This teacher-operated fixture belongs to <code>k8s-019</code>. It gives a real consuming application to the lesson&#x27;s environment, projected-file and reload explanation. It accepts exactly two public byte strings, <code>DUMMY_LESSON_ONLY</code> and <code>DUMMY_LESSON_ROTATED</code>. They are teaching markers, not credentials. Never replace these strings with a password, API token or real Secret value.</p>
 <p>The normal browser worker continues to reject Secrets, Secret references and this program override. A teacher must separately prepare an exclusive local course session and authorize this fixed observation. The teacher runner uses the preparation&#x27;s private administrator context because the ordinary worker Role deliberately lacks these operations. It does not change that Role, launch a cluster, select an ambient context, execute commands inside Pods or download an image. The caller needs the repository&#x27;s prepared Python environment, pinned kubectl, existing fixture image and an already prepared owned session.</p>
 <h3 id="follow-one-value-through-the-system">Follow one value through the system<a class="heading-anchor" href="#follow-one-value-through-the-system" aria-label="Link to this section">#</a></h3>
-<p>The API object&#x27;s desired value is only the first stage. On container startup, Kubernetes supplies <code>SYNTHETIC_MARKER</code> through <code>env[].valueFrom.secretKeyRef</code>. The operating system gives the process that environment. The Python application captures its label once in <code>Observation.<strong>init</strong></code>. A later API update does not rewrite the environment of the running process.</p>
+<p>The API object&#x27;s desired value is only the first stage. On container startup, Kubernetes supplies <code>SYNTHETIC_MARKER</code> through <code>env[].valueFrom.secretKeyRef</code>. The operating system gives the process that environment. The Python application captures its label once in <code>Observation.__init__</code>. A later API update does not rewrite the environment of the running process.</p>
 <p>The same Secret key is mounted as <code>/synthetic/message</code>. The manifest mounts the whole Secret volume read-only, with an <code>items</code> entry selecting one key and renaming it to <code>message</code>. There is no <code>subPath</code>. The application opens that path again on each observation, so it can see a newer projected file after Kubernetes refreshes the volume. Holding an old file descriptor or using <code>subPath</code> would change this experiment. Kubernetes propagates Secret volume updates eventually; an accepted patch does not establish that the file has already changed.</p>
 <p>The application also keeps a separate <code>cached</code> label in memory. It initializes this once from the projected file and changes it only when the fixed <code>POST /reload</code> endpoint succeeds. Thus file freshness and application use can disagree without either observation being fabricated. Reload reads the file once and returns the label it actually adopted. A lock serializes observations and reloads within this process; it does not make a transaction with the Kubernetes API.</p>
 <p>The label <code>initial</code> stands for the first public marker and <code>rotated</code> for the second. <code>pod_uid</code> is supplied by the downward API. <code>boot_id</code> is a newly generated process identifier. The teacher crosschecks the Pod UID against API readback and the controller owner graph; merely receiving a UID in an HTTP body would not prove ownership.</p>
@@ -174,32 +220,32 @@
 <p>The observer exposes only <code>GET /ready</code>, <code>GET /observe</code> and <code>POST /reload</code>. Responses contain the five identity/label fields, never marker bytes. Unknown paths return a fixed error. Reload rejects bodies, duplicate Content-Length headers and every Transfer-Encoding header. The file reader accepts only the exact two byte sequences, with no newline normalization, and bounds its read. An unknown or missing marker yields a generic 503 without revealing bytes or paths. Routine HTTP logging is disabled. This small server demonstrates a lifecycle mechanism; it is not a general authenticated secret-management service.</p>
 <h3 id="regenerate-and-inspect-offline">Regenerate and inspect offline<a class="heading-anchor" href="#regenerate-and-inspect-offline" aria-label="Link to this section">#</a></h3>
 <p>From the repository root, use the prepared interpreter. POSIX:</p>
-<pre><code class="language-sh">.venv/bin/python courses/kubernetes/fixtures/secret-observer/render.py
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python courses/kubernetes/fixtures/secret-observer/render.py
 .venv/bin/python -m pytest tests/test_kubernetes_secret_observer.py</code></pre>
 <p>PowerShell, using the interpreter printed by setup:</p>
-<pre><code class="language-powershell">&amp; $CoursePython courses/kubernetes/fixtures/secret-observer/render.py
-if ($LASTEXITCODE -ne 0) { throw &#x27;Fixture rendering failed.&#x27; }
-&amp; $CoursePython -m pytest tests/test_kubernetes_secret_observer.py
-if ($LASTEXITCODE -ne 0) { throw &#x27;Fixture contract tests failed.&#x27; }</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython courses<span class="syntax-punctuation">/</span>kubernetes<span class="syntax-punctuation">/</span>fixtures<span class="syntax-punctuation">/</span>secret-observer<span class="syntax-punctuation">/</span>render<span class="syntax-punctuation">.</span>py
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fixture rendering failed.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">/</span>test_kubernetes_secret_observer<span class="syntax-punctuation">.</span>py
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fixture contract tests failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
 <p>The tests use fresh temporary files, a loopback HTTP server and fake API responses. They establish program and ownership logic, not kubelet projection or actual Kubernetes cleanup. The lesson&#x27;s small encoding check remains useful as a separate offline exercise and also makes no cluster request.</p>
 <h3 id="run-only-against-a-fresh-teacher-owned-session">Run only against a fresh teacher-owned session<a class="heading-anchor" href="#run-only-against-a-fresh-teacher-owned-session" aria-label="Link to this section">#</a></h3>
 <p>Prepare the owned session immediately before the lesson using the explicit preparation workflow in <a href="../../host-labs.md.html">host-labs.md</a>. The usual worker credential expires after about 15 minutes. This runner requires at least seven minutes remaining, even though it uses the matching teacher context, so an old session cannot silently become an indefinite administrator route. A released session cannot be reused. Keep its private files outside learner progress and exports, and never print the kubeconfig, token or private key.</p>
 <p>The teacher supplies the absolute session directory from the new preparation receipt and the absolute pinned kubectl path. The runner derives the explicit teacher context, namespace and expected namespace UID from the matching private receipt and lease. It checks the kubeconfig has one fixed context, the exact loopback server and cluster CA, and embedded certificate credentials only. It rejects credential plugins and ambient kubeconfig selection. Use a new output directory whose parent already exists. These commands neither prepare nor release a cluster:</p>
 <p>POSIX:</p>
-<pre><code class="language-sh">: &quot;${LAB_SESSION:?Set the fresh private session directory from preparation}&quot;
-: &quot;${LAB_KUBECTL:?Set the pinned kubectl executable path}&quot;
-: &quot;${LAB_EVIDENCE:?Set a new evidence directory beneath an existing parent}&quot;
-.venv/bin/python courses/kubernetes/fixtures/secret-observer/teacher.py \
-  --session &quot;$LAB_SESSION&quot; --kubectl &quot;$LAB_KUBECTL&quot; \
-  --output &quot;$LAB_EVIDENCE&quot; --confirm-synthetic-secret</code></pre>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_SESSION<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set the fresh private session directory from preparation</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECTL<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set the pinned kubectl executable path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_EVIDENCE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set a new evidence directory beneath an existing parent</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+.venv/bin/python courses/kubernetes/fixtures/secret-observer/teacher.py <span class="syntax-string">\</span>
+  --session <span class="syntax-string">&quot;</span>$LAB_SESSION<span class="syntax-string">&quot;</span> --kubectl <span class="syntax-string">&quot;</span>$LAB_KUBECTL<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  --output <span class="syntax-string">&quot;</span>$LAB_EVIDENCE<span class="syntax-string">&quot;</span> --confirm-synthetic-secret</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">if (-not $env:LAB_SESSION -or -not $env:LAB_KUBECTL -or -not $env:LAB_EVIDENCE) {
-    throw &#x27;Fresh owned session, pinned kubectl and new evidence paths are required.&#x27;
-}
-&amp; $CoursePython courses/kubernetes/fixtures/secret-observer/teacher.py `
-    --session $env:LAB_SESSION --kubectl $env:LAB_KUBECTL `
-    --output $env:LAB_EVIDENCE --confirm-synthetic-secret
-if ($LASTEXITCODE -ne 0) { throw &#x27;Read the fixture evidence and cleanup status.&#x27; }</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_SESSION <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_KUBECTL <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_EVIDENCE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fresh owned session, pinned kubectl and new evidence paths are required.&#x27;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython courses<span class="syntax-punctuation">/</span>kubernetes<span class="syntax-punctuation">/</span>fixtures<span class="syntax-punctuation">/</span>secret-observer<span class="syntax-punctuation">/</span>teacher<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-session $env:LAB_SESSION <span class="syntax-punctuation">-</span>-kubectl $env:LAB_KUBECTL <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-output $env:LAB_EVIDENCE <span class="syntax-punctuation">-</span>-confirm-synthetic-secret
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Read the fixture evidence and cleanup status.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
 <p>Argument paths are separate tokens, so paths containing spaces work. The runner uses no shell interpolation or default context. Do not paste an example session from a previous teacher&#x27;s notes. Do not replace a denial with another identity. The observation is limited to the prepared owned namespace; the wrapper&#x27;s fixed operations do not reduce the underlying administrator credential&#x27;s authority, so keep that file private and under teacher control.</p>
 <p>The runner first checks the namespace UID and ownership label, then refuses preexisting fixture names. It records creation intent and returned object UIDs. The Deployment, ReplicaSet and Pod must have the expected owner chain and fresh nonce. One port-forward targets that exact Pod and binds only 127.0.0.1 on an OS-assigned port. There is no arbitrary Pod selector or exec command.</p>
 <p>Rotation uses a JSON Patch with tests for the Secret UID and resourceVersion before changing the public marker. A changed identity or concurrent edit fails instead of overwriting someone else&#x27;s state. The runner polls the real file label for at most 150 seconds. It does not sleep a fixed duration and assume an update happened. It requires the environment and cache to remain initial during that observation, invokes reload, then stops its port-forward and deletes only the recorded Pod UID. A replacement Pod must belong to the same owned Deployment. Its environment, file and initial cache must all be rotated.</p>
@@ -211,12 +257,12 @@ if ($LASTEXITCODE -ne 0) { throw &#x27;Read the fixture evidence and cleanup sta
 <p>The runner closes its own port-forward in a <code>finally</code> block. It rechecks the namespace and object ownership before cleanup and issues Kubernetes DeleteOptions with <code>preconditions.uid</code>, foreground propagation and a bounded grace period. It removes the recorded Deployment, ConfigMap and Secret, then checks their absence and the absence of its nonce-labeled Pods/ReplicaSets. It never issues a broad namespace delete or deletes a same-name replacement. SIGINT/SIGTERM trigger the same bounded cleanup path; a second such signal is ignored during cleanup. A process kill or machine crash can prevent this path.</p>
 <p>If creation may have succeeded but its UID could not be recorded, cleanup refuses that ambiguous object and retains the intent/nonce for teacher review. Do not delete by name alone to make the receipt green. The separate owned-session release operation validates the recorded control-plane identity before removing that exclusive course cluster. Use the exact preparation receipt&#x27;s session:</p>
 <p>POSIX:</p>
-<pre><code class="language-sh">.venv/bin/python scripts/prepare_kubernetes.py release \
-  --session &quot;$LAB_SESSION&quot; --confirm-release</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/prepare_kubernetes.py release <span class="syntax-string">\</span>
+  --session <span class="syntax-string">&quot;</span>$LAB_SESSION<span class="syntax-string">&quot;</span> --confirm-release</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">&amp; $CoursePython scripts/prepare_kubernetes.py release `
-    --session $env:LAB_SESSION --confirm-release
-if ($LASTEXITCODE -ne 0) { throw &#x27;Owned session release needs inspection.&#x27; }</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">/</span>prepare_kubernetes<span class="syntax-punctuation">.</span>py release <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-session $env:LAB_SESSION <span class="syntax-punctuation">-</span>-confirm-release
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned session release needs inspection.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
 <p>Release is separate from this fixture&#x27;s object cleanup. Retain both receipts. After expiry, release that exact owned session and prepare a new one; never edit expiry timestamps or reuse its credentials. Do not remove learner pads, progress, unrelated containers or another teacher&#x27;s objects.</p>
 <h3 id="references">References<a class="heading-anchor" href="#references" aria-label="Link to this section">#</a></h3>
 <ul>

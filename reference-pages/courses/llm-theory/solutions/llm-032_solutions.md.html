@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -118,51 +164,51 @@
     <article class="document"><h2 id="llm-032-explanatory-solutions">llm-032: explanatory solutions<a class="heading-anchor" href="#llm-032-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Low-rank adaptation freezes a base matrix and learns an additive product of two smaller matrices. Here row-vector inputs multiply W+A@B, with W shaped8x8,A8x2 andB2x8. The adapter has32 trainable scalars compared with64 in the base. InitializingB to zero makes the initial adapter contribution exactly zero, preserving base behavior. On the first update, the gradient ofA can be zero because it is multiplied byB, whileB receives a nonzero gradient throughA. This is expected under the stated initialization, not a disconnected graph. Low rank limits the update space; it is not a universal guarantee of equal quality to full fine-tuning.</p>
+<p>Low-rank adaptation freezes a base matrix and learns an additive product of two smaller matrices. Here row-vector inputs multiply W+A@B, with W shaped8x8,A8x2 and B shaped 2 by 8. The adapter has32 trainable scalars compared with64 in the base. InitializingB to zero makes the initial adapter contribution exactly zero, preserving base behavior. On the first update, the gradient ofA can be zero because it is multiplied byB, whileB receives a nonzero gradient throughA. This is expected under the stated initialization, not a disconnected graph. Low rank limits the update space; it is not a universal guarantee of equal quality to full fine-tuning.</p>
 <p><strong>Low-rank update:</strong> A matrix change represented as the product of two smaller matrices.</p>
 <p><strong>Frozen base:</strong> Parameters excluded from the adaptation optimizer.</p>
 <p><strong>Zero-delta initialization:</strong> An adapter starting with no change to the base function.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Keep W as a tensor without requires_grad. Wrap A andB as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out,in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape withW. Snapshot the base bytes and assert exact preservation after the adapter update.</p>
+<p>Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out,in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape withW. Snapshot the base bytes and assert exact preservation after the adapter update.</p>
 <h3 id="exercise-1-count-adapter-parameters">Exercise 1: Count adapter parameters<a class="heading-anchor" href="#exercise-1-count-adapter-parameters" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use W=I8,A=ones(8,2)/8,B=zeros(2,8).</p>
 <p>The parameter reduction comes from the factorization rank2. Increasing rank increases trainable state and changes the set of possible updates.</p>
-<pre><code class="language-python">w=torch.eye(8); a=nn.Parameter(torch.ones((8,2))/8); b=nn.Parameter(torch.zeros((2,8))); x=torch.ones((1,8))
-assert a.numel()+b.numel()==32 and w.numel()==64</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> a<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> b<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> a<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span>b<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">32</span> <span class="syntax-operator">and</span> w<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">64</span></code></pre>
 <p><strong>Expected:</strong> adapter32 parameters versus base64.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with adapter32 parameters versus base64.</p>
 <h3 id="exercise-2-check-zero-initial-delta">Exercise 2: Check zero initial delta<a class="heading-anchor" href="#exercise-2-check-zero-initial-delta" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare x@(W+A@B) withx@W before training.</p>
 <p>ZeroB eliminates the product while retaining a connected path forB throughA. The base prediction is preserved exactly at initialization.</p>
-<pre><code class="language-python">delta=a@b; initial=x@(w+delta)
-assert torch.equal(delta,torch.zeros((8,8))); assert torch.equal(initial,x@w)</code></pre>
+<pre class="highlighted-code"><code class="language-python">delta<span class="syntax-operator">=</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">;</span> initial<span class="syntax-operator">=</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>delta<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>delta<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">,</span>x<span class="syntax-decorator">@w</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both equal ones(1,8).</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with both equal ones(1,8).</p>
 <h3 id="exercise-3-differentiate-the-first-objective">Exercise 3: Differentiate the first objective<a class="heading-anchor" href="#exercise-3-differentiate-the-first-objective" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use mean squared error to a zero target and inspect both adapter gradients.</p>
 <p>The derivative with respect toA includesB and is zero at this initialization. The derivative with respect toB includesA, which is nonzero, so learning can begin.</p>
-<pre><code class="language-python">saved=w.clone(); loss=initial.square().mean(); loss.backward()
-assert torch.count_nonzero(a.grad).item()==0 and torch.count_nonzero(b.grad).item()&gt;0</code></pre>
+<pre class="highlighted-code"><code class="language-python">saved<span class="syntax-operator">=</span>w<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>initial<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>a<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>count_nonzero<span class="syntax-punctuation">(</span>b<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> A gradient zero;B gradient nonzero.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with A gradient zero;B gradient nonzero.</p>
 <h3 id="exercise-4-update-only-the-adapter">Exercise 4: Update only the adapter<a class="heading-anchor" href="#exercise-4-update-only-the-adapter" aria-label="Link to this section">#</a></h3>
 <p>The question is: Take one SGD(.1) step overA,B.</p>
 <p>An optimizer over all model parameters would violate the frozen-base contract. The snapshot directly tests the state that must remain untouched.</p>
-<pre><code class="language-python">before_b=b.detach().clone(); opt=torch.optim.SGD([a,b],lr=.1); opt.step()
-assert not torch.equal(b,before_b) and torch.equal(w,saved)</code></pre>
+<pre class="highlighted-code"><code class="language-python">before_b<span class="syntax-operator">=</span>b<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">,</span>before_b<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">,</span>saved<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> B changes;W remains exactly equal.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with B changes;W remains exactly equal.</p>
 <h3 id="exercise-5-observe-the-changed-function">Exercise 5: Observe the changed function<a class="heading-anchor" href="#exercise-5-observe-the-changed-function" aria-label="Link to this section">#</a></h3>
 <p>The question is: Recompute the zero-target squared error after the adapter step.</p>
 <p>The first update changes the function throughB. This local decrease demonstrates a working adapter path, not a general optimization guarantee.</p>
-<pre><code class="language-python">after=(x@(w+a@b)).square().mean()
-assert after.item()&lt;loss.item()</code></pre>
+<pre class="highlighted-code"><code class="language-python">after<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">@</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">+</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> after<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> loss decreases for this fixture.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with loss decreases for this fixture.</p>
 <h3 id="exercise-6-bound-the-update-rank">Exercise 6: Bound the update rank<a class="heading-anchor" href="#exercise-6-bound-the-update-rank" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute the numerical matrix rank ofA@B after the step.</p>
 <p>The factorization constrains the rank regardless of optimizer behavior. Multiple adapters or different placement choices can change the overall function class and require separate analysis.</p>
-<pre><code class="language-python">assert int(torch.linalg.matrix_rank((a@b).detach()))&lt;=2</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>matrix_rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-decorator">@b</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> rank at most2.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with rank at most2.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

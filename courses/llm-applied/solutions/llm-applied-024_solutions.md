@@ -65,9 +65,9 @@ assert answer['status']=='answered' and answer['citation']['document_id']=='metr
 assert 'eligible visits' in answer['text']
 ```
 
-**Expected:** answered withmetric-v1 citation and source text.
+**Expected:** answered with metric-v1 citation and source text.
 
-**Verify:** Compare the computed values or written argument with answered withmetric-v1 citation and source text.
+**Verify:** Compare the computed values or written argument with answered with metric-v1 citation and source text.
 
 ## Exercise 2: Abstain on missing evidence
 
@@ -80,9 +80,9 @@ missing=assistant.answer('comet_period')
 assert missing['status']=='unknown' and missing['reason']=='missing evidence'
 ```
 
-**Expected:** unknown withmissing evidence reason.
+**Expected:** unknown with missing evidence reason.
 
-**Verify:** Compare the computed values or written argument with unknown withmissing evidence reason.
+**Verify:** Compare the computed values or written argument with unknown with missing evidence reason.
 
 ## Exercise 3: Enforce access before answering
 
@@ -95,9 +95,9 @@ public=assistant.answer('restricted_threshold'); privileged=Assistant(DOCUMENTS,
 assert public['status']=='unknown' and privileged['citation']['document_id']=='private-v1'
 ```
 
-**Expected:** publicunknown; authorizedanswercitesprivate-v1.
+**Expected:** public unknown; authorizedanswercitesprivate-v1.
 
-**Verify:** Compare the computed values or written argument with publicunknown; authorizedanswercitesprivate-v1.
+**Verify:** Compare the computed values or written argument with public unknown; authorizedanswercitesprivate-v1.
 
 ## Exercise 4: Compute a data-science result deterministically
 
@@ -112,9 +112,9 @@ except ValueError: pass
 else: raise AssertionError('invalid conversion counts')
 ```
 
-**Expected:** rate.3; invalid counts raiseValueError.
+**Expected:** rate.3; invalid counts raise ValueError.
 
-**Verify:** Compare the computed values or written argument with rate.3; invalid counts raiseValueError.
+**Verify:** Compare the computed values or written argument with rate.3; invalid counts raise ValueError.
 
 ## Exercise 5: Evaluate fixed task and boundary cases
 
@@ -136,7 +136,7 @@ assert source['text'][citation['start']:citation['end']]==answer['text']
 
 ## Exercise 6: Issue a bounded capstone decision
 
-The question is: Record local fixture acceptance while leaving pretrained generation, realidentity integration andproduction readiness unverified.
+The question is: Record local fixture acceptance while leaving pretrained generation, real identity integration and production readiness unverified.
 
 A successful local baseline is meaningful progress without being a deployment claim. The next evidence is explicit:actual local model outputs, held-out domain questions and real integration boundary tests.
 
@@ -145,9 +145,9 @@ receipt={'local_fixture_pass':all(results),'pretrained_generation_executed':Fals
 assert receipt['local_fixture_pass'] and receipt['production_go']=='no-go' and not receipt['pretrained_generation_executed']
 ```
 
-**Expected:** local_fixture_passTrue; production_gono-go.
+**Expected:** local_fixture_pass True; production_go no-go.
 
-**Verify:** Compare the computed values or written argument with local_fixture_passTrue; production_gono-go.
+**Verify:** Compare the computed values or written argument with local_fixture_pass True; production_go no-go.
 
 ## Review after comparison
 

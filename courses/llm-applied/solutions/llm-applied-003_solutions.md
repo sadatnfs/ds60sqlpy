@@ -18,7 +18,7 @@ A useful subject-assistant prompt states the output schema, evidence policy, unk
 
 ## Reading the implementation
 
-Build a prompt as separate instruction, evidence andquestion fields before serialization. JSON encoding keeps quotes and newlines unambiguous but does not confer trust. A template hash identifies exact bytes. Reserve budget for the response and select complete evidence items under the remaining budget. Keep truncation decisions in metadata. Avoid evaluating a prompt variant on the same questions used to choose its wording.
+Build a prompt as separate instruction, evidence and question fields before serialization. JSON encoding keeps quotes and newlines unambiguous but does not confer trust. A template hash identifies exact bytes. Reserve budget for the response and select complete evidence items under the remaining budget. Keep truncation decisions in metadata. Avoid evaluating a prompt variant on the same questions used to choose its wording.
 
 ## Derive a context allocation and identify its missing terms
 
@@ -78,7 +78,7 @@ assert AUTHORIZED_OPERATIONS==('read_fixture',)
 
 ## Exercise 3: Reserve response capacity
 
-The question is: Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and4.
+The question is: Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and 4.
 
 The selection keeps whole evidence items and leaves the reserved response capacity intact. The example uses a known unit rather than pretending to count model tokens.
 

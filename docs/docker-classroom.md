@@ -113,7 +113,7 @@ If a runtime is unavailable, prepare that profile before running its lesson:
 | `spark-local-scala` | `spark-scala-worker` | Local Spark using Scala |
 | `spark-local-python` | `spark-python-worker` | Local Spark using Python |
 | `llm-torch-cpu` | `llm-worker` | PyTorch and tensor-based LLM lessons |
-| `java21` | `java-worker` | Java21 compilation and the prepared H2 teaching database |
+| `java21` | `java-worker` | Java 21 compilation and the prepared H2 teaching database |
 | `javascript-node` | `javascript-worker` | Node24 JavaScript ES modules |
 | `typescript-node` | `typescript-worker` | Strict TypeScript5.9 compilation and Node24 execution |
 
@@ -287,7 +287,7 @@ statistics and LLM examples alongside the language tracks. The `--wait` flag
 checks actual worker startup probes. Read the last error if a service fails to
 become healthy; do not repeatedly delete volumes to diagnose a build.
 
-Java uses a prepared Java21 compiler, saves the pad as `Main.java`, compiles to
+Java uses a prepared Java 21 compiler, saves the pad as `Main.java`, compiles to
 `classes/`, and runs `Main` with assertions enabled. Keep `public class Main`
 and omit a package declaration in this single-file pad. JavaScript uses Node24
 ES modules saved as `main.mjs`. TypeScript uses `main.mts`, strict TypeScript5.9

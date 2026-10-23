@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -124,50 +170,50 @@
 <p>This distinction is operational. A storage or transport limit might be in bytes. A tokenizer imposes a model limit in tokens. An annotation tool may record offsets in code points, UTF-16 code units or bytes. Before connecting tools, write down the offset convention. A correct entity span in one convention is not automatically a correct span in another.</p>
 <p>Consider two spellings of café. One uses a single precomposed <code>é</code>; the other uses <code>e</code> followed by a combining accent. Their glyphs may look identical. Their code-point sequences and UTF-8 bytes differ. This is a representation issue, not a spelling correction problem.</p>
 <h3 id="worked-example-inspect-all-relevant-lengths">Worked example: inspect all relevant lengths<a class="heading-anchor" href="#worked-example-inspect-all-relevant-lengths" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-python">import unicodedata as ud
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> unicodedata <span class="syntax-keyword">as</span> ud
 
-composed = &quot;café&quot;
-decomposed = &quot;cafe\u0301&quot;
-for text in (composed, decomposed):
-    print(repr(text), len(text), len(text.encode(&quot;utf-8&quot;)))
-    print([f&quot;U+{ord(char):04X}&quot; for char in text])
-print(composed == decomposed)
-print(ud.normalize(&quot;NFC&quot;, composed) == ud.normalize(&quot;NFC&quot;, decomposed))</code></pre>
+composed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">café</span><span class="syntax-string">&quot;</span>
+decomposed <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cafe</span><span class="syntax-string">\u0301</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>composed<span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">U+</span><span class="syntax-string">{</span><span class="syntax-builtin">ord</span><span class="syntax-punctuation">(</span>char<span class="syntax-punctuation">)</span><span class="syntax-string">:</span><span class="syntax-string">04X</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> char <span class="syntax-operator">in</span> text<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>composed <span class="syntax-operator">==</span> decomposed<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected code-point and byte lengths: <code>(4, 5)</code> for the composed spelling and <code>(5, 6)</code> for the decomposed spelling. Exact string equality is <code>False</code>; equality after NFC normalization is <code>True</code>. The first string ends in U+00E9. The second ends in U+0065 and U+0301. <code>repr</code> helps expose invisible distinctions, while the explicit code-point list makes the observation independent of the font.</p>
 <p><code>encode(&quot;utf-8&quot;)</code> returns bytes. It does not normalize the text. <code>normalize(&quot;NFC&quot;, text)</code> returns a new string. It does not mutate the original. These are separate operations, so make each one visible in a preprocessing pipeline. Saving only the normalized string makes some later audits impossible.</p>
 <h3 id="canonical-and-compatibility-equivalence">Canonical and compatibility equivalence<a class="heading-anchor" href="#canonical-and-compatibility-equivalence" aria-label="Link to this section">#</a></h3>
 <p>Unicode distinguishes <strong>canonical equivalence</strong>, such as the two accent representations, from <strong>compatibility equivalence</strong>, which may discard presentation distinctions. NFC performs canonical decomposition followed by composition where appropriate. NFD keeps the canonical decomposed representation. NFKC and NFKD also apply compatibility decomposition.</p>
 <p>NFC is often a reasonable interoperability choice for ordinary natural-language text, but the correct policy depends on the task. NFKC can make search more forgiving by mapping full-width letters or circled digits to ordinary forms. It can also erase a distinction relevant to an identifier, a legal transcription or a typography analysis. No normalization form understands the meaning of the document or the rules of your domain.</p>
-<pre><code class="language-python">import unicodedata as ud
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> unicodedata <span class="syntax-keyword">as</span> ud
 
-raw = &quot;① ﬁ Ａ&quot;
-print(ud.normalize(&quot;NFC&quot;, raw))
-print(ud.normalize(&quot;NFKC&quot;, raw))
-print(&quot;Straße&quot;.casefold())
-print(ud.normalize(&quot;NFC&quot;, &quot;a&quot;) == ud.normalize(&quot;NFC&quot;, &quot;\u0430&quot;))</code></pre>
+raw <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">① ﬁ Ａ</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFKC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Straße</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\u0430</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: NFC preserves <code>① ﬁ Ａ</code>; NFKC returns <code>1 fi A</code>; case folding returns <code>strasse</code>; the final comparison is <code>False</code>. The last pair is Latin <code>a</code> versus Cyrillic small <code>а</code>. Normalization is not a general defense against visually confusable identifiers. A domain that uses account names or executable identifiers needs a separate policy for scripts, confusables and allowed characters.</p>
 <p><strong>Case folding</strong> is a matching transformation, not a faithful display transformation. It can change length, as <code>ß</code> becoming <code>ss</code> demonstrates. Lowercasing and case folding are not identical. Neither removes accents nor resolves all locale-specific interpretation. Preserve the original text for display and evidence, and use an explicitly named transformed field for the intended comparison.</p>
 <h3 id="preprocessing-is-an-information-decision">Preprocessing is an information decision<a class="heading-anchor" href="#preprocessing-is-an-information-decision" aria-label="Link to this section">#</a></h3>
 <p>Let <code>T</code> be a transformation from raw strings to normalized strings. If <code>T(x) = T(y)</code> for distinct raw strings <code>x</code> and <code>y</code>, the transformation is many-to-one. After retaining only <code>T(x)</code>, there may be no unique way to recover the original input. That does not make the transformation wrong; it makes the loss part of the model specification.</p>
 <p>A useful audit groups raw values by their transformed value. The groups reveal collisions rather than hiding them inside a deduplication step. For NFC, a collision between canonically equivalent accent representations may be desirable. For NFKC, a collision between <code>①</code> and <code>1</code> deserves a task-specific decision. Never assume every collision is either a data error or a harmless duplicate.</p>
-<pre><code class="language-python">from collections import defaultdict
-import unicodedata as ud
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> defaultdict
+<span class="syntax-keyword">import</span> unicodedata <span class="syntax-keyword">as</span> ud
 
-raw_values = [&quot;1&quot;, &quot;①&quot;, &quot;café&quot;, &quot;cafe\u0301&quot;]
-preimages = defaultdict(list)
-for raw in raw_values:
-    preimages[ud.normalize(&quot;NFKC&quot;, raw)].append(raw)
-print({key: values for key, values in preimages.items() if len(values) &gt; 1})</code></pre>
+raw_values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">①</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">café</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cafe</span><span class="syntax-string">\u0301</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+preimages <span class="syntax-operator">=</span> defaultdict<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> raw <span class="syntax-operator">in</span> raw_values<span class="syntax-punctuation">:</span>
+    preimages<span class="syntax-punctuation">[</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFKC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>key<span class="syntax-punctuation">:</span> values <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> values <span class="syntax-operator">in</span> preimages<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: one group under <code>1</code> containing <code>1</code> and <code>①</code>, and one under <code>café</code> containing its two raw representations. The result is evidence of collisions in this fixture, not a universal estimate of their frequency. To measure frequency in a real corpus, report the sampling unit, number of raw values and number of transformed groups.</p>
 <p>Version preprocessing as part of the data pipeline. Record the transformation order, Unicode database version, encoding, case policy and any whitespace rules. Applying case folding before or after another transformation can affect a composed pipeline. Test the composed pipeline&#x27;s intended invariants, rather than assuming that the individual operations imply them. For each normalization form on these examples, normalizing twice should equal normalizing once; this is an idempotence check, not proof that the form preserves your task&#x27;s meaning.</p>
 <h3 id="invalid-bytes-and-explicit-decoding-decisions">Invalid bytes and explicit decoding decisions<a class="heading-anchor" href="#invalid-bytes-and-explicit-decoding-decisions" aria-label="Link to this section">#</a></h3>
 <p>Text files can contain invalid byte sequences, truncated encodings or data mislabeled with the wrong encoding. Python&#x27;s strict UTF-8 decoder raises an error for invalid input. Replacement mode inserts a replacement character and continues. Ignoring errors removes information. A pipeline that silently “fixes” every invalid record may appear robust while changing the evidence.</p>
-<pre><code class="language-python">raw_bytes = b&quot;caf\xff&quot;
-try:
-    raw_bytes.decode(&quot;utf-8&quot;, errors=&quot;strict&quot;)
-except UnicodeDecodeError as error:
-    print(error.start, error.end)
-print(raw_bytes.decode(&quot;utf-8&quot;, errors=&quot;replace&quot;))</code></pre>
+<pre class="highlighted-code"><code class="language-python">raw_bytes <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">caf</span><span class="syntax-string">\xff</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    raw_bytes<span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">strict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> UnicodeDecodeError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>error<span class="syntax-operator">.</span>start<span class="syntax-punctuation">,</span> error<span class="syntax-operator">.</span>end<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>raw_bytes<span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> errors<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">replace</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: the failing byte range is <code>[3, 4)</code>, and replacement decoding produces <code>caf�</code>. A half-open range includes the start position and excludes the end. An appropriate ingestion policy might quarantine the record while preserving its bytes and source metadata. Another application may explicitly accept replacement for a preview, while marking the text unsuitable for exact extraction. The important requirement is that the policy is visible and repeatable.</p>
 <p>Do not infer an encoding solely from whether decoding happened to succeed. Many byte sequences are valid under several encodings. Use source metadata, format specifications and reviewed detection where needed. A successful decoder is evidence about the chosen representation, not necessarily about the intended text.</p>
 <h3 id="offsets-annotations-and-evidence">Offsets, annotations and evidence<a class="heading-anchor" href="#offsets-annotations-and-evidence" aria-label="Link to this section">#</a></h3>
@@ -194,7 +240,7 @@ print(raw_bytes.decode(&quot;utf-8&quot;, errors=&quot;replace&quot;))</code></p
 <h3 id="references-and-continuation">References and continuation<a class="heading-anchor" href="#references-and-continuation" aria-label="Link to this section">#</a></h3>
 <p>See <a href="https://docs.python.org/3.12/library/unicodedata.html">Python&#x27;s Unicode database API</a> and <a href="https://unicode.org/reports/tr15/">Unicode normalization forms</a> for normative behavior. The examples use APIs available in the course&#x27;s Python 3.12 runtime. Continue to <code>nlp-003</code> for explicit extraction rules, spans and measurable false positives.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-002 after nlp-001.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-002 after nlp-001.
 Read courses/nlp/guides/nlp-002.md and courses/nlp/learners/nlp-002.py.
 Explain bytes, code points and grapheme clusters before asking me to predict lengths.
 Review my normalization and collision audit, giving one hint at a time.

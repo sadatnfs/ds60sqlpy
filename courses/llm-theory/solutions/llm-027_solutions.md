@@ -27,9 +27,9 @@ means=np.array([1.,3.]); counts=np.array([1,3])
 assert np.average(means,weights=counts)==2.5 and means.mean()==2
 ```
 
-**Expected:** token mean2.5; document mean2.
+**Expected:** token mean 2.5; document mean 2.
 
-**Verify:** Compare the computed values or written argument with token mean2.5; document mean2.
+**Verify:** Compare the computed values or written argument with token mean 2.5; document mean 2.
 
 ## Exercise 2: Build a calibration bin
 
@@ -78,7 +78,7 @@ assert (int(low.sum()),int(high.sum()))==(1,3) and int((low|high).sum())==4
 
 ## Exercise 5: Align paired errors
 
-The question is: Compare dictionariesA q1=0,q2=1 andB q2=0,q1=1 by IDs.
+The question is: Compare dictionariesA q1=0,q2=1 and B q2=0,q1=1 by IDs.
 
 A zero mean can hide opposite per-question outcomes. Pairing preserves which system fails on which case.
 

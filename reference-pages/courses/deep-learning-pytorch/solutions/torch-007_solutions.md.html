@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -170,51 +216,51 @@
 </tr>
 </tbody></table></div>
 <p>For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as 2 w has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html">PyTorch 2.9 is_leaf</a>.</p>
-<p>The first fixture has w=0 and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate&#x27;s gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.</p>
+<p>The first fixture has <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math> and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate&#x27;s gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.</p>
 <p>Now reset w.grad to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.</p>
 <p>None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html">PyTorch 2.9 zero_grad</a>.</p>
 <p>The detach example changes shared storage. After detached=source.detach(), writing detached[0]=9 changes source[0] as well. The earlier source.detach().clone() snapshot remains one because it owns a copy. The snapshot is suitable for comparing later mutation, but detaching a value that the objective actually needs can break learning. Ownership and differentiation must both match the intended interface.</p>
 <p>Finally, model.eval() does not stop derivatives through a Linear layer. It changes a module&#x27;s training flag and the behavior of layers that consult it. no_grad affects ordinary operation recording while leaving the original tensor&#x27;s requires_grad flag unchanged; factory operations with an explicit requires_grad argument are a documented exception to treating the scope as a blanket flag rewrite. Keep mode, recording and gradient-buffer decisions separate in the surrounding training or inference function.</p>
 <h3 id="exercise-1-inspect-leaf-and-nonleaf-state">Exercise 1: Inspect leaf and nonleaf state<a class="heading-anchor" href="#exercise-1-inspect-leaf-and-nonleaf-state" aria-label="Link to this section">#</a></h3>
-<p>The question is: Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.</p>
+<p>The question is: Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.</p>
 <p>Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.</p>
-<pre><code class="language-python">w=torch.tensor(0.,requires_grad=True); intermediate=2*w; intermediate.retain_grad(); intermediate.backward()
-assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermediate.grad.item()==1</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>w<span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">.</span>retain_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>is_leaf <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> intermediate<span class="syntax-operator">.</span>is_leaf <span class="syntax-operator">and</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> intermediate<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span></code></pre>
 <p><strong>Expected:</strong> w leaf True; intermediate False; gradients 2 and 1.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with w leaf True; intermediate False; gradients 2 and 1.</p>
 <h3 id="exercise-2-observe-accumulation-across-fresh-graphs">Exercise 2: Observe accumulation across fresh graphs<a class="heading-anchor" href="#exercise-2-observe-accumulation-across-fresh-graphs" aria-label="Link to this section">#</a></h3>
-<p>The question is: Compute (w-2)**2 twice at w=0 without clearing grad.</p>
+<p>The question is: Compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math> twice at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math> without clearing grad.</p>
 <p>The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.</p>
-<pre><code class="language-python">w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
-((w-2)**2).backward(); assert w.grad.item()==-8</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">4</span>
+<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">8</span></code></pre>
 <p><strong>Expected:</strong> after resetting first, grad -4 then -8.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with after resetting first, grad -4 then -8.</p>
 <h3 id="exercise-3-clear-before-an-independent-step">Exercise 3: Clear before an independent step<a class="heading-anchor" href="#exercise-3-clear-before-an-independent-step" aria-label="Link to this section">#</a></h3>
 <p>The question is: Set grad None and backpropagate once more.</p>
 <p>This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.</p>
-<pre><code class="language-python">w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4</code></pre>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> grad returns to-4.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with grad returns to-4.</p>
 <h3 id="exercise-4-separate-detach-from-ownership">Exercise 4: Separate detach from ownership<a class="heading-anchor" href="#exercise-4-separate-detach-from-ownership" aria-label="Link to this section">#</a></h3>
 <p>The question is: Detach a tensor, mutate the detached view, and compare with a detached clone.</p>
 <p>Detach cuts gradient history but does not promise a copy. A logging snapshot that must survive later mutation should clone its storage.</p>
-<pre><code class="language-python">source=torch.tensor([1.,2.],requires_grad=True); detached=source.detach(); owned=source.detach().clone(); detached[0]=9
-assert source[0].item()==9 and owned[0].item()==1 and not detached.requires_grad</code></pre>
+<pre class="highlighted-code"><code class="language-python">source<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> detached<span class="syntax-operator">=</span>source<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> owned<span class="syntax-operator">=</span>source<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> detached<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">9</span>
+<span class="syntax-keyword">assert</span> source<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">9</span> <span class="syntax-operator">and</span> owned<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> detached<span class="syntax-operator">.</span>requires_grad</code></pre>
 <p><strong>Expected:</strong> shared original changes; owned clone stays unchanged.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with shared original changes; owned clone stays unchanged.</p>
 <h3 id="exercise-5-use-nograd-for-an-observation">Exercise 5: Use no_grad for an observation<a class="heading-anchor" href="#exercise-5-use-nograd-for-an-observation" aria-label="Link to this section">#</a></h3>
 <p>The question is: Multiply a requires_grad tensor inside and outside no_grad.</p>
 <p>The scope affects new operation recording. It does not change the original tensor requires_grad flag.</p>
-<pre><code class="language-python">value=torch.tensor(2.,requires_grad=True); tracked=value*3
-with torch.no_grad(): observed=value*3
-assert tracked.requires_grad and not observed.requires_grad</code></pre>
+<pre class="highlighted-code"><code class="language-python">value<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> tracked<span class="syntax-operator">=</span>value<span class="syntax-operator">*</span><span class="syntax-number">3</span>
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> observed<span class="syntax-operator">=</span>value<span class="syntax-operator">*</span><span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> tracked<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> observed<span class="syntax-operator">.</span>requires_grad</code></pre>
 <p><strong>Expected:</strong> tracked result requires_grad True; observed result False.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with tracked result requires_grad True; observed result False.</p>
 <h3 id="exercise-6-show-eval-is-separate">Exercise 6: Show eval is separate<a class="heading-anchor" href="#exercise-6-show-eval-is-separate" aria-label="Link to this section">#</a></h3>
 <p>The question is: Put a Linear module in eval mode, run a differentiable input, and inspect output tracking.</p>
 <p>Evaluation mode changes module behavior, not the global autograd mode. Use no_grad or inference_mode separately for inference when appropriate.</p>
-<pre><code class="language-python">model=nn.Linear(1,1); model.eval(); result=model(torch.tensor([[1.]],requires_grad=True))
-assert result.requires_grad and model.training is False</code></pre>
+<pre class="highlighted-code"><code class="language-python">model<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> result<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>requires_grad <span class="syntax-operator">and</span> model<span class="syntax-operator">.</span>training <span class="syntax-operator">is</span> <span class="syntax-keyword">False</span></code></pre>
 <p><strong>Expected:</strong> output still requires_grad True.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with output still requires_grad True.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

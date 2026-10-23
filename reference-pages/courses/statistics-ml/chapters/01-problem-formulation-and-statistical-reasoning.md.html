@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -184,37 +230,37 @@
 <p>The same evidence should not be compressed into the model says deploy. Decision ownership belongs to the person or process accountable for consequences. Statistical work supplies a well-defined target, defensible evidence, uncertainty and a transparent connection to the available actions.</p>
 <h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
 <p>Complete offline program: <a href="../examples/chapter_01.py.html">chapter_01.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
-<pre><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
 <h4 id="a-denominator-changes-the-estimand">A denominator changes the estimand<a class="heading-anchor" href="#a-denominator-changes-the-estimand" aria-label="Link to this section">#</a></h4>
 <p>Three fast requests belong to one customer and one slow request to another. The request mean is 3; the customer mean is 5. Neither arithmetic result is defective. They answer different questions because the first weights customers by activity. The assertion fixes that distinction in a tiny auditable table.</p>
 <h4 id="a-probability-is-not-an-action">A probability is not an action<a class="heading-anchor" href="#a-probability-is-not-an-action" aria-label="Link to this section">#</a></h4>
 <p>With false-alarm cost 2 and missed-event cost 8, intervening costs <code>2*(1-p)</code> in expectation while doing nothing costs <code>8*p</code>. Equating them gives a threshold of 0.2, so probabilities 0.3 and 0.8 trigger action. A default threshold of 0.5 would ignore the stated consequences.</p>
 <h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-def compare_units():
-    delays = np.array([1., 1., 1., 9.])
-    customer = np.array([0, 0, 0, 1])
-    per_request = delays.mean()
-    per_customer = np.mean([delays[customer == k].mean() for k in [0, 1]])
-    assert per_request == 3 and per_customer == 5
-    print(&quot;Request mean:&quot;, per_request, &quot;customer mean:&quot;, per_customer)
+<span class="syntax-keyword">def</span> <span class="syntax-function">compare_units</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    delays <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    customer <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    per_request <span class="syntax-operator">=</span> delays<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    per_customer <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>delays<span class="syntax-punctuation">[</span>customer <span class="syntax-operator">==</span> k<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> per_request <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> per_customer <span class="syntax-operator">==</span> <span class="syntax-number">5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Request mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> per_request<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">customer mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> per_customer<span class="syntax-punctuation">)</span>
 
-def choose_action():
-    probability = np.array([0.1, 0.3, 0.8])
-    false_alarm_cost, miss_cost = 2., 8.
-    threshold = false_alarm_cost / (false_alarm_cost + miss_cost)
-    intervene = probability &gt; threshold
-    assert intervene.tolist() == [False, True, True]
-    assert np.all(np.minimum(2*(1-probability), 8*probability) &lt;= 8*probability)
-    print(&quot;Loss-derived threshold:&quot;, threshold, &quot;intervene:&quot;, intervene.tolist())
+<span class="syntax-keyword">def</span> <span class="syntax-function">choose_action</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    probability <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    false_alarm_cost<span class="syntax-punctuation">,</span> miss_cost <span class="syntax-operator">=</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.</span>
+    threshold <span class="syntax-operator">=</span> false_alarm_cost <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>false_alarm_cost <span class="syntax-operator">+</span> miss_cost<span class="syntax-punctuation">)</span>
+    intervene <span class="syntax-operator">=</span> probability <span class="syntax-operator">&gt;</span> threshold
+    <span class="syntax-keyword">assert</span> intervene<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>minimum<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>probability<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-operator">*</span>probability<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">8</span><span class="syntax-operator">*</span>probability<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Loss-derived threshold:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> threshold<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">intervene:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> intervene<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-def main():
-    compare_units()
-    choose_action()
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    compare_units<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    choose_action<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-if __name__ == &quot;__main__&quot;:
-    main()</code></pre>
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why can an accurate churn model fail to improve retention?</strong> It identifies likely departures, not necessarily customers whose departure an offer can prevent. Some high-risk customers cannot be retained; some low-risk customers would accept discounts unnecessarily. Estimate incremental treatment effects and evaluate net value under the actual offer policy.</p>
 <p><strong>Interview: What would you clarify before analyzing an experiment?</strong> Ask what was randomized, who was eligible, what outcome and horizon define success, and which decision the evidence will inform. These facts determine the estimand and independent variation before any significance test is selected.</p>

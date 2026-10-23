@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -138,152 +184,152 @@
 <h3 id="manual-scoped-command-path">Manual scoped command path<a class="heading-anchor" href="#manual-scoped-command-path" aria-label="Link to this section">#</a></h3>
 <p>This is an alternative host-terminal path after preparation, not an implemented app action. The host supplies <code>DS60_LESSON_KUBECONFIG</code>, <code>DS60_LESSON_CONTEXT</code> and <code>DS60_LESSON_NAMESPACE</code> for the scoped identity. No command below falls back to the ambient current-context. The host receipt must be checked before apply, patch or deletion; context name alone does not establish ownership.</p>
 <p>Bash on macOS/Linux/WSL:</p>
-<pre><code class="language-bash">: &quot;${DS60_LESSON_KUBECONFIG:?A scoped host-issued kubeconfig is required}&quot;
-: &quot;${DS60_LESSON_CONTEXT:?An explicit lesson context is required}&quot;
-: &quot;${DS60_LESSON_NAMESPACE:?An owned lesson namespace is required}&quot;
-K=(kubectl --kubeconfig &quot;$DS60_LESSON_KUBECONFIG&quot;
-   --context &quot;$DS60_LESSON_CONTEXT&quot; --namespace &quot;$DS60_LESSON_NAMESPACE&quot;
-   --request-timeout=10s)
-&quot;${K[@]}&quot; auth can-i create deployments.apps
-&quot;${K[@]}&quot; auth can-i create namespaces</code></pre>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>DS60_LESSON_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?A scoped host-issued kubeconfig is required</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>DS60_LESSON_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?An explicit lesson context is required</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>DS60_LESSON_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?An owned lesson namespace is required</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+K<span class="syntax-operator">=</span><span class="syntax-operator">(</span>kubectl --kubeconfig <span class="syntax-string">&quot;</span>$DS60_LESSON_KUBECONFIG<span class="syntax-string">&quot;</span>
+   --context <span class="syntax-string">&quot;</span>$DS60_LESSON_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$DS60_LESSON_NAMESPACE<span class="syntax-string">&quot;</span>
+   --request-timeout<span class="syntax-operator">=</span>10s<span class="syntax-operator">)</span>
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> auth can-i create deployments.apps
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> auth can-i create namespaces</code></pre>
 <p>PowerShell, in the same Windows/WSL environment that owns the prepared tools:</p>
-<pre><code class="language-powershell">foreach ($name in @(&#x27;DS60_LESSON_KUBECONFIG&#x27;, &#x27;DS60_LESSON_CONTEXT&#x27;, &#x27;DS60_LESSON_NAMESPACE&#x27;)) {
-    if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
-        throw &quot;Missing host-issued lesson setting: $name&quot;
-    }
-}
-$KubeArgs = @(&#x27;--kubeconfig&#x27;, $env:DS60_LESSON_KUBECONFIG,
-    &#x27;--context&#x27;, $env:DS60_LESSON_CONTEXT, &#x27;--namespace&#x27;, $env:DS60_LESSON_NAMESPACE,
-    &#x27;--request-timeout=10s&#x27;)
-kubectl @KubeArgs auth can-i create deployments.apps
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">foreach</span> <span class="syntax-punctuation">(</span>$name <span class="syntax-keyword">in</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;DS60_LESSON_KUBECONFIG&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DS60_LESSON_CONTEXT&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DS60_LESSON_NAMESPACE&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>[string]<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>IsNullOrWhiteSpace<span class="syntax-punctuation">(</span>[Environment]<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>GetEnvironmentVariable<span class="syntax-punctuation">(</span>$name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">throw</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Missing host-issued lesson setting: </span><span class="syntax-string">$</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+$KubeArgs <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;--kubeconfig&#x27;</span><span class="syntax-punctuation">,</span> $env:DS60_LESSON_KUBECONFIG<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--context&#x27;</span><span class="syntax-punctuation">,</span> $env:DS60_LESSON_CONTEXT<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--namespace&#x27;</span><span class="syntax-punctuation">,</span> $env:DS60_LESSON_NAMESPACE<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--request-timeout=10s&#x27;</span><span class="syntax-punctuation">)</span>
+kubectl @KubeArgs auth can-i create deployments<span class="syntax-punctuation">.</span>apps
 kubectl @KubeArgs auth can-i create namespaces</code></pre>
 <p><strong>Expected:</strong> the first authorization result is <code>yes</code>; namespace creation is <code>no</code> and may return nonzero. This is an intentional negative authorization check, not a reason to switch to an admin identity. For every real apply/get/wait command, check its exit status; PowerShell uses <code>$LASTEXITCODE</code>. Do not print the kubeconfig body or token. In WSL, use Linux paths and its tools; do not hand a Windows path to a Linux kubectl and assume translation.</p>
 <h3 id="worked-example-1-two-eligible-replicas">Worked example 1: two eligible replicas<a class="heading-anchor" href="#worked-example-1-two-eligible-replicas" aria-label="Link to this section">#</a></h3>
 <p>Save this as your learner <code>echo.yaml</code>. The namespace is intentionally absent; the reviewed worker operation binds it from the private lease. The host also binds ownership labels/UID receipts, verifies the fixture image and rejects namespace escapes.</p>
-<pre><code class="language-yaml">apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: echo
-  labels:
-    app: echo
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: echo
-  template:
-    metadata:
-      labels:
-        app: echo
-    spec:
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: echo
-          image: ds60-http-fixture:v1
-          imagePullPolicy: Never
-          args: [&quot;serve&quot;, &quot;--port=8080&quot;]
-          ports:
-            - name: http
-              containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: http
-            periodSeconds: 2
-            failureThreshold: 2
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {cpu: 100m, memory: 64Mi}
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: [&quot;ALL&quot;]
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Deployment
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> echo
+  <span class="syntax-tag">labels</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">replicas</span><span class="syntax-punctuation">:</span> 2
+  <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo
+  <span class="syntax-tag">template</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">labels</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo
+    <span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">automountServiceAccountToken</span><span class="syntax-punctuation">:</span> false
+      <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">runAsNonRoot</span><span class="syntax-punctuation">:</span> true
+        <span class="syntax-tag">runAsUser</span><span class="syntax-punctuation">:</span> 65532
+        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault
+      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> echo
+          <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60-http-fixture:v1
+          <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never
+          <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">serve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--port=8080</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+          <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+              <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080
+          <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready
+              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http
+            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2
+            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2
+          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 16Mi<span class="syntax-punctuation">}</span>
+            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 64Mi<span class="syntax-punctuation">}</span>
+          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false
+            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true
+            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">ALL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: echo
-spec:
-  selector:
-    app: echo
-  ports:
-    - name: http
-      port: 8080
-      targetPort: http</code></pre>
+<span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Service
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> echo
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo
+  <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080
+      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</code></pre>
 <p>Read the anatomy before applying: <code>spec.replicas</code> expresses Deployment intent; <code>spec.selector.matchLabels</code> connects its controller to the Pod template label; Service <code>spec.selector</code> selects candidate Pods. The named <code>http</code> port connects the Service target and the container&#x27;s port 8080. The probe requests <code>/ready</code> on that port. A declared container port does not itself create a listening server.</p>
 <p>Bash:</p>
-<pre><code class="language-bash">&quot;${K[@]}&quot; apply -f echo.yaml
-&quot;${K[@]}&quot; rollout status deployment/echo --timeout=90s
-&quot;${K[@]}&quot; get deployment echo -o json
-&quot;${K[@]}&quot; get pods -l app=echo -o json
-&quot;${K[@]}&quot; get endpointslices -l kubernetes.io/service-name=echo -o json</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> apply -f echo.yaml
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> rollout status deployment/echo --timeout<span class="syntax-operator">=</span>90s
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get deployment <span class="syntax-builtin">echo</span> -o json
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get pods -l app<span class="syntax-operator">=</span><span class="syntax-builtin">echo</span> -o json
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get endpointslices -l kubernetes.io/service-name<span class="syntax-operator">=</span><span class="syntax-builtin">echo</span> -o json</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">kubectl @KubeArgs apply -f echo.yaml
-if ($LASTEXITCODE -ne 0) { throw &#x27;Apply failed&#x27; }
-kubectl @KubeArgs rollout status deployment/echo --timeout=90s
-if ($LASTEXITCODE -ne 0) { throw &#x27;Rollout did not converge&#x27; }
-kubectl @KubeArgs get deployment echo -o json
-kubectl @KubeArgs get pods -l app=echo -o json
-kubectl @KubeArgs get endpointslices -l kubernetes.io/service-name=echo -o json</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">kubectl @KubeArgs apply <span class="syntax-operator">-f</span> echo<span class="syntax-punctuation">.</span>yaml
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Apply failed&#x27;</span> <span class="syntax-punctuation">}</span>
+kubectl @KubeArgs rollout status deployment<span class="syntax-punctuation">/</span><span class="syntax-builtin">echo </span><span class="syntax-punctuation">-</span>-timeout<span class="syntax-punctuation">=</span>90s
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Rollout did not converge&#x27;</span> <span class="syntax-punctuation">}</span>
+kubectl @KubeArgs get deployment <span class="syntax-builtin">echo </span>-o json
+kubectl @KubeArgs get pods -l app<span class="syntax-punctuation">=</span><span class="syntax-builtin">echo </span>-o json
+kubectl @KubeArgs get endpointslices -l kubernetes<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">/</span>service-name<span class="syntax-punctuation">=</span><span class="syntax-builtin">echo </span>-o json</code></pre>
 <p><strong>Expected after convergence:</strong> Deployment desired/updated/ready/available replicas are 2, observedGeneration has caught up to metadata.generation, two controlled Pods are Ready, and two unique ready EndpointSlice backend UIDs match those Pods. Pod names, IPs, resourceVersion and timing vary; no fixed values are invented. <code>publishNotReadyAddresses</code> is absent/false on the Service. This pilot targets steady state, so wait for controller propagation within the bounded observation window rather than assuming atomic updates across these resources.</p>
 <p>Prove the application path with a client Job in the same owned namespace. Save <code>echo-check.yaml</code>:</p>
-<pre><code class="language-yaml">apiVersion: batch/v1
-kind: Job
-metadata:
-  name: echo-check
-  labels:
-    app: echo-check
-spec:
-  backoffLimit: 0
-  activeDeadlineSeconds: 10
-  ttlSecondsAfterFinished: 180
-  template:
-    metadata:
-      labels:
-        app: echo-check
-    spec:
-      restartPolicy: Never
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: check
-          image: ds60-http-fixture:v1
-          imagePullPolicy: Never
-          args: [&quot;check&quot;, &quot;--url=http://echo:8080/ready&quot;, &quot;--expect-status=200&quot;,
-                 &quot;--expect-body=ready&quot;, &quot;--timeout=5s&quot;]
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {cpu: 100m, memory: 64Mi}
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: [&quot;ALL&quot;]</code></pre>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> batch/v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Job
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> echo-check
+  <span class="syntax-tag">labels</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo-check
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">backoffLimit</span><span class="syntax-punctuation">:</span> 0
+  <span class="syntax-tag">activeDeadlineSeconds</span><span class="syntax-punctuation">:</span> 10
+  <span class="syntax-tag">ttlSecondsAfterFinished</span><span class="syntax-punctuation">:</span> 180
+  <span class="syntax-tag">template</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">labels</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> echo-check
+    <span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">restartPolicy</span><span class="syntax-punctuation">:</span> Never
+      <span class="syntax-tag">automountServiceAccountToken</span><span class="syntax-punctuation">:</span> false
+      <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">runAsNonRoot</span><span class="syntax-punctuation">:</span> true
+        <span class="syntax-tag">runAsUser</span><span class="syntax-punctuation">:</span> 65532
+        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault
+      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> check
+          <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60-http-fixture:v1
+          <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never
+          <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">check</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--url=http://echo:8080/ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--expect-status=200</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+                 <span class="syntax-string">&quot;</span><span class="syntax-string">--expect-body=ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">--timeout=5s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 16Mi<span class="syntax-punctuation">}</span>
+            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 64Mi<span class="syntax-punctuation">}</span>
+          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false
+            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true
+            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">ALL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Run it only after the ownership/fixture checks. Bash:</p>
-<pre><code class="language-bash">&quot;${K[@]}&quot; apply -f echo-check.yaml
-&quot;${K[@]}&quot; wait --for=condition=complete job/echo-check --timeout=30s
-&quot;${K[@]}&quot; logs job/echo-check</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> apply -f echo-check.yaml
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> <span class="syntax-builtin">wait</span> --for<span class="syntax-operator">=</span>condition<span class="syntax-operator">=</span><span class="syntax-builtin">complete</span> job/echo-check --timeout<span class="syntax-operator">=</span>30s
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> logs job/echo-check</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">kubectl @KubeArgs apply -f echo-check.yaml
-if ($LASTEXITCODE -ne 0) { throw &#x27;Client Job apply failed&#x27; }
-kubectl @KubeArgs wait --for=condition=complete job/echo-check --timeout=30s
-if ($LASTEXITCODE -ne 0) { throw &#x27;Client verification did not complete successfully&#x27; }
-kubectl @KubeArgs logs job/echo-check</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">kubectl @KubeArgs apply <span class="syntax-operator">-f</span> echo-check<span class="syntax-punctuation">.</span>yaml
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Client Job apply failed&#x27;</span> <span class="syntax-punctuation">}</span>
+kubectl @KubeArgs wait <span class="syntax-punctuation">-</span>-for<span class="syntax-punctuation">=</span>condition<span class="syntax-punctuation">=</span>complete job<span class="syntax-punctuation">/</span>echo-check <span class="syntax-punctuation">-</span>-timeout<span class="syntax-punctuation">=</span>30s
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Client verification did not complete successfully&#x27;</span> <span class="syntax-punctuation">}</span>
+kubectl @KubeArgs logs job<span class="syntax-punctuation">/</span>echo-check</code></pre>
 <p>For a deliberately negative case, do not wait for Complete as though success were expected. Inspect the bounded failed Job and its logs as the expected-failure evidence, then classify it against that exercise&#x27;s contract.</p>
 <p><strong>Expected:</strong> Job succeeds and the future fixture prints <code>CHECK_OK status=200 body=ready</code>. Keep its UID/status/log receipt. A Service port-forward is useful for inspecting one process, but may bypass the ordinary Service/backend path; it is not the independent routing proof for this exercise.</p>
 <h3 id="worked-example-2-running-but-not-ready">Worked example 2: running but not ready<a class="heading-anchor" href="#worked-example-2-running-but-not-ready" aria-label="Link to this section">#</a></h3>
 <p>First record Pod UIDs and restart counts. Change only the Deployment template&#x27;s readiness path in <code>echo.yaml</code> from <code>/ready</code> to <code>/missing</code>, then apply the edited file. Do not use <code>kubectl edit</code> as a replacement for saving the desired-state source. The changed template may create a new ReplicaSet; identify the current-generation Pods rather than assuming old/new Pods have the same UID.</p>
-<p>In a qualified teacher fixture, the two intended new processes can start while their readiness checks return404. Observe the rollout until the declared bounded deadline; a rollout timeout is expected for this bad configuration. Do not interpret a nonzero rollout status as an absent API object. Old ready Pods may remain during the failed rolling update, so the Service can still have old eligible backends. This is the important difference between a real rolling update and the simpler statement that two already-running Pods become unready.</p>
+<p>In a qualified teacher fixture, the two intended new processes can start while their readiness checks return 404. Observe the rollout until the declared bounded deadline; a rollout timeout is expected for this bad configuration. Do not interpret a nonzero rollout status as an absent API object. Old ready Pods may remain during the failed rolling update, so the Service can still have old eligible backends. This is the important difference between a real rolling update and the simpler statement that two already-running Pods become unready.</p>
 <p>To demonstrate zero eligible backends without relying on rolling-update strategy, the future host fixture also supplies a controlled <code>readiness-failure</code> case: it starts the Deployment with the bad path from an empty owned namespace, or performs a documented fixture transition that makes every selected current Pod fail readiness without keeping old replicas. Its acceptance is Running processes, Ready false and zero eligible backend UIDs. That case does not promise a container restart; no liveness probe is configured. Its in-cluster client fails within its deadline, but the exact lower-level connection-refused/timeout text can vary.</p>
 <p><strong>Verify both distinctions:</strong> for an ordinary rolling change, record old versus new ReplicaSet/Pod UIDs and which version still serves traffic; for the isolated all-unready fixture, require zero unique ready backend UIDs and a bounded failed client. Restore <code>/ready</code> and require fresh convergence plus a successful new client Job. Do not claim every readiness change immediately removes all existing Service backends.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -295,7 +341,7 @@ kubectl @KubeArgs logs job/echo-check</code></pre>
 <h4 id="2-prove-a-healthy-baseline-independently">2. Prove a healthy baseline independently<a class="heading-anchor" href="#2-prove-a-healthy-baseline-independently" aria-label="Link to this section">#</a></h4>
 <p>Starting from a fresh prepared namespace, apply the healthy <code>echo.yaml</code> and client Job. Build a concise evidence table with Deployment generation/counts, Ready Pod UIDs, ready backend UIDs and the client result.</p>
 <p><strong>Expected:</strong> desired/updated/ready/available replicas are 2, the two UID sets agree and the client reports status 200/body <code>ready</code> with a successful Job.</p>
-<p><strong>Verify:</strong> observe stable convergence twice at least 2 seconds apart within a90-second lesson window, then inspect the client Job&#x27;s succeeded count and log. Do not use <code>apply</code> exit 0 or a screenshot of Running Pods as the entire check. The implementation must qualify this observation budget; it is not a universal cluster performance guarantee.</p>
+<p><strong>Verify:</strong> observe stable convergence twice at least 2 seconds apart within a 90-second lesson window, then inspect the client Job&#x27;s succeeded count and log. Do not use <code>apply</code> exit 0 or a screenshot of Running Pods as the entire check. The implementation must qualify this observation budget; it is not a universal cluster performance guarantee.</p>
 <p>Hints: (1) four observations answer four different questions; (2) compare identities, not just equal counts; (3) a successful in-cluster request closes the application-path gap left by API status alone.</p>
 <h4 id="3-repair-a-selector-mismatch">3. Repair a selector mismatch<a class="heading-anchor" href="#3-repair-a-selector-mismatch" aria-label="Link to this section">#</a></h4>
 <p>Keep the healthy Deployment unchanged. In the learner Service manifest only, change its selector from <code>app: echo</code> to <code>app: wrong</code>, apply and diagnose. Repair the learner source and reapply it.</p>
@@ -320,18 +366,18 @@ kubectl @KubeArgs logs job/echo-check</code></pre>
 <h3 id="repeating-a-client-check-and-final-cleanup">Repeating a client check and final cleanup<a class="heading-anchor" href="#repeating-a-client-check-and-final-cleanup" aria-label="Link to this section">#</a></h3>
 <p>A finished Job is immutable in relevant template fields. To repeat a check, the future broker creates a new owned attempt name. On the manual route, retain the prior receipt, verify ownership, delete only the completed <code>echo-check</code> Job and reapply the same source. Do not silently discard failed evidence or retry a side-effecting workload.</p>
 <p>After verifying ownership, Bash cleanup for the fixed names is:</p>
-<pre><code class="language-bash">&quot;${K[@]}&quot; delete deployment/echo service/echo job/echo-check --ignore-not-found=true --wait=true --timeout=30s
-&quot;${K[@]}&quot; get deployment/echo service/echo job/echo-check --ignore-not-found -o name
-&quot;${K[@]}&quot; get pods,replicasets -l app=echo -o name
-&quot;${K[@]}&quot; get pods -l batch.kubernetes.io/job-name=echo-check -o name
-&quot;${K[@]}&quot; get endpointslices -l kubernetes.io/service-name=echo -o name</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> delete deployment/echo service/echo job/echo-check --ignore-not-found<span class="syntax-operator">=</span><span class="syntax-builtin">true</span> --wait<span class="syntax-operator">=</span><span class="syntax-builtin">true</span> --timeout<span class="syntax-operator">=</span>30s
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get deployment/echo service/echo job/echo-check --ignore-not-found -o name
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get pods,replicasets -l app<span class="syntax-operator">=</span><span class="syntax-builtin">echo</span> -o name
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get pods -l batch.kubernetes.io/job-name<span class="syntax-operator">=</span>echo-check -o name
+<span class="syntax-string">&quot;</span><span class="syntax-string">${</span>K<span class="syntax-punctuation">[@]</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span> get endpointslices -l kubernetes.io/service-name<span class="syntax-operator">=</span><span class="syntax-builtin">echo</span> -o name</code></pre>
 <p>PowerShell:</p>
-<pre><code class="language-powershell">kubectl @KubeArgs delete deployment/echo service/echo job/echo-check --ignore-not-found=true --wait=true --timeout=30s
-if ($LASTEXITCODE -ne 0) { throw &#x27;Owned cleanup did not finish&#x27; }
-kubectl @KubeArgs get deployment/echo service/echo job/echo-check --ignore-not-found -o name
-kubectl @KubeArgs get pods,replicasets -l app=echo -o name
-kubectl @KubeArgs get pods -l batch.kubernetes.io/job-name=echo-check -o name
-kubectl @KubeArgs get endpointslices -l kubernetes.io/service-name=echo -o name</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">kubectl @KubeArgs delete deployment<span class="syntax-punctuation">/</span><span class="syntax-builtin">echo </span>service<span class="syntax-punctuation">/</span><span class="syntax-builtin">echo </span>job<span class="syntax-punctuation">/</span>echo-check <span class="syntax-punctuation">-</span>-ignore<span class="syntax-operator">-not</span>-found<span class="syntax-punctuation">=</span>true <span class="syntax-punctuation">-</span>-wait<span class="syntax-punctuation">=</span>true <span class="syntax-punctuation">-</span>-timeout<span class="syntax-punctuation">=</span>30s
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned cleanup did not finish&#x27;</span> <span class="syntax-punctuation">}</span>
+kubectl @KubeArgs get deployment<span class="syntax-punctuation">/</span><span class="syntax-builtin">echo </span>service<span class="syntax-punctuation">/</span><span class="syntax-builtin">echo </span>job<span class="syntax-punctuation">/</span>echo-check <span class="syntax-punctuation">-</span>-ignore<span class="syntax-operator">-not</span>-found -o name
+kubectl @KubeArgs get pods<span class="syntax-punctuation">,</span>replicasets -l app<span class="syntax-punctuation">=</span><span class="syntax-builtin">echo </span>-o name
+kubectl @KubeArgs get pods -l batch<span class="syntax-punctuation">.</span>kubernetes<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">/</span>job-name<span class="syntax-punctuation">=</span>echo-check -o name
+kubectl @KubeArgs get endpointslices -l kubernetes<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">/</span>service-name<span class="syntax-punctuation">=</span><span class="syntax-builtin">echo </span>-o name</code></pre>
 <p><strong>Expected:</strong> no remaining owned workload/backend names. If a namespace or object UID no longer matches, stop the operation instead of forcing deletion. Host release of a verified owned namespace is a separate operation, and credential files remain outside portable progress throughout.</p>
 <h3 id="diagnosis-and-retrieval">Diagnosis and retrieval<a class="heading-anchor" href="#diagnosis-and-retrieval" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
@@ -369,7 +415,7 @@ kubectl @KubeArgs get endpointslices -l kubernetes.io/service-name=echo -o name<
 <h3 id="rubric-and-evidence-boundary">Rubric and evidence boundary<a class="heading-anchor" href="#rubric-and-evidence-boundary" aria-label="Link to this section">#</a></h3>
 <p>Score 0,1 or 2 for prediction; explicit target/ownership; desired-state/backend/client evidence; fault diagnosis; and scoped cleanup/transfer. Readiness for the next lesson needs at least 8/10, every applicable live check passing, no ambient/admin target use and an explanation that distinguishes an all-unready fixture from a rolling update. If only transcripts were studied, record a reasoning result, not live runtime acceptance. The owned kind profile, HTTP/client image, broker, token lifecycle and OS/architecture matrix are all pending implementation/qualification here. No actual Kubernetes command is claimed executed by this design.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach planned k8s-008, Running, ready and reachable are different.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach planned k8s-008, Running, ready and reachable are different.
 Read docs/expansion/samples/kubernetes-pilot.md; its echo.yaml and echo-check.yaml blocks are the learner artifacts.
 This is an unregistered design preview. Do not claim a runnable cluster profile or use the ambient kubectl context.
 Direct planned prerequisite is k8s-007. Explain one concept, ask my prediction, let me attempt, then give one hint at a time.

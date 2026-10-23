@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -140,10 +186,10 @@
 <p>Slice the leading observation axis into batches. For each independent update, call zero_grad(set_to_none=True), compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.</p>
 <h3 id="trace-every-update-at-the-state-where-its-gradient-was-computed">Trace every update at the state where its gradient was computed<a class="heading-anchor" href="#trace-every-update-at-the-state-where-its-gradient-was-computed" aria-label="Link to this section">#</a></h3>
 <p>Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.</p>
-<p>For this scalar fixture, y=2x and each batch mean loss has derivative 2 mean(x²)(w-2). With rate 0.01, the exact correct trajectory is:</p>
+<p>For this scalar fixture, y=2x and each batch mean loss has derivative 2 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>mean</mo><mo stretchy="false">(</mo><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{mean}({x}^{2})</annotation></semantics></math>(w-2). With rate 0.01, the exact correct trajectory is:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Batch inputs</th>
-<th>mean(x²)</th>
+<th><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>mean</mo><mo stretchy="false">(</mo><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{mean}({x}^{2})</annotation></semantics></math></th>
 <th>Weight before</th>
 <th>Fresh gradient</th>
 <th>Weight after</th>
@@ -173,31 +219,31 @@
 <p>Each gradient uses the latest weight. Clearing the buffer before each backward ensures that the applied gradient is precisely the one shown in its row. The same records in a different order can yield another trajectory because their local curvature and current parameter state differ.</p>
 <p>Without clearing, the first step is still 0.1. The next backward adds -47.5 to the stored -10, giving -57.5, and the second weight becomes 0.675. The final fresh derivative is -80.825, but the accumulated buffer becomes -138.325 and the final weight 2.05825. These are derivatives evaluated at different historical weights. A single constant learning-rate adjustment does not turn this procedure into the intended minibatch algorithm.</p>
 <p>Interestingly, the incorrect endpoint happens to lie closer to the known optimum two on this tiny sequence. That does not make the implementation correct. It violated the declared update rule, and another sequence can behave very differently. An acceptance test must inspect the mechanism and state trace rather than reward whichever accidental final training loss is smaller.</p>
-<p>Intentional accumulation is different. Hold w fixed, compute each microbatch&#x27;s contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at w=0, the gradient is 2 mean(x²)(-2)=-182/3. One rate 0.01 step gives 91/150, about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.</p>
+<p>Intentional accumulation is different. Hold w fixed, compute each microbatch&#x27;s contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>, the gradient is 2 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>mean</mo><mo stretchy="false">(</mo><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{mean}({x}^{2})</annotation></semantics></math>(-2)=-182/3. One rate 0.01 step gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>91</mn></mrow><mrow><mn>150</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{91}{150}</annotation></semantics></math>, about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.</p>
 <p>Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is(4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.</p>
 <p>Record identities protect the training population. A shared permutation of x and y preserves y=2x after shuffling. Independently permuting either side changes the prediction task while leaving each marginal array plausible. For five records at batch size two, the tail has one record; dropping it changes which observations participated in the epoch. The loop should retain that decision in its budget and denominator report.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-count-batches-and-updates">Example A: Count batches and updates<a class="heading-anchor" href="#example-a-count-batches-and-updates" aria-label="Link to this section">#</a></h4>
 <p>The update count is the number of batches when there is one step per batch. It is neither the number of examples nor the number of epochs.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
 
-ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,len(ids),2)]
-assert batches==[[1,2],[3,4],[5,6]]</code></pre>
+ids<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> batches<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>ids<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> batches<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> three batches[[1, 2], [3, 4], [5, 6]].</p>
 <h4 id="example-b-retain-a-short-tail">Example B: Retain a short tail<a class="heading-anchor" href="#example-b-retain-a-short-tail" aria-label="Link to this section">#</a></h4>
 <p>Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.</p>
-<pre><code class="language-python">short=[list(range(5))[i:i+2] for i in range(0,5,2)]
-assert [len(batch) for batch in short]==[2,2,1]</code></pre>
+<pre class="highlighted-code"><code class="language-python">short<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> batch <span class="syntax-operator">in</span> short<span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> batch sizes 2, 2, 1.</p>
 <h4 id="example-c-run-three-independent-updates">Example C: Run three independent updates<a class="heading-anchor" href="#example-c-run-three-independent-updates" aria-label="Link to this section">#</a></h4>
 <p>Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.</p>
-<pre><code class="language-python">x=torch.arange(1,7,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([w],lr=.01); history=[]
-for start in range(0,6,2):
-    optimizer.zero_grad(set_to_none=True); loss=((w*x[start:start+2]-y[start:start+2])**2).mean(); loss.backward(); optimizer.step(); history.append(w.item())
-assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3</code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> y<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">;</span> w<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> optimizer<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> start <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    optimizer<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>start<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>start<span class="syntax-operator">+</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> optimizer<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span></code></pre>
 <p><strong>Expected:</strong> three finite distinct weights.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -209,7 +255,7 @@ assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3</
 <li><strong>Retain a short tail.</strong> Partition five IDs with batch size 2. <strong>Expected:</strong> batch sizes 2, 2, 1. <strong>Verify:</strong> Save the assertion results for exercise 2, including batch sizes 2, 2, 1.</li>
 </ol>
 <ol>
-<li><strong>Run three independent updates.</strong> Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch. <strong>Expected:</strong> three finite distinct weights. <strong>Verify:</strong> Save the assertion results for exercise 3, including three finite distinct weights.</li>
+<li><strong>Run three independent updates.</strong> Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each batch. <strong>Expected:</strong> three finite distinct weights. <strong>Verify:</strong> Save the assertion results for exercise 3, including three finite distinct weights.</li>
 </ol>
 <ol>
 <li><strong>Expose accidental accumulation.</strong> Repeat the loop without zero_grad and compare its final weight with the correct run. <strong>Expected:</strong> different endpoint. <strong>Verify:</strong> Save the assertion results for exercise 4, including different endpoint.</li>
@@ -237,7 +283,7 @@ assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3</
 <p><strong>Can two batch sizes be compared by equal epochs alone?</strong></p>
 <p>They process the same number of records but may perform different numbers of updates and use different state trajectories. Report both budgets.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-009, Batches, zero_grad and repeated updates.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-009, Batches, zero_grad and repeated updates.
 Read courses/deep-learning-pytorch/guides/torch-009.md and courses/deep-learning-pytorch/lessons/torch-009.py. Direct prerequisites: `torch-008`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

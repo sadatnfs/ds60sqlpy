@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -239,36 +285,36 @@
 <p>Run commands from the repository root.</p>
 <h3 id="standard-commands">Standard commands<a class="heading-anchor" href="#standard-commands" aria-label="Link to this section">#</a></h3>
 <p>Environment:</p>
-<pre><code class="language-text">python scripts/course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py doctor</code></pre>
 <p>Catalog:</p>
-<pre><code class="language-text">python scripts/course.py catalog</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog</code></pre>
 <p>Repository validation:</p>
-<pre><code class="language-text">python scripts/course.py validate</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py validate</code></pre>
 <p>Sensitive-content guard:</p>
-<pre><code class="language-text">python scripts/scan_secrets.py --history</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/scan_secrets.py --history</code></pre>
 <p>Practice enrichment, self-contained lesson depth, and generated portal drift:</p>
-<pre><code class="language-text">python scripts/audit_practice.py
+<pre class="highlighted-code"><code class="language-text">python scripts/audit_practice.py
 python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check</code></pre>
 <p>Add <code>--all</code> to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.</p>
 <p>On Windows, use:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
 
-&amp; $CoursePython scripts\course.py doctor
-&amp; $CoursePython scripts\course.py catalog
-&amp; $CoursePython scripts\course.py validate
-&amp; $CoursePython scripts\scan_secrets.py --history
-&amp; $CoursePython scripts\audit_practice.py
-&amp; $CoursePython scripts\audit_lesson_depth.py
-&amp; $CoursePython scripts\build_course_guide.py --check
-&amp; $CoursePython scripts\build_lesson_readers.py --check</code></pre>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py catalog
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py validate
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>scan_secrets<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-history
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>audit_practice<span class="syntax-punctuation">.</span>py
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>audit_lesson_depth<span class="syntax-punctuation">.</span>py
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_course_guide<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-check
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_lesson_readers<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-check</code></pre>
 <p>On macOS/Linux, use:</p>
-<pre><code class="language-bash">.venv/bin/python scripts/course.py doctor
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog
 .venv/bin/python scripts/course.py validate
 .venv/bin/python scripts/scan_secrets.py --history
@@ -278,13 +324,13 @@ python scripts/build_lesson_readers.py --check</code></pre>
 .venv/bin/python scripts/build_lesson_readers.py --check</code></pre>
 <p>The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.</p>
 <p>The learner setup scripts install compatible dependency ranges with <code>pip</code>. Continuous integration uses the checked-in cross-platform <code>uv.lock</code> and rejects lock drift:</p>
-<pre><code class="language-text">uv lock --check</code></pre>
+<pre class="highlighted-code"><code class="language-text">uv lock --check</code></pre>
 <p>Maintainers with <code>uv</code> can reproduce the CI core environment with:</p>
-<pre><code class="language-text">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+<pre class="highlighted-code"><code class="language-text">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
 uv run --no-sync python -m pytest -n 4 --dist loadgroup</code></pre>
 <h3 id="maintainer-checks">Maintainer checks<a class="heading-anchor" href="#maintainer-checks" aria-label="Link to this section">#</a></h3>
 <p>Core setup installs the quality tools used by continuous integration:</p>
-<pre><code class="language-text">python scripts/build_catalog.py
+<pre class="highlighted-code"><code class="language-text">python scripts/build_catalog.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/audit_practice.py
@@ -296,11 +342,11 @@ python -m pytest -n 4 --dist loadgroup
 python scripts/course.py validate
 python scripts/scan_secrets.py --history</code></pre>
 <p>The canonical full-suite command uses the quality profile&#x27;s <code>pytest-xdist</code> with a bounded default of four workers:</p>
-<pre><code class="language-text">python -m pytest -n 4 --dist loadgroup</code></pre>
+<pre class="highlighted-code"><code class="language-text">python -m pytest -n 4 --dist loadgroup</code></pre>
 <p><strong>Keep <code>--dist loadgroup</code> whenever you enable parallel workers.</strong> Tests marked with the same <code>xdist_group</code> share one worker and execute serially within that group. This protects the opt-in live PostgreSQL tests that share disposable database state. Consumers of <code>live_database</code> and <code>live_psql</code>, including transitive consumers, belong to the <code>shared-postgres</code> group. Keep that shared resource in one group when adding tests. The project also defaults to <code>--dist=loadgroup</code>, so plain <code>-n 4</code> inherits this protection. Overriding it with another distribution strategy is rejected before enabled shared database fixtures run. Existing live-test opt-ins and local disposable-database restrictions still apply. Five scheduler regressions verify shared and transitive fixture grouping, independent workers, and rejected unsafe policies.</p>
 <p>The local full run passed 890 tests and 10 subtests in 50.40 seconds with four workers and every live test enabled. The preceding 885-test sequential run took 144.23 seconds on this Mac. This is a local timing comparison; hardware, available resources and selected tests affect the result.</p>
 <p>Make provides the same command, a configurable worker count, and an explicit serial path for debugging:</p>
-<pre><code class="language-text">make test
+<pre class="highlighted-code"><code class="language-text">make test
 make test TEST_WORKERS=2
 make test-serial</code></pre>
 <p><code>make check</code> runs structural validation and then this grouped test target. <code>make testserial</code> is an alias for <code>make test-serial</code>. Without Make, the serial equivalent is <code>python -m pytest -n 0</code>. Keep focused test selections for quick iteration before running the full suite. A speed improvement is not assumed; worker startup, workload, and available resources affect measured runtime.</p>
@@ -318,7 +364,7 @@ make test-serial</code></pre>
 <p>The sensitive-content scan is deliberately offline and reports only an object ID, path, line number, and finding category so it does not copy a suspected credential into logs. It catches common token/key formats, private-key files, credential-bearing URLs, ignored credential-shaped local files, and reachable Git-history blobs. Its narrow fixture allowances are covered by tests. It is a guardrail, not proof against every secret format; still review changes and use an organization scanner when available.</p>
 <p>Every push and pull request also runs the actual learner setup flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns doctor through the generated <code>.venv</code>, and checks that setup produced no trackable files. macOS and Ubuntu execute <code>setup.sh</code>. Windows first previews <code>bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code>, then executes the same bootstrapper in locked mode. Both Windows invocations use the built-in Windows PowerShell 5.1 host. This exercises discovery, native-command argument handling, environment creation, locked dependency installation, kernel registration, both supported <code>.venv</code> layouts, and doctor without requiring PostgreSQL on the CI image.</p>
 <p>The weekly and manually dispatched heavy job validates the lock, installs every extra, then exercises the maintained advanced import manifest for the <code>bridge</code>, <code>professional</code>, <code>sql-notebooks</code>, <code>ml</code>, <code>production</code>, <code>deep-learning</code>, <code>nlp</code>, and <code>geo</code> lesson stacks on fresh Windows, Ubuntu, and macOS Python 3.12 runners:</p>
-<pre><code class="language-text">uv sync --frozen --all-extras
+<pre class="highlighted-code"><code class="language-text">uv sync --frozen --all-extras
 uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
 <p>Each import runs in an isolated process and does not fetch datasets, pretrained weights, spaCy pipelines, or external services. This proves locked package installation and basic import compatibility on those platforms; it does not prove model training, GPU support, asset availability, live APIs, or every advanced lesson&#x27;s runtime behavior. A fast core-job dry run also proves that the all-extras lock has an installable plan for Windows x86-64, Linux x86-64, Intel macOS, and Apple Silicon before the heavy job starts. The ML extra constrains Numba by platform because SHAP&#x27;s transitive requirement is otherwise broad enough for a legacy source release with incomplete Python-version metadata to enter a valid-looking lock. PyTorch and TorchVision are likewise paired by macOS architecture because current PyTorch releases no longer ship Intel-macOS wheels and now require macOS 14 for Apple Silicon. The macOS heavy job installs Homebrew&#x27;s <code>libomp</code> first, matching the documented learner setup and allowing the locked LightGBM and XGBoost binaries to load.</p>
 <p><code>Advanced imports</code> intentionally does <strong>not</strong> run for an ordinary push or pull request because installing every optional package is the slowest workflow surface. To run it immediately, follow GitHub&#x27;s <a href="https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow">manual workflow instructions</a>:</p>
@@ -329,7 +375,7 @@ uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
 <li>Open that run and watch the three <code>Advanced imports</code> matrix jobs.</li>
 </ol>
 <p>GitHub dispatches the whole workflow; its UI cannot start only one job inside a workflow. The <code>workflow_dispatch</code> event is what makes the advanced job eligible while the normal core, learner-bootstrap, and PostgreSQL jobs also run. With the GitHub CLI installed, the equivalent command is:</p>
-<pre><code class="language-text">gh workflow run ci.yml --ref &lt;branch-name&gt;</code></pre>
+<pre class="highlighted-code"><code class="language-text">gh workflow run ci.yml --ref &lt;branch-name&gt;</code></pre>
 <h3 id="local-validation-evidence-2026-07-30">Local validation evidence (2026-07-30)<a class="heading-anchor" href="#local-validation-evidence-2026-07-30" aria-label="Link to this section">#</a></h3>
 <p>The comprehensive local run recorded this evidence:</p>
 <ul>
@@ -379,28 +425,28 @@ uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
 <li>SQL-magic cells are structurally checked through notebook tags; live PostgreSQL execution is recorded separately.</li>
 </ul>
 <p>Run the notebook-aware validator after installing the core environment:</p>
-<pre><code class="language-text">python scripts/validate_notebooks.py
+<pre class="highlighted-code"><code class="language-text">python scripts/validate_notebooks.py
 python scripts/validate_notebooks.py --smoke</code></pre>
 <p>The normal smoke set excludes the live PostgreSQL notebook. After setting <code>DS60_DATABASE_URL</code> to the disposable database, execute its solution from a clean kernel:</p>
-<pre><code class="language-powershell"># Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
 
-&amp; $CoursePython -m nbconvert --execute --to notebook `
-    --output-dir .\artifacts\notebook-validation `
-    .\bridge\professional\solutions\bridge_jupyter_01_postgresql_magics_solution.ipynb</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-.venv/bin/python -m nbconvert --execute --to notebook \
-  --output-dir artifacts/notebook-validation \
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m nbconvert <span class="syntax-punctuation">-</span>-execute <span class="syntax-punctuation">-</span>-to notebook <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-output-dir <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>artifacts<span class="syntax-punctuation">\</span>notebook-validation <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>bridge_jupyter_01_postgresql_magics_solution<span class="syntax-punctuation">.</span>ipynb</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+.venv/bin/python -m nbconvert --execute --to notebook <span class="syntax-string">\</span>
+  --output-dir artifacts/notebook-validation <span class="syntax-string">\</span>
   bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code></pre>
 <p>The executed copy belongs under ignored <code>artifacts/</code>; keep the checked-in notebook output-free.</p>
 <p>Cleared notebook outputs are normal. Record execution evidence in validation logs or CI rather than committing noisy, machine-specific output.</p>
 <h5 id="guided-per-lesson-sql-notebooks">Guided per-lesson SQL notebooks<a class="heading-anchor" href="#guided-per-lesson-sql-notebooks" aria-label="Link to this section">#</a></h5>
 <p>These learner-local notebooks are generated from stable SQL catalog IDs and run complete scripts through <code>psql</code>; they are not the checked-in JupySQL magics lesson. Validate their safety and generation contract without writing into a learner&#x27;s existing <code>.learning/</code> directory:</p>
-<pre><code class="language-text">python -m pytest tests/test_sql_notebook.py tests/test_portal.py</code></pre>
+<pre class="highlighted-code"><code class="language-text">python -m pytest tests/test_sql_notebook.py tests/test_portal.py</code></pre>
 <p>The tests use isolated temporary repositories. They must prove valid notebook/kernelspec structure, no absolute checkout path or connection value, catalog-only source selection, no overwrite of learner files, fixed non-shell <code>psql -f</code>, unchanged line-start and inline meta-commands/includes, the <code>advanced_sql_training</code> restriction, and explicit reset confirmation.</p>
 <p>When manually exercising a generated notebook, first preserve any existing <code>.learning/sql/&lt;lesson-id&gt;/</code> work. Report separately whether generation, Jupyter launch, database preparation, learner SQL execution, and <code>00_verify.sql</code> succeeded. A rendered reader or structurally valid generated notebook is not evidence that PostgreSQL authentication or the lesson query succeeded.</p>
 <h4 id="3-offline-checks">3. Offline checks<a class="heading-anchor" href="#3-offline-checks" aria-label="Link to this section">#</a></h4>
@@ -415,17 +461,17 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <h4 id="4-sql-execution">4. SQL execution<a class="heading-anchor" href="#4-sql-execution" aria-label="Link to this section">#</a></h4>
 <p>Canonical automation uses PostgreSQL 17; supported learner environments are PostgreSQL 16+.</p>
 <p>Cross-platform Compose execution:</p>
-<pre><code class="language-text">docker compose up -d postgres
+<pre class="highlighted-code"><code class="language-text">docker compose up -d postgres
 docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
 docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
 docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql
 docker compose down</code></pre>
 <p><code>00_setup.sql</code> is destructive within the course-owned <code>training</code> schema. The Compose database is disposable, but still resolve the target before running setup. <code>docker compose down</code> preserves its named volume.</p>
 <p>Reset only the disposable training database:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
 <p>Run a lesson:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
 <p>Named professional SQL modules live under <code>sql/professional/</code>. Run the learner and solution artifact in separate clean sessions. Role administration, extensions, physical recovery, and replication modules include capability boundaries; report an instructional skip separately from the default rollback-safe SQL that did execute.</p>
 <p>Check:</p>
 <ul>
@@ -439,7 +485,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 <p>Do not drop <code>ON_ERROR_STOP</code>; without it, statement errors can be missed.</p>
 <h4 id="5-engineering-bridge">5. Engineering bridge<a class="heading-anchor" href="#5-engineering-bridge" aria-label="Link to this section">#</a></h4>
 <p>The bridge&#x27;s default validation does not require a database:</p>
-<pre><code class="language-text">python -m pytest bridge/tests
+<pre class="highlighted-code"><code class="language-text">python -m pytest bridge/tests
 python -m pytest bridge/professional/tests
 python -m compileall -q bridge</code></pre>
 <p>Check:</p>
@@ -452,7 +498,7 @@ python -m compileall -q bridge</code></pre>
 <p>Fake-backed success does not prove server permissions, network behavior, or a real query plan. Label a live PostgreSQL check separately when one is run.</p>
 <h4 id="6-professional-python-modules">6. Professional Python modules<a class="heading-anchor" href="#6-professional-python-modules" aria-label="Link to this section">#</a></h4>
 <p>Run the professional solution tests independently from the learner scaffolds:</p>
-<pre><code class="language-text">python -m pytest python/professional/tests</code></pre>
+<pre class="highlighted-code"><code class="language-text">python -m pytest python/professional/tests</code></pre>
 <p>Package-build tests install only into a temporary target. Arrow/DuckDB tests use generated local files. HTTP, concurrency, AI, analytics, migration, and service tests use deterministic fakes or local fixtures. No professional default test should require a public endpoint, hosted model, cloud account, or credential.</p>
 <h4 id="7-platform-checks">7. Platform checks<a class="heading-anchor" href="#7-platform-checks" aria-label="Link to this section">#</a></h4>
 <p>Core setup and doctor should run on:</p>
@@ -470,12 +516,12 @@ python -m compileall -q bridge</code></pre>
 <li>Run its prerequisite and successor smoke checks.</li>
 <li>Regenerate the catalog when artifact names or catalog-builder metadata changed:</li>
 </ol>
-<pre><code class="language-text">   python scripts/build_catalog.py
+<pre class="highlighted-code"><code class="language-text">   python scripts/build_catalog.py
    git diff -- curriculum/catalog.json</code></pre>
 <ol>
 <li>When lessons or portal behavior changed, regenerate the maintained outputs:</li>
 </ol>
-<pre><code class="language-text">   python scripts/audit_practice.py --write-report
+<pre class="highlighted-code"><code class="language-text">   python scripts/audit_practice.py --write-report
    python scripts/build_course_guide.py
    python scripts/build_lesson_readers.py
    git diff -- docs/practice-coverage.md START_HERE.html lesson-pages/</code></pre>
@@ -483,7 +529,7 @@ python -m compileall -q bridge</code></pre>
 <li>Run <code>python scripts/course.py validate</code>.</li>
 <li>Run:</li>
 </ol>
-<pre><code class="language-text">   git diff --check
+<pre class="highlighted-code"><code class="language-text">   git diff --check
    git status --short</code></pre>
 <p>Do not reformat unrelated notebooks or SQL files merely to make a focused validation pass.</p>
 <h3 id="interpreting-results">Interpreting results<a class="heading-anchor" href="#interpreting-results" aria-label="Link to this section">#</a></h3>

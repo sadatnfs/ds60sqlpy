@@ -8,7 +8,7 @@
 > work. Native terminal/editor commands below are optional alternatives.
 
 
-All 42 planned lessons have authored guides, learner artifacts, six inspectable exercises and separate explanations. The bounded browser profile executes only its reviewed Deployment/Service/ConfigMap or finite Job contract. Advanced activities are complete offline and host-lab lessons with explicit missing-capability boundaries, not invented browser execution.
+All 42 lessons have authored guides, learner artifacts, six inspectable exercises and separate explanations. The bounded browser profile executes only its reviewed Deployment/Service/ConfigMap or finite Job contract. Advanced activities are complete offline and host-lab lessons with explicit missing-capability boundaries, not invented browser execution.
 
 Use [host-labs.md](host-labs.md) for exact targeting, 15-minute lease timing, observation and cleanup. Use the [preparation guide](../../docker/kubernetes/README.md) for the actual owned runtime. The [status record](../../docs/implementation/kubernetes-content-status.md) separates local content tests, real contract-2 runtime receipts and unqualified advanced host capabilities.
 

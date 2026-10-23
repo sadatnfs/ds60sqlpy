@@ -130,7 +130,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** mean 0; scale sqrt 2.5.
    **Verify:** Save the assertion results for exercise 2, including mean 0; scale sqrt 2.5.
 
-3. **Train a fixed classifier.** Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.
+3. **Train a fixed classifier.** Zero-initialize the weight and run 40 SGD with rate 0.1 steps with binary logits loss.
    **Expected:** positive finite weight after 40 updates.
    **Verify:** Save the assertion results for exercise 3, including positive finite weight after 40 updates.
 

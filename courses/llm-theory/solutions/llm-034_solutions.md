@@ -73,9 +73,9 @@ np.testing.assert_array_equal(qr[0],[14,-127]); np.testing.assert_allclose(scale
 row_error=float(np.max(np.abs((qr.astype(float)*scales)@x-reference))); assert np.isfinite(row_error)
 ```
 
-**Expected:** row scales.9/127 and1.7/127;row0 integers[14,-127].
+**Expected:** row scales.9/127 and 1.7/127;row0 integers[14,-127].
 
-**Verify:** Compare the computed values or written argument with row scales.9/127 and1.7/127;row0 integers[14,-127].
+**Verify:** Compare the computed values or written argument with row scales.9/127 and 1.7/127;row0 integers[14,-127].
 
 ## Exercise 5: Account for storage metadata
 

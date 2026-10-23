@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -337,18 +383,20 @@
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 6 (<code>python-06</code>): lists, sets, dictionaries, and iteration.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
 <li>Confirm the course environment before changing it:</li>
 </ol>
-<pre><code class="language-powershell">   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   &amp; $CoursePython scripts\course.py doctor</code></pre>
-<pre><code class="language-bash">   # macOS/Linux
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
    .venv/bin/python scripts/course.py doctor</code></pre>
 <ol>
 <li>Read <code>python/ds-60day/companion-guides/day07_strings_regex_pathlib.md</code>, then open <code>python/ds-60day/notebooks/day07_strings_regex_pathlib.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
@@ -374,24 +422,24 @@
 <p><code>pattern.fullmatch(text)</code> requires the entire input to match, while <code>search</code> can find a match inside longer text. Raw string syntax such as <code>r&quot;\d{4}&quot;</code> preserves backslashes for the regex engine. In <code>folder / &quot;report.csv&quot;</code>, <code>/</code> is <code>Path</code> joining syntax, not division.</p>
 <h5 id="guide--worked-example-1-extract-named-fields-from-a-bounded-filename">Worked example 1 — Extract named fields from a bounded filename<a class="heading-anchor" href="#guide--worked-example-1-extract-named-fields-from-a-bounded-filename" aria-label="Link to this section">#</a></h5>
 <p>Use <code>fullmatch</code> when extra text must be rejected. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">import re
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
 
-pattern = re.compile(
-    r&quot;sales_(?P&lt;date&gt;\d{4}-\d{2}-\d{2})_(?P&lt;region&gt;[a-z]+)\.csv&quot;
-)
-match = pattern.fullmatch(&quot;sales_2025-07-01_west.csv&quot;)
-match.groupdict() if match else None</code></pre>
+pattern <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_(?P&lt;date&gt;</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{4}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">)_(?P&lt;region&gt;[a-z]+)</span><span class="syntax-string">\</span><span class="syntax-string">.csv</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+match <span class="syntax-operator">=</span> pattern<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_2025-07-01_west.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">match</span><span class="syntax-operator">.</span>groupdict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> match <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">`{&#x27;date&#x27;: &#x27;2025-07-01&#x27;, &#x27;region&#x27;: &#x27;west&#x27;}`. A filename with extra trailing text returns `None`.</code></pre>
+<pre class="highlighted-code"><code class="language-text">`{&#x27;date&#x27;: &#x27;2025-07-01&#x27;, &#x27;region&#x27;: &#x27;west&#x27;}`. A filename with extra trailing text returns `None`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--worked-example-2-build-a-path-without-platform-specific-separators">Worked example 2 — Build a path without platform-specific separators<a class="heading-anchor" href="#guide--worked-example-2-build-a-path-without-platform-specific-separators" aria-label="Link to this section">#</a></h5>
 <p>Let <code>Path</code> own path joining and filename fields. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
-<pre><code class="language-python">from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-report = Path(&quot;artifacts&quot;) / &quot;daily sales.csv&quot;
-(report.parent, report.stem, report.suffix, report.with_suffix(&quot;.json&quot;))</code></pre>
+report <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily sales.csv</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">(</span>report<span class="syntax-operator">.</span>parent<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>suffix<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>with_suffix<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
-<pre><code class="language-text">A tuple of `Path` values is displayed. On every supported operating system the components remain meaningful without hard-coded `/` or `\` separators.</code></pre>
+<pre class="highlighted-code"><code class="language-text">A tuple of `Path` values is displayed. On every supported operating system the components remain meaningful without hard-coded `/` or `\` separators.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
 <h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
 <p>When the output differs from your prediction, use this order:</p>
@@ -423,16 +471,16 @@ report = Path(&quot;artifacts&quot;) / &quot;daily sales.csv&quot;
 </ul>
 <p>Use ordinary string methods for simple, fixed transformations. Reach for regex when the text has a pattern with alternatives or variable-length parts.</p>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import re
-from pathlib import Path
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-line = &quot;run_id=DS-042 status=ok&quot;
-match = re.fullmatch(r&quot;run_id=(?P&lt;run_id&gt;[A-Z]{2}-\d{3}) status=(?P&lt;status&gt;\w+)&quot;, line)
-if match is not None:
-    print(match.groupdict())
+line <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">run_id=DS-042 status=ok</span><span class="syntax-string">&quot;</span>
+match <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">run_id=(?P&lt;run_id&gt;[A-Z]</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{3}</span><span class="syntax-string">) status=(?P&lt;status&gt;</span><span class="syntax-string">\</span><span class="syntax-string">w+)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> line<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">if</span> match <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>match<span class="syntax-operator">.</span>groupdict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-report = Path(&quot;reports&quot;) / &quot;daily.csv&quot;
-print(report.parent, report.stem, report.suffix)</code></pre>
+report <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">reports</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily.csv</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-operator">.</span>parent<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>suffix<span class="syntax-punctuation">)</span></code></pre>
 <p>The regex describes the whole record. <code>Path</code> composes a portable location without hard-coding <code>/</code> or <code>\</code>.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -477,7 +525,7 @@ print(report.parent, report.stem, report.suffix)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-07`
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-07`
 (Day 7 — Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
 I have completed the direct prerequisites: `python-06`. Emphasize text normalization, bounded pattern matching, and portable paths.
 Read `python/ds-60day/companion-guides/day07_strings_regex_pathlib.md` and use the learner notebook
@@ -551,22 +599,22 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><code>pattern.fullmatch(text)</code> requires the entire input to match, while <code>search</code> can find a match inside longer text. Raw string syntax such as <code>r&quot;\d{4}&quot;</code> preserves backslashes for the regex engine. In <code>folder / &quot;report.csv&quot;</code>, <code>/</code> is <code>Path</code> joining syntax, not division.</p>
 <h5 id="learner--cell-4--worked-example-1-extract-named-fields-from-a-bounded-filename">Worked example 1 — Extract named fields from a bounded filename<a class="heading-anchor" href="#learner--cell-4--worked-example-1-extract-named-fields-from-a-bounded-filename" aria-label="Link to this section">#</a></h5>
 <p>Use <code>fullmatch</code> when extra text must be rejected. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import re</span>
-<span> </span>
-<span>pattern = re.compile(</span>
-<span>    r&quot;sales_(?P&lt;date&gt;\d{4}-\d{2}-\d{2})_(?P&lt;region&gt;[a-z]+)\.csv&quot;</span>
-<span>)</span>
-<span>match = pattern.fullmatch(&quot;sales_2025-07-01_west.csv&quot;)</span>
-<span>match.groupdict() if match else None</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"></span>
+<span class="source-line">pattern <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_(?P&lt;date&gt;</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{4}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">)_(?P&lt;region&gt;[a-z]+)</span><span class="syntax-string">\</span><span class="syntax-string">.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">match <span class="syntax-operator">=</span> pattern<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_2025-07-01_west.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">match</span><span class="syntax-operator">.</span>groupdict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> match <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>{&#x27;date&#x27;: &#x27;2025-07-01&#x27;, &#x27;region&#x27;: &#x27;west&#x27;}</code>. A filename with extra trailing text returns <code>None</code>.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
 <h5 id="learner--cell-6--worked-example-2-build-a-path-without-platform-specific-separators">Worked example 2 — Build a path without platform-specific separators<a class="heading-anchor" href="#learner--cell-6--worked-example-2-build-a-path-without-platform-specific-separators" aria-label="Link to this section">#</a></h5>
 <p>Let <code>Path</code> own path joining and filename fields. Predict first; then run the next cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span> </span>
-<span>report = Path(&quot;artifacts&quot;) / &quot;daily sales.csv&quot;</span>
-<span>(report.parent, report.stem, report.suffix, report.with_suffix(&quot;.json&quot;))</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">report <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily sales.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>report<span class="syntax-operator">.</span>parent<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>suffix<span class="syntax-punctuation">,</span> report<span class="syntax-operator">.</span>with_suffix<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> A tuple of <code>Path</code> values is displayed. On every supported operating system the components remain meaningful without hard-coded <code>/</code> or <code>\</code> separators.</p>
 <h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
@@ -580,21 +628,21 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> Prefer <code>split</code>, <code>partition</code>, <code>startswith</code>, and <code>endswith</code> for fixed formats; use a parser rather than regex for languages such as HTML.</p>
 <p><strong>Boundary to test:</strong> Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import re</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>text = &#x27;Order #1234 placed by alice@example.com on 2025-01-03&#x27;</span>
-<span>order_id = re.search(r&#x27;#(\d+)&#x27;, text).group(1)</span>
-<span>email = re.search(r&#x27;[\w.%-]+@[\w.-]+&#x27;, text).group(0)</span>
-<span>date = re.search(r&#x27;\d{4}-\d{2}-\d{2}&#x27;, text).group(0)</span>
-<span>order_id, email, date</span>
-<span> </span>
-<span># Pathlib demo</span>
-<span>artifact_dir = Path(&#x27;artifacts/day07&#x27;)</span>
-<span>artifact_dir.mkdir(parents=True, exist_ok=True)</span>
-<span>(artifact_dir / &#x27;sample.txt&#x27;).write_text(&#x27;hello&#x27;, encoding=&#x27;utf-8&#x27;)</span>
-<span>list(artifact_dir.glob(&#x27;*.txt&#x27;))</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">Order #1234 placed by alice@example.com on 2025-01-03</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line">order_id <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>search<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">#(</span><span class="syntax-string">\</span><span class="syntax-string">d+)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">email <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>search<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">[</span><span class="syntax-string">\</span><span class="syntax-string">w.</span><span class="syntax-string">%</span><span class="syntax-string">-]+@[</span><span class="syntax-string">\</span><span class="syntax-string">w.-]+</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">date <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>search<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{4}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">order_id<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> date</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Pathlib demo</span></span>
+<span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">artifacts/day07</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>artifact_dir <span class="syntax-operator">/</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">sample.txt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">hello</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>artifact_dir<span class="syntax-operator">.</span>glob<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">*.txt</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -618,86 +666,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
-<span># Short contract: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. use one bounded regex for extraction, then se...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. use one bounded regex for extraction, then se...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. <strong>Rules:</strong> normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. <strong>Verify:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
-<span># Short contract: Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. normalize the stem to lowe...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. normalize the stem to lowe...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Compare <code>&quot;\n&quot;</code> with <code>r&quot;\n&quot;</code> and predict their lengths and printed representations. <strong>Progressive hint:</strong> A raw string preserves the backslash needed by many regex patterns. <strong>Verify:</strong> Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
-<span># Short contract: Compare `&quot;\n&quot;` with `r&quot;\n&quot;` and predict their lengths and printed representations. A raw string preserves the backslash needed by many regex patterns. Record `len`, `repr`, and...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Compare `&quot;\n&quot;` with `r&quot;\n&quot;` and predict their lengths and printed representations. A raw string preserves the backslash needed by many regex patterns. Record `len`, `repr`, and...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace named regex groups while parsing <code>order-2048.csv</code>; distinguish <code>group(0)</code> from the named capture. <strong>Progressive hint:</strong> The whole match and captured subparts are different values. <strong>Verify:</strong> Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
-<span># Short contract: Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. The whole match and captured subparts are different values. Assert `group...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. The whole match and captured subparts are different values. Assert `group...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>parse_report_name(Path)</code> returning a date and region for names like <code>sales_2025-07-01_west.csv</code>, rejecting mismatches. <strong>Progressive hint:</strong> Use <code>fullmatch</code> so extra suffix text cannot pass silently. <strong>Verify:</strong> Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
-<span># Short contract: Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. Use `fullmatch` so extra suffix text cannot pas...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. Use `fullmatch` so extra suffix text cannot pas...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a greedy <code>&lt;.*&gt;</code> pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. <strong>Progressive hint:</strong> Use a constrained or non-greedy pattern only for a bounded format. <strong>Verify:</strong> Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
-<span># Short contract: Repair a greedy `&lt;.*&gt;` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. Use a constrained or non-greedy pattern only for a...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Repair a greedy `&lt;.*&gt;` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. Use a constrained or non-greedy pattern only for a...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Build a rename plan to kebab-case that detects collisions before changing any files, including <code>A B.txt</code> and <code>a-b.txt</code>. <strong>Progressive hint:</strong> Separate planning/validation from filesystem mutation. <strong>Verify:</strong> Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
-<span># Short contract: Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. Separate planning/validation from filesystem mutation. Ge...</span>
-<span># Prediction:</span>
-<span> </span>
-<span># Implementation:</span>
-<span> </span>
-<span># Verification (assert or inspect exactly what the prompt requires):</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. Separate planning/validation from filesystem mutation. Ge...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -751,86 +799,86 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. Constraints: use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>. That connects the answer to text normalization, bounded pattern matching, and portable paths.</p>
-<pre><code class="language-python">import re
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
 
-EMAIL_SHAPE = re.compile(
-    r&quot;(?&lt;![\w.+-])[A-Za-z0-9._%+-]+@&quot;
-    r&quot;[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w.-])&quot;
-)
-
-
-def extract_emails(text: str) -&gt; list[str]:
-    matches = EMAIL_SHAPE.findall(text)
-    normalized = [match.casefold() for match in matches]
-    return list(dict.fromkeys(normalized))
+EMAIL_SHAPE <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">(?&lt;![</span><span class="syntax-string">\</span><span class="syntax-string">w.+-])[A-Za-z0-9._</span><span class="syntax-string">%</span><span class="syntax-string">+-]+@</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">[A-Za-z0-9.-]+</span><span class="syntax-string">\</span><span class="syntax-string">.[A-Za-z]</span><span class="syntax-string">{</span><span class="syntax-string">2,}(?![</span><span class="syntax-string">\</span><span class="syntax-string">w.-])</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
 
 
-text = (
-    &quot;Contact Ada@Example.com or lin@example.com; &quot;
-    &quot;ADA@example.com replied.&quot;
-)
-addresses = extract_emails(text)
-assert addresses == [&quot;ada@example.com&quot;, &quot;lin@example.com&quot;]
-assert extract_emails(&quot;There is no address in this sentence.&quot;) == []</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">extract_emails</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    matches <span class="syntax-operator">=</span> EMAIL_SHAPE<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+    normalized <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>match<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> match <span class="syntax-operator">in</span> matches<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-operator">.</span>fromkeys<span class="syntax-punctuation">(</span>normalized<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+
+text <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">Contact Ada@Example.com or lin@example.com; </span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">ADA@example.com replied.</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
+addresses <span class="syntax-operator">=</span> extract_emails<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> addresses <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">ada@example.com</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">lin@example.com</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> extract_emails<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">There is no address in this sentence.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <p>The bounded pattern extracts a useful email <em>shape</em> only. Normalization and first-seen de-duplication are separate steps, and no claim is made that the domain or mailbox exists.</p>
 <p><strong>Verification evidence:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. <strong>Rules:</strong> normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. <strong>Verify:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. Rules: normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: use a temporary directory and inspect the complete plan before implementing a separate apply step. That connects the answer to text normalization, bounded pattern matching, and portable paths.</p>
-<pre><code class="language-python">import re
-from pathlib import Path
-import tempfile
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
 
 
-def kebab_stem(stem: str) -&gt; str:
-    return re.sub(r&quot;[^a-z0-9]+&quot;, &quot;-&quot;, stem.lower()).strip(&quot;-&quot;)
+<span class="syntax-keyword">def</span> <span class="syntax-function">kebab_stem</span><span class="syntax-punctuation">(</span>stem<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> re<span class="syntax-operator">.</span>sub<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">[^a-z0-9]+</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> stem<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-def plan_kebab_renames(folder: Path) -&gt; list[tuple[Path, Path]]:
-    files = sorted(
-        (path for path in folder.iterdir() if path.is_file()),
-        key=lambda path: path.name.casefold(),
-    )
-    proposals = [
-        (path, path.with_name(kebab_stem(path.stem) + path.suffix))
-        for path in files
-    ]
-    targets: dict[str, Path] = {}
-    source_names = {path.name.casefold(): path for path in files}
-    for source, target in proposals:
-        key = target.name.casefold()
-        prior = targets.get(key)
-        occupied = source_names.get(key)
-        if prior is not None and prior != source:
-            raise ValueError(f&quot;rename targets collide at {target.name!r}&quot;)
-        if occupied is not None and occupied != source:
-            raise ValueError(f&quot;target already exists: {target.name!r}&quot;)
-        targets[key] = source
-    return [
-        (source, target)
-        for source, target in proposals
-        if source.name != target.name
-    ]
+<span class="syntax-keyword">def</span> <span class="syntax-function">plan_kebab_renames</span><span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    files <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-punctuation">(</span>path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> folder<span class="syntax-operator">.</span>iterdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> path<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> path<span class="syntax-punctuation">:</span> path<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    proposals <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+        <span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> path<span class="syntax-operator">.</span>with_name<span class="syntax-punctuation">(</span>kebab_stem<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> path<span class="syntax-operator">.</span>suffix<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files
+    <span class="syntax-punctuation">]</span>
+    targets<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+    source_names <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>path<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files<span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">for</span> source<span class="syntax-punctuation">,</span> target <span class="syntax-operator">in</span> proposals<span class="syntax-punctuation">:</span>
+        key <span class="syntax-operator">=</span> target<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        prior <span class="syntax-operator">=</span> targets<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span>
+        occupied <span class="syntax-operator">=</span> source_names<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> prior <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> prior <span class="syntax-operator">!=</span> source<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">rename targets collide at </span><span class="syntax-string">{</span>target<span class="syntax-operator">.</span>name<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> occupied <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> occupied <span class="syntax-operator">!=</span> source<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">target already exists: </span><span class="syntax-string">{</span>target<span class="syntax-operator">.</span>name<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        targets<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> source
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>
+        <span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">for</span> source<span class="syntax-punctuation">,</span> target <span class="syntax-operator">in</span> proposals
+        <span class="syntax-keyword">if</span> source<span class="syntax-operator">.</span>name <span class="syntax-operator">!=</span> target<span class="syntax-operator">.</span>name
+    <span class="syntax-punctuation">]</span>
 
 
-with tempfile.TemporaryDirectory() as temporary:
-    folder = Path(temporary)
-    source = folder / &quot;Quarterly Report.CSV&quot;
-    unchanged = folder / &quot;notes.txt&quot;
-    source.write_text(&quot;quarter,value\nQ1,10\n&quot;, encoding=&quot;utf-8&quot;)
-    unchanged.write_text(&quot;keep&quot;, encoding=&quot;utf-8&quot;)
-    planned = plan_kebab_renames(folder)
-    assert planned == [(source, folder / &quot;quarterly-report.CSV&quot;)]
-    assert source.exists() and unchanged.exists()
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> temporary<span class="syntax-punctuation">:</span>
+    folder <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-punctuation">)</span>
+    source <span class="syntax-operator">=</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Quarterly Report.CSV</span><span class="syntax-string">&quot;</span>
+    unchanged <span class="syntax-operator">=</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">notes.txt</span><span class="syntax-string">&quot;</span>
+    source<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">quarter,value</span><span class="syntax-string">\n</span><span class="syntax-string">Q1,10</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    unchanged<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">keep</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    planned <span class="syntax-operator">=</span> plan_kebab_renames<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> planned <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">,</span> folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quarterly-report.CSV</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> source<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> unchanged<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-    (folder / &quot;A B.txt&quot;).write_text(&quot;one&quot;, encoding=&quot;utf-8&quot;)
-    (folder / &quot;a-b.TXT&quot;).write_text(&quot;two&quot;, encoding=&quot;utf-8&quot;)
-    try:
-        plan_kebab_renames(folder)
-    except ValueError as error:
-        assert &quot;collide&quot; in str(error) or &quot;exists&quot; in str(error)
-    else:
-        raise AssertionError(&quot;case-normalized collision should fail&quot;)</code></pre>
+    <span class="syntax-punctuation">(</span>folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A B.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">(</span>folder <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a-b.TXT</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">two</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        plan_kebab_renames<span class="syntax-punctuation">(</span>folder<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">collide</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-string">&quot;</span><span class="syntax-string">exists</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">case-normalized collision should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Applying <code>Path.rename</code> is a separate, deliberate mutation after this complete plan passes collision checks.</p>
 <p><strong>Verification evidence:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</p>
 <h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -859,55 +907,55 @@ with tempfile.TemporaryDirectory() as temporary:
 <h5 id="solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups">Shared implementation for Exercises 3–4 — Escapes and groups<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups" aria-label="Link to this section">#</a></h5>
 <p>An ordinary <code>&quot;\n&quot;</code> is one newline character. The raw <code>r&quot;\n&quot;</code> is two characters: a backslash and <code>n</code>. <code>group(0)</code> is the full match; a named group returns only its captured portion.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths">Shared implementation for Exercises 5–7 — Parse and plan before mutating paths<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">from __future__ import annotations
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-import re
-from pathlib import Path
+<span class="syntax-keyword">import</span> re
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-REPORT_PATTERN = re.compile(
-    r&quot;sales_(?P&lt;date&gt;\d{4}-\d{2}-\d{2})_(?P&lt;region&gt;[a-z]+)\.csv&quot;
-)
-
-
-def parse_report_name(path: Path) -&gt; tuple[str, str]:
-    &quot;&quot;&quot;Return (date, region) from one complete, valid report filename.&quot;&quot;&quot;
-
-    match = REPORT_PATTERN.fullmatch(path.name)
-    if match is None:
-        raise ValueError(f&quot;unexpected report name: {path.name!r}&quot;)
-    return match.group(&quot;date&quot;), match.group(&quot;region&quot;)
+REPORT_PATTERN <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_(?P&lt;date&gt;</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{4}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">)_(?P&lt;region&gt;[a-z]+)</span><span class="syntax-string">\</span><span class="syntax-string">.csv</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
 
 
-assert parse_report_name(Path(&quot;sales_2025-07-01_west.csv&quot;)) == (
-    &quot;2025-07-01&quot;, &quot;west&quot;
-)
+<span class="syntax-keyword">def</span> <span class="syntax-function">parse_report_name</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return (date, region) from one complete, valid report filename.&quot;&quot;&quot;</span>
 
-bounded_tags = re.findall(r&quot;&lt;[^&lt;&gt;]*&gt;&quot;, &quot;&lt;b&gt;one&lt;/b&gt;&lt;i&gt;two&lt;/i&gt;&quot;)
-assert bounded_tags == [&quot;&lt;b&gt;&quot;, &quot;&lt;/b&gt;&quot;, &quot;&lt;i&gt;&quot;, &quot;&lt;/i&gt;&quot;]
-
-
-def kebab_stem(stem: str) -&gt; str:
-    words = re.findall(r&quot;[A-Za-z0-9]+&quot;, stem.casefold())
-    return &quot;-&quot;.join(words)
+    match <span class="syntax-operator">=</span> REPORT_PATTERN<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> match <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unexpected report name: </span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>name<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-def plan_renames(paths: list[Path]) -&gt; dict[Path, Path]:
-    &quot;&quot;&quot;Return a collision-free plan without touching the filesystem.&quot;&quot;&quot;
+<span class="syntax-keyword">assert</span> parse_report_name<span class="syntax-punctuation">(</span>Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_2025-07-01_west.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">2025-07-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span>
 
-    plan = {path: path.with_name(f&quot;{kebab_stem(path.stem)}{path.suffix.lower()}&quot;)
-            for path in paths}
-    destinations = list(plan.values())
-    if len({destination.name.casefold() for destination in destinations}) != len(destinations):
-        raise ValueError(&quot;rename destinations collide&quot;)
-    return plan
+bounded_tags <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;[^&lt;&gt;]*&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;b&gt;one&lt;/b&gt;&lt;i&gt;two&lt;/i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> bounded_tags <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;b&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/b&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 
 
-try:
-    plan_renames([Path(&quot;A B.txt&quot;), Path(&quot;a-b.txt&quot;)])
-except ValueError as error:
-    assert &quot;collide&quot; in str(error)
-else:
-    raise AssertionError(&quot;the collision should be detected before renaming&quot;)</code></pre>
+<span class="syntax-keyword">def</span> <span class="syntax-function">kebab_stem</span><span class="syntax-punctuation">(</span>stem<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    words <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">[A-Za-z0-9]+</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> stem<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">plan_renames</span><span class="syntax-punctuation">(</span>paths<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return a collision-free plan without touching the filesystem.&quot;&quot;&quot;</span>
+
+    plan <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>path<span class="syntax-punctuation">:</span> path<span class="syntax-operator">.</span>with_name<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>kebab_stem<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>suffix<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> paths<span class="syntax-punctuation">}</span>
+    destinations <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>plan<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>destination<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> destination <span class="syntax-operator">in</span> destinations<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>destinations<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rename destinations collide</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> plan
+
+
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    plan_renames<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A B.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a-b.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">collide</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">the collision should be detected before renaming</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Regular expressions are appropriate for these deliberately small filename/tag grammars; they are not a replacement for a standards-aware HTML parser.</p></div>
       </section>
 
@@ -944,60 +992,60 @@ else:
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-07-solutions-strings-regex-pathlib">Day 07 — Solutions: Strings, Regex, Pathlib<a class="heading-anchor" href="#solution-2--cell-1--day-07-solutions-strings-regex-pathlib" aria-label="Link to this section">#</a></h3>
 <p>Runnable snippets for email extraction and kebab-case renaming.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Exercise 1 — Extract all emails (unique, lowercased)</span>
-<span>import re</span>
-<span>from typing import Iterable, Set</span>
-<span> </span>
-<span>EMAIL = re.compile(r&#x27;[\w.%-]+@[\w.-]+\.[A-Za-z]{2,}&#x27;)</span>
-<span> </span>
-<span>def extract_emails(lines: Iterable[str]) -&gt; Set[str]:</span>
-<span>    found: set[str] = set()</span>
-<span>    for line in lines:</span>
-<span>        for m in EMAIL.findall(line):</span>
-<span>            found.add(m.lower())</span>
-<span>    return found</span>
-<span> </span>
-<span>text = &#x27;&#x27;&#x27;</span>
-<span>Contact alice@example.com, Bob@Example.com.</span>
-<span>Backup: team@sub.domain.org</span>
-<span>&#x27;&#x27;&#x27;</span>
-<span>extract_emails(text.splitlines())</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 1 — Extract all emails (unique, lowercased)</span></span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Set</span>
+<span class="source-line"></span>
+<span class="source-line">EMAIL <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">[</span><span class="syntax-string">\</span><span class="syntax-string">w.</span><span class="syntax-string">%</span><span class="syntax-string">-]+@[</span><span class="syntax-string">\</span><span class="syntax-string">w.-]+</span><span class="syntax-string">\</span><span class="syntax-string">.[A-Za-z]</span><span class="syntax-string">{</span><span class="syntax-string">2,}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">extract_emails</span><span class="syntax-punctuation">(</span>lines<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Set<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    found<span class="syntax-punctuation">:</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> line <span class="syntax-operator">in</span> lines<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> m <span class="syntax-operator">in</span> EMAIL<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span>line<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            found<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>m<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> found</span>
+<span class="source-line"></span>
+<span class="source-line">text <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;&#x27;</span></span>
+<span class="source-line"><span class="syntax-string">Contact alice@example.com, Bob@Example.com.</span></span>
+<span class="source-line"><span class="syntax-string">Backup: team@sub.domain.org</span></span>
+<span class="source-line"><span class="syntax-string">&#x27;&#x27;&#x27;</span></span>
+<span class="source-line">extract_emails<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Exercise 2 — Rename files to kebab-case (dry run)</span>
-<span>from pathlib import Path</span>
-<span>import re</span>
-<span> </span>
-<span>_slug_chars = re.compile(r&#x27;[^a-z0-9-]+&#x27;)</span>
-<span>_multi_dash = re.compile(r&#x27;-{2,}&#x27;)</span>
-<span> </span>
-<span>def to_kebab(stem: str) -&gt; str:</span>
-<span>    s = stem.lower().replace(&#x27;_&#x27;,&#x27;-&#x27;).replace(&#x27; &#x27;,&#x27;-&#x27;)</span>
-<span>    s = _slug_chars.sub(&#x27;-&#x27;, s)</span>
-<span>    s = _multi_dash.sub(&#x27;-&#x27;, s).strip(&#x27;-&#x27;)</span>
-<span>    return s or &#x27;file&#x27;</span>
-<span> </span>
-<span>def rename_dir_to_kebab(dirpath: Path, *, dry_run: bool = True) -&gt; list[tuple[Path, Path]]:</span>
-<span>    changes: list[tuple[Path, Path]] = []</span>
-<span>    for p in dirpath.iterdir():</span>
-<span>        if not p.is_file():</span>
-<span>            continue</span>
-<span>        new_stem = to_kebab(p.stem)</span>
-<span>        target = p.with_name(new_stem + p.suffix.lower())</span>
-<span>        if target == p:</span>
-<span>            continue</span>
-<span>        if target.exists():</span>
-<span>            print(f&#x27;skip (exists): {target}&#x27;)</span>
-<span>            continue</span>
-<span>        changes.append((p, target))</span>
-<span>        if dry_run:</span>
-<span>            print(f&#x27;DRY-RUN: {p.name} -&gt; {target.name}&#x27;)</span>
-<span>        else:</span>
-<span>            p.rename(target)</span>
-<span>            print(f&#x27;renamed: {p.name} -&gt; {target.name}&#x27;)</span>
-<span>    return changes</span>
-<span> </span>
-<span># Example (dry-run):</span>
-<span># rename_dir_to_kebab(Path(&#x27;reports&#x27;), dry_run=True)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 2 — Rename files to kebab-case (dry run)</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"></span>
+<span class="source-line">_slug_chars <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">[^a-z0-9-]+</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">_multi_dash <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">{</span><span class="syntax-string">2,}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">to_kebab</span><span class="syntax-punctuation">(</span>stem<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> stem<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">_</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>replace<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string"> </span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> _slug_chars<span class="syntax-operator">.</span>sub<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    s <span class="syntax-operator">=</span> _multi_dash<span class="syntax-operator">.</span>sub<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">-</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> s <span class="syntax-operator">or</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">file</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">rename_dir_to_kebab</span><span class="syntax-punctuation">(</span>dirpath<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> dry_run<span class="syntax-punctuation">:</span> <span class="syntax-builtin">bool</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    changes<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> dirpath<span class="syntax-operator">.</span>iterdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> p<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">continue</span></span>
+<span class="source-line">        new_stem <span class="syntax-operator">=</span> to_kebab<span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        target <span class="syntax-operator">=</span> p<span class="syntax-operator">.</span>with_name<span class="syntax-punctuation">(</span>new_stem <span class="syntax-operator">+</span> p<span class="syntax-operator">.</span>suffix<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> target <span class="syntax-operator">==</span> p<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">continue</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> target<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">skip (exists): </span><span class="syntax-string">{</span>target<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">continue</span></span>
+<span class="source-line">        changes<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> dry_run<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">DRY-RUN: </span><span class="syntax-string">{</span>p<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string"> -&gt; </span><span class="syntax-string">{</span>target<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            p<span class="syntax-operator">.</span>rename<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">renamed: </span><span class="syntax-string">{</span>p<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string"> -&gt; </span><span class="syntax-string">{</span>target<span class="syntax-operator">.</span>name<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> changes</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Example (dry-run):</span></span>
+<span class="source-line"><span class="syntax-comment"># rename_dir_to_kebab(Path(&#x27;reports&#x27;), dry_run=True)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1029,56 +1077,56 @@ else:
 <h5 id="solution-2--cell-4--practices-1-2-escapes-and-groups">Practices 1–2 — Escapes and groups<a class="heading-anchor" href="#solution-2--cell-4--practices-1-2-escapes-and-groups" aria-label="Link to this section">#</a></h5>
 <p>An ordinary <code>&quot;\n&quot;</code> is one newline character. The raw <code>r&quot;\n&quot;</code> is two characters: a backslash and <code>n</code>. <code>group(0)</code> is the full match; a named group returns only its captured portion.</p>
 <h5 id="solution-2--cell-4--practices-3-5-parse-and-plan-before-mutating-paths">Practices 3–5 — Parse and plan before mutating paths<a class="heading-anchor" href="#solution-2--cell-4--practices-3-5-parse-and-plan-before-mutating-paths" aria-label="Link to this section">#</a></h5></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from __future__ import annotations</span>
-<span> </span>
-<span>import re</span>
-<span>from pathlib import Path</span>
-<span> </span>
-<span>REPORT_PATTERN = re.compile(</span>
-<span>    r&quot;sales_(?P&lt;date&gt;\d{4}-\d{2}-\d{2})_(?P&lt;region&gt;[a-z]+)\.csv&quot;</span>
-<span>)</span>
-<span> </span>
-<span> </span>
-<span>def parse_report_name(path: Path) -&gt; tuple[str, str]:</span>
-<span>    &quot;&quot;&quot;Return (date, region) from one complete, valid report filename.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    match = REPORT_PATTERN.fullmatch(path.name)</span>
-<span>    if match is None:</span>
-<span>        raise ValueError(f&quot;unexpected report name: {path.name!r}&quot;)</span>
-<span>    return match.group(&quot;date&quot;), match.group(&quot;region&quot;)</span>
-<span> </span>
-<span> </span>
-<span>assert parse_report_name(Path(&quot;sales_2025-07-01_west.csv&quot;)) == (</span>
-<span>    &quot;2025-07-01&quot;, &quot;west&quot;</span>
-<span>)</span>
-<span> </span>
-<span>bounded_tags = re.findall(r&quot;&lt;[^&lt;&gt;]*&gt;&quot;, &quot;&lt;b&gt;one&lt;/b&gt;&lt;i&gt;two&lt;/i&gt;&quot;)</span>
-<span>assert bounded_tags == [&quot;&lt;b&gt;&quot;, &quot;&lt;/b&gt;&quot;, &quot;&lt;i&gt;&quot;, &quot;&lt;/i&gt;&quot;]</span>
-<span> </span>
-<span> </span>
-<span>def kebab_stem(stem: str) -&gt; str:</span>
-<span>    words = re.findall(r&quot;[A-Za-z0-9]+&quot;, stem.casefold())</span>
-<span>    return &quot;-&quot;.join(words)</span>
-<span> </span>
-<span> </span>
-<span>def plan_renames(paths: list[Path]) -&gt; dict[Path, Path]:</span>
-<span>    &quot;&quot;&quot;Return a collision-free plan without touching the filesystem.&quot;&quot;&quot;</span>
-<span> </span>
-<span>    plan = {path: path.with_name(f&quot;{kebab_stem(path.stem)}{path.suffix.lower()}&quot;)</span>
-<span>            for path in paths}</span>
-<span>    destinations = list(plan.values())</span>
-<span>    if len({destination.name.casefold() for destination in destinations}) != len(destinations):</span>
-<span>        raise ValueError(&quot;rename destinations collide&quot;)</span>
-<span>    return plan</span>
-<span> </span>
-<span> </span>
-<span>try:</span>
-<span>    plan_renames([Path(&quot;A B.txt&quot;), Path(&quot;a-b.txt&quot;)])</span>
-<span>except ValueError as error:</span>
-<span>    assert &quot;collide&quot; in str(error)</span>
-<span>else:</span>
-<span>    raise AssertionError(&quot;the collision should be detected before renaming&quot;)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> re</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"></span>
+<span class="source-line">REPORT_PATTERN <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>compile<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_(?P&lt;date&gt;</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{4}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">-</span><span class="syntax-string">\</span><span class="syntax-string">d</span><span class="syntax-string">{2}</span><span class="syntax-string">)_(?P&lt;region&gt;[a-z]+)</span><span class="syntax-string">\</span><span class="syntax-string">.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_report_name</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return (date, region) from one complete, valid report filename.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    match <span class="syntax-operator">=</span> REPORT_PATTERN<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> match <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">unexpected report name: </span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>name<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> parse_report_name<span class="syntax-punctuation">(</span>Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sales_2025-07-01_west.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">2025-07-01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">bounded_tags <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;[^&lt;&gt;]*&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;b&gt;one&lt;/b&gt;&lt;i&gt;two&lt;/i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> bounded_tags <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">&lt;b&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/b&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&lt;/i&gt;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">kebab_stem</span><span class="syntax-punctuation">(</span>stem<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    words <span class="syntax-operator">=</span> re<span class="syntax-operator">.</span>findall<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">[A-Za-z0-9]+</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> stem<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-</span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">plan_renames</span><span class="syntax-punctuation">(</span>paths<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a collision-free plan without touching the filesystem.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    plan <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>path<span class="syntax-punctuation">:</span> path<span class="syntax-operator">.</span>with_name<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>kebab_stem<span class="syntax-punctuation">(</span>path<span class="syntax-operator">.</span>stem<span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">{</span>path<span class="syntax-operator">.</span>suffix<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> paths<span class="syntax-punctuation">}</span></span>
+<span class="source-line">    destinations <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>plan<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>destination<span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>casefold<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> destination <span class="syntax-operator">in</span> destinations<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>destinations<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rename destinations collide</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> plan</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    plan_renames<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A B.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a-b.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">collide</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">the collision should be detected before renaming</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Regular expressions are appropriate for these deliberately small filename/tag grammars; they are not a replacement for a standards-aware HTML parser.</p></article></div>
       </section>

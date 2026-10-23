@@ -24,13 +24,13 @@ The prepared scripts live underfixtures/pretrained. prepare_assets.py requires a
 
 The pinned revision identifies a particular repository state; the local manifest identifies the acquired files and their hashes. The lock identifies resolved dependency artifacts for a platform. The image identifies the executable environment. None of these identities alone establishes that training happened. A run receipt and saved artifact provide that next tier, followed by separate reload and task-quality observations.
 
-The existing recipe record reports13 acquired files and actual10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
+The existing recipe record reports13 acquired files and actual 10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
 
 The evaluation dataset contains one held-out entity label, while the four training records share an assignment-unit extraction task and prompt template. Distinct family labels do not automatically produce independent business domains. The dramatic full-SFT loss drop therefore needs that narrow context. It does not establish that full SFT generally beats LoRA or that either model understands unrelated statistical questions.
 
 The generation probe is particularly informative because it tests a different boundary. It supplies the correct conversion definition as evidence, yet the saved adapter produced a fluent incorrect formula: eligible visits divided by eligible visits. That is a task-quality failure despite successful asset loading, masking, optimization, save and reload. The output also did not establish claim-level citation support. Preserve the failure rather than replacing it with a hypothetical correct answer.
 
-Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared128-token limit are rejected rather than silently losing answers.
+Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared 128-token limit are rejected rather than silently losing answers.
 
 Chat-template prefix equality is another concrete gate. The prompt rendered with a generation marker must be an exact token prefix of the full prompt-plus-completion rendering. This checks the specific template's boundary, not a universal property of all templates. A different model or tokenizer may require a different valid construction. Preserve the actual tokenized example and prefix lengths in the receipt.
 
@@ -60,9 +60,9 @@ Default lesson action: no download
 Optional acquisition: explicit --acknowledge-network flag
 ```
 
-**Expected:** exact40-character revision and Apache-2.0 card note are present.
+**Expected:** exact 40-character revision and Apache-2.0 card note are present.
 
-**Verify:** Compare the computed values or written argument with exact40-character revision and Apache-2.0 card note are present.
+**Verify:** Compare the computed values or written argument with exact 40-character revision and Apache-2.0 card note are present.
 
 ## Exercise 2: Separate acquisition from execution
 
@@ -119,7 +119,7 @@ assert (batch['labels'][active] == batch['input_ids'][active]).all()
 
 ## Exercise 5: Compare full and adapter configuration
 
-The question is: Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and10-step cap.
+The question is: Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and 10-step cap.
 
 The recipe supports a controlled mechanism comparison, not an assertion that a ten-step run produces a useful assistant. Actual memory and time must be measured on the prepared environment.
 
@@ -148,9 +148,9 @@ Separate maintainer recipe: qualified mechanics with an observed generation-qual
 Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.
 ```
 
-**Expected:** pretrained executionunverified; no generated success receipt.
+**Expected:** pretrained execution unverified; no generated success receipt.
 
-**Verify:** Compare the computed values or written argument with pretrained executionunverified; no generated success receipt.
+**Verify:** Compare the computed values or written argument with pretrained execution unverified; no generated success receipt.
 
 ## Review after comparison
 

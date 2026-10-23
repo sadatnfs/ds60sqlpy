@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -381,25 +427,27 @@
 </tbody></table></div>
 <p>Tracking proves what was logged, not that the data were valid or the run can be reproduced. Record dataset identity, code revision, environment lock, and seed alongside model hyperparameters.</p>
 <h4 id="guide--worked-example-one-explicit-local-run">Worked example: one explicit local run<a class="heading-anchor" href="#guide--worked-example-one-explicit-local-run" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-python">import mlflow
-import mlflow.sklearn
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> mlflow
+<span class="syntax-keyword">import</span> mlflow.sklearn
 
-mlflow.set_experiment(&quot;ds60-local-experiment&quot;)
-with mlflow.start_run(run_name=&quot;baseline&quot;) as run:
-    mlflow.log_param(&quot;model&quot;, &quot;LogisticRegression&quot;)
-    mlflow.log_param(&quot;random_state&quot;, 42)
-    mlflow.log_metric(&quot;roc_auc&quot;, 0.91)
-    # After fitting:
-    # mlflow.sklearn.log_model(pipeline, artifact_path=&quot;model&quot;)
-    print(run.info.run_id)</code></pre>
+mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-local-experiment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span>
+    mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">LogisticRegression</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">random_state</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.91</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># After fitting:</span>
+    <span class="syntax-comment"># mlflow.sklearn.log_model(pipeline, artifact_path=&quot;model&quot;)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>run<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id<span class="syntax-punctuation">)</span></code></pre>
 <p>Use actual calculated metrics in the notebook; the literal metric above only shows the logging API. Keep <code>mlruns/</code> as a learner-local ignored artifact, not a source file to commit.</p>
 <h4 id="guide--view-the-local-ui">View the local UI<a class="heading-anchor" href="#guide--view-the-local-ui" aria-label="Link to this section">#</a></h4>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/mlflow ui --backend-store-uri mlruns</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/mlflow ui --backend-store-uri mlruns</code></pre>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\mlflow.exe ui --backend-store-uri mlruns</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>mlflow<span class="syntax-punctuation">.</span>exe ui <span class="syntax-punctuation">-</span>-backend-store-uri mlruns</code></pre>
 <p>Open <code>http://127.0.0.1:5000</code>, and stop the process with Ctrl+C when finished. The server binds locally and the lesson works offline.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 53 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
 <li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
@@ -407,9 +455,9 @@ with mlflow.start_run(run_name=&quot;baseline&quot;) as run:
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept deep dive — MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
@@ -424,44 +472,44 @@ with mlflow.start_run(run_name=&quot;baseline&quot;) as run:
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-separate-comparable-configuration-from-results">Focused example A — separate comparable configuration from results<a class="heading-anchor" href="#guide--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
-<pre><code class="language-python">run_record = {
-    &quot;params&quot;: {
-        &quot;model&quot;: &quot;logistic_regression&quot;,
-        &quot;C&quot;: 1.0,
-        &quot;split_seed&quot;: 5301,
-        &quot;data_snapshot&quot;: &quot;sha256:example&quot;,
-    },
-    &quot;metrics&quot;: {
-        &quot;validation_roc_auc&quot;: 0.91,
-        &quot;test_roc_auc&quot;: 0.89,
-    },
-    &quot;tags&quot;: {
-        &quot;purpose&quot;: &quot;course-baseline&quot;,
-        &quot;metric_definition&quot;: &quot;roc_auc&quot;,
-    },
-}
-assert &quot;validation_roc_auc&quot; not in run_record[&quot;params&quot;]
-print(run_record)</code></pre>
+<pre class="highlighted-code"><code class="language-python">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">logistic_regression</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">split_seed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5301</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">data_snapshot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sha256:example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">metrics</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">validation_roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.91</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">test_roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.89</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">tags</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">purpose</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course-baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">metric_definition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">validation_roc_auc</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> run_record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>run_record<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Configuration, measured outcomes, and contextual labels are distinct, making search and comparison less ambiguous.</p>
 <p><strong>Assumption to name:</strong> The data snapshot and metric definition are stable enough that two records are actually comparable.</p>
 <h5 id="guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B — create and inspect a fully local temporary run<a class="heading-anchor" href="#guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
-<pre><code class="language-python">from pathlib import Path
-from tempfile import TemporaryDirectory
-import mlflow
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory
+<span class="syntax-keyword">import</span> mlflow
 
-original_uri = mlflow.get_tracking_uri()
-with TemporaryDirectory() as directory:
-    mlflow.set_tracking_uri(Path(directory).as_uri())
-    mlflow.set_experiment(&quot;day53-local-mechanics&quot;)
-    with mlflow.start_run(run_name=&quot;bounded-example&quot;) as active:
-        mlflow.log_param(&quot;alpha&quot;, 0.1)
-        mlflow.log_metric(&quot;validation_score&quot;, 0.8)
-        run_id = active.info.run_id
-    recorded = mlflow.get_run(run_id)
-    print(recorded.info.status, recorded.data.params, recorded.data.metrics)
-    assert recorded.info.status == &quot;FINISHED&quot;
-mlflow.set_tracking_uri(original_uri)</code></pre>
+original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>get_tracking_uri<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span>
+    mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-punctuation">(</span>Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>as_uri<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">day53-local-mechanics</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bounded-example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> active<span class="syntax-punctuation">:</span>
+        mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span>
+        mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">validation_score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">)</span>
+        run_id <span class="syntax-operator">=</span> active<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id
+    recorded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>get_run<span class="syntax-punctuation">(</span>run_id<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>recorded<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>status<span class="syntax-punctuation">,</span> recorded<span class="syntax-operator">.</span>data<span class="syntax-operator">.</span>params<span class="syntax-punctuation">,</span> recorded<span class="syntax-operator">.</span>data<span class="syntax-operator">.</span>metrics<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> recorded<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FINISHED</span><span class="syntax-string">&quot;</span>
+mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-punctuation">(</span>original_uri<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The context manager closes the run as FINISHED, and the parameter/metric are queryable from a local temporary tracking store.</p>
 <p><strong>Assumption to name:</strong> The temporary store proves API mechanics only; it is intentionally deleted and not a durable team record.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
@@ -585,7 +633,7 @@ mlflow.set_tracking_uri(original_uri)</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
-<pre><code class="language-text">Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:
@@ -652,40 +700,40 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Organize experiments and runs.</li>
 <li>Save and load models from MLflow. Note: <code>pip install mlflow</code> (already in requirements.txt). By default this uses a local <code>mlruns</code> folder.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import mlflow</span>
-<span>import mlflow.sklearn</span>
-<span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.model_selection import train_test_split</span>
-<span>from sklearn.preprocessing import StandardScaler</span>
-<span>from sklearn.pipeline import Pipeline</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.metrics import roc_auc_score</span>
-<span>X,y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr,Xte,ytr,yte = train_test_split(X,y, test_size=0.2, random_state=42, stratify=y)</span>
-<span>pipe = Pipeline([(&#x27;sc&#x27;, StandardScaler()), (&#x27;clf&#x27;, LogisticRegression(max_iter=1000))])</span>
-<span>mlflow.set_experiment(&#x27;ds-60day-bc-experiment&#x27;)</span>
-<span>with mlflow.start_run(run_name=&#x27;baseline-logreg&#x27;):</span>
-<span>    mlflow.log_param(&#x27;model&#x27;, &#x27;LogisticRegression&#x27;)</span>
-<span>    mlflow.log_param(&#x27;scale&#x27;, True)</span>
-<span>    pipe.fit(Xtr,ytr)</span>
-<span>    yprob = pipe.predict_proba(Xte)[:,1]</span>
-<span>    auc = roc_auc_score(yte, yprob)</span>
-<span>    mlflow.log_metric(&#x27;roc_auc&#x27;, auc)</span>
-<span>    mlflow.sklearn.log_model(pipe, artifact_path=&#x27;model&#x27;)</span>
-<span>    print(&#x27;ROC AUC:&#x27;, auc)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> mlflow</span>
+<span class="source-line"><span class="syntax-keyword">import</span> mlflow.sklearn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> roc_auc_score</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span> test_size<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line">pipe <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">clf</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ds-60day-bc-experiment</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">baseline-logreg</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">LogisticRegression</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">scale</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    pipe<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    yprob <span class="syntax-operator">=</span> pipe<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    auc <span class="syntax-operator">=</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> yprob<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> auc<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>log_model<span class="syntax-punctuation">(</span>pipe<span class="syntax-punctuation">,</span> artifact_path<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ROC AUC:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> auc<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--viewing-results">Viewing results<a class="heading-anchor" href="#learner--cell-3--viewing-results" aria-label="Link to this section">#</a></h4>
 <p>Run the MLflow UI in a terminal:</p>
-<pre><code class="language-bash">mlflow ui --backend-store-uri mlruns</code></pre>
+<pre class="highlighted-code"><code class="language-bash">mlflow ui --backend-store-uri mlruns</code></pre>
 <p>Then open http://127.0.0.1:5000 to view experiments.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-4--loading-a-model-from-mlflow">Loading a model from MLflow<a class="heading-anchor" href="#learner--cell-4--loading-a-model-from-mlflow" aria-label="Link to this section">#</a></h4>
 <p>You can load the saved model artifact and use it for inference.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Example: load the last logged model (adjust run_id/artifact URI as needed)</span>
-<span># model_uri = &#x27;runs:/&lt;run_id&gt;/model&#x27;</span>
-<span># loaded = mlflow.sklearn.load_model(model_uri)</span>
-<span># loaded.predict(Xte[:5])</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Example: load the last logged model (adjust run_id/artifact URI as needed)</span></span>
+<span class="source-line"><span class="syntax-comment"># model_uri = &#x27;runs:/&lt;run_id&gt;/model&#x27;</span></span>
+<span class="source-line"><span class="syntax-comment"># loaded = mlflow.sklearn.load_model(model_uri)</span></span>
+<span class="source-line"><span class="syntax-comment"># loaded.predict(Xte[:5])</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-6--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-6--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -703,46 +751,46 @@ merely ran is not evidence of mastery.</code></pre></div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-a-separate-comparable-configuration-from-results">Focused example A — separate comparable configuration from results<a class="heading-anchor" href="#learner--cell-7--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The data snapshot and metric definition are stable enough that two records are actually comparable.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>run_record = {</span>
-<span>    &quot;params&quot;: {</span>
-<span>        &quot;model&quot;: &quot;logistic_regression&quot;,</span>
-<span>        &quot;C&quot;: 1.0,</span>
-<span>        &quot;split_seed&quot;: 5301,</span>
-<span>        &quot;data_snapshot&quot;: &quot;sha256:example&quot;,</span>
-<span>    },</span>
-<span>    &quot;metrics&quot;: {</span>
-<span>        &quot;validation_roc_auc&quot;: 0.91,</span>
-<span>        &quot;test_roc_auc&quot;: 0.89,</span>
-<span>    },</span>
-<span>    &quot;tags&quot;: {</span>
-<span>        &quot;purpose&quot;: &quot;course-baseline&quot;,</span>
-<span>        &quot;metric_definition&quot;: &quot;roc_auc&quot;,</span>
-<span>    },</span>
-<span>}</span>
-<span>assert &quot;validation_roc_auc&quot; not in run_record[&quot;params&quot;]</span>
-<span>print(run_record)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">logistic_regression</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">split_seed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5301</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">data_snapshot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sha256:example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">metrics</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">validation_roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.91</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">test_roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.89</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">tags</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">purpose</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course-baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">metric_definition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">validation_roc_auc</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> run_record<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>run_record<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Configuration, measured outcomes, and contextual labels are distinct, making search and comparison less ambiguous.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B — create and inspect a fully local temporary run<a class="heading-anchor" href="#learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The temporary store proves API mechanics only; it is intentionally deleted and not a durable team record.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
-<span>from tempfile import TemporaryDirectory</span>
-<span>import mlflow</span>
-<span> </span>
-<span>original_uri = mlflow.get_tracking_uri()</span>
-<span>with TemporaryDirectory() as directory:</span>
-<span>    mlflow.set_tracking_uri(Path(directory).as_uri())</span>
-<span>    mlflow.set_experiment(&quot;day53-local-mechanics&quot;)</span>
-<span>    with mlflow.start_run(run_name=&quot;bounded-example&quot;) as active:</span>
-<span>        mlflow.log_param(&quot;alpha&quot;, 0.1)</span>
-<span>        mlflow.log_metric(&quot;validation_score&quot;, 0.8)</span>
-<span>        run_id = active.info.run_id</span>
-<span>    recorded = mlflow.get_run(run_id)</span>
-<span>    print(recorded.info.status, recorded.data.params, recorded.data.metrics)</span>
-<span>    assert recorded.info.status == &quot;FINISHED&quot;</span>
-<span>mlflow.set_tracking_uri(original_uri)</span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory</span>
+<span class="source-line"><span class="syntax-keyword">import</span> mlflow</span>
+<span class="source-line"></span>
+<span class="source-line">original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>get_tracking_uri<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> directory<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-punctuation">(</span>Path<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>as_uri<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">day53-local-mechanics</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">bounded-example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> active<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        mlflow<span class="syntax-operator">.</span>log_param<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">validation_score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        run_id <span class="syntax-operator">=</span> active<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id</span>
+<span class="source-line">    recorded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>get_run<span class="syntax-punctuation">(</span>run_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>recorded<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>status<span class="syntax-punctuation">,</span> recorded<span class="syntax-operator">.</span>data<span class="syntax-operator">.</span>params<span class="syntax-punctuation">,</span> recorded<span class="syntax-operator">.</span>data<span class="syntax-operator">.</span>metrics<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> recorded<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>status <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FINISHED</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-punctuation">(</span>original_uri<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><p><strong>Expected observation:</strong> The context manager closes the run as FINISHED, and the parameter/metric are queryable from a local temporary tracking store.</p>
 <h5 id="learner--cell-12--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-12--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
@@ -817,19 +865,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Keep the official solution closed until you have attempted each task.</span>
-<span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
-<span> </span>
-<span># Practice 4 — Failure-state handling</span>
-<span> </span>
-<span> </span>
-<span># Practice 5 — Provenance manifest</span>
-<span> </span>
-<span> </span>
-<span># Practice 6 — Reload and signature check</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Failure-state handling</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Provenance manifest</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Reload and signature check</span></span>
+<span class="source-line"></span></code></pre>
 </article></div>
       </section>
 
@@ -873,31 +921,31 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <p>Setup</p>
-<pre><code class="language-python">import mlflow, mlflow.sklearn
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
-import numpy as np
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> mlflow<span class="syntax-operator">,</span> mlflow.sklearn
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split<span class="syntax-punctuation">,</span> GridSearchCV
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> roc_auc_score
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
-X, y = load_breast_cancer(return_X_y=True)
-Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, stratify=y)
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> test_size<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">)</span>
 
-mlflow.set_experiment(&#x27;rf-breast-cancer&#x27;)</code></pre>
+mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf-breast-cancer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Worked reference for Exercise 1 — Grid search with autologging</p>
-<pre><code class="language-python">mlflow.sklearn.autolog()
+<pre class="highlighted-code"><code class="language-python">mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>autolog<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-param_grid = {&#x27;n_estimators&#x27;:[100,300], &#x27;max_depth&#x27;:[None,5,10]}
-rf = RandomForestClassifier(random_state=0)
-cv = GridSearchCV(rf, param_grid=param_grid, scoring=&#x27;roc_auc&#x27;, cv=3, n_jobs=1, return_train_score=True)
+param_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">n_estimators</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">300</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">max_depth</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+cv <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> param_grid<span class="syntax-operator">=</span>param_grid<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> return_train_score<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
-with mlflow.start_run(run_name=&#x27;rf_grid&#x27;):
-    cv.fit(Xtr, ytr)
-    best_auc = cv.best_score_
-    mlflow.log_metric(&#x27;cv_auc_mean&#x27;, best_auc)
-    print(&#x27;Best CV AUC:&#x27;, best_auc)
+<span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf_grid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    cv<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+    best_auc <span class="syntax-operator">=</span> cv<span class="syntax-operator">.</span>best_score_
+    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cv_auc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> best_auc<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Best CV AUC:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> best_auc<span class="syntax-punctuation">)</span>
 
-print(&#x27;Best params:&#x27;, cv.best_params_)</code></pre>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Best params:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>autolog captures params, metrics, and model artifacts automatically</li>
@@ -905,19 +953,19 @@ print(&#x27;Best params:&#x27;, cv.best_params_)</code></pre>
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Log and load best model</p>
-<pre><code class="language-python">with mlflow.start_run(run_name=&#x27;rf_best_model&#x27;) as run:
-    best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
-    proba = best.predict_proba(Xte)[:,1]
-    test_auc = roc_auc_score(yte, proba)
-    mlflow.log_metric(&#x27;test_auc&#x27;, test_auc)
-    mlflow.sklearn.log_model(best, &#x27;model&#x27;)
-    run_id = run.info.run_id
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf_best_model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span>
+    best <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+    proba <span class="syntax-operator">=</span> best<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    test_auc <span class="syntax-operator">=</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span>
+    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> test_auc<span class="syntax-punctuation">)</span>
+    mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>log_model<span class="syntax-punctuation">(</span>best<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    run_id <span class="syntax-operator">=</span> run<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id
 
-print(&#x27;Logged under run:&#x27;, run_id)
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Logged under run:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> run_id<span class="syntax-punctuation">)</span>
 
-# Load model later
-loaded = mlflow.sklearn.load_model(f&#x27;runs:/{run_id}/model&#x27;)
-print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]))</code></pre>
+<span class="syntax-comment"># Load model later</span>
+loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>load_model<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">runs:/</span><span class="syntax-string">{</span>run_id<span class="syntax-string">}</span><span class="syntax-string">/model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Loaded AUC:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> loaded<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Notes</p>
 <ul>
 <li>Track the run_id to retrieve artifacts</li>
@@ -1028,34 +1076,34 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 <hr>
 <p>Setup</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import mlflow, mlflow.sklearn</span>
-<span>from sklearn.datasets import load_breast_cancer</span>
-<span>from sklearn.model_selection import train_test_split, GridSearchCV</span>
-<span>from sklearn.ensemble import RandomForestClassifier</span>
-<span>from sklearn.metrics import roc_auc_score</span>
-<span>import numpy as np</span>
-<span> </span>
-<span>X, y = load_breast_cancer(return_X_y=True)</span>
-<span>Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, stratify=y)</span>
-<span> </span>
-<span>mlflow.set_experiment(&#x27;rf-breast-cancer&#x27;)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> mlflow<span class="syntax-operator">,</span> mlflow.sklearn</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split<span class="syntax-punctuation">,</span> GridSearchCV</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> roc_auc_score</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> test_size<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf-breast-cancer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Worked reference for Exercise 1 — Grid search with autologging</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>mlflow.sklearn.autolog()</span>
-<span> </span>
-<span>param_grid = {&#x27;n_estimators&#x27;:[100,300], &#x27;max_depth&#x27;:[None,5,10]}</span>
-<span>rf = RandomForestClassifier(random_state=0)</span>
-<span>cv = GridSearchCV(rf, param_grid=param_grid, scoring=&#x27;roc_auc&#x27;, cv=3, n_jobs=1, return_train_score=True)</span>
-<span> </span>
-<span>with mlflow.start_run(run_name=&#x27;rf_grid&#x27;):</span>
-<span>    cv.fit(Xtr, ytr)</span>
-<span>    best_auc = cv.best_score_</span>
-<span>    mlflow.log_metric(&#x27;cv_auc_mean&#x27;, best_auc)</span>
-<span>    print(&#x27;Best CV AUC:&#x27;, best_auc)</span>
-<span> </span>
-<span>print(&#x27;Best params:&#x27;, cv.best_params_)</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>autolog<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">param_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">n_estimators</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">300</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">max_depth</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">cv <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> param_grid<span class="syntax-operator">=</span>param_grid<span class="syntax-punctuation">,</span> scoring<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">roc_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> cv<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> return_train_score<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf_grid</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    cv<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    best_auc <span class="syntax-operator">=</span> cv<span class="syntax-operator">.</span>best_score_</span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cv_auc_mean</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> best_auc<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Best CV AUC:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> best_auc<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Best params:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Explanation</p>
 <ul>
@@ -1064,20 +1112,20 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 </ul>
 <hr>
 <p>Worked reference for Exercise 2 — Log and load best model</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>with mlflow.start_run(run_name=&#x27;rf_best_model&#x27;) as run:</span>
-<span>    best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)</span>
-<span>    proba = best.predict_proba(Xte)[:,1]</span>
-<span>    test_auc = roc_auc_score(yte, proba)</span>
-<span>    mlflow.log_metric(&#x27;test_auc&#x27;, test_auc)</span>
-<span>    mlflow.sklearn.log_model(best, &#x27;model&#x27;)</span>
-<span>    run_id = run.info.run_id</span>
-<span> </span>
-<span>print(&#x27;Logged under run:&#x27;, run_id)</span>
-<span> </span>
-<span># Load model later</span>
-<span>loaded = mlflow.sklearn.load_model(f&#x27;runs:/{run_id}/model&#x27;)</span>
-<span>print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]))</span>
-<span> </span></code></pre>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf_best_model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    best <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    proba <span class="syntax-operator">=</span> best<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    test_auc <span class="syntax-operator">=</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>log_metric<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_auc</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> test_auc<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>log_model<span class="syntax-punctuation">(</span>best<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    run_id <span class="syntax-operator">=</span> run<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Logged under run:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> run_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Load model later</span></span>
+<span class="source-line">loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>load_model<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">runs:/</span><span class="syntax-string">{</span>run_id<span class="syntax-string">}</span><span class="syntax-string">/model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Loaded AUC:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> roc_auc_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> loaded<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Notes</p>
 <ul>

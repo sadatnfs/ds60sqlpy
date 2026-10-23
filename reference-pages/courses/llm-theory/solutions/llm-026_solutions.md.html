@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,43 +171,43 @@
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Create frozen torch tensors and fit or derive a small linear probe separately from the encoder. Never backpropagate the probe objective into the frozen representation. Compare predicted labels on held-out identities, not the same rows used to choose the threshold. Shuffling labels changes the association while retaining the feature distribution. Record counts and split units beside both scores.</p>
 <h3 id="exercise-1-construct-transparent-representations">Exercise 1: Construct transparent representations<a class="heading-anchor" href="#exercise-1-construct-transparent-representations" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels0,0,1,1.</p>
+<p>The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1.</p>
 <p>The label is deliberately encoded in a coordinate. This supplies a clear positive control for the probing procedure.</p>
-<pre><code class="language-python">features=torch.tensor([[-2.,0.],[-1.,1.],[1.,0.],[2.,1.]]); labels=torch.tensor([0,0,1,1]); prediction=(features[:,0]&gt;0).long()
-assert torch.equal(prediction,labels)</code></pre>
+<pre class="highlighted-code"><code class="language-python">features<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> prediction<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>long<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>prediction<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> first-coordinate sign predicts all four labels.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with first-coordinate sign predicts all four labels.</p>
 <h3 id="exercise-2-use-a-held-out-fixture">Exercise 2: Use a held-out fixture<a class="heading-anchor" href="#exercise-2-use-a-held-out-fixture" aria-label="Link to this section">#</a></h3>
 <p>The question is: Evaluate the same fixed threshold on new representations[-3,1],[3,0].</p>
 <p>The threshold is fixed before opening these two rows. The result has only two held-out units and should be reported with that count.</p>
-<pre><code class="language-python">held=torch.tensor([[-3.,1.],[3.,0.]]); truth=torch.tensor([0,1]); got=(held[:,0]&gt;0).long()
-assert torch.equal(got,truth)</code></pre>
+<pre class="highlighted-code"><code class="language-python">held<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> truth<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> got<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>held<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>long<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>got<span class="syntax-punctuation">,</span>truth<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> two correct held-out predictions.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with two correct held-out predictions.</p>
 <h3 id="exercise-3-add-shuffled-label-control">Exercise 3: Add shuffled-label control<a class="heading-anchor" href="#exercise-3-add-shuffled-label-control" aria-label="Link to this section">#</a></h3>
-<p>The question is: Compare predictions against shuffled labels0,1,0,1.</p>
+<p>The question is: Compare predictions against shuffled labels 0,1,0,1.</p>
 <p>The control breaks the specific association while preserving label balance. A high control score would suggest the probe or split can exploit another shortcut.</p>
-<pre><code class="language-python">shuffled=torch.tensor([0,1,0,1]); assert int((prediction==shuffled).sum())==2</code></pre>
+<pre class="highlighted-code"><code class="language-python">shuffled<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>prediction<span class="syntax-operator">==</span>shuffled<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> 2 of4 correct.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 2 of4 correct.</p>
 <h3 id="exercise-4-protect-frozen-state">Exercise 4: Protect frozen state<a class="heading-anchor" href="#exercise-4-protect-frozen-state" aria-label="Link to this section">#</a></h3>
 <p>The question is: Clone features, compute a probe loss using a separate trainable weight, and inspect gradients.</p>
 <p>A readout investigation should not alter the representation under study. Fine-tuning the encoder answers a different question about learnability.</p>
-<pre><code class="language-python">before=features.clone(); weight=nn.Parameter(torch.tensor([[1.],[0.]])); logits=(features@weight).ravel(); loss=F.binary_cross_entropy_with_logits(logits,labels.float()); loss.backward()
-assert weight.grad is not None and features.grad is None and torch.equal(features,before)</code></pre>
+<pre class="highlighted-code"><code class="language-python">before<span class="syntax-operator">=</span>features<span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> weight<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> logits<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>features<span class="syntax-decorator">@weight</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>binary_cross_entropy_with_logits<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span>labels<span class="syntax-operator">.</span>float<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> weight<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> features<span class="syntax-operator">.</span>grad <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">,</span>before<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> probe gradient exists; features have no gradient.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with probe gradient exists; features have no gradient.</p>
 <h3 id="exercise-5-expose-family-leakage">Exercise 5: Expose family leakage<a class="heading-anchor" href="#exercise-5-expose-family-leakage" aria-label="Link to this section">#</a></h3>
-<p>The question is: Mark rows0 and1 as versions of familyA and place them on opposite sides of a split.</p>
+<p>The question is: Mark rows0 and 1 as versions of familyA and place them on opposite sides of a split.</p>
 <p>A probe can memorize family-specific features. Row-level disjointness does not prevent related documents from leaking across evaluation.</p>
-<pre><code class="language-python">families=[&#x27;A&#x27;,&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;]; assert {families[0]} &amp; {families[1]}=={&#x27;A&#x27;}</code></pre>
+<pre class="highlighted-code"><code class="language-python">families<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">C</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span>families<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">{</span>families<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> familyA crosses partitions.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with familyA crosses partitions.</p>
 <h3 id="exercise-6-bound-the-interpretation">Exercise 6: Bound the interpretation<a class="heading-anchor" href="#exercise-6-bound-the-interpretation" aria-label="Link to this section">#</a></h3>
 <p>The question is: Write a result with heldout_count2,control_accuracy.5 and causal_use_establishedFalse.</p>
 <p>Even perfect decoding does not show that the original system consulted that coordinate. The interpretation must match what the probe actually measured.</p>
-<pre><code class="language-python">report={&#x27;heldout_count&#x27;:2,&#x27;control_accuracy&#x27;:.5,&#x27;decodable&#x27;:True,&#x27;causal_use_established&#x27;:False}
-assert report[&#x27;decodable&#x27;] and not report[&#x27;causal_use_established&#x27;]</code></pre>
+<pre class="highlighted-code"><code class="language-python">report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">heldout_count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">control_accuracy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">decodable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">causal_use_established</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">decodable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">causal_use_established</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> report distinguishes decodability from causal use.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with report distinguishes decodability from causal use.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

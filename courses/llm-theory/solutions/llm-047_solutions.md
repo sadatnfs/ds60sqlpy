@@ -28,7 +28,7 @@ Inputs have shape(tokens, model_width), router logits(tokens, experts), and expe
 
 The question is: Use experts I, 2I, -I and three token/router rows with selected probabilities \(\frac{3}{4}\) and \(\frac{1}{4}\).
 
-The third token combines a negative expert with a positive expert, so routing can change the function ratherthan merely selecting a faster implementation of the same computation.
+The third token combines a negative expert with a positive expert, so routing can change the function rather than merely selecting a faster implementation of the same computation.
 
 ```python
 x=np.array([[1.,0.],[0.,1.],[1.,1.]])
@@ -82,7 +82,7 @@ np.testing.assert_allclose(coefficient*2*np.dot([.5,.5],[.5,.5]),.01,atol=1e-12,
 
 The question is: Perturb the first logit of the first top-2 mixture row without changing selected experts.
 
-Within a fixedselectedset, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret thislocal derivative as differentiating through everyrouting decision.
+Within a fixedselectedset, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.
 
 ```python
 h=1e-6; plus=logits.copy(); minus=logits.copy(); plus[0,0]+=h; minus[0,0]-=h
@@ -114,7 +114,7 @@ assert active*2*width*hidden==32768
 
 The question is: Reject top-k 0 and capacity 0; check equal router logits choose lower indices deterministically.
 
-Tie andoverflow policies affect reproducibility andwhich tokens receiveexpert computation. They must be explicit beforecomparing modelquality orload statistics.
+Tie and overflow policies affect reproducibility and which tokens receive expert computation. They must be explicit before comparing model quality or load statistics.
 
 ```python
 _,tied,_=mixture(np.ones((1,2)),np.zeros((1,3)),experts,2); assert tied.tolist()==[[0,1]]

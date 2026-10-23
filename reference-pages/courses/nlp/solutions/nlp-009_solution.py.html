@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,59 +161,59 @@
       <h1>Nlp 009 Solution</h1>
       <p class="source-path">Generated from <code>courses/nlp/solutions/nlp-009_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>import numpy as np</span>
-<span>from sklearn.feature_extraction.text import CountVectorizer</span>
-<span>from sklearn.linear_model import LogisticRegression</span>
-<span>from sklearn.pipeline import make_pipeline</span>
-<span> </span>
-<span>TRAIN=[&quot;urgent outage&quot;,&quot;urgent incident&quot;,&quot;outage incident&quot;,&quot;thanks resolved&quot;,&quot;thanks update&quot;,&quot;resolved update&quot;]</span>
-<span>LABELS=np.array([1,1,1,0,0,0])</span>
-<span> </span>
-<span>def fit_classifier(c=1.):</span>
-<span>    if c&lt;=0:raise ValueError(&quot;C must be positive&quot;)</span>
-<span>    model=make_pipeline(CountVectorizer(token_pattern=r&quot;(?u)\b\w+\b&quot;),</span>
-<span>                        LogisticRegression(C=c,solver=&quot;liblinear&quot;,random_state=0,max_iter=500))</span>
-<span>    return model.fit(TRAIN,LABELS)</span>
-<span> </span>
-<span>def sigmoid(score):</span>
-<span>    score=np.asarray(score,dtype=float)</span>
-<span>    return np.exp(-np.logaddexp(0.,-score))</span>
-<span> </span>
-<span>def brier(probability,truth):</span>
-<span>    p=np.asarray(probability,dtype=float);y=np.asarray(truth,dtype=float)</span>
-<span>    if p.shape!=y.shape or p.size==0 or not np.all(np.isfinite(p)):</span>
-<span>        raise ValueError(&quot;equal nonempty finite arrays required&quot;)</span>
-<span>    if np.any((p&lt;0)|(p&gt;1)) or np.any((y!=0)&amp;(y!=1)):</span>
-<span>        raise ValueError(&quot;binary labels and probabilities required&quot;)</span>
-<span>    return float(np.mean((p-y)**2))</span>
-<span> </span>
-<span>def main():</span>
-<span>    x=np.array([2.,1.]);weights=np.array([2.,-1.]);score=x@weights-.5</span>
-<span>    assert score==2.5 and np.isclose(sigmoid(score),.9241418199787566)</span>
-<span>    model=fit_classifier();vectorizer=model[0]</span>
-<span>    heldout=vectorizer.transform([&quot;escalation urgent&quot;])</span>
-<span>    assert &quot;escalation&quot; not in vectorizer.vocabulary_ and heldout.shape[1]==6</span>
-<span>    assert model.predict([&quot;urgent outage&quot;,&quot;thanks resolved&quot;]).tolist()==[1,0]</span>
-<span>    small=fit_classifier(.1)[1].coef_;large=fit_classifier(10.)[1].coef_</span>
-<span>    assert np.linalg.norm(small)&lt;np.linalg.norm(large)</span>
-<span>    p=np.array([.2,.4,.8])</span>
-<span>    assert (p&gt;=.5).tolist()==[False,False,True]</span>
-<span>    assert (p&gt;=.3).tolist()==[False,True,True]</span>
-<span>    truth=[1,0,1,0]</span>
-<span>    assert np.isclose(brier([.9,.9,.1,.1],truth),.41)</span>
-<span>    assert np.isclose(brier([.6,.6,.4,.4],truth),.26)</span>
-<span>    unigram=vectorizer.transform([&quot;urgent&quot;,&quot;not urgent&quot;]).toarray()</span>
-<span>    assert np.array_equal(unigram[0],unigram[1])</span>
-<span>    bigram=CountVectorizer(ngram_range=(1,2)).fit([&quot;urgent&quot;,&quot;not urgent&quot;])</span>
-<span>    assert &quot;not urgent&quot; in bigram.vocabulary_</span>
-<span>    try:brier([1.2],[1])</span>
-<span>    except ValueError:pass</span>
-<span>    else:raise AssertionError(&quot;invalid probability accepted&quot;)</span>
-<span>    print(&quot;nlp-009: logit=2.5; Brier=.41/.26; threshold and negation checks passed&quot;)</span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.feature_extraction.text <span class="syntax-keyword">import</span> CountVectorizer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> make_pipeline</span>
+<span class="source-line"></span>
+<span class="source-line">TRAIN<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">urgent outage</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">urgent incident</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">outage incident</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">thanks resolved</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">thanks update</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">resolved update</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">LABELS<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_classifier</span><span class="syntax-punctuation">(</span>c<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> c<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">C must be positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    model<span class="syntax-operator">=</span>make_pipeline<span class="syntax-punctuation">(</span>CountVectorizer<span class="syntax-punctuation">(</span>token_pattern<span class="syntax-operator">=</span><span class="syntax-string">r</span><span class="syntax-string">&quot;</span><span class="syntax-string">(?u)</span><span class="syntax-string">\</span><span class="syntax-string">b</span><span class="syntax-string">\</span><span class="syntax-string">w+</span><span class="syntax-string">\</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                        LogisticRegression<span class="syntax-punctuation">(</span>C<span class="syntax-operator">=</span>c<span class="syntax-punctuation">,</span>solver<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">liblinear</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> model<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>TRAIN<span class="syntax-punctuation">,</span>LABELS<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">sigmoid</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    score<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>np<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span>score<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">brier</span><span class="syntax-punctuation">(</span>probability<span class="syntax-punctuation">,</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>probability<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>truth<span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>shape<span class="syntax-operator">!=</span>y<span class="syntax-operator">.</span>shape <span class="syntax-operator">or</span> p<span class="syntax-operator">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">equal nonempty finite arrays required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">|</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">&gt;</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">!=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">!=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">binary labels and probabilities required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>weights<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>score<span class="syntax-operator">=</span>x<span class="syntax-decorator">@weights</span><span class="syntax-operator">-</span><span class="syntax-number">.5</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> score<span class="syntax-operator">==</span><span class="syntax-number">2.5</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>sigmoid<span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9241418199787566</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    model<span class="syntax-operator">=</span>fit_classifier<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>vectorizer<span class="syntax-operator">=</span>model<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    heldout<span class="syntax-operator">=</span>vectorizer<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">escalation urgent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">escalation</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> vectorizer<span class="syntax-operator">.</span>vocabulary_ <span class="syntax-operator">and</span> heldout<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">6</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> model<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">urgent outage</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">thanks resolved</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    small<span class="syntax-operator">=</span>fit_classifier<span class="syntax-punctuation">(</span><span class="syntax-number">.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_<span class="syntax-punctuation">;</span>large<span class="syntax-operator">=</span>fit_classifier<span class="syntax-punctuation">(</span><span class="syntax-number">10.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>coef_</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>small<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>large<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>p<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>p<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    truth<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>brier<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.41</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>brier<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.4</span><span class="syntax-punctuation">,</span><span class="syntax-number">.4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>truth<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.26</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    unigram<span class="syntax-operator">=</span>vectorizer<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">urgent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">not urgent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>toarray<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>unigram<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>unigram<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    bigram<span class="syntax-operator">=</span>CountVectorizer<span class="syntax-punctuation">(</span>ngram_range<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">urgent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">not urgent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">not urgent</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> bigram<span class="syntax-operator">.</span>vocabulary_</span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>brier<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span><span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid probability accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nlp-009: logit=2.5; Brier=.41/.26; threshold and negation checks passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

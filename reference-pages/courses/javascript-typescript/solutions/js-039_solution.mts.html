@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,94 +161,94 @@
       <h1>Js 039 Solution</h1>
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-039_solution.mts</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span>import { strict as assert } from &#x27;node:assert&#x27;;</span>
-<span> </span>
-<span>type Base = { readonly id: string; readonly attempt: number };</span>
-<span>type State = Base &amp; ({ readonly kind: &#x27;queued&#x27; } | { readonly kind: &#x27;running&#x27; } | { readonly kind: &#x27;succeeded&#x27;; readonly value: number } | { readonly kind: &#x27;failed&#x27;; readonly reason: string } | { readonly kind: &#x27;cancelled&#x27;; readonly reason: string });</span>
-<span>type Event = { type: &#x27;start&#x27; } | { type: &#x27;complete&#x27;; value: number } | { type: &#x27;fail&#x27;; reason: string } | { type: &#x27;retry&#x27; } | { type: &#x27;cancel&#x27;; reason: string };</span>
-<span>function initial(): State { return { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; }; }</span>
-<span>function assertNever(value: never): never { throw new Error(&#x27;unknown event: &#x27; + JSON.stringify(value)); }</span>
-<span>function transition(state: State, event: Event): State {</span>
-<span>  if (state.kind === &#x27;succeeded&#x27; || state.kind === &#x27;cancelled&#x27;) throw new Error(&#x27;terminal state&#x27;);</span>
-<span>  switch (event.type) {</span>
-<span>    case &#x27;start&#x27;:</span>
-<span>      if (state.kind !== &#x27;queued&#x27;) throw new Error(&#x27;invalid transition to running&#x27;);</span>
-<span>      return { id: state.id, attempt: state.attempt + 1, kind: &#x27;running&#x27; };</span>
-<span>    case &#x27;complete&#x27;:</span>
-<span>      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to succeeded&#x27;);</span>
-<span>      if (!Number.isFinite(event.value)) throw new RangeError(&#x27;finite result required&#x27;);</span>
-<span>      return { ...state, kind: &#x27;succeeded&#x27;, value: event.value };</span>
-<span>    case &#x27;fail&#x27;:</span>
-<span>      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to failed&#x27;);</span>
-<span>      return { ...state, kind: &#x27;failed&#x27;, reason: event.reason };</span>
-<span>    case &#x27;retry&#x27;:</span>
-<span>      if (state.kind !== &#x27;failed&#x27;) throw new Error(&#x27;invalid transition to queued&#x27;);</span>
-<span>      if (state.attempt &gt;= 3) throw new Error(&#x27;retry budget exhausted&#x27;);</span>
-<span>      return { id: state.id, attempt: state.attempt, kind: &#x27;queued&#x27; };</span>
-<span>    case &#x27;cancel&#x27;: return { id: state.id, attempt: state.attempt, kind: &#x27;cancelled&#x27;, reason: event.reason };</span>
-<span>    default: return assertNever(event);</span>
-<span>  }</span>
-<span>}</span>
-<span>function replay(state: State, events: readonly Event[]): State { return events.reduce(transition, state); }</span>
-<span> </span>
-<span>export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {</span>
-<span>  // Exercise 1: Complete one valid job lifecycle</span>
-<span>  {</span>
-<span>    const started = transition(initial(), { type: &#x27;start&#x27; });</span>
-<span>    const completed = transition(started, { type: &#x27;complete&#x27;, value: 7 });</span>
-<span>    assert.deepEqual(completed, { id: &#x27;A&#x27;, attempt: 1, kind: &#x27;succeeded&#x27;, value: 7 });</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 2: Reject a result arriving before start</span>
-<span>  {</span>
-<span>    const queued = initial();</span>
-<span>    assert.throws(() =&gt; transition(queued, { type: &#x27;complete&#x27;, value: 7 }), /invalid transition/u);</span>
-<span>    assert.deepEqual(queued, { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; });</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 3: Enforce the retry budget</span>
-<span>  {</span>
-<span>    let state: State = initial();</span>
-<span>    for (let attempt = 1; attempt &lt;= 3; attempt += 1) {</span>
-<span>      state = transition(state, { type: &#x27;start&#x27; });</span>
-<span>      state = transition(state, { type: &#x27;fail&#x27;, reason: &#x27;temporary&#x27; });</span>
-<span>      if (attempt &lt; 3) state = transition(state, { type: &#x27;retry&#x27; });</span>
-<span>    }</span>
-<span>    assert.equal(state.attempt, 3);</span>
-<span>    assert.throws(() =&gt; transition(state, { type: &#x27;retry&#x27; }), /retry budget/u);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 4: Keep cancellation terminal</span>
-<span>  {</span>
-<span>    const cancelled = transition(transition(initial(), { type: &#x27;start&#x27; }), { type: &#x27;cancel&#x27;, reason: &#x27;user request&#x27; });</span>
-<span>    assert.equal(cancelled.kind, &#x27;cancelled&#x27;);</span>
-<span>    assert.throws(() =&gt; transition(cancelled, { type: &#x27;complete&#x27;, value: 2 }), /terminal/u);</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 5: Replay deterministically from the same history</span>
-<span>  {</span>
-<span>    const events: Event[] = [{ type: &#x27;start&#x27; }, { type: &#x27;fail&#x27;, reason: &#x27;retryable&#x27; }, { type: &#x27;retry&#x27; }, { type: &#x27;start&#x27; }, { type: &#x27;complete&#x27;, value: 3 }];</span>
-<span>    const first = replay(initial(), events);</span>
-<span>    const second = replay(initial(), events);</span>
-<span>    assert.deepEqual(first, second);</span>
-<span>    assert.deepEqual(first, { id: &#x27;A&#x27;, attempt: 2, kind: &#x27;succeeded&#x27;, value: 3 });</span>
-<span>  }</span>
-<span> </span>
-<span>  // Exercise 6: Preserve input state and validate success values</span>
-<span>  {</span>
-<span>    const queued = initial();</span>
-<span>    const before = structuredClone(queued);</span>
-<span>    const running = transition(queued, { type: &#x27;start&#x27; });</span>
-<span>    assert.deepEqual(queued, before);</span>
-<span>    assert.notEqual(running, queued);</span>
-<span>    assert.throws(() =&gt; transition(running, { type: &#x27;complete&#x27;, value: NaN }), RangeError);</span>
-<span>  }</span>
-<span> </span>
-<span>  return { checks: 6, status: &quot;passed&quot; };</span>
-<span>}</span>
-<span> </span>
-<span>console.log(JSON.stringify(await verify()));</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">type</span> Base <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">readonly</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">type</span> State <span class="syntax-operator">=</span> Base <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;queued&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;running&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;succeeded&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">readonly</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;failed&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">readonly</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">readonly</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;cancelled&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">readonly</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">type</span> Event <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">;</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;fail&#x27;</span><span class="syntax-punctuation">;</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;retry&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;cancel&#x27;</span><span class="syntax-punctuation">;</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> State <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;queued&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> assertNever<span class="syntax-punctuation">(</span>value<span class="syntax-operator">:</span> <span class="syntax-keyword">never</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> never <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unknown event: &#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> transition<span class="syntax-punctuation">(</span>state<span class="syntax-operator">:</span> <span class="syntax-keyword">State</span><span class="syntax-punctuation">,</span> event<span class="syntax-operator">:</span> <span class="syntax-keyword">Event</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> State <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;succeeded&#x27;</span> <span class="syntax-operator">||</span> state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;cancelled&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;terminal state&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">switch</span> <span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span><span class="syntax-keyword">type</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;start&#x27;</span><span class="syntax-operator">:</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;queued&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;invalid transition to running&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">state.id</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">state.attempt</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;running&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-operator">:</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;running&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;invalid transition to succeeded&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isFinite</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> RangeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;finite result required&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>state<span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;succeeded&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">event.value</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;fail&#x27;</span><span class="syntax-operator">:</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;running&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;invalid transition to failed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>state<span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;failed&#x27;</span><span class="syntax-punctuation">,</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">event.reason</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;retry&#x27;</span><span class="syntax-operator">:</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>kind <span class="syntax-operator">!==</span> <span class="syntax-string">&#x27;failed&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;invalid transition to queued&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>attempt <span class="syntax-operator">&gt;=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;retry budget exhausted&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">state.id</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">state.attempt</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;queued&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">case</span> <span class="syntax-string">&#x27;cancel&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-keyword">state.id</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">state.attempt</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;cancelled&#x27;</span><span class="syntax-punctuation">,</span> reason<span class="syntax-operator">:</span> <span class="syntax-keyword">event.reason</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    default<span class="syntax-operator">:</span> <span class="syntax-keyword">return</span> assertNever<span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> replay<span class="syntax-punctuation">(</span>state<span class="syntax-operator">:</span> <span class="syntax-keyword">State</span><span class="syntax-punctuation">,</span> events<span class="syntax-operator">:</span> <span class="syntax-keyword">readonly</span> Event<span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> State <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> events<span class="syntax-punctuation">.</span>reduce<span class="syntax-punctuation">(</span>transition<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> <span class="syntax-builtin">Promise</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span><span class="syntax-punctuation">;</span> status<span class="syntax-operator">:</span> <span class="syntax-keyword">string</span> <span class="syntax-punctuation">}</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 1: Complete one valid job lifecycle</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> started <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> completed <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>started<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>completed<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">1</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;succeeded&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 2: Reject a result arriving before start</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> queued <span class="syntax-operator">=</span> initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> transition<span class="syntax-punctuation">(</span>queued<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/invalid transition/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>queued<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">0</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;queued&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 3: Enforce the retry budget</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">let</span> state<span class="syntax-operator">:</span> <span class="syntax-keyword">State</span> <span class="syntax-operator">=</span> initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> attempt <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> attempt <span class="syntax-operator">&lt;=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span> attempt <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      state <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      state <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;fail&#x27;</span><span class="syntax-punctuation">,</span> reason<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;temporary&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>attempt <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> state <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;retry&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">.</span>attempt<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> transition<span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;retry&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/retry budget/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 4: Keep cancellation terminal</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> cancelled <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>transition<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;cancel&#x27;</span><span class="syntax-punctuation">,</span> reason<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;user request&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>cancelled<span class="syntax-punctuation">.</span>kind<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;cancelled&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> transition<span class="syntax-punctuation">(</span>cancelled<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/terminal/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 5: Replay deterministically from the same history</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> events<span class="syntax-operator">:</span> <span class="syntax-keyword">Event</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;fail&#x27;</span><span class="syntax-punctuation">,</span> reason<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;retryable&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;retry&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> replay<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> second <span class="syntax-operator">=</span> replay<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> attempt<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span><span class="syntax-punctuation">,</span> kind<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;succeeded&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">3</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-comment">// Exercise 6: Preserve input state and validate success values</span></span>
+<span class="source-line">  <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> queued <span class="syntax-operator">=</span> initial<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> before <span class="syntax-operator">=</span> structuredClone<span class="syntax-punctuation">(</span>queued<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">const</span> running <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>queued<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;start&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>queued<span class="syntax-punctuation">,</span> before<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>running<span class="syntax-punctuation">,</span> queued<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> transition<span class="syntax-punctuation">(</span>running<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">type</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;complete&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">NaN</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-keyword">6</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

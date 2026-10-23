@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-018`
 
 ## Learning objectives
 
-Explain bigo, deque, heap using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Adda,b,c to anArrayDeque and remove from the front. The final exercise transfers the mechanism to handle empty removal explicitly.
+Explain bigo, deque, heap using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Add a,b,c to an ArrayDeque and remove from the front. The final exercise transfers the mechanism to handle empty removal explicitly.
 
 ## Purpose and mental model
 
-A data structure is a set of operations with representation and cost tradeoffs. AnArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. AHashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. ADeque supports queue and stack operations without shifting an array prefix. APriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.
+A data structure is a set of operations with representation and cost tradeoffs. An ArrayList supports constant-time indexed access but shifting elements after a front insertion costs linear work. A HashMap offers expected constant-time lookup under appropriate hashing assumptions,not a promise that every operation always costs one step. A Deque supports queue and stack operations without shifting an array prefix. A PriorityQueue keeps the smallest element available but does not expose a fully sorted iteration order. BigO describes how work grows with input size,not a measured wall-clock time or a guarantee about constants.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ A data structure is a set of operations with representation and cost tradeoffs. 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-019/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add andpoll maintain a heap ordering,and repeatedpoll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.
+ArrayDeque.addLast/removeFirst implements a queue;push/pop implements a stack. PriorityQueue.add and poll maintain a heap ordering,and repeated poll produces sorted removal order. Iterating the heap is not a sorted traversal. Count comparisons in a simple linear search to connect an algorithmic model to observations. A hash-based membership result must use stable equality and hashing contracts.
 
 ## Worked example / walkthrough
 
@@ -90,15 +90,15 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use a FIFO queue.** Adda,b,c to anArrayDeque and remove from the front.
+1. **Use a FIFO queue.** Add a,b,c to an ArrayDeque and remove from the front.
    **Expected:** a,b,c order.
    **Verify:** Compare your assertion values or captured diagnostic with a,b,c order.
 
-2. **Use a LIFO stack.** Push1,2,3 onto aDeque andpop all values.
+2. **Use a LIFO stack.** Push1,2,3 onto a Deque and pop all values.
    **Expected:** 3,2,1.
    **Verify:** Compare your assertion values or captured diagnostic with 3,2,1.
 
-3. **Poll a priority queue.** Insert5,1,4,2 and repeatedlypoll.
+3. **Poll a priority queue.** Insert5,1,4,2 and repeatedly poll.
    **Expected:** 1,2,4,5.
    **Verify:** Compare your assertion values or captured diagnostic with 1,2,4,5.
 
@@ -111,8 +111,8 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your assertion values or captured diagnostic with earlier sequence removed first.
 
 6. **Handle empty removal explicitly.** CompareDeque.pollFirst withremoveFirst on an empty queue.
-   **Expected:** poll returnsnull;remove throwsNoSuchElementException.
-   **Verify:** Compare your assertion values or captured diagnostic with poll returnsnull;remove throwsNoSuchElementException.
+   **Expected:** poll returns null; remove throws NoSuchElementException.
+   **Verify:** Compare your assertion values or captured diagnostic with poll returns null; remove throws NoSuchElementException.
 
 ## Common pitfalls and diagnosis
 

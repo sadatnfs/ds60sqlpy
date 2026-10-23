@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,42 +161,42 @@
       <h1>Nlp 022 Cases</h1>
       <p class="source-path">Generated from <code>courses/nlp/fixtures/nlp-022-cases.json</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
-<span>  &quot;lesson_id&quot;: &quot;nlp-022&quot;,</span>
-<span>  &quot;cases&quot;: [</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 1,</span>
-<span>      &quot;task&quot;: &quot;Build the inverted index from the three documents.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;router postings{d0,d1}; term frequency and document frequency remain distinct.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 2,</span>
-<span>      &quot;task&quot;: &quot;Calculate d0&#x27;s router reset score with the stated k1,b and IDF variant.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;Implementation matches the explicit formula; d0&gt;d1&gt;d2=0.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 3,</span>
-<span>      &quot;task&quot;: &quot;Score unseen and inspect the result semantics.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;All numerical scores zero; the application should report no lexical evidence rather than a meaningful top result.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 4,</span>
-<span>      &quot;task&quot;: &quot;Fuse the two supplied rankings with k=60.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;b first with score1/62+1/61; duplicate IDs in one ranking rejected.&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 5,</span>
-<span>      &quot;task&quot;: &quot;Evaluate [d2,d0,d1] using the declared graded relevance.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;MRR.5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3)).&quot;</span>
-<span>    },</span>
-<span>    {</span>
-<span>      &quot;exercise&quot;: 6,</span>
-<span>      &quot;task&quot;: &quot;Restrict searchable documents to d0 before scoring.&quot;,</span>
-<span>      &quot;expected&quot;: &quot;Only d0 appears in results; a written handoff records source version and support limits.&quot;</span>
-<span>    }</span>
-<span>  ]</span>
-<span>}</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;lesson_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;nlp-022&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;cases&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build the inverted index from the three documents.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;router postings{d0,d1}; term frequency and document frequency remain distinct.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Calculate d0&#x27;s router reset score with the stated k1,b and IDF variant.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implementation matches the explicit formula; d0&gt;d1&gt;d2=0.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Score unseen and inspect the result semantics.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;All numerical scores zero; the application should report no lexical evidence rather than a meaningful top result.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Fuse the two supplied rankings with k=60.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b first with score1/62+1/61; duplicate IDs in one ranking rejected.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Evaluate [d2,d0,d1] using the declared graded relevance.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;MRR.5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3)).&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Restrict searchable documents to d0 before scoring.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only d0 appears in results; a written handoff records source version and support limits.&quot;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

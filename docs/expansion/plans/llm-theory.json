@@ -861,7 +861,7 @@
       "runtime": "python-core",
       "outcome": "Transformer architecture describes which positions exchange information and how those representations are used.",
       "lab": "Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks.",
-      "verification": "encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3]. both cross outputs[1, 1]; padded source weight0.",
+      "verification": "encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3]. both cross outputs[1, 1]; padded source weight 0.",
       "concepts": [
         "Encoder",
         "Causal decoder",
@@ -880,8 +880,8 @@
       ],
       "runtime": "python-core",
       "outcome": "Position mechanisms tell attention how token order or distance should influence a comparison.",
-      "lab": "Rotate[1, 0] bypi/2 andcheck length preservation.",
-      "verification": "approximately[0, 1]; norm1. finite vector; long_context_quality_verifiedFalse; odd width rejected.",
+      "lab": "Rotate[1, 0] bypi/2 and check length preservation.",
+      "verification": "approximately[0, 1]; norm 1. finite vector; long_context_quality_verified=False; odd width rejected.",
       "concepts": [
         "RoPE",
         "Relative offset",
@@ -900,8 +900,8 @@
       ],
       "runtime": "llm-torch-cpu",
       "outcome": "Normalization placement changes the residual network's gradient path.",
-      "lab": "Normalizevector3, 4 withunitgain andepsilon1e-8.",
-      "verification": "RMSNorm mean nonzero; LayerNorm meanapproximately0. LayerNormshiftinvariant; RMSNormchanges; bothzerocasesfinite.",
+      "lab": "Normalize vector 3, 4] with unit gain and epsilon 1e-8.",
+      "verification": "RMSNorm mean nonzero; LayerNorm mean approximately 0. LayerNorm shift invariant; RMSNorm changes; both zero cases finite.",
       "concepts": [
         "Pre-norm",
         "Post-norm",
@@ -920,8 +920,8 @@
       ],
       "runtime": "python-core",
       "outcome": "Attention architecture and attention execution are separate design dimensions.",
-      "lab": "Usebatch1, time5, queryheads4, headwidth2, float32, andcompareKVheads4, 2, 1.",
-      "verification": "rawKVbytes320, 160, 80; projection weights256, 192, 160 for modelwidth8 withoutbiases. both raiseValueError; no outputNaNs are accepted.",
+      "lab": "Use batch 1, time 5, query heads 4, head width 2, float32, and compare KV heads 4, 2, 1.",
+      "verification": "raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases. both raise ValueError; no output NaNs are accepted.",
       "concepts": [
         "MHA",
         "MQA",
@@ -940,8 +940,8 @@
       ],
       "runtime": "python-core",
       "outcome": "A mixture-of-experts layer routes each token to a subset of specialized transformations.",
-      "lab": "UseexpertsI, 2I, -I andthree token/router rows with selected probabilities3/4 and1/4.",
-      "verification": "outputs[1.25, 0], [0, 1.75], [-.25, -.25]. invalid policiesraiseValueError; top2tieindices0, 1.",
+      "lab": "Use experts I, 2I, -I and three token/router rows with selected probabilities 3/4 and 1/4.",
+      "verification": "outputs[1.25, 0], [0, 1.75], [-.25, -.25]. invalid policies raise ValueError; top-2 tie indices 0, 1.",
       "concepts": [
         "Sparse expert activation",
         "Router",
@@ -959,9 +959,9 @@
         "llm-047"
       ],
       "runtime": "python-core",
-      "outcome": "Speculative decoding proposes several tokens with a cheaper draft model andverifies them against a target model.",
-      "lab": "Usep[.5, .3, .2] andq[.2, .5, .3]; calculate acceptedmass, rejectionmass andresidual.",
-      "verification": "acceptedmass[.2, .3, .2]; rejection.3; residual[1, 0, 0]; combinedmassp. rejection mass is0 and residual isNone; accepted EOS stops generation; the token cap is respected; unsupported proposals raiseValueError.",
+      "outcome": "Speculative decoding proposes several tokens with a cheaper draft model and verifies them against a target model.",
+      "lab": "Use p[.5, .3, .2] and q[.2, .5, .3]; calculate accepted mass, rejection mass and residual.",
+      "verification": "accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p. rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.",
       "concepts": [
         "Draft distribution",
         "Acceptance probability",

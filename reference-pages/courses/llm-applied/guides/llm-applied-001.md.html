@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -125,7 +171,7 @@
 <p>For a data-science assistant, a current metric definition belongs in versioned retrieval because it may change and needs a source. A repeated formatting failure may justify prompt improvement or fine-tuning after a baseline is measured. Exact aggregation belongs in deterministic code with a validated input schema. Causal interpretation still requires a defensible study design; a model can help inspect that design but cannot make an observational comparison causal by describing it confidently. This lesson builds an explicit decision policy over task characteristics, not an artificial intelligence model.</p>
 <h3 id="a-question-that-requires-more-than-a-plausible-sentence">A question that requires more than a plausible sentence<a class="heading-anchor" href="#a-question-that-requires-more-than-a-plausible-sentence" aria-label="Link to this section">#</a></h3>
 <p>Imagine an analyst asking a Methods Desk assistant: “What was conversion yesterday, and should we conclude that the checkout change worked?” The assistant has access to a metric handbook and, through a reviewed tool, a small table of events. This is an illustrative design case rather than a recorded model experiment. Its purpose is to expose the decisions hidden inside an apparently simple question.</p>
-<p>There are 12 recorded visits and four recorded purchases. Two visits belong to test accounts, and one of those visits contains a purchase. The handbook defines conversion using eligible visits and excludes test accounts. The descriptive calculation is therefore(4-1)/(12-2)=3/10=0.3. Dividing the raw totals gives 4/12, about 0.3333. Both expressions are easy to calculate; only one matches the stated eligibility policy. An arithmetic-capable model can still give the wrong answer if it selects the wrong definition or fails to apply the exclusion.</p>
+<p>There are 12 recorded visits and four recorded purchases. Two visits belong to test accounts, and one of those visits contains a purchase. The handbook defines conversion using eligible visits and excludes test accounts. The descriptive calculation is therefore(4-1)/(12-2)=3/10=0.3. Dividing the raw totals gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>4</mn></mrow><mrow><mn>12</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{4}{12}</annotation></semantics></math>, about 0.3333. Both expressions are easy to calculate; only one matches the stated eligibility policy. An arithmetic-capable model can still give the wrong answer if it selects the wrong definition or fails to apply the exclusion.</p>
 <p>The second half of the question asks for a stronger conclusion. A comparison with an earlier day can reflect changes in traffic, measurement, user composition or the checkout itself. The assistant must know whether there was random assignment, which unit was assigned, which outcomes were observed and which analysis was planned. The number 0.3 is a descriptive result. It does not contain that design information. A helpful answer can report the value, identify the definition and computation, and explain what evidence is missing before interpreting the checkout change.</p>
 <p>This decomposition gives the assistant a practical purpose: shorten the path from an analyst&#x27;s question to a reviewable evidence chain. It should help find the applicable definition, preserve units, prepare a bounded tool request and explain the resulting artifact. The assistant&#x27;s most valuable behavior may sometimes be noticing that the requested conclusion is stronger than the available evidence.</p>
 <h3 id="what-changes-when-a-prompt-context-or-model-changes">What changes when a prompt, context or model changes<a class="heading-anchor" href="#what-changes-when-a-prompt-context-or-model-changes" aria-label="Link to this section">#</a></h3>
@@ -202,25 +248,25 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-route-a-changing-definition">Example A: Route a changing definition<a class="heading-anchor" href="#example-a-route-a-changing-definition" aria-label="Link to this section">#</a></h4>
 <p>A definition can change after training, so its identity and version should remain inspectable outside model weights. Retrieval is a way to supply that evidence, not a guarantee the answer will use it faithfully.</p>
-<pre><code class="language-python">import numpy as np
-def choose(task):
-    if task[&#x27;exact_computation&#x27;]: return &#x27;deterministic_tool&#x27;,&#x27;exact computation&#x27;
-    if task[&#x27;fresh_evidence&#x27;] or task[&#x27;citation_required&#x27;]: return &#x27;retrieval&#x27;,&#x27;current cited evidence&#x27;
-    if task[&#x27;stable_behavior_gap&#x27;] and task[&#x27;governed_examples&#x27;]&gt;=100: return &#x27;adaptation_candidate&#x27;,&#x27;stable measured behavior&#x27;
-    return &#x27;measure_baseline&#x27;,&#x27;prompt and evaluation first&#x27;
-task={&#x27;exact_computation&#x27;:False,&#x27;fresh_evidence&#x27;:True,&#x27;citation_required&#x27;:True,&#x27;stable_behavior_gap&#x27;:False,&#x27;governed_examples&#x27;:0}
-assert choose(task)==(&#x27;retrieval&#x27;,&#x27;current cited evidence&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">def</span> <span class="syntax-function">choose</span><span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">deterministic_tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact computation</span><span class="syntax-string">&#x27;</span>
+    <span class="syntax-keyword">if</span> task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">or</span> task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">retrieval</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">current cited evidence</span><span class="syntax-string">&#x27;</span>
+    <span class="syntax-keyword">if</span> task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">adaptation_candidate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable measured behavior</span><span class="syntax-string">&#x27;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">measure_baseline</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prompt and evaluation first</span><span class="syntax-string">&#x27;</span>
+task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">retrieval</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">current cited evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> route retrieval; reason current cited evidence.</p>
 <h4 id="example-b-route-an-exact-calculation">Example B: Route an exact calculation<a class="heading-anchor" href="#example-b-route-an-exact-calculation" aria-label="Link to this section">#</a></h4>
 <p>The assistant may explain the result, but the arithmetic should be performed by a bounded deterministic function. A fluent estimate is not an acceptable substitute for an exact total.</p>
-<pre><code class="language-python">task={&#x27;exact_computation&#x27;:True,&#x27;fresh_evidence&#x27;:False,&#x27;citation_required&#x27;:False,&#x27;stable_behavior_gap&#x27;:False,&#x27;governed_examples&#x27;:0}
-assert choose(task)==(&#x27;deterministic_tool&#x27;,&#x27;exact computation&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">deterministic_tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> route deterministic_tool; reason exact computation.</p>
 <h4 id="example-c-require-evidence-before-fine-tuning">Example C: Require evidence before fine-tuning<a class="heading-anchor" href="#example-c-require-evidence-before-fine-tuning" aria-label="Link to this section">#</a></h4>
 <p>The example count 120 exceeds the helper&#x27;s teaching admission threshold 100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.</p>
-<pre><code class="language-python">task={&#x27;exact_computation&#x27;:False,&#x27;fresh_evidence&#x27;:False,&#x27;citation_required&#x27;:False,&#x27;stable_behavior_gap&#x27;:True,&#x27;governed_examples&#x27;:0}
-assert choose(task)[0]==&#x27;measure_baseline&#x27;
-task[&#x27;governed_examples&#x27;]=120; assert choose(task)[0]==&#x27;adaptation_candidate&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">measure_baseline</span><span class="syntax-string">&#x27;</span>
+task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">120</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adaptation_candidate</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> first measure_baseline; then adaptation_candidate.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -255,7 +301,7 @@ task[&#x27;governed_examples&#x27;]=120; assert choose(task)[0]==&#x27;adaptatio
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p>API and mechanism reference: <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-001, The subject assistant decision: prompts, retrieval or fine-tuning.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-001, The subject assistant decision: prompts, retrieval or fine-tuning.
 Read courses/llm-applied/guides/llm-applied-001.md and courses/llm-applied/lessons/llm-applied-001.py. Direct prerequisites: `llm-014`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

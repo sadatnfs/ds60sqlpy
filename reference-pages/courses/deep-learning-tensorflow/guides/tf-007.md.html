@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -122,7 +168,7 @@
 <p>Identify which forward operations and variables are recorded for differentiation. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Automatic differentiation follows a recorded computation from a watched variable to a chosen output. TensorFlow&#x27;s GradientTape is a recording scope. It does not infer dependencies merely because two values have a familiar name or because an unrecorded forward result happens to equal a recorded one.</p>
-<p>Use loss=(w-2)^2 with a float64 Variable. At zero the connected gradient is -4; at two it is numeric zero. If the forward loss was computed before the tape began, the tape has no recorded route from that loss to w, so its gradient is None. Missing and zero therefore report different facts. Treating every missing path as a zero update hides a broken experiment.</p>
+<p>Use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(w-2\right)}^{2}</annotation></semantics></math> with a float64 Variable. At zero the connected gradient is -4; at two it is numeric zero. If the forward loss was computed before the tape began, the tape has no recorded route from that loss to w, so its gradient is None. Missing and zero therefore report different facts. Treating every missing path as a zero update hides a broken experiment.</p>
 <p>Variables also have identity and mutable state. assign_sub updates the existing Variable; rebinding a Python name to a calculated Tensor creates a different object. This unit inspects those boundaries using scalar CPU fixtures, before the three-point gradient pilot introduces paired observations. A qualified TensorFlow runtime is required for execution; reading the trace remains useful when that profile is unavailable.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Tensor:</strong> a TensorFlow value with shape and dtype, which need not be a trainable mutable parameter.</p>
@@ -144,47 +190,47 @@
 <p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
 <h4 id="example-a-a-recorded-scalar-loss">Example A: A recorded scalar loss<a class="heading-anchor" href="#example-a-a-recorded-scalar-loss" aria-label="Link to this section">#</a></h4>
 <p>The multiplication and subtraction depend on w inside the recording region.</p>
-<pre><code class="language-python">import tensorflow as tf
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
 
-with tf.device(&quot;/CPU:0&quot;):
-    w = tf.Variable(0.0, dtype=tf.float64)
-    with tf.GradientTape() as tape:
-        loss = tf.square(w - 2.0)
-    gradient = tape.gradient(loss, w)
-assert gradient is not None
-assert float(gradient.numpy()) == -4.0
-print(float(loss.numpy()), float(gradient.numpy()))</code></pre>
+<span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    w <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>Variable<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>w <span class="syntax-operator">-</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+    gradient <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> gradient <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">4.0</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>gradient<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The output is loss 4 and gradient -4. A watched mutable Variable and a connected forward path produce an ordinary numeric gradient.</p>
 <h4 id="example-b-a-value-formed-before-recording">Example B: A value formed before recording<a class="heading-anchor" href="#example-b-a-value-formed-before-recording" aria-label="Link to this section">#</a></h4>
 <p>Keep the same numerical loss but move its calculation outside the scope.</p>
-<pre><code class="language-python">with tf.device(&quot;/CPU:0&quot;):
-    precomputed = tf.square(w - 2.0)
-    with tf.GradientTape() as tape:
-        copied_loss = tf.identity(precomputed)
-    missing = tape.gradient(copied_loss, w)
-assert missing is None
-print(missing)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>device<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/CPU:0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    precomputed <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span>w <span class="syntax-operator">-</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> tf<span class="syntax-operator">.</span>GradientTape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> tape<span class="syntax-punctuation">:</span>
+        copied_loss <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>identity<span class="syntax-punctuation">(</span>precomputed<span class="syntax-punctuation">)</span>
+    missing <span class="syntax-operator">=</span> tape<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>copied_loss<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> missing <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The scalar can still equal 4, but the Variable-dependent operations were not recorded. Starting another scope afterward cannot reconstruct them.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Trace a recorded path.</strong> Reproduce the connected scalar example and name which forward operations depend on w. <strong>Expected:</strong> Loss 4 and gradient -4 at w=0, dtype float64. <strong>Verify:</strong> Assert the scalar values and inspect that subtraction and square both occur inside the tape indentation.</li>
+<li><strong>Trace a recorded path.</strong> Reproduce the connected scalar example and name which forward operations depend on w. <strong>Expected:</strong> Loss 4 and gradient -4 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>, dtype float64. <strong>Verify:</strong> Assert the scalar values and inspect that subtraction and square both occur inside the tape indentation.</li>
 </ol>
 <ol>
-<li><strong>Distinguish a true zero.</strong> Create a fresh Variable at w=2 and record the same loss computation. <strong>Expected:</strong> Connected loss 0 and numeric gradient 0, not None. <strong>Verify:</strong> Use is not None before comparing the gradient value to 0.</li>
+<li><strong>Distinguish a true zero.</strong> Create a fresh Variable at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">w=2</annotation></semantics></math> and record the same loss computation. <strong>Expected:</strong> Connected loss 0 and numeric gradient 0, not None. <strong>Verify:</strong> Use is not None before comparing the gradient value to 0.</li>
 </ol>
 <ol>
 <li><strong>Repair a missing path.</strong> Reproduce the outside-scope calculation, then recompute the forward path inside a new tape. <strong>Expected:</strong> Outside path gives None; repaired path at zero gives -4. <strong>Verify:</strong> Retain both results and assert their different types/values rather than converting None to zero.</li>
 </ol>
 <ol>
-<li><strong>Watch a constant deliberately.</strong> Differentiate square(c-2) for a float64 constant c=0 with and without tape.watch(c). <strong>Expected:</strong> Unwatched constant gives None; explicitly watched constant gives -4. <strong>Verify:</strong> Assert both outcomes and explain why this does not make all input features trainable parameters.</li>
+<li><strong>Watch a constant deliberately.</strong> Differentiate square(c-2) for a float64 constant <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>c</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">c=0</annotation></semantics></math> with and without tape.watch(c). <strong>Expected:</strong> Unwatched constant gives None; explicitly watched constant gives -4. <strong>Verify:</strong> Assert both outcomes and explain why this does not make all input features trainable parameters.</li>
 </ol>
 <ol>
-<li><strong>Preserve Variable identity.</strong> Compare name rebinding after w-0.1*gradient with w.assign_sub on a fresh Variable. <strong>Expected:</strong> Rebinding yields a Tensor at 0.4 while the old Variable remains 0; assign_sub preserves the Variable object and changes its value to 0.4. <strong>Verify:</strong> Inspect isinstance(...,tf.Variable), object identity and both old/new numeric values.</li>
+<li><strong>Preserve Variable identity.</strong> Compare name rebinding after <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>−</mo><mn>0.1</mn><mo>·</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi></mrow></mrow><annotation encoding="application/x-tex">w-0.1\cdot \mathrm{gradient}</annotation></semantics></math> with w.assign_sub on a fresh Variable. <strong>Expected:</strong> Rebinding yields a Tensor at 0.4 while the old Variable remains 0; assign_sub preserves the Variable object and changes its value to 0.4. <strong>Verify:</strong> Inspect isinstance(...,tf.Variable), object identity and both old/new numeric values.</li>
 </ol>
 <ol>
-<li><strong>Use a fresh recording.</strong> Query an ordinary tape twice, then repeat the operation using a new tape. Also use constant feature x=2 with loss=(w*x-4)^2 at w=0. <strong>Expected:</strong> Second use of the consumed tape raises RuntimeError; a fresh scalar tape gives -4, and the constant-feature loss gives gradient -16. <strong>Verify:</strong> Capture the consumed-tape exception and assert the two fresh-path gradients separately.</li>
+<li><strong>Use a fresh recording.</strong> Query an ordinary tape twice, then repeat the operation using a new tape. Also use constant feature <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x=2</annotation></semantics></math> with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mo>=</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>·</mo><mi>x</mi><mo>−</mo><mn>4</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{loss}={\left(w\cdot x-4\right)}^{2}</annotation></semantics></math> at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>. <strong>Expected:</strong> Second use of the consumed tape raises RuntimeError; a fresh scalar tape gives -4, and the constant-feature loss gives gradient -16. <strong>Verify:</strong> Capture the consumed-tape exception and assert the two fresh-path gradients separately.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -196,13 +242,13 @@ print(missing)</code></pre>
 <p>If gradient is None, trace the earliest Variable-dependent operation and check whether it occurred before the tape or became a Python/NumPy value. Explicitly watching a constant cannot restore an operation performed earlier. If a second gradient query fails, inspect whether an ordinary tape has already been consumed instead of swallowing the RuntimeError.</p>
 <p>If a parameter stops behaving like a Variable after an update, inspect whether Python name rebinding replaced it with a Tensor. A correct printed weight alone does not establish the state contract needed by another step. Keep CPU placement and dtype explicit; a missing TensorFlow import is an unavailable runtime, not a mathematical failure or a prompt to install packages inside this file.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of (3*w-6)^2 at zero before running a fresh recording.</p>
+<p>Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>3</mn><mo>·</mo><mi>w</mi><mo>−</mo><mn>6</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(3\cdot w-6\right)}^{2}</annotation></semantics></math> at zero before running a fresh recording.</p>
 <h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
-<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>tf-008</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-007,
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-007,
 Eager tensors, variables and a tape. Read courses/deep-learning-tensorflow/guides/tf-007.md
 and courses/deep-learning-tensorflow/lessons/tf-007.py. Respect direct prerequisites
 tf-006 and beginner depth. Explain the actual fixture&#x27;s

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,77 +177,77 @@
 <h3 id="exercise-1-create-and-retrieve-an-item-over-real-http">Exercise 1: Create and retrieve an item over real HTTP<a class="heading-anchor" href="#exercise-1-create-and-retrieve-an-item-over-real-http" aria-label="Link to this section">#</a></h3>
 <p>Task: POST item A with value 2, then GET the list.</p>
 <p>The assertions cross the real transport boundary. A typed or pure handler result alone would not check serialization, headers, routing or socket cleanup.</p>
-<pre><code class="language-javascript">await withService(async context =&gt; {
-  const created = await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body: JSON.stringify({ id: &#x27;A&#x27;, value: 2 }) });
-  assert.equal(created.status, 201);
-  assert.deepEqual(await created.json(), { id: &#x27;A&#x27;, value: 2 });
-  const listed = await request(context, &#x27;/items&#x27;);
-  assert.equal(listed.status, 200);
-  assert.deepEqual(await listed.json(), [{ id: &#x27;A&#x27;, value: 2 }]);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> created <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>created<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">201</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> created<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> listed <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>listed<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> listed<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 201 created; subsequent 200 list contains exactly A.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-reject-malformed-data-before-changing-state">Exercise 2: Reject malformed data before changing state<a class="heading-anchor" href="#exercise-2-reject-malformed-data-before-changing-state" aria-label="Link to this section">#</a></h3>
 <p>Task: Send malformed JSON and a wrong-shaped object, then inspect the repository through GET.</p>
 <p>The failure is atomic relative to the in-memory mutation. No partial record is inserted before validation finishes.</p>
-<pre><code class="language-javascript">await withService(async context =&gt; {
-  for (const body of [&#x27;{broken&#x27;, JSON.stringify({ id: &#x27;A&#x27;, value: &#x27;wrong&#x27; })]) {
-    const response = await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body });
-    assert.equal(response.status, 400);
-    await response.text();
-  }
-  assert.deepEqual(await (await request(context, &#x27;/items&#x27;)).json(), []);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> body <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;{broken&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;wrong&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both 400; list remains empty.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-preserve-original-state-on-duplicate-creation">Exercise 3: Preserve original state on duplicate creation<a class="heading-anchor" href="#exercise-3-preserve-original-state-on-duplicate-creation" aria-label="Link to this section">#</a></h3>
 <p>Task: Create A with value 2, then try A with value 9.</p>
 <p>A duplicate business identifier is not an instruction to overwrite. The explicit conflict status preserves both the domain invariant and a diagnosable client outcome.</p>
-<pre><code class="language-javascript">await withService(async context =&gt; {
-  await (await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body: JSON.stringify({ id: &#x27;A&#x27;, value: 2 }) })).text();
-  const duplicate = await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body: JSON.stringify({ id: &#x27;A&#x27;, value: 9 }) });
-  assert.equal(duplicate.status, 409);
-  assert.deepEqual(await duplicate.json(), { error: &#x27;duplicate_id&#x27; });
-  assert.deepEqual(await (await request(context, &#x27;/items&#x27;)).json(), [{ id: &#x27;A&#x27;, value: 2 }]);
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">await</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> duplicate <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">9</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>duplicate<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">409</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> duplicate<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> error<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;duplicate_id&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> value<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> second request 409; stored value remains 2.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-enforce-body-and-media-type-contracts">Exercise 4: Enforce body and media-type contracts<a class="heading-anchor" href="#exercise-4-enforce-body-and-media-type-contracts" aria-label="Link to this section">#</a></h3>
 <p>Task: Send 513 body bytes, then a text/plain payload.</p>
 <p>Representation size and representation format are separate boundaries. A JSON parser should not be used as a substitute for either policy.</p>
-<pre><code class="language-javascript">await withService(async context =&gt; {
-  const large = await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body: &#x27;x&#x27;.repeat(513) });
-  assert.equal(large.status, 413); await large.text();
-  const wrongType = await request(context, &#x27;/items&#x27;, { method: &#x27;POST&#x27;, body: &#x27;{}&#x27;, headers: { &#x27;content-type&#x27;: &#x27;text/plain&#x27; } });
-  assert.equal(wrongType.status, 415); await wrongType.text();
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> large <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;x&#x27;</span><span class="syntax-punctuation">.</span>repeat<span class="syntax-punctuation">(</span><span class="syntax-number">513</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>large<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">413</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> large<span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> wrongType <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;POST&#x27;</span><span class="syntax-punctuation">,</span> body<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;{}&#x27;</span><span class="syntax-punctuation">,</span> headers<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;content-type&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;text/plain&#x27;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongType<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">415</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> wrongType<span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 413 for size and 415 for media type.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-distinguish-unknown-routes-and-unsupported-methods">Exercise 5: Distinguish unknown routes and unsupported methods<a class="heading-anchor" href="#exercise-5-distinguish-unknown-routes-and-unsupported-methods" aria-label="Link to this section">#</a></h3>
 <p>Task: Request an absent path and DELETE on the item route.</p>
 <p>A method is part of endpoint semantics. Returning one generic status would remove information needed by a client or operator to diagnose the request.</p>
-<pre><code class="language-javascript">await withService(async context =&gt; {
-  const missing = await request(context, &#x27;/missing&#x27;);
-  assert.equal(missing.status, 404); await missing.text();
-  const wrongMethod = await request(context, &#x27;/items&#x27;, { method: &#x27;DELETE&#x27; });
-  assert.equal(wrongMethod.status, 405); await wrongMethod.text();
-});</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> missing <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/missing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">404</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> missing<span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> wrongMethod <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/items&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> method<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;DELETE&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>wrongMethod<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">405</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> wrongMethod<span class="syntax-punctuation">.</span>text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 404 and 405 respectively.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-correlate-safe-events-and-prove-listener-cleanup">Exercise 6: Correlate safe events and prove listener cleanup<a class="heading-anchor" href="#exercise-6-correlate-safe-events-and-prove-listener-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Task: Request health, inspect its request id and event keys, then check the server after the helper exits.</p>
 <p>The event records only selected metadata. Cleanup is observed after the helper completes, rather than inferred from the presence of a finally block.</p>
-<pre><code class="language-javascript">let owned;
-await withService(async context =&gt; {
-  owned = context.server;
-  const response = await request(context, &#x27;/health&#x27;);
-  const id = response.headers.get(&#x27;x-request-id&#x27;);
-  assert.deepEqual(await response.json(), { status: &#x27;ready&#x27; });
-  assert.equal(context.events[0].requestId, id);
-  assert.deepEqual(Object.keys(context.events[0]).sort(), [&#x27;method&#x27;, &#x27;requestId&#x27;, &#x27;route&#x27;, &#x27;status&#x27;]);
-  assert.equal(context.events[0].status, 200);
-});
-assert.equal(owned.listening, false);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> owned<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> withService<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> context <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  owned <span class="syntax-operator">=</span> context<span class="syntax-punctuation">.</span>server<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> response <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> request<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/health&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">const</span> id <span class="syntax-operator">=</span> response<span class="syntax-punctuation">.</span>headers<span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;x-request-id&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> response<span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;ready&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>requestId<span class="syntax-punctuation">,</span> id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>keys<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;method&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;requestId&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;route&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;status&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>owned<span class="syntax-punctuation">.</span>listening<span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> matching id and status; server no longer listening.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

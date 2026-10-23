@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,49 +161,49 @@
       <h1>Llm 008</h1>
       <p class="source-path">Generated from <code>courses/llm-theory/lessons/llm-008.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-008: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span>table = np.array([[1, 0], [0, 1], [2, 2], [-1, 1]], dtype=np.float64)</span>
-<span>ids = np.array([2, 0, 2], dtype=np.int64)</span>
-<span>output = table[ids]</span>
-<span>np.testing.assert_array_equal(output, [[2, 2], [1, 0], [2, 2]])</span>
-<span>assert output.shape == (3, 2)</span>
-<span>print(output)</span>
-<span> </span>
-<span>wrapped = table[np.array([-1])]</span>
-<span>np.testing.assert_array_equal(wrapped, [[-1, 1]])</span>
-<span>assert int(np.array([-1])[0]) &lt; 0</span>
-<span>print(wrapped)</span>
-<span> </span>
-<span># Exercise 1: Trace row selection</span>
-<span># Calculate the output for IDs [2,0,2] from the supplied four-row table.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 2: Construct a lookup guard</span>
-<span># Implement lookup(table,ids) and compare its result with a one-hot matrix product.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 3: Reject invalid IDs</span>
-<span># Test IDs [-1], [4] and [1.5] without allowing negative wrap or rounding.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 4: Handle an empty token list</span>
-<span># Look up [] in the same nonempty table and state which later stage must decide whether</span>
-<span># empty text is acceptable.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 5: Preserve table ownership</span>
-<span># Change output[0,0] to 999 after lookup, then inspect the original table and the repeated</span>
-<span># third output row.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span>
-<span># Exercise 6: Transfer across a vocabulary permutation</span>
-<span># Reorder table rows using [2,0,3,1]. Remap the original IDs [2,0,2] so their feature</span>
-<span># vectors stay identical.</span>
-<span># Add your attempt and keep its observed values or exception beside your prediction.</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-008: predict from the companion guide, then modify an owned copy.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">table <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">ids <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span></span>
+<span class="source-line">output <span class="syntax-operator">=</span> table<span class="syntax-punctuation">[</span>ids<span class="syntax-punctuation">]</span></span>
+<span class="source-line">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> output<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">wrapped <span class="syntax-operator">=</span> table<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>wrapped<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>wrapped<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Trace row selection</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate the output for IDs [2,0,2] from the supplied four-row table.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Construct a lookup guard</span></span>
+<span class="source-line"><span class="syntax-comment"># Implement lookup(table,ids) and compare its result with a one-hot matrix product.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Reject invalid IDs</span></span>
+<span class="source-line"><span class="syntax-comment"># Test IDs [-1], [4] and [1.5] without allowing negative wrap or rounding.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Handle an empty token list</span></span>
+<span class="source-line"><span class="syntax-comment"># Look up [] in the same nonempty table and state which later stage must decide whether</span></span>
+<span class="source-line"><span class="syntax-comment"># empty text is acceptable.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Preserve table ownership</span></span>
+<span class="source-line"><span class="syntax-comment"># Change output[0,0] to 999 after lookup, then inspect the original table and the repeated</span></span>
+<span class="source-line"><span class="syntax-comment"># third output row.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer across a vocabulary permutation</span></span>
+<span class="source-line"><span class="syntax-comment"># Reorder table rows using [2,0,3,1]. Remap the original IDs [2,0,2] so their feature</span></span>
+<span class="source-line"><span class="syntax-comment"># vectors stay identical.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add your attempt and keep its observed values or exception beside your prediction.</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

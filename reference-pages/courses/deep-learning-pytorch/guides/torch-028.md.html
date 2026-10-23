@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -177,7 +223,7 @@
 <td>a reproducible input contract</td>
 </tr>
 </tbody></table></div>
-<p>Adam maintains m_t=beta 1<em>m_(t-1)+(1-beta 1)</em>g_t and v_t=beta 2<em>v_(t-1)+(1-beta 2)</em>g_t^2, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.</p>
+<p>Adam maintains <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo stretchy="false">)</mo><msub><mi>g</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">m_t=\beta_1m_{t-1}+(1-\beta_1)g_t</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo stretchy="false">)</mo><msubsup><mi>g</mi><mi>t</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">v_t=\beta_2v_{t-1}+(1-\beta_2)g_t^2</annotation></semantics></math>, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.</p>
 <p>The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.</p>
 <p>The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a2×1 noise tensor, and then updates.</p>
 <p>The child reconstructs the model and optimizer, loads their saved state, and only then restores torch RNG state. Restoring before constructing Linear would let initialization consume a draw from the restored stream. Setting the seed again would return to the stream&#x27;s beginning instead of its saved position. Matching the three-value probe checks this ordering directly before the weight comparison tests the next noisy update. <a href="https://docs.pytorch.org/docs/2.9/notes/randomness.html">PyTorch 2.9 reproducibility guidance</a>.</p>
@@ -189,33 +235,33 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-create-nontrivial-training-state">Example A: Create nontrivial training state<a class="heading-anchor" href="#example-a-create-nontrivial-training-state" aria-label="Link to this section">#</a></h4>
 <p>Saving before any updates would not test nonzero optimizer moments. Two steps create history that a fresh optimizer lacks.</p>
-<pre><code class="language-python">import numpy as np
-import torch
-from torch import nn
-from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
-from pathlib import Path
-def make_state():
-    model=nn.Linear(1,1,bias=False)
-    with torch.no_grad(): model.weight.zero_()
-    return model,torch.optim.Adam(model.parameters(),lr=.05)
-def step(model,optimizer,noise):
-    x=torch.tensor([[1.],[2.]]); target=2*x+noise
-    optimizer.zero_grad(set_to_none=True); (model(x)-target).square().mean().backward(); optimizer.step()
-torch.manual_seed(7); model,optimizer=make_state()
-for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
-parameter=next(model.parameters()); assert optimizer.state[parameter][&#x27;step&#x27;].item()==2 and parameter.item()&gt;0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">import</span> tempfile<span class="syntax-operator">,</span>json<span class="syntax-operator">,</span>subprocess<span class="syntax-operator">,</span>sys<span class="syntax-operator">,</span>textwrap
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">def</span> <span class="syntax-function">make_state</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Linear<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>bias<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> model<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>zero_<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> model<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.05</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">step</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span>optimizer<span class="syntax-punctuation">,</span>noise<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> target<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-operator">+</span>noise
+    optimizer<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>target<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> optimizer<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-punctuation">,</span>optimizer<span class="syntax-operator">=</span>make_state<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> step<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span>optimizer<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+parameter<span class="syntax-operator">=</span><span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> optimizer<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>parameter<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> parameter<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> optimizer step 2 and positive weight.</p>
 <h4 id="example-b-save-the-complete-local-contract">Example B: Save the complete local contract<a class="heading-anchor" href="#example-b-save-the-complete-local-contract" aria-label="Link to this section">#</a></h4>
 <p>The state dictionary values are serialized at this point. The checkpoint is local and trusted; the example does not load arbitrary external pick led objects.</p>
-<pre><code class="language-python">temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); path=folder/&#x27;checkpoint.pt&#x27;
-checkpoint={&#x27;model&#x27;:model.state_dict(),&#x27;optimizer&#x27;:optimizer.state_dict(),&#x27;rng&#x27;:torch.get_rng_state(),&#x27;data_position&#x27;:2}
-torch.save(checkpoint,path); assert path.is_file() and checkpoint[&#x27;data_position&#x27;]==2</code></pre>
+<pre class="highlighted-code"><code class="language-python">temporary<span class="syntax-operator">=</span>tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> folder<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-operator">.</span>name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> path<span class="syntax-operator">=</span>folder<span class="syntax-operator">/</span><span class="syntax-string">&#x27;</span><span class="syntax-string">checkpoint.pt</span><span class="syntax-string">&#x27;</span>
+checkpoint<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>model<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">optimizer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>optimizer<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rng</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>torch<span class="syntax-operator">.</span>get_rng_state<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">data_position</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span>
+torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">(</span>checkpoint<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> path<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> checkpoint<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">data_position</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> file exists and metadata position 2.</p>
 <h4 id="example-c-record-uninterrupted-continuation">Example C: Record uninterrupted continuation<a class="heading-anchor" href="#example-c-record-uninterrupted-continuation" aria-label="Link to this section">#</a></h4>
 <p>The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.</p>
-<pre><code class="language-python">probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); expected=parameter.item()
-assert torch.isfinite(probe).all() and optimizer.state[parameter][&#x27;step&#x27;].item()==3 and np.isfinite(expected)</code></pre>
+<pre class="highlighted-code"><code class="language-python">probe<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>rand<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> noise<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>rand<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.01</span><span class="syntax-punctuation">;</span> step<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span>optimizer<span class="syntax-punctuation">,</span>noise<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> expected<span class="syntax-operator">=</span>parameter<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> optimizer<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>parameter<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">step</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">3</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> finite weight, step 3, and saved three-value random probe.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: optimizer step 2 and positive weight. directory absent; no distributed-loader claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
@@ -255,7 +301,7 @@ assert torch.isfinite(probe).all() and optimizer.state[parameter][&#x27;step&#x2
 <p><strong>Is a seed equivalent to generator state?</strong></p>
 <p>No. A seed identifies an initial stream; state identifies the current position after prior draws. A restart needs the state or an exact replay of every earlier draw.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-028, Restartable training, optimizer state and RNG evidence.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-028, Restartable training, optimizer state and RNG evidence.
 Read courses/deep-learning-pytorch/guides/torch-028.md and courses/deep-learning-pytorch/lessons/torch-028.py. Direct prerequisites: `torch-027`.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.

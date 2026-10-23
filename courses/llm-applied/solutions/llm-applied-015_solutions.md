@@ -45,7 +45,7 @@ Each optimizer iteration computes loss at the current parameters, records it, ba
 
 The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.
 
-The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token2 and the answer[5, 3]. A model could succeed by learning a shortcut from token2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
+The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token 2 and the answer[5, 3]. A model could succeed by learning a shortcut from token 2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
 
 The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.
 
@@ -111,7 +111,7 @@ assert not torch.equal(before,model.token.weight.detach())
 
 ## Exercise 4: Inspect the mask derivative
 
-The question is: Differentiate cross entropy with respect to fresh zero logits under the samelabels.
+The question is: Differentiate cross entropy with respect to fresh zero logits under the same labels.
 
 The loss mask affects optimization, not merely the displayed average. This independent probe isolates target participation from the model architecture.
 
@@ -154,9 +154,9 @@ assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not
 with torch.no_grad(): np.testing.assert_allclose(receipt['final_train'],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)
 ```
 
-**Expected:** receipt says20 updates, 4 active training targets and no natural-language competence claim.
+**Expected:** receipt says 20 updates, 4 active training targets and no natural-language competence claim.
 
-**Verify:** Compare the computed values or written argument with receipt says20 updates, 4 active training targets and no natural-language competence claim.
+**Verify:** Compare the computed values or written argument with receipt says 20 updates, 4 active training targets and no natural-language competence claim.
 
 ## Review after comparison
 

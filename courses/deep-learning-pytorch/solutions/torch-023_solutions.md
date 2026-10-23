@@ -16,7 +16,7 @@ Gradient clipping limits a norm after backward and before the optimizer step. It
 
 ## Reading the implementation
 
-Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients inplace and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
+Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients in place and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
 
 ## Trace the optimizer state transition and objective denominator
 
@@ -63,7 +63,7 @@ else: raise AssertionError('detached loss backpropagated')
 
 ## Exercise 2: Repair two exact updates
 
-The question is: Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+The question is: Use x 1, 2, 3, y = 2x, w = 0 and two SGD with rate 0.1 steps with gradient clearing.
 
 Comparing each state finds the first divergence. A final-value-only check can hide wrong intermediate logging or compensating errors.
 
@@ -96,7 +96,7 @@ assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor(
 
 ## Exercise 4: Apply the clipped update
 
-The question is: Use SGD.1 after clipping and inspect the parameter.
+The question is: Use SGD with rate 0.1 after clipping and inspect the parameter.
 
 Clipping after step would not undo an oversized update. The order backward, inspect, clip, step is part of the training contract.
 

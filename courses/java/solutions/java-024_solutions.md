@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas andmemory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.
+Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas and memory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.
 
-Java21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.
+Java 21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.
 
 **Virtual thread:** A lightweight Java thread scheduled over carrier threads.
 
@@ -14,7 +14,7 @@ Java21 has pinning cases where a virtual thread blocks while holding a synchroni
 
 **Backpressure:** A limit on admitted resource-consuming operations.
 
-**Pinning in Java21:** A condition preventing a blocked virtual thread from releasing its carrier.
+**Pinning in Java 21:** A condition preventing a blocked virtual thread from releasing its carrier.
 
 ## Reading the reference
 
@@ -22,7 +22,7 @@ Thread.ofVirtual starts a virtual thread;isVirtual identifies it. Executors.newV
 
 ## Exercise 1: Observe virtual identity
 
-Task: Start a virtual thread that recordsisVirtual andjoin it.
+Task: Start a virtual thread that records isVirtual and join it.
 
 The identity check establishes the actual thread type. It does not measure performance or the number of carrier threads used.
 
@@ -113,7 +113,7 @@ try(var executor=java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor(
 
 Task: Read a state snapshot inside a synchronized block,then wait on a latch after leaving it.
 
-This design releases the monitor before blocking. It avoids the illustrated Java21 monitor-held blocking pattern,but it does not measure carrier pinning or prove a general performance improvement.
+This design releases the monitor before blocking. It avoids the illustrated Java 21 monitor-held blocking pattern,but it does not measure carrier pinning or prove a general performance improvement.
 
 ```java
 Object monitor=new Object();var waiting=new java.util.concurrent.CountDownLatch(1);var finish=new java.util.concurrent.CountDownLatch(1);int[] state={7};var snapshot=new java.util.concurrent.atomic.AtomicInteger();

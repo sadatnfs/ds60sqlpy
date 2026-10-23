@@ -47,7 +47,7 @@ Both frameworks perform cross-correlation here. Rotating the asymmetric kernel c
 
 ## Exercise 1: Compute the fixed spatial filter
 
-The question is: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.
+The question is: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.
 
 Each patch subtracts its bottom-right value from its top-left value. The difference is four throughout this ramp fixture.
 

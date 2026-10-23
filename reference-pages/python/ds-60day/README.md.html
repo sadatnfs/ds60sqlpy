@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -116,6 +162,7 @@
       <p class="source-path">Generated from <code>python/ds-60day/README.md</code></p>
     </header>
     <article class="document"><h2 id="python-and-data-science-track">Python and data-science track<a class="heading-anchor" href="#python-and-data-science-track" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>Python and data science</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
 <p>This track preserves 60 ordered lessons covering practical Python, data analysis, statistics, machine learning, and selected production topics. Four named foundation checkpoints slow the early learning ramp, and thirteen named professional modules extend practice beyond the numbered sequence. Use the catalog&#x27;s prerequisite order rather than treating 60 as a deadline.</p>
 <p>Start at the repository <a href="../../README.md.html">README</a>, and run all commands from the repository root.</p>
 <h3 id="set-up">Set up<a class="heading-anchor" href="#set-up" aria-label="Link to this section">#</a></h3>
@@ -127,18 +174,18 @@
 </ul>
 <p>The recommended baseline is Python 3.12.</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Core setup installs the notebook, data, and quality groups. To prepare the later heavy lessons while connected:</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1 -Advanced</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
 <p>Inspect lesson dependencies and first-run downloads before installing everything:</p>
-<pre><code class="language-text">python scripts/course.py catalog --track python</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track python</code></pre>
 <h3 id="study-a-lesson">Study a lesson<a class="heading-anchor" href="#study-a-lesson" aria-label="Link to this section">#</a></h3>
 <p>For each lesson:</p>
 <ol>
@@ -157,9 +204,9 @@
 </ul>
 <p>Launch JupyterLab:</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyterlab .\python\ds-60day\notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyterlab <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">\</span>ds<span class="syntax-punctuation">-</span>60day<span class="syntax-punctuation">\</span>notebooks</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyterlab python/ds-60day/notebooks</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyterlab python/ds-60day/notebooks</code></pre>
 <p>You can also open notebooks directly in VS Code. Select the repository <code>.venv</code> as both interpreter and notebook kernel; see <a href="../../docs/vscode.md.html">VS Code</a>.</p>
 <h3 id="artifact-coverage">Artifact coverage<a class="heading-anchor" href="#artifact-coverage" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -174,24 +221,24 @@
 <h3 id="continue-into-professional-python">Continue into professional Python<a class="heading-anchor" href="#continue-into-professional-python" aria-label="Link to this section">#</a></h3>
 <p>After the numbered track, or earlier when you meet a module&#x27;s catalog prerequisites, continue with the <a href="../../docs/professional-paths.md.html">professional learning paths</a>. The extension covers package builds, reliable HTTP clients, concurrency, Arrow/DuckDB, generative testing, advanced typing, experiments, reproducible model delivery, service hardening, measurement-first performance, exact value and time boundaries, leakage-resistant evaluation, and restartable pipelines.</p>
 <p>Use stable lesson IDs rather than inventing Day 61 filenames:</p>
-<pre><code class="language-text">python scripts/course.py catalog --track python
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track python
 python scripts/course.py progress complete python-pro-01</code></pre>
 <h3 id="offline-behavior">Offline behavior<a class="heading-anchor" href="#offline-behavior" aria-label="Link to this section">#</a></h3>
 <p>Most lessons use generated or local data. Several data-analysis lessons call Seaborn’s sample-data loader; the first call downloads and caches the dataset. Pretrained torchvision, Hugging Face, and spaCy exercises require a disclosed cache or their lesson’s offline fallback.</p>
 <p>Prepare while connected and read <a href="../../docs/setup/offline.md.html">Offline use</a>. A package being installed does not guarantee that its model weights or dataset are cached.</p>
 <h3 id="progress">Progress<a class="heading-anchor" href="#progress" aria-label="Link to this section">#</a></h3>
 <p>Local progress is stored under the ignored <code>.learning/</code> directory:</p>
-<pre><code class="language-text">python scripts/course.py progress show
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py progress show
 python scripts/course.py progress complete python-01 --notes &quot;Created the environment and explained kernels.&quot;</code></pre>
 <p>Use the stable lesson IDs printed by the catalog.</p>
 <h3 id="connect-python-with-postgresql">Connect Python with PostgreSQL<a class="heading-anchor" href="#connect-python-with-postgresql" aria-label="Link to this section">#</a></h3>
 <p>After Python Day 15 and SQL Day 15, the optional <a href="../../bridge/README.md.html">engineering bridge</a> adds typed configuration, safe Psycopg queries, transaction and retry design, database testing, ETL, concurrency, and production failure handling.</p>
 <h3 id="learn-with-codex">Learn with Codex<a class="heading-anchor" href="#learn-with-codex" aria-label="Link to this section">#</a></h3>
 <p>The repository-local tutor skill can guide the lesson without revealing answers immediately:</p>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to guide Python Day 1. Check my setup, quiz prerequisites, and give hints before solutions.</code></pre>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to guide Python Day 1. Check my setup, quiz prerequisites, and give hints before solutions.</code></pre>
 <p>See <a href="../../docs/learning-with-codex.md.html">Learning with Codex</a>.</p>
 <h3 id="validate">Validate<a class="heading-anchor" href="#validate" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">python scripts/course.py validate</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py validate</code></pre>
 <p>Structural validation does not mean every notebook was fully executed. See <a href="../../docs/validation.md.html">Validation</a> for the evidence labels and full workflow.</p>
 <h3 id="scope">Scope<a class="heading-anchor" href="#scope" aria-label="Link to this section">#</a></h3>
 <p>This is a practical Python-for-data-science path, not a replacement for the complete Python language reference. The high-level sequence remains in <a href="../PYTHON_TRAINING.md.html">PYTHON_TRAINING.md</a>; <code>curriculum/catalog.json</code> is the checked-in generated artifact map, built from lesson filenames and catalog-builder metadata.</p>

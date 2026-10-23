@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -117,31 +163,31 @@
     </header>
     <article class="document"><h2 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h2>
 <p>Start from the repository root and run:</p>
-<pre><code class="language-text">python scripts/course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py doctor</code></pre>
 <p>If <code>python</code> points elsewhere, use the repository interpreter directly. On Windows PowerShell, resolve the standard-<code>venv</code> or conda-prefix layout once per window:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
 <p>On macOS/Linux, run <code>.venv/bin/python scripts/course.py doctor</code>.</p>
 <p>For the difference between <code>.venv</code>, disposable caches, offline model data, learner progress, and Docker state, see <a href="local-files-and-caches.md.html">Local environments and caches</a>.</p>
 <h3 id="file-not-found-for-requirements-scripts-notebooks-or-sql">“File not found” for requirements, scripts, notebooks, or SQL<a class="heading-anchor" href="#file-not-found-for-requirements-scripts-notebooks-or-sql" aria-label="Link to this section">#</a></h3>
 <p>You are probably in the wrong directory.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">Test-Path .\README.md
-Get-Location</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>README<span class="syntax-punctuation">.</span><span class="syntax-builtin">md</span>
+<span class="syntax-builtin">Get-Location</span></code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">test -f README.md
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">test</span> -f README.md
 pwd</code></pre>
 <p>Change to the directory containing the root README and retry.</p>
 <h3 id="python-or-py-is-not-found"><code>python</code> or <code>py</code> is not found<a class="heading-anchor" href="#python-or-py-is-not-found" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Windows: do not reinstall merely because an existing Python or Anaconda installation is missing from <code>PATH</code>. From the repository root, run the read-only discovery preview first:</li>
 </ul>
-<pre><code class="language-powershell">  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-  &amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">  <span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+  <span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql -WhatIf</code></pre>
 <p>If it finds a supported Python, Anaconda, or Miniconda installation, rerun without <code>-WhatIf</code> to prepare the repository environment. Only if discovery reports that no supported interpreter exists should you install Python 3.12 manually or explicitly preview the optional winget path with <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -InstallMissingWithWinget -WhatIf</code>.</p>
 <ul>
 <li>macOS/Linux: run <code>python3.12 --version</code>; do not replace the operating system’s Python.</li>
@@ -149,55 +195,55 @@ pwd</code></pre>
 </ul>
 <h3 id="virtual-environment-creation-fails">Virtual environment creation fails<a class="heading-anchor" href="#virtual-environment-creation-fails" aria-label="Link to this section">#</a></h3>
 <p>Windows:</p>
-<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
-&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql -WhatIf
+<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql</code></pre>
 <p>The preview discovers Python.org and Anaconda/Miniconda installations before the real run chooses either the standard <code>venv</code> layout or the conda-prefix fallback. It does not delete a partial environment.</p>
 <p>Linux may need the venv package:</p>
-<pre><code class="language-bash">sudo apt-get install python3.12-venv</code></pre>
+<pre class="highlighted-code"><code class="language-bash">sudo apt-get install python3.12-venv</code></pre>
 <p>Remove a partially created <code>.venv</code> only after confirming it is the repository environment and contains no work you need.</p>
 <h3 id="powershell-refuses-to-activate-the-environment">PowerShell refuses to activate the environment<a class="heading-anchor" href="#powershell-refuses-to-activate-the-environment" aria-label="Link to this section">#</a></h3>
 <p>Activation is not required:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
 <p>For a temporary activated session:</p>
-<pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>Activate<span class="syntax-punctuation">.</span>ps1</code></pre>
 <p>The activation script exists only in the standard <code>venv</code> layout. The conda-prefix fallback continues to use <code>&amp; $CoursePython ...</code>. Do not change machine-wide execution policy for this course.</p>
 <h3 id="a-package-installs-but-the-notebook-cannot-import-it">A package installs but the notebook cannot import it<a class="heading-anchor" href="#a-package-installs-but-the-notebook-cannot-import-it" aria-label="Link to this section">#</a></h3>
 <p>The terminal interpreter and notebook kernel differ.</p>
 <ol>
 <li>Run:</li>
 </ol>
-<pre><code class="language-text">   python -c &quot;import sys; print(sys.executable)&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-text">   python -c &quot;import sys; print(sys.executable)&quot;</code></pre>
 <ol>
 <li>In the notebook, run:</li>
 </ol>
-<pre><code class="language-python">   import sys
-   print(sys.executable)</code></pre>
+<pre class="highlighted-code"><code class="language-python">   <span class="syntax-keyword">import</span> sys
+   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">)</span></code></pre>
 <ol>
 <li>Select the repository <code>.venv</code> kernel and restart it.</li>
 </ol>
 <p>Multiple clones share the per-user <code>ds60sqlpy</code> kernel name. Check the complete <code>sys.executable</code> path. A stale registration can point to a moved or deleted folder. Repair only the registration from the intended environment:</p>
-<pre><code class="language-powershell"># Windows, after resolving $CoursePython above
-&amp; $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</code></pre>
-<pre><code class="language-bash"># macOS/Linux
-.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</code></pre>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows, after resolving $CoursePython above</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m ipykernel install <span class="syntax-punctuation">-</span>-user <span class="syntax-punctuation">-</span>-name ds60sqlpy <span class="syntax-punctuation">-</span>-display-name <span class="syntax-string">&quot;</span><span class="syntax-string">Python (ds60sqlpy)</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p>Restart the kernel and verify its path again. Virtual environments should be recreated after moving them rather than copied between operating systems or folders. See <a href="https://docs.python.org/3.12/library/venv.html">Python venv</a>.</p>
 <h3 id="jupyter-is-not-found"><code>jupyter</code> is not found<a class="heading-anchor" href="#jupyter-is-not-found" aria-label="Link to this section">#</a></h3>
 <p>Use the environment’s Python:</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython -m jupyterlab</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyterlab</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python -m jupyterlab</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyterlab</code></pre>
 <p>If the module is missing, rerun the setup script and doctor.</p>
 <h3 id="package-installation-fails">Package installation fails<a class="heading-anchor" href="#package-installation-fails" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -233,7 +279,7 @@ pwd</code></pre>
 <li>Linux: install the PostgreSQL client package.</li>
 </ul>
 <p>Then verify:</p>
-<pre><code class="language-text">psql --version</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql --version</code></pre>
 <p>The supported major version is 16 or newer.</p>
 <h3 id="postgresql-connection-is-refused">PostgreSQL connection is refused<a class="heading-anchor" href="#postgresql-connection-is-refused" aria-label="Link to this section">#</a></h3>
 <p>Confirm the server is running:</p>
@@ -246,7 +292,7 @@ pwd</code></pre>
 <p>Also check host, port, database, and role. The default port is 5432.</p>
 <h3 id="native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect">Native <code>psql</code> works, but doctor or a guided notebook cannot connect<a class="heading-anchor" href="#native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect" aria-label="Link to this section">#</a></h3>
 <p>Native OS setup uses your local role, while course tools default to the Compose <code>ds60</code> connection. Select the same target as the successful native command in the terminal that starts the portal. For macOS/Linux&#x27;s normal username-and-socket route:</p>
-<pre><code class="language-bash">export DS60_DATABASE_URL=advanced_sql_training
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span>advanced_sql_training
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/learning_portal.py</code></pre>
 <p>For native Windows, follow the <a href="setup/windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">password-file handoff</a> and set its password-free local URL in the launching PowerShell window. Guided notebooks disable password prompts. An interactive login that asked for a password does not prove unattended authentication. See <a href="setup/postgresql.md.html">Local PostgreSQL</a>.</p>
@@ -257,30 +303,30 @@ pwd</code></pre>
 <li>Start Docker Desktop or your container daemon.</li>
 <li>Check the exact state:</li>
 </ol>
-<pre><code class="language-text">   docker compose ps
+<pre class="highlighted-code"><code class="language-text">   docker compose ps
    docker compose logs postgres</code></pre>
 <ol>
 <li>If host port 5432 is already in use, choose another host port before starting the service.</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">   $env:DS60_POSTGRES_PORT = &quot;55432&quot;
+<pre class="highlighted-code"><code class="language-powershell">   $env:DS60_POSTGRES_PORT <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">55432</span><span class="syntax-string">&quot;</span>
    docker compose up -d postgres</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">   export DS60_POSTGRES_PORT=55432
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-builtin">export</span> DS60_POSTGRES_PORT<span class="syntax-operator">=</span><span class="syntax-number">55432</span>
    docker compose up -d postgres</code></pre>
 <p>The <code>sql-runner</code> service connects over the internal Compose network, so its course commands remain unchanged.</p>
 <h3 id="role-postgres-does-not-exist-on-macos"><code>role &quot;postgres&quot; does not exist</code> on macOS<a class="heading-anchor" href="#role-postgres-does-not-exist-on-macos" aria-label="Link to this section">#</a></h3>
 <p>Homebrew commonly creates a role matching the macOS username. Omit <code>-U postgres</code> and use:</p>
-<pre><code class="language-bash">psql -d advanced_sql_training</code></pre>
+<pre class="highlighted-code"><code class="language-bash">psql -d advanced_sql_training</code></pre>
 <p>Do not create an unnecessary superuser merely to match an old command.</p>
 <h3 id="peer-authentication-fails-on-linux">Peer authentication fails on Linux<a class="heading-anchor" href="#peer-authentication-fails-on-linux" aria-label="Link to this section">#</a></h3>
 <p>Create a PostgreSQL role matching the Linux username:</p>
-<pre><code class="language-bash">sudo -u postgres createuser --createdb &quot;$USER&quot;
+<pre class="highlighted-code"><code class="language-bash">sudo -u postgres createuser --createdb <span class="syntax-string">&quot;</span>$USER<span class="syntax-string">&quot;</span>
 createdb advanced_sql_training</code></pre>
 <p>Then use normal local <code>psql</code> commands without <code>-U postgres</code>.</p>
 <h3 id="the-training-database-already-exists">The training database already exists<a class="heading-anchor" href="#the-training-database-already-exists" aria-label="Link to this section">#</a></h3>
 <p>That is normally fine. Run the setup file to reset only the disposable <code>training</code> schema:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql</code></pre>
 <p>This deletes and recreates the training schema. Stop if the target database is not disposable.</p>
 <p>Run <code>sql/postgres-60day/00_verify.sql</code> immediately afterward to catch an incomplete or incorrect seed.</p>
 <h3 id="a-later-sql-project-says-a-table-or-schema-does-not-exist">A later SQL project says a table or schema does not exist<a class="heading-anchor" href="#a-later-sql-project-says-a-table-or-schema-does-not-exist" aria-label="Link to this section">#</a></h3>
@@ -296,17 +342,17 @@ createdb advanced_sql_training</code></pre>
 <ol>
 <li>Run the bridge tests first:</li>
 </ol>
-<pre><code class="language-text">   python -m pytest bridge/tests</code></pre>
+<pre class="highlighted-code"><code class="language-text">   python -m pytest bridge/tests</code></pre>
 <ol>
 <li>Confirm <code>DS60_DATABASE_URL</code> points to the disposable course database, not a workplace, shared, or production database.</li>
 <li>Run the SQL setup and verification before a live exercise.</li>
 <li>Check whether the lesson needs Psycopg:</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-   &amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
+   <span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">   bash scripts/setup.sh --advanced</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   bash scripts/setup.sh --advanced</code></pre>
 <ol>
 <li>Distinguish a fake-backed unit-test pass from server authentication, permissions, lock behavior, or network evidence.</li>
 </ol>
@@ -322,7 +368,7 @@ createdb advanced_sql_training</code></pre>
 <p>If the extension loads but PostgreSQL does not connect, verify <code>DS60_DATABASE_URL</code> in the terminal that launched Jupyter. Do not print the value when it contains a password. Use <code>postgresql+psycopg://</code> through the lesson&#x27;s SQLAlchemy engine rather than accidentally requesting the older <code>psycopg2</code> driver. See <a href="setup/jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>.</p>
 <h3 id="a-sql-file-shows-errors-but-the-command-exits-successfully">A SQL file shows errors but the command exits successfully<a class="heading-anchor" href="#a-sql-file-shows-errors-but-the-command-exits-successfully" aria-label="Link to this section">#</a></h3>
 <p>Use:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
 <p>Without <code>ON_ERROR_STOP</code>, <code>psql</code> can continue after a statement fails.</p>
 <h3 id="bash-commands-fail-in-powershell">Bash commands fail in PowerShell<a class="heading-anchor" href="#bash-commands-fail-in-powershell" aria-label="Link to this section">#</a></h3>
 <p>PowerShell does not use:</p>
@@ -335,7 +381,7 @@ createdb advanced_sql_training</code></pre>
 <p>Use the Windows guide and PowerShell examples instead of translating punctuation literally.</p>
 <h3 id="find-the-executable-solution-for-a-lesson">Find the executable solution for a lesson<a class="heading-anchor" href="#find-the-executable-solution-for-a-lesson" aria-label="Link to this section">#</a></h3>
 <p>Inspect:</p>
-<pre><code class="language-text">python scripts/course.py catalog</code></pre>
+<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog</code></pre>
 <p>PostgreSQL executable and Markdown solutions cover Days 1–60. Use the generated availability view for the exact path. The Day 52–54 executable warehouse solutions are stateful and must run in order.</p>
 <h3 id="still-blocked">Still blocked<a class="heading-anchor" href="#still-blocked" aria-label="Link to this section">#</a></h3>
 <p>Capture:</p>

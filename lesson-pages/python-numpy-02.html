@@ -214,6 +214,52 @@
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -331,16 +377,18 @@
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Open the <a href="python-numpy-02.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython python/professional/lessons/py_numpy_02.py</code></pre>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">/</span>professional<span class="syntax-punctuation">/</span>lessons<span class="syntax-punctuation">/</span>py_numpy_02<span class="syntax-punctuation">.</span>py</code></pre>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_02.py</code></pre>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_02.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-02.html#solution-1">explanatory solutions</a> and <a href="python-numpy-02.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -363,19 +411,19 @@
 <p>The exercises make shape validation explicit, preserve inputs, reject undefined denominators and test nonsquare examples. Empty outer batches can remain valid, while a mean over an empty feature axis is usually undefined. Decide these cases before relying on a library warning or accidental broadcasting behavior.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">x = np.array([[1.0, 3.0, 5.0], [2.0, 4.0, 9.0]])
-centered = x - x.mean(axis=1, keepdims=True)
-assert centered.shape == (2, 3) and np.allclose(centered.mean(axis=1), 0)
-print(&quot;Row centered:&quot;, centered.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+centered <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> centered<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>centered<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Row centered:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> centered<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>axis=1 combines the three feature positions inside each row. keepdims retains a two-by-one mean so subtraction repeats each row&#x27;s own mean across its three columns. The zero row means are a mathematical invariant, not merely an expected printout.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">a = np.array([[0.0, 0.0], [3.0, 4.0]])
-b = np.array([[0.0, 4.0], [3.0, 0.0], [0.0, 0.0]])
-difference = a[:, None, :] - b[None, :, :]
-distance = np.sqrt(np.sum(difference**2, axis=-1))
-assert distance.shape == (2, 3)
-assert np.allclose(distance, [[4, 3, 0], [3, 4, 5]])
-print(&quot;Pairwise distances:&quot;, distance.tolist())</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+difference <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+distance <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>difference<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> distance<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>distance<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Pairwise distances:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> distance<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The inserted singleton axes form every a-row/b-row pair. The final axis still represents coordinate differences and is the only axis summed. The resulting two-by-three table preserves the identities of both sets of points; accidentally summing axis zero would answer a different question.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -416,7 +464,7 @@ print(&quot;Pairwise distances:&quot;, distance.tolist())</code></pre>
 <li><a href="https://numpy.org/doc/stable/reference/generated/numpy.einsum.html">NumPy einsum API</a>.</li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-02: Axes, Broadcasting, and Batched Linear Algebra.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-02: Axes, Broadcasting, and Batched Linear Algebra.
 Read python/professional/companion-guides/py_numpy_02.md and python/professional/lessons/py_numpy_02.py. Direct prerequisites: python-numpy-01.
 Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
 Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
@@ -452,131 +500,131 @@ Done when all six contracts and their boundary cases have inspected evidence and
           </div>
         </header>
 
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-numpy-02: Axes, Broadcasting, and Batched Linear Algebra.</span>
-<span> </span>
-<span>Run the worked examples, then implement the six contracts below.</span>
-<span>Official implementations remain in solutions/.</span>
-<span>&quot;&quot;&quot;</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def column_center(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a new floating matrix whose columns have zero means. Require a finite</span>
-<span>    two-dimensional array with at least one row. Test two rows and three columns so</span>
-<span>    row/column mistakes cannot pass accidentally.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement column_center&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def scale_rows(values: np.ndarray, factors: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Multiply each matrix row by its corresponding finite factor without mutating either</span>
-<span>    input. Require factors to be a one-dimensional vector whose length equals the number of</span>
-<span>    rows. Permit an empty row batch.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement scale_rows&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def pairwise_squared(left: np.ndarray, right: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return squared Euclidean distances between rows of two finite matrices with equal</span>
-<span>    feature counts. Support empty row sets. Reject mismatched feature dimensions or</span>
-<span>    unrepresentable squared distances with ValueError. Use the tiny broadcasted difference,</span>
-<span>    not Python nested loops.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement pairwise_squared&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def weighted_columns(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return weighted column means for a finite matrix using one nonnegative finite weight per</span>
-<span>    row. Require positive total weight. Reject negative weights, zero total or wrong length,</span>
-<span>    rather than dividing and returning NaNs.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement weighted_columns&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def batched_projection(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Apply a finite two-dimensional weight matrix(d, k) to values with at least two</span>
-<span>    dimensions and final dimension d. Return all leading dimensions followed by k. Reject an</span>
-<span>    incompatible final dimension.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement batched_projection&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def unit_rows(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows</span>
-<span>    remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and</span>
-<span>    then hiding its warning.</span>
-<span>    &quot;&quot;&quot;</span>
-<span>    raise NotImplementedError(&quot;Implement unit_rows&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def worked_examples() -&gt; None:</span>
-<span>    x = np.array([[1.0, 3.0, 5.0], [2.0, 4.0, 9.0]])</span>
-<span>    centered = x - x.mean(axis=1, keepdims=True)</span>
-<span>    assert centered.shape == (2, 3) and np.allclose(centered.mean(axis=1), 0)</span>
-<span>    print(&quot;Row centered:&quot;, centered.tolist())</span>
-<span> </span>
-<span>    a = np.array([[0.0, 0.0], [3.0, 4.0]])</span>
-<span>    b = np.array([[0.0, 4.0], [3.0, 0.0], [0.0, 0.0]])</span>
-<span>    difference = a[:, None, :] - b[None, :, :]</span>
-<span>    distance = np.sqrt(np.sum(difference**2, axis=-1))</span>
-<span>    assert distance.shape == (2, 3)</span>
-<span>    assert np.allclose(distance, [[4, 3, 0], [3, 4, 5]])</span>
-<span>    print(&quot;Pairwise distances:&quot;, distance.tolist())</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    worked_examples()</span>
-<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
-<span> </span>
-<span># Exercise 1: Reduce the observation axis</span>
-<span># Prompt: Return a new floating matrix whose columns have zero means. Require a finite</span>
-<span># two-dimensional array with at least one row. Test two rows and three columns so row/column</span>
-<span># mistakes cannot pass accidentally.</span>
-<span># Expected: [[1,10,100],[3,14,108]] becomes[[-1,-2,-4],[1,2,4]]. The source is unchanged;</span>
-<span># shape(0,3) and a vector raise ValueError.</span>
-<span> </span>
-<span># Exercise 2: Broadcast one factor per row</span>
-<span># Prompt: Multiply each matrix row by its corresponding finite factor without mutating either</span>
-<span># input. Require factors to be a one-dimensional vector whose length equals the number of rows.</span>
-<span># Permit an empty row batch.</span>
-<span># Expected: [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise</span>
-<span># ValueError; shape(0,3) with an empty vector returns (0,3).</span>
-<span> </span>
-<span># Exercise 3: Create all pairs with a declared contraction</span>
-<span># Prompt: Return squared Euclidean distances between rows of two finite matrices with equal</span>
-<span># feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable</span>
-<span># squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.</span>
-<span># Expected: [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns</span>
-<span># shape(0,1); two versus three features raises ValueError.</span>
-<span> </span>
-<span># Exercise 4: Contract observations using valid weights</span>
-<span># Prompt: Return weighted column means for a finite matrix using one nonnegative finite weight per</span>
-<span># row. Require positive total weight. Reject negative weights, zero total or wrong length, rather</span>
-<span># than dividing and returning NaNs.</span>
-<span># Expected: [[1,10],[3,30]] with [1,3] gives [2.5,25]. Weights[0,0],[-1,2] and [1] raise</span>
-<span># ValueError; weights scaled by ten give the same means.</span>
-<span> </span>
-<span># Exercise 5: Preserve leading batch axes</span>
-<span># Prompt: Apply a finite two-dimensional weight matrix(d, k) to values with at least two</span>
-<span># dimensions and final dimension d. Return all leading dimensions followed by k. Reject an</span>
-<span># incompatible final dimension.</span>
-<span># Expected: A(2,3,4) input times a(4,2) weight matrix returns (2,3,2), matching an explicit</span>
-<span># per-batch matrix multiply. A(3,4) input also works; weights(3,2) are rejected.</span>
-<span> </span>
-<span># Exercise 6: Normalize while preserving zero vectors</span>
-<span># Prompt: Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows</span>
-<span># remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and then</span>
-<span># hiding its warning.</span>
-<span># Expected: [[3,4],[0,0],[-2,0]] becomes[[.6,.8],[0,0],[-1,0]]. All results are finite, source</span>
-<span># stays unchanged and infinity raises ValueError.</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-numpy-02: Axes, Broadcasting, and Batched Linear Algebra.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run the worked examples, then implement the six contracts below.</span></span>
+<span class="source-line"><span class="syntax-string">Official implementations remain in solutions/.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">column_center</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a new floating matrix whose columns have zero means. Require a finite</span></span>
+<span class="source-line"><span class="syntax-string">    two-dimensional array with at least one row. Test two rows and three columns so</span></span>
+<span class="source-line"><span class="syntax-string">    row/column mistakes cannot pass accidentally.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement column_center</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">scale_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> factors<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Multiply each matrix row by its corresponding finite factor without mutating either</span></span>
+<span class="source-line"><span class="syntax-string">    input. Require factors to be a one-dimensional vector whose length equals the number of</span></span>
+<span class="source-line"><span class="syntax-string">    rows. Permit an empty row batch.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement scale_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">pairwise_squared</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return squared Euclidean distances between rows of two finite matrices with equal</span></span>
+<span class="source-line"><span class="syntax-string">    feature counts. Support empty row sets. Reject mismatched feature dimensions or</span></span>
+<span class="source-line"><span class="syntax-string">    unrepresentable squared distances with ValueError. Use the tiny broadcasted difference,</span></span>
+<span class="source-line"><span class="syntax-string">    not Python nested loops.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement pairwise_squared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">weighted_columns</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return weighted column means for a finite matrix using one nonnegative finite weight per</span></span>
+<span class="source-line"><span class="syntax-string">    row. Require positive total weight. Reject negative weights, zero total or wrong length,</span></span>
+<span class="source-line"><span class="syntax-string">    rather than dividing and returning NaNs.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement weighted_columns</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">batched_projection</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Apply a finite two-dimensional weight matrix(d, k) to values with at least two</span></span>
+<span class="source-line"><span class="syntax-string">    dimensions and final dimension d. Return all leading dimensions followed by k. Reject an</span></span>
+<span class="source-line"><span class="syntax-string">    incompatible final dimension.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement batched_projection</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">unit_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-string">    Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows</span></span>
+<span class="source-line"><span class="syntax-string">    remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and</span></span>
+<span class="source-line"><span class="syntax-string">    then hiding its warning.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement unit_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    centered <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> centered<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>centered<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Row centered:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> centered<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    difference <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    distance <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>difference<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> distance<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>distance<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Pairwise distances:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> distance<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked examples passed. Complete the six task functions and their boundary checks.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Reduce the observation axis</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a new floating matrix whose columns have zero means. Require a finite</span></span>
+<span class="source-line"><span class="syntax-comment"># two-dimensional array with at least one row. Test two rows and three columns so row/column</span></span>
+<span class="source-line"><span class="syntax-comment"># mistakes cannot pass accidentally.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[1,10,100],[3,14,108]] becomes[[-1,-2,-4],[1,2,4]]. The source is unchanged;</span></span>
+<span class="source-line"><span class="syntax-comment"># shape(0,3) and a vector raise ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Broadcast one factor per row</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Multiply each matrix row by its corresponding finite factor without mutating either</span></span>
+<span class="source-line"><span class="syntax-comment"># input. Require factors to be a one-dimensional vector whose length equals the number of rows.</span></span>
+<span class="source-line"><span class="syntax-comment"># Permit an empty row batch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError; shape(0,3) with an empty vector returns (0,3).</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Create all pairs with a declared contraction</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return squared Euclidean distances between rows of two finite matrices with equal</span></span>
+<span class="source-line"><span class="syntax-comment"># feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable</span></span>
+<span class="source-line"><span class="syntax-comment"># squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns</span></span>
+<span class="source-line"><span class="syntax-comment"># shape(0,1); two versus three features raises ValueError.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Contract observations using valid weights</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return weighted column means for a finite matrix using one nonnegative finite weight per</span></span>
+<span class="source-line"><span class="syntax-comment"># row. Require positive total weight. Reject negative weights, zero total or wrong length, rather</span></span>
+<span class="source-line"><span class="syntax-comment"># than dividing and returning NaNs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[1,10],[3,30]] with [1,3] gives [2.5,25]. Weights[0,0],[-1,2] and [1] raise</span></span>
+<span class="source-line"><span class="syntax-comment"># ValueError; weights scaled by ten give the same means.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Preserve leading batch axes</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Apply a finite two-dimensional weight matrix(d, k) to values with at least two</span></span>
+<span class="source-line"><span class="syntax-comment"># dimensions and final dimension d. Return all leading dimensions followed by k. Reject an</span></span>
+<span class="source-line"><span class="syntax-comment"># incompatible final dimension.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: A(2,3,4) input times a(4,2) weight matrix returns (2,3,2), matching an explicit</span></span>
+<span class="source-line"><span class="syntax-comment"># per-batch matrix multiply. A(3,4) input also works; weights(3,2) are rejected.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Normalize while preserving zero vectors</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows</span></span>
+<span class="source-line"><span class="syntax-comment"># remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and then</span></span>
+<span class="source-line"><span class="syntax-comment"># hiding its warning.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: [[3,4],[0,0],[-2,0]] becomes[[.6,.8],[0,0],[-1,0]]. All results are finite, source</span></span>
+<span class="source-line"><span class="syntax-comment"># stays unchanged and infinity raises ValueError.</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 
@@ -615,144 +663,144 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <h5 id="solution-1--exercise-1-reduce-the-observation-axis">Exercise 1: Reduce the observation axis<a class="heading-anchor" href="#solution-1--exercise-1-reduce-the-observation-axis" aria-label="Link to this section">#</a></h5>
 <p>Return a new floating matrix whose columns have zero means. Require a finite two-dimensional array with at least one row. Test two rows and three columns so row/column mistakes cannot pass accidentally.</p>
 <p><strong>Expected:</strong> [[1,10,100],[3,14,108]] becomes[[-1,-2,-4],[1,2,4]]. The source is unchanged; shape(0,3) and a vector raise ValueError.</p>
-<pre><code class="language-python">def column_center(values: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(values, dtype=float)
-    if x.ndim != 2 or x.shape[0] == 0 or not np.isfinite(x).all():
-        raise ValueError(&quot;Expected a finite matrix with observations&quot;)
-    mean = (x / x.shape[0]).sum(axis=0, keepdims=True)
-    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
-        result = x - mean
-    if not np.isfinite(result).all():
-        raise ValueError(&quot;Centered result exceeds finite floating range&quot;)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">column_center</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite matrix with observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    mean <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>x <span class="syntax-operator">/</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        result <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> mean
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Centered result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>Each output column subtracts the average across observations, so axis zero is reduced. Keeping the dimension documents that the result has one row of feature means. Conversion makes fractional means representable. The nonsquare fixture prevents a row-centered result from having a misleadingly compatible interpretation, and the empty-observation rejection prevents an undefined mean from quietly producing NaNs.</p>
-<pre><code class="language-python">x = np.array([[1, 10, 100], [3, 14, 108]])
-assert np.allclose(column_center(x), [[-1, -2, -4], [1, 2, 4]])
-assert x[0, 0] == 1
-assert np.allclose(column_center(np.array([[1e308], [1e308]])), [[0], [0]])
-expect_value_error(lambda: column_center(np.empty((0, 3))))
-expect_value_error(lambda: column_center(np.array([1, 2])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">108</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>column_center<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-2-broadcast-one-factor-per-row">Exercise 2: Broadcast one factor per row<a class="heading-anchor" href="#solution-1--exercise-2-broadcast-one-factor-per-row" aria-label="Link to this section">#</a></h5>
 <p>Multiply each matrix row by its corresponding finite factor without mutating either input. Require factors to be a one-dimensional vector whose length equals the number of rows. Permit an empty row batch.</p>
 <p><strong>Expected:</strong> [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise ValueError; shape(0,3) with an empty vector returns (0,3).</p>
-<pre><code class="language-python">def scale_rows(values: np.ndarray, factors: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(values, dtype=float)
-    f = np.asarray(factors, dtype=float)
-    if (
-        x.ndim != 2
-        or f.ndim != 1
-        or len(f) != x.shape[0]
-        or not np.isfinite(x).all()
-        or not np.isfinite(f).all()
-    ):
-        raise ValueError(&quot;Expected one finite factor per row&quot;)
-    return np.asarray(x * f[:, None])</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">scale_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> factors<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    f <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>factors<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> f<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one finite factor per row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>x <span class="syntax-operator">*</span> f<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The new axis changes factors from shape(n,) to(n,1), so the factor is repeated across columns of its own row. Without it, a vector is matched to the last dimension and means column factors. The length check is deliberately stronger than asking whether NumPy can broadcast the inputs, because a numerically valid broadcast could violate the function&#x27;s row-level meaning.</p>
-<pre><code class="language-python">x = np.array([[1, 2, 3], [4, 5, 6]])
-assert np.allclose(scale_rows(x, np.array([10, 100])), [[10, 20, 30], [400, 500, 600]])
-assert scale_rows(np.empty((0, 3)), np.array([])).shape == (0, 3)
-expect_value_error(lambda: scale_rows(x, np.array([1, 2, 3])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>scale_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">,</span> <span class="syntax-number">600</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> scale_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> scale_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-3-create-all-pairs-with-a-declared-contraction">Exercise 3: Create all pairs with a declared contraction<a class="heading-anchor" href="#solution-1--exercise-3-create-all-pairs-with-a-declared-contraction" aria-label="Link to this section">#</a></h5>
 <p>Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.</p>
 <p><strong>Expected:</strong> [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns shape(0,1); two versus three features raises ValueError.</p>
-<pre><code class="language-python">def pairwise_squared(left: np.ndarray, right: np.ndarray) -&gt; np.ndarray:
-    a = np.asarray(left, dtype=float)
-    b = np.asarray(right, dtype=float)
-    if (
-        a.ndim != 2
-        or b.ndim != 2
-        or a.shape[1] != b.shape[1]
-        or not np.isfinite(a).all()
-        or not np.isfinite(b).all()
-    ):
-        raise ValueError(&quot;Expected finite matrices with equal feature dimensions&quot;)
-    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
-        difference = a[:, None, :] - b[None, :, :]
-        result = np.sum(difference * difference, axis=-1)
-    if not np.isfinite(result).all():
-        raise ValueError(&quot;Squared distances exceed finite floating range&quot;)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">pairwise_squared</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite matrices with equal feature dimensions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        difference <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+        result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>difference <span class="syntax-operator">*</span> difference<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Squared distances exceed finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>The temporary has an axis for left rows, an axis for right rows and an axis for features. Squaring and summing only the feature axis preserves the pair table. The explicit feature-count check prevents unrelated coordinate spaces from being compared. For large row counts this temporary can be expensive; the exercise teaches shape correctness, while a later optimization should use blocking and numerical checks rather than assume broadcasting is always cheap.</p>
-<pre><code class="language-python">a = np.array([[0, 0], [3, 4]])
-b = np.array([[0, 0]])
-assert np.allclose(pairwise_squared(a, b), [[0], [25]])
-assert pairwise_squared(np.empty((0, 2)), b).shape == (0, 1)
-expect_value_error(lambda: pairwise_squared(a, np.ones((1, 3))))</code></pre>
+<pre class="highlighted-code"><code class="language-python">a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>pairwise_squared<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> pairwise_squared<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pairwise_squared<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-4-contract-observations-using-valid-weights">Exercise 4: Contract observations using valid weights<a class="heading-anchor" href="#solution-1--exercise-4-contract-observations-using-valid-weights" aria-label="Link to this section">#</a></h5>
 <p>Return weighted column means for a finite matrix using one nonnegative finite weight per row. Require positive total weight. Reject negative weights, zero total or wrong length, rather than dividing and returning NaNs.</p>
 <p><strong>Expected:</strong> [[1,10],[3,30]] with [1,3] gives [2.5,25]. Weights[0,0],[-1,2] and [1] raise ValueError; weights scaled by ten give the same means.</p>
-<pre><code class="language-python">def weighted_columns(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(values, dtype=float)
-    w = np.asarray(weights, dtype=float)
-    if (
-        x.ndim != 2
-        or w.ndim != 1
-        or len(w) != x.shape[0]
-        or not np.isfinite(x).all()
-        or not np.isfinite(w).all()
-        or np.any(w &lt; 0)
-        or not np.any(w &gt; 0)
-    ):
-        raise ValueError(&quot;Expected finite nonnegative weights with positive sum&quot;)
-    scaled = w / w.max()
-    normalized = scaled / scaled.sum()
-    result = np.einsum(&quot;n,nd-&gt;d&quot;, normalized, x)
-    if not np.isfinite(result).all():
-        raise ValueError(&quot;Weighted result exceeds finite floating range&quot;)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">weighted_columns</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> w<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span>
+        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>w <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>w <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite nonnegative weights with positive sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    scaled <span class="syntax-operator">=</span> w <span class="syntax-operator">/</span> w<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    normalized <span class="syntax-operator">=</span> scaled <span class="syntax-operator">/</span> scaled<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>einsum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">n,nd-&gt;d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> normalized<span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Weighted result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>The repeated n label in the einsum input is summed and the remaining d label names the output feature axis. Scaling weights by their maximum before normalization prevents overflow in the total weight. Contracting normalized weights with values then forms a convex mean without multiplying two huge unnormalized operands. Scaling all weights equally must not change the result, giving an independent invariant. The nonnegative contract makes these weights interpretable as averaging weights; allowing signed weights would define a different operation with different denominator behavior.</p>
-<pre><code class="language-python">x = np.array([[1, 10], [3, 30]])
-assert np.allclose(weighted_columns(x, np.array([1, 3])), [2.5, 25])
-assert np.allclose(weighted_columns(x, np.array([10, 30])), [2.5, 25])
-assert np.isclose(
-    weighted_columns(np.array([[1e308], [1e308]]), np.array([1e308, 1e308]))[0], 1e308
-)
-expect_value_error(lambda: weighted_columns(x, np.array([0, 0])))
-expect_value_error(lambda: weighted_columns(x, np.array([-1, 2])))
-expect_value_error(lambda: weighted_columns(x, np.array([1])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>
+    weighted_columns<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span>
+<span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-5-preserve-leading-batch-axes">Exercise 5: Preserve leading batch axes<a class="heading-anchor" href="#solution-1--exercise-5-preserve-leading-batch-axes" aria-label="Link to this section">#</a></h5>
 <p>Apply a finite two-dimensional weight matrix(d, k) to values with at least two dimensions and final dimension d. Return all leading dimensions followed by k. Reject an incompatible final dimension.</p>
 <p><strong>Expected:</strong> A(2,3,4) input times a(4,2) weight matrix returns (2,3,2), matching an explicit per-batch matrix multiply. A(3,4) input also works; weights(3,2) are rejected.</p>
-<pre><code class="language-python">def batched_projection(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(values, dtype=float)
-    w = np.asarray(weights, dtype=float)
-    if (
-        x.ndim &lt; 2
-        or w.ndim != 2
-        or x.shape[-1] != w.shape[0]
-        or not np.isfinite(x).all()
-        or not np.isfinite(w).all()
-    ):
-        raise ValueError(&quot;Expected a compatible final feature dimension&quot;)
-    return np.asarray(np.einsum(&quot;...d,dk-&gt;...k&quot;, x, w))</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">batched_projection</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> w<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span>
+        <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> w<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a compatible final feature dimension</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>einsum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">...d,dk-&gt;...k</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The ellipsis preserves every leading axis instead of hardcoding one batch dimension. Only the feature dimension d contracts with the weight matrix, and k becomes the last output dimension. Comparing with explicit per-batch multiplication validates the contraction independently of its compact notation. A reshape that flattens batches can produce equal numbers but lose entity boundaries, so shape is checked alongside values.</p>
-<pre><code class="language-python">x = np.arange(24).reshape(2, 3, 4)
-w = np.arange(8).reshape(4, 2)
-r = batched_projection(x, w)
-assert r.shape == (2, 3, 2) and np.allclose(r, np.stack([x[0] @ w, x[1] @ w]))
-assert batched_projection(x[0], w).shape == (3, 2)
-expect_value_error(lambda: batched_projection(x, np.ones((3, 2))))</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">@</span> w<span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">@</span> w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h5 id="solution-1--exercise-6-normalize-while-preserving-zero-vectors">Exercise 6: Normalize while preserving zero vectors<a class="heading-anchor" href="#solution-1--exercise-6-normalize-while-preserving-zero-vectors" aria-label="Link to this section">#</a></h5>
 <p>Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and then hiding its warning.</p>
 <p><strong>Expected:</strong> [[3,4],[0,0],[-2,0]] becomes[[.6,.8],[0,0],[-1,0]]. All results are finite, source stays unchanged and infinity raises ValueError.</p>
-<pre><code class="language-python">def unit_rows(values: np.ndarray) -&gt; np.ndarray:
-    x = np.asarray(values, dtype=float)
-    if x.ndim != 2 or not np.isfinite(x).all():
-        raise ValueError(&quot;Expected a finite matrix&quot;)
-    scale = np.max(np.abs(x), axis=1, keepdims=True, initial=0)
-    scaled = np.zeros_like(x)
-    np.divide(x, scale, out=scaled, where=scale != 0)
-    norm = np.linalg.norm(scaled, axis=1, keepdims=True)
-    result = np.zeros_like(x)
-    np.divide(scaled, norm, out=result, where=norm != 0)
-    return np.asarray(result)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">unit_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite matrix</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> initial<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    scaled <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+    np<span class="syntax-operator">.</span>divide<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> scale<span class="syntax-punctuation">,</span> out<span class="syntax-operator">=</span>scaled<span class="syntax-punctuation">,</span> where<span class="syntax-operator">=</span>scale <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    norm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+    np<span class="syntax-operator">.</span>divide<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">,</span> norm<span class="syntax-punctuation">,</span> out<span class="syntax-operator">=</span>result<span class="syntax-punctuation">,</span> where<span class="syntax-operator">=</span>norm <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>Scaling each row by its largest absolute value first prevents squared-norm overflow for very large finite coordinates. The norm then reduces bounded features while retaining a one-column axis. A zero-initialized output gives zero rows their declared result, and where prevents invalid division. This differs from np.where(condition, x/norm,0), which evaluates x/norm before selection and may emit invalid values. Normalization changes scale but does not create meaningful direction for a zero vector.</p>
-<pre><code class="language-python">x = np.array([[3.0, 4.0], [0.0, 0.0], [-2.0, 0.0]])
-r = unit_rows(x)
-assert np.allclose(r, [[0.6, 0.8], [0.0, 0.0], [-1.0, 0.0]]) and np.isfinite(r).all()
-assert np.array_equal(x, [[3, 4], [0, 0], [-2, 0]])
-assert np.allclose(unit_rows(np.array([[1e308, 1e308]])), [[np.sqrt(0.5), np.sqrt(0.5)]])
-expect_value_error(lambda: unit_rows(np.array([[np.inf]])))</code></pre>
+<pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+r <span class="syntax-operator">=</span> unit_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>unit_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> unit_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_numpy_02_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -787,163 +835,163 @@ expect_value_error(lambda: unit_rows(np.array([[np.inf]])))</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-02.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections.abc import Callable</span>
-<span> </span>
-<span>import numpy as np</span>
-<span> </span>
-<span> </span>
-<span>def column_center(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    if x.ndim != 2 or x.shape[0] == 0 or not np.isfinite(x).all():</span>
-<span>        raise ValueError(&quot;Expected a finite matrix with observations&quot;)</span>
-<span>    mean = (x / x.shape[0]).sum(axis=0, keepdims=True)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):</span>
-<span>        result = x - mean</span>
-<span>    if not np.isfinite(result).all():</span>
-<span>        raise ValueError(&quot;Centered result exceeds finite floating range&quot;)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def scale_rows(values: np.ndarray, factors: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    f = np.asarray(factors, dtype=float)</span>
-<span>    if (</span>
-<span>        x.ndim != 2</span>
-<span>        or f.ndim != 1</span>
-<span>        or len(f) != x.shape[0]</span>
-<span>        or not np.isfinite(x).all()</span>
-<span>        or not np.isfinite(f).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected one finite factor per row&quot;)</span>
-<span>    return np.asarray(x * f[:, None])</span>
-<span> </span>
-<span> </span>
-<span>def pairwise_squared(left: np.ndarray, right: np.ndarray) -&gt; np.ndarray:</span>
-<span>    a = np.asarray(left, dtype=float)</span>
-<span>    b = np.asarray(right, dtype=float)</span>
-<span>    if (</span>
-<span>        a.ndim != 2</span>
-<span>        or b.ndim != 2</span>
-<span>        or a.shape[1] != b.shape[1]</span>
-<span>        or not np.isfinite(a).all()</span>
-<span>        or not np.isfinite(b).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected finite matrices with equal feature dimensions&quot;)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):</span>
-<span>        difference = a[:, None, :] - b[None, :, :]</span>
-<span>        result = np.sum(difference * difference, axis=-1)</span>
-<span>    if not np.isfinite(result).all():</span>
-<span>        raise ValueError(&quot;Squared distances exceed finite floating range&quot;)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def weighted_columns(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    w = np.asarray(weights, dtype=float)</span>
-<span>    if (</span>
-<span>        x.ndim != 2</span>
-<span>        or w.ndim != 1</span>
-<span>        or len(w) != x.shape[0]</span>
-<span>        or not np.isfinite(x).all()</span>
-<span>        or not np.isfinite(w).all()</span>
-<span>        or np.any(w &lt; 0)</span>
-<span>        or not np.any(w &gt; 0)</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected finite nonnegative weights with positive sum&quot;)</span>
-<span>    scaled = w / w.max()</span>
-<span>    normalized = scaled / scaled.sum()</span>
-<span>    result = np.einsum(&quot;n,nd-&gt;d&quot;, normalized, x)</span>
-<span>    if not np.isfinite(result).all():</span>
-<span>        raise ValueError(&quot;Weighted result exceeds finite floating range&quot;)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def batched_projection(values: np.ndarray, weights: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    w = np.asarray(weights, dtype=float)</span>
-<span>    if (</span>
-<span>        x.ndim &lt; 2</span>
-<span>        or w.ndim != 2</span>
-<span>        or x.shape[-1] != w.shape[0]</span>
-<span>        or not np.isfinite(x).all()</span>
-<span>        or not np.isfinite(w).all()</span>
-<span>    ):</span>
-<span>        raise ValueError(&quot;Expected a compatible final feature dimension&quot;)</span>
-<span>    return np.asarray(np.einsum(&quot;...d,dk-&gt;...k&quot;, x, w))</span>
-<span> </span>
-<span> </span>
-<span>def unit_rows(values: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x = np.asarray(values, dtype=float)</span>
-<span>    if x.ndim != 2 or not np.isfinite(x).all():</span>
-<span>        raise ValueError(&quot;Expected a finite matrix&quot;)</span>
-<span>    scale = np.max(np.abs(x), axis=1, keepdims=True, initial=0)</span>
-<span>    scaled = np.zeros_like(x)</span>
-<span>    np.divide(x, scale, out=scaled, where=scale != 0)</span>
-<span>    norm = np.linalg.norm(scaled, axis=1, keepdims=True)</span>
-<span>    result = np.zeros_like(x)</span>
-<span>    np.divide(scaled, norm, out=result, where=norm != 0)</span>
-<span>    return np.asarray(result)</span>
-<span> </span>
-<span> </span>
-<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
-<span>    try:</span>
-<span>        call()</span>
-<span>    except ValueError:</span>
-<span>        return</span>
-<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
-<span> </span>
-<span> </span>
-<span>def main() -&gt; None:</span>
-<span>    # Exercise 1: Reduce the observation axis</span>
-<span>    x = np.array([[1, 10, 100], [3, 14, 108]])</span>
-<span>    assert np.allclose(column_center(x), [[-1, -2, -4], [1, 2, 4]])</span>
-<span>    assert x[0, 0] == 1</span>
-<span>    assert np.allclose(column_center(np.array([[1e308], [1e308]])), [[0], [0]])</span>
-<span>    expect_value_error(lambda: column_center(np.empty((0, 3))))</span>
-<span>    expect_value_error(lambda: column_center(np.array([1, 2])))</span>
-<span>    # Exercise 2: Broadcast one factor per row</span>
-<span>    x = np.array([[1, 2, 3], [4, 5, 6]])</span>
-<span>    assert np.allclose(scale_rows(x, np.array([10, 100])), [[10, 20, 30], [400, 500, 600]])</span>
-<span>    assert scale_rows(np.empty((0, 3)), np.array([])).shape == (0, 3)</span>
-<span>    expect_value_error(lambda: scale_rows(x, np.array([1, 2, 3])))</span>
-<span>    # Exercise 3: Create all pairs with a declared contraction</span>
-<span>    a = np.array([[0, 0], [3, 4]])</span>
-<span>    b = np.array([[0, 0]])</span>
-<span>    assert np.allclose(pairwise_squared(a, b), [[0], [25]])</span>
-<span>    assert pairwise_squared(np.empty((0, 2)), b).shape == (0, 1)</span>
-<span>    expect_value_error(lambda: pairwise_squared(a, np.ones((1, 3))))</span>
-<span>    # Exercise 4: Contract observations using valid weights</span>
-<span>    x = np.array([[1, 10], [3, 30]])</span>
-<span>    assert np.allclose(weighted_columns(x, np.array([1, 3])), [2.5, 25])</span>
-<span>    assert np.allclose(weighted_columns(x, np.array([10, 30])), [2.5, 25])</span>
-<span>    assert np.isclose(</span>
-<span>        weighted_columns(np.array([[1e308], [1e308]]), np.array([1e308, 1e308]))[0], 1e308</span>
-<span>    )</span>
-<span>    expect_value_error(lambda: weighted_columns(x, np.array([0, 0])))</span>
-<span>    expect_value_error(lambda: weighted_columns(x, np.array([-1, 2])))</span>
-<span>    expect_value_error(lambda: weighted_columns(x, np.array([1])))</span>
-<span>    # Exercise 5: Preserve leading batch axes</span>
-<span>    x = np.arange(24).reshape(2, 3, 4)</span>
-<span>    w = np.arange(8).reshape(4, 2)</span>
-<span>    r = batched_projection(x, w)</span>
-<span>    assert r.shape == (2, 3, 2) and np.allclose(r, np.stack([x[0] @ w, x[1] @ w]))</span>
-<span>    assert batched_projection(x[0], w).shape == (3, 2)</span>
-<span>    expect_value_error(lambda: batched_projection(x, np.ones((3, 2))))</span>
-<span>    # Exercise 6: Normalize while preserving zero vectors</span>
-<span>    x = np.array([[3.0, 4.0], [0.0, 0.0], [-2.0, 0.0]])</span>
-<span>    r = unit_rows(x)</span>
-<span>    assert np.allclose(r, [[0.6, 0.8], [0.0, 0.0], [-1.0, 0.0]]) and np.isfinite(r).all()</span>
-<span>    assert np.array_equal(x, [[3, 4], [0, 0], [-2, 0]])</span>
-<span>    assert np.allclose(unit_rows(np.array([[1e308, 1e308]])), [[np.sqrt(0.5), np.sqrt(0.5)]])</span>
-<span>    expect_value_error(lambda: unit_rows(np.array([[np.inf]])))</span>
-<span>    print(&quot;python-numpy-02: all six normal and boundary contracts passed&quot;)</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    main()</span>
-<span> </span></code></pre></div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-02.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">column_center</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite matrix with observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    mean <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>x <span class="syntax-operator">/</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> x <span class="syntax-operator">-</span> mean</span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Centered result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">scale_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> factors<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    f <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>factors<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> f<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected one finite factor per row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>x <span class="syntax-operator">*</span> f<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">pairwise_squared</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        a<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> b<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> a<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> b<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite matrices with equal feature dimensions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">with</span> np<span class="syntax-operator">.</span>errstate<span class="syntax-punctuation">(</span>over<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> invalid<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ignore</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        difference <span class="syntax-operator">=</span> a<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>difference <span class="syntax-operator">*</span> difference<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Squared distances exceed finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">weighted_columns</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> w<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>w <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>w <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected finite nonnegative weights with positive sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scaled <span class="syntax-operator">=</span> w <span class="syntax-operator">/</span> w<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    normalized <span class="syntax-operator">=</span> scaled <span class="syntax-operator">/</span> scaled<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>einsum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">n,nd-&gt;d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> normalized<span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Weighted result exceeds finite floating range</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">batched_projection</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>weights<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> w<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> w<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a compatible final feature dimension</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>einsum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">...d,dk-&gt;...k</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">unit_rows</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">2</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a finite matrix</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scale <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> initial<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    scaled <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>divide<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> scale<span class="syntax-punctuation">,</span> out<span class="syntax-operator">=</span>scaled<span class="syntax-punctuation">,</span> where<span class="syntax-operator">=</span>scale <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    norm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>zeros_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    np<span class="syntax-operator">.</span>divide<span class="syntax-punctuation">(</span>scaled<span class="syntax-punctuation">,</span> norm<span class="syntax-punctuation">,</span> out<span class="syntax-operator">=</span>result<span class="syntax-punctuation">,</span> where<span class="syntax-operator">=</span>norm <span class="syntax-operator">!=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">expect_value_error</span><span class="syntax-punctuation">(</span>call<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        call<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Reduce the observation axis</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">108</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>column_center<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> column_center<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Broadcast one factor per row</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>scale_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">,</span> <span class="syntax-number">600</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> scale_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> scale_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Create all pairs with a declared contraction</span></span>
+<span class="source-line">    a <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    b <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>pairwise_squared<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> pairwise_squared<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> pairwise_squared<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Contract observations using valid weights</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">25</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        weighted_columns<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> weighted_columns<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Preserve leading batch axes</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> r<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">@</span> w<span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">@</span> w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> batched_projection<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Normalize while preserving zero vectors</span></span>
+<span class="source-line">    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    r <span class="syntax-operator">=</span> unit_rows<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>unit_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1e308</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1e308</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    expect_value_error<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> unit_rows<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>inf<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python-numpy-02: all six normal and boundary contracts passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
       </section>
 
 

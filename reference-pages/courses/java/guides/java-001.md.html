@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,7 +165,7 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner, approximately 90 minutes. Direct prerequisites: None. This lesson starts from a plain text source file.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a message variable containing Hello,Java and print it once. The final exercise transfers the mechanism to observe a real compiler diagnostic.</p>
+<p>Explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a message variable containing Hello, Java and print it once. The final exercise transfers the mechanism to observe a real compiler diagnostic.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A Java program begins as text. The compiler checks syntax and types, then writes bytecode in a class file. The Java Virtual Machine loads that bytecode and invokes a recognized entry point. Compilation and execution are different stages: a missing semicolon prevents compilation, while division by zero can fail after the program starts. This course uses a public class named Main stored in Main.java. The main method is static so the launcher can call it without first creating an object. Its String array parameter contains command-line arguments. Assertions are optional in ordinary Java launches, so the classroom deliberately enables them with-ea. A printed success message cannot replace a check that would fail on incorrect behavior.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -127,9 +173,9 @@
 <p><strong>Bytecode:</strong> Instructions stored in a class file for the JVM.</p>
 <p><strong>Entry point:</strong> The method the launcher invokes to start the program.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-001/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
@@ -137,42 +183,42 @@ java -ea Main</code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-print-a-first-result">Example A: Print a first result<a class="heading-anchor" href="#example-a-print-a-first-result" aria-label="Link to this section">#</a></h4>
 <p>The variable holds a reference to a String value. println adds a line separator, while the assertion checks the content independently of terminal formatting.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        String message = &quot;Hello, Java&quot;;
-        System.out.println(message);
-        assert message.equals(&quot;Hello, Java&quot;);
-    }
-}
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+        System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> one line Hello, Java.</p>
 <h4 id="example-b-evaluate-before-printing">Example B: Evaluate before printing<a class="heading-anchor" href="#example-b-evaluate-before-printing" aria-label="Link to this section">#</a></h4>
 <p>The numeric addition happens before concatenation because it is assigned first. Mixing strings and numbers in one expression can change which plus operators mean concatenation.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        String message = &quot;Hello, Java&quot;;
-        System.out.println(message);
-        assert message.equals(&quot;Hello, Java&quot;);
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+        System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-        int total = 2 + 3;
-        String line = &quot;total=&quot; + total;
-        assert total == 5;
-        assert line.equals(&quot;total=5&quot;);
-    }
-}
+        <span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+        String line <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> total<span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> total <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> line<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total=5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> integer5 and text total=5.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Print a first result.</strong> Create a message variable containing Hello,Java and print it once. <strong>Expected:</strong> one line Hello, Java. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with one line Hello, Java.</li>
+<li><strong>Print a first result.</strong> Create a message variable containing Hello, Java and print it once. <strong>Expected:</strong> one line Hello, Java. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with one line Hello, Java.</li>
 </ol>
 <ol>
 <li><strong>Evaluate before printing.</strong> Compute2+3 into an int and build the string total=5. <strong>Expected:</strong> integer5 and text total=5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with integer5 and text total=5.</li>
@@ -181,13 +227,13 @@ public class Main {
 <li><strong>Trace sequential state.</strong> Start count1,increment it,then multiply it by3. <strong>Expected:</strong> final count6. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with final count6.</li>
 </ol>
 <ol>
-<li><strong>Verify assertion mode.</strong> Use an assertion side effect only to detect whether this teaching launch enabled assertions; fail explicitly otherwise. <strong>Expected:</strong> assertion-enabled flagtrue. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with assertion-enabled flagtrue.</li>
+<li><strong>Verify assertion mode.</strong> Use an assertion side effect only to detect whether this teaching launch enabled assertions; fail explicitly otherwise. <strong>Expected:</strong> assertion-enabled flag true. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with assertion-enabled flag true.</li>
 </ol>
 <ol>
 <li><strong>Separate runtime failure.</strong> Divide an integer by a variable containing0 and catch exactly ArithmeticException. <strong>Expected:</strong> ArithmeticException observed;program continues after the catch. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ArithmeticException observed;program continues after the catch.</li>
 </ol>
 <ol>
-<li><strong>Observe a real compiler diagnostic.</strong> Compile a small in-memory Broken class whose return statement lacks a semicolon; capture diagnostics without executing it. <strong>Expected:</strong> compiler resultfalse and at least one ERROR diagnostic. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with compiler resultfalse and at least one ERROR diagnostic.</li>
+<li><strong>Observe a real compiler diagnostic.</strong> Compile a small in-memory Broken class whose return statement lacks a semicolon; capture diagnostics without executing it. <strong>Expected:</strong> compiler result false and at least one ERROR diagnostic. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with compiler result false and at least one ERROR diagnostic.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
@@ -201,7 +247,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-001: From source file to running JVM.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-001: From source file to running JVM.
 Read courses/java/guides/java-001.md and courses/java/lessons/java-001.java. Direct prerequisites: None. This lesson starts from a plain text source file..
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

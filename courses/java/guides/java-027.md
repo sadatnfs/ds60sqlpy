@@ -6,27 +6,27 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-026`
 
 ## Learning objectives
 
-Explain build input, reproducible artifact, dependency pin, jar using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Build a Hello class whose main printsbuild-ok. The final exercise transfers the mechanism to record an explicit dependency contract.
+Explain build input, reproducible artifact, dependency pin, jar using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Build a Hello class whose main prints build-ok. The final exercise transfers the mechanism to record an explicit dependency contract.
 
 ## Purpose and mental model
 
-A build turns source anddeclared dependencies into an artifact. Reproducibility requires identifying the compiler,target level,inputs,dependency versions andpackaging metadata. A source repository alone isnot enough if a build fetches moving dependency versions or embeds timestamps that change everyrun. Maven andGradle can manage larger builds,but their configuration still needs explicit versions,verification andoffline preparation. This default lesson uses only the JDK'sjavac andjar tools on a literal source fixture.
+A build turns source and declared dependencies into an artifact. Reproducibility requires identifying the compiler,target level,inputs,dependency versions and packaging metadata. A source repository alone is not enough if a build fetches moving dependency versions or embeds timestamps that change everyrun. Maven and Gradle can manage larger builds,but their configuration still needs explicit versions,verification and offline preparation. This default lesson uses only the JDK'sjavac and jar tools on a literal source fixture.
 
-The example compiles one small application,packages it twice with a fixed archive timestamp,andcompares the resulting bytes in the same prepared JDK environment. It then executes theJAR. This establishes a bounded local reproducibility property,not byte-identical builds across everyJDK orOS. A dependency lock orchecksum is an identity control,not proof that a dependency is safe orappropriate.
+The example compiles one small application,packages it twice with a fixed archive timestamp,and compares the resulting bytes in the same prepared JDK environment. It then executes the JAR. This establishes a bounded local reproducibility property,not byte-identical builds across everyJDK or OS. A dependency lock or checksum is an identity control,not proof that a dependency is safe or appropriate.
 
 ## Vocabulary and concepts
 
-**Build input:** Source,toolchain anddependency state used toproduce an artifact.
+**Build input:** Source,toolchain and dependency state used to produce an artifact.
 
 **Reproducible artifact:** An output matching a declared byte-identity contract under fixed inputs.
 
-**Dependency pin:** An exact version orhash identifying a required component.
+**Dependency pin:** An exact version or hash identifying a required component.
 
-**JAR:** AJava archive containing classes,resources andoptional launch metadata.
+**JAR:** A Java archive containing classes,resources and optional launch metadata.
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-027/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -43,7 +43,7 @@ The [JAR fixture](../fixtures/java-027/README.md) provides the matching source a
 
 ## Syntax anatomy and execution trace
 
-The JavaCompiler API invokes the prepared compiler with--release21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider andgiven a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifactbytes;use a fresh childJVM toprove theJAR entrypoint works. A changed source ordependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+The JavaCompiler API invokes the prepared compiler with --release 21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider and given a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifact bytes;use a fresh childJVM to prove the JAR entrypoint works. A changed source or dependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
@@ -79,11 +79,11 @@ public class Main {
 
 ```
 
-**Expected:** compiler exit0;Hello.class exists.
+**Expected:** compiler exit 0;Hello.class exists.
 
 ### Example B: Create a runnable archive
 
-The archive contains both bytecode andentrypoint metadata. These are separate checks from its filename extension.
+The archive contains both bytecode and entrypoint metadata. These are separate checks from its filename extension.
 
 ```java
 import java.util.*;
@@ -126,29 +126,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Compile a literal application.** Build a Hello class whose main printsbuild-ok.
-   **Expected:** compiler exit0;Hello.class exists.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler exit0;Hello.class exists.
+1. **Compile a literal application.** Build a Hello class whose main prints build-ok.
+   **Expected:** compiler exit 0;Hello.class exists.
+   **Verify:** Compare your assertion values or captured diagnostic with compiler exit 0;Hello.class exists.
 
-2. **Create a runnable archive.** Package the compiled classes withmain-classHello andfixedtimestamp.
+2. **Create a runnable archive.** Package the compiled classes withmain-classHello and fixed timestamp.
    **Expected:** JAR exists andcontainsHello.class.
    **Verify:** Compare your assertion values or captured diagnostic with JAR exists andcontainsHello.class.
 
-3. **Compare two builds with fixed metadata.** Package the same classes twice withthe same timestamp.
+3. **Compare two builds with fixed metadata.** Package the same classes twice with the same timestamp.
    **Expected:** archive byte hashes equal in this preparedJDK.
    **Verify:** Compare your assertion values or captured diagnostic with archive byte hashes equal in this preparedJDK.
 
-4. **Execute the packaged entrypoint.** Run theJAR in a bounded childJVM.
-   **Expected:** stdoutbuild-ok;exit0.
-   **Verify:** Compare your assertion values or captured diagnostic with stdoutbuild-ok;exit0.
+4. **Execute the packaged entrypoint.** Run the JAR in a bounded childJVM.
+   **Expected:** stdoutbuild-ok;exit 0.
+   **Verify:** Compare your assertion values or captured diagnostic with stdoutbuild-ok;exit 0.
 
-5. **Detect a changed source identity.** Hash two source strings differing in their printedmessage.
+5. **Detect a changed source identity.** Hash two source strings differing in their printed message.
    **Expected:** differentSHA256digests.
    **Verify:** Compare your assertion values or captured diagnostic with differentSHA256digests.
 
-6. **Record an explicit dependency contract.** Represent H2 asversion2.5.252 witha requiredverifiedhash field andreject a movingLATEST label.
-   **Expected:** exactversionaccepted;LATESTnot treated as a pin.
-   **Verify:** Compare your assertion values or captured diagnostic with exactversionaccepted;LATESTnot treated as a pin.
+6. **Record an explicit dependency contract.** Represent H2 asversion2.5.252 witha required verified hash field and reject a movingLATEST label.
+   **Expected:** exact version accepted; LATEST not treated as a pin.
+   **Verify:** Compare your assertion values or captured diagnostic with exact version accepted; LATEST not treated as a pin.
 
 ## Common pitfalls and diagnosis
 

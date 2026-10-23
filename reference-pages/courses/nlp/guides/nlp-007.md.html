@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -123,12 +169,12 @@
 <p>The unit is one document, not one token or one customer. Repeated occurrences of tea in a document increase term frequency but count only once toward document frequency. Changing the document boundaries therefore changes IDF even if the concatenated text is unchanged. Preserve the corpus definition and fit the vocabulary/IDF only on the training or indexed collection appropriate to the evaluation claim.</p>
 <p>This lesson derives the exact smoothing and normalization convention used by a real scikit-learn TfidfVectorizer. TF-IDF is a family of weighting choices, so an undocumented formula can produce a valid-looking vector different from a library&#x27;s result. We compare every coordinate against a hand-built oracle before using cosine scores.</p>
 <h3 id="derive-the-chosen-weighting-convention">Derive the chosen weighting convention<a class="heading-anchor" href="#derive-the-chosen-weighting-convention" aria-label="Link to this section">#</a></h3>
-<p>Let n be the number of training documents and df_j the number containing term j. With smooth_idf=True, the implementation used here assigns idf_j=log((1+n)/(1+df_j))+1. The natural logarithm and final plus one matter. Raw term frequency multiplies that weight by the count tf_ij; optional sublinear frequency instead uses 1+log(tf_ij) for positive counts.</p>
-<p>The two training documents are tea tea cup and coffee cup. Sorted vocabulary order is [coffee,cup,tea]. Coffee and tea each occur in one document, while cup occurs in both. Thus the rare-term weight a is log(3/2)+1, and cup has weight one. Before normalization the rows are [0,1,2a] and [a,1,0].</p>
-<p>L2 normalization divides each nonzero row by its Euclidean norm. It removes overall magnitude from cosine comparisons while retaining relative term weighting. The first row norm is sqrt(1+4a^2). A repeated term still changes direction relative to other terms, so normalization does not erase every effect of document length or repetition.</p>
+<p>Let n be the number of training documents and df_j the number containing term j. With smooth_idf=True, the implementation used here assigns <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">f</mi></mrow><mrow><mi>j</mi></mrow></msub><mo>=</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mi>n</mi></mrow><mrow><mn>1</mn><mo>+</mo><mo>∂</mo><msub><mi>f</mi><mrow><mi>j</mi></mrow></msub></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathrm{idf}_{j}=\log(\frac{1+n}{1+\partial f_{j}})+1</annotation></semantics></math>. The natural logarithm and final plus one matter. Raw term frequency multiplies that weight by the count tf_ij; optional sublinear frequency instead uses <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>+</mo><mi>log</mi><mo stretchy="false">(</mo><msub><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">f</mi></mrow><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1+\log(\mathrm{tf}_{ij})</annotation></semantics></math> for positive counts.</p>
+<p>The two training documents are tea tea cup and coffee cup. Sorted vocabulary order is [coffee,cup,tea]. Coffee and tea each occur in one document, while cup occurs in both. Thus the rare-term weight a is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\log(\frac{3}{2})+1</annotation></semantics></math>, and cup has weight one. Before normalization the rows are [0,1,2a] and [a,1,0].</p>
+<p>L2 normalization divides each nonzero row by its Euclidean norm. It removes overall magnitude from cosine comparisons while retaining relative term weighting. The first row norm is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{1+4a^2}</annotation></semantics></math>. A repeated term still changes direction relative to other terms, so normalization does not erase every effect of document length or repetition.</p>
 <h3 id="read-the-sparse-matrix-and-api">Read the sparse matrix and API<a class="heading-anchor" href="#read-the-sparse-matrix-and-api" aria-label="Link to this section">#</a></h3>
 <p>fit_transform learns the vocabulary and IDF from TRAIN and returns a sparse matrix. transform applies those frozen values to a query or held-out document. get_feature_names_out supplies the column mapping. Never interpret coefficient or vector position zero as a particular word without checking that mapping.</p>
-<p>A sparse matrix stores nonzero entries rather than a full dense rectangle. This matters when thousands of documents use only a small fraction of a large vocabulary. The worked fixture can safely call toarray because it is only two by three. Converting a real corpus matrix to dense can exhaust memory, so use sparse multiplication and bounded inspection in production.</p>
+<p>A sparse matrix stores nonzero entries rather than a full dense rectangle. This matters when thousands of documents use only a small fraction of a large vocabulary. The worked fixture can safely call <code>toarray()</code> because it is only two by three. Converting a real corpus matrix to dense can exhaust memory, so use sparse multiplication and bounded inspection in production.</p>
 <p>For normalized nonzero vectors, cosine equals their dot product. The expression X @ query.T produces one score per document. A query with no known terms becomes a zero vector. The computed dot products are all zero, but that is an absence-of-representation case, not evidence that every document is equally irrelevant. A retrieval system should recognize it and choose an explicit fallback or abstention.</p>
 <h3 id="representation-limitations-and-diagnosis">Representation limitations and diagnosis<a class="heading-anchor" href="#representation-limitations-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A unigram representation ignores order, so dog bites person and person bites dog share the same counts. It can also lose negation, domain synonyms and spelling variants. Character n-grams, word n-grams or other representations may address some failures, but each changes the vocabulary and evaluation contract. A dense embedding is another candidate, not an automatic replacement for a useful lexical baseline.</p>
@@ -136,23 +182,23 @@
 <p>The reference checks raw counts, IDF values, normalized vectors, cosine, sublinear TF and frozen unknown-token behavior separately. This decomposition helps locate a mismatch: a wrong document frequency differs from a right vector with the wrong normalization or vocabulary order.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-compute-df-and-idf">Worked example 1: Compute DF and IDF<a class="heading-anchor" href="#worked-example-1-compute-df-and-idf" aria-label="Link to this section">#</a></h4>
-<p>For the two authored documents, df(coffee)=1, df(cup)=2 and df(tea)=1. With the chosen smoothed formula, IDF is [a,1,a] where a=log(1.5)+1, about 1.40547. Counting the two tea occurrences as df=2 would incorrectly reduce its IDF.</p>
+<p>For the two authored documents, df(coffee)=1, df(cup)=2 and df(tea)=1. With the chosen smoothed formula, IDF is [a,1,a] where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>a</mi><mo>=</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1.5</mn><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a=\log(1.5)+1</annotation></semantics></math>, about 1.40547. Counting the two tea occurrences as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>∂</mo><mi>f</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\partial f=2</annotation></semantics></math> would incorrectly reduce its IDF.</p>
 <h4 id="worked-example-2-normalize-and-retrieve">Worked example 2: Normalize and retrieve<a class="heading-anchor" href="#worked-example-2-normalize-and-retrieve" aria-label="Link to this section">#</a></h4>
-<p>The first raw weighted row [0,1,2a] becomes that row divided by sqrt(1+4a^2). Query tea becomes [0,0,1]. Their dot product is 2a/sqrt(1+4a^2), while the coffee document has score zero. The score follows the declared lexical representation and does not claim semantic understanding of tea.</p>
+<p>The first raw weighted row [0,1,2a] becomes that row divided by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{1+4a^2}</annotation></semantics></math>. Query tea becomes [0,0,1]. Their dot product is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn><mi>a</mi></mrow><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2a}{\sqrt{1+4a^2}}</annotation></semantics></math>, while the coffee document has score zero. The score follows the declared lexical representation and does not claim semantic understanding of tea.</p>
 <h4 id="worked-example-3-observe-an-unsupported-query">Worked example 3: Observe an unsupported query<a class="heading-anchor" href="#worked-example-3-observe-an-unsupported-query" aria-label="Link to this section">#</a></h4>
 <p>Both matcha and an empty query produce zero stored entries under the frozen vocabulary. The vocabulary remains unchanged. A production search endpoint should report or handle this boundary explicitly rather than returning a seemingly meaningful ranking based only on arbitrary tie order.</p>
 <h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
 <p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
-<pre><code class="language-python">import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-v=TfidfVectorizer().fit([&#x27;tea tea cup&#x27;,&#x27;coffee cup&#x27;])
-print(v.get_feature_names_out(),v.idf_)
-a=np.log(3/2)+1
-assert np.allclose(v.idf_,[a,1,a])</code></pre>
-<pre><code class="language-python">x=v.transform([&#x27;tea tea cup&#x27;,&#x27;coffee cup&#x27;]);q=v.transform([&#x27;tea&#x27;])
-scores=(x@q.T).toarray().ravel()
-print(scores)
-assert np.isclose(scores[0],2*a/np.sqrt(1+4*a*a)) and scores[1]==0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.feature_extraction.text <span class="syntax-keyword">import</span> TfidfVectorizer
+v<span class="syntax-operator">=</span>TfidfVectorizer<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tea tea cup</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">coffee cup</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>v<span class="syntax-operator">.</span>get_feature_names_out<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>v<span class="syntax-operator">.</span>idf_<span class="syntax-punctuation">)</span>
+a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>v<span class="syntax-operator">.</span>idf_<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>a<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">x<span class="syntax-operator">=</span>v<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tea tea cup</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">coffee cup</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>q<span class="syntax-operator">=</span>v<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">tea</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+scores<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>x<span class="syntax-decorator">@q</span><span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>toarray<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>ravel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>a<span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-number">4</span><span class="syntax-operator">*</span>a<span class="syntax-operator">*</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> scores<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-007.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-007-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-007.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-007_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
@@ -163,8 +209,8 @@ assert np.isclose(scores[0],2*a/np.sqrt(1+4*a*a)) and scores[1]==0</code></pre>
 <p><strong>Hints:</strong> Each document contributes at most one to a term&#x27;s DF.</p>
 <h4 id="exercise-2-match-the-idf-formula">Exercise 2: Match the IDF formula<a class="heading-anchor" href="#exercise-2-match-the-idf-formula" aria-label="Link to this section">#</a></h4>
 <p>Implement the stated smoothed IDF and compare with vectorizer.idf_.</p>
-<p><strong>Expected:</strong> [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.</p>
-<p><strong>Verify:</strong> [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\log(\frac{3}{2})+1,1,\log(\frac{3}{2})+1]</annotation></semantics></math> in the verified vocabulary order.</p>
+<p><strong>Verify:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\log(\frac{3}{2})+1,1,\log(\frac{3}{2})+1]</annotation></semantics></math> in the verified vocabulary order. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Include both smoothing additions and the final plus one.</p>
 <h4 id="exercise-3-build-the-normalized-rows">Exercise 3: Build the normalized rows<a class="heading-anchor" href="#exercise-3-build-the-normalized-rows" aria-label="Link to this section">#</a></h4>
 <p>Construct both weighted rows manually and normalize each nonzero row.</p>
@@ -173,8 +219,8 @@ assert np.isclose(scores[0],2*a/np.sqrt(1+4*a*a)) and scores[1]==0</code></pre>
 <p><strong>Hints:</strong> Normalize after multiplying counts by IDF.</p>
 <h4 id="exercise-4-compute-sparse-cosine">Exercise 4: Compute sparse cosine<a class="heading-anchor" href="#exercise-4-compute-sparse-cosine" aria-label="Link to this section">#</a></h4>
 <p>Transform query tea and multiply X by its transpose.</p>
-<p><strong>Expected:</strong> First score 2a/sqrt(1+4a^2); second score zero.</p>
-<p><strong>Verify:</strong> First score 2a/sqrt(1+4a^2); second score zero. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> First score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn><mi>a</mi></mrow><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2a}{\sqrt{1+4a^2}}</annotation></semantics></math>; second score zero.</p>
+<p><strong>Verify:</strong> First score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn><mi>a</mi></mrow><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2a}{\sqrt{1+4a^2}}</annotation></semantics></math>; second score zero. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Normalized nonzero vectors turn cosine into a dot product.</p>
 <h4 id="exercise-5-handle-oov-without-refitting">Exercise 5: Handle OOV without refitting<a class="heading-anchor" href="#exercise-5-handle-oov-without-refitting" aria-label="Link to this section">#</a></h4>
 <p>Transform matcha and empty text, then compare the vocabulary before/after.</p>
@@ -183,13 +229,13 @@ assert np.isclose(scores[0],2*a/np.sqrt(1+4*a*a)) and scores[1]==0</code></pre>
 <p><strong>Hints:</strong> Use transform rather than fit_transform for evaluation queries.</p>
 <h4 id="exercise-6-change-one-weighting-choice">Exercise 6: Change one weighting choice<a class="heading-anchor" href="#exercise-6-change-one-weighting-choice" aria-label="Link to this section">#</a></h4>
 <p>Enable sublinear_tf without normalization and inspect the tea weight.</p>
-<p><strong>Expected:</strong> Tea weight becomes (1+log(2))*a, distinct from 2a.</p>
-<p><strong>Verify:</strong> Tea weight becomes (1+log(2))*a, distinct from 2a. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Expected:</strong> Tea weight becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>·</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">(1+\log(2))\cdot a</annotation></semantics></math>, distinct from 2a.</p>
+<p><strong>Verify:</strong> Tea weight becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>·</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">(1+\log(2))\cdot a</annotation></semantics></math>, distinct from 2a. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
 <p><strong>Hints:</strong> Keep the same fitted corpus, IDF smoothing and column mapping.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why can TF-IDF remain useful beside dense embeddings?</strong> It provides an efficient lexical baseline that preserves exact rare terms and is easy to inspect. Domain names and identifiers can favor lexical matching; compare or combine representations using task evidence.</p>
 <p><strong>Interview: Is IDF fitted on test text always leakage?</strong> The answer depends on the declared setup. A fixed indexed corpus can be part of a transductive retrieval task, while an inductive classification claim requires train-only fitting. The information boundary must be explicit.</p>
-<p><strong>Interview: Why avoid toarray on a real corpus?</strong> Sparse matrices save memory by storing nonzero values. Densifying can allocate documents times vocabulary entries even when almost all are zero. Inspect bounded slices or use sparse operations.</p>
+<p><strong>Interview: Why avoid <code>toarray()</code> on a real corpus?</strong> Sparse matrices save memory by storing nonzero values. Densifying can allocate documents times vocabulary entries even when almost all are zero. Inspect bounded slices or use sparse operations.</p>
 <h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
 <p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-008</code>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
@@ -197,7 +243,7 @@ assert np.isclose(scores[0],2*a/np.sqrt(1+4*a*a)) and scores[1]==0</code></pre>
 <li><a href="https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction">scikit-learn text feature extraction</a></li>
 </ul>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-007.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-007.
 Read courses/nlp/guides/nlp-007.md and courses/nlp/learners/nlp-007.py.
 Direct prerequisites: `nlp-006`.
 Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.

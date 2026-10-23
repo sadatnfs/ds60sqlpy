@@ -50,7 +50,7 @@ g=tape.gradient(loss,optimum); assert g is not None and float(g)==0
 
 ## Exercise 3: Repair two updates
 
-The question is: Use x1,2,3,y2x,w0 and rate.1 for exactly2 steps.
+The question is: Use x = [1, 2, 3],y = 2x,w = 0 and rate 0.1 for exactly 2 steps.
 
 The first update is28/15 and the second moves closer to2. This exact recurrence tests the loop order independently of framework metrics.
 

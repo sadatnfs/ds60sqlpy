@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-001`
 
 ## Learning objectives
 
-Explain primitive, overflow, narrowing conversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Calculate7/2 and7/2.0. The final exercise transfers the mechanism to reject an unsupported exact division.
+Explain primitive, overflow, narrowing conversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Calculate integer division `7 / 2` and floating-point division `7 / 2.0`. The final exercise transfers the mechanism to reject an unsupported exact division.
 
 ## Purpose and mental model
 
@@ -14,7 +14,7 @@ A numeric type defines both a range and a set of operations. Java int arithmetic
 
 ## Vocabulary and concepts
 
-**Primitive:** A built-in value type such asint orboolean.
+**Primitive:** A built-in value type such asint or boolean.
 
 **Overflow:** A result outside the range of its chosen representation.
 
@@ -22,7 +22,7 @@ A numeric type defines both a range and a set of operations. Java int arithmetic
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-002/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-L suffix creates a long literal. A widening conversion fromint tolong preserves the integer value, but the multiplication must occur after widening if it would overflowint. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so1.0 and1.00 need a declared equality policy.
+L suffix creates a long literal. A widening conversion fromint to long preserves the integer value, but the multiplication must occur after widening if it would overflowint. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so1.0 and 1.00 need a declared equality policy.
 
 ## Worked example / walkthrough
 
@@ -59,11 +59,11 @@ public class Main {
 
 ```
 
-**Expected:** integer3 and double3.5.
+**Expected:** integer 3 and double 3.5.
 
 ### Example B: Widen before multiplication
 
-The cast affects the multiplication itself. Casting the wrappedint result tolong afterward cannot recover lost information.
+The cast affects the multiplication itself. Casting the wrappedint result to long afterward cannot recover lost information.
 
 ```java
 import java.util.*;
@@ -92,9 +92,9 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Compare integer and decimal division.** Calculate7/2 and7/2.0.
-   **Expected:** integer3 and double3.5.
-   **Verify:** Compare your assertion values or captured diagnostic with integer3 and double3.5.
+1. **Compare integer and decimal division.** Calculate integer division `7 / 2` and floating-point division `7 / 2.0`.
+   **Expected:** integer 3 and double 3.5.
+   **Verify:** Compare your assertion values or captured diagnostic with integer 3 and double 3.5.
 
 2. **Widen before multiplication.** Compute50000 squared with an explicitly widened left operand.
    **Expected:** 2500000000L;int product differs.
@@ -104,17 +104,17 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** ArithmeticException.
    **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException.
 
-4. **Preserve decimal source meaning.** Add BigDecimal values constructed from strings0.10 and0.20.
+4. **Preserve decimal source meaning.** Add BigDecimal values constructed from strings0.10 and 0.20.
    **Expected:** exact decimal0.30.
    **Verify:** Compare your assertion values or captured diagnostic with exact decimal0.30.
 
-5. **Distinguish value from scale.** Compare BigDecimal1.0 and1.00 withcompareTo andequals.
-   **Expected:** compareTo0;equalsfalse.
-   **Verify:** Compare your assertion values or captured diagnostic with compareTo0;equalsfalse.
+5. **Distinguish value from scale.** Compare BigDecimal1.0 and 1.00 withcompareTo and equals.
+   **Expected:** compareTo0;equals false.
+   **Verify:** Compare your assertion values or captured diagnostic with compareTo0;equals false.
 
-6. **Reject an unsupported exact division.** Divide decimal1 by3 without a rounding policy, then supply scale2 andHALF_UP.
-   **Expected:** exact division throws;rounded result0.33.
-   **Verify:** Compare your assertion values or captured diagnostic with exact division throws;rounded result0.33.
+6. **Reject an unsupported exact division.** Divide decimal1 by3 without a rounding policy, then supply scale2 and HALF_UP.
+   **Expected:** exact division throws; rounded result 0.33.
+   **Verify:** Compare your assertion values or captured diagnostic with exact division throws; rounded result 0.33.
 
 ## Common pitfalls and diagnosis
 

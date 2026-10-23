@@ -54,7 +54,7 @@ A two-output example makes the semantic unit visible. WithB=2, \(D=2\) and all r
 
 Masking must use the same participation rule in the numerator and denominator. Keeping only the first two residuals gives numerator 2, count 2 and loss 1. Zeroing the third contribution and then averaging the original three positions gives \(\frac{2}{3}\). The valid mean gradient for the retained residuals is[1, -1]; dividing by the padded length shrinks it to[\(\frac{2}{3}\), \(\frac{-2}{3}\)]. Padding can therefore change both reported quality and training updates without adding any new observation.
 
-An all-false mask is not the same as two accepted residuals equal to zero. The former has no defined mean denominator; the latter has a valid zero loss. Decide whether the surrounding pipeline should reject an empty objective orskip an update under an explicit policy. Silently calling it a perfect batch hides a missing-data condition.
+An all-false mask is not the same as two accepted residuals equal to zero. The former has no defined mean denominator; the latter has a valid zero loss. Decide whether the surrounding pipeline should reject an empty objective or skip an update under an explicit policy. Silently calling it a perfect batch hides a missing-data condition.
 
 Group weighting provides another counterexample. If one group contains residual[2] and another contains[0, 0, 0], the all-record MSE is \(\frac{4}{4}=1\). The unweighted mean of group MSEs is(4+0)/2=2. The correct choice depends on whether equal influence belongs to observations or groups. Accumulation and distributed-gradient chapters return to this denominator problem when batch sizes differ.
 
@@ -136,7 +136,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-If duplicating a batch changes a reported mean, inspect the actual reduction and any mask orweight denominator. If adding padding makes the objective smaller, compare the included count with the tensor's total element count. If gradients differ by a constant factor across implementations, check batch and feature reductions before adjusting the learning rate.
+If duplicating a batch changes a reported mean, inspect the actual reduction and any mask or weight denominator. If adding padding makes the objective smaller, compare the included count with the tensor's total element count. If gradients differ by a constant factor across implementations, check batch and feature reductions before adjusting the learning rate.
 
 If the forward scalar agrees but gradients do not, inspect per-entry losses and shapes. Broadcasting can create a different pairing that accidentally shares one scalar value. If a masked batch has no participants, handle that absence explicitly instead of widening a tolerance aroundNaN. During TensorFlow comparison, inspect both feature reduction and batch/sample weighting; matching a function's name does not establish that the same axes entered the denominator.
 

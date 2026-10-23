@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -127,54 +173,54 @@
 <h3 id="exercise-1-compute-a-full-prefix-oracle">Exercise 1: Compute a full-prefix oracle<a class="heading-anchor" href="#exercise-1-compute-a-full-prefix-oracle" aria-label="Link to this section">#</a></h3>
 <p>The question is: Initialize seed7 decoder and evaluate IDs2,5,7,3 at once.</p>
 <p>The reference recomputes the complete context without relying on cached state. It provides a separate path for checking the incremental implementation.</p>
-<pre><code class="language-python">torch.manual_seed(7); model=TinyDecoder(); model.eval(); ids=torch.tensor([[2,5,7,3]])
-with torch.no_grad(): full,_=model(ids)
-assert tuple(full.shape)==(1,4,16)</code></pre>
+<pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-operator">=</span>TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> ids<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> full<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>full<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> logits shape(1,4,16).</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with logits shape(1,4,16).</p>
 <h3 id="exercise-2-run-one-token-at-a-time">Exercise 2: Run one token at a time<a class="heading-anchor" href="#exercise-2-run-one-token-at-a-time" aria-label="Link to this section">#</a></h3>
 <p>The question is: Carry returned K/V through four one-token calls and concatenate logits.</p>
 <p>Both key/value history and position offset must be correct. A cache with valid tensor shapes can still produce wrong logits if positions restart at zero.</p>
-<pre><code class="language-python">cache=None; outputs=[]
-with torch.no_grad():
-    for i in range(4):
-        logits,cache=model(ids[:,i:i+1],cache); outputs.append(logits)
-incremental=torch.cat(outputs,dim=1)
-torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> incremental logits match full within1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with incremental logits match full within1e-6.</p>
+<pre class="highlighted-code"><code class="language-python">cache<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> outputs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        logits<span class="syntax-punctuation">,</span>cache<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span>i<span class="syntax-punctuation">:</span>i<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>cache<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> outputs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span>
+incremental<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>cat<span class="syntax-punctuation">(</span>outputs<span class="syntax-punctuation">,</span>dim<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>incremental<span class="syntax-punctuation">,</span>full<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> incremental logits match full within 1e-6.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with incremental logits match full within 1e-6.</p>
 <h3 id="exercise-3-inspect-cache-growth">Exercise 3: Inspect cache growth<a class="heading-anchor" href="#exercise-3-inspect-cache-growth" aria-label="Link to this section">#</a></h3>
 <p>The question is: Check final cache token count and per-head width.</p>
 <p>The time dimension grows with consumed tokens. The head and feature dimensions are fixed by the model and should not grow during a request.</p>
-<pre><code class="language-python">assert tuple(cache[&#x27;k&#x27;].shape)==tuple(cache[&#x27;v&#x27;].shape)==(1,2,4,16)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>cache<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">k</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>cache<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> cache shape(1,2,4,16).</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with cache shape(1,2,4,16).</p>
 <h3 id="exercise-4-bind-ownership">Exercise 4: Bind ownership<a class="heading-anchor" href="#exercise-4-bind-ownership" aria-label="Link to this section">#</a></h3>
 <p>The question is: Associate the cache with requestA and modelv1; reject requestB.</p>
 <p>The numerical decoder cannot infer which person or request owns a tensor. Ownership belongs at the caller boundary and must be tested explicitly.</p>
-<pre><code class="language-python">owned={&#x27;request&#x27;:&#x27;A&#x27;,&#x27;model&#x27;:&#x27;v1&#x27;,&#x27;state&#x27;:cache}
-def acquire(record,request,version):
-    if record[&#x27;request&#x27;]!=request or record[&#x27;model&#x27;]!=version: raise ValueError(&#x27;foreign cache&#x27;)
-    return record[&#x27;state&#x27;]
-assert acquire(owned,&#x27;A&#x27;,&#x27;v1&#x27;) is cache
-try: acquire(owned,&#x27;B&#x27;,&#x27;v1&#x27;)
-except ValueError: pass
-else: raise AssertionError(&#x27;cross-request cache accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python">owned<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">request</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">state</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>cache<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">acquire</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">,</span>request<span class="syntax-punctuation">,</span>version<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">request</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span>request <span class="syntax-operator">or</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span>version<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">foreign cache</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">state</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> acquire<span class="syntax-punctuation">(</span>owned<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> cache
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> acquire<span class="syntax-punctuation">(</span>owned<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">B</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">cross-request cache accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError for foreign request.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for foreign request.</p>
 <h3 id="exercise-5-start-a-fresh-request-empty">Exercise 5: Start a fresh request empty<a class="heading-anchor" href="#exercise-5-start-a-fresh-request-empty" aria-label="Link to this section">#</a></h3>
-<p>The question is: Run token2 with no cache and compare with the first full-prefix position.</p>
+<p>The question is: Run token 2 with no cache and compare with the first full-prefix position.</p>
 <p>An empty cache resets both context and position offset. Clearing only metadata while retaining tensors would not restore a fresh request.</p>
-<pre><code class="language-python">with torch.no_grad(): fresh,_=model(torch.tensor([[2]]),None)
-torch.testing.assert_close(fresh,full[:,:1],atol=1e-6,rtol=0)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> fresh<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>model<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>fresh<span class="syntax-punctuation">,</span>full<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> logits match the original first position.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with logits match the original first position.</p>
 <h3 id="exercise-6-invalidate-after-a-model-change">Exercise 6: Invalidate after a model change<a class="heading-anchor" href="#exercise-6-invalidate-after-a-model-change" aria-label="Link to this section">#</a></h3>
 <p>The question is: Attempt to use the v1-owned cache with versionv2.</p>
 <p>Keys and values were computed using specific weights and tokenization. Reusing them after either changes can produce inconsistent inference even if the dimensions remain compatible.</p>
-<pre><code class="language-python">try: acquire(owned,&#x27;A&#x27;,&#x27;v2&#x27;)
-except ValueError: pass
-else: raise AssertionError(&#x27;stale cache accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> acquire<span class="syntax-punctuation">(</span>owned<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">A</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">v2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stale cache accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError for stale version.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for stale version.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

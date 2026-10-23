@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,19 +165,19 @@
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate, approximately 90 minutes. Direct prerequisites: <code>java-023</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Explain virtual thread, carrier, backpressure, pinning in java21 using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a virtual thread that recordsisVirtual andjoin it. The final exercise transfers the mechanism to keep a blocking wait outside a monitor.</p>
+<p>Explain virtual thread, carrier, backpressure, pinning in java21 using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a virtual thread that records isVirtual and join it. The final exercise transfers the mechanism to keep a blocking wait outside a monitor.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas andmemory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.</p>
-<p>Java21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.</p>
+<p>Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express. They still run on carrier operating-system threads and do not create additional CPU cores. A CPU-bound calculation does not become faster merely because it is placed in a virtual thread. Resource limits such as database connections,remote quotas and memory still need backpressure. A virtual-thread-per-task executor is therefore not permission to admit unlimited work.</p>
+<p>Java 21 has pinning cases where a virtual thread blocks while holding a synchronized monitor or during certain native operations,preventing its carrier from being reused for other virtual threads. Later JDK behavior can differ,so version the explanation. Keep blocking work outside a monitor when the state contract permits it,or redesign the synchronization carefully. This lesson checks thread identity,lifetime,cancellation and a semaphore admission limit without making throughput claims.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Virtual thread:</strong> A lightweight Java thread scheduled over carrier threads.</p>
 <p><strong>Carrier:</strong> An operating-system thread executing virtual-thread work.</p>
 <p><strong>Backpressure:</strong> A limit on admitted resource-consuming operations.</p>
-<p><strong>Pinning in Java21:</strong> A condition preventing a blocked virtual thread from releasing its carrier.</p>
+<p><strong>Pinning in Java 21:</strong> A condition preventing a blocked virtual thread from releasing its carrier.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
 <p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-024/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
-<pre><code class="language-text">javac --release 21 Main.java
+<pre class="highlighted-code"><code class="language-text">javac --release 21 Main.java
 java -ea Main</code></pre>
 <p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
@@ -139,41 +185,41 @@ java -ea Main</code></pre>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-observe-virtual-identity">Example A: Observe virtual identity<a class="heading-anchor" href="#example-a-observe-virtual-identity" aria-label="Link to this section">#</a></h4>
 <p>The identity check establishes the actual thread type. It does not measure performance or the number of carrier threads used.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        var virtual=new java.util.concurrent.atomic.AtomicBoolean();Thread task=Thread.ofVirtual().start(() -&gt; virtual.set(Thread.currentThread().isVirtual()));task.join(2000);
-        assert !task.isAlive() &amp;&amp; virtual.get();
-    }
-}
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">var</span> virtual<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">atomic</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">AtomicBoolean</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>Thread task<span class="syntax-operator">=</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofVirtual</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">start</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> virtual<span class="syntax-punctuation">.</span><span class="syntax-attribute">set</span><span class="syntax-punctuation">(</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">currentThread</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isVirtual</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>task<span class="syntax-punctuation">.</span><span class="syntax-attribute">join</span><span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>task<span class="syntax-punctuation">.</span><span class="syntax-attribute">isAlive</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> virtual<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> true and terminated.</p>
 <h4 id="example-b-use-a-scoped-virtual-executor">Example B: Use a scoped virtual executor<a class="heading-anchor" href="#example-b-use-a-scoped-virtual-executor" aria-label="Link to this section">#</a></h4>
 <p>The executor lifetime encloses its tasks. Capturing a separate effectively-final input per submission avoids confusing loop-state ownership.</p>
-<pre><code class="language-java">import java.util.*;
+<pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">import</span> java.util.*<span class="syntax-punctuation">;</span>
 
-public class Main {
+<span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    public static void main(String[] args) throws Exception {
-        var virtual=new java.util.concurrent.atomic.AtomicBoolean();Thread task=Thread.ofVirtual().start(() -&gt; virtual.set(Thread.currentThread().isVirtual()));task.join(2000);
-        assert !task.isAlive() &amp;&amp; virtual.get();
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">var</span> virtual<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">atomic</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">AtomicBoolean</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>Thread task<span class="syntax-operator">=</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">ofVirtual</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">start</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> virtual<span class="syntax-punctuation">.</span><span class="syntax-attribute">set</span><span class="syntax-punctuation">(</span>Thread<span class="syntax-punctuation">.</span><span class="syntax-attribute">currentThread</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">isVirtual</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>task<span class="syntax-punctuation">.</span><span class="syntax-attribute">join</span><span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">assert</span> <span class="syntax-operator">!</span>task<span class="syntax-punctuation">.</span><span class="syntax-attribute">isAlive</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> virtual<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-        try(var executor=java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
-            List&lt;java.util.concurrent.Future&lt;Integer&gt;&gt; futures=new ArrayList&lt;&gt;();for(int value=1;value&lt;=4;value++){int input=value;futures.add(executor.submit(() -&gt; input*input));}
-            List&lt;Integer&gt; results=new ArrayList&lt;&gt;();for(var future:futures)results.add(future.get(2,java.util.concurrent.TimeUnit.SECONDS));
-            assert results.equals(List.of(1,4,9,16));
-        }
-    }
-}
+        <span class="syntax-keyword">try</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> executor<span class="syntax-operator">=</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Executors</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">newVirtualThreadPerTaskExecutor</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+            List<span class="syntax-operator">&lt;</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">Future</span><span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> futures<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> value<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span>value<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span>value<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">int</span> input<span class="syntax-operator">=</span>value<span class="syntax-punctuation">;</span>futures<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span>executor<span class="syntax-punctuation">.</span><span class="syntax-attribute">submit</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> input<span class="syntax-operator">*</span>input<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">}</span>
+            List<span class="syntax-operator">&lt;</span>Integer<span class="syntax-operator">&gt;</span> results<span class="syntax-operator">=</span><span class="syntax-keyword">new</span> ArrayList<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">var</span> future<span class="syntax-punctuation">:</span>futures<span class="syntax-punctuation">)</span>results<span class="syntax-punctuation">.</span><span class="syntax-attribute">add</span><span class="syntax-punctuation">(</span>future<span class="syntax-punctuation">.</span><span class="syntax-attribute">get</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>java<span class="syntax-punctuation">.</span><span class="syntax-attribute">util</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">concurrent</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">TimeUnit</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">SECONDS</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+            <span class="syntax-keyword">assert</span> results<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span>List<span class="syntax-punctuation">.</span><span class="syntax-attribute">of</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 </code></pre>
 <p><strong>Expected:</strong> 1,4,9,16.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Observe virtual identity.</strong> Start a virtual thread that recordsisVirtual andjoin it. <strong>Expected:</strong> true and terminated. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with true and terminated.</li>
+<li><strong>Observe virtual identity.</strong> Start a virtual thread that records isVirtual and join it. <strong>Expected:</strong> true and terminated. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with true and terminated.</li>
 </ol>
 <ol>
 <li><strong>Use a scoped virtual executor.</strong> Submit four square calculations and retrieve their results with timeouts. <strong>Expected:</strong> 1,4,9,16. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 1,4,9,16.</li>
@@ -202,7 +248,7 @@ public class Main {
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-024: Virtual threads and blocking work.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for java-024: Virtual threads and blocking work.
 Read courses/java/guides/java-024.md and courses/java/lessons/java-024.java. Direct prerequisites: `java-023`.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.

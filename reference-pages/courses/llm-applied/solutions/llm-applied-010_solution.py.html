@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -115,56 +161,56 @@
       <h1>Llm Applied 010 Solution</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-010_solution.py</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-010: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
-<span> </span>
-<span>from collections import deque</span>
-<span> </span>
-<span>def rewrite(query,synonyms): return &#x27; &#x27;.join(synonyms.get(token,token) for token in query.lower().split())</span>
-<span>def walk(start,graph,max_hops):</span>
-<span>    if type(max_hops) is not int or max_hops&lt;0: raise ValueError(&#x27;nonnegative integer hop budget required&#x27;)</span>
-<span>    if start not in graph: return []</span>
-<span>    queue=deque([(start,0)]); seen={start}; result=[]</span>
-<span>    while queue:</span>
-<span>        node,depth=queue.popleft(); result.append(node)</span>
-<span>        if depth==max_hops: continue</span>
-<span>        for target in graph[node]:</span>
-<span>            if target in graph and target not in seen: seen.add(target); queue.append((target,depth+1))</span>
-<span>    return result</span>
-<span> </span>
-<span> </span>
-<span>def verify():</span>
-<span>    # Exercise 1: Apply a controlled synonym rewrite</span>
-<span>    original=&#x27;buy rate&#x27;; rewritten=rewrite(original,{&#x27;buy&#x27;:&#x27;purchase&#x27;})</span>
-<span>    assert rewritten==&#x27;purchase rate&#x27; and original==&#x27;buy rate&#x27;</span>
-<span> </span>
-<span>    # Exercise 2: Retain a rewrite trace</span>
-<span>    trace={&#x27;original&#x27;:original,&#x27;rewritten&#x27;:rewritten,&#x27;policy&#x27;:&#x27;synonyms-v1&#x27;}</span>
-<span>    assert set(trace)=={&#x27;original&#x27;,&#x27;rewritten&#x27;,&#x27;policy&#x27;}</span>
-<span> </span>
-<span>    # Exercise 3: Follow two evidence hops</span>
-<span>    graph={&#x27;metric&#x27;:[&#x27;exclusions&#x27;],&#x27;exclusions&#x27;:[&#x27;test_accounts&#x27;],&#x27;test_accounts&#x27;:[]}</span>
-<span>    assert walk(&#x27;metric&#x27;,graph,2)==[&#x27;metric&#x27;,&#x27;exclusions&#x27;,&#x27;test_accounts&#x27;]</span>
-<span> </span>
-<span>    # Exercise 4: Stop at the declared depth</span>
-<span>    assert walk(&#x27;metric&#x27;,graph,1)==[&#x27;metric&#x27;,&#x27;exclusions&#x27;]</span>
-<span>    for bad_budget in [1.5,True,float(&#x27;nan&#x27;),-1]:</span>
-<span>        try: walk(&#x27;metric&#x27;,graph,bad_budget)</span>
-<span>        except ValueError: pass</span>
-<span>        else: raise AssertionError(&#x27;invalid hop budget accepted&#x27;)</span>
-<span> </span>
-<span>    # Exercise 5: Break a retrieval cycle</span>
-<span>    cyclic={**graph,&#x27;test_accounts&#x27;:[&#x27;metric&#x27;]}; result=walk(&#x27;metric&#x27;,cyclic,10)</span>
-<span>    assert result==[&#x27;metric&#x27;,&#x27;exclusions&#x27;,&#x27;test_accounts&#x27;] and len(result)==len(set(result))</span>
-<span> </span>
-<span>    # Exercise 6: Preserve authorization across hops</span>
-<span>    admitted={&#x27;metric&#x27;:[&#x27;restricted&#x27;],&#x27;public&#x27;:[]}</span>
-<span>    assert walk(&#x27;metric&#x27;,admitted,3)==[&#x27;metric&#x27;]</span>
-<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
-<span> </span>
-<span> </span>
-<span>if __name__ == &quot;__main__&quot;:</span>
-<span>    print(verify())</span>
-<span> </span></code></pre></article>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;llm-applied-010: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> deque</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">rewrite</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span>synonyms<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;</span><span class="syntax-string"> </span><span class="syntax-string">&#x27;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>synonyms<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>token<span class="syntax-punctuation">,</span>token<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> token <span class="syntax-operator">in</span> query<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">walk</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span>graph<span class="syntax-punctuation">,</span>max_hops<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>max_hops<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> max_hops<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nonnegative integer hop budget required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> start <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> graph<span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    queue<span class="syntax-operator">=</span>deque<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> seen<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>start<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> result<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> queue<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        node<span class="syntax-punctuation">,</span>depth<span class="syntax-operator">=</span>queue<span class="syntax-operator">.</span>popleft<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>node<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> depth<span class="syntax-operator">==</span>max_hops<span class="syntax-punctuation">:</span> <span class="syntax-keyword">continue</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> target <span class="syntax-operator">in</span> graph<span class="syntax-punctuation">[</span>node<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">if</span> target <span class="syntax-operator">in</span> graph <span class="syntax-operator">and</span> target <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> seen<span class="syntax-punctuation">:</span> seen<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> queue<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">,</span>depth<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 1: Apply a controlled synonym rewrite</span></span>
+<span class="source-line">    original<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">buy rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span> rewritten<span class="syntax-operator">=</span>rewrite<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">buy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchase</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> rewritten<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchase rate</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> original<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">buy rate</span><span class="syntax-string">&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 2: Retain a rewrite trace</span></span>
+<span class="source-line">    trace<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">original</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>original<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rewritten</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>rewritten<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">synonyms-v1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>trace<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">original</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rewritten</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 3: Follow two evidence hops</span></span>
+<span class="source-line">    graph<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exclusions</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exclusions</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_accounts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_accounts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> walk<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>graph<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exclusions</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_accounts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 4: Stop at the declared depth</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> walk<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>graph<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exclusions</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> bad_budget <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">nan</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> walk<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>graph<span class="syntax-punctuation">,</span>bad_budget<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span></span>
+<span class="source-line">        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid hop budget accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 5: Break a retrieval cycle</span></span>
+<span class="source-line">    cyclic<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>graph<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_accounts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> result<span class="syntax-operator">=</span>walk<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>cyclic<span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exclusions</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test_accounts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># Exercise 6: Preserve authorization across hops</span></span>
+<span class="source-line">    admitted<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">restricted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">public</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> walk<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>admitted<span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">checks</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></article>
   </main>
 </body>
 </html>

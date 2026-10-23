@@ -96,6 +96,6 @@ Turn the sanitized proposal into a go/no-go review record with explicit evidence
 
 **Expected result/shape:** For spark-030 Exercise 6, A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.
 
-**Verify:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram orsyntax alone.
+**Verify:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.
 
 **Progressive hint:** A checked configuration is useful evidence but is not a completed remote run.

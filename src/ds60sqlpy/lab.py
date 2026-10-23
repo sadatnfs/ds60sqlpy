@@ -71,7 +71,7 @@ class LabServer(PortalServer):
         # A mapped Docker host port changes the one exact accepted Host/Origin,
         # never the listening interface or an allowlist of arbitrary hosts.
         if public_port is not None:
-            self.expected_host = f"127.0.0.1:{public_port}"
+            self.expected_host = "127.0.0.1" if public_port == 80 else f"127.0.0.1:{public_port}"
         self.RequestHandlerClass = LabRequestHandler
         self.coaching = CoachingService(catalog, self.progress)
         self.pads = PadRunner(catalog, python=python)
@@ -85,7 +85,12 @@ class LabServer(PortalServer):
         self._module_state_directory = (
             progress_path.parent / "modules" if progress_path is not None else None
         )
-        self._classroom = ClassroomService(catalog, self.action, self.targets)
+        self._classroom = ClassroomService(
+            catalog,
+            self.action,
+            self.targets,
+            runs_directory=self.progress.path.parent / "classroom-runs",
+        )
 
     def server_close(self) -> None:
         lock = getattr(self, "_module_lock", None)
@@ -96,6 +101,28 @@ class LabServer(PortalServer):
                 if modules is not None:
                     modules.close()
         super().server_close()
+
+    def _save_run_receipt(
+        self,
+        lesson_id: str,
+        language: str,
+        mode: str,
+        source: str,
+        result: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Keep completed execution distinct from a failed attempt to retain its output."""
+        try:
+            receipt = self._classroom.runs.record(lesson_id, language, mode, source, result)
+        except (OSError, TypeError, ValueError):
+            return {
+                **result,
+                "receipt_saved": False,
+                "receipt_error": (
+                    "Execution finished, but its run receipt could not be saved. "
+                    "Copy the output before leaving this page. Do not rerun only to save it."
+                ),
+            }
+        return {**result, "receipt_saved": True, "receipt_id": receipt["id"]}
 
     def action(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Dispatch only catalog-bound operations, with strict input types."""
@@ -194,7 +221,8 @@ class LabServer(PortalServer):
                     "A pad is already running. Wait for its result before running again."
                 )
             try:
-                return self.sql_lessons.run(lesson_id, code, timeout_seconds=timeout)
+                result = self.sql_lessons.run(lesson_id, code, timeout_seconds=timeout)
+                return self._save_run_receipt(lesson_id, "sql", "lesson", code, result)
             finally:
                 self.execution_lock.release()
         if action in {"save-pad", "read-pad", "pad-history", "read-history", "run"}:
@@ -253,11 +281,12 @@ class LabServer(PortalServer):
                     "A pad is already running. Wait for its result before running again."
                 )
             try:
-                return (
+                result = (
                     self.pads.run(lesson_id, language, code)
                     if timeout is None
                     else self.pads.run(lesson_id, language, code, timeout_seconds=timeout)
                 )
+                return self._save_run_receipt(lesson_id, language, "snippet", code, result)
             finally:
                 self.execution_lock.release()
         raise ValueError("Unknown learning-lab action.")

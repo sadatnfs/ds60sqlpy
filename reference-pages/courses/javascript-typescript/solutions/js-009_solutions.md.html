@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -129,51 +175,51 @@
 <h3 id="exercise-1-accept-a-valid-order">Exercise 1: Accept a valid order<a class="heading-anchor" href="#exercise-1-accept-a-valid-order" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate id A, quantity 2, price 125 and calculate integer cents.</p>
 <p>The accepted record is a copy with a known schema. It does not expose a reference that an external caller can later edit to invalidate the already checked value.</p>
-<pre><code class="language-javascript">const raw = { id: &#x27;A&#x27;, quantity: 2, priceCents: 125 };
-const order = validateOrder(raw);
-assert.equal(total(order), 250);
-assert.notEqual(order, raw);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> raw <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-number">125</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> order <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">250</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> total 250; fresh accepted object.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-2-reject-syntactically-valid-but-wrong-shaped-json">Exercise 2: Reject syntactically valid but wrong-shaped JSON<a class="heading-anchor" href="#exercise-2-reject-syntactically-valid-but-wrong-shaped-json" aria-label="Link to this section">#</a></h3>
 <p>Task: Parse null, an array and an object with an extra field, then validate.</p>
 <p>JSON.parse proves only syntax. It does not know the domain fields or reject a valid JSON value of the wrong kind.</p>
-<pre><code class="language-javascript">for (const text of [&#x27;null&#x27;, &#x27;[]&#x27;, &#x27;{&quot;id&quot;:&quot;A&quot;,&quot;quantity&quot;:1,&quot;priceCents&quot;:2,&quot;extra&quot;:true}&#x27;]) {
-  assert.throws(() =&gt; validateOrder(JSON.parse(text)), TypeError);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> text <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;null&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;id&quot;:&quot;A&quot;,&quot;quantity&quot;:1,&quot;priceCents&quot;:2,&quot;extra&quot;:true}&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>parse<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> TypeError for each shape violation.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-3-reject-invalid-numeric-domain-values">Exercise 3: Reject invalid numeric domain values<a class="heading-anchor" href="#exercise-3-reject-invalid-numeric-domain-values" aria-label="Link to this section">#</a></h3>
 <p>Task: Try quantity 0, quantity 1.5 and negative price.</p>
 <p>A numeric runtime type does not establish a positive integer or nonnegative cent amount. The validator makes those domain rules explicit.</p>
-<pre><code class="language-javascript">for (const raw of [{ id: &#x27;A&#x27;, quantity: 0, priceCents: 2 }, { id: &#x27;A&#x27;, quantity: 1.5, priceCents: 2 }, { id: &#x27;A&#x27;, quantity: 1, priceCents: -1 }]) {
-  assert.throws(() =&gt; validateOrder(raw), RangeError);
-}</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> raw <span class="syntax-keyword">of</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> RangeError for each.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-4-prevent-unsafe-integer-multiplication">Exercise 4: Prevent unsafe integer multiplication<a class="heading-anchor" href="#exercise-4-prevent-unsafe-integer-multiplication" aria-label="Link to this section">#</a></h3>
 <p>Task: Use a valid safe unit price with quantity 2 whose product exceeds the safe integer range.</p>
 <p>Inputs can each be valid while their combination exceeds the output representation. Validate the computed result as well as individual fields.</p>
-<pre><code class="language-javascript">const order = validateOrder({ id: &#x27;A&#x27;, quantity: 2, priceCents: Number.MAX_SAFE_INTEGER });
-assert.throws(() =&gt; total(order), RangeError);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> order <span class="syntax-operator">=</span> validateOrder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> total<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> RangeError from total.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-5-preserve-a-translated-cause">Exercise 5: Preserve a translated cause<a class="heading-anchor" href="#exercise-5-preserve-a-translated-cause" aria-label="Link to this section">#</a></h3>
 <p>Task: Wrap a SyntaxError with a contextual Error using cause.</p>
 <p>The added context should not erase the underlying failure type or stack. Callers can inspect the cause when deciding whether recovery is appropriate.</p>
-<pre><code class="language-javascript">const original = new SyntaxError(&#x27;invalid fixture JSON&#x27;);
-const contextual = new Error(&#x27;Cannot read order fixture&#x27;, { cause: original });
-assert.equal(contextual.cause, original);
-assert.match(contextual.message, /order fixture/u);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> SyntaxError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;invalid fixture JSON&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> contextual <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Cannot read order fixture&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> cause<span class="syntax-operator">:</span> original <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>contextual<span class="syntax-punctuation">.</span>cause<span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>match<span class="syntax-punctuation">(</span>contextual<span class="syntax-punctuation">.</span>message<span class="syntax-punctuation">,</span> <span class="syntax-string">/order fixture/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> cause identity retained.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="exercise-6-prove-rejected-input-caused-no-mutation">Exercise 6: Prove rejected input caused no mutation<a class="heading-anchor" href="#exercise-6-prove-rejected-input-caused-no-mutation" aria-label="Link to this section">#</a></h3>
 <p>Task: Validate a bad quantity and compare the original object after failure.</p>
 <p>Validation should not partially repair or mutate untrusted input before throwing unless that behavior is explicitly part of the API. A pure boundary is easier to audit.</p>
-<pre><code class="language-javascript">const raw = { id: &#x27;A&#x27;, quantity: -1, priceCents: 5 };
-const before = structuredClone(raw);
-assert.throws(() =&gt; validateOrder(raw), RangeError);
-assert.deepEqual(raw, before);</code></pre>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> raw <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-operator">:</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> priceCents<span class="syntax-operator">:</span> <span class="syntax-number">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> before <span class="syntax-operator">=</span> structuredClone<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> validateOrder<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> RangeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">,</span> before<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> input unchanged.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>

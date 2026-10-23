@@ -14,13 +14,13 @@ A path names a location; it is not the file contents or a guarantee that the loc
 
 ## Reading the reference
 
-Path.resolve appends a child path,normalize removes lexicaldot segments,andtoRealPath consults the filesystem. Files.writeString/readString acceptStandardCharsets.UTF_8. Files.list andFiles.walk return streams that must close. Files.move withATOMIC_MOVE requests atomicity and may throwAtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
+Path.resolve appends a child path,normalize removes lexicaldot segments,andtoRealPath consults the filesystem. Files.writeString/readString acceptStandardCharsets.UTF_8. Files.list andFiles.walk return streams that must close. Files.move with ATOMIC_MOVE requests atomicity and may throwAtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
 
 ## Exercise 1: Round-trip explicit UTF-8
 
-Task: WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.
+Task: Write Café and an emoji to an owned temporary file,then read it with UTF-8.
 
-Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading,not just aString kept in memory.
+Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading,not just a String kept in memory.
 
 ```java
 withTemp(root -> {
@@ -38,7 +38,7 @@ withTemp(root -> {
 
 Task: Resolve a missing child inside the temporary directory and inspect existence before creating it.
 
-Constructing aPath does not create a file. Keeping those actions separate prevents accidental assumptions about setup state.
+Constructing a Path does not create a file. Keeping those actions separate prevents accidental assumptions about setup state.
 
 ```java
 withTemp(root -> {
@@ -87,9 +87,9 @@ withTemp(root -> {
 });
 ```
 
-**Expected:** either targetnew withstagedabsent,or explicit unsupported result retainingold.
+**Expected:** either targetnew with staged absent,or explicit unsupported result retaining old.
 
-**Verify:** Compare the program values or named exception with either targetnew withstagedabsent,or explicit unsupported result retainingold. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with either targetnew with staged absent,or explicit unsupported result retaining old. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## Exercise 5: Expose a lexical path escape
 
@@ -121,9 +121,9 @@ catch(java.io.IOException expected) { propagated=expected.getMessage().equals("f
 assert propagated && created[0]!=null && !java.nio.file.Files.exists(created[0]);
 ```
 
-**Expected:** original exception propagated;owned directory absent.
+**Expected:** original exception propagated; owned directory absent.
 
-**Verify:** Compare the program values or named exception with original exception propagated;owned directory absent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with original exception propagated; owned directory absent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
 ## After comparing the answer
 

@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,7 +177,7 @@
 <p>For the literal text <code>Visits: 10; Purchases: 3; Unit: account</code>, the visit digits occupy the half-open character interval[8, 10), the purchase digit[23, 24), and the unit[32, 39). Slicing the original string at those boundaries recovers10, 3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.</p>
 <p>The record check accepts exactly three keys and requires type(value) to be int for both counts. Python&#x27;s Boolean subtype relationship makes this stricter than a plain isinstance(value, int) test. A True visit count would otherwise become one in arithmetic even though the source proposed a logical value. Extra fields are also rejected, so a model cannot quietly insert an unsupported p_value alongside otherwise valid counts.</p>
 <p>The domain constraint0&lt;=purchases&lt;=visits assumes at most one counted purchase per eligible visit. It is not a universal business rule. If the real outcome counts multiple items purchased in a visit, the ratio may legitimately exceed one and needs a different name and contract. A validator should make that modeling choice explicit instead of treating every ratio as a probability.</p>
-<p>For the valid fixture, 3/10=0.3 describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.</p>
+<p>For the valid fixture, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>10</mn></mrow></mfrac><mo>=</mo><mn>0.3</mn></mrow><annotation encoding="application/x-tex">\frac{3}{10}=0.3</annotation></semantics></math> describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.</p>
 <p>Aggregation adds another distinction. Suppose one account has1 purchase in1 visit and another has1 purchase in9 visits. The pooled visit rate is2/10=0.2. The equally weighted mean of account-specific rates is(1+1/9)/2=5/9, about0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.</p>
 <p>Missingness and invalidity need explicit statuses. purchases=None is rejected by this strict count schema; purchases=0 is a real observed zero. A broader system could carry a separate unknown record with a source reason. It should not coerce unknown to zero, nor remove every hard-to-parse study and then report the remaining sample as representative.</p>
 <h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
@@ -141,52 +187,52 @@
 <h3 id="exercise-1-validate-a-correct-proposal">Exercise 1: Validate a correct proposal<a class="heading-anchor" href="#exercise-1-validate-a-correct-proposal" aria-label="Link to this section">#</a></h3>
 <p>The question is: Validate visits 10, purchases 3 and assignment_unit account.</p>
 <p>The denominator and unit are known before division. This calculation is deterministic and does not depend on the wording of an explanation.</p>
-<pre><code class="language-python">record=validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:3,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})
-assert rate(record)==.3</code></pre>
+<pre class="highlighted-code"><code class="language-python">record<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> rate<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.3</span></code></pre>
 <p><strong>Expected:</strong> conversion rate 0.3.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with conversion rate 0.3.</p>
 <h3 id="exercise-2-reject-a-plausible-but-impossible-record">Exercise 2: Reject a plausible but impossible record<a class="heading-anchor" href="#exercise-2-reject-a-plausible-but-impossible-record" aria-label="Link to this section">#</a></h3>
 <p>The question is: Validate visits 2 and purchases 3 under the declared one-purchase-per-visit policy.</p>
 <p>A JSON parser cannot detect this domain contradiction. The validation rule catches a semantically invalid proposal even though its keys and primitive types are correct.</p>
-<pre><code class="language-python">try: validate({&#x27;visits&#x27;:2,&#x27;purchases&#x27;:3,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})
-except ValueError: pass
-else: raise AssertionError(&#x27;impossible counts accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">impossible counts accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError for inconsistent counts.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for inconsistent counts.</p>
 <h3 id="exercise-3-trace-extracted-values-to-text">Exercise 3: Trace extracted values to text<a class="heading-anchor" href="#exercise-3-trace-extracted-values-to-text" aria-label="Link to this section">#</a></h3>
 <p>The question is: Parse the source text Visits: 10; Purchases: 3; Unit: account and retain source spans.</p>
 <p>Offsets refer to the original source string. Normalizing text before saving offsets without a mapping would make citations point at the wrong characters.</p>
-<pre><code class="language-python">text=&#x27;Visits: 10; Purchases: 3; Unit: account&#x27;
-parsed,spans=extract(text)
-assert parsed==record
-assert text[slice(*spans[&#x27;visits&#x27;])]==&#x27;10&#x27; and text[slice(*spans[&#x27;purchases&#x27;])]==&#x27;3&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python">text<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Visits: 10; Purchases: 3; Unit: account</span><span class="syntax-string">&#x27;</span>
+parsed<span class="syntax-punctuation">,</span>spans<span class="syntax-operator">=</span>extract<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> parsed<span class="syntax-operator">==</span>record
+<span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">10</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">3</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> values10 and3; each span slices the original digits.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with values10 and3; each span slices the original digits.</p>
 <h3 id="exercise-4-distinguish-missing-from-zero">Exercise 4: Distinguish missing from zero<a class="heading-anchor" href="#exercise-4-distinguish-missing-from-zero" aria-label="Link to this section">#</a></h3>
 <p>The question is: Submit a record with purchases=None and compare it with a real zero-purchase record.</p>
 <p>A missing value requires a separate unknown-status schema or a repair workflow. Coercing it to zero changes the statistical meaning of the data.</p>
-<pre><code class="language-python">try: validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:None,&#x27;assignment_unit&#x27;:&#x27;account&#x27;})
-except TypeError: pass
-else: raise AssertionError(&#x27;missing treated as count&#x27;)
-assert rate(validate({&#x27;visits&#x27;:10,&#x27;purchases&#x27;:0,&#x27;assignment_unit&#x27;:&#x27;account&#x27;}))==0</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> TypeError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">missing treated as count</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> rate<span class="syntax-punctuation">(</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
 <p><strong>Expected:</strong> None is rejected by this strict schema; zero is accepted with rate 0.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with None is rejected by this strict schema; zero is accepted with rate 0.</p>
 <h3 id="exercise-5-reject-boolean-and-extra-fields">Exercise 5: Reject boolean and extra fields<a class="heading-anchor" href="#exercise-5-reject-boolean-and-extra-fields" aria-label="Link to this section">#</a></h3>
 <p>The question is: Submit visits=True, then add an undeclared p_value field to a valid proposal.</p>
 <p>A model can produce syntactically convenient but semantically wrong values. Exact-key and exact-type checks prevent a downstream analysis from silently consuming unsupported claims.</p>
-<pre><code class="language-python">for candidate,kind in [({&#x27;visits&#x27;:True,&#x27;purchases&#x27;:0,&#x27;assignment_unit&#x27;:&#x27;account&#x27;},TypeError),({**record,&#x27;p_value&#x27;:.01},ValueError)]:
-    try: validate(candidate)
-    except kind: pass
-    else: raise AssertionError(&#x27;schema bypass accepted&#x27;)</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">for</span> candidate<span class="syntax-punctuation">,</span>kind <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>record<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">p_value</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">.01</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span>candidate<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> kind<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">schema bypass accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> TypeError for a boolean count; ValueError for an extra field.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with TypeError for a boolean count; ValueError for an extra field.</p>
 <h3 id="exercise-6-preserve-the-assignment-unit">Exercise 6: Preserve the assignment unit<a class="heading-anchor" href="#exercise-6-preserve-the-assignment-unit" aria-label="Link to this section">#</a></h3>
 <p>The question is: Attempt to replace account with visit and explain why the independence assumption cannot be inferred from the count fields.</p>
 <p>The fixture deliberately supports one study design. Expanding it to visit-level randomization requires an explicit new contract and evaluation, not a casual string substitution.</p>
-<pre><code class="language-python">try: validate({**record,&#x27;assignment_unit&#x27;:&#x27;visit&#x27;})
-except ValueError: pass
-else: raise AssertionError(&#x27;unsupported assignment unit&#x27;)
-assert record[&#x27;assignment_unit&#x27;]==&#x27;account&#x27;</code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>record<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unsupported assignment unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span></code></pre>
 <p><strong>Expected:</strong> invalid unit rejected; account remains explicit.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with invalid unit rejected; account remains explicit.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

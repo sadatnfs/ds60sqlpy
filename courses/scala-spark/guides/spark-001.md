@@ -1,10 +1,10 @@
 # spark-001: Choose a Scala-first or PySpark-first local route
 
-Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
 
 ## Level and prerequisites
 
-Beginner; 45 minutes. Direct design prerequisites: none. An ID in this prerequisite list may still be unpublished. Use its concept diagnostic or wait for the authored bridge; do not infer an executable prerequisite from a planning ID.
+Beginner; 45 minutes. Direct design prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
 
 Learner artifact: [spark-001.md](../lessons/spark-001.md). Keep [solutions](../solutions/spark-001_solutions.md) closed until an attempt or explicit reveal.
 
@@ -17,7 +17,14 @@ Learner artifact: [spark-001.md](../lessons/spark-001.md). Keep [solutions](../s
 
 A source file is a description of work. A compiler checks Scala syntax and produces JVM bytecode; a JVM executes that bytecode. Spark is a separate data engine. PySpark lets a Python driver describe work that the Spark engine evaluates. Having Python alone does not establish a Spark installation. A version report is evidence about installed tools; a candidate compatibility tuple is a design choice until a real profile executes.
 
-The Scala-first route needs no Python prerequisite. The PySpark-first route uses existing Python functions, collections and testing skills, represented by python-10. Both eventually need the same row/schema concepts. The proposed Spark 4.2.0 / Scala 2.13.18 / JDK21 / Python3.12 tuple comes from [Apache compatibility documentation](https://spark.apache.org/docs/4.2.0/) and the [tagged Spark build](https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml); the profile receipt, when available, must report the actual qualified versions.
+The Scala-first route needs no Python prerequisite. The PySpark-first route
+uses existing Python functions, collections and testing skills, represented by
+`python-10`. Both routes eventually need the same row and schema concepts.
+The classroom's configured Spark image uses Spark 4.0.1 and the Scala 2.13
+binary line with Java 17, while its worker Python is 3.12. Consult the actual
+worker version report and the [versioned Spark requirements](https://spark.apache.org/docs/4.0.1/)
+when reproducing a run. A compatible version range is useful setup guidance;
+it is separate from evidence that your current worker executed successfully.
 
 - **JDK:** the development kit including compiler/runtime tools for Java bytecode
 - **JVM:** the process executing compatible bytecode
@@ -39,7 +46,7 @@ Main.scala -> Scala compiler -> Main.class -> JVM process -> stdout: 42
 
 ### Worked example 2: Distinguish a candidate from a receipt
 
-A supported version range cannot prove that dependencies were downloaded, matched or executed on this machine.
+A supported version range cannot prove that dependencies were downloaded, matched or executed on this machine. The following deliberately hypothetical report illustrates that distinction; it is not a report of your running classroom.
 
 ```text
 candidate: Spark4.2.0 / Scala2.13.18 / JDK21
@@ -54,7 +61,7 @@ receipt: profile absent; no executed probe
 
 Label each artifact and explain what can be edited.
 
-**Inputs/evidence:** For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit0.
+**Inputs/evidence:** For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit 0.
 
 **Expected result/shape:** For spark-001 Exercise 1, source, compiled bytecode, observed output and process status are four different categories.
 
@@ -157,7 +164,7 @@ Close the source. Explain the mechanism in your own words, name the boundary tha
 
 ## Common pitfalls
 
-Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not treat a proposed tuple or an exit0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
+Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
 
 ## Next step
 

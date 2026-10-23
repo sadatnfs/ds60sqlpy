@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -119,19 +165,19 @@
 <p>Read the <a href="../guides/spark-040.md.html">guide</a>. These are sanitized reasoning fixtures, not executable deployment instructions. Retain an independent answer and the evidence supporting it for each task.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-partition-stride-is-not-a-data-filter">Worked example 1: Partition stride is not a data filter<a class="heading-anchor" href="#worked-example-1-partition-stride-is-not-a-data-filter" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-text">Source IDs: -10,0,5,10,99,NULL
+<pre class="highlighted-code"><code class="language-text">Source IDs: -10,0,5,10,99,NULL
 Illustrative partition0: id &lt; 5 OR id IS NULL
 Illustrative partition1: id &gt;= 5
 Configured lowerBound=0,upperBound=10,numPartitions=2</code></pre>
 <p>Partition 0 includes -10,0, NULL;partition 1 includes 5,10,99. All six source rows can be read. To select only[0,10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
 <h4 id="worked-example-2-map-an-exact-decimal-instant-and-missing-field">Worked example 2: Map an exact decimal,instant and missing field<a class="heading-anchor" href="#worked-example-2-map-an-exact-decimal-instant-and-missing-field" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-json">{
-  &quot;event_id&quot;: 7,
-  &quot;cents&quot;: 125,
-  &quot;price_decimal_text&quot;: &quot;12345678.90&quot;,
-  &quot;event_time_with_offset&quot;: &quot;2026-10-23T12:00:00-07:00&quot;,
-  &quot;note&quot;: null
-}</code></pre>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;event_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;cents&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">125</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;price_decimal_text&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;12345678.90&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;event_time_with_offset&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-23T12:00:00-07:00&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;note&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p>The proposed Spark contract retains cents 125 as bigint, price as decimal(10,2), the event instant as 19:00UTC under the UTC baseline, and note as NULL. This exact-value fixture can falsify a float conversion, timezone reinterpretation or null-to-empty-string shortcut before any large read is approved.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-grain-population-and-bounded-read-scope">Exercise 1: Define grain, population and bounded read scope<a class="heading-anchor" href="#exercise-1-define-grain-population-and-bounded-read-scope" aria-label="Link to this section">#</a></h4>

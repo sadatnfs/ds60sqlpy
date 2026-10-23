@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -131,35 +177,35 @@
 <p>For a subject-matter assistant, decompose the task before choosing training. The system may need retrieval to find a current policy, extraction to identify a date, a deterministic calculation to compute a duration, and generation to explain the result. A single final answer conceals those components unless the evaluation measures them separately. The applied LLM journey builds this architecture later. Here, learn to name the intermediate evidence that would make a claim inspectable.</p>
 <h3 id="a-minimal-corpus-with-provenance">A minimal corpus with provenance<a class="heading-anchor" href="#a-minimal-corpus-with-provenance" aria-label="Link to this section">#</a></h3>
 <p>Use four authored tickets so every row is visible. The <code>id</code> identifies a stored example. The <code>family</code> groups paraphrases or related versions that should not be treated as independent. <code>text</code> is the model input. <code>label</code> is the target under this chapter&#x27;s queue policy. A real corpus would also store source, collection time, annotation version, language and permitted uses. A family ID is not automatically the same as a class label: two unrelated billing problems can have the same class and different families.</p>
-<pre><code class="language-python">from collections import Counter
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
 
-documents = [
-    {&quot;id&quot;: &quot;a&quot;, &quot;family&quot;: &quot;account-reset&quot;, &quot;text&quot;: &quot;Reset password&quot;, &quot;label&quot;: &quot;account&quot;},
-    {&quot;id&quot;: &quot;b&quot;, &quot;family&quot;: &quot;billing-charge&quot;, &quot;text&quot;: &quot;Double charge&quot;, &quot;label&quot;: &quot;billing&quot;},
-    {&quot;id&quot;: &quot;c&quot;, &quot;family&quot;: &quot;account-reset&quot;, &quot;text&quot;: &quot;Password reset please&quot;, &quot;label&quot;: &quot;account&quot;},
-    {&quot;id&quot;: &quot;d&quot;, &quot;family&quot;: &quot;billing-refund&quot;, &quot;text&quot;: &quot;Refund request&quot;, &quot;label&quot;: &quot;billing&quot;},
-]
-print(len(documents))
-print(dict(Counter(row[&quot;label&quot;] for row in documents)))
-print([len(row[&quot;text&quot;].split()) for row in documents])</code></pre>
+documents <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account-reset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Reset password</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing-charge</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Double charge</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account-reset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Password reset please</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">account</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">d</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing-refund</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Refund request</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">billing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>documents<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>Counter<span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">label</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> documents<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> documents<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: 4 documents, <code>{&#x27;account&#x27;: 2, &#x27;billing&#x27;: 2}</code>, and whitespace-piece counts <code>[2, 2, 3, 2]</code>. The total is 9 pieces. We deliberately call them whitespace pieces. <code>str.split()</code> is a convenient counting rule, not a language-independent tokenizer. It leaves punctuation attached and does not correctly segment every writing system. Chapter 4 will make tokenization a first-class choice.</p>
 <p>The generator expression passed to <code>Counter</code> yields one label per document. It therefore counts documents, not words. The list comprehension for lengths yields one integer per document and preserves row order. Keeping these two computations separate makes it harder to confuse corpus size with text length. Neither result says that the corpus represents a population: these four records were authored to expose a mechanism, not sampled to estimate real support traffic.</p>
 <h3 id="why-changing-the-denominator-changes-the-question">Why changing the denominator changes the question<a class="heading-anchor" href="#why-changing-the-denominator-changes-the-question" aria-label="Link to this section">#</a></h3>
 <p>Suppose a model gets one long document right and one short document wrong. Let <code>c_i</code> be 1 for a correct document prediction and 0 otherwise. Unweighted document accuracy is <code>sum(c_i) / n</code>. A length-weighted score is <code>sum(w_i * c_i) / sum(w_i)</code>, where <code>w_i</code> is document length. They estimate different summaries. Weights do not become appropriate merely because the arithmetic is easy.</p>
-<pre><code class="language-python">correct = [1, 0]
-lengths = [1000, 10]
-document_accuracy = sum(correct) / len(correct)
-length_weighted_accuracy = sum(c * n for c, n in zip(correct, lengths)) / sum(lengths)
-print(document_accuracy)
-print(round(length_weighted_accuracy, 4))</code></pre>
+<pre class="highlighted-code"><code class="language-python">correct <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+lengths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+document_accuracy <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">)</span>
+length_weighted_accuracy <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>c <span class="syntax-operator">*</span> n <span class="syntax-keyword">for</span> c<span class="syntax-punctuation">,</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> lengths<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>lengths<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>document_accuracy<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>length_weighted_accuracy<span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: <code>0.5</code> and <code>0.9901</code>. The second number is a <strong>length-weighted document accuracy</strong>, not token accuracy. There were no token-level predictions in this example. It gives the long document one hundred times as much weight as the short one. If each ticket consumes one routing decision, that weighting may hide an operationally important failure. If a different business question genuinely weights outcomes by text volume, document that estimand explicitly.</p>
 <p>This is an early example of a recurring failure in machine learning: the model can improve a reported metric while the useful outcome gets worse. Before celebrating a number, name its numerator, denominator, weights and target population. Also report counts. An accuracy of 1.0 on two examples is not compelling evidence of reliability.</p>
 <h3 id="related-text-and-leakage">Related text and leakage<a class="heading-anchor" href="#related-text-and-leakage" aria-label="Link to this section">#</a></h3>
 <p>If record <code>a</code> is used for training and <code>c</code> for evaluation, the model sees two versions of the password-reset problem. Depending on the intended deployment, that may be legitimate repeated traffic or an optimistic test of generalization to new problem families. The split should represent the question you intend to answer. Do not invent family labels after observing which split gives the highest score.</p>
-<pre><code class="language-python">train = [documents[0], documents[1]]
-holdout = [documents[2], documents[3]]
-overlap = {row[&quot;family&quot;] for row in train} &amp; {row[&quot;family&quot;] for row in holdout}
-print(sorted(overlap))</code></pre>
+<pre class="highlighted-code"><code class="language-python">train <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>documents<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> documents<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+holdout <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>documents<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> documents<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+overlap <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> train<span class="syntax-punctuation">}</span> <span class="syntax-operator">&amp;</span> <span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">family</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> holdout<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>overlap<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Expected: <code>[&#x27;account-reset&#x27;]</code>. The code detects a known overlap; it cannot discover every semantic paraphrase on its own. In real corpora, combine source IDs, customer or document lineage, content hashes and reviewed near-duplicate detection. An exact hash misses paraphrases, while aggressive semantic deduplication can erase useful variation. Later chapters explain those tradeoffs. The first responsibility is to preserve provenance so the split can be audited.</p>
 <h3 id="how-to-run-and-retain-your-work">How to run and retain your work<a class="heading-anchor" href="#how-to-run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
 <p>Open this lesson in the Docker classroom with the <code>python-core</code> profile. The source pad uses Python in a temporary job directory. No dataset, pretrained model, API key or network download is required. The checked-in learner file is <code>courses/nlp/learners/nlp-001.py</code>; use the browser pad to preserve your own draft without editing that file. Save notes explaining the unit behind each result. A successful process means this code ran, not that the corpus or evaluation design is suitable for deployment.</p>
@@ -182,7 +228,7 @@ print(sorted(overlap))</code></pre>
 <h3 id="further-reading-and-next-step">Further reading and next step<a class="heading-anchor" href="#further-reading-and-next-step" aria-label="Link to this section">#</a></h3>
 <p>The <a href="https://www.nltk.org/book/">NLTK book</a> offers task-oriented linguistic context. The worked corpus, calculations and exercises here are original course examples. Continue to <code>nlp-002</code> for the representation of text as Unicode and bytes, including transformations that change the information available to a model. The <a href="../../llm-applied/README.md.html">applied LLM journey</a> uses these task and evidence contracts to design subject-matter assistants.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for nlp-001.
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for nlp-001.
 Read courses/nlp/guides/nlp-001.md and courses/nlp/learners/nlp-001.py.
 Explain document, prediction and evaluation units with the supplied tickets.
 Ask me to predict each count, review my own attempt and give one hint at a time.

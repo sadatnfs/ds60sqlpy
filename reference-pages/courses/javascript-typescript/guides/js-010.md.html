@@ -100,6 +100,52 @@
       body { background: #fff; }
       .document { border: 0; box-shadow: none; }
     }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
   </style>
 </head>
 <body>
@@ -137,70 +183,70 @@
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-observe-a-live-binding">Example A: Observe a live binding<a class="heading-anchor" href="#example-a-observe-a-live-binding" aria-label="Link to this section">#</a></h4>
 <p>The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, writeFile, rm } from &#x27;node:fs/promises&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
-import { pathToFileURL } from &#x27;node:url&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> pathToFileURL <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:url&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withModules(files, use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-modules-&#x27;));
-  try {
-    for (const [name, source] of Object.entries(files)) await writeFile(join(directory, name), source, &#x27;utf8&#x27;);
-    return await use(directory);
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withModules<span class="syntax-punctuation">(</span>files<span class="syntax-punctuation">,</span> use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-modules-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">]</span> <span class="syntax-keyword">of</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>entries<span class="syntax-punctuation">(</span>files<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withModules({ &#x27;counter.mjs&#x27;: &#x27;export let count = 0; export function increment() { count += 1; }&#x27; }, async directory =&gt; {
-      const module = await import(pathToFileURL(join(directory, &#x27;counter.mjs&#x27;)).href);
-      assert.equal(module.count, 0);
-      module.increment();
-      assert.equal(module.count, 1);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;counter.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export let count = 0; export function increment() { count += 1; }&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;counter.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      module<span class="syntax-punctuation">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> count changes from 0 to 1 through the imported namespace.</p>
 <h4 id="example-b-resolve-a-relative-dependency">Example B: Resolve a relative dependency<a class="heading-anchor" href="#example-b-resolve-a-relative-dependency" aria-label="Link to this section">#</a></h4>
 <p>The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.</p>
-<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
-import { mkdtemp, writeFile, rm } from &#x27;node:fs/promises&#x27;;
-import { tmpdir } from &#x27;node:os&#x27;;
-import { join } from &#x27;node:path&#x27;;
-import { pathToFileURL } from &#x27;node:url&#x27;;
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> mkdtemp<span class="syntax-punctuation">,</span> writeFile<span class="syntax-punctuation">,</span> rm <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:fs/promises&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> tmpdir <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:os&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> join <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:path&#x27;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> pathToFileURL <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:url&#x27;</span><span class="syntax-punctuation">;</span>
 
-async function withModules(files, use) {
-  const directory = await mkdtemp(join(tmpdir(), &#x27;course-modules-&#x27;));
-  try {
-    for (const [name, source] of Object.entries(files)) await writeFile(join(directory, name), source, &#x27;utf8&#x27;);
-    return await use(directory);
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
-}
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> withModules<span class="syntax-punctuation">(</span>files<span class="syntax-punctuation">,</span> use<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">const</span> directory <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mkdtemp<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>tmpdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-modules-&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">]</span> <span class="syntax-keyword">of</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>entries<span class="syntax-punctuation">(</span>files<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">await</span> writeFile<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> source<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;utf8&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">await</span> use<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span> <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> rm<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> recursive<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> force<span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 
-export async function verify() {
-  // Worked example
-  {
-    await withModules({ &#x27;math.mjs&#x27;: &#x27;export const twice = value =&gt; 2 * value;&#x27;, &#x27;main.mjs&#x27;: &quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot; }, async directory =&gt; {
-      const module = await import(pathToFileURL(join(directory, &#x27;main.mjs&#x27;)).href);
-      assert.equal(module.answer, 8);
-    });
-  }
+<span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">// Worked example</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-string">&#x27;math.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&#x27;export const twice = value =&gt; 2 * value;&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-operator">:</span> <span class="syntax-string">&quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> directory <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">const</span> module <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> <span class="syntax-keyword">import</span><span class="syntax-punctuation">(</span>pathToFileURL<span class="syntax-punctuation">(</span>join<span class="syntax-punctuation">(</span>directory<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;main.mjs&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>href<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>answer<span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-  return { checks: 1, status: &quot;passed&quot; };
-}
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 
-console.log(JSON.stringify(await verify()));
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 </code></pre>
 <p><strong>Expected:</strong> answer equals 8.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
@@ -235,7 +281,7 @@ console.log(JSON.stringify(await verify()));
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
 <p><a href="https://nodejs.org/docs/latest-v24.x/api/esm.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-010: Modules and dependency boundaries.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-010: Modules and dependency boundaries.
 Read courses/javascript-typescript/guides/js-010.md and courses/javascript-typescript/lessons/js-010.mjs. Direct prerequisites: `js-009`.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
 give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.

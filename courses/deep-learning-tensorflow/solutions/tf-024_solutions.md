@@ -50,7 +50,7 @@ assert mean[0]==0 and vx[0,0]==-vx[1,0]
 
 ## Exercise 3: Train within a fixed budget
 
-The question is: Initialize one weight0 and run40 full-batch SGD steps at rate.1 using binary logits loss.
+The question is: Initialize one weight 0 and run40 full-batch SGD steps at rate 0.1 using binary logits loss.
 
 The known sign relation creates a transparent diagnostic. The loop is intentionally bounded and does not tune its step count after viewing held-out predictions.
 

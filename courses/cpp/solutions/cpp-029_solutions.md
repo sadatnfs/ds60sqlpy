@@ -13,7 +13,7 @@ Thread startup, cancellation request and completion are separate events. The pro
 <!-- depth:start -->
 ## Thread lifetime and cooperative cancellation
 
-Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker's last access. In the first program, answer belongs to main, the thread writes42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.
+Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker's last access. In the first program, answer belongs to main, the thread writes 42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.
 
 A thread object that remains joinable at destruction is a serious lifecycle error for std::thread. Every path after successful creation needs an ownership decision: join the work or deliberately transfer its management. Detaching makes lifetime reasoning harder because the creating scope can disappear while the worker still uses borrowed state. The course examples retain and join every worker instead.
 
